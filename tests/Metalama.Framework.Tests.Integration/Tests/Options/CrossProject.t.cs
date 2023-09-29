@@ -12,11 +12,11 @@ internal class DerivedOfNested : BaseNestingClass.BaseNestedClass
 [MyOptions("OtherClass")]
 internal class OtherClass
 {
-    [PrintOptionsAspect]
-    [global::Metalama.Framework.Tests.Integration.Tests.Options.CrossProject.ActualOptionsAttribute("OtherClass")]
-    internal class C
-    {
-    }
+  [PrintOptionsAspect]
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.CrossProject.ActualOptionsAttribute("OtherClass")]
+  internal class C
+  {
+  }
 }
 [PrintOptionsAspect]
 [global::Metalama.Framework.Tests.Integration.Tests.Options.CrossProject.ActualOptionsAttribute("FromAssembly")]

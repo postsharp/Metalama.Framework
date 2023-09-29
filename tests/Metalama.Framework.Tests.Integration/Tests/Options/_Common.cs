@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
 using Metalama.Framework.Project;
@@ -11,7 +13,7 @@ using Metalama.Framework.Tests.Integration.Tests.Options;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 
-public record MyOptions : IHierarchicalOptions<IDeclaration>
+public class MyOptions : IHierarchicalOptions<IDeclaration>
 {
     public string? Value { get; init; }
 
@@ -19,7 +21,9 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public bool? BaseWins { get; init; }
 
-    public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
+#if !NET5_0_OR_GREATER
+    public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;
+#endif
 
     public object ApplyChanges( object changes, in ApplyChangesContext context )
     {
@@ -31,15 +35,22 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
         {
             var other = (MyOptions)changes;
 
+            if (other.Value == null)
+            {
+                return this;
+            }
+
             return new MyOptions
             {
-                Value = other.Value ?? Value, BaseWins = other.BaseWins ?? BaseWins, OverrideHistory = $"{OverrideHistory ?? Value}->{other.Value}"
+                Value = other.Value ?? Value,
+                BaseWins = other.BaseWins ?? BaseWins,
+                OverrideHistory = $"{OverrideHistory ?? Value}->{other.OverrideHistory ?? other.Value}"
             };
         }
     }
 }
 
-public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
+public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
 {
     private string _value;
     private bool _baseWins;
@@ -50,7 +61,10 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOpti
         _baseWins = baseWins;
     }
 
-    public MyOptions GetOptions() => new() { Value = _value, BaseWins = _baseWins };
+    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+    {
+        yield return new MyOptions { Value = _value, BaseWins = _baseWins };
+    }
 }
 
 public class ActualOptionsAttribute : Attribute
@@ -64,7 +78,7 @@ public class ShowOptionsAspect : Attribute, IAspect<IDeclaration>
     {
         builder.Advice.IntroduceAttribute(
             builder.Target,
-            AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { builder.Target.Enhancements().GetOptions<MyOptions>().Value } ) );
+            AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { builder.Target.Enhancements().GetOptions<MyOptions>().OverrideHistory } ) );
     }
 
     public void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }

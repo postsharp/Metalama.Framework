@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
@@ -30,19 +29,17 @@ internal sealed class AspectBuilderState
 
     public CancellationToken CancellationToken { get; }
 
-    public IAspectInstance AspectInstance { get; }
+    public IAspectInstanceInternal AspectInstance { get; }
 
     public AdviceFactoryState AdviceFactoryState { get; }
-
-    public bool IsAspectSkipped => this.AdviceFactoryState.IsAspectSkipped;
-
+    
     public string? Layer { get; }
 
     public AspectBuilderState(
         ProjectServiceProvider serviceProvider,
         UserDiagnosticSink diagnostics,
         AspectPipelineConfiguration configuration,
-        IAspectInstance aspectInstance,
+        IAspectInstanceInternal aspectInstance,
         AdviceFactoryState adviceFactoryState,
         string? layer,
         CancellationToken cancellationToken )
@@ -59,7 +56,7 @@ internal sealed class AspectBuilderState
 
     internal AspectInstanceResult ToResult()
     {
-        var outcome = this.Diagnostics.ErrorCount == 0 ? this.IsAspectSkipped ? AdviceOutcome.Ignore : AdviceOutcome.Default : AdviceOutcome.Error;
+        var outcome = this.Diagnostics.ErrorCount == 0 ? this.AspectInstance.IsSkipped ? AdviceOutcome.Ignore : AdviceOutcome.Default : AdviceOutcome.Error;
 
         return outcome == AdviceOutcome.Default
             ? new AspectInstanceResult(

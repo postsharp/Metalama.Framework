@@ -1,4 +1,5 @@
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
@@ -8,7 +9,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Options.NonEligible;
 
 public record NonElifibleOptions : IHierarchicalOptions<INamedType>, IEligible<INamedType>
 {
-    public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
+#if !NET5_0_OR_GREATER
+    public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;
+#endif
 
     public object ApplyChanges( object changes, in ApplyChangesContext context )
     {

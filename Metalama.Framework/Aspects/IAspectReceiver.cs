@@ -110,7 +110,7 @@ namespace Metalama.Framework.Aspects
         new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
         
         /// <summary>
-        /// Sets options for the declarations in the current set of declarations.
+        /// Sets options for the declarations in the current set of declarations by supplying a <see cref="Func{TResult}"/>.
         /// </summary>
         /// <param name="func">A function giving the options for the given declaration.</param>
         /// <typeparam name="TOptions">The type of options.</typeparam>
@@ -118,6 +118,17 @@ namespace Metalama.Framework.Aspects
         /// This method should only set the option properties that need to be changed. All unchanged properties must be let null.
         /// </remarks>
         void SetOptions<TOptions>( Func<TDeclaration, TOptions> func )
-            where TOptions : IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
+
+        /// <summary>
+        /// Sets options for the declarations in the current set of declarations by supplying a <see cref="Func{TResult}"/>.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <typeparam name="TOptions">The type of options.</typeparam>
+        /// <remarks>
+        /// This method should only set the option properties that need to be changed. All unchanged properties must be let null.
+        /// </remarks>
+        void SetOptions<TOptions>( TOptions options )
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
     }
 }

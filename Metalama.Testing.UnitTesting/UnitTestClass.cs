@@ -80,11 +80,14 @@ namespace Metalama.Testing.UnitTesting
         /// </summary>
         protected TestContext CreateTestContext( TestContextOptions? contextOptions, IAdditionalServiceCollection? services = null )
             => this.CreateTestContextCore(
-                contextOptions ?? new TestContextOptions { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) },
+                contextOptions ?? this.GetDefaultTestContextOptions(),
                 this.GetMockServices( services ) );
 
         protected virtual TestContext CreateTestContextCore( TestContextOptions contextOptions, IAdditionalServiceCollection services )
             => new( contextOptions, services );
+
+        protected virtual TestContextOptions GetDefaultTestContextOptions()
+            => new() { AdditionalAssemblies = ImmutableArray.Create( this.GetType().Assembly ) };
 
         private IAdditionalServiceCollection GetMockServices( IAdditionalServiceCollection? arg )
         {

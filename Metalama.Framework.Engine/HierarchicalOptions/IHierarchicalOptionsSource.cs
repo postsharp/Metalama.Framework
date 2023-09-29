@@ -8,5 +8,5 @@ namespace Metalama.Framework.Engine.HierarchicalOptions;
 
 internal interface IHierarchicalOptionsSource
 {
-    IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IDiagnosticAdder diagnosticAdder );
+    IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink );
 }

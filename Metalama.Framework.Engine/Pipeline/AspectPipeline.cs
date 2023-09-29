@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( licenseConsumptionManager != null )
             {
-                var licenseVerifier = new LicenseVerifier( projectServiceProviderWithProject, compilation.AssemblyName );
+                var licenseVerifier = new LicenseVerifier( projectServiceProviderWithProject );
 
                 if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
                 {
@@ -445,11 +445,16 @@ namespace Metalama.Framework.Engine.Pipeline
                     hierarchicalOptionsManager: hierarchicalOptionsManager,
                     externalAnnotationProvider: contributorSources.ExternalAnnotationProvider );
 
+                var diagnosticSink = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
+
                 hierarchicalOptionsManager.Initialize(
+                    pipelineConfiguration.CompileTimeProject,
                     contributorSources.OptionsSources,
                     contributorSources.ExternalOptionsProvider,
                     compilationModel,
-                    diagnosticAdder );
+                    diagnosticSink );
+
+                diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
             }
             else
             {
@@ -497,7 +502,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var compileTimeProject = pipelineConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
                 var licensingDiagnostics = new UserDiagnosticSink( compileTimeProject );
-                licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                licenseVerifier.VerifyCompilationResult( pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
                 pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
             }
 

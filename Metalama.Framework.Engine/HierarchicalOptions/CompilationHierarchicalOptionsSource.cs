@@ -6,48 +6,29 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
 internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOptionsSource
 {
+    private readonly ProjectServiceProvider _serviceProvider;
     private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
-
-    private readonly ConcurrentDictionary<Type, Func<IHierarchicalOptionsProvider, IHierarchicalOptions>> _toOptionsMethods = new();
-    private readonly ProjectSpecificCompileTimeTypeResolver _typeResolver;
+    private readonly UserCodeInvoker _invoker;
 
     public CompilationHierarchicalOptionsSource( ProjectServiceProvider serviceProvider )
     {
+        this._serviceProvider = serviceProvider;
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
-        this._typeResolver = serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
+        this._invoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
-    private Func<IHierarchicalOptionsProvider, IHierarchicalOptions> GetToOptionsMethod( Type type )
-        => this._toOptionsMethods.GetOrAdd( type, GetToOptionsMethodCore );
-
-    private static Func<IHierarchicalOptionsProvider, IHierarchicalOptions> GetToOptionsMethodCore( Type type )
+    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink )
     {
-        var parameter = Expression.Parameter( typeof(IHierarchicalOptionsProvider) );
-        var interfaceType = typeof(IHierarchicalOptionsProvider<>).MakeGenericType( type );
-        var cast = Expression.Convert( parameter, interfaceType );
-
-        var methodCall = Expression.Call(
-            cast,
-            interfaceType.GetMethod( nameof(IHierarchicalOptionsProvider<IHierarchicalOptions>.GetOptions) ).AssertNotNull() );
-
-        return Expression.Lambda<Func<IHierarchicalOptionsProvider, IHierarchicalOptions>>( methodCall, parameter ).Compile();
-    }
-
-    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
-    {
-        var genericIHierarchicalOptionsAttribute = compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptionsProvider<>) );
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
         var systemAttributeType = compilation.Factory.GetTypeByReflectionType( typeof(Attribute) );
 
@@ -67,25 +48,24 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
                 continue;
             }
 
-            var optionTypes =
-                attributeType.AllImplementedInterfaces.Where( i => i.Definition == genericIHierarchicalOptionsAttribute )
-                    .Select( x => (INamedType) x.TypeArguments[0] )
-                    .Select( x => this._typeResolver.GetCompileTimeType( x.GetSymbol().AssertNotNull(), false ).AssertNotNull() )
-                    .ToReadOnlyList();
-
             foreach ( var attribute in compilation.GetAllAttributesOfType( attributeType ) )
             {
-                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticAdder, out var deserializedAttribute ) )
+                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticSink, out var deserializedAttribute ) )
                 {
                     continue;
                 }
 
                 var optionsAttribute = (IHierarchicalOptionsProvider) deserializedAttribute;
 
-                foreach ( var optionType in optionTypes )
-                {
-                    var options = this.GetToOptionsMethod( optionType ).Invoke( optionsAttribute );
+                var invokerContext = new UserCodeExecutionContext(
+                    this._serviceProvider,
+                    UserCodeDescription.Create( "executing GetOptions() for '{0}' applied to '{1}'", attributeType.Name, attribute.ContainingDeclaration ),
+                    targetDeclaration: attribute.ContainingDeclaration );
 
+                var optionList = this._invoker.Invoke( () => optionsAttribute.GetOptions( attribute.ContainingDeclaration ).ToReadOnlyList(), invokerContext );
+
+                foreach ( var options in optionList )
+                {
                     yield return new HierarchicalOptionsInstance( attribute.ContainingDeclaration, options );
                 }
             }

@@ -131,8 +131,6 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Returns the result of <c>Microsoft.CodeAnalysis.SemanticModel.GetSymbolInfo</c>.
         /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
         public ISymbol? GetSymbol( SyntaxNode node )
         {
             using var enumerator = node.GetAnnotations( _symbolAnnotationKind ).GetEnumerator();

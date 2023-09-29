@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.Options;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             IReadOnlyList<string> fabricTypes,
             IReadOnlyList<string> transitiveFabricTypes,
             IReadOnlyList<string> otherTemplateTypes,
+            IReadOnlyList<string> optionTypes,
             IReadOnlyList<string>? references,
             TemplateProjectManifest? templates,
             string? redistributionLicenseKey,
@@ -39,6 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             this.FabricTypes = fabricTypes;
             this.TransitiveFabricTypes = transitiveFabricTypes;
             this.OtherTemplateTypes = otherTemplateTypes;
+            this.OptionTypes = optionTypes;
             this.References = references;
             this.Templates = templates;
             this.RedistributionLicenseKey = redistributionLicenseKey;
@@ -97,6 +100,11 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         /// Gets the list of types that implement the <see cref="Metalama.Framework.Fabrics.TransitiveProjectFabric"/> interface.
         /// </summary>
         public IReadOnlyList<string> TransitiveFabricTypes { get; }
+
+        /// <summary>
+        /// Gets the list of types that implement the <see cref="IHierarchicalOptions"/> interface.
+        /// </summary>
+        public IReadOnlyList<string> OptionTypes { get; }
 
         public TemplateProjectManifest? Templates { get; }
 

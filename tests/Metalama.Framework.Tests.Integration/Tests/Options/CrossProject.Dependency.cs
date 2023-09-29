@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
@@ -16,7 +18,9 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 
     public bool? BaseWins { get; init; }
 
-    public IHierarchicalOptions GetDefaultOptions( IProject project ) => this;
+#if !NET5_0_OR_GREATER
+    public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;
+#endif
 
     public object ApplyChanges( object changes, in ApplyChangesContext context )
     {
@@ -29,7 +33,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 }
 
 [AttributeUsage( AttributeTargets.All, AllowMultiple = true )]
-public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
+public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
 {
     private string _value;
 
@@ -38,7 +42,10 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOpti
         _value = value;
     }
 
-    public MyOptions GetOptions() => new() { Value = _value };
+    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+    {
+        yield return new MyOptions { Value = _value };
+    }
 }
 
 [MyOptions( "FromBaseClass" )]

@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Options;
@@ -15,19 +14,13 @@ namespace Metalama.Framework.Options;
 /// </summary>
 /// <remarks>
 /// <para>
-///  Users typically set options from a fabric using the <see cref="IAspectReceiver{TDeclaration}.SetOptions{TOptions}"/>
+///  Users typically set options from a fabric using the <see cref="IAspectReceiver{TDeclaration}.SetOptions{TOptions}(TOptions)"/>
 /// method of the <see cref="IAmender{T}.Outbound"/> object.
 /// </para>
 /// <para>
 ///  Implementations of this class must be immutable. An instance of this object represents a <i>layer</i> of options,
 ///  and these layers are merged by the <see cref="IIncrementalObject.ApplyChanges"/> method. Therefore, all properties should typically be nullable or
 ///  support another representation of being unset.
-/// </para>
-/// <para>
-/// Aspects typically use the <see cref="IAspectBuilder{TAspectTarget}.GetOptions{T}"/> method of the <see cref="IAspectBuilder{TAspectTarget}"/>
-/// to get the options applying to the current aspect instance. This method is also exposed on the <see cref="IAspectInstance"/> interface.
-/// This service is also exposed by the <see cref="DeclarationExtensions.Enhancements{T}"/> method, but the result does not include the options
-/// set by the aspect itself.
 /// </para>
 /// <para>
 /// Classes that implement this interface must implement the <see cref="IHierarchicalOptions{T}"/> generic interface where <c>T</c> is
@@ -39,21 +32,32 @@ namespace Metalama.Framework.Options;
 /// Classes that implement this interface can be annotated with the <see cref="HierarchicalOptionsAttribute"/> custom attribute,
 /// which allows authors to customize the inheritance mechanisms of the option.
 /// </para>
+/// <para>
+/// Attribute classes and aspect classes can implement the <see cref="IHierarchicalOptionsProvider"/> interface if they want to contribute
+/// options.
+/// </para>
+/// <para>
+/// Options are exposed by the <c>declaration.</c><see cref="DeclarationExtensions.Enhancements{T}"/>.<see cref="DeclarationEnhancements{T}.GetOptions{TOptions}"/> method.
+/// </para> 
 /// </remarks>
 public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializable
 {
     /// <summary>
     /// Gets the default options from the current project. 
     /// </summary>
-    /// <param name="project">The current project.</param>
-    /// <returns>The default options for the given project.</returns>
+    /// <returns>The default options for the given project, or <c>null</c> if the default value is the instance initialized by the default constructor.</returns>
     /// <remarks>
     /// <para>
     ///  If the aspect supports parameters supplied as MSBuild project properties, the implementation of this
-    ///  method should read these properties and assign their values to the returned object.
+    ///  method should read these properties and assign their values to the returned object. Otherwise, it can return <c>null</c>.
     /// </para>
     /// </remarks>
-    IHierarchicalOptions GetDefaultOptions( IProject project );
+    IHierarchicalOptions? GetDefaultOptions( OptionsInitializationContext context )
+#if NET5_0_OR_GREATER
+        => null;
+#else
+        ;
+#endif
 }
 
 /// <summary>

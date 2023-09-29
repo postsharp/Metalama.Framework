@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Options;
 using Metalama.Framework.Validation;
 using System.Collections.Immutable;
 
@@ -44,12 +43,5 @@ namespace Metalama.Framework.Aspects
         /// property of the <see cref="IAspectBuilder"/> interface.
         /// </summary>
         IAspectState? AspectState { get; }
-
-        /// <summary>
-        /// Gets the options effective for the current aspect instance, including any options set on a parent declaration.
-        /// </summary>
-        /// <typeparam name="T">The type of options.</typeparam>
-        T GetOptions<T>()
-            where T : class, IHierarchicalOptions, new();
     }
 }

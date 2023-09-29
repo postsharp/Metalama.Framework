@@ -29,7 +29,7 @@ public sealed partial class HierarchicalOptionsManager
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
-        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IDiagnosticAdder diagnosticAdder, IHierarchicalOptions defaultOptions )
+        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IUserDiagnosticSink diagnosticAdder, IHierarchicalOptions defaultOptions )
         {
             this._parent = parent;
             this._type = type;
@@ -71,9 +71,7 @@ public sealed partial class HierarchicalOptionsManager
             lock ( declarationOptions.Sync )
             {
                 declarationOptions.DirectOptions =
-                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, ApplyChangesAxis.Direct, configurator.Declaration );
-
-                declarationOptions.ResetMergedOptions();
+                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, ApplyChangesAxis.SameDeclaration, configurator.Declaration );
             }
         }
 
@@ -138,14 +136,7 @@ public sealed partial class HierarchicalOptionsManager
                         baseDeclarationOptions = null;
                     }
 
-                    if ( this.Metadata.InheritedByMembers )
-                    {
-                        containingDeclarationOptions = this.GetOptions( member.DeclaringType );
-                    }
-                    else
-                    {
-                        containingDeclarationOptions = null;
-                    }
+                    containingDeclarationOptions = this.Metadata.InheritedByMembers ? this.GetOptions( member.DeclaringType ) : null;
 
                     namespaceOptions = null;
 
@@ -184,13 +175,13 @@ public sealed partial class HierarchicalOptionsManager
             var inheritedOptionsWithNamespaceOptions = MergeOptions(
                 namespaceOptions,
                 inheritedOptions,
-                ApplyChangesAxis.Namespace,
+                ApplyChangesAxis.BaseDeclaration,
                 declaration );
 
             var mergedOptions = MergeOptions(
                 inheritedOptionsWithNamespaceOptions,
                 node?.DirectOptions,
-                ApplyChangesAxis.Declaration,
+                ApplyChangesAxis.TargetDeclaration,
                 declaration );
 
             // Cache the result.
@@ -321,6 +312,17 @@ public sealed partial class HierarchicalOptionsManager
                             new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
                             this.GetOptions( x ).AssertNotNull() ) )
                 ;
+        }
+
+        public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
+        {
+            var node = this.GetNodeAndComputeDirectOptions( declaration, true ).AssertNotNull();
+
+            lock ( node.Sync )
+            {
+                node.DirectOptions =
+                    MergeOptions( node.DirectOptions, options, ApplyChangesAxis.Aspect, declaration );
+            }
         }
     }
 }

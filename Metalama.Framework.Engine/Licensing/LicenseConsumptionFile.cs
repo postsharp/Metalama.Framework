@@ -18,13 +18,13 @@ public sealed class LicenseConsumptionFile
 
     public string TargetFramework { get; }
 
-    public decimal TotalCredits { get; }
+    public int TotalAspectClasses { get; }
 
     public string MetalamaVersion { get; }
 
     public DateTime? MetalamaBuildDate { get; }
 
-    public IReadOnlyList<LicenseCreditConsumption> ConsumedCredits { get; }
+    public IReadOnlyList<string> ConsumedAspectClasses { get; }
 
     [JsonIgnore]
     public DateTime BuildTime { get; private set; } = DateTime.Now;
@@ -36,18 +36,18 @@ public sealed class LicenseConsumptionFile
         string projectPath,
         string configuration,
         string targetFramework,
-        decimal totalCredits,
-        IReadOnlyList<LicenseCreditConsumption> consumedCredits,
+        int totalAspectClasses,
+        IReadOnlyList<string> consumedAspectClasses,
         string metalamaVersion,
         DateTime? metalamaBuildDate )
     {
         this.ProjectPath = projectPath;
         this.Configuration = configuration;
         this.TargetFramework = targetFramework;
-        this.ConsumedCredits = consumedCredits;
+        this.ConsumedAspectClasses = consumedAspectClasses;
         this.MetalamaVersion = metalamaVersion;
         this.MetalamaBuildDate = metalamaBuildDate;
-        this.TotalCredits = totalCredits;
+        this.TotalAspectClasses = totalAspectClasses;
     }
 
     public string GetFileName()
@@ -55,7 +55,7 @@ public sealed class LicenseConsumptionFile
         var uniqueId = $"{this.ProjectPath}-{this.Configuration}-{this.TargetFramework}";
         var hash = HashUtilities.HashString( uniqueId );
 
-        return $"{LicenseVerifier.LicenseCreditsFilePrefix}{Path.GetFileNameWithoutExtension( this.ProjectPath )}-{hash}.json";
+        return $"{LicenseVerifier.LicenseUsageFilePrefix}{Path.GetFileNameWithoutExtension( this.ProjectPath )}-{hash}.json";
     }
 
     public void WriteToDirectory( string directory )

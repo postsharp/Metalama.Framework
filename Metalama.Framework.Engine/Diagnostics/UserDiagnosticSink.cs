@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// Implements the user-level <see cref="IDiagnosticSink"/> interface
     /// and maps user-level diagnostics into Roslyn <see cref="Diagnostic"/>.
     /// </summary>
-    public sealed class UserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder
+    public sealed class UserDiagnosticSink : IUserDiagnosticSink
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;

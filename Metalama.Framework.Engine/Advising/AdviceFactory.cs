@@ -272,7 +272,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         switch ( result.Outcome )
         {
             case AdviceOutcome.Error:
-                this._state.SkipAspect();
+                this._state.AspectInstance.Skip();
 
                 break;
 

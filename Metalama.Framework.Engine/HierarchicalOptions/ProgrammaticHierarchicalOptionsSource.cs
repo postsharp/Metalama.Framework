@@ -16,8 +16,8 @@ internal sealed class ProgrammaticHierarchicalOptionsSource : IHierarchicalOptio
         this._getInstances = getInstances;
     }
 
-    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink )
     {
-        return this._getInstances( compilation, diagnosticAdder );
+        return this._getInstances( compilation, diagnosticSink );
     }
 }

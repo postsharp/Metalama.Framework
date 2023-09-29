@@ -24,8 +24,7 @@ public record struct HierarchicalOptionsKey( string OptionType, SerializableDecl
             return new HierarchicalOptionsKey(
 #pragma warning disable SA1101
                 constructorArguments.GetValue<string>( nameof(OptionType) )!,
-                constructorArguments.GetValue<SerializableDeclarationId>( nameof(DeclarationId) ),
-                null );
+                constructorArguments.GetValue<SerializableDeclarationId>( nameof(DeclarationId) ) );
 #pragma warning restore SA1101
         }
     }

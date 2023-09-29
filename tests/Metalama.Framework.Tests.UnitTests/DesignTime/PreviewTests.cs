@@ -165,11 +165,12 @@ class Fabric : ProjectFabric
 
                 using Metalama.Framework.Aspects;
                 using Metalama.Framework.Fabrics;
+                using Metalama.Framework.Code;
 
                 class MyAspect : TypeAspect
                 {
                     [Introduce]
-                    public string Field = meta.AspectInstance.GetOptions<MyOptions>().Value;
+                    public string Field = meta.Target.Type.Enhancements().GetOptions<MyOptions>().Value;
                 }
 
 

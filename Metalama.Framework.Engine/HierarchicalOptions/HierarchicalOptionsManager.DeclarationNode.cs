@@ -18,10 +18,19 @@ public sealed partial class HierarchicalOptionsManager
 
         private IHierarchicalOptions? _cachedMergedOptions;
         private IHierarchicalOptions? _cachedMergedOptionsExcludingNamespace;
+        private IHierarchicalOptions? _directOptions;
 
         public object Sync { get; } = new();
 
-        public IHierarchicalOptions? DirectOptions { get; set; }
+        public IHierarchicalOptions? DirectOptions
+        {
+            get => this._directOptions;
+            set
+            {
+                this._directOptions = value;
+                this.ResetMergedOptions();
+            }
+        }
 
         public IHierarchicalOptions? CachedMergedOptions
         {
@@ -59,7 +68,7 @@ public sealed partial class HierarchicalOptionsManager
             }
         }
 
-        public void ResetMergedOptions()
+        private void ResetMergedOptions()
         {
             this.CachedMergedOptions = null;
             this.HasCachedMergedOptions = false;
