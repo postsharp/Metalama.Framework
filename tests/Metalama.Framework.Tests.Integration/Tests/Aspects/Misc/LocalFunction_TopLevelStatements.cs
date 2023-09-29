@@ -1,9 +1,14 @@
+#if TEST_OPTIONS
+// @Include(Include\__LocalFunction_TopLevelStatements.cs)
+// @OutputAssemblyType(Exe)
+#endif
+
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LocalFunction;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LocalFunction_TopLevelStatements;
 
 internal class MethodAspect : OverrideMethodAspect
 {
@@ -30,20 +35,5 @@ internal class Contract : ContractAspect
 {
     public override void Validate(dynamic? value)
     {
-    }
-}
-
-internal class TargetCode
-{
-    private int Method(int a)
-    {
-        [MethodAspect]
-        [MethodBaseAspect]
-        [return: Contract]
-        int LocalFunction([Contract] int a) => a;
-
-        LocalFunction(a);
-
-        return a;
     }
 }

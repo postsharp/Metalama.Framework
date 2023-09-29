@@ -97,9 +97,9 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext, AspectReferenceSyntaxProvider referenceSyntaxProvider )
-            => this.OverriddenDeclaration switch
+            => this.OverriddenDeclaration.MethodKind switch
             {
-                { MethodKind: MethodKind.Default or MethodKind.ExplicitInterfaceImplementation } =>
+                MethodKind.Default or MethodKind.ExplicitInterfaceImplementation =>
                     InvocationExpression(
                         this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
                         ArgumentList(
@@ -118,14 +118,14 @@ namespace Metalama.Framework.Engine.Transformations
 
                                         return Argument( null, refKind, IdentifierName( p.Name ) );
                                     } ) ) ) ),
-                { MethodKind: MethodKind.Finalizer } =>
+                MethodKind.Finalizer =>
                     referenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
-                { MethodKind: MethodKind.Operator } =>
+                MethodKind.Operator =>
                     referenceSyntaxProvider.GetOperatorReference(
                         this.ParentAdvice.AspectLayerId,
                         (IMethod) this.TargetDeclaration,
                         generationContext.SyntaxGenerator ),
-                _ => throw new AssertionFailedException( $"Unsupported method: {this.OverriddenDeclaration}." )
+                _ => throw new AssertionFailedException( $"Unsupported method kind: {this.OverriddenDeclaration} is {this.OverriddenDeclaration.MethodKind}." )
             };
     }
 }

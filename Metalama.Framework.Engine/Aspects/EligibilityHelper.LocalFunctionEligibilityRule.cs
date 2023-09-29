@@ -15,11 +15,26 @@ internal partial class EligibilityHelper
         private LocalFunctionEligibilityRule() { }
 
         public EligibleScenarios GetEligibility( IDeclaration obj )
-            => ((IMethod) obj).MethodKind == MethodKind.LocalFunction ? EligibleScenarios.None : EligibleScenarios.All;
+            => obj is IMethod { MethodKind: MethodKind.LocalFunction } ? EligibleScenarios.None : EligibleScenarios.All;
 
         public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
             => ((IMethod) describedObject.Object).MethodKind == MethodKind.LocalFunction
-                ? $"{describedObject} is a local function"
+                ? $"it is a local function"
+                : (FormattableString?) null;
+    }
+
+    private sealed class LocalFunctionParameterEligibilityRule : IEligibilityRule<IDeclaration>
+    {
+        public static LocalFunctionParameterEligibilityRule Instance { get; } = new();
+
+        private LocalFunctionParameterEligibilityRule() { }
+
+        public EligibleScenarios GetEligibility( IDeclaration obj )
+            => obj is IParameter { DeclaringMember: IMethod { MethodKind: MethodKind.LocalFunction } } ? EligibleScenarios.None : EligibleScenarios.All;
+
+        public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
+            => ((IMethod)((IParameter) describedObject.Object).DeclaringMember).MethodKind == MethodKind.LocalFunction
+                ? $"it is a parameter of a local function"
                 : (FormattableString?) null;
     }
 }

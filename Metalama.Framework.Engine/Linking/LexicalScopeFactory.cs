@@ -160,7 +160,15 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                var builder = this.GetIdentifiersInTypeScope( syntaxReference.GetSyntax().GetDeclaringType().AssertNotNull() ).ToBuilder();
+                var syntaxNode = syntaxReference.GetSyntax();
+                var typeDeclarationSyntax = syntaxNode.GetDeclaringType();
+
+                if ( syntaxNode is LocalFunctionStatementSyntax && typeDeclarationSyntax == null )
+                {
+                    throw new AssertionFailedException( "Top-level local functions are not supported." );
+                }
+
+                var builder = this.GetIdentifiersInTypeScope( typeDeclarationSyntax.AssertNotNull() ).ToBuilder();
 
                 // Accessors have implicit "value" parameter.
                 if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
