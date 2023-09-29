@@ -13,8 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
     {
         public static AttributeCollection Empty { get; } = new();
 
-        public AttributeCollection( IDeclaration declaration, IReadOnlyList<AttributeRef> sourceItems ) :
-            base( declaration, sourceItems ) { }
+        public AttributeCollection( IDeclaration declaration, IReadOnlyList<AttributeRef> sourceItems )
+            : base( declaration, sourceItems ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AttributeCollection"/> class that contains no element.
