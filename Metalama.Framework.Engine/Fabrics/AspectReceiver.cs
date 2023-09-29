@@ -508,6 +508,11 @@ namespace Metalama.Framework.Engine.Fabrics
 
             foreach ( var targetDeclaration in targets )
             {
+                if ( targetDeclaration == null )
+                {
+                    continue;
+                }
+                
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
                 // Verify containment.
@@ -596,6 +601,11 @@ namespace Metalama.Framework.Engine.Fabrics
 
             foreach ( var targetDeclaration in targets )
             {
+                if ( targetDeclaration == null )
+                {
+                    continue;
+                }
+                
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
                 var containingTypeOrCompilation = (IDeclaration?) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()

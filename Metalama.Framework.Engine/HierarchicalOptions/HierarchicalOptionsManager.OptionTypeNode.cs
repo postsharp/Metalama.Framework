@@ -71,7 +71,7 @@ public sealed partial class HierarchicalOptionsManager
             lock ( declarationOptions.Sync )
             {
                 declarationOptions.DirectOptions =
-                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, ApplyChangesAxis.Direct, configurator.Declaration );
+                    MergeOptions( declarationOptions.DirectOptions, configurator.Options, ApplyChangesAxis.SameDeclaration, configurator.Declaration );
 
                 declarationOptions.ResetMergedOptions();
             }
@@ -184,13 +184,13 @@ public sealed partial class HierarchicalOptionsManager
             var inheritedOptionsWithNamespaceOptions = MergeOptions(
                 namespaceOptions,
                 inheritedOptions,
-                ApplyChangesAxis.Namespace,
+                ApplyChangesAxis.BaseDeclaration,
                 declaration );
 
             var mergedOptions = MergeOptions(
                 inheritedOptionsWithNamespaceOptions,
                 node?.DirectOptions,
-                ApplyChangesAxis.Declaration,
+                ApplyChangesAxis.TargetDeclaration,
                 declaration );
 
             // Cache the result.
