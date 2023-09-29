@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -358,7 +359,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 ?? throw new AssertionFailedException( $"Cannot get a semantic model for '{node.SyntaxTree.FilePath}'." );
 
             var symbol =
-                semanticModel.GetDeclaredSymbol( node )
+                (node is LambdaExpressionSyntax ? semanticModel.GetSymbolInfo( node ).Symbol : semanticModel.GetDeclaredSymbol( node ))
                 ?? throw new AssertionFailedException( $"Cannot get a symbol for {node.GetType().Name}." );
 
             return symbol;

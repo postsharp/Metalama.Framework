@@ -55,8 +55,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 SymbolMethodKind.Conversion => MethodKind.Operator,
                 SymbolMethodKind.UserDefinedOperator => MethodKind.Operator,
                 SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
-                SymbolMethodKind.AnonymousFunction or
-                    SymbolMethodKind.BuiltinOperator or
+                SymbolMethodKind.AnonymousFunction => MethodKind.Lambda,
+                SymbolMethodKind.BuiltinOperator or
                     SymbolMethodKind.DelegateInvoke or
                     SymbolMethodKind.ReducedExtension or
                     SymbolMethodKind.DeclareMethod or

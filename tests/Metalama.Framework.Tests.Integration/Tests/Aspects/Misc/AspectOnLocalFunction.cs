@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LocalFunction;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AspectOnLocalFunction;
 
 internal class MethodAspect : OverrideMethodAspect
 {

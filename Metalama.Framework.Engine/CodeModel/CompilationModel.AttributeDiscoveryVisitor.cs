@@ -149,18 +149,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 base.VisitAttribute( node );
             }
 
-            protected override void VisitCore( SyntaxNode? node )
-            {
-                if ( node is ExpressionSyntax or ExpressionSyntax )
-                {
-                    // Don't visit any expression or statement deeply. 
-                }
-                else
-                {
-                    base.VisitCore( node );
-                }
-            }
-
             public ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> GetDiscoveredAttributes() => this._builder.ToImmutable();
 
             public void Visit( SyntaxTree tree )

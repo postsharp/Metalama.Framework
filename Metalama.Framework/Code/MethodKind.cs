@@ -61,6 +61,11 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Local function.
         /// </summary>
-        LocalFunction
+        LocalFunction,
+
+        /// <summary>
+        /// Lambda.
+        /// </summary>
+        Lambda
     }
 }

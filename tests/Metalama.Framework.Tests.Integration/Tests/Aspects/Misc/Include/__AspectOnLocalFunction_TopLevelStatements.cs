@@ -1,4 +1,4 @@
-﻿using Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LocalFunction_TopLevelStatements;
+﻿using Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AspectOnLocalFunction_TopLevelStatements;
 
 [MethodAspect]
 [MethodBaseAspect]

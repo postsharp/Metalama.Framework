@@ -91,7 +91,7 @@ internal partial class EligibilityHelper
         {
             var declarationInterface = implementedInterface.GenericTypeArguments[0];
 
-            // If methods are eligible, we need to check that the target method is not a local function.
+            // If methods are eligible, we need to check that the target method is not a local function or a lambda.
             if ( declarationInterface.IsAssignableFrom( typeof(IMethod) ) )
             {
                 this._eligibilityRules.Add( new( typeof(IMethod), LocalFunctionEligibilityRule.Instance ) );

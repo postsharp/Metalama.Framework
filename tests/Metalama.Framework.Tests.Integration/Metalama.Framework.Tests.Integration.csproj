@@ -32,6 +32,8 @@
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
+		<!-- But still show them in solution explorer -->
+		<None Include="Tests\**\__*.cs" />
     </ItemGroup>
 
     <ItemGroup>
