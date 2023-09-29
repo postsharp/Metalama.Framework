@@ -72,8 +72,6 @@ public sealed partial class HierarchicalOptionsManager
             {
                 declarationOptions.DirectOptions =
                     MergeOptions( declarationOptions.DirectOptions, configurator.Options, ApplyChangesAxis.SameDeclaration, configurator.Declaration );
-
-                declarationOptions.ResetMergedOptions();
             }
         }
 
@@ -138,14 +136,7 @@ public sealed partial class HierarchicalOptionsManager
                         baseDeclarationOptions = null;
                     }
 
-                    if ( this.Metadata.InheritedByMembers )
-                    {
-                        containingDeclarationOptions = this.GetOptions( member.DeclaringType );
-                    }
-                    else
-                    {
-                        containingDeclarationOptions = null;
-                    }
+                    containingDeclarationOptions = this.Metadata.InheritedByMembers ? this.GetOptions( member.DeclaringType ) : null;
 
                     namespaceOptions = null;
 
@@ -321,6 +312,17 @@ public sealed partial class HierarchicalOptionsManager
                             new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
                             this.GetOptions( x ).AssertNotNull() ) )
                 ;
+        }
+
+        public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
+        {
+            var node = this.GetNodeAndComputeDirectOptions( declaration, true ).AssertNotNull();
+
+            lock ( node.Sync )
+            {
+                node.DirectOptions =
+                    MergeOptions( node.DirectOptions, options, ApplyChangesAxis.Aspect, declaration );
+            }
         }
     }
 }

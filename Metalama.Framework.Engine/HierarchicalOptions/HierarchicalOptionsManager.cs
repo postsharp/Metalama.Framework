@@ -134,35 +134,6 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         where TOptions : class, IHierarchicalOptions, new()
         => (TOptions) this.GetOptions( declaration, typeof(TOptions) );
 
-    internal static TOptions GetOptions<TOptions>( IAspectInstance aspectInstance )
-        where TOptions : class, IHierarchicalOptions, new()
-    {
-        // We require a UserCodeExecutionContext to execute this method because requiring an explicit ICompilation would
-        // make the API cumbersome. In case of need we can have another overload accepting the ICompilation.
-        var compilation = UserCodeExecutionContext.Current.Compilation.AssertNotNull();
-
-        var declaration = aspectInstance.TargetDeclaration.GetTarget( compilation );
-
-        var inheritedOptions =
-            declaration.GetCompilationModel().HierarchicalOptionsManager.GetOptions<TOptions>( declaration );
-
-        if ( aspectInstance.Aspect is IHierarchicalOptionsProvider<TOptions> hierarchicalOptionsProvider )
-        {
-            var aspectOptions = hierarchicalOptionsProvider.GetOptions();
-
-            var combinedOptions = inheritedOptions.ApplyChangesSafe(
-                    aspectOptions,
-                    new ApplyChangesContext( ApplyChangesAxis.Aspect, declaration ) )
-                .AssertNotNull();
-
-            return combinedOptions;
-        }
-        else
-        {
-            return inheritedOptions;
-        }
-    }
-
     public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>>
         GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         => this._optionTypes.Where( s => s.Value.Metadata is { InheritedByDerivedTypes: true } or { InheritedByOverridingMembers: true } )
@@ -178,5 +149,10 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         }
 
         public string DiagnosticSourceDescription => $"{this._type.Name}.GetDefaultOptions";
+    }
+
+    public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
+    {
+        this.GetOptionTypeNode( options.GetType().FullName.AssertNotNull() ).SetAspectOptions( declaration, options );
     }
 }

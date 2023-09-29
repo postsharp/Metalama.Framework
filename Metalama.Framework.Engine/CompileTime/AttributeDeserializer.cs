@@ -208,7 +208,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !this._userCodeInvoker.TryInvoke(
                             () => setter.Invoke( localAttributeInstance, new[] { translatedValue } ),
-                            executionContext.WithInvokedMember(
+                            executionContext.WithDescription(
                                 UserCodeDescription.Create( "setting the {0} property while instantiating a custom attribute", property ) ) ) )
                     {
                         attributeInstance = null;
@@ -227,7 +227,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !this._userCodeInvoker.TryInvoke(
                             () => field.SetValue( localAttributeInstance, translatedValue ),
-                            executionContext.WithInvokedMember(
+                            executionContext.WithDescription(
                                 UserCodeDescription.Create( "setting the {0} field while instantiating a custom attribute", field ) ) ) )
                     {
                         attributeInstance = null;

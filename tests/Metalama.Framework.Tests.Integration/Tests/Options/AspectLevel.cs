@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
@@ -9,20 +10,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Options;
 // @Include(_Common.cs)
 #endif
 
-public class TheAspect : TypeAspect, IHierarchicalOptionsProvider<MyOptions>
+public class TheAspect : TypeAspect, IHierarchicalOptionsProvider
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var options = builder.AspectInstance.GetOptions<MyOptions>();
+        var options = builder.Target.Enhancements().GetOptions<MyOptions>();
 
         builder.Advice.IntroduceAttribute(
             builder.Target,
             AttributeConstruction.Create( typeof(ActualOptionsAttribute), new[] { options.OverrideHistory } ) );
     }
 
-    public MyOptions GetOptions()
+    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
     {
-        return new MyOptions { Value = "FromTheAspect" };
+        yield return new MyOptions { Value = "FromTheAspect" };
     }
 }
 

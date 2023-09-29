@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -31,10 +30,6 @@ public sealed partial class InheritableAspectInstance : IAspectInstance, IAspect
     ImmutableArray<AspectPredecessor> IAspectPredecessor.Predecessors => ImmutableArray<AspectPredecessor>.Empty;
 
     public IAspectState? AspectState { get; private set; }
-
-    public T GetOptions<T>()
-        where T : class, IHierarchicalOptions, new()
-        => throw new NotImplementedException();
 
     public IAspect Aspect { get; private set; }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -32,7 +33,7 @@ public record MyOptions : IHierarchicalOptions<IDeclaration>
 }
 
 [AttributeUsage( AttributeTargets.All, AllowMultiple = true )]
-public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOptions>
+public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider
 {
     private string _value;
 
@@ -41,7 +42,10 @@ public class MyOptionsAttribute : Attribute, IHierarchicalOptionsProvider<MyOpti
         _value = value;
     }
 
-    public MyOptions GetOptions() => new() { Value = _value };
+    public IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration declaration )
+    {
+        yield return new MyOptions { Value = _value };
+    }
 }
 
 [MyOptions( "FromBaseClass" )]

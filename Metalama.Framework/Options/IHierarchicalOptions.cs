@@ -37,10 +37,7 @@ namespace Metalama.Framework.Options;
 /// options.
 /// </para>
 /// <para>
-/// Aspects typically use the <see cref="IAspectInstance.GetOptions{T}"/> method of the <see cref="IAspectInstance"/> interface
-/// to get the options applying to the current aspect instance. This method is also exposed on the <see cref="IAspectInstance"/> interface.
-/// This service is also exposed by the <see cref="DeclarationExtensions.Enhancements{T}"/> method, but the result does not include the options
-/// set by the aspect itself, or any other aspect, through the <see cref="IHierarchicalOptionsProvider"/> interface.
+/// Options are exposed by the <code>declaration.</code><see cref="DeclarationExtensions.Enhancements{T}"/>.<see cref="DeclarationEnhancements{T}.GetOptions{TOptions}"/> method.
 /// </para> 
 /// </remarks>
 public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializable

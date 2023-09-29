@@ -19,6 +19,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -74,6 +75,21 @@ internal sealed class AspectDriver : IAspectDriver
         {
             var designTimeConfiguration = serviceProvider.Global.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
             this._codeFixAvailability = designTimeConfiguration.HideUnlicensedCodeActions ? CodeFixAvailability.None : CodeFixAvailability.PreviewOnly;
+        }
+    }
+
+    private void ApplyOptions( IAspectInstanceInternal aspectInstance, IDeclaration declaration, UserCodeInvoker invoker, UserCodeExecutionContext baseContext )
+    {
+        if ( aspectInstance.Aspect is IHierarchicalOptionsProvider optionsProvider )
+        {
+            var invokerContext = baseContext.WithDescription( UserCodeDescription.Create( "executing GetOptions() for {0}", aspectInstance ) );
+
+            var optionList = invoker.Invoke( () => optionsProvider.GetOptions( declaration ).ToReadOnlyList(), invokerContext );
+
+            foreach ( var options in optionList )
+            {
+                declaration.GetCompilationModel().HierarchicalOptionsManager.SetAspectOptions( declaration, options );
+            }
         }
     }
 
@@ -161,7 +177,9 @@ internal sealed class AspectDriver : IAspectDriver
                 pipelineConfiguration.CodeFixFilter,
                 this._codeFixAvailability );
 
-            var executionContext = new UserCodeExecutionContext(
+            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+
+            var buildAspectExecutionContext = new UserCodeExecutionContext(
                 serviceProvider,
                 diagnosticSink,
                 UserCodeDescription.Create( "executing BuildAspect for {0}", aspectInstance ),
@@ -170,6 +188,9 @@ internal sealed class AspectDriver : IAspectDriver
                 targetDeclaration,
                 throwOnUnsupportedDependencies: true );
 
+            // Apply options.
+            this.ApplyOptions( aspectInstance, targetDeclaration, userCodeInvoker, buildAspectExecutionContext );
+
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(
                 serviceProvider,
@@ -177,7 +198,7 @@ internal sealed class AspectDriver : IAspectDriver
                 currentCompilationRevision,
                 aspectInstance,
                 diagnosticSink,
-                executionContext,
+                buildAspectExecutionContext,
                 pipelineStepIndex,
                 indexWithinType );
 
@@ -205,7 +226,7 @@ internal sealed class AspectDriver : IAspectDriver
 
             adviceFactoryState.AspectBuilder = aspectBuilder;
 
-            if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
+            if ( !userCodeInvoker
                     .TryInvoke(
                         () =>
                         {
@@ -223,7 +244,7 @@ internal sealed class AspectDriver : IAspectDriver
                                 aspectOfT.BuildAspect( aspectBuilder );
                             }
                         },
-                        executionContext ) )
+                        buildAspectExecutionContext ) )
             {
                 aspectInstance.Skip();
 

@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Options;
 
@@ -9,26 +11,27 @@ namespace Metalama.Framework.Options;
 /// A non-generic base interface for the generic <see cref="IHierarchicalOptions{T}"/>. You should always implement the generic interface.
 /// </summary>
 [RunTimeOrCompileTime]
-public interface IHierarchicalOptionsProvider { }
-
-/// <summary>
-/// Interface, when implemented by any custom attribute (<see cref="System.Attribute"/>) or aspect (<see cref="IAspect"/>), means that this custom attribute
-/// or aspect can provide an option layer.
-/// </summary>
-/// <typeparam name="T">The type of options provided by the current attribute or aspect.</typeparam>
-/// <remarks>
-///  <para>This interface behaves differently when implemented by a plain custom attribute than when applied to an aspect.</para>
-///  <para>When this interface is implemented by a plain custom attribute, the result of the <see cref="GetOptions"/> method is taken into account
-/// when options are requested through the <see cref="DeclarationExtensions.Enhancements{T}"/>.<see cref="DeclarationEnhancements{T}.GetOptions{TOptions}"/> method.</para>
-/// <para>However, when this interface is implemented by an aspect (i.e. any class implementing the <see cref="IAspect{T}"/> interface), the result of the
-/// <see cref="GetOptions"/> of the aspect is <i>ignored</i> by <see cref="DeclarationExtensions.Enhancements{T}"/>.<see cref="DeclarationEnhancements{T}.GetOptions{TOptions}"/>
-/// and only returned by <see cref="IAspectInstance"/>.<see cref="IAspectInstance.GetOptions{T}"/>.</para>
-/// </remarks>
-public interface IHierarchicalOptionsProvider<out T> : IHierarchicalOptionsProvider
-    where T : class, IHierarchicalOptions
+public interface IHierarchicalOptionsProvider
 {
     /// <summary>
-    /// Gets the options specified by the current attribute or aspect.
+    /// Gets the list of options provided by the current aspect or attribute.
     /// </summary>
-    T GetOptions();
+    /// <param name="targetDeclaration">The declaration to which the aspect or attribute has been applied.</param>
+    /// <returns>The list of options.</returns>
+    /// <remarks>
+    /// <para>
+    ///     This interface behaves differently when applied to plain custom attributes than when applied to aspects.
+    /// </para>
+    /// <para>
+    ///     When applied to plain custom attributes, the <see cref="GetOptions"/> method is invoked immediately in the first stage
+    ///     of the compilation process, therefore the provided options are immediately available for readers.
+    /// </para>
+    /// <para>
+    ///     However, when the interface is implemented by an aspect, i.e. any class implementing the <see cref="IAspect"/> interface,
+    ///     the <see cref="GetOptions"/> method is called right before the <see cref="IAspect{T}.BuildAspect"/> method of the aspect
+    ///     is invoked. The provided options are therefore only available to the current aspect instance and any code executing after
+    ///     this aspect instance.
+    /// </para>
+    /// </remarks>
+    IEnumerable<IHierarchicalOptions> GetOptions( IDeclaration targetDeclaration );
 }

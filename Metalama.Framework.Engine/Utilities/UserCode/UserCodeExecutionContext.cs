@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
 
-        internal UserCodeExecutionContext WithInvokedMember( UserCodeDescription invokedMember )
+        internal UserCodeExecutionContext WithDescription( UserCodeDescription invokedMember )
             => new(
                 this.ServiceProvider,
                 this.Diagnostics,

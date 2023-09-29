@@ -1,6 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
-
-using Metalama.Framework.Code;
+﻿using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Options;
 using Metalama.Framework.Project;
@@ -17,11 +15,11 @@ namespace Doc.AspectConfiguration
 
         object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
         {
-            var other = (LoggingOptions) changes;
+            var other = (LoggingOptions)changes;
 
-            return new LoggingOptions { Category = other.Category ?? this.Category };
+            return new LoggingOptions { Category = other.Category ?? Category };
         }
 
-        IHierarchicalOptions? GetDefaultOptions( OptionsInitializationContext context ) => null;
+        IHierarchicalOptions? IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context ) => null;
     }
 }
