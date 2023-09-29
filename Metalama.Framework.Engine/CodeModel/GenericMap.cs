@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -14,14 +15,21 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public GenericMap( Compilation compilation ) : this( ImmutableArray<ITypeSymbol>.Empty, compilation ) { }
 
-        private GenericMap( ImmutableArray<ITypeSymbol> typeArguments, Compilation compilation )
+        public GenericMap( ImmutableArray<ITypeSymbol> typeArguments, Compilation compilation )
         {
             this._typeArguments = typeArguments;
             this._compilation = compilation;
         }
 
-        public ITypeSymbol Map( ITypeSymbol type )
+        [return: NotNullIfNotNull( nameof(type) )]
+        public T? Map<T>( T? type )
+            where T : class, ITypeSymbol
         {
+            if ( type is null )
+            {
+                return null;
+            }
+            
             if ( this._typeArguments.IsEmpty )
             {
                 return type;
@@ -30,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 this._mapper ??= new Mapper( this );
 
-                return this._mapper.Visit( type )!;
+                return (T) this._mapper.Visit( type )!;
             }
         }
 
@@ -38,7 +46,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a <see cref="GenericMap"/> for use in the base type.
         /// </summary>
         /// <param name="typeArguments">Type arguments of the base type in the current type.</param>
-        /// <returns></returns>
         public GenericMap CreateBaseMap( ImmutableArray<ITypeSymbol> typeArguments )
         {
             if ( typeArguments.IsEmpty )
@@ -80,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override ITypeSymbol VisitArrayType( IArrayTypeSymbol symbol )
             {
-                var mappedElementType = symbol.ElementType;
+                var mappedElementType = this.Visit( symbol.ElementType )!;
 
                 if ( ReferenceEquals( mappedElementType, symbol.ElementType ) )
                 {

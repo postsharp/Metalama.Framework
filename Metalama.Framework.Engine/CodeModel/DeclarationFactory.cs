@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -513,6 +514,24 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
+    internal IMethod GetMethod( SubstitutedMethod substitutedMethod )
+    {
+        return (IMethod) this._defaultCache.GetOrAdd(
+            Ref.FromSubstitutedDeclaration( substitutedMethod ).As<ICompilationElement>(),
+            static ( l, c ) =>
+            {
+                var original = (SubstitutedMethod) l.Target!;
+
+                return new SubstitutedMethod(
+                    original.SourceMethod,
+                    Ref.FromSymbol( original.SubstitutedType, original.GetCompilationModel().CompilationContext )
+                        .GetSymbol( c.RoslynCompilation )
+                        .AssertNotNull()
+                        .AssertCast<INamedTypeSymbol>() );
+            },
+            this._compilationModel );
+    }
+
     internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options )
         => (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
@@ -624,6 +643,14 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             // ReSharper disable once SuspiciousTypeConversion.Global
             ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
             _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
+        };
+
+    internal IDeclaration GetDeclaration( ISubstitutedDeclaration declaration )
+        => declaration switch
+        {
+            SubstitutedMethod substitutedMethod => this.GetMethod( substitutedMethod ),
+
+            _ => throw new AssertionFailedException( $"Cannot get a declaration for a {declaration.GetType()}" )
         };
 
     public IType GetIType( IType type )

@@ -11,12 +11,12 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 internal abstract class MemberOrNamedTypeCollection<TMember> : DeclarationCollection<TMember, Ref<TMember>>, IMemberOrNamedTypeCollection<TMember>
     where TMember : class, IMemberOrNamedType
 {
-    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, UpdatableMemberCollection<TMember> sourceItems )
+    protected MemberOrNamedTypeCollection( IDeclaration containingDeclaration, ISourceMemberCollection<TMember> sourceItems )
         : base( containingDeclaration, sourceItems ) { }
 
     public IEnumerable<TMember> OfName( string name )
     {
-        var typedSource = (UpdatableMemberCollection<TMember>) this.Source;
+        var typedSource = (ISourceMemberCollection<TMember>) this.Source;
 
         // Enumerate the source without causing a resolution of the reference.
         foreach ( var sourceItem in typedSource.OfName( name ) )
