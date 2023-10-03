@@ -7,6 +7,7 @@ namespace Metalama.Framework.Options;
 /// <summary>
 /// An item in a <see cref="IncrementalKeyedCollection{TKey,TValue}"/>.
 /// </summary>
+/// <seealso href="@exposing-options"/>
 public interface IIncrementalKeyedCollectionItem<out TKey> : IIncrementalObject, ICompileTimeSerializable
     where TKey : notnull
 {

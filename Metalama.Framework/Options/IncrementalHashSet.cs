@@ -11,6 +11,7 @@ namespace Metalama.Framework.Options;
 /// <summary>
 /// Factory methods for the <see cref="IncrementalHashSet{T}"/> generic class.
 /// </summary>
+/// <seealso href="@exposing-options"/>
 [CompileTime]
 public static class IncrementalHashSet
 {

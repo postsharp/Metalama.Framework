@@ -58,7 +58,7 @@ namespace Metalama.Framework.Project
         /// Gets the set of properties passed from MSBuild. To expose an MSBuild property to this collection,
         /// define the <c>CompilerVisibleProperty</c> item. 
         /// </summary>
-        /// <seealso href="@exposing-configuration"/>
+        /// <seealso href="@reading-msbuild-properties"/>
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>
@@ -66,7 +66,6 @@ namespace Metalama.Framework.Project
         /// and have a default constructor. New instances will be initialized using <see cref="ProjectExtension.Initialize"/>.
         /// </summary>
         /// <typeparam name="T">The extension type, which must derive from <see cref="ProjectExtension"/> and have a default constructor.</typeparam>
-        /// <seealso href="@exposing-configuration"/>
         [Obsolete( "Use IDeclaration.Enhancements().GetOptions<T> to get or amender.Outbound.Configure<T>(...) to set an option." )]
         T Extension<T>()
             where T : ProjectExtension, new();
