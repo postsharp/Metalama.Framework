@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-    <!-- This is not necessary to reproduce the test, but it makes sure that setting this here wouldn't cause the bug. -->
+    <!-- This is not necessary to reproduce the bug, but it makes sure that setting this here wouldn't cause the bug. -->
     <MetalamaEnabled>true</MetalamaEnabled>
   </PropertyGroup>
 
