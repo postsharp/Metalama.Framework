@@ -78,6 +78,7 @@ public readonly struct DeclarationEnhancements<T>
     /// aspect instance has been initialized; options provided by other means are available immediately.
     /// </summary>
     /// <typeparam name="TOptions">The type of options.</typeparam>
+    /// <seealso href="@exposing-options"/>
     public TOptions GetOptions<TOptions>()
         where TOptions : class, IHierarchicalOptions<T>, new()
         => ((ICompilationInternal) this.Declaration.Compilation).HierarchicalOptionsManager.GetOptions<TOptions>( this.Declaration );

@@ -11,6 +11,7 @@ namespace Metalama.Framework.Options;
 /// <summary>
 /// Factory for the generic <see cref="IncrementalKeyedCollection{TKey,TValue}"/> class.
 /// </summary>
+/// <seealso href="@exposing-options"/>
 [CompileTime]
 public static class IncrementalKeyedCollection
 {

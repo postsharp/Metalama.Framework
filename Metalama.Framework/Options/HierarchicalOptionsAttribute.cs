@@ -11,6 +11,7 @@ namespace Metalama.Framework.Options;
 /// Custom attribute that, when applied to a class implementing the <see cref="IHierarchicalOptions"/> interface,
 /// specifies how the options are inherited.
 /// </summary>
+/// <seealso href="@exposing-options"/>
 [RunTimeOrCompileTime]
 [AttributeUsage( AttributeTargets.Class )]
 public sealed class HierarchicalOptionsAttribute : Attribute
