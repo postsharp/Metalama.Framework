@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
 
 internal class NotNullAttribute : ContractAspect
 {
-    public NotNullAttribute() : base( ContractDirection.Both ) { }
+    protected override ContractDirection GetDirection( IAspectBuilder builder ) => ContractDirection.Both;
 
     public override void Validate( dynamic? value )
     {

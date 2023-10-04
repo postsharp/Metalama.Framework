@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.StaticEli
 
 internal class NotNullAttribute : ContractAspect
 {
-    public NotNullAttribute() : base( ContractDirection.Input ) { }
+    protected override ContractDirection GetDirection( IAspectBuilder builder ) => ContractDirection.Input;
 
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder ) => BuildEligibilityForDirection( builder, ContractDirection.Input );
 

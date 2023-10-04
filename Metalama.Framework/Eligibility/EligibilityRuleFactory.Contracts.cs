@@ -101,7 +101,7 @@ public static partial class EligibilityRuleFactory
                 CreateRule<IParameter>(
                     parameter =>
                     {
-                        parameter.MustBeWritable();
+                        parameter.MustSatisfyAny( p => p.MustBeWritable(), p => p.MustBeReturnParameter() );
                         parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
