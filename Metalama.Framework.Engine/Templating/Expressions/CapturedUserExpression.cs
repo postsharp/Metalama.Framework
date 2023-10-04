@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.CompileTimeContracts;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -17,7 +19,23 @@ internal sealed class CapturedUserExpression : UserExpression
         this._expression = expression;
     }
 
-    public override IType Type => ((ICompilationInternal) this._compilation).Factory.GetSpecialType( SpecialType.Object );
+    public override IType Type
+        => this._expression switch
+           {
+               TypedExpressionSyntaxImpl { ExpressionType: { } expressionType } =>
+                   this._compilation.GetCompilationModel().Factory.GetIType( expressionType ),
+               TypedExpressionSyntax { ExpressionType: { } expressionType }
+                   => this._compilation.GetCompilationModel().Factory.GetIType( expressionType ),
+               IExpression expression => expression.Type,
+               ExpressionSyntax expressionSyntax => SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+                   expressionSyntax,
+                   this._compilation.GetCompilationModel().CompilationContext,
+                   out var type )
+                   ? this._compilation.GetCompilationModel().Factory.GetIType( type )
+                   : null,
+               _ => null
+           } ??
+           ((ICompilationInternal) this._compilation).Factory.GetSpecialType( SpecialType.Object );
 
     protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         => TypedExpressionSyntaxImpl.FromValue( this._expression, syntaxSerializationContext ).Syntax;

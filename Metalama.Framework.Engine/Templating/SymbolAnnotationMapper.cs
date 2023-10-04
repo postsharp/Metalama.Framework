@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -78,7 +79,10 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static bool TryFindExpressionTypeFromAnnotation( SyntaxNode node, CompilationContext compilationContext, out ITypeSymbol? type )
+        public static bool TryFindExpressionTypeFromAnnotation(
+            SyntaxNode node,
+            CompilationContext compilationContext,
+            [NotNullWhen( true )] out ITypeSymbol? type )
         {
             // If we don't know the exact type, check if we have a type annotation on the syntax.
 

@@ -5,7 +5,7 @@ internal class TargetClass
   {
     if (i == 0)
     {
-      this.M_Source(42, (global::System.Int32)42);
+      this.M_Source(42, 42);
       return;
     }
     else
