@@ -7,6 +7,8 @@ public class TheAspect : TypeAspect, IConditionallyInheritableAspect
 {
     public bool IsInheritable { get; set; }
 
+    bool IConditionallyInheritableAspect.IsInheritable( IDeclaration targetDeclaration, IAspectInstance aspectInstance ) => IsInheritable;
+
     [Introduce]
     private void IntroducedMethod() { }
 }

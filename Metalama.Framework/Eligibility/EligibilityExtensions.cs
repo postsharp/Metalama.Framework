@@ -247,7 +247,7 @@ public static partial class EligibilityExtensions
     public static void MustBeReadable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfyAny(
             b => b.MustBeOfType( typeof(IField) ),
-            b => b.Convert().To<IFieldOrProperty>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
+            b => b.Convert().To<IPropertyOrIndexer>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
 
     /// <summary>
     /// Requires the target parameter to be writable, i.e. <c>ref</c> or <c>out</c>.
@@ -365,7 +365,7 @@ public static partial class EligibilityExtensions
 
         eligibilityBuilder.MustSatisfy(
             type.IsInstanceOfType,
-            d => $"{d} is not a {GetInterfaceName( type )} but a {GetInterfaceName( d.Object.GetType() )}" );
+            d => $"{d} must be a {GetInterfaceName( type )}" );
     }
 
     /// <summary>
@@ -447,7 +447,7 @@ public static partial class EligibilityExtensions
     public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
         => eligibilityBuilder.MustSatisfy(
             t => t.Is( type, conversionKind ),
-            member => $"{member} must be a '{type}'" );
+            member => $"{member} must be of type '{type}'" );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as an <see cref="IType"/>).

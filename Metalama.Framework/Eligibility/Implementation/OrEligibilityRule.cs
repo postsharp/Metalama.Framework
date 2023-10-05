@@ -38,28 +38,50 @@ namespace Metalama.Framework.Eligibility.Implementation
             EligibleScenarios requestedEligibility,
             IDescribedObject<T> describedObject )
         {
-            StringBuilder stringBuilder = new();
-            stringBuilder.Append( "none of these conditions was fulfilled: { " );
-
-            for ( var i = 0; i < this._predicates.Length; i++ )
+            switch ( this._predicates.Length )
             {
-                var predicate = this._predicates[i];
-                var justification = predicate.GetIneligibilityJustification( requestedEligibility, describedObject );
+                case 0:
+                    return $"the Or condition group is empty";
 
-                if ( justification != null )
-                {
-                    if ( i > 0 )
+                case 1:
+#pragma warning disable CS8603
+                    return this._predicates[0].GetIneligibilityJustification( requestedEligibility, describedObject );
+#pragma warning restore CS8603
+
+                default:
                     {
-                        stringBuilder.Append( " or " );
+                        StringBuilder stringBuilder = new();
+                        stringBuilder.Append( "none of these conditions was fulfilled: { " );
+                        var letter = 'a';
+
+                        for ( var i = 0; i < this._predicates.Length; i++ )
+                        {
+                            var predicate = this._predicates[i];
+                            var justification = predicate.GetIneligibilityJustification( requestedEligibility, describedObject );
+
+                            if ( justification != null )
+                            {
+                                if ( i > 0 )
+                                {
+                                    stringBuilder.Append( ", or " );
+                                }
+
+                                stringBuilder.Append( '(' );
+                                stringBuilder.Append( letter );
+                                stringBuilder.Append( ')' );
+                                stringBuilder.Append( ' ' );
+
+                                stringBuilder.Append( justification.ToString( MetalamaExecutionContext.Current.FormatProvider ) );
+                            }
+
+                            letter++;
+                        }
+
+                        stringBuilder.Append( " }" );
+
+                        return $"{stringBuilder}";
                     }
-
-                    stringBuilder.Append( justification.ToString( MetalamaExecutionContext.Current.FormatProvider ) );
-                }
             }
-
-            stringBuilder.Append( " }" );
-
-            return $"{stringBuilder}";
         }
     }
 }

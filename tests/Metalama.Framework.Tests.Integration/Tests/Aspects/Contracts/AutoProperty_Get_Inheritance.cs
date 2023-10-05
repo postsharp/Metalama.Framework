@@ -1,14 +1,13 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618, CS0169
+#pragma warning disable CS0169, CS0649
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Out
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AutoProperty_Get_Inheritance
 {
+    [Inheritable]
     internal class NotNullAttribute : ContractAspect
     {
-        protected override ContractDirection GetDirection( IAspectBuilder builder ) => ContractDirection.Output;
-
         public override void Validate( dynamic? value )
         {
             if (value == null)
@@ -18,10 +17,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Out
         }
     }
 
-    // <target>
-    internal class Target
+    internal interface ITarget
     {
         [NotNull]
-        private string q;
+        string P { get; }
+    }
+
+    // <target>
+    internal class Target : ITarget
+    {
+        public string P { get; } = null!;
     }
 }

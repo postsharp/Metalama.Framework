@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618, CS0169
+#pragma warning disable CS8618, CS0169, CS0618
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_InvalidDirections
 {

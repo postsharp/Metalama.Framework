@@ -1565,7 +1565,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         {
             switch ( kind )
             {
-                case ContractDirection.Output when targetParameter.RefKind is not (RefKind.Ref or RefKind.Out):
+                case ContractDirection.Output when targetParameter.RefKind is not (RefKind.Ref or RefKind.Out) && !targetParameter.IsReturnParameter:
                     throw new ArgumentOutOfRangeException(
                         nameof(kind),
                         MetalamaStringFormatter.Format(

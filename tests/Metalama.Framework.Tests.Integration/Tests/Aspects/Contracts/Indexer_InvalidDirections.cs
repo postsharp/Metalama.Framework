@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618, CS0169
+#pragma warning disable CS8618, CS0169, CS0618
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_InvalidDirections
 {
@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
     {
         public NotZeroAttribute( ContractDirection direction ) : base( direction ) { }
 
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value == 0)
             {
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
         // All these targets are invalid.
 
         [NotZero( ContractDirection.Input )]
-        public int this[int x]
+        public int this[ int x ]
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
         }
 
         [NotZero( ContractDirection.Both )]
-        public int this[int x, int y]
+        public int this[ int x, int y ]
         {
             get
             {
@@ -41,11 +41,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
         }
 
         [NotZero( ContractDirection.Output )]
-        public int this[int x, int y, int z]
+        public int this[ int x, int y, int z ]
         {
-            set
-            {
-            }
+            set { }
         }
     }
 }

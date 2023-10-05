@@ -28,29 +28,75 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     public abstract class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
+        private readonly ContractDirection _direction;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractAspect"/> class.
         /// </summary>
         /// <param name="direction">The direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
         /// to which this contract applies. See the <see cref="ContractDirection"/> for details.</param>
-        protected ContractAspect( ContractDirection direction = ContractDirection.Default )
+        [Obsolete( "Specifying the direction in the constructor is obsolete. Override the GetDirection method." )]
+        protected ContractAspect( ContractDirection direction )
         {
-            this.Direction = direction;
+            this._direction = direction;
+        }
+
+        protected ContractAspect()
+        {
+            this._direction = ContractDirection.Default;
         }
 
         /// <summary>
-        /// Gets the direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
+        /// Gets or sets the direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
         /// to which this contract applies.
         /// </summary>
         /// <remarks>
-        /// It is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a contract.
+        /// In general, it is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a contract.
+        /// However, the aspect's author can opt to allow users to define the contract direction by exposing this property as <c>public</c> in derived classes.
         /// </remarks>
         [PublicAPI]
-        protected ContractDirection Direction { get; }
+        protected virtual ContractDirection GetDirection( IAspectBuilder builder ) => this._direction;
+
+        private ContractDirection GetEffectiveDirection( IAspectBuilder aspectBuilder )
+        {
+            var direction = this.GetDirection( aspectBuilder );
+
+            if ( direction == ContractDirection.Default )
+            {
+                // If the contract was inherited, we need to resolve the ContractDirection.Default value based on the base declaration.
+                // Indeed, assuming the aspect is applied to a get-only property of an interface, the intent is to validate the getter's return value.
+                // However, when a class implements this interface, it could implement the property with an automatic property, which would then
+                // have an implicit setter, and this would change the interpretation of the default behavior.
+
+                IDeclaration baseDeclaration;
+                var predecessors = aspectBuilder.AspectInstance.Predecessors;
+
+                if ( aspectBuilder.Target.DeclarationKind is DeclarationKind.Property &&
+                     !predecessors.IsDefaultOrEmpty && predecessors[0].Kind == AspectPredecessorKind.Inherited )
+                {
+                    baseDeclaration = predecessors[0].Instance.TargetDeclaration.GetTarget( aspectBuilder.Target.Compilation );
+                }
+                else
+                {
+                    baseDeclaration = aspectBuilder.Target;
+                }
+
+                direction = ContractAspectHelper.GetEffectiveDirection( direction, baseDeclaration );
+            }
+
+            // Combine secondary instances if any.
+            foreach ( var instance in aspectBuilder.AspectInstance.SecondaryInstances )
+            {
+                direction = direction.CombineWith( ((ContractAspect) instance.Aspect).GetDirection( aspectBuilder ) );
+            }
+
+            return direction;
+        }
 
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
-            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( this.Direction );
+            var direction = this.GetEffectiveDirection( builder );
+            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
 
             if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
@@ -58,12 +104,13 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            builder.Advice.AddContract( builder.Target, nameof(this.Validate), this.Direction );
+            builder.Advice.AddContract( builder.Target, nameof(this.Validate), direction );
         }
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
-            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( this.Direction );
+            var direction = this.GetEffectiveDirection( builder );
+            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
 
             if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
@@ -80,11 +127,11 @@ namespace Metalama.Framework.Aspects
             if ( parameter.DeclaringMember is IConstructor { DeclaringType.TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct } constructor &&
                  (property = constructor.DeclaringType.Properties.OfName( builder.Target.Name ).SingleOrDefault()) != null )
             {
-                builder.Advice.AddContract( property, nameof(this.Validate), this.Direction );
+                builder.Advice.AddContract( property, nameof(this.Validate), direction );
             }
             else
             {
-                builder.Advice.AddContract( parameter, nameof(this.Validate), this.Direction );
+                builder.Advice.AddContract( parameter, nameof(this.Validate), direction );
             }
         }
 

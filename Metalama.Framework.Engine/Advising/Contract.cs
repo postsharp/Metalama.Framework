@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Advising
         public Ref<IDeclaration> TargetDeclaration { get; }
 
         public TemplateMember<IMethod> Template { get; }
-        
+
         public IObjectReader Tags { get; }
 
         public IObjectReader TemplateArguments { get; }
@@ -30,29 +30,7 @@ namespace Metalama.Framework.Engine.Advising
             this.Template = template;
             this.Tags = tags;
             this.TemplateArguments = templateArguments;
-
-            // Resolve the default value before storing the direction.
-            if ( direction == ContractDirection.Default )
-            {
-                this._direction = targetDeclaration switch
-                {
-                    IParameter { IsReturnParameter: true } => ContractDirection.Output,
-                    IParameter { RefKind: RefKind.Out } => ContractDirection.Output,
-                    IParameter => ContractDirection.Input,
-                    IFieldOrPropertyOrIndexer { Writeability: Writeability.None } => ContractDirection.Output,
-                    IFieldOrPropertyOrIndexer => ContractDirection.Input,
-                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." )
-                };
-            }
-            else
-            {
-                if ( direction == ContractDirection.Input && targetDeclaration is IParameter { IsReturnParameter: true } )
-                {
-                    throw new AssertionFailedException( $"Unexpected declaration for input contract: '{targetDeclaration}'." );
-                }
-
-                this._direction = direction;
-            }
+            this._direction = ContractAspectHelper.GetEffectiveDirection( direction, targetDeclaration );
         }
 
         public bool AppliesTo( ContractDirection direction )

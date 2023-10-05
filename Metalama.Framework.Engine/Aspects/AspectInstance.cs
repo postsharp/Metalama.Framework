@@ -35,9 +35,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public bool IsSkipped { get; private set; }
 
-        // When aspect inheritance is not licensed, the this.AspectClass.IsInheritable is set to false
-        // and the ((IConditionallyInheritableAspect) this.Aspect).IsInheritable is therefore not considered.
-        public bool IsInheritable => this.AspectClass.IsInheritable ?? ((IConditionallyInheritableAspect) this.Aspect).IsInheritable;
+        public bool IsInheritable { get; }
 
         public ImmutableArray<IAspectInstance> SecondaryInstances => ImmutableArray<IAspectInstance>.Empty;
 
@@ -53,40 +51,31 @@ namespace Metalama.Framework.Engine.Aspects
 
         public int TargetDeclarationDepth { get; }
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) :
-            this( aspect, declaration.ToTypedRef(), declaration.Depth, aspectClass, predecessor ) { }
+        internal AspectInstance( IAspect aspect, IDeclaration targetDeclaration, AspectClass aspectClass, in AspectPredecessor predecessor ) :
+            this( aspect, targetDeclaration, aspectClass, ImmutableArray.Create( predecessor ) ) { }
 
-        private AspectInstance(
-            IAspect aspect,
-            in Ref<IDeclaration> declaration,
-            int declarationDepth,
-            AspectClass aspectClass,
-            in AspectPredecessor predecessor ) : this(
-            aspect,
-            declaration,
-            declarationDepth,
-            aspectClass,
-            ImmutableArray.Create( predecessor ) ) { }
+        // This constructor is used by linker tests.
+        internal AspectInstance( IAspect aspect, AspectClass aspectClass )
+        {
+            this.Aspect = aspect;
+            this.AspectClass = aspectClass;
+            this.TargetDeclaration = default;
 
-        internal AspectInstance( IAspect aspect, IDeclaration declaration, AspectClass aspectClass, ImmutableArray<AspectPredecessor> predecessors ) : this(
-            aspect,
-            declaration.ToTypedRef(),
-            declaration.Depth,
-            aspectClass,
-            predecessors ) { }
+            this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
+                .Add( aspectClass, new TemplateClassInstance( TemplateProvider.FromInstance( aspect ), aspectClass ) );
+        }
 
         internal AspectInstance(
             IAspect aspect,
-            in Ref<IDeclaration> declaration,
-            int declarationDepth,
+            IDeclaration targetDeclaration,
             AspectClass aspectClass,
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = declaration;
+            this.TargetDeclaration = targetDeclaration.ToTypedRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
-            this.TargetDeclarationDepth = declarationDepth;
+            this.TargetDeclarationDepth = targetDeclaration.Depth;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( TemplateProvider.FromInstance( aspect ), aspectClass ) );
@@ -100,20 +89,23 @@ namespace Metalama.Framework.Engine.Aspects
                 }
             }
 #endif
+
+            this.IsInheritable = aspectClass.IsInheritable
+                                 ?? ((IConditionallyInheritableAspect) aspect).IsInheritable( targetDeclaration, this );
         }
 
         internal AspectInstance(
             IAspect aspect,
-            IDeclaration declaration,
+            IDeclaration targetDeclaration,
             IAspectClassImpl aspectClass,
             IEnumerable<TemplateClassInstance> templateInstances,
             ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
-            this.TargetDeclaration = declaration.ToTypedRef();
+            this.TargetDeclaration = targetDeclaration.ToTypedRef();
             this.AspectClass = aspectClass;
             this.Predecessors = predecessors;
-            this.TargetDeclarationDepth = declaration.GetCompilationModel().GetDepth( declaration );
+            this.TargetDeclarationDepth = targetDeclaration.GetCompilationModel().GetDepth( targetDeclaration );
 
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
         }
