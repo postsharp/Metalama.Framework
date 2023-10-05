@@ -9,6 +9,11 @@ namespace Metalama.Framework.Aspects;
 public enum ContractDirection
 {
     /// <summary>
+    /// Means that the contract is disabled.
+    /// </summary>
+    None,
+    
+    /// <summary>
     /// For all parameters except <c>out</c> parameters and read-only properties or indexers, equivalent to <see cref="Input"/>. Otherwise, equivalent to <see cref="Output"/>. 
     /// </summary>
     Default,

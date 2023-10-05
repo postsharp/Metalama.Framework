@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Out
 {
     internal class NotNullAttribute : ContractAspect
     {
-        protected override ContractDirection GetDirection( IAspectBuilder builder ) => ContractDirection.Output;
+        protected override ContractDirection GetDefinedDirection( IAspectBuilder builder ) => ContractDirection.Output;
 
         public override void Validate( dynamic? value )
         {

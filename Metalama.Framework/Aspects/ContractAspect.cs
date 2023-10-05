@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Aspects
 {
-    /// <summary>
+    /// <summary>ad
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
     /// <remarks>
@@ -48,18 +48,27 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets or sets the direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
-        /// to which this contract applies.
+        /// to which this contract applies, as defined by the current aspect. This method returns <see cref="ContractDirection.Default"/> by default. When this method returns <see cref="ContractDirection.Default"/>,
+        /// the actual direction is determined according to the characteristics of the target declaration.
         /// </summary>
         /// <remarks>
         /// In general, it is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a contract.
         /// However, the aspect's author can opt to allow users to define the contract direction by exposing this property as <c>public</c> in derived classes.
         /// </remarks>
         [PublicAPI]
-        protected virtual ContractDirection GetDirection( IAspectBuilder builder ) => this._direction;
+        protected virtual ContractDirection GetDefinedDirection( IAspectBuilder builder ) => this._direction;
 
+        /// <summary>
+        /// Gets the actual direction of the contract given the direction returned by <see cref="GetDefinedDirection"/>, after resolving the <see cref="ContractDirection.Default"/>
+        /// value according to the characteristics of the target declaration, and after taking predecessors and secondary instances into account. The implementation of this method
+        /// may return <see cref="ContractDirection.None"/> to skip the aspect.
+        /// </summary>
+        [PublicAPI]
+        protected virtual ContractDirection GetActualDirection( IAspectBuilder builder, ContractDirection direction ) => direction;
+        
         private ContractDirection GetEffectiveDirection( IAspectBuilder aspectBuilder )
         {
-            var direction = this.GetDirection( aspectBuilder );
+            var direction = this.GetDefinedDirection( aspectBuilder );
 
             if ( direction == ContractDirection.Default )
             {
@@ -87,15 +96,23 @@ namespace Metalama.Framework.Aspects
             // Combine secondary instances if any.
             foreach ( var instance in aspectBuilder.AspectInstance.SecondaryInstances )
             {
-                direction = direction.CombineWith( ((ContractAspect) instance.Aspect).GetDirection( aspectBuilder ) );
+                direction = direction.CombineWith( ((ContractAspect) instance.Aspect).GetDefinedDirection( aspectBuilder ) );
             }
 
-            return direction;
+            return this.GetActualDirection( aspectBuilder, direction );
         }
 
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
+
+            if ( direction == ContractDirection.None )
+            {
+                builder.SkipAspect();
+
+                return;
+            }
+
             var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
 
             if ( !builder.VerifyEligibility( eligibilityRule ) )
@@ -110,6 +127,14 @@ namespace Metalama.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
+
+            if ( direction == ContractDirection.None )
+            {
+                builder.SkipAspect();
+
+                return;
+            }
+
             var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
 
             if ( !builder.VerifyEligibility( eligibilityRule ) )

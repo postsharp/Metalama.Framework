@@ -7,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Bot
 {
     internal class NotNullAttribute : ContractAspect
     {
-        protected override ContractDirection GetDirection( IAspectBuilder builder ) => ContractDirection.Both;
+        protected override ContractDirection GetDefinedDirection( IAspectBuilder builder ) => ContractDirection.Both;
 
         public override void Validate( dynamic? value )
         {
