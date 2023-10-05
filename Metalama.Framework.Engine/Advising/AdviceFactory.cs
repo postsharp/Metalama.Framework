@@ -1608,6 +1608,18 @@ internal sealed class AdviceFactory : IAdviceFactory
             throw new InvalidOperationException();
         }
 
+        if ( direction == ContractDirection.None )
+        {
+            return new AdviceResult<T>(
+                null,
+                this._state.CurrentCompilation,
+                AdviceOutcome.Ignore,
+                this._state.AspectBuilder.AssertNotNull(),
+                AdviceKind.AddContract,
+                Array.Empty<IInterfaceImplementationResult>(),
+                Array.Empty<IInterfaceMemberImplementationResult>() );
+        }
+
         AdviceResult<T> result;
 
         this.CheckContractEligibility( targetDeclaration, direction );

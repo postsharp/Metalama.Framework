@@ -5,7 +5,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.NoneDirec
 
 internal class NotNullAttribute : ContractAspect
 {
-    protected override bool IsEnabled( IAspectBuilder builder, ContractDirection direction ) => false;
+    protected override ContractDirection GetActualDirection( IAspectBuilder builder, ContractDirection direction ) => ContractDirection.None;
 
     public override void Validate( dynamic? value )
     {
