@@ -99,18 +99,19 @@ namespace Metalama.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
-            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
-
-            if ( !builder.VerifyEligibility( eligibilityRule ) )
-            {
-                // The aspect cannot be applied, but errors have been reported by the CheckEligibility method.
-                return;
-            }
 
             if ( !this.IsEnabled( builder, direction ) )
             {
                 builder.SkipAspect();
 
+                return;
+            }
+
+            var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
+
+            if ( !builder.VerifyEligibility( eligibilityRule ) )
+            {
+                // The aspect cannot be applied, but errors have been reported by the CheckEligibility method.
                 return;
             }
 
@@ -120,18 +121,19 @@ namespace Metalama.Framework.Aspects
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
+
+            if ( !this.IsEnabled( builder, direction ) )
+            {
+                builder.SkipAspect();
+
+                return;
+            }
+
             var eligibilityRule = EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction );
 
             if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
                 // The aspect cannot be applied, but errors have been reported by the CheckEligibility method.
-
-                return;
-            }
-
-            if ( !this.IsEnabled( builder, direction ) )
-            {
-                builder.SkipAspect();
 
                 return;
             }
