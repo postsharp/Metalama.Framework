@@ -44,7 +44,9 @@ namespace Metalama.Framework.Eligibility.Implementation
                     return $"the Or condition group is empty";
 
                 case 1:
+#pragma warning disable CS8603
                     return this._predicates[0].GetIneligibilityJustification( requestedEligibility, describedObject );
+#pragma warning restore CS8603
 
                 default:
                     {
