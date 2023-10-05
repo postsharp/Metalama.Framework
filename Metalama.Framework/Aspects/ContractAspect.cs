@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Aspects
 {
-    /// <summary>
+    /// <summary>ad
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
     /// <remarks>
@@ -57,6 +57,9 @@ namespace Metalama.Framework.Aspects
         [PublicAPI]
         protected virtual ContractDirection GetDirection( IAspectBuilder builder ) => this._direction;
 
+        [PublicAPI]
+        protected virtual bool IsEnabled( IAspectBuilder builder, ContractDirection direction ) => true;
+
         private ContractDirection GetEffectiveDirection( IAspectBuilder aspectBuilder )
         {
             var direction = this.GetDirection( aspectBuilder );
@@ -104,6 +107,13 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
+            if ( !this.IsEnabled( builder, direction ) )
+            {
+                builder.SkipAspect();
+
+                return;
+            }
+
             builder.Advice.AddContract( builder.Target, nameof(this.Validate), direction );
         }
 
@@ -115,6 +125,13 @@ namespace Metalama.Framework.Aspects
             if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
                 // The aspect cannot be applied, but errors have been reported by the CheckEligibility method.
+
+                return;
+            }
+
+            if ( !this.IsEnabled( builder, direction ) )
+            {
+                builder.SkipAspect();
 
                 return;
             }
