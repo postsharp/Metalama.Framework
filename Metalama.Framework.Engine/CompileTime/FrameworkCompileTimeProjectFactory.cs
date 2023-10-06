@@ -112,7 +112,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
 
         var manifest = this._frameworkProjectManifestDictionary.GetOrAdd(
             tfm,
-            _ => new CompileTimeProjectManifest(
+            static ( _, a ) => new CompileTimeProjectManifest(
                 _frameworkAssemblyIdentity.ToString(),
                 "",
                 new[] { typeof(InternalImplementAttribute) }.SelectAsImmutableArray( t => t.FullName ),
@@ -122,11 +122,12 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
                 ImmutableArray<string>.Empty,
-                CreateFrameworkTemplateProjectManifest( assembly ),
+                CreateFrameworkTemplateProjectManifest( a ),
                 null,
                 0,
                 Array.Empty<CompileTimeFileManifest>(),
-                Array.Empty<CompileTimeDiagnosticManifest>() ) );
+                Array.Empty<CompileTimeDiagnosticManifest>() ),
+            assembly );
 
         return new CompileTimeProject(
             serviceProvider,

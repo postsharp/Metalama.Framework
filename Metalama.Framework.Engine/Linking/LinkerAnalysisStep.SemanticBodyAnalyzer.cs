@@ -53,32 +53,47 @@ namespace Metalama.Framework.Engine.Linking
                             switch ( semantic.Symbol )
                             {
                                 case IMethodSymbol methodSymbol:
-                                    results.GetOrAdd( semantic.ToTyped<IMethodSymbol>(), _ => this.Analyze( methodSymbol ) );
+                                    results.GetOrAdd(
+                                        semantic.ToTyped<IMethodSymbol>(),
+                                        static ( _, ctx ) => ctx.me.Analyze( ctx.methodSymbol ),
+                                        (me: this, methodSymbol) );
 
                                     break;
 
                                 case IPropertySymbol propertySymbol:
                                     if ( propertySymbol.GetMethod != null )
                                     {
-                                        results.GetOrAdd( semantic.WithSymbol( propertySymbol.GetMethod ), _ => this.Analyze( propertySymbol.GetMethod ) );
+                                        results.GetOrAdd(
+                                            semantic.WithSymbol( propertySymbol.GetMethod ),
+                                            static ( _, ctx ) => ctx.me.Analyze( ctx.propertySymbol.GetMethod! ),
+                                            (me: this, propertySymbol) );
                                     }
 
                                     if ( propertySymbol.SetMethod != null )
                                     {
-                                        results.GetOrAdd( semantic.WithSymbol( propertySymbol.SetMethod ), _ => this.Analyze( propertySymbol.SetMethod ) );
+                                        results.GetOrAdd(
+                                            semantic.WithSymbol( propertySymbol.SetMethod ),
+                                            static ( _, ctx ) => ctx.me.Analyze( ctx.propertySymbol.SetMethod! ),
+                                            (me: this, propertySymbol) );
                                     }
 
                                     break;
 
-                                case IEventSymbol @eventSymbol:
-                                    if ( @eventSymbol.AddMethod != null )
+                                case IEventSymbol eventSymbol:
+                                    if ( eventSymbol.AddMethod != null )
                                     {
-                                        results.GetOrAdd( semantic.WithSymbol( @eventSymbol.AddMethod ), _ => this.Analyze( @eventSymbol.AddMethod ) );
+                                        results.GetOrAdd(
+                                            semantic.WithSymbol( eventSymbol.AddMethod ),
+                                            static ( _, ctx ) => ctx.me.Analyze( ctx.eventSymbol.AddMethod! ),
+                                            (me: this, eventSymbol) );
                                     }
 
-                                    if ( @eventSymbol.RemoveMethod != null )
+                                    if ( eventSymbol.RemoveMethod != null )
                                     {
-                                        results.GetOrAdd( semantic.WithSymbol( @eventSymbol.RemoveMethod ), _ => this.Analyze( @eventSymbol.RemoveMethod ) );
+                                        results.GetOrAdd(
+                                            semantic.WithSymbol( eventSymbol.RemoveMethod ),
+                                            static ( _, ctx ) => ctx.me.Analyze( ctx.eventSymbol.RemoveMethod! ),
+                                            (me: this, eventSymbol) );
                                     }
 
                                     break;
@@ -383,7 +398,7 @@ namespace Metalama.Framework.Engine.Linking
                         case LocalFunctionStatementSyntax:
                             // Local function statement does not affect flow, so we ignore it.
                             continue;
-                        
+
                         default:
                             return statements[i];
                     }

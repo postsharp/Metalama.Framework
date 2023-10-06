@@ -66,7 +66,8 @@ internal static class DesignTimeReferenceValidatorRunner
         public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol )
             => this._validatorCache.GetOrAdd(
                 symbol,
-                s => this._validators.GetValidatorsForSymbol( s )
-                    .SelectAsImmutableArray( x => x.ToReferenceValidationInstance( this._compilationModel ) ) );
+                static ( s, o ) => o._validators.GetValidatorsForSymbol( s )
+                    .SelectAsImmutableArray( x => x.ToReferenceValidationInstance( o._compilationModel ) ),
+                this );
     }
 }

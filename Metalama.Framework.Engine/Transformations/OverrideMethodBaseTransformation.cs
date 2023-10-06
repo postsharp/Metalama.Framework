@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
+using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -63,7 +64,7 @@ namespace Metalama.Framework.Engine.Transformations
                 if ( this.OverriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
                 {
                     returnType = context.SyntaxGenerator.Type(
-                        this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
+                        this.OverriddenDeclaration.GetCompilationModel().CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
                 }
             }
 

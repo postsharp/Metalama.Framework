@@ -18,6 +18,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+// ReSharper disable AccessToModifiedClosure
+
 namespace Metalama.Framework.Engine.Formatting
 {
     public sealed class HtmlCodeWriter : FormattedCodeWriter

@@ -20,7 +20,8 @@ internal sealed class XunitLoggerFactory : ILoggerFactory
 
     public void Dispose() { }
 
-    public ILogger GetLogger( string category ) => this._loggers.GetOrAdd( category, c => new Logger( c, this._testOutputHelper, this._verbose ) );
+    public ILogger GetLogger( string category )
+        => this._loggers.GetOrAdd( category, static ( c, me ) => new Logger( c, me._testOutputHelper, me._verbose ), this );
 
     private sealed class Logger : ILogger
     {

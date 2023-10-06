@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Text;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -21,7 +20,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public InterpolatedStringUserExpression( InterpolatedStringBuilder builder, ICompilation compilation )
         {
             this._builder = builder;
-            this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
+            this.Type = compilation.GetCompilationModel().Cache.SystemStringType;
         }
 
         protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )

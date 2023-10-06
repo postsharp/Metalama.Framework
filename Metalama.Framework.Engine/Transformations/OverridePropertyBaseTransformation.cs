@@ -12,7 +12,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -95,7 +94,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                 this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
             MethodKind.PropertySet => new SyntaxUserExpression(
                 this.CreateProceedSetExpression( context ),
-                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
+                this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType ),
             _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
         };
 

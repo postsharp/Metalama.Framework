@@ -34,7 +34,7 @@ public sealed class SerializableTypeIdResolver
     {
         if ( genericArguments == null || genericArguments.Count == 0 )
         {
-            return this._cache.GetOrAdd( typeId, id => this.ResolveCore( id ) );
+            return this._cache.GetOrAdd( typeId, static ( id, me ) => me.ResolveCore( id ), this );
         }
         else
         {
