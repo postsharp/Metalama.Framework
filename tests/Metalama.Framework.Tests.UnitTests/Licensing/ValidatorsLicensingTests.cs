@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Testing;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -77,16 +78,16 @@ class TargetClass
         public ValidatorsLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, true )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
-        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, true )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, false )]
-        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, true, TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpEssentials), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpUltimate), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaStarterBusiness), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaProfessionalBusiness), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimateBusiness), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimateOpenSourceRedistribution), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimatePersonalProjectBound), false )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimatePersonalProjectBound), true, TestLicenses.MetalamaUltimateProjectBoundProjectName )]
         public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey, bool accepted, string projectName = "TestProject" )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey, projectName: projectName );
@@ -95,15 +96,15 @@ class TargetClass
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, false )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
-        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, false )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, false )]
-        [InlineData( TestLicenseKeys.MetalamaUltimatePersonalProjectBound, true, TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpEssentials), false )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpUltimate), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal), false )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaStarterBusiness), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaProfessionalBusiness), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimateBusiness), true )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimatePersonalProjectBound), false )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimatePersonalProjectBound), true, TestLicenses.MetalamaUltimateProjectBoundProjectName )]
         public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey, bool accepted, string projectName = "TestProject" )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );

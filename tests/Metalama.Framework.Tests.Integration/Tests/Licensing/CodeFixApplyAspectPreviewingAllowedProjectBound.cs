@@ -1,5 +1,5 @@
 // @TestScenario(PreviewCodeFix)
-// @LicenseFile(Tests\Licensing\Licenses\ProjectBound.license)
+// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaUltimatePersonalProjectBound)
 // @Include(_CodeFixApplyAspect.cs);
 // @OutputAllSyntaxTrees
 
