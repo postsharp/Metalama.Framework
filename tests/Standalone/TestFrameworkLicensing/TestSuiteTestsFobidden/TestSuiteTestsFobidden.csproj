@@ -10,8 +10,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- Metalama Starter Business -->
-        <MetalamaLicense>3-ZUQQQQQQZUAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAED3WYKF9V8KYEUMGXKBYPRQNNUVQDV3BHMGEHNJHLBKGSD57EEJQRD4F3SWWEA42CUZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
+        <MetalamaLicense>$(MetalamaStarterBusinessLicenseKey)</MetalamaLicense>
         <!-- Use AspectTestClass instead of TestExecutor to tests the Rider scenario. -->
         <MetalamaTestFramework>Original</MetalamaTestFramework>
     </PropertyGroup>

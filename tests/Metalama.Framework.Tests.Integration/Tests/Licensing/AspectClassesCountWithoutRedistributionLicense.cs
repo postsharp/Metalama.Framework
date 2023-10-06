@@ -1,5 +1,5 @@
-﻿// @LicenseFile(Tests\Licensing\Licenses\Free.license)
-// @DependencyLicenseFile(Tests\Licensing\Licenses\DisallowedRedistribution.license)
+﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaFreePersonal)
+// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaUltimateOpenSourceRedistribution)
 // @Include(_Redistribution.cs);
 // @Include(_Redistribution.Dependency.cs);
 // @OutputAllSyntaxTrees

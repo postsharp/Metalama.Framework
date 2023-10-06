@@ -1,5 +1,5 @@
 // @TestScenario(PreviewLiveTemplate)
-// @LicenseFile(..\Metalama.Framework.Tests.Integration\Tests\Licensing\Licenses\ProjectBound.license)
+// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaUltimatePersonalProjectBound)
 // @Include(_LiveTemplate.cs);
 // @OutputAllSyntaxTrees
 

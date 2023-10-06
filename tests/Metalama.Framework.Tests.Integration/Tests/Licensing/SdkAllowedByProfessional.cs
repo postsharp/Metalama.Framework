@@ -1,4 +1,4 @@
-﻿// @LicenseFile(Tests\Licensing\Licenses\Professional.license)
+﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaProfessionalBusiness)
 // @Include(_AspectWeaver.cs);
 // @OutputAllSyntaxTrees
 
