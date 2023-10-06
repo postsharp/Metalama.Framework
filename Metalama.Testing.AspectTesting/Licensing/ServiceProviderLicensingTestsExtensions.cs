@@ -10,15 +10,18 @@ namespace Metalama.Testing.AspectTesting.Licensing
     {
         public static ProjectServiceProvider AddLicenseConsumptionManagerForTest( this ProjectServiceProvider serviceProvider, TestInput testInput )
         {
-            if ( testInput.Options.LicenseFile == null )
+            string? licenseKey = null;
+            
+            if ( testInput.Options.LicenseFile != null )
             {
-                return serviceProvider;
+                licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
+            }
+            else if ( testInput.Options.LicenseExpression != null )
+            {
+                licenseKey = TestOptions.ReadLicenseExpression( testInput.Options.LicenseExpression );
             }
 
-            // ReSharper disable once MethodHasAsyncOverload
-            var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
-
-            return serviceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
+            return licenseKey == null ? serviceProvider : serviceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Testing;
 using Metalama.Framework.Engine.Licensing;
 using System.Threading.Tasks;
 using Xunit;
@@ -98,13 +99,13 @@ namespace Doc.InheritedTypeLevel
         public InheritanceLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [InlineData( "PostSharp Essentials", TestLicenseKeys.PostSharpEssentials, false )]
-        [InlineData( "PostSharp Framework", TestLicenseKeys.PostSharpFramework, true )]
-        [InlineData( "PostSharp Ultimate", TestLicenseKeys.PostSharpUltimate, true )]
-        [InlineData( "Metalama Free Personal", TestLicenseKeys.MetalamaFreePersonal, false )]
-        [InlineData( "Metalama Starter Business", TestLicenseKeys.MetalamaStarterBusiness, true )]
-        [InlineData( "Metalama Professional Business", TestLicenseKeys.MetalamaProfessionalBusiness, true )]
-        [InlineData( "Metalama Ultimate Business", TestLicenseKeys.MetalamaUltimateBusiness, true )]
+        [TestLicensesInlineData( "PostSharp Essentials", nameof(TestLicenses.PostSharpEssentials), false )]
+        [TestLicensesInlineData( "PostSharp Framework", nameof(TestLicenses.PostSharpFramework), true )]
+        [TestLicensesInlineData( "PostSharp Ultimate", nameof(TestLicenses.PostSharpUltimate), true )]
+        [TestLicensesInlineData( "Metalama Free Personal", nameof(TestLicenses.MetalamaFreePersonal), false )]
+        [TestLicensesInlineData( "Metalama Starter Business", nameof(TestLicenses.MetalamaStarterBusiness), true )]
+        [TestLicensesInlineData( "Metalama Professional Business", nameof(TestLicenses.MetalamaProfessionalBusiness), true )]
+        [TestLicensesInlineData( "Metalama Ultimate Business", nameof(TestLicenses.MetalamaUltimateBusiness), true )]
         public async Task InheritanceIsAcceptedAsync( string licenseName, string licenseKey, bool accepted )
         {
             _ = licenseName;

@@ -10,8 +10,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- Metalama Professional Business -->
-        <MetalamaLicense>4-ZQAQQQQQZTAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEGGU48KSPSAKJRSXFLZAF72CTB3QUMT9RR6WTPVYSNJT46PKU645EAPBXKGNFCJPVKZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
+        <MetalamaLicense>$(MetalamaProfessionalBusinessLicenseKey)</MetalamaLicense>
     </PropertyGroup>
 
     <ItemGroup>
