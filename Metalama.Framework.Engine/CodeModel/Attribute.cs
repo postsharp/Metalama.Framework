@@ -35,7 +35,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public AttributeData AttributeData { get; }
 
-        IRef<IDeclaration> IDeclaration.ToRef() => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef() );
+        IRef<IDeclaration> IDeclaration.ToRef()
+            => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef(), this._compilation.CompilationContext );
 
         public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 

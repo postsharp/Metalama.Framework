@@ -25,7 +25,7 @@ internal sealed class IntrospectionFactory : IProjectService
     }
 
     public IntrospectionAspectInstance GetIntrospectionAspectInstance( IAspectInstance aspectInstance )
-        => this._aspectInstances.GetOrAdd( aspectInstance, x => new IntrospectionAspectInstance( x, this._compilation, this ) );
+        => this._aspectInstances.GetOrAdd( aspectInstance, static ( x, t ) => new IntrospectionAspectInstance( x, t._compilation, t ), this );
 
     public IIntrospectionAspectPredecessorInternal GetIntrospectionAspectPredecessor( IAspectPredecessor aspectPredecessor )
         => aspectPredecessor switch

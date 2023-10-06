@@ -35,7 +35,10 @@ namespace Metalama.Framework.Workspaces
             var filteredProjects = this.Projects.Where( p => filter( p ) ).OrderBy( p => p.ToString() ).ToImmutableArray();
             var filteredProjectKey = string.Join( "+", filteredProjects );
 
-            return this._subsets.GetOrAdd( filteredProjectKey, _ => new ProjectSet( filteredProjects, $"Subset of {this}" ) );
+            return this._subsets.GetOrAdd(
+                filteredProjectKey,
+                static ( _, ctx ) => new ProjectSet( ctx.filteredProjects, $"Subset of {ctx.me}" ),
+                (me: this, filteredProjects) );
         }
 
         public IDeclaration GetDeclaration( string projectName, string targetFramework, string declarationId, bool metalamaOutput )

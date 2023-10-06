@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Transformations
             var body =
                 SyntaxFactoryEx.FormattedBlock(
                     this.OverriddenDeclaration.ReturnType
-                    != this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(void) )
+                    != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
                         ? ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                             GetInvocationExpression(),

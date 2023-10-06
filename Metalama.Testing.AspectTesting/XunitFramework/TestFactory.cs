@@ -54,9 +54,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this.FileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
         }
 
-        public TestMethod GetTestMethod( string relativePath ) => this._methods.GetOrAdd( relativePath, p => new TestMethod( this, p ) );
+        public TestMethod GetTestMethod( string relativePath ) => this._methods.GetOrAdd( relativePath, static ( p, me ) => new TestMethod( me, p ), this );
 
-        public TestClass GetTestType( string? relativePath ) => this._types.GetOrAdd( relativePath ?? "", p => new TestClass( this, p ) );
+        public TestClass GetTestType( string? relativePath ) => this._types.GetOrAdd( relativePath ?? "", static ( p, me ) => new TestClass( me, p ), this );
 
         public TestCollection Collection { get; }
 

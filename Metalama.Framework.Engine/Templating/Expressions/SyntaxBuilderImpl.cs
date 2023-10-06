@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -53,7 +54,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactoryEx.ParseExpressionSafe( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new SyntaxUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
+        return new SyntaxUserExpression( expression, this._compilation.Cache.SystemObjectType );
     }
 
     public IStatement ParseStatement( string code )
@@ -64,7 +65,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     }
 
     public IStatement CreateExpressionStatement( IExpression expression )
-        => new UserStatement( SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( new( this._compilation, this._syntaxGenerationContext ) ) ) );
+        => new UserStatement(
+            SyntaxFactory.ExpressionStatement(
+                ((UserExpression) expression).ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) ) ) );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -137,7 +140,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
-            expression.ToExpressionSyntax( new( this._compilation, this._syntaxGenerationContext ) )
+            expression.ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
                 .NormalizeWhitespace()
                 .ToFullString() );
 
@@ -145,7 +148,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, new( this._compilation, this._syntaxGenerationContext ) )
+                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
                     .NormalizeWhitespace()
                     .ToFullString() );
 

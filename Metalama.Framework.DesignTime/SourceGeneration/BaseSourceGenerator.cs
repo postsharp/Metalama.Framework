@@ -151,24 +151,25 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             {
                 projectHandler = this._projectHandlers.GetOrAdd(
                     projectKey,
-                    _ =>
+                    static ( _, ctx ) =>
                     {
-                        if ( options.IsFrameworkEnabled )
+                        if ( ctx.options.IsFrameworkEnabled )
                         {
-                            if ( options.IsDesignTimeEnabled )
+                            if ( ctx.options.IsDesignTimeEnabled )
                             {
-                                return this.CreateSourceGeneratorImpl( options, projectKey );
+                                return ctx.me.CreateSourceGeneratorImpl( ctx.options, ctx.projectKey );
                             }
                             else
                             {
-                                return new OfflineProjectHandler( this.ServiceProvider, options, projectKey );
+                                return new OfflineProjectHandler( ctx.me.ServiceProvider, ctx.options, ctx.projectKey );
                             }
                         }
                         else
                         {
                             return null;
                         }
-                    } );
+                    },
+                    (options, projectKey, me: this) );
             }
 
             if ( projectHandler == null )

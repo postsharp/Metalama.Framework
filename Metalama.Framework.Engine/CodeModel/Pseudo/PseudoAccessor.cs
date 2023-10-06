@@ -16,7 +16,6 @@ using System.Collections.Immutable;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo;
@@ -37,7 +36,7 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     public IType ReturnType
         => this.MethodKind != MethodKind.PropertyGet
-            ? this.DeclaringMember.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void )
+            ? this.DeclaringMember.Compilation.GetCompilationModel().Cache.SystemVoidType
             : ((IFieldOrProperty) this.DeclaringMember).Type;
 
     [Memo]

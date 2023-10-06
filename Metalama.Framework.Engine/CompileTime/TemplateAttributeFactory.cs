@@ -45,12 +45,13 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
         adviceAttribute =
             this._cacheById.GetOrAdd(
                 memberId,
-                m =>
+                static ( m, ctx ) =>
                 {
-                    _ = this.TryGetTemplateAttributeById( m, compilation, diagnosticAdder, out var attribute );
+                    _ = ctx.me.TryGetTemplateAttributeById( m, ctx.compilation, ctx.diagnosticAdder, out var attribute );
 
                     return attribute;
-                } );
+                },
+                (me: this, compilation, diagnosticAdder) );
 
         return adviceAttribute != null;
     }

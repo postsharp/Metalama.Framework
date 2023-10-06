@@ -16,7 +16,7 @@ internal partial class AccessorBuilder
         [Memo]
         public override IType Type
         {
-            get => this.Compilation.Factory.GetTypeByReflectionType( typeof(void) );
+            get => this.Compilation.Cache.SystemVoidType;
             set => throw new NotSupportedException( "Cannot directly change accessor's parameter type." );
         }
 

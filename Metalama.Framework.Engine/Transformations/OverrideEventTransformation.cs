@@ -16,7 +16,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -139,7 +138,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
                     _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
                 },
-                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
+                this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType );
 
             var metaApi = MetaApi.ForEvent(
                 this.OverriddenDeclaration,

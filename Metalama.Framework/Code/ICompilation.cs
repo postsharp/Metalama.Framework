@@ -65,5 +65,11 @@ namespace Metalama.Framework.Code
         /// at design time, when only the closure of modified types are being incrementally recompiled.
         /// </summary>
         bool IsPartial { get; }
+
+        /// <summary>
+        /// Gets a service that caches declarations of the current compilation. It is typically used to cache often-used declarations
+        /// across aspect instances.
+        /// </summary>
+        IDeclarationCache Cache { get; }
     }
 }

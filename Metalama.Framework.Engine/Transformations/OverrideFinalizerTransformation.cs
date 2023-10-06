@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             return new SyntaxUserExpression(
                 context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
-                this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
+                this.OverriddenDeclaration.GetCompilationModel().Cache.SystemVoidType );
         }
 
         public override TransformationObservability Observability => TransformationObservability.None;

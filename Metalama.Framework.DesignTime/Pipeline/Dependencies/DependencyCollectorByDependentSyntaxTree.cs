@@ -33,7 +33,8 @@ internal sealed class DependencyCollectorByDependentSyntaxTree
 
         var compilationCollector = this._dependenciesByMasterProject.GetOrAdd(
             masterCompilation,
-            _ => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath ) );
+            static ( _, path ) => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( path ),
+            this.DependentFilePath );
 
         compilationCollector.AddSyntaxTreeDependency( masterFilePath, masterHash );
     }
@@ -49,7 +50,8 @@ internal sealed class DependencyCollectorByDependentSyntaxTree
 
         var compilationCollector = this._dependenciesByMasterProject.GetOrAdd(
             masterProject,
-            _ => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath ) );
+            static ( _, path ) => new DependencyCollectorByDependentSyntaxTreeAndMasterProject( path ),
+            this.DependentFilePath );
 
         compilationCollector.AddPartialTypeDependency( masterPartialType );
     }
