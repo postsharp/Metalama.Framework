@@ -24,6 +24,7 @@
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
         <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
+        <PackageReference Include="Metalama.Backstage.Testing" Version="$(MetalamaBackstageVersion)" />
 
         <!-- These packages ared used in tests -->
         <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />

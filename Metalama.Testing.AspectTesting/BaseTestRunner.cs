@@ -219,9 +219,13 @@ internal abstract partial class BaseTestRunner
 
         if ( testInput.Options.DependencyLicenseFile != null )
         {
-            // ReSharper disable once MethodHasAsyncOverload
             // ReSharper disable once RedundantAssignment
             dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+        }
+        else if ( testInput.Options.DependencyLicenseExpression != null )
+        {
+            // ReSharper disable once RedundantAssignment
+            dependencyLicenseKey = TestOptions.ReadLicenseExpression( testInput.Options.DependencyLicenseExpression );
         }
 
         try
