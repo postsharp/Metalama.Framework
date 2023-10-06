@@ -27,15 +27,15 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             => this.OfAttributeType( type, conversionKind );
 
         private IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.GetItems( this.Source ).Where( a => a.Type.Is( type, conversionKind ) );
+            => this.GetItems( this.Source.Where( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type, ConversionKind conversionKind )
             => this.OfAttributeType( type, conversionKind );
 
-        public IEnumerable<IAttribute> OfAttributeType( string ns, string typeName )
-            => this.GetItems( this.Source ).Where( a => a.Type.Namespace.FullName == ns && a.Type.Name == typeName );
+        public IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate )
+            => this.GetItems( this.Source.Where( a => predicate( a.AttributeType.GetTarget( this.Compilation ) ) ) );
 
         private IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         bool IAttributeCollection.Any( IType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
 
         private bool Any( IType type, ConversionKind conversionKind = ConversionKind.Default )
-            => this.GetItems( this.Source ).Any( a => a.Type.Is( type, conversionKind ) );
+            => this.Source.Any( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) );
 
         bool IAttributeCollection.Any( Type type ) => this.Any( type );
 

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Code.Collections
 
         IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind );
 
-        IEnumerable<IAttribute> OfAttributeType( string ns, string typeName );
+        IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate );
 
         bool Any( IType type );
 
