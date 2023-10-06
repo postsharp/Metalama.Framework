@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using PostSharp.Engineering.BuildTools;
 using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
@@ -8,6 +10,7 @@ using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
+using System;
 using System.IO;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2023_2;
 
@@ -50,7 +53,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies= new[] { DevelopmentDependencies.PostSharpEngineering.ToDependency(), MetalamaDependencies.MetalamaCompiler.ToDependency( new ConfigurationSpecific<BuildConfiguration>( 
+    ParametrizedDependencies = new[] { DevelopmentDependencies.PostSharpEngineering.ToDependency(), MetalamaDependencies.MetalamaCompiler.ToDependency( new ConfigurationSpecific<BuildConfiguration>( 
         BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
     )) },
     Configurations = Product.DefaultConfigurations
@@ -69,8 +72,6 @@ var product = new Product( MetalamaDependencies.Metalama )
                 }
             } )
 };
-
-        
 
 product.PrepareCompleted += OnPrepareCompleted;
 
@@ -112,4 +113,21 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     {
         arg.IsFailed = true;
     }
+    
+    arg.Context.Console.WriteHeading( "Fetching licenses" );
+    
+    var kvUri = "https://testserviceskeyvault.vault.azure.net/";
+    var client = new SecretClient( new Uri( kvUri ), new DefaultAzureCredential() );
+
+    string GetLicenseKey( string keyName ) => client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
+
+    File.WriteAllText( Path.Combine( arg.Context.RepoDirectory, "eng/Licenses.g.props" ),
+        $"""
+         <Project>
+           <PropertyGroup>
+             <MetalamaStarterBusinessLicenseKey>{GetLicenseKey( "MetalamaStarterBusiness" )}</MetalamaStarterBusinessLicenseKey>
+             <MetalamaProfessionalBusinessLicenseKey>{GetLicenseKey( "MetalamaProfessionalBusiness" )}</MetalamaProfessionalBusinessLicenseKey>
+           </PropertyGroup>
+         </Project>
+         """ );
 }

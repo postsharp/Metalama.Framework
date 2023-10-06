@@ -1,6 +1,6 @@
 // @TestScenario(ApplyLiveTemplate)
-// @LicenseFile(..\Metalama.Framework.Tests.Integration\Tests\Licensing\Licenses\Free.license)
-// @DependencyLicenseFile(..\Metalama.Framework.Tests.Integration\Tests\Licensing\Licenses\Redistribution.license)
+// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaFreePersonal)
+// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaUltimateOpenSourceRedistributionForIntegrationTests)
 // @Include(_LiveTemplateRedistribution.cs);
 // @Include(_LiveTemplateRedistribution.Dependency.cs);
 // @OutputAllSyntaxTrees

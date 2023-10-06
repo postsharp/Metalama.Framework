@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Testing;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,35 +18,45 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         public AspectCountTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, 10, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
-        [InlineData( TestLicenseKeys.PostSharpUltimate, 11, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 1, _arbitraryNamespace, _arbitraryNamespace, _redistributionInvalidErrorId )]
-        [InlineData(
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution,
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpEssentials), 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [TestLicensesInlineData( nameof(TestLicenses.PostSharpUltimate), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal), 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaStarterBusiness), 5, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaStarterBusiness), 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectsErrorId )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaProfessionalBusiness), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData(
+            nameof(TestLicenses.MetalamaProfessionalBusiness),
+            11,
+            _arbitraryNamespace,
+            _arbitraryNamespace,
+            _tooManyAspectsErrorId )]
+        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimateBusiness), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData(
+            nameof(TestLicenses.MetalamaUltimateOpenSourceRedistribution),
             1,
             _arbitraryNamespace,
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            _arbitraryNamespace,
             _redistributionInvalidErrorId )]
-        [InlineData(
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution,
+        [TestLicensesInlineData(
+            nameof(TestLicenses.MetalamaUltimateOpenSourceRedistribution),
+            1,
+            _arbitraryNamespace,
+            TestLicenses.MetalamaUltimateRedistributionNamespace,
+            _redistributionInvalidErrorId )]
+        [TestLicensesInlineData(
+            nameof(TestLicenses.MetalamaUltimateOpenSourceRedistribution),
             11,
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            TestLicenses.MetalamaUltimateRedistributionNamespace,
             _arbitraryNamespace,
             null )]
-        [InlineData(
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution,
+        [TestLicensesInlineData(
+            nameof(TestLicenses.MetalamaUltimateOpenSourceRedistribution),
             11,
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
-            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            TestLicenses.MetalamaUltimateRedistributionNamespace,
+            TestLicenses.MetalamaUltimateRedistributionNamespace,
             null )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(
             string licenseKey,
@@ -178,7 +189,7 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenses.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
         }

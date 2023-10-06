@@ -1,5 +1,5 @@
 // @TestScenario(PreviewCodeFix)
-// @LicenseFile(Tests\Licensing\Licenses\Free.license)
+// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaFreePersonal)
 // @Include(_CodeFixApplyAspect.cs);
 // @OutputAllSyntaxTrees
 
