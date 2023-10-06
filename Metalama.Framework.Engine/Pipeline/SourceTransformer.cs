@@ -1,19 +1,30 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing;
+using Metalama.Backstage.Licensing.Consumption;
+using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
+using Metalama.Compiler.Services;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using IExceptionReporter = Metalama.Backstage.Telemetry.IExceptionReporter;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -22,11 +33,176 @@ namespace Metalama.Framework.Engine.Pipeline
     /// </summary>
     [ExcludeFromCodeCoverage]
     [UsedImplicitly]
-    public sealed class SourceTransformer : ISourceTransformer
+    public sealed class SourceTransformer : ISourceTransformerWithServices
     {
+        public ServicesHolder? InitializeServices( InitializeServicesContext context )
+        {
+            var dotNetSdkDirectory = GetDotNetSdkDirectory( context.AnalyzerConfigOptionsProvider );
+
+            var licenseOptions = context.Options.RequiresMetalamaLicenseEnforcement
+                ? GetLicensingOptions( context.Options, context.AnalyzerConfigOptionsProvider )
+                : new LicensingInitializationOptions();
+
+            var applicationInfo = new SourceTransformerApplicationInfo(
+                context.Options.IsLongRunningProcess,
+                licenseOptions.IgnoreUnattendedProcessLicense );
+
+            var backstageOptions = new BackstageInitializationOptions( applicationInfo, context.Compilation.AssemblyName )
+            {
+                OpenWelcomePage = context.Options.RequiresMetalamaSupportServices,
+                AddLicensing = context.Options.RequiresMetalamaLicenseEnforcement,
+                AddSupportServices = context.Options.RequiresMetalamaSupportServices,
+                LicensingOptions = licenseOptions,
+                DotNetSdkDirectory = dotNetSdkDirectory
+            };
+           
+            BackstageServiceFactoryInitializer.Initialize( backstageOptions );
+            
+            var serviceProvider = BackstageServiceFactory.ServiceProvider;
+
+            // Initialize usage reporting.
+            try
+            {
+                if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && context.Compilation.AssemblyName != null &&
+                     usageReporter.ShouldReportSession( context.Compilation.AssemblyName ) )
+                {
+                    usageReporter.StartSession( "TransformerUsage" );
+                }
+            }
+            catch ( Exception e )
+            {
+                ReportException( e, serviceProvider, false );
+
+                // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
+            }
+            
+            // Enforce licensing.
+            if ( serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
+            {
+                var projectName = Path.GetFileNameWithoutExtension( context.Options.MsBuildProjectFullPath ) ?? "unknown";
+
+                if ( !licenseManager.CanConsume( LicenseRequirement.Free, projectName ) )
+                {
+                    // We only emit the generic invalid license error when no specific error message
+                    // comes from the license manager to avoid confusion of users.
+                    if ( !licenseManager.Messages.Any( m => m.IsError ) )
+                    {
+                        context.ReportDiagnostic( LicensingDiagnosticDescriptors.InvalidLicenseOverall.CreateRoslynDiagnostic( null, default ) );
+                    }
+                    else
+                    {
+                        // Errors are emitted by the MetalamaFrameworkServicesHolder.DisposeServices() method.
+                    }
+
+                    return null;
+                }
+            }
+
+            return new MetalamaFrameworkServicesHolder( serviceProvider );
+        }
+
+        private sealed class MetalamaFrameworkServicesHolder : ServicesHolder
+        {
+            private readonly IServiceProvider _serviceProvider;
+
+            public MetalamaFrameworkServicesHolder( IServiceProvider serviceProvider )
+                : base(
+                    new LoggerAdapter( serviceProvider.GetLoggerFactory().GetLogger( "Compiler" ) ),
+                    new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() ) )
+            {
+                this._serviceProvider = serviceProvider;
+            }
+
+            public override void DisposeServices( Action<Diagnostic> reportDiagnostic )
+            {
+                // Write all licensing messages that may have been emitted during the compilation.
+                if ( this._serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
+                {
+                    foreach ( var licensingMessage in licenseManager.Messages )
+                    {
+                        var diagnosticDefinition = licensingMessage.IsError
+                            ? LicensingDiagnosticDescriptors.LicensingError
+                            : LicensingDiagnosticDescriptors.LicensingWarning;
+
+                        reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, licensingMessage.Text ) );
+                    }
+                }
+
+                // Report usage.
+                try
+                {
+                    this._serviceProvider.GetBackstageService<IUsageReporter>()?.StopSession();
+                }
+                catch ( Exception e )
+                {
+                    ReportException( e, this._serviceProvider, false );
+
+                    // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
+                }
+
+                // Close logs.
+                // Logging has to be disposed as the last one, so it could be used until now.
+                this._serviceProvider.GetLoggerFactory().Dispose();
+            }
+        }
+
+        private static string? GetDotNetSdkDirectory( AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider )
+        {
+            if ( !analyzerConfigOptionsProvider.GlobalOptions.TryGetValue( "build_property.NETCoreSdkBundledVersionsProps", out var propsFilePath )
+                 || string.IsNullOrEmpty( propsFilePath ) )
+            {
+                return null;
+            }
+
+            return Path.GetFullPath( Path.GetDirectoryName( propsFilePath )! );
+        }
+
+        private static LicensingInitializationOptions GetLicensingOptions(
+            InitializeServicesOptions initializeServicesOptions,
+            AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider )
+        {
+            // Load license keys from build options.
+            string? projectLicense = null;
+
+            if ( analyzerConfigOptionsProvider.GlobalOptions.TryGetValue( "build_property.MetalamaLicense", out var licenseProperty ) )
+            {
+                projectLicense = licenseProperty.Trim();
+            }
+
+            if ( !(analyzerConfigOptionsProvider.GlobalOptions.TryGetValue( "build_property.MetalamaIgnoreUserLicenses", out var ignoreUserLicensesProperty )
+                   && bool.TryParse( ignoreUserLicensesProperty, out var ignoreUserLicenses )) )
+            {
+                ignoreUserLicenses = false;
+            }
+
+            return new LicensingInitializationOptions
+            {
+                ProjectLicense = projectLicense,
+                IgnoreUserProfileLicenses = ignoreUserLicenses,
+                IgnoreUnattendedProcessLicense = ignoreUserLicenses,
+                DisableLicenseAudit = !initializeServicesOptions.RequiresMetalamaLicenseAudit
+            };
+        }
+        
+        private static void ReportException( Exception e, IServiceProvider serviceProvider, bool throwReporterExceptions )
+        {
+            try
+            {
+                var reporter = serviceProvider.GetBackstageService<IExceptionReporter>();
+                reporter?.ReportException( e );
+            }
+            catch ( Exception reporterException )
+            {
+                if ( throwReporterExceptions )
+                {
+                    throw new AggregateException( e, reporterException );
+                }
+            }
+        }
+        
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( context.Services );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider();
 
             try
             {
