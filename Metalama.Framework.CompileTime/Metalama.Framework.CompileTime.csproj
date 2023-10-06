@@ -28,6 +28,7 @@
              but we need the support in the IDE -->
 
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)"/>
+        <PackageReference Include="Metalama.Framework.RunTime" Version="$(MetalamaFrameworkRunTimeVersion)" />
 
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
