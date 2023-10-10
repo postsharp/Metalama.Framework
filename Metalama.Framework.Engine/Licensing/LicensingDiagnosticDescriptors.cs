@@ -58,4 +58,13 @@ public static class LicensingDiagnosticDescriptors
                 "The '{0}' code action provided by '{1}' cannot be applied because code actions are not covered by your license.",
                 "Code actions not available",
                 _category );
+    
+    internal static readonly DiagnosticDefinition
+        NoLicenseKeyRegistered
+            = new(
+                "LAMA0809",
+                Severity.Error,
+                "No Metalama license key is registered. To register a license key, see https://postsharp.net/links/metalama-register-license.",
+                "No Metalama license key",
+                _category );
 }

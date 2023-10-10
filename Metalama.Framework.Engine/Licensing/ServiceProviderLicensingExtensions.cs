@@ -18,7 +18,7 @@ public static class ServiceProviderLicensingExtensions
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>
-    public static ProjectServiceProvider AddLicenseConsumptionManagerForLicenseKey( this ServiceProvider<IProjectService> serviceProvider, string licenseKey )
+    public static ProjectServiceProvider AddLicenseConsumptionManagerForLicenseKey( this ServiceProvider<IProjectService> serviceProvider, string? licenseKey )
     {
         // We always ignore user profile and unattended licenses in tests.
         return serviceProvider.AddLicenseConsumptionManager(

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Testing;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,6 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         private const string _arbitraryNamespace = "AspectCountTests.ArbitraryNamespace";
         private const string _tooManyAspectClassesErrorId = "LAMA0800";
         private const string _redistributionInvalidErrorId = "LAMA0803";
+        private const string _noLicenseKeyErrorId = "LAMA0809";
 
         private readonly ITestOutputHelper _logger;
 
@@ -23,6 +25,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         }
 
         [Theory]
+        [TestLicensesInlineData( null, 1, _arbitraryNamespace, _arbitraryNamespace, _noLicenseKeyErrorId )]
         [TestLicensesInlineData( nameof(TestLicenses.PostSharpEssentials), 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
         [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
         [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
@@ -81,7 +84,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal), 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(
-            string licenseKey,
+            string? licenseKey,
             int numberOfAspects,
             string aspectNamespace,
             string targetNamespace,
@@ -141,7 +144,7 @@ namespace {0}
 }}
 ";
 
-            this._logger.WriteLine( licenseKey );
+            this._logger.WriteLine( "License ID:" + (licenseKey == null ? "none" : licenseKey.Split( '-' )[0]) );
 
             var sourceCodeBuilder = new StringBuilder();
             var aspectApplicationBuilder = new StringBuilder();

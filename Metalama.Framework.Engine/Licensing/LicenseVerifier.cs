@@ -192,10 +192,17 @@ public sealed class LicenseVerifier : IProjectService
 
         if ( hasLicenseError )
         {
-            diagnostics.Report(
-                LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
-                    null,
-                    (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
+            if ( string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) )
+            {
+                diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
+            }
+            else
+            {
+                diagnostics.Report(
+                    LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
+                        null,
+                        (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
+            }
         }
 
         // Write consumption data to disk if required.
