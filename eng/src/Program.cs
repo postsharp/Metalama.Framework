@@ -128,7 +128,20 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
         var kvUri = "https://testserviceskeyvault.vault.azure.net/";
         var client = new SecretClient( new Uri( kvUri ), new DefaultAzureCredential() );
 
-        string GetLicenseKey( string keyName ) => client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
+        string GetLicenseKey( string keyName )
+        {
+            try
+            {
+                return client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
+            }
+            catch ( Exception ex )
+            {
+                arg.Context.Console.WriteWarning( $"Could not get license key {keyName}, some licensing tests are going to fail." );
+                arg.Context.Console.WriteMessage( ex.Message );
+
+                return string.Empty;
+            }
+        }
 
         File.WriteAllText( licensesFile,
             $"""

@@ -35,13 +35,11 @@ namespace Metalama.Framework.Engine.Pipeline
     [UsedImplicitly]
     public sealed class SourceTransformer : ISourceTransformerWithServices
     {
-        public ServicesHolder? InitializeServices( InitializeServicesContext context )
+        public IServiceProvider? InitializeServices( InitializeServicesContext context )
         {
             var dotNetSdkDirectory = GetDotNetSdkDirectory( context.AnalyzerConfigOptionsProvider );
 
-            var licenseOptions = context.Options.RequiresMetalamaLicenseEnforcement
-                ? GetLicensingOptions( context.Options, context.AnalyzerConfigOptionsProvider )
-                : new LicensingInitializationOptions();
+            var licenseOptions = GetLicensingOptions( context.AnalyzerConfigOptionsProvider );
 
             var applicationInfo = new SourceTransformerApplicationInfo(
                 context.Options.IsLongRunningProcess,
@@ -49,9 +47,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var backstageOptions = new BackstageInitializationOptions( applicationInfo, context.Compilation.AssemblyName )
             {
-                OpenWelcomePage = context.Options.RequiresMetalamaSupportServices,
-                AddLicensing = context.Options.RequiresMetalamaLicenseEnforcement,
-                AddSupportServices = context.Options.RequiresMetalamaSupportServices,
+                OpenWelcomePage = true,
+                AddLicensing = true,
+                AddSupportServices = true,
                 LicensingOptions = licenseOptions,
                 DotNetSdkDirectory = dotNetSdkDirectory
             };
@@ -79,7 +77,8 @@ namespace Metalama.Framework.Engine.Pipeline
             // Enforce licensing.
             if ( serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
             {
-                var projectName = Path.GetFileNameWithoutExtension( context.Options.MsBuildProjectFullPath ) ?? "unknown";
+                var projectPath = MSBuildProjectOptionsFactory.Default.GetProjectOptions( context.AnalyzerConfigOptionsProvider ).ProjectPath;
+                var projectName = Path.GetFileNameWithoutExtension( projectPath ) ?? "unknown";
 
                 if ( !licenseManager.CanConsume( LicenseRequirement.Free, projectName ) )
                 {
@@ -98,22 +97,28 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
-            return new MetalamaFrameworkServicesHolder( serviceProvider );
+            return new CompilerServiceProvider( serviceProvider );
         }
 
-        private sealed class MetalamaFrameworkServicesHolder : ServicesHolder
+        private sealed class CompilerServiceProvider : IDisposableServiceProvider
         {
             private readonly IServiceProvider _serviceProvider;
+            private readonly LoggerAdapter _logger;
+            private readonly ExceptionReporterAdapter _exceptionReporter;
 
-            public MetalamaFrameworkServicesHolder( IServiceProvider serviceProvider )
-                : base(
-                    new LoggerAdapter( serviceProvider.GetLoggerFactory().GetLogger( "Compiler" ) ),
-                    new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() ) )
+            public CompilerServiceProvider( IServiceProvider serviceProvider )
             {
                 this._serviceProvider = serviceProvider;
+                this._logger = new LoggerAdapter( serviceProvider.GetLoggerFactory().GetLogger( "Compiler" ) );
+                this._exceptionReporter = new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() );
             }
 
-            public override void DisposeServices( Action<Diagnostic> reportDiagnostic )
+            public object? GetService( Type serviceType )
+                => serviceType == typeof(Metalama.Compiler.Services.ILogger) ? this._logger
+                    : serviceType == typeof(Metalama.Compiler.Services.IExceptionReporter) ? this._exceptionReporter
+                    : null;
+
+            public void DisposeServices( Action<Diagnostic> reportDiagnostic )
             {
                 // Write all licensing messages that may have been emitted during the compilation.
                 if ( this._serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
@@ -157,9 +162,7 @@ namespace Metalama.Framework.Engine.Pipeline
             return Path.GetFullPath( Path.GetDirectoryName( propsFilePath )! );
         }
 
-        private static LicensingInitializationOptions GetLicensingOptions(
-            InitializeServicesOptions initializeServicesOptions,
-            AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider )
+        private static LicensingInitializationOptions GetLicensingOptions( AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider )
         {
             // Load license keys from build options.
             string? projectLicense = null;
@@ -179,8 +182,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 ProjectLicense = projectLicense,
                 IgnoreUserProfileLicenses = ignoreUserLicenses,
-                IgnoreUnattendedProcessLicense = ignoreUserLicenses,
-                DisableLicenseAudit = !initializeServicesOptions.RequiresMetalamaLicenseAudit
+                IgnoreUnattendedProcessLicense = ignoreUserLicenses
             };
         }
         
