@@ -145,7 +145,7 @@ public sealed partial class HierarchicalOptionsManager
                 case IAssembly { IsExternal: true }:
                     // Make sure not to go down to the compilation.
                     baseDeclarationOptions = null;
-                    containingDeclarationOptions = null;
+                    containingDeclarationOptions = this._defaultOptions;
                     namespaceOptions = null;
 
                     break;
