@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
 
-        public ReferenceAssemblyLocator( ProjectServiceProvider serviceProvider )
+        public ReferenceAssemblyLocator( ProjectServiceProvider serviceProvider, string additionalPackageReferences )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
@@ -78,33 +78,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
-            string additionalPackageReferences;
-
-            string additionalPackagesHash;
-
-            if ( !projectOptions.CompileTimePackages.IsDefaultOrEmpty )
-            {
-                if ( string.IsNullOrEmpty( projectOptions.ProjectAssetsFile ) )
-                {
-                    throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
-                }
-
-                if ( string.IsNullOrEmpty( projectOptions.TargetFrameworkMoniker ) && string.IsNullOrWhiteSpace( projectOptions.TargetFramework ) )
-                {
-                    throw new InvalidOperationException(
-                        "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
-                }
-
-                additionalPackageReferences = GetAdditionalPackageReferences( projectOptions );
-
-                additionalPackagesHash = HashUtilities.HashString( additionalPackageReferences );
-            }
-            else
-            {
-                additionalPackageReferences = "";
-                additionalPackagesHash = "default";
-            }
-
             this._restoreTimeout = projectOptions.ReferenceAssemblyRestoreTimeout ?? 120_000;
 
             this._logger.Trace?.Log(
@@ -112,6 +85,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     ", ",
                     new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsReadOnlyList(
                         x => x.Assembly.Location ) ) );
+
+            var additionalPackagesHash = additionalPackageReferences is "" ? "default" : HashUtilities.HashString( additionalPackageReferences );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, additionalPackagesHash );
@@ -204,8 +179,19 @@ namespace Metalama.Framework.Engine.CompileTime
             return Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
         }
 
-        private static string GetAdditionalPackageReferences( IProjectOptions options )
+        internal static string GetAdditionalPackageReferences( IProjectOptions options )
         {
+            if ( string.IsNullOrEmpty( options.ProjectAssetsFile ) )
+            {
+                throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
+            }
+
+            if ( string.IsNullOrEmpty( options.TargetFrameworkMoniker ) && string.IsNullOrWhiteSpace( options.TargetFramework ) )
+            {
+                throw new InvalidOperationException(
+                    "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
+            }
+            
             var resolvedPackages = new Dictionary<string, string>();
 
             var assetsJson = JObject.Parse( File.ReadAllText( options.ProjectAssetsFile.AssertNotNull() ) );
