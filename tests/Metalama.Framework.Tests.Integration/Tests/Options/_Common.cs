@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -40,6 +41,8 @@ public class MyOptions : IHierarchicalOptions<IDeclaration>
                 return this;
             }
 
+            Debugger.Break();
+        
             return new MyOptions
             {
                 Value = other.Value ?? Value,
