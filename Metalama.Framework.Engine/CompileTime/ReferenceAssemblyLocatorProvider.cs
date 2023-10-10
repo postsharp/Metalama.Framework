@@ -31,8 +31,11 @@ internal sealed class ReferenceAssemblyLocatorProvider : IGlobalService
             // We lock instead of using ConcurrentDictionary because instantiating the class is expensive.
             lock ( this._sync )
             {
-                referenceAssemblyLocator = new ReferenceAssemblyLocator( serviceProvider, additionalPackageReferences );
-                this._referenceAssemblyLocators = this._referenceAssemblyLocators.Add( additionalPackageReferences, referenceAssemblyLocator );
+                if ( !this._referenceAssemblyLocators.TryGetValue( additionalPackageReferences, out referenceAssemblyLocator ) )
+                {
+                    referenceAssemblyLocator = new ReferenceAssemblyLocator( serviceProvider, additionalPackageReferences );
+                    this._referenceAssemblyLocators = this._referenceAssemblyLocators.Add( additionalPackageReferences, referenceAssemblyLocator );
+                }
             }
         }
 
