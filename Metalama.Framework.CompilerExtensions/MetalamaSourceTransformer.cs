@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Compiler.Services;
+using System;
 using System.ComponentModel;
 
 namespace Metalama.Framework.CompilerExtensions
@@ -21,7 +21,7 @@ namespace Metalama.Framework.CompilerExtensions
                 "Metalama.Framework.Engine.Pipeline.SourceTransformer" );
         }
 
-        public ServicesHolder? InitializeServices( InitializeServicesContext context ) => this._impl.InitializeServices( context );
+        public IServiceProvider? InitializeServices( InitializeServicesContext context ) => this._impl.InitializeServices( context );
 
         public void Execute( TransformerContext context ) => this._impl.Execute( context );
     }
