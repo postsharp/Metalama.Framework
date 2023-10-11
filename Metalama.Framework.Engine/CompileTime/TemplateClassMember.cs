@@ -27,6 +27,4 @@ namespace Metalama.Framework.Engine.CompileTime
         public ImmutableDictionary<string, TemplateClassMemberParameter> IndexedParameters { get; } =
             Parameters.Concat( TypeParameters ).ToImmutableDictionary( x => x.Name, x => x );
     }
-
-    internal sealed record TemplateClassMemberParameter( int SourceIndex, string Name, bool IsCompileTime, int? TemplateIndex );
 }
