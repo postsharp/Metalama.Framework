@@ -78,4 +78,13 @@ public static class LicensingDiagnosticDescriptors
         "Cannot start Metalama: invalid license. To register a license key, see https://postsharp.net/links/metalama-register-license.",
         "Cannot start Metalama: invalid license.",
         _category );    
+    
+    internal static readonly DiagnosticDefinition
+        NoLicenseKeyRegistered
+            = new(
+                "LAMA0809",
+                Severity.Error,
+                "No Metalama license key is registered. To register a license key, see https://postsharp.net/links/metalama-register-license.",
+                "No Metalama license key",
+                _category );
 }

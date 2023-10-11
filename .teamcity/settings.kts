@@ -18,7 +18,8 @@ project {
    buildType(PublicBuild)
    buildType(PublicDeployment)
    buildType(VersionBump)
-   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,PublicDeployment,VersionBump)
+   buildType(DownstreamMerge)
+   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,PublicDeployment,VersionBump,DownstreamMerge)
 }
 
 object DebugBuild : BuildType({
@@ -33,6 +34,7 @@ object DebugBuild : BuildType({
     }
     vcs {
         root(DslContext.settingsRoot)
+        root(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkPrivate"), "+:. => source-dependencies/Metalama.Framework.Private")
     }
 
     steps {
@@ -88,16 +90,6 @@ object DebugBuild : BuildType({
     }
 
     dependencies {
-        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_ReleaseBuild")) {
-            snapshot {
-                     onDependencyFailure = FailureAction.FAIL_TO_START
-            }
-
-            artifacts {
-                cleanDestination = true
-                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
-            }
-        }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -106,6 +98,21 @@ object DebugBuild : BuildType({
             artifacts {
                 cleanDestination = true
                 artifactRules = "+:artifacts/packages/Release/Shipping/**/*=>dependencies/Metalama.Compiler"
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkPrivate_DebugBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkRunTime_DebugBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Framework.RunTime"
             }
         }
 
@@ -126,6 +133,7 @@ object PublicBuild : BuildType({
     }
     vcs {
         root(DslContext.settingsRoot)
+        root(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkPrivate"), "+:. => source-dependencies/Metalama.Framework.Private")
     }
 
     steps {
@@ -177,19 +185,13 @@ object PublicBuild : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
+        sshAgent {
+            // By convention, the SSH key name is always PostSharp.Engineering for all repositories using SSH to connect.
+            teamcitySshKey = "PostSharp.Engineering"
+        }
     }
 
     dependencies {
-        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_PublicBuild")) {
-            snapshot {
-                     onDependencyFailure = FailureAction.FAIL_TO_START
-            }
-
-            artifacts {
-                cleanDestination = true
-                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
-            }
-        }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -198,6 +200,21 @@ object PublicBuild : BuildType({
             artifacts {
                 cleanDestination = true
                 artifactRules = "+:artifacts/packages/Release/Shipping/**/*=>dependencies/Metalama.Compiler"
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkPrivate_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkRunTime_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Framework.RunTime"
             }
         }
 
@@ -252,19 +269,13 @@ object PublicDeployment : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
+        sshAgent {
+            // By convention, the SSH key name is always PostSharp.Engineering for all repositories using SSH to connect.
+            teamcitySshKey = "PostSharp.Engineering"
+        }
     }
 
     dependencies {
-        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_PublicBuild")) {
-            snapshot {
-                     onDependencyFailure = FailureAction.FAIL_TO_START
-            }
-
-            artifacts {
-                cleanDestination = true
-                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
-            }
-        }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -276,6 +287,26 @@ object PublicDeployment : BuildType({
             }
         }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_PublicDeployment")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkPrivate_PublicDeployment")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkRunTime_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Framework.RunTime"
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaFrameworkRunTime_PublicDeployment")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -340,7 +371,82 @@ object VersionBump : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
+        sshAgent {
+            // By convention, the SSH key name is always PostSharp.Engineering for all repositories using SSH to connect.
+            teamcitySshKey = "PostSharp.Engineering"
+        }
     }
+
+})
+
+object DownstreamMerge : BuildType({
+
+    name = "Downstream Merge"
+
+    params {
+        text("DownstreamMergeArguments", "", label = "Merge downstream Arguments", description = "Arguments to append to the 'Merge downstream' build step.", allowEmpty = true)
+        text("TimeOut", "300", label = "Time-Out Threshold", description = "Seconds after the duration of the last successful build.", regex = """\d+""", validationMessage = "The timeout has to be an integer number.")
+    }
+    vcs {
+        root(DslContext.settingsRoot)
+    }
+
+    steps {
+        powerShell {
+            name = "Merge downstream"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools git merge-downstream %DownstreamMergeArguments%")
+        }
+    }
+
+    failureConditions {
+        failOnMetricChange {
+            metric = BuildFailureOnMetric.MetricType.BUILD_DURATION
+            units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
+            comparison = BuildFailureOnMetric.MetricComparison.MORE
+            compareTo = build {
+                buildRule = lastSuccessful()
+            }
+            stopBuildOnFailure = true
+            param("metricThreshold", "%TimeOut%")
+        }
+    }
+
+    requirements {
+        equals("env.BuildAgentType", "caravela04cloud")
+    }
+
+    features {
+        swabra {
+            lockingProcesses = Swabra.LockingProcessPolicy.KILL
+            verbose = true
+        }
+        sshAgent {
+            // By convention, the SSH key name is always PostSharp.Engineering for all repositories using SSH to connect.
+            teamcitySshKey = "PostSharp.Engineering"
+        }
+    }
+
+    triggers {
+        vcs {
+            watchChangesInDependencies = true
+            branchFilter = "+:<default>"
+            // Build will not trigger automatically if the commit message contains comment value.
+            triggerRules = "-:comment=<<VERSION_BUMP>>|<<DEPENDENCIES_UPDATED>>:**"
+        }
+    }
+
+    dependencies {
+        dependency(DebugBuild) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+        }
+
+     }
 
 })
 

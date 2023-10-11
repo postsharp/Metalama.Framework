@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
         protected async Task<DiagnosticBag> GetDiagnosticsAsync(
             string code,
-            string licenseKey,
+            string? licenseKey,
             string? assemblyName = "AspectCountTests.ArbitraryNamespace",
             string projectName = "TestProject" )
         {

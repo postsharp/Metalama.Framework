@@ -29,17 +29,15 @@ var product = new Product( MetalamaDependencies.Metalama )
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
                 "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
-                
+
                 // XML formatting seems to be conflicting.
-                "**\\*.props",
-                "**\\*.targets",
-                "**\\*.csproj",
-                "**\\*.md",
-                "**\\*.xml",
-                "**\\*.config"
+                "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
             }
         },
-        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true, TestMethod = BuildMethod.Build },
+        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
+        {
+            IsTestOnly = true, TestMethod = BuildMethod.Build
+        },
         new ManyDotNetSolutions( "Tests\\Standalone" ),
     },
     PublicArtifacts = Pattern.Create(
@@ -55,15 +53,15 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Tool.$(PackageVersion).nupkg" ),
     ParametrizedDependencies = new[]
     {
-        DevelopmentDependencies.PostSharpEngineering.ToDependency(),
-        MetalamaDependencies.MetalamaCompiler.ToDependency(
+        DevelopmentDependencies.PostSharpEngineering.ToDependency(), MetalamaDependencies.MetalamaCompiler.ToDependency(
             new ConfigurationSpecific<BuildConfiguration>(
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) ),
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
     },
+    SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
     Configurations = Product.DefaultConfigurations
-        .WithValue( 
+        .WithValue(
             BuildConfiguration.Debug,
             c => c with
             {
