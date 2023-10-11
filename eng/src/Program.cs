@@ -53,9 +53,15 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies = new[] { DevelopmentDependencies.PostSharpEngineering.ToDependency(), MetalamaDependencies.MetalamaCompiler.ToDependency( new ConfigurationSpecific<BuildConfiguration>( 
-        BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
-    )) },
+    ParametrizedDependencies = new[]
+    {
+        DevelopmentDependencies.PostSharpEngineering.ToDependency(),
+        MetalamaDependencies.MetalamaBackstage.ToDependency(),
+        MetalamaDependencies.MetalamaCompiler.ToDependency(
+            new ConfigurationSpecific<BuildConfiguration>(
+                BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
+            ) )
+    },
     Configurations = Product.DefaultConfigurations
         .WithValue( 
             BuildConfiguration.Debug,
@@ -113,21 +119,38 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     {
         arg.IsFailed = true;
     }
-    
-    arg.Context.Console.WriteHeading( "Fetching licenses" );
-    
-    var kvUri = "https://testserviceskeyvault.vault.azure.net/";
-    var client = new SecretClient( new Uri( kvUri ), new DefaultAzureCredential() );
 
-    string GetLicenseKey( string keyName ) => client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
+    var licensesFile = Path.Combine( arg.Context.RepoDirectory, "eng/Licenses.g.props" );
+    if ( !File.Exists( licensesFile ) )
+    {
+        arg.Context.Console.WriteHeading( "Fetching licenses" );
 
-    File.WriteAllText( Path.Combine( arg.Context.RepoDirectory, "eng/Licenses.g.props" ),
-        $"""
-         <Project>
-           <PropertyGroup>
-             <MetalamaStarterBusinessLicenseKey>{GetLicenseKey( "MetalamaStarterBusiness" )}</MetalamaStarterBusinessLicenseKey>
-             <MetalamaProfessionalBusinessLicenseKey>{GetLicenseKey( "MetalamaProfessionalBusiness" )}</MetalamaProfessionalBusinessLicenseKey>
-           </PropertyGroup>
-         </Project>
-         """ );
+        var kvUri = "https://testserviceskeyvault.vault.azure.net/";
+        var client = new SecretClient( new Uri( kvUri ), new DefaultAzureCredential() );
+
+        string GetLicenseKey( string keyName )
+        {
+            try
+            {
+                return client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
+            }
+            catch ( Exception ex )
+            {
+                arg.Context.Console.WriteWarning( $"Could not get license key {keyName}, some licensing tests are going to fail." );
+                arg.Context.Console.WriteMessage( ex.Message );
+
+                return string.Empty;
+            }
+        }
+
+        File.WriteAllText( licensesFile,
+            $"""
+             <Project>
+               <PropertyGroup>
+                 <MetalamaStarterBusinessLicenseKey>{GetLicenseKey( "MetalamaStarterBusiness" )}</MetalamaStarterBusinessLicenseKey>
+                 <MetalamaProfessionalBusinessLicenseKey>{GetLicenseKey( "MetalamaProfessionalBusiness" )}</MetalamaProfessionalBusinessLicenseKey>
+               </PropertyGroup>
+             </Project>
+             """ );
+    }
 }

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <RepoDirectory>$(MSBuildThisFileDirectory)</RepoDirectory>
-        <RepoKind>AzureRepos</RepoKind>
+        <RepoKind>GitHub</RepoKind>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
         <!-- CS8032: An instance of analyzer X cannot be created. -->

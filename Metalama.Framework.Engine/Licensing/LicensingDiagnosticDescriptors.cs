@@ -8,7 +8,7 @@ public static class LicensingDiagnosticDescriptors
 {
     // Reserved range: 800-819
 
-    private const string _category = "Metalama.General";
+    private const string _category = "Metalama.Licensing";
 
     internal static readonly DiagnosticDefinition<(int ActualCount, int MaxAspectsCount, string ProjectName)> TooManyAspectClasses =
         new(
@@ -50,12 +50,32 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Metalama SDK not available." );
 
-    internal static readonly DiagnosticDefinition<(string Title, string Origin)>
-        CodeActionNotAvailable
-            = new(
-                "LAMA0805",
-                Severity.Error,
-                "The '{0}' code action provided by '{1}' cannot be applied because code actions are not covered by your license.",
-                "Code actions not available",
-                _category );
+    internal static readonly DiagnosticDefinition<(string Title, string Origin)> CodeActionNotAvailable =
+        new(
+            "LAMA0805",
+            Severity.Error,
+            "The '{0}' code action provided by '{1}' cannot be applied because code actions are not covered by your license.",
+            "Code actions not available",
+            _category );
+
+    internal static readonly DiagnosticDefinition<string> LicensingWarning = new(
+        "LAMA0806",
+        Severity.Warning,
+        "{0}",
+        "Licensing warning.",
+        _category );
+
+    internal static readonly DiagnosticDefinition<string> LicensingError = new(
+        "LAMA0807",
+        Severity.Error,
+        "{0}",
+        "Licensing error.",
+        _category );
+    
+    internal static readonly DiagnosticDefinition InvalidLicenseOverall = new(
+        "LAMA0808",
+        Severity.Error,
+        "Cannot start Metalama: invalid license. To register a license key, see https://postsharp.net/links/metalama-register-license.",
+        "Cannot start Metalama: invalid license.",
+        _category );    
 }
