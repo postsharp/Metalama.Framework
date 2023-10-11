@@ -48,9 +48,3 @@ internal sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipelin
         public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol ) { }
     }
 }
-
-// ReSharper disable NotAccessedPositionalProperty.Global
-internal sealed record TestDesignTimeAspectPipelineResult(
-    bool Success,
-    ImmutableArray<Diagnostic> Diagnostics,
-    ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees );
