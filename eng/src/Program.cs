@@ -62,6 +62,15 @@ var product = new Product( MetalamaDependencies.Metalama )
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) )
     },
+    ParametrizedDependencies = new[]
+    {
+        DevelopmentDependencies.PostSharpEngineering.ToDependency(),
+        MetalamaDependencies.MetalamaCompiler.ToDependency(
+            new ConfigurationSpecific<BuildConfiguration>(
+                BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
+            ) ),
+        MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
+    },
     Configurations = Product.DefaultConfigurations
         .WithValue( 
             BuildConfiguration.Debug,
