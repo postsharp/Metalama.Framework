@@ -21,6 +21,7 @@ public sealed partial class HierarchicalOptionsManager
     private sealed class OptionTypeNode
     {
         private readonly IHierarchicalOptions _defaultOptions;
+        private readonly IHierarchicalOptions _emptyOptions;
         private readonly HierarchicalOptionsManager _parent;
         private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
@@ -29,11 +30,12 @@ public sealed partial class HierarchicalOptionsManager
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
-        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IUserDiagnosticSink diagnosticAdder, IHierarchicalOptions defaultOptions )
+        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IUserDiagnosticSink diagnosticAdder, IHierarchicalOptions defaultOptions, IHierarchicalOptions emptyOptions )
         {
             this._parent = parent;
             this._type = type;
             this._defaultOptions = defaultOptions;
+            this._emptyOptions = emptyOptions;
             this._typeName = type.FullName.AssertNotNull();
             var invoker = parent._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
@@ -145,7 +147,10 @@ public sealed partial class HierarchicalOptionsManager
                 case IAssembly { IsExternal: true }:
                     // Make sure not to go down to the compilation.
                     baseDeclarationOptions = null;
-                    containingDeclarationOptions = this._defaultOptions;
+
+                    // An assembly that knows about an option will have the correct default set in its manifest.
+                    // For assemblies that don't know about an option, we use options gotten by calling the default constructor.
+                    containingDeclarationOptions = node?.DirectOptions == null ? this._emptyOptions : null;
                     namespaceOptions = null;
 
                     break;

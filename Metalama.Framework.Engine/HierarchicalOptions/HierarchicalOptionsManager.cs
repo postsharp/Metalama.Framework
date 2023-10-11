@@ -56,31 +56,13 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
         foreach ( var optionTypeName in project.ClosureOptionTypes )
         {
-            var userCodeExecutionContext = new UserCodeExecutionContext(
-                this._serviceProvider,
-                diagnosticSink,
-                UserCodeDescription.Create( "Initializing options '{0}'", optionTypeName ),
-                compilationModel: compilationModel );
-
             var optionType = this.GetOptionType( optionTypeName, compilationModel );
 
-            var empty = (IHierarchicalOptions) FormatterServices.GetUninitializedObject( optionType ).AssertNotNull();
-
-            var context = new OptionsInitializationContext(
-                compilationModel.Project,
-                new ScopedDiagnosticSink( diagnosticSink, new GetDefaultOptionsDiagnosticSourceDescription( optionType ), null, null ) );
-
-            if ( !this._userCodeInvoker.TryInvoke(
-                    () => empty.GetDefaultOptions( context ) ?? (IHierarchicalOptions) Activator.CreateInstance( optionType ).AssertNotNull(),
-                    userCodeExecutionContext,
-                    out var defaultOptions ) )
-            {
-                // If we fail to get the default options, we will continue with the non-initialized options.
-            }
+            var (defaultOptions, emptyOptions) = ComputeDefaultOptions( optionType, compilationModel, this._userCodeInvoker, this._serviceProvider, diagnosticSink );
 
             this._optionTypes.TryAdd(
                 optionTypeName,
-                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions ?? empty ) );
+                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions, emptyOptions ) );
         }
 
         if ( externalOptionsProvider != null )
@@ -98,6 +80,44 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         {
             this.AddSource( source, compilationModel, diagnosticSink );
         }
+    }
+
+    internal static (IHierarchicalOptions DefaultOptions, IHierarchicalOptions EmptyOptions) ComputeDefaultOptions(
+        Type optionType,
+        CompilationModel compilationModel,
+        UserCodeInvoker userCodeInvoker,
+        ProjectServiceProvider serviceProvider,
+        IUserDiagnosticSink diagnosticSink )
+    {
+        var userCodeExecutionContext = new UserCodeExecutionContext(
+            serviceProvider,
+            diagnosticSink,
+            UserCodeDescription.Create( "Initializing options '{0}'", optionType ),
+            compilationModel: compilationModel );
+
+        if ( !userCodeInvoker.TryInvoke(
+                () => (IHierarchicalOptions) Activator.CreateInstance( optionType ).AssertNotNull(),
+                userCodeExecutionContext,
+                out var emptyOptions ) )
+        {
+            // If we fail to construct the options, we will continue with the non-initialized options.
+            emptyOptions = (IHierarchicalOptions) FormatterServices.GetUninitializedObject( optionType ).AssertNotNull();
+        }
+
+        var context = new OptionsInitializationContext(
+            compilationModel.Project,
+            new ScopedDiagnosticSink( diagnosticSink, new GetDefaultOptionsDiagnosticSourceDescription( optionType ), null, null ) );
+
+        if ( !userCodeInvoker.TryInvoke(
+                () => emptyOptions!.GetDefaultOptions( context ),
+                userCodeExecutionContext,
+                out var defaultOptions ) )
+        {
+            // If we fail to get the default options, we will continue with the non-initialized options.
+            defaultOptions = emptyOptions;
+        }
+
+        return (defaultOptions!, emptyOptions!);
     }
 
     internal void AddSource( IHierarchicalOptionsSource source, CompilationModel compilationModel, IUserDiagnosticSink diagnosticSink )
