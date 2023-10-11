@@ -12,7 +12,7 @@ using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System;
 using System.IO;
-using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2023_4;
+using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_0;
 
 var product = new Product( MetalamaDependencies.Metalama )
 {
