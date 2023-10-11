@@ -56,15 +56,6 @@ var product = new Product( MetalamaDependencies.Metalama )
     ParametrizedDependencies = new[]
     {
         DevelopmentDependencies.PostSharpEngineering.ToDependency(),
-        MetalamaDependencies.MetalamaBackstage.ToDependency(),
-        MetalamaDependencies.MetalamaCompiler.ToDependency(
-            new ConfigurationSpecific<BuildConfiguration>(
-                BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
-            ) )
-    },
-    ParametrizedDependencies = new[]
-    {
-        DevelopmentDependencies.PostSharpEngineering.ToDependency(),
         MetalamaDependencies.MetalamaCompiler.ToDependency(
             new ConfigurationSpecific<BuildConfiguration>(
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
