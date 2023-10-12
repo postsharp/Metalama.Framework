@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
@@ -312,7 +313,12 @@ namespace Metalama.Framework.Engine.Templating
                 if ( node is RecordDeclarationSyntax )
                 {
                     var symbol = ModelExtensions.GetDeclaredSymbol( this._semanticModel, node );
-
+                    
+                    // Records are currently not supported.
+                    this.Report(
+                        SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
+                            node.Identifier.GetLocation(),
+                            symbol ) );
                 }
             }
 

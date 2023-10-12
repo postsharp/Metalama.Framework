@@ -65,7 +65,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         [PublicAPI]
         protected virtual ContractDirection GetActualDirection( IAspectBuilder builder, ContractDirection direction ) => direction;
-        
+
         private ContractDirection GetEffectiveDirection( IAspectBuilder aspectBuilder )
         {
             var direction = this.GetDefinedDirection( aspectBuilder );
