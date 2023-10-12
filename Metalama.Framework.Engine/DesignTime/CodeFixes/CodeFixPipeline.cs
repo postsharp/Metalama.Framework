@@ -82,9 +82,4 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             return FallibleResultWithDiagnostics<CodeFixPipelineResult>.Succeeded( new CodeFixPipelineResult( configuration, finalCompilation, codeFixes ) );
         }
     }
-
-    internal sealed record CodeFixPipelineResult(
-        AspectPipelineConfiguration Configuration,
-        CompilationModel Compilation,
-        ImmutableArray<CodeFixInstance> CodeFixes );
 }
