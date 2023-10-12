@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -184,7 +185,7 @@ namespace Metalama.Testing.UnitTesting
             IEnumerable<string>? preprocessorSymbols = null,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            var additionalAssemblies = new[] { typeof(UnitTestClass).Assembly };
+            var additionalAssemblies = new[] { typeof(FieldOrPropertyInfo).Assembly, typeof(UnitTestClass).Assembly };
 
             var parseOptions = GetParseOptions( preprocessorSymbols );
 
