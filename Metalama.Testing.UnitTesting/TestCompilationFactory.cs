@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -94,7 +95,10 @@ namespace Metalama.Testing.UnitTesting
                     r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
             var metalamaLibraries = addMetalamaReferences
-                ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly }
+                ? new[]
+                {
+                    typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly, typeof(FieldOrPropertyInfo).Assembly
+                }
                 : null;
 
             // Force the loading of some system assemblies before we search them in the AppDomain.
@@ -184,7 +188,7 @@ namespace Metalama.Testing.UnitTesting
             IEnumerable<string>? preprocessorSymbols = null,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            var additionalAssemblies = new[] { typeof(UnitTestClass).Assembly };
+            var additionalAssemblies = new[] { typeof(FieldOrPropertyInfo).Assembly, typeof(UnitTestClass).Assembly };
 
             var parseOptions = GetParseOptions( preprocessorSymbols );
 
