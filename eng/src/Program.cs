@@ -53,7 +53,9 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Tool.$(PackageVersion).nupkg" ),
     ParametrizedDependencies = new[]
     {
-        DevelopmentDependencies.PostSharpEngineering.ToDependency(), MetalamaDependencies.MetalamaCompiler.ToDependency(
+        DevelopmentDependencies.PostSharpEngineering.ToDependency(),
+        MetalamaDependencies.MetalamaBackstage.ToDependency(),
+        MetalamaDependencies.MetalamaCompiler.ToDependency(
             new ConfigurationSpecific<BuildConfiguration>(
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) ),

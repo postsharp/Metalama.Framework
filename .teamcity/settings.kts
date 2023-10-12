@@ -90,6 +90,16 @@ object DebugBuild : BuildType({
     }
 
     dependencies {
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_DebugBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
+            }
+        }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -192,6 +202,16 @@ object PublicBuild : BuildType({
     }
 
     dependencies {
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
+            }
+        }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -276,6 +296,21 @@ object PublicDeployment : BuildType({
     }
 
     dependencies {
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_PublicBuild")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+
+            artifacts {
+                cleanDestination = true
+                artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
+            }
+        }
+        dependency(AbsoluteId("Metalama_Metalama20234_MetalamaBackstage_PublicDeployment")) {
+            snapshot {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+            }
+        }
         dependency(AbsoluteId("Metalama_Metalama20234_MetalamaCompiler_PublicBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
