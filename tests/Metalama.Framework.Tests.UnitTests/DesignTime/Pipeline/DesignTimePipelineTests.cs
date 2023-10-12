@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.RunTime;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -56,7 +57,8 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(Enumerable).Assembly.Location ),
-                    MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ) )
+                    MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof(FieldOrPropertyInfo).Assembly.Location ) )
                 .AddReferences( additionalReferences ?? Enumerable.Empty<MetadataReference>() );
         }
 
