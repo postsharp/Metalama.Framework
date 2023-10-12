@@ -95,7 +95,10 @@ namespace Metalama.Testing.UnitTesting
                     r => MetadataReference.CreateFromFile( Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) );
 
             var metalamaLibraries = addMetalamaReferences
-                ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly }
+                ? new[]
+                {
+                    typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly, typeof(ITemplateSyntaxFactory).Assembly, typeof(FieldOrPropertyInfo).Assembly
+                }
                 : null;
 
             // Force the loading of some system assemblies before we search them in the AppDomain.
