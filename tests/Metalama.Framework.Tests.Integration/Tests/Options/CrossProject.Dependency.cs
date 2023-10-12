@@ -12,7 +12,7 @@ using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
 
-public record MyOptions : IHierarchicalOptions<IDeclaration>
+public class MyOptions : IHierarchicalOptions<IDeclaration>
 {
     public string? Value { get; init; }
 

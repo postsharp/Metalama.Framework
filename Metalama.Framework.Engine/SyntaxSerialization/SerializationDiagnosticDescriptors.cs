@@ -68,8 +68,31 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseTypeSerializer)> MissingBaseSerializerConstructor = new(
             "LAMA0207",
             _category,
-            "Cannot generate a compile-time serializer for '{0}' because the base type serializer '{1}' must declare a visible parameterless constructor.",
+            "Cannot generate a compile-time serializer for '{0}' because the base type serializer '{1}' must declare a visible parameterless constructor " +
+            "or a deserializing constructor with single IArgumentReader parameter.",
             Error,
             "Missing base serializer constructor." );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> AmbiguousManualSerializer = new(
+            "LAMA0208",
+            _category,
+            "Compile-time serializable type '{0}' declares multiple nested classes implementing ReferenceTypeSerializer or ValueTypeSerializer. Only one manual serializer is allowed.",
+            Error,
+            "Ambiguous manual serializer." );
+
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> AmbiguousBaseSerializer = new(
+            "LAMA0209",
+            _category,
+            "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' declares multiple nested type implementing ReferenceTypeSerializer.",
+            Error,
+            "Ambiguous base serializer." );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> RecordSerializersNotSupported = new(
+            "LAMA0210",
+            _category,
+            "Cannot generate a compile-time serializer for '{0}' because generated serializers are not currently supported for record class or record struct. " +
+            "You can provide a manual serializer (public nested class) derived from ReferenceTypeSerializer (record classes) or ValueTypeSerializer (record structs) instead.",
+            Error,
+            "Generated serializers are not currently supported for records." );
     }
 }

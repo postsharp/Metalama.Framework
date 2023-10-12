@@ -7,7 +7,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.NonEligible;
 
-public record NonElifibleOptions : IHierarchicalOptions<INamedType>, IEligible<INamedType>
+public class NonEligibleOptions : IHierarchicalOptions<INamedType>, IEligible<INamedType>
 {
 #if !NET5_0_OR_GREATER
     public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;
@@ -32,6 +32,6 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( c => c.Types ).SetOptions( _ => new NonElifibleOptions() );
+        amender.Outbound.SelectMany( c => c.Types ).SetOptions( _ => new NonEligibleOptions() );
     }
 }

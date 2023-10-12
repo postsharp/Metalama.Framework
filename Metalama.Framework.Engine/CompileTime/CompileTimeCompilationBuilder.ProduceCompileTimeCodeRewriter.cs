@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -54,6 +55,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
+            private readonly CompilationContext _compileTimeCompilationContext;
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
@@ -111,6 +113,8 @@ namespace Metalama.Framework.Engine.CompileTime
                         .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
+
+                this._compileTimeCompilationContext = compilationContext.CompilationContext;
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
@@ -564,32 +568,58 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
                      && symbol.GetPrimaryDeclaration() == node )
                 {
-                    var serializedTypeName = this.CreateNameExpression( serializableType.Type );
-
-                    if ( !serializableType.Type.IsValueType
-                         && !serializableType.Type.GetMembers()
-                             .Any( m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } method && method.GetPrimarySyntaxReference() != null ) )
+                    if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, symbol, out var existingSerializer, out var ambiguous ) && ambiguous )
                     {
-                        // There is no defined constructor, so we need to explicitly add parameterless constructor (only for reference types).
-                        members.Add(
-                            ConstructorDeclaration(
-                                    List<AttributeListSyntax>(),
-                                    TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) ),
-                                    serializedTypeName.ShortName,
-                                    ParameterList(),
-                                    null,
-                                    SyntaxFactoryEx.FormattedBlock(),
-                                    null )
-                                .NormalizeWhitespace() );
+                        this._diagnosticAdder.Report(
+                            SerializationDiagnosticDescriptors.AmbiguousManualSerializer.CreateRoslynDiagnostic(
+                                symbol.GetDiagnosticLocation(),
+                                symbol ) );
+
+                        this.Success = false;
                     }
-
-                    var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName );
-                    var serializerType = this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName );
-
-                    if ( deserializingConstructor != null && serializerType != null )
+                    else if ( existingSerializer == null && node is RecordDeclarationSyntax )
                     {
-                        members.Add( deserializingConstructor.NormalizeWhitespace() );
-                        members.Add( serializerType.NormalizeWhitespace() );
+                        // Records are currently not suppported.
+                        this._diagnosticAdder.Report(
+                            SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
+                                symbol.GetDiagnosticLocation(),
+                                symbol ) );
+
+                        this.Success = false;
+                    }
+                    else if (existingSerializer == null)
+                    {
+                        var serializedTypeName = this.CreateNameExpression( serializableType.Type );
+
+                        if ( !serializableType.Type.IsValueType
+                             && !serializableType.Type.GetMembers()
+                                 .Any( m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } method && method.GetPrimarySyntaxReference() != null ) )
+                        {
+                            // There is no defined constructor, so we need to explicitly add parameterless constructor (only for reference types).
+                            members.Add(
+                                ConstructorDeclaration(
+                                        List<AttributeListSyntax>(),
+                                        TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                        serializedTypeName.ShortName,
+                                        ParameterList(),
+                                        null,
+                                        SyntaxFactoryEx.FormattedBlock(),
+                                        null )
+                                    .NormalizeWhitespace() );
+                        }
+
+                        var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName );
+                        var serializerType = this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName );
+
+                        if ( deserializingConstructor != null && serializerType != null )
+                        {
+                            members.Add( deserializingConstructor.NormalizeWhitespace() );
+                            members.Add( serializerType.NormalizeWhitespace() );
+                        }
+                        else
+                        {
+                            this.Success = false;
+                        }
                     }
                 }
 

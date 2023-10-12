@@ -306,6 +306,14 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
                 }
+                
+                // Verify that a record and is not ICompileTimeSerializable.
+                // We do not support generating serializers for records at the moment.
+                if ( node is RecordDeclarationSyntax )
+                {
+                    var symbol = ModelExtensions.GetDeclaredSymbol( this._semanticModel, node );
+
+                }
             }
 
             private void VerifyModifiers( SyntaxTokenList modifiers )
