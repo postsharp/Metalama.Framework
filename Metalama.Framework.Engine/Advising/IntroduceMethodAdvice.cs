@@ -70,7 +70,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, Met
         if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
         {
             // Templates with dynamic return value result in object return type of the introduced member.
-            this.Builder.ReturnParameter.Type = this.Builder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
+            this.Builder.ReturnParameter.Type = this.Builder.Compilation.Cache.SystemObjectType;
         }
         else
         {

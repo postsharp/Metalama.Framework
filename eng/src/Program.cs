@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using PostSharp.Engineering.BuildTools;
 using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
@@ -8,6 +10,7 @@ using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
+using System;
 using System.IO;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2023_4;
 
@@ -26,17 +29,15 @@ var product = new Product( MetalamaDependencies.Metalama )
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
                 "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
-                
+
                 // XML formatting seems to be conflicting.
-                "**\\*.props",
-                "**\\*.targets",
-                "**\\*.csproj",
-                "**\\*.md",
-                "**\\*.xml",
-                "**\\*.config"
+                "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
             }
         },
-        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true, TestMethod = BuildMethod.Build },
+        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
+        {
+            IsTestOnly = true, TestMethod = BuildMethod.Build
+        },
         new ManyDotNetSolutions( "Tests\\Standalone" ),
     },
     PublicArtifacts = Pattern.Create(
@@ -50,11 +51,19 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies= new[] { DevelopmentDependencies.PostSharpEngineering.ToDependency(), MetalamaDependencies.MetalamaCompiler.ToDependency( new ConfigurationSpecific<BuildConfiguration>( 
-        BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
-    )) },
+    ParametrizedDependencies = new[]
+    {
+        DevelopmentDependencies.PostSharpEngineering.ToDependency(),
+        MetalamaDependencies.MetalamaBackstage.ToDependency(),
+        MetalamaDependencies.MetalamaCompiler.ToDependency(
+            new ConfigurationSpecific<BuildConfiguration>(
+                BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
+            ) ),
+        MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
+    },
+    SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
     Configurations = Product.DefaultConfigurations
-        .WithValue( 
+        .WithValue(
             BuildConfiguration.Debug,
             c => c with
             {
@@ -69,8 +78,6 @@ var product = new Product( MetalamaDependencies.Metalama )
                 }
             } )
 };
-
-        
 
 product.PrepareCompleted += OnPrepareCompleted;
 
@@ -111,5 +118,39 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, srcDirectory, toolDirectory ) )
     {
         arg.IsFailed = true;
+    }
+
+    var licensesFile = Path.Combine( arg.Context.RepoDirectory, "eng/Licenses.g.props" );
+    if ( !File.Exists( licensesFile ) )
+    {
+        arg.Context.Console.WriteHeading( "Fetching licenses" );
+
+        var kvUri = "https://testserviceskeyvault.vault.azure.net/";
+        var client = new SecretClient( new Uri( kvUri ), new DefaultAzureCredential() );
+
+        string GetLicenseKey( string keyName )
+        {
+            try
+            {
+                return client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
+            }
+            catch ( Exception ex )
+            {
+                arg.Context.Console.WriteWarning( $"Could not get license key {keyName}, some licensing tests are going to fail." );
+                arg.Context.Console.WriteMessage( ex.Message );
+
+                return string.Empty;
+            }
+        }
+
+        File.WriteAllText( licensesFile,
+            $"""
+             <Project>
+               <PropertyGroup>
+                 <MetalamaStarterBusinessLicenseKey>{GetLicenseKey( "MetalamaStarterBusiness" )}</MetalamaStarterBusinessLicenseKey>
+                 <MetalamaProfessionalBusinessLicenseKey>{GetLicenseKey( "MetalamaProfessionalBusiness" )}</MetalamaProfessionalBusinessLicenseKey>
+               </PropertyGroup>
+             </Project>
+             """ );
     }
 }

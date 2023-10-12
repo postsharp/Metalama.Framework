@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -97,7 +96,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                 MethodKind.PropertySet => new SyntaxUserExpression(
                     this.CreateProceedSetExpression( context ),
-                    this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
+                    this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType ),
                 _ => throw new AssertionFailedException( $"Unexpected MethodKind for '{accessor}': {accessor.MethodKind}." )
             };
 

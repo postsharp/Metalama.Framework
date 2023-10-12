@@ -234,13 +234,13 @@ public sealed partial class HierarchicalOptionsManager
         {
             return this._optionsByDeclaration.GetOrAdd(
                 declaration.ToTypedRef(),
-                _ =>
+                static ( _, ctx ) =>
                 {
                     var node = new DeclarationNode();
 
-                    if ( !declaration.BelongsToCurrentProject )
+                    if ( !ctx.declaration.BelongsToCurrentProject )
                     {
-                        if ( this._parent._externalOptionsProvider?.TryGetOptions( declaration, this._typeName, out var options ) == true )
+                        if ( ctx.me._parent._externalOptionsProvider?.TryGetOptions( ctx.declaration, ctx.me._typeName, out var options ) == true )
                         {
                             node.DirectOptions = node.CachedMergedOptions = options;
                         }
@@ -249,11 +249,12 @@ public sealed partial class HierarchicalOptionsManager
                     {
                         // Note that in case of race we may wire a node that will be unused,
                         // but this should not affect the consistency of the data structure.
-                        this.WireNodeToParents( declaration, node );
+                        ctx.me.WireNodeToParents( ctx.declaration, node );
                     }
 
                     return node;
-                } );
+                },
+                (me: this, declaration) );
         }
 
         private void WireNodeToParents( IDeclaration declaration, DeclarationNode node )

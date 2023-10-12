@@ -111,7 +111,7 @@ internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerI
     {
         Invariant.Assert( hasGetter || hasSetter );
 
-        this._type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
+        this._type = targetType.Compilation.GetCompilationModel().Cache.SystemObjectType;
 
         if ( hasGetter )
         {

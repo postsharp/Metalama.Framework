@@ -54,8 +54,7 @@ internal sealed class AttributeClassificationService : IGlobalService, IDisposab
             return false;
         }
 
-        var declarationFactory = attribute.GetCompilationModel().Factory;
-        var templateAttributeType = declarationFactory.GetSpecialType( InternalSpecialType.ITemplateAttribute );
+        var templateAttributeType = attribute.GetCompilationModel().Cache.ITemplateAttributeType;
 
         return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
     }

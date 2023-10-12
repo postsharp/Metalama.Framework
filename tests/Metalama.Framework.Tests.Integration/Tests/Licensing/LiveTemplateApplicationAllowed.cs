@@ -1,5 +1,5 @@
 // @TestScenario(ApplyLiveTemplate)
-// @LicenseFile(..\Metalama.Framework.Tests.Integration\Tests\Licensing\Licenses\Ultimate.license)
+// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaUltimateBusiness)
 // @Include(_LiveTemplate.cs);
 // @OutputAllSyntaxTrees
 

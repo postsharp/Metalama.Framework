@@ -595,6 +595,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsPartial => this.PartialCompilation.IsPartial;
 
+        [Memo]
+        internal DeclarationCache Cache => new( this );
+
+        IDeclarationCache ICompilation.Cache => this.Cache;
+
         internal CompilationModel CreateMutableClone( string? debugLabel = null ) => new( this, true, debugLabel, this.Options );
 
         internal CompilationModel CreateImmutableClone( string? debugLabel = null ) => new( this, false, debugLabel, this.Options );

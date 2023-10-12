@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using System;
 using RefKind = Metalama.Framework.Code.RefKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -15,7 +14,7 @@ internal partial class AccessorBuilder
 
         public override IType Type
         {
-            get => this.Compilation.Factory.GetSpecialType( SpecialType.Void );
+            get => this.Compilation.Cache.SystemVoidType;
             set => throw new NotSupportedException( "Cannot change event accessor's return parameter type." );
         }
 

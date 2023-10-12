@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using System;
@@ -244,12 +245,16 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
         /// </summary>
         public string? LicenseFile { get; set; }
+        
+        public string? LicenseExpression { get; set; }
 
         /// <summary>
         /// Gets or sets the name of a file in the project directory containing the license key to be used to compile the dependency.
         /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
         /// </summary>
         public string? DependencyLicenseFile { get; set; }
+        
+        public string? DependencyLicenseExpression { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether an error should be reported if the compilation uses aspects that
@@ -388,7 +393,11 @@ namespace Metalama.Testing.AspectTesting
 
             this.LicenseFile ??= baseOptions.LicenseFile;
 
+            this.LicenseExpression ??= baseOptions.LicenseExpression;
+
             this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
+
+            this.DependencyLicenseExpression ??= baseOptions.DependencyLicenseExpression;
 
             this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
 
@@ -638,10 +647,22 @@ namespace Metalama.Testing.AspectTesting
                         this.LicenseFile = optionArg;
 
                         break;
+                    
+                    case "LicenseExpression":
+
+                        this.LicenseExpression = optionArg;
+
+                        break;
 
                     case "DependencyLicenseFile":
 
                         this.DependencyLicenseFile = optionArg;
+
+                        break;
+
+                    case "DependencyLicenseExpression":
+
+                        this.DependencyLicenseExpression = optionArg;
 
                         break;
 
@@ -721,6 +742,16 @@ namespace Metalama.Testing.AspectTesting
         {
             this.ApplySourceDirectives( sourceCode );
             this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
+        }
+
+        internal static string ReadLicenseExpression( string licenseExpression )
+        {
+            if ( licenseExpression.Split( ';' ) is not [var type, var field] )
+            {
+                throw new InvalidOperationException( $"Could not parse license expression '{licenseExpression}'." );
+            }
+
+            return Type.GetType( type ).AssertNotNull().GetField( field ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
         }
     }
 }

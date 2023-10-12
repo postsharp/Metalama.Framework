@@ -21,15 +21,21 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         /// </summary>
         private AttributeCollection() { }
 
-        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( INamedType type ) => this.OfAttributeType( type );
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( IType type ) => this.OfAttributeType( type );
 
-        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( INamedType type, ConversionKind conversionKind ) => this.OfAttributeType( type, conversionKind );
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( IType type, ConversionKind conversionKind )
+            => this.OfAttributeType( type, conversionKind );
 
-        private IEnumerable<IAttribute> OfAttributeType( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Where( a => a.Type.Is( type, conversionKind ) );
+        private IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind = ConversionKind.Default )
+            => this.GetItems( this.Source.Where( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) ) );
 
         IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type ) => this.OfAttributeType( type );
 
-        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type, ConversionKind conversionKind ) => this.OfAttributeType( type, conversionKind );
+        IEnumerable<IAttribute> IAttributeCollection.OfAttributeType( Type type, ConversionKind conversionKind )
+            => this.OfAttributeType( type, conversionKind );
+
+        public IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate )
+            => this.GetItems( this.Source.Where( a => predicate( a.AttributeType.GetTarget( this.Compilation ) ) ) );
 
         private IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
@@ -39,14 +45,17 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 return Enumerable.Empty<IAttribute>();
             }
 
-            return this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ), conversionKind );
+            return this.OfAttributeType(
+                (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ),
+                conversionKind );
         }
 
-        bool IAttributeCollection.Any( INamedType type ) => this.Any( type );
+        bool IAttributeCollection.Any( IType type ) => this.Any( type );
 
-        bool IAttributeCollection.Any( INamedType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
+        bool IAttributeCollection.Any( IType type, ConversionKind conversionKind ) => this.Any( type, conversionKind );
 
-        private bool Any( INamedType type, ConversionKind conversionKind = ConversionKind.Default ) => this.GetItems( this.Source ).Any( a => a.Type.Is( type, conversionKind ) );
+        private bool Any( IType type, ConversionKind conversionKind = ConversionKind.Default )
+            => this.Source.Any( a => a.AttributeType.GetTarget( this.Compilation ).Is( type, conversionKind ) );
 
         bool IAttributeCollection.Any( Type type ) => this.Any( type );
 

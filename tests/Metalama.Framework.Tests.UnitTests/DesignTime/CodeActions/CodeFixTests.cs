@@ -115,7 +115,7 @@ public sealed class CodeFixTests : UnitTestClass
         Assert.Single( codeRefactoringContext.RegisteredRefactorings, refactoring => refactoring.Title.Contains( "[Refactoring]" ) );
     }
 
-    [Fact]
+    [Fact( Skip = "https://postsharp.tpondemand.com/entity/33620-code-fixes-tests-fail-intermittently" )]
     public async Task CodeFixesInDependency()
     {
         using var testContext = this.CreateTestContext();

@@ -20,7 +20,7 @@ namespace Metalama.Testing.AspectTesting
 
         public TestAssemblyMetadata GetMetadata( IAssemblyInfo assembly )
         {
-            return _projectOptionsCache.GetOrAdd( assembly.AssemblyPath, _ => GetMetadataCore( assembly ) );
+            return _projectOptionsCache.GetOrAdd( assembly.AssemblyPath, static ( _, a ) => GetMetadataCore( a ), assembly );
         }
 
         private static TestAssemblyMetadata GetMetadataCore( IAssemblyInfo assembly )

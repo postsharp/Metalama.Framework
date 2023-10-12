@@ -182,7 +182,7 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
                 this,
                 -1,
                 null,
-                this.Compilation.Factory.GetTypeByReflectionType( typeof(void) ).AssertNotNull(),
+                this.Compilation.Cache.SystemVoidType.AssertNotNull(),
                 RefKind.None,
                 this.ParentAdvice );
     }

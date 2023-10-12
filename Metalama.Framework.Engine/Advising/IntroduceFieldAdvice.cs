@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                this.Builder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
+                this.Builder.Type = this.SourceCompilation.GetCompilationModel().Cache.SystemObjectType;
                 this.Builder.Writeability = Writeability.All;
             }
 

@@ -144,7 +144,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
         Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
         Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
-        this._type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
+        this._type = targetType.Compilation.GetCompilationModel().Cache.SystemObjectType;
 
         if ( hasGetter )
         {

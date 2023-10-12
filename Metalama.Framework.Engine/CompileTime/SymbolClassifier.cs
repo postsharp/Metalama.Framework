@@ -149,8 +149,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplateInfo GetTemplateInfo( ISymbol symbol, bool isInherited )
             => isInherited
-                ? this._cacheInheritedTemplateInfo.GetOrAdd( symbol, s => this.GetTemplateInfoCore( s, true ) )
-                : this._cacheNonInheritedTemplateInfo.GetOrAdd( symbol, s => this.GetTemplateInfoCore( s, false ) );
+                ? this._cacheInheritedTemplateInfo.GetOrAdd( symbol, static ( s, x ) => x.GetTemplateInfoCore( s, true ), this )
+                : this._cacheNonInheritedTemplateInfo.GetOrAdd( symbol, static ( s, x ) => x.GetTemplateInfoCore( s, false ), this );
 
         private TemplateInfo GetTemplateInfoCore( ISymbol symbol, bool isInherited )
         {

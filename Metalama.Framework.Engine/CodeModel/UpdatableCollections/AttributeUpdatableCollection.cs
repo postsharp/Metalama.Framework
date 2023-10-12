@@ -51,7 +51,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
                     // Note that Roslyn can return an AttributeData that does not belong to the same compilation
                     // as the parent symbol, probably because of some bug or optimisation.
 
-                    action( new AttributeRef( attribute, this._parent ) );
+                    action( new AttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
                 }
 
                 break;
@@ -77,7 +77,7 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
                     continue;
                 }
 
-                action( new AttributeRef( attribute, this._parent ) );
+                action( new AttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
             }
         }
     }

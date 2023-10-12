@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -66,7 +65,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
         {
             if ( value == Writeability.InitOnly )
             {
-                throw new InvalidOperationException( $"Writeability for fields can only be set to {Writeability.All} (no modifier), {Writeability.ConstructorOnly} (readonly) or {Writeability.None} (const)." );
+                throw new InvalidOperationException(
+                    $"Writeability for fields can only be set to {Writeability.All} (no modifier), {Writeability.ConstructorOnly} (readonly) or {Writeability.None} (const)." );
             }
 
             this._writeability = value;
@@ -84,7 +84,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext ).GetTypedExpressionSyntax();
+        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
+            .GetTypedExpressionSyntax();
 
     public TemplateMember<IField>? InitializerTemplate { get; set; }
 
@@ -92,7 +93,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
         : base( targetType, name, advice )
     {
         this.InitializerTags = initializerTags;
-        this._type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
+        this._type = this.Compilation.Cache.SystemObjectType;
     }
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );

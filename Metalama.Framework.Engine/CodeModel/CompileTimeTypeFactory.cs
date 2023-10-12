@@ -45,14 +45,18 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             return this._instances.GetOrAdd(
                 id,
-                key => key.StartsWith( "typeof(", StringComparison.Ordinal )
-                    ? CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), symbolForMetadata )
-                    : CompileTimeType.CreateFromSymbolId( new SymbolId( key ), symbolForMetadata ) );
+                static ( key, s ) => key.StartsWith( "typeof(", StringComparison.Ordinal )
+                    ? CompileTimeType.CreateFromTypeId( new SerializableTypeId( key ), s )
+                    : CompileTimeType.CreateFromSymbolId( new SymbolId( key ), s ),
+                symbolForMetadata );
         }
 
         public CompileTimeType Get( SerializableTypeId declarationId, CompileTimeTypeMetadata metadata )
         {
-            return this._instances.GetOrAdd( declarationId.ToString(), id => CompileTimeType.CreateFromTypeId( new SerializableTypeId( id ), metadata ) );
+            return this._instances.GetOrAdd(
+                declarationId.ToString(),
+                static ( id, m ) => CompileTimeType.CreateFromTypeId( new SerializableTypeId( id ), m ),
+                metadata );
         }
     }
 }

@@ -13,17 +13,19 @@ namespace Metalama.Framework.Code.Collections
     /// </remarks>
     public interface IAttributeCollection : IReadOnlyCollection<IAttribute>
     {
-        IEnumerable<IAttribute> OfAttributeType( INamedType type );
+        IEnumerable<IAttribute> OfAttributeType( IType type );
 
-        IEnumerable<IAttribute> OfAttributeType( INamedType type, ConversionKind conversionKind );
+        IEnumerable<IAttribute> OfAttributeType( IType type, ConversionKind conversionKind );
 
         IEnumerable<IAttribute> OfAttributeType( Type type );
 
         IEnumerable<IAttribute> OfAttributeType( Type type, ConversionKind conversionKind );
 
-        bool Any( INamedType type );
+        IEnumerable<IAttribute> OfAttributeType( Func<IType, bool> predicate );
 
-        bool Any( INamedType type, ConversionKind conversionKind );
+        bool Any( IType type );
+
+        bool Any( IType type, ConversionKind conversionKind );
 
         bool Any( Type type );
 

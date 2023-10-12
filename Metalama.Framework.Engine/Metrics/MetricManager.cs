@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Metrics
         public T GetMetric<T>( IMeasurable measurable )
             where T : IMetric
         {
-            var provider = this._metricProviders.GetOrAdd( typeof(T), _ => this.GetExtensionProvider<T>() );
+            var provider = this._metricProviders.GetOrAdd( typeof(T), static ( _, me ) => me.GetExtensionProvider<T>(), this );
 
             if ( provider == null )
             {
