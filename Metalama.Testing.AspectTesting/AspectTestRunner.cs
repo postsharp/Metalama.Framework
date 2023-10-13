@@ -18,10 +18,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using System.Runtime.CompilerServices;
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 #endif
 
@@ -35,7 +35,7 @@ namespace Metalama.Testing.AspectTesting
         private int _runCount;
 
 #if NET5_0_OR_GREATER
-        internal static readonly SemaphoreSlim _consoleLock = new( 1 );
+        private static readonly SemaphoreSlim _consoleLock = new( 1 );
 #endif
 
         public AspectTestRunner(
@@ -301,12 +301,12 @@ namespace Metalama.Testing.AspectTesting
 
                             switch ( result )
                             {
-                                //case Task task:
-                                //    // Await normal task.
-                                //    await task;
+                                case Task task:
+                                    // Await normal task.
+                                    await task;
 
-                                //    break;
-                                    
+                                    break;
+
                                 case not null:
                                     // Try to await through reflection.
                                     var resultType = result.GetType();
@@ -314,23 +314,14 @@ namespace Metalama.Testing.AspectTesting
                                     var getAwaiterMethod =
                                         resultType.GetMethod(
                                             "GetAwaiter",
-                                            BindingFlags.Instance | BindingFlags.Public ,
+                                            BindingFlags.Instance | BindingFlags.Public,
                                             null,
                                             CallingConventions.Any,
                                             Array.Empty<Type>(),
-                                            null );
+                                            null ) 
+                                        ?? throw new InvalidOperationException( $"Awaitable type {resultType} does not have GetAwaiter method (bug in code model?)." );
 
-                                    if ( getAwaiterMethod == null )
-                                    {
-                                        throw new InvalidOperationException( $"Awaitable type {resultType} does not have GetAwaiter method (bug in code model?)." );
-                                    }
-
-                                    var awaiter = getAwaiterMethod.Invoke( result, null );
-
-                                    if ( awaiter == null )
-                                    {
-                                        throw new InvalidOperationException( "GetAwaiter method returned null." );
-                                    }
+                                    var awaiter = getAwaiterMethod.Invoke( result, null ) ?? throw new InvalidOperationException( "GetAwaiter method returned null." );
 
                                     var helperTask = new Task( () => { } );
 
@@ -349,12 +340,8 @@ namespace Metalama.Testing.AspectTesting
                                             null,
                                             CallingConventions.Any,
                                             Array.Empty<Type>(),
-                                            null );
-
-                                    if ( getResultMethod == null )
-                                    {
-                                        throw new InvalidOperationException( $"Awaiter type {awaiterType} does not have GetResult method." );
-                                    }
+                                            null ) 
+                                        ?? throw new InvalidOperationException( $"Awaiter type {awaiterType} does not have GetResult method." );
 
                                     // Call GetResult.
                                     getResultMethod.Invoke( awaiter, null );

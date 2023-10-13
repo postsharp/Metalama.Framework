@@ -1,19 +1,17 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NET5_0_OR_GREATER
-
 using Metalama.Backstage.Testing;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-#if NET5_0_OR_GREATER
 using Xunit;
-#endif
 using Xunit.Abstractions;
 using IMessageSink = Xunit.Abstractions.IMessageSink;
 
@@ -21,7 +19,7 @@ using IMessageSink = Xunit.Abstractions.IMessageSink;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework
 {
-    public class AspectTestRunnerTests : UnitTestClass
+    public sealed class AspectTestRunnerTests : UnitTestClass
     {
         private static readonly SemaphoreSlim _executionSemaphore = new SemaphoreSlim( 1 );
         private static readonly AsyncLocal<(Task InsideTestTask, Task TestWaitTask)> _testLocal = new AsyncLocal<(Task, Task)>();
@@ -36,7 +34,7 @@ public class Program
     {{
         var typeName = ""{this.GetType().AssemblyQualifiedName}"";
         var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
@@ -57,7 +55,7 @@ public class Program
     {{
         var typeName = ""{this.GetType().AssemblyQualifiedName}"";
         var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
@@ -79,7 +77,7 @@ public class Program
     {{
         var typeName = ""{this.GetType().AssemblyQualifiedName}"";
         var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
@@ -100,7 +98,7 @@ public class Program
     {{
         var typeName = ""{this.GetType().AssemblyQualifiedName}"";
         var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
@@ -124,7 +122,7 @@ public class Program
     {{
         var typeName = ""{this.GetType().AssemblyQualifiedName}"";
         var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
@@ -135,7 +133,7 @@ public class Program
             await this.RunAwaitTest( source );
         }
 
-        private async Task RunAwaitTest(string source)
+        private async Task RunAwaitTest( string source )
         {
             using var testContext = this.CreateTestContext();
             var fileSystem = new TestFileSystem( testContext.ServiceProvider.Underlying );
@@ -146,7 +144,7 @@ public class Program
             fileSystem.WriteAllText( Path.Combine( directory, "Test.t.cs" ), source );
 
             var serviceProvider = (GlobalServiceProvider) testContext.ServiceProvider.Global.Underlying
-                .WithUntypedService( typeof( Backstage.Extensibility.IFileSystem ), fileSystem )
+                .WithUntypedService( typeof(Backstage.Extensibility.IFileSystem), fileSystem )
                 .WithService( new FakeMetadataReader( directory ) );
 
             var messageSink = new TestMessageSink();
@@ -159,10 +157,11 @@ public class Program
 
             var testRunner = new AspectTestRunner( serviceProvider, directory, testProjectReferences, testOutputHelper );
 
-            var testInput = new TestInput.Factory(serviceProvider).FromFile( testProjectProperties, testDirectoryOptionsReader, "Test.cs" );
+            var testInput = new TestInput.Factory( serviceProvider ).FromFile( testProjectProperties, testDirectoryOptionsReader, "Test.cs" );
 
             // A task that will be started by the test.
             var insideTestTask = new Task( () => { } );
+
             // A task that the test will wait for after starting the first task.
             var testWaitTask = new Task( () => { } );
 
@@ -191,7 +190,7 @@ public class Program
 
                 // At this point the test is awaiting for testWaitTask.
                 // Await the test and a small delay.
-                if ( runTestTask == await Task.WhenAny( runTestTask, Task.Delay( 1000 ) ))
+                if ( runTestTask == await Task.WhenAny( runTestTask, Task.Delay( 1000 ) ) )
                 {
                     throw new InvalidOperationException( "AspectTestRunner returned even though the the task the test is waiting for was not started." );
                 }
@@ -206,11 +205,11 @@ public class Program
             }
         }
 
-        private class OutputHelper : ITestOutputHelper
+        private sealed class OutputHelper : ITestOutputHelper
         {
             private readonly IMessageSink _messageSink;
 
-            public OutputHelper(IMessageSink messageSink)
+            public OutputHelper( IMessageSink messageSink )
             {
                 this._messageSink = messageSink;
             }
@@ -222,11 +221,11 @@ public class Program
 
             public void WriteLine( string format, params object[] args )
             {
-                this._messageSink.OnMessage( new Message( string.Format( format, args ) ) );
+                this._messageSink.OnMessage( new Message( string.Format( CultureInfo.InvariantCulture, format, args ) ) );
             }
         }
 
-        private record Message(string Text) : IMessageSinkMessage
+        private sealed record Message( string Text ) : IMessageSinkMessage
         {
             public override string ToString() => this.Text;
         }
