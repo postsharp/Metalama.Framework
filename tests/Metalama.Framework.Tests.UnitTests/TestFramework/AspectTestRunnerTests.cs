@@ -25,49 +25,6 @@ namespace Metalama.Framework.Tests.UnitTests.TestFramework
         private static readonly AsyncLocal<(Task InsideTestTask, Task TestWaitTask)> _testLocal = new AsyncLocal<(Task, Task)>();
 
         [Fact]
-        public async Task AwaitsMainMethod_ValueTask()
-        {
-            var source = $@"
-public class Program
-{{
-    static async System.Threading.Tasks.ValueTask Main()
-    {{
-        var typeName = ""{this.GetType().AssemblyQualifiedName}"";
-        var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
-        var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
-        asyncLocal.Value.InsideTestTask.Start();
-        await asyncLocal.Value.TestWaitTask;
-    }}
-}}
-";
-
-            await this.RunAwaitTest( source );
-        }
-
-        [Fact]
-        public async Task AwaitsMainMethod_ValueTaskInt()
-        {
-            var source = $@"
-public class Program
-{{
-    static async System.Threading.Tasks.ValueTask<int> Main()
-    {{
-        var typeName = ""{this.GetType().AssemblyQualifiedName}"";
-        var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
-        var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
-        asyncLocal.Value.InsideTestTask.Start();
-        await asyncLocal.Value.TestWaitTask;
-        return 0;
-    }}
-}}
-";
-
-            await this.RunAwaitTest( source );
-        }
-
-        [Fact]
         public async Task AwaitsMainMethod_Task()
         {
             var source = $@"
@@ -126,6 +83,30 @@ public class Program
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
+    }}
+}}
+";
+
+            await this.RunAwaitTest( source );
+        }
+
+        [Fact]
+        public async Task AwaitsMainMethod_NonAsyncTaskInt()
+        {
+            var source = $@"
+public class Program
+{{
+    static System.Threading.Tasks.Task<int> Main() => InnerMain();
+
+    static async System.Threading.Tasks.Task<int> InnerMain()
+    {{
+        var typeName = ""{this.GetType().AssemblyQualifiedName}"";
+        var type = System.Type.GetType(typeName);
+        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
+        asyncLocal.Value.InsideTestTask.Start();
+        await asyncLocal.Value.TestWaitTask;
+        return 0;
     }}
 }}
 ";

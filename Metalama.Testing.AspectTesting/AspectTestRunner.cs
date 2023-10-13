@@ -18,6 +18,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using Metalama.Framework.Code.Types;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
 using System.Reflection;
@@ -291,14 +294,17 @@ namespace Metalama.Testing.AspectTesting
 
                     try
                     {
-                        if ( mainMethod.GetAsyncInfo() is { IsAwaitable: false } )
-                        {
-                            method.Invoke( null, null );
-                        }
-                        else
-                        {
-                            var result = method.Invoke( null, null );
+                        var parameters = method.GetParameters();
 
+                        var result = parameters switch
+                        {
+                            [] => method.Invoke( null, null ),
+                            [{ }] => method.Invoke(null, new object[] { Array.Empty<string>() }),
+                            _ => throw new InvalidOperationException("Program.Main has unsupported signature.")
+                        };
+
+                        if ( mainMethod.GetAsyncInfo() is { IsAwaitable: true } )
+                        {
                             switch ( result )
                             {
                                 case Task task:
@@ -307,49 +313,8 @@ namespace Metalama.Testing.AspectTesting
 
                                     break;
 
-                                case not null:
-                                    // Try to await through reflection.
-                                    var resultType = result.GetType();
-
-                                    var getAwaiterMethod =
-                                        resultType.GetMethod(
-                                            "GetAwaiter",
-                                            BindingFlags.Instance | BindingFlags.Public,
-                                            null,
-                                            CallingConventions.Any,
-                                            Array.Empty<Type>(),
-                                            null ) 
-                                        ?? throw new InvalidOperationException( $"Awaitable type {resultType} does not have GetAwaiter method (bug in code model?)." );
-
-                                    var awaiter = getAwaiterMethod.Invoke( result, null ) ?? throw new InvalidOperationException( "GetAwaiter method returned null." );
-
-                                    var helperTask = new Task( () => { } );
-
-                                    // Simulate await by calling OnCompleted that would start the helper task we will await for.
-                                    ((INotifyCompletion) awaiter).OnCompleted( helperTask.Start );
-
-                                    // helperTask will complete when awaiter completes.
-                                    await helperTask;
-
-                                    var awaiterType = awaiter.GetType();
-
-                                    var getResultMethod =
-                                        awaiterType.GetMethod(
-                                            "GetResult",
-                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
-                                            null,
-                                            CallingConventions.Any,
-                                            Array.Empty<Type>(),
-                                            null ) 
-                                        ?? throw new InvalidOperationException( $"Awaiter type {awaiterType} does not have GetResult method." );
-
-                                    // Call GetResult.
-                                    getResultMethod.Invoke( awaiter, null );
-
-                                    break;
-
                                 default:
-                                    throw new InvalidOperationException( "Program.Main returned a null Task." );
+                                    throw new InvalidOperationException( "Program.Main did not return Task." );
                             }
                         }
                     }
@@ -428,9 +393,17 @@ namespace Metalama.Testing.AspectTesting
                 return null;
             }
 
-            if ( mainMethod.Parameters.Count != 0 )
+            if ( !( mainMethod is { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } }
+                 || mainMethod is { ReturnType: INamedType { Definition: { SpecialType: SpecialType.Task_T }, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } } ) )
             {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters." );
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must return void, int, Task or Task<int>." );
+
+                return null;
+            }
+
+            if ( !( mainMethod.Parameters is [] or [{ Type: IArrayType { ElementType: { SpecialType: SpecialType.String } } }] ) )
+            {
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters or have a single 'string[]' parameter." );
 
                 return null;
             }
