@@ -77,14 +77,21 @@ public static class LicensingDiagnosticDescriptors
         Severity.Error,
         "Cannot start Metalama: invalid license. To register a license key, see https://postsharp.net/links/metalama-register-license.",
         "Cannot start Metalama: invalid license.",
-        _category );    
-    
-    internal static readonly DiagnosticDefinition
-        NoLicenseKeyRegistered
-            = new(
-                "LAMA0809",
-                Severity.Error,
-                "No Metalama license key is registered. To register a license key, see https://postsharp.net/links/metalama-register-license.",
-                "No Metalama license key",
-                _category );
+        _category );
+
+    internal static readonly DiagnosticDefinition NoLicenseKeyRegistered
+        = new(
+            "LAMA0809",
+            Severity.Error,
+            "No Metalama license key is registered. To register a license key, see https://postsharp.net/links/metalama-register-license.",
+            "No Metalama license key",
+            _category );
+
+    internal static readonly DiagnosticDefinition RoslynApiNotAvailable =
+        new(
+            "LAMA0810",
+            Severity.Error,
+            "Accessing the Roslyn API via Metalama.Framework.Sdk package is not covered by your license.",
+            "Roslyn API not available.",
+            _category );
 }
