@@ -18,14 +18,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-using SpecialType = Metalama.Framework.Code.SpecialType;
-using Metalama.Framework.Code.Types;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 #endif
 
 namespace Metalama.Testing.AspectTesting
@@ -299,8 +297,8 @@ namespace Metalama.Testing.AspectTesting
                         var result = parameters switch
                         {
                             [] => method.Invoke( null, null ),
-                            [{ }] => method.Invoke(null, new object[] { Array.Empty<string>() }),
-                            _ => throw new InvalidOperationException("Program.Main has unsupported signature.")
+                            [{ }] => method.Invoke( null, new object[] { Array.Empty<string>() } ),
+                            _ => throw new InvalidOperationException( "Program.Main has unsupported signature." )
                         };
 
                         if ( mainMethod.GetAsyncInfo() is { IsAwaitable: true } )
@@ -393,15 +391,16 @@ namespace Metalama.Testing.AspectTesting
                 return null;
             }
 
-            if ( !( mainMethod is { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } }
-                 || mainMethod is { ReturnType: INamedType { Definition: { SpecialType: SpecialType.Task_T }, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } } ) )
+            if ( !(mainMethod is 
+                    { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } } 
+                    or { ReturnType: INamedType { Definition.SpecialType: SpecialType.Task_T, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } }) )
             {
                 testResult.SetFailed( $"The 'Program.{mainMethodName}' method must return void, int, Task or Task<int>." );
 
                 return null;
             }
 
-            if ( !( mainMethod.Parameters is [] or [{ Type: IArrayType { ElementType: { SpecialType: SpecialType.String } } }] ) )
+            if ( !(mainMethod.Parameters is [] or [{ Type: IArrayType { ElementType.SpecialType: SpecialType.String } }]) )
             {
                 testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters or have a single 'string[]' parameter." );
 

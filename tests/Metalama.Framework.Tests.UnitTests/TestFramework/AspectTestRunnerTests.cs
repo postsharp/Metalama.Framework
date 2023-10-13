@@ -102,7 +102,7 @@ public class Program
     {{
         var typeName = ""{this.GetType().AssemblyQualifiedName}"";
         var type = System.Type.GetType(typeName);
-        var asyncLocalField = type.GetField( ""{nameof( _testLocal )}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
+        var asyncLocalField = type.GetField( ""{nameof(_testLocal)}"", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static );
         var asyncLocal = (System.Threading.AsyncLocal<(System.Threading.Tasks.Task InsideTestTask, System.Threading.Tasks.Task TestWaitTask)>)asyncLocalField.GetValue(null);
         asyncLocal.Value.InsideTestTask.Start();
         await asyncLocal.Value.TestWaitTask;
