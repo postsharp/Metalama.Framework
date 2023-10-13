@@ -30,7 +30,12 @@ public sealed partial class HierarchicalOptionsManager
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
-        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IUserDiagnosticSink diagnosticAdder, IHierarchicalOptions defaultOptions, IHierarchicalOptions emptyOptions )
+        public OptionTypeNode(
+            HierarchicalOptionsManager parent,
+            Type type,
+            IUserDiagnosticSink diagnosticAdder,
+            IHierarchicalOptions defaultOptions,
+            IHierarchicalOptions emptyOptions )
         {
             this._parent = parent;
             this._type = type;
@@ -306,18 +311,23 @@ public sealed partial class HierarchicalOptionsManager
         public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         {
             // We have to return the merged options of any node that has direct options. We don't return the whole cache because this cache may be incomplete.
+            var optionsOnDeclarations = this._optionsByDeclaration
+                .Where( x => x.Value.DirectOptions != null )
+                .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
+                .Where(
+                    x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation } or
+                        { CanBeInherited: true, BelongsToCurrentProject: true } )
+                .Select(
+                    x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
+                        new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
+                        this.GetOptions( x ).AssertNotNull() ) );
 
-            return this._optionsByDeclaration
-                    .Where( x => x.Value.DirectOptions != null )
-                    .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
-                    .Where(
-                        x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation } or
-                            { CanBeInherited: true, BelongsToCurrentProject: true } )
-                    .Select(
-                        x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
-                            new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
-                            this.GetOptions( x ).AssertNotNull() ) )
-                ;
+            // We also have to return the assembly-level options.
+            var defaultOptions = new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
+                new HierarchicalOptionsKey( this._typeName, compilation.ToSerializableId() ),
+                this._defaultOptions );
+
+            return optionsOnDeclarations.Concat( defaultOptions );
         }
 
         public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )

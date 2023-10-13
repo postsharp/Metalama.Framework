@@ -20,35 +20,16 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
     private readonly UserCodeInvoker _invoker;
-    private readonly ProjectSpecificCompileTimeTypeResolver _typeResolver;
 
     public CompilationHierarchicalOptionsSource( ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
         this._invoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
-        this._typeResolver = this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
     }
 
     public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink )
     {
-        // For each known options type, compute its default value for this compilation.
-        foreach ( var optionsType in compilation.GetDerivedTypes(
-                     (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(IHierarchicalOptions) ),
-                     DerivedTypesOptions.IncludingExternalTypesDangerous ) )
-        {
-            if ( optionsType.IsAbstract )
-            {
-                continue;
-            }
-
-            var optionsSystemType = this._typeResolver.GetCompileTimeType( optionsType.GetSymbol().AssertNotNull(), false ).AssertNotNull();
-
-            var (defaultOptions, _) = HierarchicalOptionsManager.ComputeDefaultOptions( optionsSystemType, compilation, this._invoker, this._serviceProvider, diagnosticSink );
-
-            yield return new HierarchicalOptionsInstance( compilation.DeclaringAssembly, defaultOptions );
-        }
-
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
         var systemAttributeType = compilation.Factory.GetTypeByReflectionType( typeof(Attribute) );
 
