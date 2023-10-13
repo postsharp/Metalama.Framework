@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using System.Runtime.CompilerServices;
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
 using System.Reflection;
@@ -34,7 +35,7 @@ namespace Metalama.Testing.AspectTesting
         private int _runCount;
 
 #if NET5_0_OR_GREATER
-        private static readonly SemaphoreSlim _consoleLock = new( 1 );
+        internal static readonly SemaphoreSlim _consoleLock = new( 1 );
 #endif
 
         public AspectTestRunner(
@@ -290,21 +291,78 @@ namespace Metalama.Testing.AspectTesting
 
                     try
                     {
-                        if ( !mainMethod.IsAsync )
+                        if ( mainMethod.GetAsyncInfo() is { IsAwaitable: false } )
                         {
                             method.Invoke( null, null );
                         }
                         else
                         {
-                            var task = (Task?) method.Invoke( null, null );
+                            var result = method.Invoke( null, null );
 
-                            if ( task != null )
+                            switch ( result )
                             {
-                                await task;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException( "Program.Main returned a null Task." );
+                                //case Task task:
+                                //    // Await normal task.
+                                //    await task;
+
+                                //    break;
+                                    
+                                case not null:
+                                    // Try to await through reflection.
+                                    var resultType = result.GetType();
+
+                                    var getAwaiterMethod =
+                                        resultType.GetMethod(
+                                            "GetAwaiter",
+                                            BindingFlags.Instance | BindingFlags.Public ,
+                                            null,
+                                            CallingConventions.Any,
+                                            Array.Empty<Type>(),
+                                            null );
+
+                                    if ( getAwaiterMethod == null )
+                                    {
+                                        throw new InvalidOperationException( $"Awaitable type {resultType} does not have GetAwaiter method (bug in code model?)." );
+                                    }
+
+                                    var awaiter = getAwaiterMethod.Invoke( result, null );
+
+                                    if ( awaiter == null )
+                                    {
+                                        throw new InvalidOperationException( "GetAwaiter method returned null." );
+                                    }
+
+                                    var helperTask = new Task( () => { } );
+
+                                    // Simulate await by calling OnCompleted that would start the helper task we will await for.
+                                    ((INotifyCompletion) awaiter).OnCompleted( helperTask.Start );
+
+                                    // helperTask will complete when awaiter completes.
+                                    await helperTask;
+
+                                    var awaiterType = awaiter.GetType();
+
+                                    var getResultMethod =
+                                        awaiterType.GetMethod(
+                                            "GetResult",
+                                            BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
+                                            null,
+                                            CallingConventions.Any,
+                                            Array.Empty<Type>(),
+                                            null );
+
+                                    if ( getResultMethod == null )
+                                    {
+                                        throw new InvalidOperationException( $"Awaiter type {awaiterType} does not have GetResult method." );
+                                    }
+
+                                    // Call GetResult.
+                                    getResultMethod.Invoke( awaiter, null );
+
+                                    break;
+
+                                default:
+                                    throw new InvalidOperationException( "Program.Main returned a null Task." );
                             }
                         }
                     }
@@ -379,13 +437,6 @@ namespace Metalama.Testing.AspectTesting
             if ( !mainMethod.IsStatic )
             {
                 testResult.SetFailed( $"The 'Program.{mainMethodName}' method must be static." );
-
-                return null;
-            }
-
-            if ( mainMethod is { IsAsync: true, ReturnType: not INamedType { Name: "Task" } } )
-            {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method, if it is async, must be of return type 'Task'." );
 
                 return null;
             }
