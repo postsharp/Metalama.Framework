@@ -4,11 +4,13 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -39,6 +41,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _hasCompileTimeCodeFast;
             private readonly ITypeSymbol _typeFabricType;
             private readonly ITypeSymbol _iAdviceAttributeType;
+            private readonly ITypeSymbol _iCompileTimeSerializableType;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -68,6 +71,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
                 this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
                 this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
+                this._iCompileTimeSerializableType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( ICompileTimeSerializable ) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -308,17 +312,22 @@ namespace Metalama.Framework.Engine.Templating
                     }
                 }
                 
-                // Verify that a record and is not ICompileTimeSerializable.
+                // Verify that a record and is not ICompileTimeSerializable without manual serializer.
                 // We do not support generating serializers for records at the moment.
                 if ( node is RecordDeclarationSyntax )
                 {
                     var symbol = ModelExtensions.GetDeclaredSymbol( this._semanticModel, node );
+
+                    if ( symbol is INamedTypeSymbol typeSymbol
+                        && typeSymbol.AllInterfaces.Any( x => SymbolEqualityComparer.Default.Equals( typeSymbol, this._iCompileTimeSerializableType ) )
+                        && SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, typeSymbol, out var _serializerType, out var ambiguous ) && !ambiguous )
+                    {
+                        this.Report(
+                            SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
+                                node.Identifier.GetLocation(),
+                                symbol ) );
+                    }
                     
-                    // Records are currently not supported.
-                    this.Report(
-                        SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
-                            node.Identifier.GetLocation(),
-                            symbol ) );
                 }
             }
 
