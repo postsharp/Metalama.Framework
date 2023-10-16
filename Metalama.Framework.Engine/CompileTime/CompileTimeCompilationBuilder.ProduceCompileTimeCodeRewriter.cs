@@ -567,11 +567,15 @@ namespace Metalama.Framework.Engine.CompileTime
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
                      && symbol.GetPrimaryDeclaration() == node )
                 {
-                    if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, symbol, out var existingSerializer, out var ambiguous ) && ambiguous )
+                    if ( !SerializerGeneratorHelper.TryGetSerializer(
+                            this._compileTimeCompilationContext,
+                            symbol,
+                            out var existingSerializer,
+                            out var ambiguous ) && ambiguous )
                     {
-                        throw new AssertionFailedException($"Ambiguous serializer for {symbol}. This should have been caught by TemplatingCodeValidator.");
+                        throw new AssertionFailedException( $"Ambiguous serializer for {symbol}. This should have been caught by TemplatingCodeValidator." );
                     }
-                    else if (existingSerializer == null)
+                    else if ( existingSerializer == null )
                     {
                         var serializedTypeName = this.CreateNameExpression( serializableType.Type );
 
