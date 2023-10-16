@@ -9,6 +9,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.Recor
  */
 
 //<target>
-public record class TargetClass : ICompileTimeSerializable
+public record class TargetClass(int Foo) : ICompileTimeSerializable
 {
 }

@@ -5,23 +5,17 @@ using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.RecordClass_Manual;
 
-/*
- * The record class with a custom serializer.
- */
-
 //<target>
 [RunTimeOrCompileTime]
-public record class SerializableClass : ICompileTimeSerializable
+public record class SerializableClass(int Foo) : ICompileTimeSerializable
 {
-    public int Foo { get; set; }
-
     public class Serializer_Custom : ReferenceTypeSerializer
     {
-        public override object CreateInstance(Type type, IArgumentsReader constructorArguments) => new SerializableClass();
+        public override object CreateInstance(Type type, IArgumentsReader constructorArguments) => new SerializableClass(constructorArguments.GetValue<int>("Foo"));
 
-        public override void DeserializeFields(object obj, IArgumentsReader initializationArguments) => ((SerializableClass)obj).Foo = initializationArguments.GetValue<int>("Foo");
+        public override void DeserializeFields(object obj, IArgumentsReader initializationArguments) { }
 
-        public override void SerializeObject(object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments) => initializationArguments.SetValue("Foo", ((SerializableClass)obj).Foo);
+        public override void SerializeObject(object obj, IArgumentsWriter constructorArguments, IArgumentsWriter initializationArguments) => constructorArguments.SetValue("Foo", ((SerializableClass)obj).Foo);
     }
 }
 
@@ -32,7 +26,7 @@ public class TestAspect : OverrideMethodAspect
 
     public TestAspect(int x)
     {
-        SerializedValue = new SerializableClass() { Foo = 42 };
+        SerializedValue = new SerializableClass(42);
     }
 
     public override dynamic? OverrideMethod()

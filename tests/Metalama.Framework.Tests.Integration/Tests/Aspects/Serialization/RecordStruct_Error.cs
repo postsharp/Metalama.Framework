@@ -9,6 +9,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.Recor
  */
 
 //<target>
-public record struct TargetStruct : ICompileTimeSerializable
+public record struct TargetStruct(int Foo) : ICompileTimeSerializable
 {
 }

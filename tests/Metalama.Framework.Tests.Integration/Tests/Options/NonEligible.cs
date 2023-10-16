@@ -7,7 +7,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.NonEligible;
 
-public class NonEligibleOptions : IHierarchicalOptions<INamedType>, IEligible<INamedType>
+public record class NonEligibleOptions : IHierarchicalOptions<INamedType>, IEligible<INamedType>
 {
 #if !NET5_0_OR_GREATER
     public IHierarchicalOptions GetDefaultOptions( OptionsInitializationContext context ) => this;

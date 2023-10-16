@@ -327,9 +327,9 @@ namespace Metalama.Framework.Engine.Templating
                                 symbol.GetDiagnosticLocation(),
                                 symbol ) );
                     }
-                    else if ( serializerType == null && node is RecordDeclarationSyntax )
+                    else if ( serializerType == null && node is RecordDeclarationSyntax { ParameterList.Parameters: { Count: >0 } } )
                     {
-                        // Generated record serializers are not supported.
+                        // Generated serializers for positional records are not supported.
                         this.Report(
                             SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
                                 node.Identifier.GetLocation(),

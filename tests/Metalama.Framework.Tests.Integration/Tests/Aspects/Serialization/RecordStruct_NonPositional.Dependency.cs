@@ -2,17 +2,21 @@
 using Metalama.Framework.Serialization;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.RecordStruct_Manual;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.RecordStruct_NonPositional;
 
 //<target>
 [RunTimeOrCompileTime]
-public record struct SerializableStruct(int Foo) : ICompileTimeSerializable
+public record struct SerializableStruct : ICompileTimeSerializable
 {
+    public int Foo { get; set; }
+
     public class Serializer_Custom : ValueTypeSerializer<SerializableStruct>
     {
-        public override SerializableStruct DeserializeObject( IArgumentsReader initializationArguments )
+        public override SerializableStruct DeserializeObject( IArgumentsReader initializationArguments)
         {
-            return new SerializableStruct(initializationArguments.GetValue<int>("Foo"));
+            SerializableStruct s = default;
+            s.Foo = initializationArguments.GetValue<int>("Foo");
+            return s;
         }
 
         public override void SerializeObject(SerializableStruct obj, IArgumentsWriter arguments) => arguments.SetValue("Foo", ((SerializableStruct)obj).Foo);
