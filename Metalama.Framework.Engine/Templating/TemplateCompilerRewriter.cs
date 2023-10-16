@@ -1651,15 +1651,15 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
         else
         {
-            using ( this.WithMetaContext( MetaContext.CreateForBuildTimeBlock( this._currentMetaContext! ) ) )
+            using ( this.WithMetaContext( MetaContext.CreateForCompileTimeBlock( this._currentMetaContext! ) ) )
             {
+                this.ReserveLocalFunctionNames( node.Statements );
+
                 var metaStatements = this.ToMetaStatements( node.Statements );
 
-                // Add the statements to the parent list.
                 this._currentMetaContext!.Statements.AddRange( metaStatements );
 
-                // Returns an empty block intentionally.
-                return Block();
+                return Block( this._currentMetaContext.Statements );
             }
         }
     }
@@ -1764,14 +1764,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         .WithLeadingTrivia( this.GetIndentation() ) );
             }
 
-            // Reserve names for local functions in the current block. This needs to be done upfront because local functions, contrarily to local variables,
-            // can be used before they are declared.
-            foreach ( var localFunctionDeclaration in statements.OfType<LocalFunctionStatementSyntax>() )
-            {
-                var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunctionDeclaration ).AssertNotNull();
-                var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( symbol ).Identifier;
-                this._currentMetaContext.AddRunTimeSymbolLocal( symbol, declaredSymbolNameLocal );
-            }
+            this.ReserveLocalFunctionNames( statements );
 
             this._currentMetaContext.Statements.AddRange( this.ToMetaStatements( statements ) );
 
@@ -1818,11 +1811,23 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     /// <summary>
+    /// Reserve names for local functions in the current block. This needs to be done upfront because local functions, contrarily to local variables,
+    /// can be used before they are declared.
+    /// </summary>
+    private void ReserveLocalFunctionNames( SyntaxList<StatementSyntax> statements )
+    {
+        foreach ( var localFunctionDeclaration in statements.OfType<LocalFunctionStatementSyntax>() )
+        {
+            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunctionDeclaration ).AssertNotNull();
+            var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( symbol ).Identifier;
+            this._currentMetaContext!.AddRunTimeSymbolLocal( symbol, declaredSymbolNameLocal );
+        }
+    }
+
+    /// <summary>
     /// Transforms a list of <see cref="StatementSyntax"/> of the source template into a list of <see cref="StatementSyntax"/> for the compiled
     /// template.
     /// </summary>
-    /// <param name="statements"></param>
-    /// <returns></returns>
     private IEnumerable<StatementSyntax> ToMetaStatements( in SyntaxList<StatementSyntax> statements ) => statements.SelectMany( this.ToMetaStatements );
 
     /// <summary>
@@ -1852,11 +1857,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         if ( statement is BlockSyntax block )
         {
-            // Push the build-time template block.
-            newContext = MetaContext.CreateForBuildTimeBlock( this._currentMetaContext! );
+            // Push the compile-time template block.
+            newContext = MetaContext.CreateForCompileTimeBlock( this._currentMetaContext! );
 
             using ( this.WithMetaContext( newContext ) )
             {
+                this.ReserveLocalFunctionNames( block.Statements );
+
                 // Process all statements in this block.
                 foreach ( var childStatement in block.Statements )
                 {
