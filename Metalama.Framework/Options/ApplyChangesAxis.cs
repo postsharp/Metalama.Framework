@@ -31,9 +31,9 @@ public enum ApplyChangesAxis
     /// Means that options directly applied to the declaration override options inherited along the containment or base axis.
     /// </summary>
     TargetDeclaration,
-    
+
     /// <summary>
     /// Means that options defined by the aspect instance itself override any other option.
     /// </summary>
-    Aspect,
+    Aspect
 }

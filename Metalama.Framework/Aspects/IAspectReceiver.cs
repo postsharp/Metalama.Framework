@@ -108,7 +108,7 @@ namespace Metalama.Framework.Aspects
         /// Filters the set of declarations included in the current set.
         /// </summary>
         new IAspectReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
-        
+
         /// <summary>
         /// Sets options for the declarations in the current set of declarations by supplying a <see cref="Func{TResult}"/>.
         /// </summary>

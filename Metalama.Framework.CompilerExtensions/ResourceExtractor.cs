@@ -408,10 +408,12 @@ namespace Metalama.Framework.CompilerExtensions
                     if ( assembly != null )
                     {
                         log?.AppendLine( $"'{requestedAssemblyName.Name}' was already loaded (version '{assembly.GetName().Version}')" );
+
                         return assembly;
                     }
 
-                    log?.AppendLine( $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded version '{embeddedAssembly.Name.Version}'." );
+                    log?.AppendLine(
+                        $"'{requestedAssemblyName.Name}' was not loaded yet. Trying to provide the embedded version '{embeddedAssembly.Name.Version}'." );
                 }
                 else
                 {

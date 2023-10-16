@@ -43,7 +43,7 @@ public partial class IncrementalKeyedCollection<TKey, TValue> : IIncrementalObje
     }
 
     protected virtual IncrementalKeyedCollection<TKey, TValue> Create( ImmutableDictionary<TKey, Item> items, bool clear = false ) => new( items, clear );
-    
+
     /// <summary>
     /// Creates a <see cref="IncrementalKeyedCollection{TKey,TValue}"/> that contains all operations already contained in the current object,
     /// plus the operation of adding an item, or, if an item with the same key already exists, update it with the given new values.
