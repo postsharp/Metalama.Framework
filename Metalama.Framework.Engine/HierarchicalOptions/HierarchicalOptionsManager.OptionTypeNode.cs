@@ -21,6 +21,7 @@ public sealed partial class HierarchicalOptionsManager
     private sealed class OptionTypeNode
     {
         private readonly IHierarchicalOptions _defaultOptions;
+        private readonly IHierarchicalOptions _emptyOptions;
         private readonly HierarchicalOptionsManager _parent;
         private readonly ConcurrentDictionary<Ref<IDeclaration>, DeclarationNode> _optionsByDeclaration = new();
         private readonly EligibilityHelper _eligibilityHelper;
@@ -29,11 +30,17 @@ public sealed partial class HierarchicalOptionsManager
 
         public HierarchicalOptionsAttribute Metadata { get; }
 
-        public OptionTypeNode( HierarchicalOptionsManager parent, Type type, IUserDiagnosticSink diagnosticAdder, IHierarchicalOptions defaultOptions )
+        public OptionTypeNode(
+            HierarchicalOptionsManager parent,
+            Type type,
+            IUserDiagnosticSink diagnosticAdder,
+            IHierarchicalOptions defaultOptions,
+            IHierarchicalOptions emptyOptions )
         {
             this._parent = parent;
             this._type = type;
             this._defaultOptions = defaultOptions;
+            this._emptyOptions = emptyOptions;
             this._typeName = type.FullName.AssertNotNull();
             var invoker = parent._serviceProvider.GetRequiredService<UserCodeInvoker>();
             var context = new UserCodeExecutionContext( parent._serviceProvider, UserCodeDescription.Create( "Instantiating {0}", type ) );
@@ -145,7 +152,10 @@ public sealed partial class HierarchicalOptionsManager
                 case IAssembly { IsExternal: true }:
                     // Make sure not to go down to the compilation.
                     baseDeclarationOptions = null;
-                    containingDeclarationOptions = null;
+
+                    // An assembly that knows about an option will have the correct default set in its manifest.
+                    // For assemblies that don't know about an option, we use options gotten by calling the default constructor.
+                    containingDeclarationOptions = node?.DirectOptions == null ? this._emptyOptions : null;
                     namespaceOptions = null;
 
                     break;
@@ -301,18 +311,33 @@ public sealed partial class HierarchicalOptionsManager
         public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>> GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         {
             // We have to return the merged options of any node that has direct options. We don't return the whole cache because this cache may be incomplete.
+            var optionsOnDeclarations = this._optionsByDeclaration
+                .Where( x => x.Value.DirectOptions != null )
+                .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
+                .Where(
+                    x => x is { DeclarationKind: DeclarationKind.Namespace } or
+                        { CanBeInherited: true, BelongsToCurrentProject: true } )
+                .Select(
+                    x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
+                        new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
+                        this.GetOptions( x ).AssertNotNull() ) );
 
-            return this._optionsByDeclaration
-                    .Where( x => x.Value.DirectOptions != null )
-                    .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
-                    .Where(
-                        x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation } or
-                            { CanBeInherited: true, BelongsToCurrentProject: true } )
-                    .Select(
-                        x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
-                            new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
-                            this.GetOptions( x ).AssertNotNull() ) )
-                ;
+            // We have to return the assembly-level options even if no option has been specifically defined on the compilation because default
+            // options may be project-dependency.
+            var compilationOptions = this._defaultOptions;
+
+            if ( this._optionsByDeclaration.TryGetValue( compilation.ToTypedRef<IDeclaration>(), out var compilationNode )
+                 && compilationNode.DirectOptions != null )
+            {
+                compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation )
+                    .AssertNotNull();
+            }
+
+            var defaultOptions = new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
+                new HierarchicalOptionsKey( this._typeName, compilation.ToSerializableId() ),
+                compilationOptions );
+
+            return optionsOnDeclarations.Concat( defaultOptions );
         }
 
         public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
