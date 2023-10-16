@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly TemplateCompiler _templateCompiler;
             private readonly CancellationToken _cancellationToken;
             private readonly SyntaxGenerationContext _syntaxGenerationContext;
-            private readonly CompilationContext _compileTimeCompilationContext;
+            private readonly CompilationContext _runtimeCompilationContext;
             private readonly NameSyntax _originalNameTypeSyntax;
             private readonly NameSyntax _originalPathTypeSyntax;
             private readonly ITypeSymbol _fabricType;
@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
-                this._compileTimeCompilationContext = compileTimeCompilationContext;
+                this._runtimeCompilationContext = compilationContext.CompilationContext;
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
@@ -562,12 +562,12 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                // Add serialization logic if the type is serializable and this is the primary declaration.
+                // Add serialization logic if the type is serializable and does not have existing serializer and this is the primary declaration.
                 if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
                      && symbol.GetPrimaryDeclaration() == node )
                 {
                     if ( !SerializerGeneratorHelper.TryGetSerializer(
-                            this._compileTimeCompilationContext,
+                            this._runtimeCompilationContext,
                             symbol,
                             out var existingSerializer,
                             out var ambiguous ) && ambiguous )
