@@ -131,13 +131,15 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             return true;
         }
 
-        public bool TryInvoke<T>( Func<T> func, UserCodeExecutionContext context, out T? result )
+        public bool TryInvoke<T>( Func<T> func, UserCodeExecutionContext context, [NotNullWhen( true )] out T? result )
         {
             try
             {
                 result = this.Invoke( func, context, false );
 
+#pragma warning disable CS8762 // Parameter must have a non-null value when exiting in some condition.
                 return true;
+#pragma warning restore CS8762 // Parameter must have a non-null value when exiting in some condition.
             }
             catch ( Exception e )
             {
