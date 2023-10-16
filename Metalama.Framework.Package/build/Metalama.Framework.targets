@@ -12,7 +12,7 @@
 
         <!-- Define a new build configuration named LamaDebug (configured below).
              This needs to be done in the targets file, and not in the props file, because Microsoft.NET.Sdk.props will not define it if we define it first in our own props file. -->
-        <Configurations>$(Configurations);LamaDebug</Configurations>
+        <Configurations Condition="'$(MetalamaCreateLamaDebugConfiguration)'!='False'">$(Configurations);LamaDebug</Configurations>
 
         <!-- If this is a compile-time project, do not remove compile-time-only code. -->
         <MetalamaRemoveCompileTimeOnlyCode Condition="'$(MetalamaCompileTimeProject)'=='True'">False</MetalamaRemoveCompileTimeOnlyCode>
