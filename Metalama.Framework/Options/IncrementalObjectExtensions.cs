@@ -29,7 +29,7 @@ public static class IncrementalObjectExtensions
             return (T) baseOptions.ApplyChanges( overrideOptions, context );
         }
     }
-    
+
     /// <summary>
     /// Invokes <see cref="IIncrementalObject.ApplyChanges"/> in a type--safe way.
     /// </summary>

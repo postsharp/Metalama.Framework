@@ -30,8 +30,8 @@ internal static class ContractAspectHelper
     internal static ContractDirection CombineWith( this ContractDirection a, ContractDirection b )
         => (a, b) switch
         {
-            ( ContractDirection.None, _ ) => b,
-            ( _, ContractDirection.None) => a,
+            (ContractDirection.None, _) => b,
+            (_, ContractDirection.None) => a,
             (ContractDirection.Both, _) => ContractDirection.Both,
             (_, ContractDirection.Both) => ContractDirection.Both,
             (ContractDirection.Input, ContractDirection.Output) => ContractDirection.Both,
