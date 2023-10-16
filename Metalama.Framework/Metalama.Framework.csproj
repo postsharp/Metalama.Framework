@@ -30,7 +30,7 @@
 
     <Target Name="CheckGeneratedCode" BeforeTargets="ResolveAssemblyReferences">
         <!-- Produce error in non-design-time build if `b prepare` wasn't run. -->
-        <Error Text="The code in this repository can't normally be compiled by Metalama users. If you want to do that, contact us at hello@postsharp.net."
+        <Error Text="This repository is provided under a commercial source-available license. While you can access the source code for troubleshooting purposes, building from this repository necessitates a valid source code subscription. For inquiries, reach out to hello@postsharp.net."
                Condition="('$(DesignTimeBuild)' != 'true' AND '$(BuildingProject)' == 'true') AND !Exists('..\source-dependencies\Metalama.Framework.Private')" />
     </Target>
 
