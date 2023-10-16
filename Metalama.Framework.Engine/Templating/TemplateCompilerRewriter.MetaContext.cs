@@ -74,12 +74,12 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             /// <summary>
-            /// Creates a child <see cref="MetaContext"/> that corresponds to a new build-time block (lexical scope).
+            /// Creates a child <see cref="MetaContext"/> that corresponds to a new compile-time block (lexical scope).
             /// Symbols defined in the child scope are not defined in the parent scope.
             /// </summary>
-            public static MetaContext CreateForBuildTimeBlock( MetaContext parentContext )
+            public static MetaContext CreateForCompileTimeBlock( MetaContext parentContext )
             {
-                // Build-time blocks are currently without effect because the dictionary maps resolved symbols, and not symbol
+                // Compile-time blocks are currently without effect because the dictionary maps resolved symbols, and not symbol
                 // names. Two declaration of variables with the same name are still different symbols, so we don't strictly
                 // need to split the dictionaries.
                 // However, we're keeping this method for completeness and clarity.

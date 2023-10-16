@@ -80,7 +80,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
             this._optionTypes.TryAdd(
                 optionTypeName,
-                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions ?? empty ) );
+                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions ?? empty, empty ) );
         }
 
         if ( externalOptionsProvider != null )
