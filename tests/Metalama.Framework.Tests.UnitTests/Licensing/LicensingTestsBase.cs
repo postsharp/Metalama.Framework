@@ -6,9 +6,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
-using System.Collections.Immutable;
 using System.Globalization;
-using System.Reflection;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
@@ -22,22 +20,13 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             string code,
             string? licenseKey,
             string? assemblyName = "AspectCountTests.ArbitraryNamespace",
-            string projectName = "TestProject",
-            ImmutableArray<Assembly>? additionalAssemblies = null )
+            string projectName = "TestProject" )
         {
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManagerForLicenseKey( licenseKey ) );
 
             var testContextOptions = this.GetDefaultTestContextOptions() with { ProjectName = projectName };
 
-            if ( additionalAssemblies != null )
-            {
-                testContextOptions = testContextOptions with
-                {
-                    AdditionalAssemblies = testContextOptions.AdditionalAssemblies.AddRange( additionalAssemblies )
-                };
-            }
-            
             using var testContext = this.CreateTestContext( testContextOptions, mocks );
             var domain = testContext.Domain;
 
