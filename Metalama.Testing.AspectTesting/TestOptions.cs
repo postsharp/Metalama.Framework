@@ -184,7 +184,7 @@ namespace Metalama.Testing.AspectTesting
         /// Gets the set of preprocessor symbols that are defined for this test.
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @DefinedConstant(constant)</c>.
         /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
-        /// /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
+        /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
         /// </summary>
         public List<string> DefinedConstants { get; } = new();
 

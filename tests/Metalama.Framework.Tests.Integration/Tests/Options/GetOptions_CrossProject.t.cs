@@ -1,0 +1,4 @@
+[Aspect]
+class Target
+{
+}

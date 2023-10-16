@@ -35,11 +35,13 @@ public class C2
   [ShowOptionsAspect]
   [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->Project->C2")]
   public event EventHandler? E;
+  [ShowOptionsAspect]
+  [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->Project->->->C2")]
   public class N
   {
     [ShowOptionsAspect]
-    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->Project->C2")]
-    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->Project->C2")] int p)
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->Project->->->C2")]
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->Project->->->C2")] int p)
     {
     }
   }

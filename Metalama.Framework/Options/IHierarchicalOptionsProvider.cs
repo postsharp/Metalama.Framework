@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Options;
 
 /// <summary>
-/// A non-generic base interface for the generic <see cref="IHierarchicalOptions{T}"/>. You should always implement the generic interface.
+/// A base interface for attributes that provide options.
 /// </summary>
 /// <seealso href="@exposing-options"/>
 [RunTimeOrCompileTime]

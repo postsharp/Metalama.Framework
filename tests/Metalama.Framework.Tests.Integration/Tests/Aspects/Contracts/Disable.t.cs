@@ -1,5 +1,5 @@
 internal class C
 {
-    [NotNull]
-    public string? P { get; set; }
+  [NotNull]
+  public string? P { get; set; }
 }
