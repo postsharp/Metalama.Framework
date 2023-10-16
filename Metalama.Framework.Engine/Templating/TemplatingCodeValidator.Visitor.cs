@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
                 this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
                 this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
-                this._iCompileTimeSerializableType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof( ICompileTimeSerializable ) );
+                this._iCompileTimeSerializableType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -312,12 +312,12 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 // Verify serialization conditions.
-                var symbol = ModelExtensions.GetDeclaredSymbol( this._semanticModel, node );
+                var symbol = this._semanticModel.GetDeclaredSymbol( node );
 
-                if ( symbol is INamedTypeSymbol typeSymbol
-                     && this._compilationContext.SourceCompilation.HasImplicitConversion( typeSymbol, this._iCompileTimeSerializableType ) )
+                if ( symbol is not null
+                     && this._compilationContext.SourceCompilation.HasImplicitConversion( symbol, this._iCompileTimeSerializableType ) )
                 {
-                    SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, typeSymbol, out var serializerType, out var ambiguous );
+                    SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, symbol, out var serializerType, out var ambiguous );
 
                     if ( ambiguous )
                     {
@@ -327,7 +327,7 @@ namespace Metalama.Framework.Engine.Templating
                                 symbol.GetDiagnosticLocation(),
                                 symbol ) );
                     }
-                    else if ( serializerType == null && node is RecordDeclarationSyntax { ParameterList.Parameters: { Count: >0 } } )
+                    else if ( serializerType == null && node is RecordDeclarationSyntax { ParameterList.Parameters.Count: > 0 } )
                     {
                         // Generated serializers for positional records are not supported.
                         this.Report(

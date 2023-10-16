@@ -112,8 +112,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
                 this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
-
-                this._compileTimeCompilationContext = compilationContext.CompilationContext;
+                this._compileTimeCompilationContext = compileTimeCompilationContext;
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(

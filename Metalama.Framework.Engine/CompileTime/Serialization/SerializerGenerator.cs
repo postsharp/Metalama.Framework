@@ -96,6 +96,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 }
 
                 // The base type is outside of current assembly, check that it has the deserializing constructor.
+                // We need visibility for a type we are currently building in compile-time compilation. Testing for public or protected is a good approximation.
                 deserializingBaseConstructor =
                     translatedBaseType
                         .Constructors
