@@ -70,7 +70,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             if ( baseConstructor == null )
             {
                 this._diagnosticAdder.Report(
-                    SerializationDiagnosticDescriptors.MissingParameterlessConstructor.CreateRoslynDiagnostic(
+                    SerializationDiagnosticDescriptors.MissingBaseParameterlessConstructor.CreateRoslynDiagnostic(
                         targetType.GetDiagnosticLocation(),
                         (targetType, baseType) ) );
 
@@ -109,8 +109,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                         .Constructors
                         .SingleOrDefault(
                             x =>
-                                x is { Parameters: [] }
-                                && x.DeclaredAccessibility is Accessibility.Public or Accessibility.Protected );
+                                x is { Parameters: [], DeclaredAccessibility: Accessibility.Public or Accessibility.Protected } );
             }
             else
             {
@@ -143,7 +142,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             else
             {
                 this._diagnosticAdder.Report(
-                    SerializationDiagnosticDescriptors.MissingDeserializingConstructor.CreateRoslynDiagnostic(
+                    SerializationDiagnosticDescriptors.MissingBaseConstructor.CreateRoslynDiagnostic(
                         targetType.GetDiagnosticLocation(),
                         (targetType, baseType) ) );
 
@@ -153,7 +152,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         else
         {
             // Otherwise the base type is serializable and in the same assembly, check whether there is a deserializing constructor.
-            SerializerGeneratorHelper.TryGetSerializer(this._runTimeCompilationContext, baseType, out var baseSerializer, out _);
+            SerializerGeneratorHelper.TryGetSerializer( this._runTimeCompilationContext, baseType, out var baseSerializer, out _ );
 
             if ( baseSerializer != null )
             {
@@ -163,7 +162,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                         .Constructors
                         .SingleOrDefault(
                             x => IsDeserializingConstructor( this._runTimeCompilationContext, x )
-                             && x.IsVisibleTo( this._runTimeCompilationContext.Compilation, targetType ) );
+                                 && x.IsVisibleTo( this._runTimeCompilationContext.Compilation, targetType ) );
 
                 if ( baseConstructor != null )
                 {
@@ -215,9 +214,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     private static bool IsDeserializingConstructor( CompilationContext compilationContext, IMethodSymbol method )
     {
         return method is { Parameters: [{ CustomModifiers: [], RefCustomModifiers: [], RefKind: RefKind.None }] }
-                                        && compilationContext.SymbolComparer.Equals(
-                                            method.Parameters[0].Type,
-                                            compilationContext.ReflectionMapper.GetTypeSymbol( typeof( IArgumentsReader ) ) );
+               && compilationContext.SymbolComparer.Equals(
+                   method.Parameters[0].Type,
+                   compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) );
     }
 
     public TypeDeclarationSyntax? CreateSerializerType( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
@@ -235,9 +234,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
 
         // Get base serializer ctor.
-        var baseCtor = 
-            baseSerializerType.Constructors.SingleOrDefault( c => c.Parameters.Length == 0 )
-            ?? baseSerializerType.Constructors.SingleOrDefault( c => IsDeserializingConstructor( this._runTimeCompilationContext, c ) );
+        var baseCtor = baseSerializerType.Constructors.SingleOrDefault( c => c.Parameters.Length == 0 );
 
         if ( baseCtor == null )
         {
@@ -326,7 +323,8 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 this._runTimeCompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) ),
                 this._runTimeCompilationContext.SymbolComparer ) )
         {
-            if ( !SerializerGeneratorHelper.TryGetSerializer(this._runTimeCompilationContext, targetType.BaseType, out var baseSerializer, out var ambiguous ) && ambiguous )
+            if ( !SerializerGeneratorHelper.TryGetSerializer( this._runTimeCompilationContext, targetType.BaseType, out var baseSerializer, out var ambiguous )
+                 && ambiguous )
             {
                 this._diagnosticAdder.Report(
                     SerializationDiagnosticDescriptors.AmbiguousBaseSerializer.CreateRoslynDiagnostic(
@@ -335,7 +333,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
                 return null;
             }
- 
+
             if ( baseSerializer != null && baseSerializer.IsVisibleTo( this._runTimeCompilationContext.Compilation, targetType ) )
             {
                 return baseSerializer;
@@ -356,7 +354,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 {
                     // We are probably looking in the run-time assembly, but the serializer can be in the compile-time assembly.
                     var baseReflectionType = referencedProject.GetType( targetType.BaseType.GetFullName().AssertNotNull() );
-                    var baseTypeSymbol = (INamedTypeSymbol)this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseReflectionType );
+                    var baseTypeSymbol = (INamedTypeSymbol) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseReflectionType );
 
                     if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, baseTypeSymbol, out baseSerializer, out ambiguous ) && ambiguous )
                     {

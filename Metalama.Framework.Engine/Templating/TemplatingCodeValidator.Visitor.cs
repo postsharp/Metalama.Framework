@@ -241,7 +241,6 @@ namespace Metalama.Framework.Engine.Templating
                 using var context = this.WithDeclaration( node );
 
                 this.VerifyTypeDeclaration( node, context );
-
                 base.VisitRecordDeclaration( node );
             }
 
@@ -311,23 +310,31 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
                 }
-                
-                // Verify that a record and is not ICompileTimeSerializable without manual serializer.
-                // We do not support generating serializers for records at the moment.
-                if ( node is RecordDeclarationSyntax )
-                {
-                    var symbol = ModelExtensions.GetDeclaredSymbol( this._semanticModel, node );
 
-                    if ( symbol is INamedTypeSymbol typeSymbol
-                        && typeSymbol.AllInterfaces.Any( x => SymbolEqualityComparer.Default.Equals( typeSymbol, this._iCompileTimeSerializableType ) )
-                        && SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, typeSymbol, out var _serializerType, out var ambiguous ) && !ambiguous )
+                // Verify serialization conditions.
+                var symbol = ModelExtensions.GetDeclaredSymbol( this._semanticModel, node );
+
+                if ( symbol is INamedTypeSymbol typeSymbol
+                     && this._compilationContext.SourceCompilation.HasImplicitConversion( typeSymbol, this._iCompileTimeSerializableType ) )
+                {
+                    SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, typeSymbol, out var serializerType, out var ambiguous );
+
+                    if ( ambiguous )
                     {
+                        // Ambiguous manual serializer.
+                        this.Report(
+                            SerializationDiagnosticDescriptors.AmbiguousManualSerializer.CreateRoslynDiagnostic(
+                                symbol.GetDiagnosticLocation(),
+                                symbol ) );
+                    }
+                    else if ( serializerType == null && node is RecordDeclarationSyntax )
+                    {
+                        // Generated record serializers are not supported.
                         this.Report(
                             SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
                                 node.Identifier.GetLocation(),
                                 symbol ) );
                     }
-                    
                 }
             }
 

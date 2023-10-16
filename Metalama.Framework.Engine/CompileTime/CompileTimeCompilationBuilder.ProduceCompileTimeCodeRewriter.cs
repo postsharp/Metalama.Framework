@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -570,22 +569,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, symbol, out var existingSerializer, out var ambiguous ) && ambiguous )
                     {
-                        this._diagnosticAdder.Report(
-                            SerializationDiagnosticDescriptors.AmbiguousManualSerializer.CreateRoslynDiagnostic(
-                                symbol.GetDiagnosticLocation(),
-                                symbol ) );
-
-                        this.Success = false;
-                    }
-                    else if ( existingSerializer == null && node is RecordDeclarationSyntax )
-                    {
-                        // Records are currently not suppported.
-                        this._diagnosticAdder.Report(
-                            SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
-                                symbol.GetDiagnosticLocation(),
-                                symbol ) );
-
-                        this.Success = false;
+                        throw new AssertionFailedException($"Ambiguous serializer for {symbol}. This should have been caught by TemplatingCodeValidator.");
                     }
                     else if (existingSerializer == null)
                     {
@@ -618,6 +602,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
                         else
                         {
+                            // Above method calls return null when they fail.
                             this.Success = false;
                         }
                     }

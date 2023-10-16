@@ -43,20 +43,20 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             Error,
             "Custom equality comparers not supported." );
 
-        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingDeserializingConstructor = new(
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseConstructor = new(
             "LAMA0204",
             _category,
             "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' declared in a referenced assembly is serializable " +
-            "and does not have an accessible deserializing constructor with a single parameter of type IArgumentsReader.",
+            "and does not have an accessible parameterless constructor nor an accessible deserializing constructor with a single parameter of type IArgumentsReader.",
             Error,
-            "Missing deserializing constructor." );
+            "Missing base parameterless or deserializing constructor." );
 
-        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingParameterlessConstructor = new(
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseParameterlessConstructor = new(
             "LAMA0205",
             _category,
             "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' is not serializable and does not have a visible parameterless constructor.",
             Error,
-            "Missing parameterless constructor." );
+            "Missing base parameterless constructor." );
 
         internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseSerializer = new(
             "LAMA0206",
@@ -68,8 +68,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseTypeSerializer)> MissingBaseSerializerConstructor = new(
             "LAMA0207",
             _category,
-            "Cannot generate a compile-time serializer for '{0}' because the base type serializer '{1}' must declare a visible parameterless constructor " +
-            "or a deserializing constructor with single IArgumentReader parameter.",
+            "Cannot generate a compile-time serializer for '{0}' because the base type serializer '{1}' must declare a visible parameterless constructor.",
             Error,
             "Missing base serializer constructor." );
 
