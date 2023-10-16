@@ -13,7 +13,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.Serialization;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
@@ -64,23 +63,35 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
             var optionType = this.GetOptionType( optionTypeName, compilationModel );
 
-            var empty = (IHierarchicalOptions) FormatterServices.GetUninitializedObject( optionType ).AssertNotNull();
+            if ( !this._userCodeInvoker.TryInvoke(
+                    () => (IHierarchicalOptions) Activator.CreateInstance( optionType ).AssertNotNull(),
+                    userCodeExecutionContext,
+                    out var emptyOptions ) )
+            {
+                continue;
+            }
 
-            var context = new OptionsInitializationContext(
+            var getDefaultOptionsContext = new OptionsInitializationContext(
                 compilationModel.Project,
-                new ScopedDiagnosticSink( diagnosticSink, new GetDefaultOptionsDiagnosticSourceDescription( optionType ), null, null ) );
+                new ScopedDiagnosticSink(
+                    diagnosticSink,
+                    new AdhocDiagnosticSource( $"executing the '{optionType.Name}.{nameof(IHierarchicalOptions.GetDefaultOptions)}' method" ),
+                    null,
+                    null ) );
 
             if ( !this._userCodeInvoker.TryInvoke(
-                    () => empty.GetDefaultOptions( context ) ?? (IHierarchicalOptions) Activator.CreateInstance( optionType ).AssertNotNull(),
+                    () => emptyOptions.GetDefaultOptions( getDefaultOptionsContext ),
                     userCodeExecutionContext,
                     out var defaultOptions ) )
             {
                 // If we fail to get the default options, we will continue with the non-initialized options.
             }
 
+            defaultOptions ??= emptyOptions;
+
             this._optionTypes.TryAdd(
                 optionTypeName,
-                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions ?? empty, empty ) );
+                new OptionTypeNode( this, optionType, diagnosticSink, defaultOptions, emptyOptions ) );
         }
 
         if ( externalOptionsProvider != null )
@@ -137,18 +148,6 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         => this._optionTypes.Where( s => s.Value.Metadata is { InheritedByDerivedTypes: true } or { InheritedByOverridingMembers: true } )
             .SelectMany( s => s.Value.GetInheritableOptions( compilation, withSyntaxTree ) );
-
-    private sealed class GetDefaultOptionsDiagnosticSourceDescription : IDiagnosticSource
-    {
-        private readonly Type _type;
-
-        public GetDefaultOptionsDiagnosticSourceDescription( Type type )
-        {
-            this._type = type;
-        }
-
-        public string DiagnosticSourceDescription => $"{this._type.Name}.GetDefaultOptions";
-    }
 
     public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
     {
