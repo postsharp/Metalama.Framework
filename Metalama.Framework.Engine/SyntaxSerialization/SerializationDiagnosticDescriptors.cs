@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> AmbiguousBaseSerializer = new(
             "LAMA0209",
             _category,
-            "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' declares multiple nested type implementing ReferenceTypeSerializer.",
+            "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' declares multiple nested types implementing ReferenceTypeSerializer.",
             Error,
             "Ambiguous base serializer." );
 
