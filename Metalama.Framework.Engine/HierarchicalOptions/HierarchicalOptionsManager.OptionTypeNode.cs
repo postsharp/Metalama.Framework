@@ -329,7 +329,8 @@ public sealed partial class HierarchicalOptionsManager
             if ( this._optionsByDeclaration.TryGetValue( compilation.ToTypedRef<IDeclaration>(), out var compilationNode )
                  && compilationNode.DirectOptions != null )
             {
-                compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation );
+                compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation )
+                    .AssertNotNull();
             }
 
             var defaultOptions = new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
