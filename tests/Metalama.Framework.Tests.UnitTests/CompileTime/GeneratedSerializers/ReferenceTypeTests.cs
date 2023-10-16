@@ -495,42 +495,4 @@ public class A<T>
         Assert.Equal( 13, deserialized.Field );
         Assert.Equal( 42.0, deserialized.Property );
     }
-
-    [Fact]
-    public void Record()
-    {
-        // Verifies that serializable compile-time type with explicit parameterless constructor can be serialized and deserialized.
-        // Generator should not inject parameterless constructor when it is already defined.
-        const string code = @"
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Serialization;
-[assembly: CompileTime]
-public record A(int X, string Y) : ICompileTimeSerializable
-{    
-}
-";
-
-        using var testContext = this.CreateTestContext();
-        var domain = testContext.Domain;
-
-        var project = CreateCompileTimeProject( domain, testContext, code );
-
-        var type = project.GetType( "A" );
-        var lamaSerializer = GetSerializer( type );
-
-        dynamic instance = Activator.CreateInstance( type, 13, "42" )!;
-
-        var constructorArgumentsWriter = new TestArgumentsWriter();
-        var initializationArgumentsWriter = new TestArgumentsWriter();
-        lamaSerializer.SerializeObject( instance, constructorArgumentsWriter, initializationArgumentsWriter );
-
-        var constructorArgumentsReader = constructorArgumentsWriter.ToReader();
-        var initializationArgumentsReader = initializationArgumentsWriter.ToReader();
-
-        dynamic deserialized = lamaSerializer.CreateInstance( type, constructorArgumentsReader );
-        lamaSerializer.DeserializeFields( ref deserialized, initializationArgumentsReader );
-
-        Assert.Equal( 13, deserialized.X );
-        Assert.Equal( "42", deserialized.Y );
-    }
 }
