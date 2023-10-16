@@ -87,5 +87,7 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual bool RoslynIsCompileTimeOnly => true;
 
+    public virtual string? CompileTimeTargetFrameworks => null;
+
     public virtual bool IsTest => false;
 }
