@@ -315,17 +315,26 @@ public sealed partial class HierarchicalOptionsManager
                 .Where( x => x.Value.DirectOptions != null )
                 .Select( x => (IDeclarationImpl) x.Key.GetTarget( compilation ) )
                 .Where(
-                    x => x is { DeclarationKind: DeclarationKind.Namespace or DeclarationKind.Compilation } or
+                    x => x is { DeclarationKind: DeclarationKind.Namespace } or
                         { CanBeInherited: true, BelongsToCurrentProject: true } )
                 .Select(
                     x => new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
                         new HierarchicalOptionsKey( this._typeName, x.ToSerializableId(), withSyntaxTree ? x.GetPrimarySyntaxTree()?.FilePath : null ),
                         this.GetOptions( x ).AssertNotNull() ) );
 
-            // We also have to return the assembly-level options.
+            // We have to return the assembly-level options even if no option has been specifically defined on the compilation because default
+            // options may be project-dependency.
+            var compilationOptions = this._defaultOptions;
+
+            if ( this._optionsByDeclaration.TryGetValue( compilation.ToTypedRef<IDeclaration>(), out var compilationNode )
+                 && compilationNode.DirectOptions != null )
+            {
+                compilationOptions = MergeOptions( compilationOptions, compilationNode.DirectOptions, ApplyChangesAxis.SameDeclaration, compilation );
+            }
+
             var defaultOptions = new KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>(
                 new HierarchicalOptionsKey( this._typeName, compilation.ToSerializableId() ),
-                this._defaultOptions );
+                compilationOptions );
 
             return optionsOnDeclarations.Concat( defaultOptions );
         }
