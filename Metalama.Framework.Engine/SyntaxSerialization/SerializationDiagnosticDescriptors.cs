@@ -43,20 +43,20 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             Error,
             "Custom equality comparers not supported." );
 
-        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingDeserializingConstructor = new(
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseConstructor = new(
             "LAMA0204",
             _category,
             "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' declared in a referenced assembly is serializable " +
-            "and does not have an accessible deserializing constructor with a single parameter of type IArgumentsReader.",
+            "and does not have an accessible parameterless constructor nor an accessible deserializing constructor with a single parameter of type IArgumentsReader.",
             Error,
-            "Missing deserializing constructor." );
+            "Missing base parameterless or deserializing constructor." );
 
-        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingParameterlessConstructor = new(
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseParameterlessConstructor = new(
             "LAMA0205",
             _category,
             "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' is not serializable and does not have a visible parameterless constructor.",
             Error,
-            "Missing parameterless constructor." );
+            "Missing base parameterless constructor." );
 
         internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> MissingBaseSerializer = new(
             "LAMA0206",
@@ -71,5 +71,27 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             "Cannot generate a compile-time serializer for '{0}' because the base type serializer '{1}' must declare a visible parameterless constructor.",
             Error,
             "Missing base serializer constructor." );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> AmbiguousManualSerializer = new(
+            "LAMA0208",
+            _category,
+            "Compile-time serializable type '{0}' declares multiple nested classes implementing ReferenceTypeSerializer or ValueTypeSerializer. Only one manual serializer is allowed.",
+            Error,
+            "Ambiguous manual serializer." );
+
+        internal static readonly DiagnosticDefinition<(INamedTypeSymbol Type, INamedTypeSymbol BaseType)> AmbiguousBaseSerializer = new(
+            "LAMA0209",
+            _category,
+            "Cannot generate a compile-time serializer for '{0}' because the base type '{1}' declares multiple nested types implementing ReferenceTypeSerializer.",
+            Error,
+            "Ambiguous base serializer." );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> RecordSerializersNotSupported = new(
+            "LAMA0210",
+            _category,
+            "Cannot generate a compile-time serializer for '{0}' because generated serializers are not currently supported for a positional record class or struct. " +
+            "You can provide a manual serializer (public nested class) derived from ReferenceTypeSerializer (record classes) or ValueTypeSerializer (record structs) instead.",
+            Error,
+            "Generated serializers are not currently supported for records." );
     }
 }

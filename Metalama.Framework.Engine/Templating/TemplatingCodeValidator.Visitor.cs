@@ -4,10 +4,13 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,6 +41,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _hasCompileTimeCodeFast;
             private readonly ITypeSymbol _typeFabricType;
             private readonly ITypeSymbol _iAdviceAttributeType;
+            private readonly ITypeSymbol _iCompileTimeSerializableType;
             private TemplateCompiler? _templateCompiler;
 
             private ISymbol? _currentDeclaration;
@@ -67,6 +71,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
                 this._typeFabricType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
                 this._iAdviceAttributeType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) );
+                this._iCompileTimeSerializableType = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ICompileTimeSerializable) );
             }
 
             private bool IsInTemplate => this._currentTemplateInfo is { AttributeType: not TemplateAttributeType.None };
@@ -236,7 +241,6 @@ namespace Metalama.Framework.Engine.Templating
                 using var context = this.WithDeclaration( node );
 
                 this.VerifyTypeDeclaration( node, context );
-
                 base.VisitRecordDeclaration( node );
             }
 
@@ -304,6 +308,32 @@ namespace Metalama.Framework.Engine.Templating
                                          baseTypeScope.ToDisplayString()) ) );
                             }
                         }
+                    }
+                }
+
+                // Verify serialization conditions.
+                var symbol = this._semanticModel.GetDeclaredSymbol( node );
+
+                if ( symbol is not null
+                     && this._compilationContext.SourceCompilation.HasImplicitConversion( symbol, this._iCompileTimeSerializableType ) )
+                {
+                    SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, symbol, out var serializerType, out var ambiguous );
+
+                    if ( ambiguous )
+                    {
+                        // Ambiguous manual serializer.
+                        this.Report(
+                            SerializationDiagnosticDescriptors.AmbiguousManualSerializer.CreateRoslynDiagnostic(
+                                symbol.GetDiagnosticLocation(),
+                                symbol ) );
+                    }
+                    else if ( serializerType == null && node is RecordDeclarationSyntax { ParameterList.Parameters.Count: > 0 } )
+                    {
+                        // Generated serializers for positional records are not supported.
+                        this.Report(
+                            SerializationDiagnosticDescriptors.RecordSerializersNotSupported.CreateRoslynDiagnostic(
+                                node.Identifier.GetLocation(),
+                                symbol ) );
                     }
                 }
             }

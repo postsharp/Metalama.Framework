@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            attributeInstance = localAttributeInstance!;
+            attributeInstance = localAttributeInstance;
 
             return true;
         }

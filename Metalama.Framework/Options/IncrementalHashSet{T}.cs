@@ -41,7 +41,7 @@ public partial class IncrementalHashSet<T> : IIncrementalObject, IReadOnlyCollec
     }
 
     protected virtual IncrementalHashSet<T> Create( ImmutableDictionary<T, bool> dictionary, bool clear = false ) => new( dictionary, clear );
-    
+
     /// <summary>
     /// Creates a new <see cref="IncrementalHashSet{T}"/> that represents the operation of adding an item to the collection,
     /// additionally to any operation represented by the current collection.

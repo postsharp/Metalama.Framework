@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger.Trace?.Log(
                 "Assembly versions: " + string.Join(
                     ", ",
-                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.SelectAsReadOnlyList(
+                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }.SelectAsReadOnlyList(
                         x => x.Assembly.Location ) ) );
 
             var targetFrameworksString = string.IsNullOrEmpty( projectOptions.CompileTimeTargetFrameworks )
@@ -112,14 +112,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
-                new[] { typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }.ToDictionary(
+                new[] { typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.ToDictionary(
                     x => x.Assembly.GetName().Name.AssertNotNull(),
                     x => x.Assembly.Location );
 
             // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
             MetalamaCompilerInfo.EnsureInitialized();
 
-            // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
+            // Add the Metalama.Compiler.Interface assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
 
             // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
@@ -341,6 +341,7 @@ namespace Metalama.Framework.Engine.CompileTime
                        <ItemGroup>
                          <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
                          <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+                         <PackageReference Include="Metalama.Framework.RunTime" Version="{AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly ).GetPackageVersion( "Metalama.Framework.RunTime" )}" />
                          {additionalPackageReferences}
                        </ItemGroup>
                        <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
