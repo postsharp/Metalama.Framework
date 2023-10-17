@@ -17,9 +17,11 @@
          Metalama.Compiler targets file. -->
     
     <PropertyGroup Condition="'$(Configuration)'=='LamaDebug'">
-        <MetalamaFormatOutput>True</MetalamaFormatOutput>
         <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
-        <MetalamaEmitCompilerTransformedFiles>True</MetalamaEmitCompilerTransformedFiles>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(MetalamaDebugTransformedCode)'=='True'">
+        <MetalamaFormatOutput Condition="'$(MetalamaFormatOutput)'==''">True</MetalamaFormatOutput>
     </PropertyGroup>
 
 </Project>
