@@ -20,11 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		eng\Versions.props = eng\Versions.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.SourceTransformer", "Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.SourceTransformer", "source-dependencies\Metalama.Framework.Private\src\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Sdk", "Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj", "{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.GenerateMetaSyntaxRewriter", "Build\Metalama.Framework.GenerateMetaSyntaxRewriter\Metalama.Framework.GenerateMetaSyntaxRewriter.csproj", "{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}"
 EndProject
@@ -78,7 +76,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Engine.A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Tool", "Metalama.Tool\Metalama.Tool.csproj", "{59F4924C-3414-4A14-AE7E-1B7FCF581F93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.CompilerExtensions.Resources", "Metalama.Framework.CompilerExtensions.Resources\Metalama.Framework.CompilerExtensions.Resources.csproj", "{124208A3-9955-4960-9A22-2CBB54657D33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.CompilerExtensions.Resources", "Metalama.Framework.CompilerExtensions.Resources\Metalama.Framework.CompilerExtensions.Resources.csproj", "{124208A3-9955-4960-9A22-2CBB54657D33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -102,10 +100,6 @@ Global
 		{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB98654B-14D3-4ED5-A194-7205A3BEAFD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D3EE834-B910-4F2F-8069-F95CE8D0D933}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -208,7 +202,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62} = {19660464-978E-4457-846E-B399BB6A3884}
-		{33AD46E7-A88B-4C6D-AB9F-99823DC7DB54} = {19660464-978E-4457-846E-B399BB6A3884}
 		{69EB8F34-975E-46AD-8EA1-A592A629CCD6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{7D8C16EE-B822-4AE3-B9C1-810C010573D6} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{FEB29B18-21EF-4A0F-92B8-E6C0F4B22FD0} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}

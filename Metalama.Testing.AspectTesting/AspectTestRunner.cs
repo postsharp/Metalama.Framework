@@ -20,8 +20,10 @@ using Xunit;
 using Xunit.Abstractions;
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
 using System.Reflection;
 using System.Runtime.Loader;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 #endif
 
 namespace Metalama.Testing.AspectTesting
@@ -303,21 +305,27 @@ namespace Metalama.Testing.AspectTesting
 
                     try
                     {
-                        if ( !mainMethod.IsAsync )
-                        {
-                            method.Invoke( null, null );
-                        }
-                        else
-                        {
-                            var task = (Task?) method.Invoke( null, null );
+                        var parameters = method.GetParameters();
 
-                            if ( task != null )
+                        var result = parameters switch
+                        {
+                            [] => method.Invoke( null, null ),
+                            [{ }] => method.Invoke( null, new object[] { Array.Empty<string>() } ),
+                            _ => throw new InvalidOperationException( "Program.Main has unsupported signature." )
+                        };
+
+                        if ( mainMethod.GetAsyncInfo() is { IsAwaitable: true } )
+                        {
+                            switch ( result )
                             {
-                                await task;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException( "Program.Main returned a null Task." );
+                                case Task task:
+                                    // Await normal task.
+                                    await task;
+
+                                    break;
+
+                                default:
+                                    throw new InvalidOperationException( "Program.Main did not return Task." );
                             }
                         }
                     }
@@ -396,16 +404,18 @@ namespace Metalama.Testing.AspectTesting
                 return null;
             }
 
-            if ( mainMethod is { IsAsync: true, ReturnType: not INamedType { Name: "Task" } } )
+            if ( !(mainMethod is 
+                    { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } } 
+                    or { ReturnType: INamedType { Definition.SpecialType: SpecialType.Task_T, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } }) )
             {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method, if it is async, must be of return type 'Task'." );
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must return void, int, Task or Task<int>." );
 
                 return null;
             }
 
-            if ( mainMethod.Parameters.Count != 0 )
+            if ( !(mainMethod.Parameters is [] or [{ Type: IArrayType { ElementType.SpecialType: SpecialType.String } }]) )
             {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters." );
+                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters or have a single 'string[]' parameter." );
 
                 return null;
             }

@@ -2,8 +2,7 @@
   "solution": {
     "path": "Metalama.sln",
     "projects": [
-      "Build\\Metalama.Framework.GenerateMetaSyntaxRewriter\\Metalama.Framework.GenerateMetaSyntaxRewriter.csproj",
-      "Build\\Metalama.SourceTransformer\\Metalama.SourceTransformer.csproj",
+      "source-dependencies\\Metalama.Framework.Private\\src\\Metalama.SourceTransformer\\Metalama.SourceTransformer.csproj",
       "Metalama.Framework.CompileTimeContracts\\Metalama.Framework.CompileTimeContracts.csproj",
       "Metalama.Framework.CompileTime\\Metalama.Framework.CompileTime.csproj",
       "Metalama.Framework.DesignTime.Contracts\\Metalama.Framework.DesignTime.Contracts.csproj",

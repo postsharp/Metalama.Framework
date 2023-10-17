@@ -56,6 +56,7 @@ public class C2
     [ShowOptionsAspect]
     public event EventHandler? E;
 
+    [ShowOptionsAspect]
     public class N
     {
         [ShowOptionsAspect]

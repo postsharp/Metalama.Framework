@@ -41,8 +41,8 @@ public class C2
   public class N
   {
     [ShowOptionsAspect]
-    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->FromFabric.Project->FromFabric.C2->FromFabric.C2->FromAspect.C2")]
-    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->FromFabric.Project->FromFabric.C2->FromFabric.C2->FromAspect.C2")] int p)
+    [global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->FromFabric.Project->->->FromFabric.C2->FromFabric.C2->FromAspect.C2")]
+    public void M([ShowOptionsAspect][global::Metalama.Framework.Tests.Integration.Tests.Options.ActualOptionsAttribute("->FromFabric.Project->->->FromFabric.C2->FromFabric.C2->FromAspect.C2")] int p)
     {
     }
   }

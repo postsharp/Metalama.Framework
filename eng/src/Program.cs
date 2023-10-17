@@ -76,7 +76,8 @@ var product = new Product( MetalamaDependencies.Metalama )
                     // Do not upload uncompressed crash reports because they are too big.
                     $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
                 }
-            } )
+            } ),
+    SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } }
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
@@ -92,13 +93,14 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     arg.Context.Console.WriteHeading( "Generating code" );
 
     var generatorDirectory =
-        Path.Combine( arg.Context.RepoDirectory, "Build", "Metalama.Framework.GenerateMetaSyntaxRewriter" );
+        Path.Combine( arg.Context.RepoDirectory, "source-dependencies", "Metalama.Framework.Private", "src",
+            "Metalama.Framework.GenerateMetaSyntaxRewriter" );
     var project =
         new DotNetSolution( Path.Combine(
             generatorDirectory,
             "Metalama.Framework.GenerateMetaSyntaxRewriter.csproj" ) );
 
-    var settings = new BuildSettings() { BuildConfiguration = BuildConfiguration.Debug };
+    var settings = new BuildSettings { BuildConfiguration = BuildConfiguration.Debug };
     if ( !project.Restore( arg.Context, settings ) )
     {
         arg.IsFailed = true;
@@ -114,8 +116,14 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net60" );
     var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
     var srcDirectory = arg.Context.RepoDirectory;
+    var commandLine = srcDirectory;
 
-    if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, srcDirectory, toolDirectory ) )
+    if ( arg.Settings.Properties.ContainsKey( "PrepareStubs" ) )
+    {
+        commandLine = $"{commandLine} --stubs";
+    }
+
+    if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, commandLine, toolDirectory ) )
     {
         arg.IsFailed = true;
     }

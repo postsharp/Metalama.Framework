@@ -19,7 +19,8 @@
 
 
     <ItemGroup>
-        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.DesignTime\*.cs" />
+        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.DesignTime\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersion)')" />
+        <Compile Include="..\.generated\$(ThisRoslynVersion)-stubs\Metalama.Framework.DesignTime\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersion)')" />
     </ItemGroup>
 
 
