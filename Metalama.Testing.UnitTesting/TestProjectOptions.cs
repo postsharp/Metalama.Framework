@@ -28,7 +28,7 @@ namespace Metalama.Testing.UnitTesting
             this._properties = contextOptions.Properties;
 
             // We don't use the backstage TempFileManager because it would generate paths that are too long.
-            var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
+            var baseDirectory = Path.Combine( MetalamaPathUtilities.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
             this._baseDirectory = CreateDirectoryLazy( baseDirectory );
 
             var projectDirectory = Path.Combine( baseDirectory, "Project" );

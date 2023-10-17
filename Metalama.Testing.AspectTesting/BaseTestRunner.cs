@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -813,7 +814,7 @@ internal abstract partial class BaseTestRunner
             if ( ns.ContainsOrdinal( "Microsoft.CSharp.RuntimeBinder" ) &&
                  string.Equals( typeName, "CSharpArgumentInfo", StringComparison.Ordinal ) )
             {
-                var directory = Path.Combine( Path.GetTempPath(), "Metalama", "InvalidAssemblies" );
+                var directory = Path.Combine( MetalamaPathUtilities.GetTempPath(), "Metalama", "InvalidAssemblies" );
 
                 if ( !this._fileSystem.DirectoryExists( directory ) )
                 {

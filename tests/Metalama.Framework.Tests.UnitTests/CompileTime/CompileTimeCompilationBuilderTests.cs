@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
@@ -183,7 +184,7 @@ class ReferencingClass
 
                     var compileTimeProjectRepository = CompileTimeProjectRepository.Create( domain, testContext.ServiceProvider, compilation ).AssertNotNull();
 
-                    var runTimePath = Path.GetTempFileName();
+                    var runTimePath = MetalamaPathUtilities.GetTempFileName();
                     tempFiles.Add( runTimePath );
 
                     // We must create the dll on disk to emulate the path taken by real code.
