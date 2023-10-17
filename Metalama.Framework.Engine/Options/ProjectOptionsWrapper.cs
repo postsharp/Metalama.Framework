@@ -74,4 +74,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual bool IsTest => this.Wrapped.IsTest;
 
     public virtual bool RoslynIsCompileTimeOnly => this.Wrapped.RoslynIsCompileTimeOnly;
+
+    public string? CompileTimeTargetFrameworks => this.Wrapped.CompileTimeTargetFrameworks;
 }
