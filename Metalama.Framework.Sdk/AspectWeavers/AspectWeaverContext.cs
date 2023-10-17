@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
     {
         private readonly Action<Diagnostic> _addDiagnostic;
         private readonly ISdkHierarchicalOptionsManager _optionsManager;
-            
+
         private IPartialCompilation _compilation;
 
         public ProjectServiceProvider ServiceProvider { get; }

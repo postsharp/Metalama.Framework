@@ -198,8 +198,7 @@ namespace Metalama.Testing.UnitTesting
             if ( dependentCode != null )
             {
                 var dependentCompilation = CreateEmptyCSharpCompilation( name == null ? null : null + ".Dependency", additionalAssemblies )
-                    .AddSyntaxTrees(
-                        dependentCode.SelectAsArray( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
+                    .AddSyntaxTrees( dependentCode.SelectAsArray( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: parseOptions ) ) );
 
                 mainRoslynCompilation = mainRoslynCompilation.AddReferences( dependentCompilation.ToMetadataReference() );
             }
