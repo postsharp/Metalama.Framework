@@ -1,10 +1,19 @@
 // --- CodeFixPreviewingAllowedProjectBound.cs ---
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0800 on ``: `This project uses 1 aspect classes, but only 0 are allowed by your license. For details, use the following command: `metalama license usage details --project CodeFixPreviewingAllowedProjectBound`.`
 // Warning MY001 on `Method`: `Add some attribute`
 //    CodeFix: Add [My] to 'TargetCode.Method(int)'`
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixPreviewingAllowedProjectBound;
+class Dummy
+{
+}
 // --- _CodeFix.cs ---
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0800 on ``: `This project uses 1 aspect classes, but only 0 are allowed by your license. For details, use the following command: `metalama license usage details --project CodeFixPreviewingAllowedProjectBound`.`
 // Warning MY001 on `Method`: `Add some attribute`
 //    CodeFix: Add [My] to 'TargetCode.Method(int)'`
+internal class TargetCode
+{
+  [SuggestMyAttributeAttribute]
+  [My]
+  private int Method(int a)
+  {
+    return a;
+  }
+}

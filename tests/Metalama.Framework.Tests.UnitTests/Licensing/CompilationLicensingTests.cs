@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Testing;
+using Metalama.Framework.Engine.Licensing;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -38,7 +39,12 @@ class Test
 
             var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey, projectName: projectName );
 
-            Assert.Empty( diagnostics );
+            // We want to assert that the diagnostics are empty, but unit tests reference Metalama.Framework.Sdk,
+            // so we need to ignore the Roslyn API license error.
+            if ( diagnostics.Count > 0 )
+            {
+                Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
+            }
         }
     }
 }
