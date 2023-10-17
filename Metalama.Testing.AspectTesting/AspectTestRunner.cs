@@ -77,11 +77,24 @@ namespace Metalama.Testing.AspectTesting
                 return;
             }
 
-            var serviceProviderForThisTest = testContext.ServiceProvider
-                .WithService( new Observer( testContext.ServiceProvider, testResult ) )
+            var serviceProviderForThisTestWithoutLicensing = testContext.ServiceProvider
+                .WithService( new Observer( testContext.ServiceProvider, testResult ) );
+
+            var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
                 .AddLicenseConsumptionManagerForTest( testInput );
 
-            var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, testContext.Domain );
+            var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
+            var isLicensingRequiredForCompilation = testScenario switch
+            {
+                TestScenario.ApplyCodeFix => false,
+                TestScenario.PreviewCodeFix => false,
+                TestScenario.Default => true,
+                _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
+            };
+
+            var pipeline = new CompileTimeAspectPipeline( 
+                isLicensingRequiredForCompilation ? serviceProviderForThisTestWithLicensing : serviceProviderForThisTestWithoutLicensing,
+                testContext.Domain );
 
             var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.PipelineDiagnostics,
@@ -90,7 +103,7 @@ namespace Metalama.Testing.AspectTesting
 
             if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
             {
-                switch ( testInput.Options.TestScenario ?? TestScenario.Default )
+                switch ( testScenario )
                 {
                     case TestScenario.ApplyCodeFix:
                     case TestScenario.PreviewCodeFix:
@@ -100,7 +113,7 @@ namespace Metalama.Testing.AspectTesting
                                     testInput,
                                     testResult,
                                     testContext.Domain,
-                                    serviceProviderForThisTest,
+                                    serviceProviderForThisTestWithLicensing,
                                     testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
                             {
                                 return;
@@ -120,7 +133,7 @@ namespace Metalama.Testing.AspectTesting
                         }
 
                     default:
-                        throw new InvalidOperationException( $"Unknown test scenario: {testInput.Options.TestScenario}" );
+                        throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" );
                 }
             }
             else

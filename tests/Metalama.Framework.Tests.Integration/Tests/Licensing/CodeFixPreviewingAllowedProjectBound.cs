@@ -5,8 +5,6 @@
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixPreviewingAllowedProjectBound;
 
-// TODO: fix
-
 class Dummy
 {
 }

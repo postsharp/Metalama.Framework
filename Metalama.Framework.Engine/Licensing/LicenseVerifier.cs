@@ -157,7 +157,7 @@ public sealed class LicenseVerifier : IProjectService
             IAspectClassImpl { Project: { } } aspectClassImpl when IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
-            _ => manager.CanConsume( LicenseRequirement.Professional )
+            _ => manager.CanConsume( LicenseRequirement.Professional, serviceProvider.GetService<IProjectOptions>()?.ProjectName )
         };
     }
 

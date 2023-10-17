@@ -495,15 +495,20 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
-            // Enforce licensing.
-            var licenseVerifier = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
+            // Enforce licensing. Design-time licensing is handled elsewhere. (See usages of LicenseVerifier's methods.)
+            var executionScenario = pipelineConfiguration.ServiceProvider.GetRequiredService<ExecutionScenario>();
 
-            if ( licenseVerifier != null )
+            if ( !executionScenario.IsDesignTime )
             {
-                var compileTimeProject = pipelineConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
-                var licensingDiagnostics = new UserDiagnosticSink( compileTimeProject );
-                licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
-                pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
+                var licenseVerifier = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
+
+                if ( licenseVerifier != null )
+                {
+                    var compileTimeProject = pipelineConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
+                    var licensingDiagnostics = new UserDiagnosticSink( compileTimeProject );
+                    licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                    pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
+                }
             }
 
             // Report diagnostics
