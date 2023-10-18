@@ -4,6 +4,7 @@
 using JetBrains.Profiler.SelfApi;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine;
 using System.IO;
 using System.Threading;
@@ -32,7 +33,7 @@ internal static class MemoryLeakHelper
     {
         DotMemory.EnsurePrerequisite();
         var dotMemoryConfig = new DotMemory.Config();
-        var path = Path.Combine( Path.GetTempPath(), "Metalama", "MemoryDumps" );
+        var path = Path.Combine( MetalamaPathUtilities.GetTempPath(), "Metalama", "MemoryDumps" );
         dotMemoryConfig.SaveToDir( path );
 
         DotMemory.GetSnapshotOnce( dotMemoryConfig );

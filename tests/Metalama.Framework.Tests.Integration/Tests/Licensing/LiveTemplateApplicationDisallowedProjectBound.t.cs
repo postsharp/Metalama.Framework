@@ -1,1 +1,2 @@
-// Error LAMA0800 on ``: `This project uses 1 aspect classes, but only 0 are allowed by your license. For details, use the following command: `metalama license usage details --project LiveTemplateApplicationDisallowedProjectBound`.`
+// LiveTemplateAspectPipeline.TryExecute failed.
+// Error LAMA0805 on `TargetMethod`: `The 'Apply [TestAspect] aspect' code action provided by 'TestAspect' cannot be applied because code actions are not covered by your license.`

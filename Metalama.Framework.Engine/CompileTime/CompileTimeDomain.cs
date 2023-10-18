@@ -40,12 +40,12 @@ namespace Metalama.Framework.Engine.CompileTime
         [UsedImplicitly]
         protected ICompileTimeDomainObserver? Observer { get; }
 
-        public CompileTimeDomain( GlobalServiceProvider serviceProvider )
+        public CompileTimeDomain( GlobalServiceProvider serviceProvider, string? debugName = null )
         {
             this.Observer = serviceProvider.GetService<ICompileTimeDomainObserver>();
             this.Observer?.OnDomainCreated( this );
 
-            this._assemblyLoader = new AssemblyLoader( this.ResolveAssembly );
+            this._assemblyLoader = new AssemblyLoader( this.ResolveAssembly, $"CompileTimeDomain {debugName}".TrimEnd() );
 
             this._logger = Logger.Domain;
         }
