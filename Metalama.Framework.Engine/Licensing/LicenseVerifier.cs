@@ -13,6 +13,8 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Services;
+using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -95,7 +97,7 @@ public sealed class LicenseVerifier : IProjectService
             // The project has no aspect class and no reference with aspects.
             return true;
         }
-
+        
         foreach ( var closureProject in project.ClosureProjects )
         {
             if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
@@ -155,12 +157,21 @@ public sealed class LicenseVerifier : IProjectService
             IAspectClassImpl { Project: { } } aspectClassImpl when IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
-            _ => manager.CanConsume( LicenseRequirement.Professional )
+            _ => manager.CanConsume( LicenseRequirement.Professional, serviceProvider.GetService<IProjectOptions>()?.ProjectName )
         };
     }
 
-    internal void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
+    internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
+        // Verify SDK license
+        if ( compilation.References.Any( r => r.Display?.EndsWith( "metalama.framework.sdk.dll", StringComparison.OrdinalIgnoreCase ) ?? false ) )
+        {
+            if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
+            {
+                diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
+            }
+        }
+
         // List all aspect classed, that are used. Don't count skipped instances.
         var aspectClasses = aspectInstanceResults.Where( r => !r.AspectInstance.IsSkipped ).Select( r => r.AspectInstance.AspectClass ).ToHashSet();
 

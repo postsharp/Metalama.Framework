@@ -115,6 +115,9 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override bool RoslynIsCompileTimeOnly => this.GetBooleanOption( MSBuildPropertyNames.MetalamaRoslynIsCompileTimeOnly, defaultValue: true );
 
+        [Memo]
+        public override string? CompileTimeTargetFrameworks => this.GetStringOption( MSBuildPropertyNames.MetalamaCompileTimeTargetFrameworks );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );

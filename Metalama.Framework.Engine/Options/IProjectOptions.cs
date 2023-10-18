@@ -145,6 +145,11 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         bool RoslynIsCompileTimeOnly { get; }
 
+        /// <summary>
+        /// Gets a semicolon-separated list of target frameworks that can be used for compile-time code, e.g. <c>netstandard2.0;net6.0;net48</c>.
+        /// </summary>
+        string? CompileTimeTargetFrameworks { get; }
+
         bool IsTest { get; }
     }
 }

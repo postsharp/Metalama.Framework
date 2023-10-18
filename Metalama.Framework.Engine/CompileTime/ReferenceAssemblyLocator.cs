@@ -32,12 +32,15 @@ namespace Metalama.Framework.Engine.CompileTime
     internal sealed class ReferenceAssemblyLocator
     {
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
+        private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
+
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
         private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
         private readonly IPlatformInfo _platformInfo;
         private readonly DotNetTool _dotNetTool;
         private readonly int _restoreTimeout;
+        private readonly ImmutableArray<string> _targetFrameworks;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -87,10 +90,25 @@ namespace Metalama.Framework.Engine.CompileTime
                     new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }.SelectAsReadOnlyList(
                         x => x.Assembly.Location ) ) );
 
-            var additionalPackagesHash = additionalPackageReferences is "" ? "default" : HashUtilities.HashString( additionalPackageReferences );
+            var targetFrameworksString = string.IsNullOrEmpty( projectOptions.CompileTimeTargetFrameworks )
+                ? _defaultCompileTimeTargetFrameworks
+                : projectOptions.CompileTimeTargetFrameworks;
+
+            this._targetFrameworks = targetFrameworksString.Split( ';' ).ToImmutableArray();
+
+            if ( !this._targetFrameworks.Contains( "netstandard2.0" ) )
+            {
+                throw new InvalidOperationException(
+                    $"Custom MetalamaCompileTimeTargetFrameworks has to include 'netstandard2.0', but it was {this._targetFrameworks}" );
+            }
+
+            var projectHash =
+                additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks
+                    ? "default"
+                    : HashUtilities.HashString( $"{additionalPackageReferences}\n{targetFrameworksString}" );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
-                .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, additionalPackagesHash );
+                .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, projectHash );
 
             // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
@@ -133,7 +151,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
             // Get system assemblies.
-            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( additionalPackageReferences );
+            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( targetFrameworksString, additionalPackageReferences );
             this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
@@ -175,7 +193,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private string GetAdditionalCompileTimeAssembliesDirectory()
         {
-            var platform = Environment.Version.Major < 6 ? "net471" : "net6.0";
+            string platform;
+
+            if ( Environment.Version.Major < 6 )
+            {
+                platform = this._targetFrameworks.FirstOrDefault( f => f.StartsWith( "net4", StringComparison.Ordinal ) )
+                           ?? throw new InvalidOperationException( "Custom MetalamaCompileTimeTargetFrameworks did not include .NET Framework 4.x." );
+            }
+            else
+            {
+                platform = this._targetFrameworks.FirstOrDefault( f => f is ['n', 'e', 't', >= '6' and <= '9', ..] )
+                           ?? throw new InvalidOperationException( "Custom MetalamaCompileTimeTargetFrameworks did not include .NET 6+." );
+            }
 
             return Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
         }
@@ -246,7 +275,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
         }
 
-        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string additionalPackageReferences )
+        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string targetFrameworks, string additionalPackageReferences )
         {
             using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {
@@ -305,7 +334,7 @@ namespace Metalama.Framework.Engine.CompileTime
                        </PropertyGroup>
                        <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
                        <PropertyGroup>
-                         <TargetFrameworks>netstandard2.0;net6.0;net471</TargetFrameworks>
+                         <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
                          <OutputType>Exe</OutputType>
                          <LangVersion>latest</LangVersion>
                        </PropertyGroup>

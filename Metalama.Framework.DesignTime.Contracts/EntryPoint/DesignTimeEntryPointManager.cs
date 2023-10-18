@@ -29,7 +29,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             // Note that there maybe many instances of this class in the AppDomain, so it needs to make sure it uses a shared point of contact.
             // We're using a named AppDomain data slot for this. We have to synchronize access using a named semaphore.
 
-            using var mutex = new Mutex( initiallyOwned: false, $@"Global\{_appDomainDataName}" );
+            using var mutex = OpenOrCreateMutex( $@"Global\{_appDomainDataName}" );
 
             try
             {
@@ -56,7 +56,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             {
                 mutex.ReleaseMutex();
             }
-        }
+        }  
 
         // The constructor is public because it is used for tests, so we don't base tests on the singleton instance.
         // ReSharper disable once EmptyConstructor
@@ -101,5 +101,45 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
         }
 
         Version IDesignTimeEntryPointManager.Version => this.GetType().Assembly.GetName().Version!;
+
+        // This code is duplicated from MutexHelper in Metalama.Backstage and should be kept in sync (this version does not have logging).
+        internal static Mutex OpenOrCreateMutex( string mutexName )
+        {
+            // The number of iterations is intentionally very low.
+            // We will restart if the following occurs:
+            //   1) TryOpenExisting fails, i.e. there is no existing mutex.
+            //   2) Creating a new mutex fails, i.e. the mutex was created in the meantime by a process with higher set of rights.
+            // The probability of mutex being destroyed when we call TryOpenExisting again is fairly low.
+
+            for ( var i = 0; ; i++ )
+            {
+                // First try opening the mutex.
+                if ( Mutex.TryOpenExisting( mutexName, out var existingMutex ) )
+                {
+                    return existingMutex;
+                }
+                else
+                {
+                    // Otherwise we will try to create the mutex.
+                    try
+                    {
+                        return new Mutex( false, mutexName );
+                    }
+                    catch ( UnauthorizedAccessException )
+                    {
+                        if ( i < 3 )
+                        {
+                            // Mutex was probably created in the meantime and is not accessible - we will restart.
+                            continue;
+                        }
+                        else
+                        {
+                            // There were too many restarts - just rethrow.
+                            throw;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

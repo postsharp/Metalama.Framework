@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
     /// An implementation of <see cref="CompileTimeDomain"/> base on <c>AssemblyLoadContext</c> and able to unload
-    /// itself. When compiled with .NET Standard (instead of .NET 6.0), the class has no unloading effect.
+    /// itself.
     /// </summary>
     public sealed class UnloadableCompileTimeDomain : CompileTimeDomain
     {
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public UnloadableCompileTimeDomain( GlobalServiceProvider serviceProvider ) : base( serviceProvider )
         {
             CollectibleExecutionContext.RegisterDisposeAction( this.WaitForDisposal );
-            this._assemblyLoadContext = new AssemblyLoadContext( "Metalama_" + Guid.NewGuid(), true );
+            this._assemblyLoadContext = new AssemblyLoadContext( "Metalama_" + Guid.NewGuid(), isCollectible: true );
 
             this._taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
         }
