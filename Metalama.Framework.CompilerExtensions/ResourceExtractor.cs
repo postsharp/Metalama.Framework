@@ -38,6 +38,7 @@ namespace Metalama.Framework.CompilerExtensions
         private static volatile bool _initialized;
         private static string? _versionNumber;
         private static AssemblyLoader? _assemblyLoader;
+        private static readonly string? _overriddenTempPath;
 
         static ResourceExtractor()
         {
@@ -55,10 +56,13 @@ namespace Metalama.Framework.CompilerExtensions
                        string.Join( "", moduleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
 
             _snapshotDirectory = GetTempDirectory( "Extract" );
+            
+            var overriddenTempPath = Environment.GetEnvironmentVariable( "METALAMA_TEMP" );
+            _overriddenTempPath = string.IsNullOrEmpty( overriddenTempPath ) ? null : overriddenTempPath;
         }
 
         private static string GetTempDirectory( string purpose )
-            => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId, _isNetFramework ? "desktop" : "core" );
+            => Path.Combine( _overriddenTempPath ?? Path.GetTempPath(), "Metalama", purpose, _buildId, _isNetFramework ? "desktop" : "core" );
 
         private static void Initialize()
         {
