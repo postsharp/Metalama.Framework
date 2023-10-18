@@ -2,6 +2,9 @@
 
 This repository houses the core framework implementation of [Metalama](https://github.com/postsharp/Metalama).
 
+<!-- Matomo Image Tracker-->
+<img referrerpolicy="no-referrer-when-downgrade" src="https://postsharp.matomo.cloud/matomo.php?idsite=4&amp;rec=1" style="border:0" alt="" />
+<!-- End Matomo -->
 
 > [!WARNING]
 > This repository operates under a [source-available commercial license](LICENSE.md). While you can refer to the source code for reference and troubleshooting purposes, modifications and builds from this source code are prohibited. To modify and build from the source code, a separate Source Subscription must be acquired.
