@@ -248,15 +248,11 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
     internal CompilationModel CreateCompilationModel( Compilation compilation ) => (CompilationModel) this.CreateCompilation( compilation );
 
     private CompileTimeDomain CreateDomain()
-    {
 #if NET5_0_OR_GREATER
-        var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
-
-        return domain;
+        => new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
 #else
-        return new CompileTimeDomain( this.ServiceProvider.Global );
+        => new CompileTimeDomain( this.ServiceProvider.Global );
 #endif
-    }
 
     internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
 

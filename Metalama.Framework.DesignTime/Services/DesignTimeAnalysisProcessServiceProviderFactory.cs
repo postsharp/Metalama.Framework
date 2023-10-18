@@ -51,7 +51,7 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
         serviceProvider = serviceProvider.WithService( GetWorkspaceProvider( serviceProvider ) );
 
         // Add the pipeline factory.
-        var pipelineFactory = new DesignTimeAspectPipelineFactory( serviceProvider, new CompileTimeDomain( serviceProvider ) );
+        var pipelineFactory = new DesignTimeAspectPipelineFactory( serviceProvider, new CompileTimeDomain( serviceProvider, "DesignTime" ) );
         serviceProvider = serviceProvider.WithServices( pipelineFactory );
 
         // Add services that depend on the pipeline factory.
