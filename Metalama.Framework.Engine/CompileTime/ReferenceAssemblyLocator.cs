@@ -33,6 +33,8 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
+        private static readonly ImmutableArray<string> _defaultNugetSources =
+            ImmutableArray.Create( "https://api.nuget.org/v3/index.json", @"C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\" );
 
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
@@ -102,10 +104,25 @@ namespace Metalama.Framework.Engine.CompileTime
                     $"Custom MetalamaCompileTimeTargetFrameworks has to include 'netstandard2.0', but it was {this._targetFrameworks}" );
             }
 
+            string? additionalNugetSources = null;
+
+            if ( projectOptions.RestoreSources != null )
+            {
+                var sources = projectOptions.RestoreSources
+                    .Split( ';' )
+                    .Except( _defaultNugetSources )
+                    .ToArray();
+
+                if ( sources.Any() )
+                {
+                    additionalNugetSources = string.Join( ";", sources );
+                }
+            }
+
             var projectHash =
-                additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks
+                additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks && additionalNugetSources is null
                     ? "default"
-                    : HashUtilities.HashString( $"{additionalPackageReferences}\n{targetFrameworksString}" );
+                    : HashUtilities.HashString( $"{additionalPackageReferences}\n{targetFrameworksString}\n{additionalNugetSources}" );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, projectHash );
@@ -151,7 +168,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
             // Get system assemblies.
-            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( targetFrameworksString, additionalPackageReferences );
+            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( targetFrameworksString, additionalPackageReferences, additionalNugetSources );
             this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
@@ -275,7 +292,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
         }
 
-        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string targetFrameworks, string additionalPackageReferences )
+        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string targetFrameworks, string additionalPackageReferences, string? additionalNugetSources )
         {
             using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {
@@ -337,6 +354,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
                          <OutputType>Exe</OutputType>
                          <LangVersion>latest</LangVersion>
+                         <RestoreAdditionalProjectSources>{additionalNugetSources}</RestoreAdditionalProjectSources>
                        </PropertyGroup>
                        <ItemGroup>
                          <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />

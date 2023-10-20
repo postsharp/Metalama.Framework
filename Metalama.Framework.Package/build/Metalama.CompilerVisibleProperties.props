@@ -25,6 +25,8 @@
         <CompilerVisibleProperty Include="NuGetTargetMoniker"/>
         <CompilerVisibleProperty Include="Configuration"/>
         <CompilerVisibleProperty Include="MetalamaRoslynIsCompileTimeOnly"/>
+		<CompilerVisibleProperty Include="MetalamaCompileTimeTargetFrameworks"/>
+		<CompilerVisibleProperty Include="MetalamaRestoreSources"/>
         
     </ItemGroup>
 
