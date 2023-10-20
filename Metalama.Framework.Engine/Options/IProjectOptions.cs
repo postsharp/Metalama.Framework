@@ -150,6 +150,11 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         string? CompileTimeTargetFrameworks { get; }
 
+        /// <summary>
+        /// Gets NuGet sources configured for restoring packages.
+        /// </summary>
+        string? RestoreSources { get; }
+
         bool IsTest { get; }
     }
 }

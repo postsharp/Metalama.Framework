@@ -36,6 +36,12 @@
         <AdditionalFiles Include="$(MetalamaDesignTimeFallbackTouchFile)" Visible="False" />
     </ItemGroup>
 
+    <Target Name="GetRestoreSources" BeforeTargets="PrepareForBuild" DependsOnTargets="_GetRestoreSettings" Condition="$(IsRestoreTargetsFileLoaded)=='true'">
+        <PropertyGroup>
+            <MetalamaRestoreSources>$(_OutputSources)</MetalamaRestoreSources>
+        </PropertyGroup>
+    </Target>
+
     <Target Name="ExportMetalamaFrameworkProperties" BeforeTargets="PrepareForBuild">
         <Error Text="The IntermediateOutputPath property is not defined." Condition="'$(IntermediateOutputPath)'==''"/>
         <PropertyGroup>
