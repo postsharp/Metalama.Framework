@@ -118,6 +118,9 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override string? CompileTimeTargetFrameworks => this.GetStringOption( MSBuildPropertyNames.MetalamaCompileTimeTargetFrameworks );
 
+        [Memo]
+        public override string? RestoreSources => this.GetStringOption( MSBuildPropertyNames.MetalamaRestoreSources );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );
