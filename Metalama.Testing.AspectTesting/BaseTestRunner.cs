@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -685,7 +686,8 @@ internal abstract partial class BaseTestRunner
 
     private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
     {
-        var htmlCodeWriter = this.CreateHtmlCodeWriter( testResult.TestContext.AssertNotNull().ServiceProvider, testInput.Options );
+        var serviceProvider = testResult.TestContext.AssertNotNull().ServiceProvider;
+        var htmlCodeWriter = this.CreateHtmlCodeWriter( serviceProvider, testInput.Options );
 
         var htmlDirectory = Path.Combine(
             this.ProjectDirectory!,
@@ -702,11 +704,18 @@ internal abstract partial class BaseTestRunner
         // Write each document individually.
         if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
         {
+            var pipeline = new TestDesignTimeAspectPipeline( serviceProvider, testResult.TestContext.AssertNotNull(  ).Domain );
+            var designTimePipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation.AssertNotNull(  ) );
+
+            var compilationWithDesignTimeTrees =
+                testResult.InputCompilation.AddSyntaxTrees( designTimePipelineResult.AdditionalSyntaxTrees.Select( x => x.GeneratedSyntaxTree ) );
+            
+            
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
                 var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
 
-                await this.WriteHtmlAsync( testResult, syntaxTree, htmlDirectory, htmlCodeWriter, isTargetCode );
+                await this.WriteHtmlAsync( compilationWithDesignTimeTrees, testResult, syntaxTree, htmlDirectory, htmlCodeWriter, isTargetCode );
             }
         }
     }
@@ -717,6 +726,7 @@ internal abstract partial class BaseTestRunner
     protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );
 
     private async Task WriteHtmlAsync(
+        Compilation compilationWithDesignTimeTrees,
         TestResult testResult,
         TestSyntaxTree testSyntaxTree,
         string htmlDirectory,
@@ -740,8 +750,10 @@ internal abstract partial class BaseTestRunner
             // Add diagnostics to the input tree.
             inputDiagnostics = new List<Diagnostic>();
             inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
-            var semanticModel = testResult.InputCompilation.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
+            var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
             inputDiagnostics.AddRange( semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) );
+            
+            // TODO: Suppress.
         }
 
         if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )
