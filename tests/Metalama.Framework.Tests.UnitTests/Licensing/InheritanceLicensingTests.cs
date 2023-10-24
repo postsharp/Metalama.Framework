@@ -99,13 +99,13 @@ namespace Doc.InheritedTypeLevel
         public InheritanceLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [TestLicensesInlineData( "PostSharp Essentials", nameof(TestLicenses.PostSharpEssentials), false )]
-        [TestLicensesInlineData( "PostSharp Framework", nameof(TestLicenses.PostSharpFramework), true )]
-        [TestLicensesInlineData( "PostSharp Ultimate", nameof(TestLicenses.PostSharpUltimate), true )]
-        [TestLicensesInlineData( "Metalama Free Personal", nameof(TestLicenses.MetalamaFreePersonal), false )]
-        [TestLicensesInlineData( "Metalama Starter Business", nameof(TestLicenses.MetalamaStarterBusiness), true )]
-        [TestLicensesInlineData( "Metalama Professional Business", nameof(TestLicenses.MetalamaProfessionalBusiness), true )]
-        [TestLicensesInlineData( "Metalama Ultimate Business", nameof(TestLicenses.MetalamaUltimateBusiness), true )]
+        [TestLicensesInlineData( "PostSharp Essentials", nameof(TestLicenseKeys.PostSharpEssentials), false )]
+        [TestLicensesInlineData( "PostSharp Framework", nameof(TestLicenseKeys.PostSharpFramework), true )]
+        [TestLicensesInlineData( "PostSharp Ultimate", nameof(TestLicenseKeys.PostSharpUltimate), true )]
+        [TestLicensesInlineData( "Metalama Free Personal", nameof(TestLicenseKeys.MetalamaFreePersonal), false )]
+        [TestLicensesInlineData( "Metalama Starter Business", nameof(TestLicenseKeys.MetalamaStarterBusiness), true )]
+        [TestLicensesInlineData( "Metalama Professional Business", nameof(TestLicenseKeys.MetalamaProfessionalBusiness), true )]
+        [TestLicensesInlineData( "Metalama Ultimate Business", nameof(TestLicenseKeys.MetalamaUltimateBusiness), true )]
         public async Task InheritanceIsAcceptedAsync( string licenseName, string licenseKey, bool accepted )
         {
             _ = licenseName;

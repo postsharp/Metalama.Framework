@@ -13,15 +13,15 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [TestLicensesInlineData( nameof(TestLicenses.PostSharpEssentials) )]
-        [TestLicensesInlineData( nameof(TestLicenses.PostSharpFramework) )]
-        [TestLicensesInlineData( nameof(TestLicenses.PostSharpUltimate) )]
-        [TestLicensesInlineData( nameof(TestLicenses.MetalamaFreePersonal) )]
-        [TestLicensesInlineData( nameof(TestLicenses.MetalamaStarterBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenses.MetalamaProfessionalBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimateBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimateOpenSourceRedistribution) )]
-        [TestLicensesInlineData( nameof(TestLicenses.MetalamaUltimatePersonalProjectBound), TestLicenses.MetalamaUltimateProjectBoundProjectName )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpEssentials) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpFramework) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpUltimate) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
+        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
         public async Task CompilationPassesWithValidLicenseAsync( string licenseKey, string projectName = "TestProject" )
         {
             const string code = @"
