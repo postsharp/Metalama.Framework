@@ -10,8 +10,8 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -193,25 +193,9 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
     {
-        StringBuilder stringBuilder = new();
-        stringBuilder.Append( this.DeclaringType.ToDisplayString( format, context ) );
-        stringBuilder.Append( '.' );
-        stringBuilder.Append( this.Name );
-        stringBuilder.Append( '(' );
+        var parameterTypes = this.Parameters.AsEnumerable<IParameter>().Select( p => p.Type );
 
-        foreach ( var parameter in this.Parameters )
-        {
-            if ( parameter.Index > 0 )
-            {
-                stringBuilder.Append( ", " );
-            }
-
-            stringBuilder.Append( parameter.Type.ToDisplayString( format, context ) );
-        }
-
-        stringBuilder.Append( ')' );
-
-        return stringBuilder.ToString();
+        return DisplayStringFormatter.Format( format, context, $"{this.DeclaringType}.{this.Name}({parameterTypes})" );
     }
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;

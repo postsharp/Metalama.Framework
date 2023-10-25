@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 public sealed partial class CompilationModel
 {
     private ImmutableDictionary<INamedTypeSymbol, FieldUpdatableCollection> _fields;
-    private ImmutableDictionary<INamedTypeSymbol, MethodUpdatableCollection> _methods;
+    private ImmutableDictionary<INamedTypeSymbol, ISourceMemberCollection<IMethod>> _methods;
     private ImmutableDictionary<INamedTypeSymbol, ConstructorUpdatableCollection> _constructors;
     private ImmutableDictionary<INamedTypeSymbol, EventUpdatableCollection> _events;
     private ImmutableDictionary<INamedTypeSymbol, PropertyUpdatableCollection> _properties;
@@ -110,23 +111,26 @@ public sealed partial class CompilationModel
         ref ImmutableDictionary<TKey, TCollection> dictionary,
         bool requestMutableCollection,
         TKey declaringTypeSymbol,
-        Func<CompilationModel, TKey, TCollection> createCollection )
+        Func<CompilationModel, TKey, TCollection> createCollection,
+        Func<TCollection, TKey, TCollection>? createSubstitutedCollection = null )
         where TDeclaration : class, IDeclaration
-        where TCollection : UpdatableDeclarationCollection<TDeclaration>
+        where TCollection : ISourceDeclarationCollection<TDeclaration>
         where TKey : notnull
         => this.GetMemberCollection<TKey, TDeclaration, Ref<TDeclaration>, TCollection>(
             ref dictionary,
             requestMutableCollection,
             declaringTypeSymbol,
-            createCollection );
+            createCollection,
+            createSubstitutedCollection );
 
     private TCollection GetMemberCollection<TKey, TDeclaration, TRef, TCollection>(
         ref ImmutableDictionary<TKey, TCollection> dictionary,
         bool requestMutableCollection,
         TKey declaration,
-        Func<CompilationModel, TKey, TCollection> createCollection )
+        Func<CompilationModel, TKey, TCollection> createCollection,
+        Func<TCollection, TKey, TCollection>? createSubstitutedCollection )
         where TDeclaration : class, IDeclaration
-        where TCollection : UpdatableDeclarationCollection<TDeclaration, TRef>
+        where TCollection : ISourceDeclarationCollection<TDeclaration, TRef>
         where TKey : notnull
         where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
     {
@@ -154,7 +158,24 @@ public sealed partial class CompilationModel
         }
         else
         {
-            collection = createCollection( this.Compilation, declaration );
+            if ( createSubstitutedCollection != null &&
+                 declaration is INamedTypeSymbol { IsGenericType: true } substitutedType &&
+                 substitutedType.OriginalDefinition != substitutedType )
+            {
+                var sourceCollection = this.GetMemberCollection<TKey, TDeclaration, TRef, TCollection>(
+                    ref dictionary,
+                    requestMutableCollection,
+                    (TKey) substitutedType.OriginalDefinition,
+                    createCollection,
+                    createSubstitutedCollection );
+
+                collection = createSubstitutedCollection( sourceCollection, declaration );
+            }
+            else
+            {
+                collection = createCollection( this.Compilation, declaration );
+            }
+
             dictionary = dictionary.SetItem( declaration, collection );
         }
 
@@ -168,12 +189,13 @@ public sealed partial class CompilationModel
             declaringType,
             ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
-    internal MethodUpdatableCollection GetMethodCollection( INamedTypeSymbol declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedTypeSymbol, IMethod, MethodUpdatableCollection>(
+    internal ISourceMemberCollection<IMethod> GetMethodCollection( INamedTypeSymbol declaringType, bool mutable = false )
+        => this.GetMemberCollection<INamedTypeSymbol, IMethod, ISourceMemberCollection<IMethod>>(
             ref this._methods,
             mutable,
             declaringType,
-            ( c, t ) => new MethodUpdatableCollection( c, t ) );
+            ( c, t ) => new MethodUpdatableCollection( c, t ),
+            ( s, t ) => new MemberSubstitutedCollection<IMethod>( s, t ) );
 
     internal ConstructorUpdatableCollection GetConstructorCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IConstructor, ConstructorUpdatableCollection>(
@@ -238,7 +260,8 @@ public sealed partial class CompilationModel
             ref this._attributes,
             mutable,
             parent,
-            ( c, t ) => new AttributeUpdatableCollection( c, t, moduleSymbol ) );
+            ( c, t ) => new AttributeUpdatableCollection( c, t, moduleSymbol ),
+            null );
     }
 
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
@@ -376,7 +399,7 @@ public sealed partial class CompilationModel
                 break;
 
             case IMethod method:
-                var methods = this.GetMethodCollection( method.DeclaringType.GetSymbol().AssertNotNull(), true );
+                var methods = this.GetMethodCollection( method.DeclaringType.GetSymbol().AssertNotNull(), true ).AssertCast<MethodUpdatableCollection>();
                 methods.Add( method.ToMemberRef() );
 
                 break;

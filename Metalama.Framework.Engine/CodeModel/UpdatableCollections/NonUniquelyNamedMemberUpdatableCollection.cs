@@ -16,7 +16,6 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
     protected override IEnumerable<ISymbol> GetSymbols()
         => this.DeclaringTypeOrNamespace.GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
-    protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base(
-        compilation,
-        declaringType ) { }
+    protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType )
+        : base( compilation, declaringType ) { }
 }

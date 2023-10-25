@@ -18,11 +18,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
 {
-    private readonly IAttributeData _attributeConstruction;
+    internal IAttributeData AttributeConstruction { get; }
 
     public AttributeBuilder( Advice advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
     {
-        this._attributeConstruction = attributeConstruction;
+        this.AttributeConstruction = attributeConstruction;
         this.ContainingDeclaration = containingDeclaration;
     }
 
@@ -39,15 +39,15 @@ internal sealed class AttributeBuilder : DeclarationBuilder, IAttributeImpl
     public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-        => this._attributeConstruction.ToString() ?? "";
+        => this.AttributeConstruction.ToString() ?? "";
 
     public INamedType Type => this.Constructor.DeclaringType;
 
-    public IConstructor Constructor => this._attributeConstruction.Constructor;
+    public IConstructor Constructor => this.AttributeConstruction.Constructor;
 
-    public ImmutableArray<TypedConstant> ConstructorArguments => this._attributeConstruction.ConstructorArguments;
+    public ImmutableArray<TypedConstant> ConstructorArguments => this.AttributeConstruction.ConstructorArguments;
 
-    public INamedArgumentList NamedArguments => this._attributeConstruction.NamedArguments;
+    public INamedArgumentList NamedArguments => this.AttributeConstruction.NamedArguments;
 
     public FormattableString FormatPredecessor( ICompilation compilation ) => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 

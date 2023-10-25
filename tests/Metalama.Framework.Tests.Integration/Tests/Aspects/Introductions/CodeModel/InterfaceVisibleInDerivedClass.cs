@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.CodeModel.InterfaceVisibleInDerivedClass
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.CodeModel.InterfaceVisibleInDerivedClass
 {
     /*
      * Tests that the aspect on the derived class sees the introduced interface on the base class.

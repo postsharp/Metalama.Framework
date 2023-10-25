@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code
 {
     /// <summary>
     /// Represents a typed value that can be defined, defined to null, or undefined. Used to represent default values,
-    /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments.
+    /// for instance <see cref="IParameter.DefaultValue"/>, or attribute arguments.
     /// </summary>
     [CompileTime]
     public readonly struct TypedConstant : IExpression
@@ -93,10 +93,10 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedConstant"/> struct that represents the fact that the value
-        /// was set to something, even <c>null</c>. To represent the fact that the default value was not set, use <c>default(OptionalValue)</c>.
+        /// was set to something, even <c>null</c>. To represent the fact that the default value was not set, use <c>default(TypedConstant)</c>.
         /// </summary>
         /// <param name="value">The value (even <c>null</c>).</param>
-        /// <param name="type"></param>
+        /// <param name="type">The type of the value.</param>
         private TypedConstant( object? value, IType type ) : this()
         {
             if ( value != null )
