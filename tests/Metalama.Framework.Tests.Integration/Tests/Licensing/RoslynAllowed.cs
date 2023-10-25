@@ -1,4 +1,4 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenses,Metalama.Backstage.Testing;MetalamaProfessionalPersonal)
+﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaProfessionalPersonal)
 // @Include(_Roslyn.cs);
 // @OutputAllSyntaxTrees
 
