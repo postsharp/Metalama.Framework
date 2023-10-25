@@ -10,8 +10,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- Metalama Ultimate Personal Prject-Bound (project "ProjectBoundTestsProject") -->
-        <MetalamaLicense>19-ZUWQQQQQ6EAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQUQYW77DFS8UE3A9FH68EXCHR629X3EDV56MCNGGVCQCUUEKRAV2GH9DNWLV95EQWL28NHM2AKKU426FARGLBXDW92Y8TVRX3U7FJXVETL3H7QQEZBEVKPZUXVDVKBJKP</MetalamaLicense>
+        <MetalamaLicense>$(MetalamaUltimatePersonalProjectBoundLicenseKey)</MetalamaLicense>
         <!-- Use AspectTestClass instead of TestExecutor to tests the Rider scenario. -->
         <MetalamaTestFramework>Original</MetalamaTestFramework>
     </PropertyGroup>

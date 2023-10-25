@@ -746,12 +746,12 @@ namespace Metalama.Testing.AspectTesting
 
         internal static string ReadLicenseExpression( string licenseExpression )
         {
-            if ( licenseExpression.Split( ';' ) is not [var type, var field] )
+            if ( licenseExpression.Split( ';' ) is not [var type, var property] )
             {
                 throw new InvalidOperationException( $"Could not parse license expression '{licenseExpression}'." );
             }
 
-            return Type.GetType( type ).AssertNotNull().GetField( field ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
+            return Type.GetType( type ).AssertNotNull().GetProperty( property ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
         }
     }
 }

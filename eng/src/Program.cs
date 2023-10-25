@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using PostSharp.Engineering.BuildTools;
 using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
@@ -10,7 +8,6 @@ using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
-using System;
 using System.IO;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_0;
 
@@ -81,6 +78,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
+product.PrepareCompleted += TestLicensesCache.FetchOnPrepareCompleted;
 
 var commandApp = new CommandApp();
 
@@ -126,39 +124,5 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, commandLine, toolDirectory ) )
     {
         arg.IsFailed = true;
-    }
-
-    var licensesFile = Path.Combine( arg.Context.RepoDirectory, "eng/Licenses.g.props" );
-    if ( !File.Exists( licensesFile ) )
-    {
-        arg.Context.Console.WriteHeading( "Fetching licenses" );
-
-        var kvUri = "https://testserviceskeyvault.vault.azure.net/";
-        var client = new SecretClient( new Uri( kvUri ), new DefaultAzureCredential() );
-
-        string GetLicenseKey( string keyName )
-        {
-            try
-            {
-                return client.GetSecret( $"TestLicenseKey{keyName}" ).Value.Value;
-            }
-            catch ( Exception ex )
-            {
-                arg.Context.Console.WriteWarning( $"Could not get license key {keyName}, some licensing tests are going to fail." );
-                arg.Context.Console.WriteMessage( ex.Message );
-
-                return string.Empty;
-            }
-        }
-
-        File.WriteAllText( licensesFile,
-            $"""
-             <Project>
-               <PropertyGroup>
-                 <MetalamaStarterBusinessLicenseKey>{GetLicenseKey( "MetalamaStarterBusiness" )}</MetalamaStarterBusinessLicenseKey>
-                 <MetalamaProfessionalBusinessLicenseKey>{GetLicenseKey( "MetalamaProfessionalBusiness" )}</MetalamaProfessionalBusinessLicenseKey>
-               </PropertyGroup>
-             </Project>
-             """ );
     }
 }
