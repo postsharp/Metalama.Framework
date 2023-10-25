@@ -5,7 +5,7 @@
         <PackageId>Metalama.Framework.Redist</PackageId>
         <PackageDescription>
             Redistributable components for package 'Metalama.Framework'. This package should only be installed as a dependency.
-            (This is not the package you are looking for).
+            (This is not the package you are looking for.)
         </PackageDescription>
         <IsPackable>True</IsPackable>
         <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
