@@ -174,9 +174,9 @@ public sealed class LicenseVerifier : IProjectService
 
         // List all aspect classed, that are used.
         var aspectClasses = aspectInstanceResults
+            
+            // Don't count skipped instances.
             .Where(
-
-                // Don't count skipped instances.
                 r => !r.AspectInstance.IsSkipped
 
                      // Don't count child aspects
