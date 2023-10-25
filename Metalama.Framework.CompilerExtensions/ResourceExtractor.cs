@@ -23,6 +23,8 @@ namespace Metalama.Framework.CompilerExtensions
     /// </summary>
     public static class ResourceExtractor
     {
+        private const string _designTimeContractsAssemblyName = "Metalama.Framework.DesignTime.Contracts";
+
         private static readonly object _initializeLock = new();
         private static readonly string[] _assembliesShippedWithMetalamaCompiler = new[] { "Metalama.Backstage", "Metalama.Compiler.Interfaces" };
 
@@ -93,7 +95,11 @@ namespace Metalama.Framework.CompilerExtensions
 
                         _versionNumber = GetRoslynVersion();
 
-                        _assemblyLoader = new AssemblyLoader( name => GetAssembly( name ) );
+                        // Since GetAssemblyCore loads the DesignTime.Contracts assembly outside of the AssemblyLoader ALC,
+                        // we also need to handle loading its dependencies by specifying the globalResolveHandlerFilter.
+                        _assemblyLoader = new AssemblyLoader(
+                            name => GetAssembly( name ),
+                            globalResolveHandlerFilter: a => a?.GetName().Name == _designTimeContractsAssemblyName );
 
                         _initialized = true;
                     }
@@ -427,6 +433,13 @@ namespace Metalama.Framework.CompilerExtensions
                 if ( embeddedAssembly.Name.Version == requestedAssemblyName.Version )
                 {
                     log?.AppendLine( $"Loading the embedded assembly '{embeddedAssembly.Path}'." );
+
+                    // It seems assemblies loaded into an ALC don't participate in COM type equivalence.
+                    // Since we need that for the DesignTime.Contracts assembly, load it without using ALC.
+                    if ( name.StartsWith( $"{_designTimeContractsAssemblyName}," ) )
+                    {
+                        return Assembly.LoadFile( embeddedAssembly.Path );
+                    }
 
                     return _assemblyLoader.LoadAssembly( embeddedAssembly.Path );
                 }

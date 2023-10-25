@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.Observer = serviceProvider.GetService<ICompileTimeDomainObserver>();
             this.Observer?.OnDomainCreated( this );
 
-            this._assemblyLoader = new AssemblyLoader( this.ResolveAssembly, $"CompileTimeDomain {debugName}".TrimEnd() );
+            this._assemblyLoader = new AssemblyLoader( this.ResolveAssembly, debugName: $"CompileTimeDomain {debugName}".TrimEnd() );
 
             this._logger = Logger.Domain;
         }
