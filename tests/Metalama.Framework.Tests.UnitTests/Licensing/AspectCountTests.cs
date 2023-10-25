@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Testing;
-using Metalama.Framework.Engine.Licensing;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -226,12 +225,7 @@ namespace {0}
 
             if ( expectedErrorId == null )
             {
-                // We want to assert that the diagnostics are empty, but unit tests reference Metalama.Framework.Sdk,
-                // so we need to ignore the Roslyn API license error.
-                if ( diagnostics.Count > 0 )
-                {
-                    Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
-                }
+                AssertEmptyOrSdkOnly( diagnostics );
             }
             else
             {
@@ -281,9 +275,7 @@ class TargetClass
 
             var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-            // We want to assert that the diagnostics are empty, but unit tests reference Metalama.Framework.Sdk,
-            // so we need to ignore the Roslyn API license error.
-            Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
+            AssertEmptyOrSdkOnly( diagnostics );
         }
 
         [Fact]
@@ -348,9 +340,7 @@ class TargetClass
 
             var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-            // We want to assert that the diagnostics are empty, but unit tests reference Metalama.Framework.Sdk,
-            // so we need to ignore the Roslyn API license error.
-            Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
+            AssertEmptyOrSdkOnly( diagnostics );
         }
 
         [Fact]

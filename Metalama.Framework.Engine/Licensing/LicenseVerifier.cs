@@ -172,8 +172,26 @@ public sealed class LicenseVerifier : IProjectService
             }
         }
 
-        // List all aspect classed, that are used. Don't count skipped instances.
-        var aspectClasses = aspectInstanceResults.Where( r => !r.AspectInstance.IsSkipped ).Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+        // List all aspect classed, that are used.
+        var aspectClasses = aspectInstanceResults
+            .Where(
+
+                // Don't count skipped instances.
+                r => !r.AspectInstance.IsSkipped
+
+                     // Don't count child aspects
+                     && (r.AspectInstance.PredecessorDegree == 0
+
+                         // that are not public
+                         || r.AspectInstance.AspectClass.Type.IsPublic
+
+                         // and don't inherit from Attribute class
+                         || typeof(Attribute).IsAssignableFrom( r.AspectInstance.AspectClass.Type )
+
+                         // and are not applied in other way than as a child aspect.
+                         || r.AspectInstance.Predecessors.Any( p => p.Kind != AspectPredecessorKind.ChildAspect )) )
+            .Select( r => r.AspectInstance.AspectClass )
+            .ToHashSet();
 
         // Let all contracts to be used for free.
         aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) );
@@ -216,7 +234,7 @@ public sealed class LicenseVerifier : IProjectService
         }
 
         // Write consumption data to disk if required.
-        if ( hasLicenseError || (this._projectOptions.WriteLicenseUsageData ?? this._licenseConsumptionService.IsTrialLicense) )
+        if ( hasLicenseError && (this._projectOptions.WriteLicenseUsageData ?? this._licenseConsumptionService.IsTrialLicense) )
         {
             var directory = GetConsumptionDataDirectory( this._tempFileManager );
 

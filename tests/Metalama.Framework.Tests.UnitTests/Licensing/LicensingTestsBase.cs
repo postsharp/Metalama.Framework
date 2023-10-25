@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using System.Globalization;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
@@ -53,6 +54,21 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             }
 
             return diagnostics;
+        }
+
+        protected static void AssertEmptyOrSdkOnly( DiagnosticBag diagnostics )
+        {
+            // We want to assert that the diagnostics are empty, but unit tests reference Metalama.Framework.Sdk,
+            // so we need to ignore the Roslyn API license error, if present.
+            // The SDK license error is tested in integration tests separately.
+            if ( diagnostics.Count == 0 )
+            {
+                return;
+            }
+
+            // First, we need to make sure there is only one diagnostic in total. Running the next assert only would ignore other diagnostics.
+            Assert.Single( diagnostics );
+            Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
         }
     }
 }
