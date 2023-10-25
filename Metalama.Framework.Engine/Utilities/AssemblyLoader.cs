@@ -17,7 +17,7 @@ internal sealed class AssemblyLoader : IDisposable
     private readonly Func<string, Assembly> _loadAssembly;
     private readonly Action? _assemblyResolveUnsubscribe;
 
-    public AssemblyLoader( Func<string, Assembly?> resolveAssembly, string? debugName = null )
+    public AssemblyLoader( Func<string, Assembly?> resolveAssembly, Func<Assembly?, bool>? globalResolveHandlerFilter = null, string? debugName = null )
     {
         this._resolveAssembly = resolveAssembly;
 
@@ -40,13 +40,26 @@ internal sealed class AssemblyLoader : IDisposable
             var loadByPathMethod = alcType!.GetMethod( "LoadFromAssemblyPath" )!;
             this._loadAssembly = (Func<string, Assembly>) Delegate.CreateDelegate( typeof(Func<string, Assembly>), metalamaAlc, loadByPathMethod );
 
+            if ( globalResolveHandlerFilter != null )
+            {
+                var loadByNameMethod = alcType.GetMethod( "LoadFromAssemblyName" )!;
+
+                var loadByNameDelegate =
+                    (Func<AssemblyName, Assembly>) Delegate.CreateDelegate( typeof(Func<AssemblyName, Assembly>), metalamaAlc, loadByNameMethod );
+
+                Assembly? GlobalResolveHandler( object? s, ResolveEventArgs e )
+                    => globalResolveHandlerFilter( e.RequestingAssembly ) ? loadByNameDelegate( new AssemblyName( e.Name ) ) : null;
+
+                AppDomain.CurrentDomain.AssemblyResolve += GlobalResolveHandler;
+                this._assemblyResolveUnsubscribe = () => AppDomain.CurrentDomain.AssemblyResolve -= GlobalResolveHandler;
+            }
+
             return;
         }
 
         this._loadAssembly = Assembly.LoadFile;
 
         AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
-
         this._assemblyResolveUnsubscribe = () => AppDomain.CurrentDomain.AssemblyResolve -= this.OnAssemblyResolve;
     }
 
