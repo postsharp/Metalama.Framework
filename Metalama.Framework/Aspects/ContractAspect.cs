@@ -4,6 +4,8 @@ using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Metalama.Framework.Aspects
@@ -26,8 +28,27 @@ namespace Metalama.Framework.Aspects
     /// </para>
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
+    [Layers( Layer0Apply, Layer1Build )]
     public abstract class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
+        public const string Layer0Apply = nameof( Layer0Apply );
+        public const string Layer1Build = nameof( Layer1Build );
+
+        /// <summary>
+        /// This class supports Metalama framework infrastucture and should not be used directly by user code.
+        /// </summary>
+        [CompileTime]
+        [EditorBrowsable( EditorBrowsableState.Never )]
+        public sealed class RedirectToProxyParameterAnnotation : IAnnotation<IFieldOrPropertyOrIndexer>, IAnnotation<IParameter>
+        {
+            public RedirectToProxyParameterAnnotation( IParameter parameter )
+            {
+                this.Parameter = parameter ?? throw new ArgumentNullException( nameof( parameter ) );
+            }
+
+            public IParameter Parameter { get; }
+        }
+
         private readonly ContractDirection _direction;
 
         /// <summary>
@@ -102,6 +123,83 @@ namespace Metalama.Framework.Aspects
             return this.GetActualDirection( aspectBuilder, direction );
         }
 
+        private static IReadOnlyList<IParameter>? GetValidatedDistinctProxyParametersForRedirection( IEnumerable<RedirectToProxyParameterAnnotation> annotations, IType targetType )
+        {
+            // Avoid performance hit for the very common case that there are no applicable annotations.
+
+            var iter = annotations.GetEnumerator();
+
+            if ( !iter.MoveNext() )
+            {
+                return null;
+            }
+
+            // Then very common that there is only a single applicable annotation.
+
+            var first = iter.Current;
+
+            if ( !iter.MoveNext() )
+            {
+                return ParameterIsValid( first.Parameter, targetType ) ? new[] { first.Parameter } : null;
+            }
+
+            var distinctByParameter = new HashSet<IParameter>
+            {
+                first.Parameter,
+                iter.Current.Parameter
+            };
+
+            while ( iter.MoveNext() )
+            {
+                distinctByParameter.Add( iter.Current.Parameter );
+            }
+
+            return distinctByParameter.Where( p => ParameterIsValid( p, targetType ) ).ToList();
+
+            static bool ParameterIsValid( IParameter parameter, IType expectedType )
+            {
+                var isValid = parameter.Type.Equals( expectedType );
+
+                if ( !isValid )
+                {
+                    // TODO: How best to report invalid parameters?
+                    // Invalid parameters would be caused by faulty logic in other aspects (which are expected to be in-house maintained), and
+                    // the user can't take any action to fix this.
+
+                    throw new InvalidOperationException( "The type of " + nameof( RedirectToProxyParameterAnnotation ) + "." + nameof( RedirectToProxyParameterAnnotation.Parameter ) + " does not match the type of the target of the " + nameof( ContractAspect ) + "." );
+                }
+
+                return isValid;
+            }
+        }
+
+        // TODO: Consider adding protected virtual RedirectionStrategy GetRedirectionStrategy( builder, IParameter proxyParameter ) so that derived types can opt out of redirection if they don't support it.
+        // RedirectionStrategy could be { Redirect, Skip, Fail }
+
+        void IAspect<IFieldOrPropertyOrIndexer>.BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+        {
+            if ( builder.Layer != Layer1Build )
+            {
+                return;
+            }
+
+            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection( builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(), builder.Target.Type );
+
+            if ( redirectToParameters is { Count: > 0 } )
+            {
+                foreach ( var parameter in redirectToParameters )
+                {
+                    // TODO: Use AssertNotNull() extension method instead of `throw` if it can be made accessible.
+
+                    this.BuildAspect( builder.WithTarget( parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
+                }
+            }
+            else
+            {
+                this.BuildAspect( builder );
+            }
+        }
+
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
@@ -122,6 +220,28 @@ namespace Metalama.Framework.Aspects
             }
 
             builder.Advice.AddContract( builder.Target, nameof(this.Validate), direction );
+        }
+
+        void IAspect<IParameter>.BuildAspect( IAspectBuilder<IParameter> builder )
+        {
+            if ( builder.Layer != Layer1Build )
+            {
+                return;
+            }
+
+            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection( builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(), builder.Target.Type );
+
+            if ( redirectToParameters is { Count: > 0 } )
+            {
+                foreach ( var parameter in redirectToParameters )
+                {
+                    this.BuildAspect( builder.WithTarget( parameter ) );
+                }
+            }
+            else
+            {
+                this.BuildAspect( builder );
+            }
         }
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
