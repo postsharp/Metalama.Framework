@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Aspects
@@ -28,26 +28,12 @@ namespace Metalama.Framework.Aspects
     /// </para>
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
-    [Layers( Layer0Apply, Layer1Build )]
-    public abstract class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
+    [Layers( Layer1Build )]
+    public abstract partial class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
-        public const string Layer0Apply = nameof( Layer0Apply );
-        public const string Layer1Build = nameof( Layer1Build );
-
-        /// <summary>
-        /// This class supports Metalama framework infrastucture and should not be used directly by user code.
-        /// </summary>
-        [CompileTime]
-        [EditorBrowsable( EditorBrowsableState.Never )]
-        public sealed class RedirectToProxyParameterAnnotation : IAnnotation<IFieldOrPropertyOrIndexer>, IAnnotation<IParameter>
-        {
-            public RedirectToProxyParameterAnnotation( IParameter parameter )
-            {
-                this.Parameter = parameter ?? throw new ArgumentNullException( nameof( parameter ) );
-            }
-
-            public IParameter Parameter { get; }
-        }
+        // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects
+        // and then request redirection before the build layer.
+        public const string Layer1Build = "Build";
 
         private readonly ContractDirection _direction;
 
@@ -123,11 +109,13 @@ namespace Metalama.Framework.Aspects
             return this.GetActualDirection( aspectBuilder, direction );
         }
 
-        private static IReadOnlyList<IParameter>? GetValidatedDistinctProxyParametersForRedirection( IEnumerable<RedirectToProxyParameterAnnotation> annotations, IType targetType )
+        private static IReadOnlyCollection<IParameter>? GetValidatedDistinctProxyParametersForRedirection(
+            IEnumerable<RedirectToProxyParameterAnnotation> annotations,
+            IType targetType )
         {
             // Avoid performance hit for the very common case that there are no applicable annotations.
 
-            var iter = annotations.GetEnumerator();
+            using var iter = annotations.GetEnumerator();
 
             if ( !iter.MoveNext() )
             {
@@ -140,24 +128,36 @@ namespace Metalama.Framework.Aspects
 
             if ( !iter.MoveNext() )
             {
-                return ParameterIsValid( first.Parameter, targetType ) ? new[] { first.Parameter } : null;
+                return ParameterIsValid( first?.Parameter, targetType ) ? new[] { first.Parameter } : null;
             }
 
-            var distinctByParameter = new HashSet<IParameter>
-            {
-                first.Parameter,
-                iter.Current.Parameter
-            };
+            var distinctByParameter = new HashSet<IParameter>();
+
+            AddIfValid( distinctByParameter, first?.Parameter, targetType );
+            AddIfValid( distinctByParameter, iter.Current?.Parameter, targetType );
 
             while ( iter.MoveNext() )
             {
-                distinctByParameter.Add( iter.Current.Parameter );
+                AddIfValid( distinctByParameter, iter.Current?.Parameter, targetType );
             }
 
-            return distinctByParameter.Where( p => ParameterIsValid( p, targetType ) ).ToList();
+            return distinctByParameter;
 
-            static bool ParameterIsValid( IParameter parameter, IType expectedType )
+            static void AddIfValid( HashSet<IParameter> set, IParameter? parameter, IType expectedType )
             {
+                if ( ParameterIsValid( parameter, expectedType ) )
+                {
+                    set.Add( parameter );
+                }
+            }
+
+            static bool ParameterIsValid( [NotNullWhen( true )] IParameter? parameter, IType expectedType )
+            {
+                if ( parameter == null )
+                {
+                    return false;
+                }
+
                 var isValid = parameter.Type.Equals( expectedType );
 
                 if ( !isValid )
@@ -166,7 +166,9 @@ namespace Metalama.Framework.Aspects
                     // Invalid parameters would be caused by faulty logic in other aspects (which are expected to be in-house maintained), and
                     // the user can't take any action to fix this.
 
-                    throw new InvalidOperationException( "The type of " + nameof( RedirectToProxyParameterAnnotation ) + "." + nameof( RedirectToProxyParameterAnnotation.Parameter ) + " does not match the type of the target of the " + nameof( ContractAspect ) + "." );
+                    throw new InvalidOperationException(
+                        "The type of " + nameof(RedirectToProxyParameterAnnotation) + "." + nameof(RedirectToProxyParameterAnnotation.Parameter)
+                        + " does not match the type of the target of the " + nameof(ContractAspect) + "." );
                 }
 
                 return isValid;
