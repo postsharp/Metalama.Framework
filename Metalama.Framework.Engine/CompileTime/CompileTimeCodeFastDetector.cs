@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 else
                 {
                     // Any tree containing a using directive for Metalama.Framework needs to be included.
-                    if ( IsMetalamaFramework( node.Name ) )
+                    if ( node.Name != null && IsMetalamaFramework( node.Name ) )
                     {
                         return true;
                     }

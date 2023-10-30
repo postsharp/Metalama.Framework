@@ -5,7 +5,7 @@
         <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
     </ItemGroup>
 
-    <Import Project="..\Build\RoslynVersion\Roslyn.4.0.1.props" />
+    <Import Project="..\Build\RoslynVersion\Roslyn.4.4.0.props" />
 
     <Import Project="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
 

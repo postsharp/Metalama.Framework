@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <Import Project="..\Build\RoslynVersion\Latest.imports" />
 
@@ -7,7 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-        <AssemblyName>Metalama.Framework.DesignTime.VisualStudio.$(ThisRoslynVersion)</AssemblyName>
+        <AssemblyName>Metalama.Framework.DesignTime.VisualStudio.$(ThisRoslynVersionNoPreview)</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

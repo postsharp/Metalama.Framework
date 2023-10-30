@@ -14,7 +14,7 @@
 9. Look at all projects named e.g. `Metalama.*.<LAST_VERSION>.csproj` and duplicate them, but import the _previous last version_.
 10. Update Metalama.sln to include the new project.
 11. Do a find-in-files for the _previous_ latest version and see where things need to be changed or added. This includes:
-    1. Many `InternalsVisibleTo`
+    1. Many `InternalsVisibleTo`, including one in the `Metalama.Framework.RunTime` repo
     2. `ResourceExtractor.GetRoslynVersion`
     3. `JsonSerializationBinder`
 12. Update `Metalama.Framework.CompilerExtensions.csproj` to include the new assemblies.

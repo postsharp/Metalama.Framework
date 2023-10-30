@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
 
             public override SyntaxNode? VisitAttributeList( AttributeListSyntax node )
             {
-                var attributes = node.Attributes.SelectAsImmutableArray( this.VisitAttribute ).WhereNotNull().ToReadOnlyList();
+                var attributes = node.Attributes.SelectAsImmutableArray( this.VisitAttribute ).WhereNotNull().Cast<AttributeSyntax>().ToReadOnlyList();
 
                 if ( attributes.Count == 0 )
                 {

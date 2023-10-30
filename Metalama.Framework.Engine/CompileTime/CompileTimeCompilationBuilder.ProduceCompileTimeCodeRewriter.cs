@@ -1333,7 +1333,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertNotNull() ) );
+                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertCast<UsingDirectiveSyntax>().AssertNotNull() ) );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
                     var attributes = this.VisitAttributeLists( node.AttributeLists );

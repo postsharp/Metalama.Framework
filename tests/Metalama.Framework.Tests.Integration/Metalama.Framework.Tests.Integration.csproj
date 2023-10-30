@@ -33,8 +33,8 @@
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
-		<!-- But still show them in solution explorer -->
-		<None Include="Tests\**\__*.cs" />
+        <!-- But still show them in solution explorer -->
+        <None Include="Tests\**\__*.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -45,7 +45,7 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-		    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
