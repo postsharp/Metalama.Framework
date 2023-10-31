@@ -1571,7 +1571,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                         MetalamaStringFormatter.Format(
                             $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
 
-                case ContractDirection.Input when targetParameter.RefKind is not (RefKind.None or RefKind.Ref or RefKind.In):
+                case ContractDirection.Input when targetParameter.RefKind is RefKind.Out:
                     throw new ArgumentOutOfRangeException(
                         nameof(kind),
                         MetalamaStringFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );

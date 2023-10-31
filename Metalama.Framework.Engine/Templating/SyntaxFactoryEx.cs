@@ -235,4 +235,14 @@ internal static partial class SyntaxFactoryEx
 
         return statement;
     }
+
+    internal static SyntaxToken InvocationRefKindToken( this Code.RefKind refKind )
+        => refKind switch
+        {
+            Code.RefKind.None or Code.RefKind.In => default,
+            Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+            Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+            Code.RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
+            _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
+        };
 }
