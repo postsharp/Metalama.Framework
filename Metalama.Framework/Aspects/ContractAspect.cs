@@ -305,6 +305,22 @@ namespace Metalama.Framework.Aspects
         [Template]
         public abstract void Validate( dynamic? value );
 
+        /// <summary>
+        /// Redirects validation logic of <see cref="ContractAspect"/> from the specified property to the specified parameter.
+        /// </summary>
+        /// <param name="aspectBuilder">Current aspect builder.</param>
+        /// <param name="sourceTarget">A declaration to redirect the validation logic from.</param>
+        /// <param name="targetParameter">A parameter to redirect the validation logic to.</param>
+        /// <remarks>
+        /// <para>
+        /// This call will only redirect validation logic of contracts applied after the current aspect. 
+        /// Contracts applied before the current aspect will not be affected.
+        /// </para>
+        /// <para>
+        /// If an aspect needs to see the contract aspect instances and redirect their validation logic at the same time, 
+        /// it should be applied after the default layer of <see cref="ContractAspect"/> and before the layer that applies the contract logic, i.e. <see cref="ContractAspect.BuildLayer"/>.
+        /// </para>
+        /// </remarks>
         public static void RedirectContracts( IAspectBuilder aspectBuilder, IFieldOrPropertyOrIndexer sourceTarget, IParameter targetParameter )
         {
             aspectBuilder.Advice.AddAnnotation( sourceTarget, new RedirectToProxyParameterAnnotation( targetParameter ) );
