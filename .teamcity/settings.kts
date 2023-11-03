@@ -76,7 +76,7 @@ object DebugBuild : BuildType({
         swabra {
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
-        }, 
+        }
         perfmon {}
     }
 
