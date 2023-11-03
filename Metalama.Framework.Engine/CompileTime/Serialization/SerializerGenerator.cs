@@ -49,7 +49,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         return this.ClassifyFieldOrProperty( serializableTypeMember ) == FieldOrPropertyDeserializationKind.Deserialize_MakeMutable;
     }
 
-    public MemberDeclarationSyntax? CreateDeserializingConstructor( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
+    public MemberDeclarationSyntax? CreateDeserializingConstructor( SerializableTypeInfo serializableType, SyntaxToken constructorName )
     {
         var targetType = serializableType.Type.AssertNotNull();
         var baseType = serializableType.Type.BaseType.AssertNotNull();
@@ -198,7 +198,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             ConstructorDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( serializableType.Type.IsValueType ? Token( SyntaxKind.PrivateKeyword ) : Token( SyntaxKind.ProtectedKeyword ) ),
-                serializableTypeName.ShortName,
+                constructorName,
                 ParameterList(
                     SingletonSeparatedList(
                         Parameter( Identifier( argumentReaderParameterName ) )
@@ -220,7 +220,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                    compilationContext.ReflectionMapper.GetTypeSymbol( typeof(IArgumentsReader) ) );
     }
 
-    public TypeDeclarationSyntax? CreateSerializerType( SerializableTypeInfo serializableType, in QualifiedTypeNameInfo serializableTypeName )
+    public TypeDeclarationSyntax? CreateSerializerType( SerializableTypeInfo serializableType, TypeSyntax serializableTypeSyntax )
     {
         var members = new List<MemberDeclarationSyntax>();
 
@@ -252,13 +252,13 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         if ( serializableType.Type.IsValueType )
         {
             members.Add( this.CreateValueTypeSerializeMethod( serializableType, baseSerializerType ) );
-            members.Add( this.CreateValueTypeDeserializeMethod( serializableTypeName, baseSerializerType ) );
+            members.Add( this.CreateValueTypeDeserializeMethod( serializableTypeSyntax, baseSerializerType ) );
         }
         else
         {
-            members.Add( this.CreateCreateInstanceMethod( serializableType, serializableTypeName, baseSerializerType ) );
-            members.Add( this.CreateReferenceTypeSerializeMethod( serializableType, serializableTypeName, baseSerializerType ) );
-            members.Add( this.CreateReferenceTypeDeserializeMethod( serializableType, serializableTypeName, baseSerializerType ) );
+            members.Add( this.CreateCreateInstanceMethod( serializableType, serializableTypeSyntax, baseSerializerType ) );
+            members.Add( this.CreateReferenceTypeSerializeMethod( serializableType, serializableTypeSyntax, baseSerializerType ) );
+            members.Add( this.CreateReferenceTypeDeserializeMethod( serializableType, serializableTypeSyntax, baseSerializerType ) );
         }
 
         var baseType = this.HasPendingBaseSerializer( serializableType.Type, baseSerializerType )
@@ -412,7 +412,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
     private MethodDeclarationSyntax CreateCreateInstanceMethod(
         SerializableTypeInfo serializedType,
-        in QualifiedTypeNameInfo serializedTypeName,
+        TypeSyntax serializedTypeSyntax,
         INamedTypeSymbol baseSerializer )
     {
         var serializerBaseType = baseSerializer;
@@ -447,7 +447,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                         ObjectCreationExpression(
-                            serializedTypeName.QualifiedName,
+                            serializedTypeSyntax,
                             ArgumentList( SingletonSeparatedList( Argument( IdentifierName( createInstanceMethod.Parameters[1].Name ) ) ) ),
                             null ),
                         Token( SyntaxKind.SemicolonToken ) ) );
@@ -459,7 +459,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     }
 
     private static LocalDeclarationStatementSyntax CreateTypedLocalVariable(
-        in QualifiedTypeNameInfo type,
+        TypeSyntax serializedTypeSyntax,
         ExpressionSyntax untypedExpression,
         out string name )
     {
@@ -470,20 +470,20 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         return
             LocalDeclarationStatement(
                 VariableDeclaration(
-                    type.QualifiedName,
+                    serializedTypeSyntax,
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( typedVariableName ),
                             null,
                             EqualsValueClause(
                                 SyntaxFactoryEx.SafeCastExpression(
-                                    type.QualifiedName,
+                                    serializedTypeSyntax,
                                     untypedExpression ) ) ) ) ) );
     }
 
     private MethodDeclarationSyntax CreateReferenceTypeSerializeMethod(
         SerializableTypeInfo serializedType,
-        in QualifiedTypeNameInfo serializedTypeName,
+        TypeSyntax serializedTypeSyntax,
         INamedTypeSymbol baseSerializer )
     {
         BlockSyntax body;
@@ -497,7 +497,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         if ( serializedType.SerializedMembers.Count > 0 )
         {
             var localVariableDeclaration =
-                CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
+                CreateTypedLocalVariable( serializedTypeSyntax, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
 
             var statements = new[]
             {
@@ -540,7 +540,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
     private MethodDeclarationSyntax CreateReferenceTypeDeserializeMethod(
         SerializableTypeInfo serializedType,
-        in QualifiedTypeNameInfo serializedTypeName,
+        TypeSyntax serializedTypeSyntax,
         INamedTypeSymbol baseSerializer )
     {
         var baseDeserializeMethod = baseSerializer.GetMembers()
@@ -554,7 +554,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         if ( serializedType.SerializedMembers.Count > 0 )
         {
             var localVariableDeclaration =
-                CreateTypedLocalVariable( serializedTypeName, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
+                CreateTypedLocalVariable( serializedTypeSyntax, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
 
             var statements = new[]
             {
@@ -615,7 +615,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             body );
     }
 
-    private MethodDeclarationSyntax CreateValueTypeDeserializeMethod( in QualifiedTypeNameInfo serializedTypeName, INamedTypeSymbol baseSerializer )
+    private MethodDeclarationSyntax CreateValueTypeDeserializeMethod( TypeSyntax serializedTypeSyntax, INamedTypeSymbol baseSerializer )
     {
         var deserializeMethod = baseSerializer.GetMembers()
             .OfType<IMethodSymbol>()
@@ -628,7 +628,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 ReturnStatement(
                     Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                     ObjectCreationExpression(
-                        serializedTypeName.QualifiedName,
+                        serializedTypeSyntax,
                         ArgumentList( SingletonSeparatedList( Argument( IdentifierName( deserializeMethod.Parameters[0].Name ) ) ) ),
                         null ),
                     Token( SyntaxKind.SemicolonToken ) ) );

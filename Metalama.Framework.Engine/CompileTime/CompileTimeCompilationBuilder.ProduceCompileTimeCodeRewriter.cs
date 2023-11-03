@@ -576,7 +576,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                     else if ( existingSerializer == null )
                     {
-                        var serializedTypeName = this.CreateNameExpression( serializableType.Type );
+                        var serializedTypeName = this.CreateTypeSyntax( serializableType.Type ).AssertCast<NameSyntax>();
+                        var constructorName = GetConstructorNameToken( serializedTypeName );
 
                         if ( !serializableType.Type.IsValueType
                              && !serializableType.Type.GetMembers()
@@ -587,7 +588,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 ConstructorDeclaration(
                                         List<AttributeListSyntax>(),
                                         TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) ),
-                                        serializedTypeName.ShortName,
+                                        constructorName,
                                         ParameterList(),
                                         null,
                                         SyntaxFactoryEx.FormattedBlock(),
@@ -595,7 +596,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     .NormalizeWhitespace() );
                         }
 
-                        var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName );
+                        var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, constructorName );
                         var serializerType = this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName );
 
                         if ( deserializingConstructor != null && serializerType != null )
@@ -1333,7 +1334,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertCast<UsingDirectiveSyntax>().AssertNotNull() ) );
+                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertCast<UsingDirectiveSyntax>() ).WhereNotNull() );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
                     var attributes = this.VisitAttributeLists( node.AttributeLists );
@@ -1351,6 +1352,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     return CompilationUnit( default, default, default, default );
                 }
+            }
+
+            public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
+            {
+#if ROSLYN_4_8_0_OR_GREATER
+                if ( !node.UnsafeKeyword.IsKind( SyntaxKind.None ) )
+                {
+                    return null;
+                }
+#endif
+
+                return base.VisitUsingDirective( node );
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -1409,10 +1422,19 @@ namespace Metalama.Framework.Engine.CompileTime
             public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
                 => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ).AssertNotNull() );
 
-            private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
+            private static SyntaxToken GetConstructorNameToken( NameSyntax typeName )
+                => typeName switch
+                {
+                    AliasQualifiedNameSyntax aliasQualifiedNameSyntax => aliasQualifiedNameSyntax.Name.Identifier,
+                    QualifiedNameSyntax qualifiedNameSyntax => qualifiedNameSyntax.Right.Identifier,
+                    SimpleNameSyntax simpleNameSyntax => simpleNameSyntax.Identifier,
+                    _ => throw new AssertionFailedException( $"Unexpected syntax kind {typeName.Kind()} at '{typeName.GetLocation()}'." )
+                };
+
+            private TypeSyntax CreateTypeSyntax( INamespaceOrTypeSymbol symbol )
             {
                 var unnestedType = this._currentContext.NestedType;
-                var fullyQualifiedName = (NameSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
+                var type = OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
 
                 static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
                     => syntax switch
@@ -1427,14 +1449,17 @@ namespace Metalama.Framework.Engine.CompileTime
                         _ => throw new AssertionFailedException( $"Unexpected syntax kind {syntax.Kind()} at '{syntax.GetDiagnosticLocation()}'." )
                     };
 
-                if ( unnestedType != null && symbol.Equals( unnestedType ) )
+                if ( symbol.Equals( unnestedType ) )
                 {
-                    return new QualifiedTypeNameInfo(
-                        RenameType( fullyQualifiedName, this._currentContext.NestedTypeNewName!, this._currentContext.NestingLevel ),
-                        this._currentContext.NestedTypeNewName! );
+                    if ( type is not NameSyntax typeName )
+                    {
+                        throw new AssertionFailedException( $"Attempting to rename type '{type}' that doesn't have a name." );
+                    }
+
+                    return RenameType( typeName, this._currentContext.NestedTypeNewName!, this._currentContext.NestingLevel );
                 }
 
-                return new QualifiedTypeNameInfo( fullyQualifiedName );
+                return type;
             }
 
             public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
@@ -1447,7 +1472,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var nodeWithoutPreprocessorDirectives = base.VisitQualifiedName( node ).AssertNotNull();
 
-                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                    return this.CreateTypeSyntax( namespaceOrType ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
 
                 return base.VisitQualifiedName( node );
@@ -1463,7 +1488,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var nodeWithoutPreprocessorDirectives = base.VisitMemberAccessExpression( node ).AssertNotNull();
 
-                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                    return this.CreateTypeSyntax( namespaceOrType ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
 
                 return base.VisitMemberAccessExpression( node );
@@ -1489,7 +1514,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     switch ( symbol )
                     {
                         case INamespaceOrTypeSymbol namespaceOrType:
-                            return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                            return this.CreateTypeSyntax(namespaceOrType).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
 
                         case { IsStatic: true }
                             when node.Parent is not MemberAccessExpressionSyntax
@@ -1504,7 +1529,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                     return MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
-                                            this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
+                                            this.CreateTypeSyntax(symbol.ContainingType),
                                             IdentifierName( node.Identifier.Text ) )
                                         .WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                             }
