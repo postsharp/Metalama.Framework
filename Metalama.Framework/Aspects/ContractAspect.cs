@@ -28,12 +28,12 @@ namespace Metalama.Framework.Aspects
     /// </para>
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
-    [Layers( Layer1Build )]
+    [Layers( BuildLayer )]
     public abstract partial class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
         // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects
         // and then request redirection before the build layer.
-        public const string Layer1Build = "Build";
+        public const string BuildLayer = "Build";
 
         private readonly ContractDirection _direction;
 
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Aspects
 
         void IAspect<IFieldOrPropertyOrIndexer>.BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
-            if ( builder.Layer != Layer1Build )
+            if ( builder.Layer != BuildLayer )
             {
                 return;
             }
@@ -226,7 +226,7 @@ namespace Metalama.Framework.Aspects
 
         void IAspect<IParameter>.BuildAspect( IAspectBuilder<IParameter> builder )
         {
-            if ( builder.Layer != Layer1Build )
+            if ( builder.Layer != BuildLayer )
             {
                 return;
             }
@@ -304,5 +304,10 @@ namespace Metalama.Framework.Aspects
 
         [Template]
         public abstract void Validate( dynamic? value );
+
+        public static void RedirectContracts( IAspectBuilder aspectBuilder, IFieldOrPropertyOrIndexer sourceTarget, IParameter targetParameter )
+        {
+            aspectBuilder.Advice.AddAnnotation( sourceTarget, new RedirectToProxyParameterAnnotation( targetParameter ) );
+        }
     }
 }

@@ -6,14 +6,14 @@ internal class TargetClass
   public int Method([MyContractAspect] int intParam = 42, [MyContractAspect] object? objectParam = null, [MyContractAspect] TestEnum enumParam = TestEnum.Default)
   {
     global::System.Console.WriteLine($"Override1");
-    _ = this.Method_MyContractAspect2(intParam, objectParam, enumParam);
-    return this.Method_MyContractAspect2(intParam, objectParam, enumParam);
+    _ = this.Method_MyContractAspect_Build2(intParam, objectParam, enumParam);
+    return this.Method_MyContractAspect_Build2(intParam, objectParam, enumParam);
   }
   private int Method_Source(int intParam = 42, object? objectParam = null, TestEnum enumParam = TestEnum.Default)
   {
     return 42;
   }
-  private global::System.Int32 Method_MyContractAspect2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
+  private global::System.Int32 Method_MyContractAspect_Build2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on enumParam");
     global::System.Console.WriteLine("Contract on objectParam");
@@ -28,8 +28,8 @@ internal class TargetClass
   public async Task<int> AsyncMethod([MyContractAspect] int intParam = 42, [MyContractAspect] object? objectParam = null, [MyContractAspect] TestEnum enumParam = TestEnum.Default)
   {
     global::System.Console.WriteLine($"Override1");
-    _ = (await this.AsyncMethod_MyContractAspect2(intParam, objectParam, enumParam));
-    return (await this.AsyncMethod_MyContractAspect2(intParam, objectParam, enumParam));
+    _ = (await this.AsyncMethod_MyContractAspect_Build2(intParam, objectParam, enumParam));
+    return (await this.AsyncMethod_MyContractAspect_Build2(intParam, objectParam, enumParam));
   }
   private async Task<int> AsyncMethod_Source(int intParam = 42, object? objectParam = null, TestEnum enumParam = TestEnum.Default)
   {
@@ -42,7 +42,7 @@ internal class TargetClass
     _ = (await this.AsyncMethod_Source(intParam, objectParam, enumParam));
     return (await this.AsyncMethod_Source(intParam, objectParam, enumParam));
   }
-  private global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_MyContractAspect2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
+  private global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_MyContractAspect_Build2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on enumParam");
     global::System.Console.WriteLine("Contract on objectParam");
@@ -55,14 +55,14 @@ internal class TargetClass
   public IEnumerable<int> IteratorMethod([MyContractAspect] int intParam = 42, [MyContractAspect] object? objectParam = null, [MyContractAspect] TestEnum enumParam = TestEnum.Default)
   {
     global::System.Console.WriteLine($"Override1");
-    _ = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IteratorMethod_MyContractAspect2(intParam, objectParam, enumParam));
-    return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IteratorMethod_MyContractAspect2(intParam, objectParam, enumParam));
+    _ = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IteratorMethod_MyContractAspect_Build2(intParam, objectParam, enumParam));
+    return global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.IteratorMethod_MyContractAspect_Build2(intParam, objectParam, enumParam));
   }
   private IEnumerable<int> IteratorMethod_Source(int intParam = 42, object? objectParam = null, TestEnum enumParam = TestEnum.Default)
   {
     yield return 42;
   }
-  private global::System.Collections.Generic.IEnumerable<global::System.Int32> IteratorMethod_MyContractAspect2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
+  private global::System.Collections.Generic.IEnumerable<global::System.Int32> IteratorMethod_MyContractAspect_Build2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on enumParam");
     global::System.Console.WriteLine("Contract on objectParam");
@@ -77,8 +77,8 @@ internal class TargetClass
   public async IAsyncEnumerable<int> AsyncIteratorMethod([MyContractAspect] int intParam = 42, [MyContractAspect] object? objectParam = null, [MyContractAspect] TestEnum enumParam = TestEnum.Default)
   {
     global::System.Console.WriteLine($"Override1");
-    _ = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncIteratorMethod_MyContractAspect2(intParam, objectParam, enumParam)));
-    await foreach (var r_1 in (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncIteratorMethod_MyContractAspect2(intParam, objectParam, enumParam))))
+    _ = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncIteratorMethod_MyContractAspect_Build2(intParam, objectParam, enumParam)));
+    await foreach (var r_1 in (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncIteratorMethod_MyContractAspect_Build2(intParam, objectParam, enumParam))))
     {
       yield return r_1;
     }
@@ -99,7 +99,7 @@ internal class TargetClass
     }
     yield break;
   }
-  private global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32> AsyncIteratorMethod_MyContractAspect2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
+  private global::System.Collections.Generic.IAsyncEnumerable<global::System.Int32> AsyncIteratorMethod_MyContractAspect_Build2([global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Int32 intParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::System.Object? objectParam, [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.MyContractAspect] global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32707.TestEnum enumParam)
   {
     global::System.Console.WriteLine("Contract on enumParam");
     global::System.Console.WriteLine("Contract on objectParam");

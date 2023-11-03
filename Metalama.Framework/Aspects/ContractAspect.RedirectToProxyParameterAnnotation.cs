@@ -13,7 +13,7 @@ public abstract partial class ContractAspect
     /// </summary>
     [CompileTime]
     [EditorBrowsable( EditorBrowsableState.Never )]
-    public sealed class RedirectToProxyParameterAnnotation : IAnnotation<IFieldOrPropertyOrIndexer>, IAnnotation<IParameter>
+    internal sealed class RedirectToProxyParameterAnnotation : IAnnotation<IFieldOrPropertyOrIndexer>, IAnnotation<IParameter>
     {
         public RedirectToProxyParameterAnnotation( IParameter parameter )
         {
