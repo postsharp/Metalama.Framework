@@ -49,5 +49,7 @@ internal class MemberSubstitutedCollection<T> : ISourceMemberCollection<T>
         => SubstitutedMemberFactory.Substitute( sourceRef.GetTarget( this.Compilation ), this._substitutedType );
 
     ISourceDeclarationCollection<T, Ref<T>> ISourceDeclarationCollection<T, Ref<T>>.Clone( CompilationModel compilation )
-        => throw new System.NotImplementedException();
+        => new MemberSubstitutedCollection<T>(
+            (ISourceMemberCollection<T>) this._source.Clone( compilation ),
+            compilation.CompilationContext.SymbolTranslator.Translate( this._substitutedType ).AssertNotNull() );
 }
