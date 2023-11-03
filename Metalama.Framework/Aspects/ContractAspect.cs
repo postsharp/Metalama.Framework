@@ -4,6 +4,8 @@ using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Aspects
@@ -26,8 +28,13 @@ namespace Metalama.Framework.Aspects
     /// </para>
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
-    public abstract class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
+    [Layers( BuildLayer )]
+    public abstract partial class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
+        // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects
+        // and then request redirection before the build layer.
+        public const string BuildLayer = "Build";
+
         private readonly ContractDirection _direction;
 
         /// <summary>
@@ -102,6 +109,99 @@ namespace Metalama.Framework.Aspects
             return this.GetActualDirection( aspectBuilder, direction );
         }
 
+        private static IReadOnlyCollection<IParameter>? GetValidatedDistinctProxyParametersForRedirection(
+            IEnumerable<RedirectToProxyParameterAnnotation> annotations,
+            IType targetType )
+        {
+            // Avoid performance hit for the very common case that there are no applicable annotations.
+
+            using var iter = annotations.GetEnumerator();
+
+            if ( !iter.MoveNext() )
+            {
+                return null;
+            }
+
+            // Then very common that there is only a single applicable annotation.
+
+            var first = iter.Current;
+
+            if ( !iter.MoveNext() )
+            {
+                return ParameterIsValid( first?.Parameter, targetType ) ? new[] { first.Parameter } : null;
+            }
+
+            var distinctByParameter = new HashSet<IParameter>();
+
+            AddIfValid( distinctByParameter, first?.Parameter, targetType );
+            AddIfValid( distinctByParameter, iter.Current?.Parameter, targetType );
+
+            while ( iter.MoveNext() )
+            {
+                AddIfValid( distinctByParameter, iter.Current?.Parameter, targetType );
+            }
+
+            return distinctByParameter;
+
+            static void AddIfValid( HashSet<IParameter> set, IParameter? parameter, IType expectedType )
+            {
+                if ( ParameterIsValid( parameter, expectedType ) )
+                {
+                    set.Add( parameter );
+                }
+            }
+
+            static bool ParameterIsValid( [NotNullWhen( true )] IParameter? parameter, IType expectedType )
+            {
+                if ( parameter == null )
+                {
+                    return false;
+                }
+
+                var isValid = parameter.Type.Equals( expectedType );
+
+                if ( !isValid )
+                {
+                    // TODO: How best to report invalid parameters?
+                    // Invalid parameters would be caused by faulty logic in other aspects (which are expected to be in-house maintained), and
+                    // the user can't take any action to fix this.
+
+                    throw new InvalidOperationException(
+                        "The type of " + nameof(RedirectToProxyParameterAnnotation) + "." + nameof(RedirectToProxyParameterAnnotation.Parameter)
+                        + " does not match the type of the target of the " + nameof(ContractAspect) + "." );
+                }
+
+                return isValid;
+            }
+        }
+
+        // TODO: Consider adding protected virtual RedirectionStrategy GetRedirectionStrategy( builder, IParameter proxyParameter ) so that derived types can opt out of redirection if they don't support it.
+        // RedirectionStrategy could be { Redirect, Skip, Fail }
+
+        void IAspect<IFieldOrPropertyOrIndexer>.BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
+        {
+            if ( builder.Layer != BuildLayer )
+            {
+                return;
+            }
+
+            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection( builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(), builder.Target.Type );
+
+            if ( redirectToParameters is { Count: > 0 } )
+            {
+                foreach ( var parameter in redirectToParameters )
+                {
+                    // TODO: Use AssertNotNull() extension method instead of `throw` if it can be made accessible.
+
+                    this.BuildAspect( builder.WithTarget( parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
+                }
+            }
+            else
+            {
+                this.BuildAspect( builder );
+            }
+        }
+
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
@@ -122,6 +222,28 @@ namespace Metalama.Framework.Aspects
             }
 
             builder.Advice.AddContract( builder.Target, nameof(this.Validate), direction );
+        }
+
+        void IAspect<IParameter>.BuildAspect( IAspectBuilder<IParameter> builder )
+        {
+            if ( builder.Layer != BuildLayer )
+            {
+                return;
+            }
+
+            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection( builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(), builder.Target.Type );
+
+            if ( redirectToParameters is { Count: > 0 } )
+            {
+                foreach ( var parameter in redirectToParameters )
+                {
+                    this.BuildAspect( builder.WithTarget( parameter ) );
+                }
+            }
+            else
+            {
+                this.BuildAspect( builder );
+            }
         }
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
@@ -182,5 +304,26 @@ namespace Metalama.Framework.Aspects
 
         [Template]
         public abstract void Validate( dynamic? value );
+
+        /// <summary>
+        /// Redirects validation logic of <see cref="ContractAspect"/> from the specified property to the specified parameter.
+        /// </summary>
+        /// <param name="aspectBuilder">Current aspect builder.</param>
+        /// <param name="sourceTarget">A declaration to redirect the validation logic from.</param>
+        /// <param name="targetParameter">A parameter to redirect the validation logic to.</param>
+        /// <remarks>
+        /// <para>
+        /// This call will only redirect validation logic of contracts applied after the current aspect. 
+        /// Contracts applied before the current aspect will not be affected.
+        /// </para>
+        /// <para>
+        /// If an aspect needs to see the contract aspect instances and redirect their validation logic at the same time, 
+        /// it should be applied after the default layer of <see cref="ContractAspect"/> and before the layer that applies the contract logic, i.e. <see cref="ContractAspect.BuildLayer"/>.
+        /// </para>
+        /// </remarks>
+        public static void RedirectContracts( IAspectBuilder aspectBuilder, IFieldOrPropertyOrIndexer sourceTarget, IParameter targetParameter )
+        {
+            aspectBuilder.Advice.AddAnnotation( sourceTarget, new RedirectToProxyParameterAnnotation( targetParameter ) );
+        }
     }
 }
