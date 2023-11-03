@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return Array.Empty<TemplateClassData>();
             }
 
-            return new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
+            return new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect), typeof(ContractAspect) }
                 .SelectAsImmutableArray(
                     t => new TemplateClassData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t, this.CompilationContext ) );
         }
