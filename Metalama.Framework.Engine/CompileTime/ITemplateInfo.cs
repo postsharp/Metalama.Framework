@@ -13,4 +13,6 @@ internal interface ITemplateInfo
     TemplateAttributeType AttributeType { get; }
 
     bool IsNone { get; }
+
+    RoslynApiVersion? UsedApiVersion { get; }
 }

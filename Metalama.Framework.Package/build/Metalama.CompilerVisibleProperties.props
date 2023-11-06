@@ -27,6 +27,7 @@
         <CompilerVisibleProperty Include="MetalamaRoslynIsCompileTimeOnly"/>
 		<CompilerVisibleProperty Include="MetalamaCompileTimeTargetFrameworks"/>
 		<CompilerVisibleProperty Include="MetalamaRestoreSources"/>
+		<CompilerVisibleProperty Include="MetalamaTemplateLanguageVersion"/>
         
     </ItemGroup>
 

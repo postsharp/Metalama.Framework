@@ -235,6 +235,12 @@ namespace Metalama.Testing.AspectTesting
         public LanguageVersion? LanguageVersion { get; set; }
 
         /// <summary>
+        /// Gets or sets the version of the C# language that the dependencies of the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @DependencyLanguageVersion(version)</c>.
+        /// </summary>
+        public LanguageVersion? DependencyLanguageVersion { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of C# language features that the test should be compiled with.
         /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>.
         /// </summary>
@@ -615,9 +621,21 @@ namespace Metalama.Testing.AspectTesting
                         break;
 
                     case "LanguageVersion":
-                        if ( LanguageVersionFacts.TryParse( optionArg, out var result ) )
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var languageVersion ) )
                         {
-                            this.LanguageVersion = result;
+                            this.LanguageVersion = languageVersion;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                        }
+
+                        break;
+
+                    case "DependencyLanguageVersion":
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var dependencyLanguageVersion ) )
+                        {
+                            this.DependencyLanguageVersion = dependencyLanguageVersion;
                         }
                         else
                         {

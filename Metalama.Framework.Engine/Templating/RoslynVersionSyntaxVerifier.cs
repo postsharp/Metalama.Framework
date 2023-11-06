@@ -1,7 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,17 +15,13 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
     private readonly IDiagnosticAdder _diagnostics;
 
     [UsedImplicitly]
-    public RoslynApiVersion MaximalAcceptableApiVersion { get; }
-
-    [UsedImplicitly]
-    public string MaximalAcceptableLanguageVersion { get; }
+    public LanguageVersion MaximalAcceptableLanguageVersion { get; }
 
     public RoslynApiVersion MaximalUsedVersion { get; private set; } = RoslynApiVersion.Lowest;
 
-    public RoslynVersionSyntaxVerifier( IDiagnosticAdder diagnostics, RoslynApiVersion maximalAcceptableApiVersion, string maximalAcceptableLanguageVersion )
+    public RoslynVersionSyntaxVerifier( IDiagnosticAdder diagnostics, LanguageVersion maximalAcceptableLanguageVersion )
     {
         this._diagnostics = diagnostics;
-        this.MaximalAcceptableApiVersion = maximalAcceptableApiVersion;
         this.MaximalAcceptableLanguageVersion = maximalAcceptableLanguageVersion;
     }
 
@@ -32,13 +30,13 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
         this._diagnostics.Report(
             TemplatingDiagnosticDescriptors.TemplateUsesUnsupportedLanguageVersion.CreateRoslynDiagnostic(
                 node.GetLocation(),
-                this.MaximalAcceptableLanguageVersion ) );
+                this.MaximalAcceptableLanguageVersion.ToDisplayString() ) );
     }
 
     // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificNode( SyntaxNode node, RoslynApiVersion version )
     {
-        if ( version > this.MaximalAcceptableApiVersion )
+        if ( version.ToLanguageVersion() > this.MaximalAcceptableLanguageVersion )
         {
             this.OnForbiddenSyntaxUsed( node );
         }
@@ -60,7 +58,7 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
 
         if ( !nodeOrToken.IsKind( SyntaxKind.None ) )
         {
-            if ( version > this.MaximalAcceptableApiVersion )
+            if ( version.ToLanguageVersion() > this.MaximalAcceptableLanguageVersion )
             {
                 this.OnForbiddenSyntaxUsed( nodeOrToken );
             }
@@ -75,7 +73,7 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
     // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificFieldKind( in SyntaxNodeOrToken nodeOrToken, RoslynApiVersion version )
     {
-        if ( version > this.MaximalAcceptableApiVersion )
+        if ( version.ToLanguageVersion() > this.MaximalAcceptableLanguageVersion )
         {
             this.OnForbiddenSyntaxUsed( nodeOrToken );
         }

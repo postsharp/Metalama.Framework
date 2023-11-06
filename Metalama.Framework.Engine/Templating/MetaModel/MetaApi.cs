@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -140,6 +141,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         }
 
         public UserDiagnosticSink Diagnostics => this._common.DiagnosticSink;
+
+        internal TemplateMember<IMemberOrNamedType> Template => this._common.Template;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common )
             : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )

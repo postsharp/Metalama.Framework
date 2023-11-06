@@ -121,6 +121,9 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override string? RestoreSources => this.GetStringOption( MSBuildPropertyNames.MetalamaRestoreSources );
 
+        [Memo]
+        public override string? TemplateLanguageVersion => this.GetStringOption( MSBuildPropertyNames.MetalamaTemplateLanguageVersion );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );

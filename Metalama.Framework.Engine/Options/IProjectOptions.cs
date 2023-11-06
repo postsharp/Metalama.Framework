@@ -155,6 +155,11 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         string? RestoreSources { get; }
 
+        /// <summary>
+        /// Gets the C# language version that's used by templates. Any syntax from higher C# versions is not allowed in template bodies.
+        /// </summary>
+        string? TemplateLanguageVersion { get; }
+
         bool IsTest { get; }
     }
 }
