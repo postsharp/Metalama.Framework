@@ -35,7 +35,6 @@ public class TheAspect : OverrideMethodAspect
     }
 }
 
-[RunTimeOrCompileTime]
 #pragma warning disable CS0436 // Type conflicts with imported type
 [InlineArray(10)]
 #pragma warning restore CS0436
