@@ -1,5 +1,6 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER) - Return type covariance not supported in .NET Framework
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
 using System;

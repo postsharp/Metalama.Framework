@@ -1,5 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <PropertyGroup>
+        <MetalamaTestProjectDirectory>$(MSBuildThisFileDirectory)</MetalamaTestProjectDirectory>
+    </PropertyGroup>
+
+    <Import Project="..\..\Build\RoslynVersion\Latest.imports" />
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.props" />
     <Import Project="..\..\eng\Coverage.props" />
 
@@ -11,6 +16,8 @@
         <MetalamaTestGenerateDefaultRunner>False</MetalamaTestGenerateDefaultRunner>
         <RootNamespace>Metalama.Framework.Tests.Integration</RootNamespace>
         <OutputType>Library</OutputType>
+        <AssemblyName>Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)</AssemblyName>
+        <LangVersion Condition="'$(LangVersionOverride)'!=''">$(LangVersionOverride)</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -24,6 +31,7 @@
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
         <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
+        <PackageReference Include="System.Text.Json" Version="7.0.3" />
         <PackageReference Include="Metalama.Backstage.Testing" Version="$(MetalamaBackstageVersion)" />
 
         <!-- These packages ared used in tests -->
@@ -32,15 +40,15 @@
 
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
-        <Compile Remove="Tests\**\__*.cs" />
+        <Compile Remove="$(MSBuildThisFileDirectory)\Tests\**\__*.cs" />
         <!-- But still show them in solution explorer -->
-        <None Include="Tests\**\__*.cs" />
+        <None Include="$(MSBuildThisFileDirectory)\Tests\**\__*.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
+        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
     </ItemGroup>
 
     <ItemGroup>

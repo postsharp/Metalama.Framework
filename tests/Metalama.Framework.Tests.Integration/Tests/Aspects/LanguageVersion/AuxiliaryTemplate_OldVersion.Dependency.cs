@@ -1,3 +1,5 @@
+#if ROSLYN_4_4_0_OR_GREATER
+
 using System;
 using Metalama.Framework.Aspects;
 
@@ -18,3 +20,5 @@ public class TheAspect : TypeAspect
         Console.WriteLine("""aux""");
     }
 }
+
+#endif

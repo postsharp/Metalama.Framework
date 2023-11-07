@@ -42,7 +42,7 @@
         <CoverletVersion>3.1.0</CoverletVersion>
         <DiffPlexVersion>1.7.1</DiffPlexVersion>
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
-        <PostSharpPackageVersion>6.11.2-rc</PostSharpPackageVersion>
+        <PostSharpPackageVersion>2024.0.2-preview</PostSharpPackageVersion>
     </PropertyGroup>
 
     <!-- Set the deafult versions of auto-updated dependencies -->

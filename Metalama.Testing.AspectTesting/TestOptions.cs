@@ -57,7 +57,7 @@ namespace Metalama.Testing.AspectTesting
         public bool? IncludeAllSeverities { get; set; }
 
         /// <summary>
-        /// Gets or sets the fully-qualified name of the test runner factory type (implementing <see cref="ITestRunnerFactory"/>).
+        /// Gets or sets the name of the test runner factory type (implementing <see cref="ITestRunnerFactory"/>).
         /// You can only define this option in the <c>metalamaTests.json</c> file of a directory. This setting is for Metalama internal use only.
         /// </summary>
         public string? TestRunnerFactoryType { get; set; }
@@ -476,7 +476,7 @@ namespace Metalama.Testing.AspectTesting
 
                     case "DesignTime":
                         this.TestRunnerFactoryType =
-                            "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Metalama.Framework.Tests.Integration";
+                            "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory";
 
                         break;
 
@@ -489,13 +489,13 @@ namespace Metalama.Testing.AspectTesting
                             {
                                 case AspectTesting.TestScenario.PreviewLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
 
                                     break;
 
                                 case AspectTesting.TestScenario.ApplyLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
 
                                     break;
                             }
