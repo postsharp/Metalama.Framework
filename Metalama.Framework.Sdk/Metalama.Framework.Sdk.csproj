@@ -8,7 +8,7 @@
         <RootNamespace>Metalama.Framework.Engine</RootNamespace>
 
         <!-- This is to prevent the Metalama.Compiler.Sdk package to change our nuspec -->
-		<MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
+        <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
@@ -16,6 +16,7 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.8.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />

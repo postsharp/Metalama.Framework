@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -93,7 +94,7 @@ namespace Metalama.Framework.Engine.Transformations
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            var proceedExpressionProvider = ( TemplateKind kind ) => this.CreateProceedDynamicExpression( context, accessor, kind );
+            SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind ) => this.CreateProceedDynamicExpression( context, accessor, kind );
 
             var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
                 this.OverriddenDeclaration,
@@ -115,7 +116,7 @@ namespace Metalama.Framework.Engine.Transformations
                 metaApi,
                 accessor,
                 accessorTemplate,
-                proceedExpressionProvider,
+                ProceedExpressionProvider,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );

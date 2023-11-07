@@ -159,22 +159,35 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
                 else
                 {
-                    if ( parameter.RefKind is RefKind.Out or RefKind.Ref )
+                    if ( parameter.RefKind is RefKind.Out or RefKind.Ref or RefKind.RefReadOnly )
                     {
-                        // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
-                        // We also intentionally omit to cast the value since it would be illegal.
+                        SyntaxKind refKindKeyword;
 
-                        if ( !arg.IsReferenceable )
+                        if ( parameter.RefKind is RefKind.RefReadOnly )
                         {
-                            throw new DiagnosticException(
-                                GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateRoslynDiagnostic(
-                                    null,
-                                    (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );
+                            // `ref readonly` parameters can be called with the `ref` or `in` modifier if the argument is a mutable variable/`ref` expression,
+                            // but only with `in` if it's a read-only variable/`readonly ref`.
+                            // If the argument is not a `ref` or variable, no modifier is possible and the code produces a warning.
+
+                            refKindKeyword = arg.IsReferenceable ? SyntaxKind.InKeyword : SyntaxKind.None;
+                        }
+                        else
+                        {
+                            // With out and ref parameters, we unconditionally add the out or ref modifier, and "hope" the code will later compile.
+                            // We also intentionally omit to cast the value since it would be illegal.
+
+                            if ( !arg.IsReferenceable )
+                            {
+                                throw new DiagnosticException(
+                                    GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter.CreateRoslynDiagnostic(
+                                        null,
+                                        (arg.Syntax.ToString(), parameter.Name, parameter.DeclaringMember) ) );
+                            }
+
+                            refKindKeyword = parameter.RefKind is RefKind.Ref ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
                         }
 
-                        var syntax = parameter.RefKind is RefKind.Ref ? SyntaxKind.RefKeyword : SyntaxKind.OutKeyword;
-
-                        argument = SyntaxFactory.Argument( null, SyntaxFactory.Token( syntax ), arg.Syntax );
+                        argument = SyntaxFactory.Argument( null, SyntaxFactory.Token( refKindKeyword ), arg.Syntax );
                     }
                     else
                     {
@@ -213,6 +226,10 @@ namespace Metalama.Framework.Engine.CodeModel
             return instance.Convert( declaration.DeclaringType, generationContext ).Syntax;
         }
 
+        /// <summary>
+        /// Converts Roslyn <see cref="Microsoft.CodeAnalysis.RefKind"/> to Metalama <see cref="RefKind"/> for members and return parameters.
+        /// Note that the conversion for parameters is different.
+        /// </summary>
         internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )
             => roslynRefKind switch
             {

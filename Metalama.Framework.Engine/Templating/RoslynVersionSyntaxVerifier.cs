@@ -52,6 +52,12 @@ internal sealed partial class RoslynVersionSyntaxVerifier : SafeSyntaxWalker
     // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificField( in SyntaxNodeOrToken nodeOrToken, RoslynApiVersion version )
     {
+        // TODO: A field can be added in a new version of Roslyn that returns a concrete value for old code,
+        // when the new field is a generalization of an old field.
+        // For example, in Roslyn 4.8, the new field UsingDirectiveSyntax.NamespaceOrType (a generalization of UsingDirectiveSyntax.Name) is always not null.
+        // Though this is not a problem at the moment and I'm not certain how to fix it (check whether the new field is optional?),
+        // I'm keeping this as is for now.
+
         if ( !nodeOrToken.IsKind( SyntaxKind.None ) )
         {
             if ( version > this.MaximalAcceptableApiVersion )

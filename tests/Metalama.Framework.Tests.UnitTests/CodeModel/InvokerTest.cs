@@ -89,15 +89,15 @@ class TargetCode
 
                 AssertEx.DynamicEquals(
                     byRefMethod.Invoke(
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), intType, syntaxGenerationContext, true ),
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), intType, syntaxGenerationContext, true ) ),
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), intType, syntaxGenerationContext, isReferenceable: true ),
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), intType, syntaxGenerationContext, isReferenceable: true ) ),
                     @"global::TargetCode.ByRef(out x, ref y)" );
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                     () => byRefMethod.Invoke(
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), syntaxGenerationContext ),
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), syntaxGenerationContext ) ) );
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), syntaxGenerationContext, isReferenceable: false ),
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), syntaxGenerationContext, isReferenceable: false ) ) );
             }
         }
 

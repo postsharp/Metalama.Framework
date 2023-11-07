@@ -38,24 +38,22 @@ internal sealed class RiderCodeRefactoringProvider : TheCodeRefactoringProvider
             return;
         }
 
-        var diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
-
-        this._diagnosticAnalyzer.AnalyzeSemanticModel(
-            new SemanticModelAnalysisContext(
-                semanticModel,
+        var compilationWithAnalyzer = semanticModel.Compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>( this._diagnosticAnalyzer ),
+            new CompilationWithAnalyzersOptions(
                 context.Document.Project.AnalyzerOptions,
-                diagnostic =>
-                {
-                    if ( diagnostic.Severity == DiagnosticSeverity.Hidden && diagnostic.Location.SourceSpan.IntersectsWith( context.Span ) )
-                    {
-                        diagnostics.Add( diagnostic );
-                    }
-                },
-                _ => true,
-                context.CancellationToken ) );
+                onAnalyzerException: null,
+                concurrentAnalysis: true,
+                logAnalyzerExecutionTime: false ) );
+
+        var diagnostics =
+            await compilationWithAnalyzer.GetAnalyzerSemanticDiagnosticsAsync( semanticModel, filterSpan: context.Span, context.CancellationToken );
+
+        var filteredDiagnostics =
+            diagnostics.Where( d => d.Severity == DiagnosticSeverity.Hidden && d.Location.SourceSpan.IntersectsWith( context.Span ) ).ToImmutableArray();
 
         // Report code fixes for found diagnostics as refactorings.
-        await this._codeFixProvider.RegisterCodeFixesAsync( new HiddenCodeFixToCodeRefactoringContext( context, diagnostics.ToImmutable() ) );
+        await this._codeFixProvider.RegisterCodeFixesAsync( new HiddenCodeFixToCodeRefactoringContext( context, filteredDiagnostics ) );
     }
 
     private sealed class HiddenCodeFixToCodeRefactoringContext : ICodeFixContext

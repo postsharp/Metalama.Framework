@@ -506,7 +506,11 @@ namespace Metalama.Framework.CompilerExtensions
                 }
             }
 
-            if ( version >= new Version( 4, 4 ) )
+            if ( version >= new Version( 4, 8 ) )
+            {
+                return "4.8.0";
+            }
+            else if ( version >= new Version( 4, 4 ) )
             {
                 return "4.4.0";
             }

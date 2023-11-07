@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -72,19 +71,7 @@ namespace Metalama.Framework.Engine.Linking
                         BracketedArgumentList(
                             SeparatedList(
                                 targetIndexer.Parameters.SelectAsReadOnlyList(
-                                    p =>
-                                    {
-                                        var refKind = p.RefKind switch
-                                        {
-                                            RefKind.None => default,
-                                            RefKind.In => default,
-                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                            _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
-                                        };
-
-                                        return Argument( null, refKind, IdentifierName( p.Name ) );
-                                    } ) ) ) )
+                                    p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) )
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Previous,

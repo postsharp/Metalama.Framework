@@ -4,7 +4,7 @@
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
-		<IsPackable>false</IsPackable>
+        <IsPackable>false</IsPackable>
         <ReferenceMetalamaSystemTypes>False</ReferenceMetalamaSystemTypes>
 
     </PropertyGroup>
@@ -23,7 +23,10 @@
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.4.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.4.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0"/>
-   
+
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.8.0"/>
 
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting"/>
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting"/>

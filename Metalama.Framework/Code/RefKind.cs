@@ -21,14 +21,14 @@ namespace Metalama.Framework.Code
         Ref,
 
         /// <summary>
-        /// <c>in</c> input parameter. Synonym of <see cref="RefReadOnly"/>.
+        /// <c>in</c> input parameter.
         /// </summary>
         In,
 
         /// <summary>
-        /// <c>ref readonly</c> property or return parameter.
+        /// <c>ref readonly</c> property, parameter, or return parameter.
         /// </summary>
-        RefReadOnly = In,
+        RefReadOnly,
 
         /// <summary>
         /// <c>out</c>.

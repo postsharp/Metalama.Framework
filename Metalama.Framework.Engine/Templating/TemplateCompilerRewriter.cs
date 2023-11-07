@@ -365,7 +365,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             var identifierSymbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
-            if ( this.IsLocalSymbol( identifierSymbol ) )
+            if ( IsLocalSymbol( identifierSymbol ) )
             {
                 if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
@@ -434,11 +434,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <summary>
     /// Determines is a symbol is local to the current template.
     /// </summary>
-    private bool IsLocalSymbol( ISymbol? symbol )
+    private static bool IsLocalSymbol( ISymbol? symbol )
         => symbol switch
         {
             IMethodSymbol { MethodKind: MethodKind.LocalFunction or MethodKind.AnonymousFunction or MethodKind.LambdaMethod } or ILocalSymbol => true,
-            IParameterSymbol or ITypeParameterSymbol => this.IsLocalSymbol( symbol.ContainingSymbol ),
+            IParameterSymbol or ITypeParameterSymbol => IsLocalSymbol( symbol.ContainingSymbol ),
             _ => false
         };
 
@@ -486,13 +486,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return base.TransformIdentifierName( SyntaxFactoryEx.VarIdentifier() );
         }
 
-        // If the identifier is declared withing the template, the expanded name is given by the TemplateExpansionContext and
+        // If the identifier is declared within the template, the expanded name is given by the TemplateExpansionContext and
         // stored in a template variable named __foo, where foo is the variable name in the template. This variable is defined
         // and initialized in the VisitVariableDeclarator.
         // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
         var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
-        if ( this.IsLocalSymbol( identifierSymbol ) )
+        if ( IsLocalSymbol( identifierSymbol ) )
         {
             if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
             {
@@ -948,7 +948,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( identifier );
 
-            if ( this.IsLocalSymbol( identifierSymbol ) || identifierSymbol is IDiscardSymbol )
+            if ( IsLocalSymbol( identifierSymbol ) || identifierSymbol is IDiscardSymbol )
             {
                 if ( this.IsCompileTimeDynamic( assignment.Right ) )
                 {

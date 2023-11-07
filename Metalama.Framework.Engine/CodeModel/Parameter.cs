@@ -42,6 +42,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 Microsoft.CodeAnalysis.RefKind.Ref => RefKind.Ref,
                 Microsoft.CodeAnalysis.RefKind.Out => RefKind.Out,
                 Microsoft.CodeAnalysis.RefKind.In => RefKind.In,
+#if ROSLYN_4_8_0_OR_GREATER
+                Microsoft.CodeAnalysis.RefKind.RefReadOnlyParameter => RefKind.RefReadOnly,
+#endif
                 _ => throw new InvalidOperationException( $"Roslyn RefKind {this._parameterSymbol.RefKind} not recognized." )
             };
 
@@ -79,7 +82,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         bool IExpression.IsAssignable => true;
 
-        public ref object? Value => ref RefHelper.Wrap( new SyntaxUserExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, true ) );
+        public ref object? Value => ref RefHelper.Wrap( new SyntaxVariableExpression( SyntaxFactory.IdentifierName( this.Name ), this.Type, this.RefKind ) );
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new(
