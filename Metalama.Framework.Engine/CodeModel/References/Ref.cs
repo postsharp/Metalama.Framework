@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -22,9 +22,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Asserts that a given symbol is compatible with a given <see cref="IDeclaration"/> interface.
         /// </summary>
-        /// <param name="symbol"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         public static ISymbol AssertValidType<T>( this ISymbol symbol )
             where T : ICompilationElement
         {
@@ -40,23 +37,21 @@ namespace Metalama.Framework.Engine.CodeModel.References
         }
 
         /// <summary>
-        /// Creates a <see cref="Ref{T}"/> from a <see cref="DeclarationBuilder"/>.
+        /// Creates a <see cref="Ref{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <typeparam name="TCodeElement"></typeparam>
-        /// <typeparam name="TBuilder"></typeparam>
-        /// <returns></returns>
-        public static Ref<TCodeElement> FromBuilder<TCodeElement, TBuilder>( TBuilder builder )
+        public static Ref<TCodeElement> FromBuilder<TCodeElement>( IDeclarationBuilder builder )
             where TCodeElement : class, IDeclaration
-            where TBuilder : IDeclarationBuilder
             => new( builder );
 
         /// <summary>
-        /// Creates a <see cref="Ref{T}"/> from a <see cref="DeclarationBuilder"/>.
+        /// Creates a <see cref="Ref{T}"/> from an <see cref="IDeclarationBuilder"/>.
         /// </summary>
-        /// <param name="builder"></param>
-        /// <returns></returns>
         public static Ref<IDeclaration> FromBuilder( IDeclarationBuilder builder ) => new( builder );
+
+        /// <summary>
+        /// Creates a <see cref="Ref{T}"/> from an <see cref="ISubstitutedDeclaration"/>.
+        /// </summary>
+        public static Ref<IDeclaration> FromSubstitutedDeclaration( ISubstitutedDeclaration declaration ) => new( declaration );
 
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
@@ -157,6 +152,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.Target = builder;
             this.TargetKind = DeclarationRefTargetKind.Default;
             this._compilationContext = builder.GetCompilationModel().CompilationContext;
+        }
+
+        internal Ref( ISubstitutedDeclaration declaration )
+        {
+            this.Target = declaration;
+            this.TargetKind = DeclarationRefTargetKind.Default;
+            this._compilationContext = declaration.GetCompilationModel().CompilationContext;
         }
 
         private Ref( object? target, CompilationContext? compilationContext, DeclarationRefTargetKind targetKind )
@@ -406,6 +408,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                 case IDeclarationBuilder builder:
                     return Convert( compilation.Factory.GetDeclaration( builder, options ) );
+
+                case ISubstitutedDeclaration substitutedDeclaration:
+                    return Convert( compilation.Factory.GetDeclaration( substitutedDeclaration ) );
 
                 case string id:
                     {

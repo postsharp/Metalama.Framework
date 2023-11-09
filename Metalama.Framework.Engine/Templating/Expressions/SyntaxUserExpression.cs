@@ -17,11 +17,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             bool isReferenceable = false,
             bool isAssignable = false )
         {
-            _ = isReferenceable;
-
             this.Expression = expression;
             this.Type = type;
             this.IsAssignable = isAssignable;
+            this.IsReferenceable = isReferenceable;
         }
 
         protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext ) => this.Expression;
@@ -29,6 +28,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         public override IType Type { get; }
 
         public override bool IsAssignable { get; }
+
+        internal override bool IsReferenceable { get; }
 
         protected ExpressionSyntax Expression { get; }
 

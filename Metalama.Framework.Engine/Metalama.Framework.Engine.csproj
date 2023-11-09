@@ -7,7 +7,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
-        <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
+        <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersionNoPreview)</AssemblyName>
         <PackageId>Metalama.Framework.Engine</PackageId>
 		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
 		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
@@ -44,8 +44,8 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersion)')" />
-        <Compile Include="..\.generated\$(ThisRoslynVersion)-stubs\Metalama.Framework.Engine\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersion)')" />
+        <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)\Metalama.Framework.Engine\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
+        <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)-stubs\Metalama.Framework.Engine\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
     </ItemGroup>
 
     <ItemGroup>
@@ -69,6 +69,7 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
         <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
         <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+        <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
         <ProjectReference Include="..\Metalama.Framework.CompileTimeContracts\Metalama.Framework.CompileTimeContracts.csproj" />

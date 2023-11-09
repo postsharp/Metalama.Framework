@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 internal abstract class AllMembersCollection<T> : IMemberCollection<T>
     where T : class, IMember
 {
-    private volatile Dictionary<T, T>? _members;
+    private volatile HashSet<T>? _members;
 
     protected AllMembersCollection( NamedType declaringType )
     {
@@ -25,9 +25,9 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     private NamedType DeclaringType { get; }
 
-    public IEnumerable<T> OfName( string name ) => this.GetItemsCore( name ).Keys;
+    public IEnumerable<T> OfName( string name ) => this.GetItemsCore( name );
 
-    public IEnumerator<T> GetEnumerator() => this.GetItems().Keys.GetEnumerator();
+    public IEnumerator<T> GetEnumerator() => this.GetItems().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
@@ -37,10 +37,10 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     protected abstract IEqualityComparer<T> Comparer { get; }
 
-    private Dictionary<T, T> GetItemsCore( string? name )
+    private HashSet<T> GetItemsCore( string? name )
     {
         // We don't assign the field directly so we don't get into concurrent updates of the collection.
-        var members = new Dictionary<T, T>( this.Comparer );
+        var members = new HashSet<T>( this.Comparer );
 
         for ( var t = (INamedType) this.DeclaringType; t != null; t = t.BaseType )
         {
@@ -49,15 +49,9 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
             foreach ( var member in declaredMembers )
             {
-                if ( !includePrivate && member.Accessibility == Accessibility.Private )
+                if ( includePrivate || member.Accessibility != Accessibility.Private )
                 {
-                    continue;
-                }
-
-                // ReSharper disable once CanSimplifyDictionaryLookupWithTryAdd
-                if ( !members.ContainsKey( member ) )
-                {
-                    members.Add( member, member );
+                    members.Add( member );
                 }
             }
         }
@@ -65,7 +59,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
         return members;
     }
 
-    private Dictionary<T, T> GetItems()
+    private HashSet<T> GetItems()
     {
         if ( this._members == null )
         {

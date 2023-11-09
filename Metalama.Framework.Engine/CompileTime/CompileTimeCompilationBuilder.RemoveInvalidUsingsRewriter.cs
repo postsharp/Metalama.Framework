@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
             {
-                var symbolInfo = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.Name );
+                var symbolInfo = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node.GetNamespaceOrType() );
 
                 if ( symbolInfo.Symbol == null )
                 {

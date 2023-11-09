@@ -12,13 +12,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class ParameterList : DeclarationCollection<IParameter, Ref<IParameter>>, IParameterList
     {
-        public ParameterList( IMethodBase declaringType, IReadOnlyList<Ref<IParameter>> sourceItems ) : base(
-            declaringType,
-            sourceItems ) { }
+        public ParameterList( IMethodBase declaringMethod, IReadOnlyList<Ref<IParameter>> sourceItems )
+            : base( declaringMethod, sourceItems ) { }
 
-        public ParameterList( IIndexer declaringType, IReadOnlyList<Ref<IParameter>> sourceItems ) : base(
-            declaringType,
-            sourceItems ) { }
+        public ParameterList( IIndexer declaringIndexer, IReadOnlyList<Ref<IParameter>> sourceItems )
+            : base( declaringIndexer, sourceItems ) { }
 
         private ParameterList() { }
 

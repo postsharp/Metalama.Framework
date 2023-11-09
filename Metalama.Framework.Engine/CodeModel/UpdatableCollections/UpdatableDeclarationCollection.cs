@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 #pragma warning disable SA1402
 
-internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : BaseDeclarationCollection, ILazy, IReadOnlyList<TRef>
+internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : BaseDeclarationCollection, ILazy, ISourceDeclarationCollection<TDeclaration, TRef>
     where TDeclaration : class, IDeclaration
     where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
 {
@@ -61,12 +61,15 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
     }
 
     protected abstract void PopulateAllItems( Action<TRef> action );
+    
+    internal int Version { get; private set; }
 
     protected void AddItem( in TRef item )
     {
         if ( this.IsComplete )
         {
             this._allItems!.Add( item );
+            this.Version++;
         }
     }
 
@@ -76,6 +79,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         {
             Interlocked.Increment( ref this._removeOperationsCount );
             this._allItems!.Remove( item );
+            this.Version++;
         }
     }
 
@@ -96,7 +100,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
         return this._allItems!.Any( i => i.Equals( item ) );
     }
 
-    public UpdatableDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation )
+    public ISourceDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation )
     {
         var clone = (UpdatableDeclarationCollection<TDeclaration, TRef>) this.MemberwiseClone();
         clone.Compilation = compilation;
@@ -172,11 +176,11 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
 
         readonly object IEnumerator.Current => this.Current;
 
-        public void Dispose() { }
+        public readonly void Dispose() { }
     }
 }
 
-internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>
+internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>, ISourceDeclarationCollection<TDeclaration>
     where TDeclaration : class, IDeclaration
 {
     protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }

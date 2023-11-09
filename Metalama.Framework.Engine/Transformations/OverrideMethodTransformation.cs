@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
-            var proceedExpressionProvider = ( TemplateKind kind ) => this.CreateProceedExpression( context, kind );
+            SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind ) => this.CreateProceedExpression( context, kind );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
@@ -46,7 +47,7 @@ namespace Metalama.Framework.Engine.Transformations
                 metaApi,
                 this.OverriddenDeclaration,
                 this.BoundTemplate,
-                proceedExpressionProvider,
+                ProceedExpressionProvider,
                 this.ParentAdvice.AspectLayerId );
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.TemplateMember.Declaration );

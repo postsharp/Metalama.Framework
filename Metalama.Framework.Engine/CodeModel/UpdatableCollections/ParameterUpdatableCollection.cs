@@ -32,7 +32,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
             case IMethodBaseBuilder builder:
                 foreach ( var p in builder.Parameters )
                 {
-                    action( Ref.FromBuilder<IParameter, IParameterBuilder>( p ) );
+                    action( Ref.FromBuilder<IParameter>( p ) );
                 }
 
                 break;
@@ -48,7 +48,7 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
             case IIndexerBuilder indexerBuilder:
                 foreach ( var p in indexerBuilder.Parameters )
                 {
-                    action( Ref.FromBuilder<IParameter, IParameterBuilder>( p ) );
+                    action( Ref.FromBuilder<IParameter>( p ) );
                 }
 
                 break;

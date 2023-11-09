@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     IArrayTypeSymbol arrayType => OurSyntaxGenerator.CompileTime.ArrayTypeExpression(
                         OurSyntaxGenerator.CompileTime.Type( arrayType.ElementType ) ),
-                    _ => (TypeSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
+                    _ => OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
                 };
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

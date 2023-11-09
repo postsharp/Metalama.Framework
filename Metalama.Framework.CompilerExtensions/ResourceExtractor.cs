@@ -23,6 +23,8 @@ namespace Metalama.Framework.CompilerExtensions
     /// </summary>
     public static class ResourceExtractor
     {
+        private const string _designTimeContractsAssemblyName = "Metalama.Framework.DesignTime.Contracts";
+
         private static readonly object _initializeLock = new();
         private static readonly string[] _assembliesShippedWithMetalamaCompiler = new[] { "Metalama.Backstage", "Metalama.Compiler.Interfaces" };
 
@@ -38,6 +40,7 @@ namespace Metalama.Framework.CompilerExtensions
         private static volatile bool _initialized;
         private static string? _versionNumber;
         private static AssemblyLoader? _assemblyLoader;
+        private static readonly string? _overriddenTempPath;
 
         static ResourceExtractor()
         {
@@ -55,10 +58,13 @@ namespace Metalama.Framework.CompilerExtensions
                        string.Join( "", moduleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
 
             _snapshotDirectory = GetTempDirectory( "Extract" );
+            
+            var overriddenTempPath = Environment.GetEnvironmentVariable( "METALAMA_TEMP" );
+            _overriddenTempPath = string.IsNullOrEmpty( overriddenTempPath ) ? null : overriddenTempPath;
         }
 
         private static string GetTempDirectory( string purpose )
-            => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId, _isNetFramework ? "desktop" : "core" );
+            => Path.Combine( _overriddenTempPath ?? Path.GetTempPath(), "Metalama", purpose, _buildId, _isNetFramework ? "desktop" : "core" );
 
         private static void Initialize()
         {
@@ -89,7 +95,11 @@ namespace Metalama.Framework.CompilerExtensions
 
                         _versionNumber = GetRoslynVersion();
 
-                        _assemblyLoader = new AssemblyLoader( name => GetAssembly( name ) );
+                        // Since GetAssemblyCore loads the DesignTime.Contracts assembly outside of the AssemblyLoader ALC,
+                        // we also need to handle loading its dependencies by specifying the globalResolveHandlerFilter.
+                        _assemblyLoader = new AssemblyLoader(
+                            name => GetAssembly( name ),
+                            globalResolveHandlerFilter: a => a?.GetName().Name == _designTimeContractsAssemblyName );
 
                         _initialized = true;
                     }
@@ -424,6 +434,13 @@ namespace Metalama.Framework.CompilerExtensions
                 {
                     log?.AppendLine( $"Loading the embedded assembly '{embeddedAssembly.Path}'." );
 
+                    // It seems assemblies loaded into an ALC don't participate in COM type equivalence.
+                    // Since we need that for the DesignTime.Contracts assembly, load it without using ALC.
+                    if ( name.StartsWith( $"{_designTimeContractsAssemblyName}," ) )
+                    {
+                        return Assembly.LoadFile( embeddedAssembly.Path );
+                    }
+
                     return _assemblyLoader.LoadAssembly( embeddedAssembly.Path );
                 }
                 else
@@ -489,7 +506,11 @@ namespace Metalama.Framework.CompilerExtensions
                 }
             }
 
-            if ( version >= new Version( 4, 4 ) )
+            if ( version >= new Version( 4, 8 ) )
+            {
+                return "4.8.0";
+            }
+            else if ( version >= new Version( 4, 4 ) )
             {
                 return "4.4.0";
             }

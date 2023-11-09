@@ -89,5 +89,7 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? CompileTimeTargetFrameworks => null;
 
+    public virtual string? RestoreSources => null;
+
     public virtual bool IsTest => false;
 }

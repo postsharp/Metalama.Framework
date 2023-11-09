@@ -4,8 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Metalama Free -->
-    <MetalamaLicense>2-ZTQQQQQQ6QZEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEJ2D6DXU2WGSFJYN7NBESWRPV5AX9D5WWKRKRQQK4J3YELXMLRVDXRVBTZSKQADXRJZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
+    <MetalamaLicense>$(MetalamaFreePersonalLicenseKey)</MetalamaLicense>
   </PropertyGroup>
 
   <ItemGroup>

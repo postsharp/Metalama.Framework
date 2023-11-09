@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -77,5 +78,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 TypeDeclarationSyntax type => type,
                 _ => node.Parent?.GetDeclaringType()
             };
+
+        internal static bool IsNameOf( this InvocationExpressionSyntax node )
+            => node.Expression.Kind() == SyntaxKind.NameOfKeyword ||
+               (node.Expression is IdentifierNameSyntax identifierName && string.Equals( identifierName.Identifier.Text, "nameof", StringComparison.Ordinal ));
+
+        internal static TypeSyntax GetNamespaceOrType( this UsingDirectiveSyntax usingDirective ) =>
+#if ROSLYN_4_8_0_OR_GREATER
+            usingDirective.NamespaceOrType;
+#else
+            usingDirective.Name;
+#endif
     }
 }

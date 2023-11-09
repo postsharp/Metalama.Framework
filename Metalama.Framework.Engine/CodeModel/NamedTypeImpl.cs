@@ -539,7 +539,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         // Process the Roslyn type system.
         foreach ( var type in this.TypeSymbol.Interfaces )
         {
-            builder.Add( (INamedTypeSymbol) genericMap.Map( type ) );
+            builder.Add( genericMap.Map( type ) );
         }
 
         if ( this.TypeSymbol.BaseType != null )
