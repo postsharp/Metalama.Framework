@@ -12,5 +12,3 @@ public sealed record TestDesignTimeAspectPipelineResult(
     ImmutableArray<Diagnostic> Diagnostics,
     ImmutableArray<ScopedSuppression> Suppressions,
     ImmutableArray<IntroducedSyntaxTree> AdditionalSyntaxTrees );
-    
-    // TODO: Add suppressions.

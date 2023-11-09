@@ -704,18 +704,26 @@ internal abstract partial class BaseTestRunner
         // Write each document individually.
         if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
         {
-            var pipeline = new TestDesignTimeAspectPipeline( serviceProvider, testResult.TestContext.AssertNotNull(  ).Domain );
-            var designTimePipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation.AssertNotNull(  ) );
+            var pipeline = new TestDesignTimeAspectPipeline( serviceProvider, testResult.TestContext.AssertNotNull().Domain );
+            var inputCompilation = testResult.InputCompilation.AssertNotNull();
+            var designTimePipelineResult = await pipeline.ExecuteAsync( inputCompilation );
 
             var compilationWithDesignTimeTrees =
-                testResult.InputCompilation.AddSyntaxTrees( designTimePipelineResult.AdditionalSyntaxTrees.Select( x => x.GeneratedSyntaxTree ) );
-            
-            
+                inputCompilation
+                    .AddSyntaxTrees( designTimePipelineResult.AdditionalSyntaxTrees.Select( x => x.GeneratedSyntaxTree ) );
+
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
                 var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
 
-                await this.WriteHtmlAsync( compilationWithDesignTimeTrees, testResult, syntaxTree, htmlDirectory, htmlCodeWriter, isTargetCode );
+                await this.WriteHtmlAsync(
+                    compilationWithDesignTimeTrees,
+                    testResult,
+                    syntaxTree,
+                    htmlDirectory,
+                    htmlCodeWriter,
+                    isTargetCode,
+                    designTimePipelineResult.Suppressions );
             }
         }
     }
@@ -731,7 +739,8 @@ internal abstract partial class BaseTestRunner
         TestSyntaxTree testSyntaxTree,
         string htmlDirectory,
         HtmlCodeWriter htmlCodeWriter,
-        bool writeDiff )
+        bool writeDiff,
+        ImmutableArray<ScopedSuppression> suppressions )
     {
         StreamWriter? inputTextWriter = null;
         StreamWriter? outputTextWriter = null;
@@ -751,9 +760,24 @@ internal abstract partial class BaseTestRunner
             inputDiagnostics = new List<Diagnostic>();
             inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
             var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
-            inputDiagnostics.AddRange( semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) );
-            
-            // TODO: Suppress.
+
+            foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )
+            {
+                // Check if any suppression applies to this diagnostic.
+                if ( suppressions.Any(
+                        s => s.Definition.SuppressedDiagnosticId == diagnostic.Id
+                             && s.GetScopeSymbolOrNull( compilationWithDesignTimeTrees )
+                                 ?.DeclaringSyntaxReferences.Any(
+                                     r =>
+                                         r.SyntaxTree == diagnostic.Location.SourceTree &&
+                                         r.Span.Contains( diagnostic.Location.SourceSpan ) ) == true ) )
+                {
+                    return;
+                }
+
+                // Add the diagnostic.
+                inputDiagnostics.Add( diagnostic );
+            }
         }
 
         if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )
