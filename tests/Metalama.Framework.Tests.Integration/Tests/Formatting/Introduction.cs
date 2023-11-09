@@ -1,9 +1,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.TestFramework.Introduction;
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Introduction;
 
-public class C
+public partial class C
 {
     private void M()
     {
