@@ -1,5 +1,9 @@
 <Project>
 
+    <PropertyGroup>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
     <ItemGroup>
         <Compile Include="..\Metalama.Testing.UnitTesting\**\*.cs" Exclude="..\Metalama.Testing.UnitTesting\bin\**\*.cs;..\Metalama.Testing.UnitTesting\obj\**\*.cs" />
         <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
