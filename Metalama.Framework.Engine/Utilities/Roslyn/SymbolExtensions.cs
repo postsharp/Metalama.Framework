@@ -240,6 +240,19 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 } );
         }
 
+        internal static bool IsPrimaryConstructor( this IMethodSymbol constructorSymbol )
+        {
+#if ROSLYN_4_8_0_OR_GREATER
+            var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
+
+            return 
+                constructorSymbol is { MethodKind: MethodKind.Constructor } 
+                && declarationSyntax is TypeDeclarationSyntax { ParameterList: not null };
+#else
+            return false;
+#endif
+        }
+
         internal static FrameworkName? GetTargetFramework( this Compilation compilation )
         {
             var attribute = compilation.Assembly.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(TargetFrameworkAttribute) );

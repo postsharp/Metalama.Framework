@@ -28,7 +28,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
     public AppendConstructorParameterAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
-        IDeclaration targetDeclaration,
+        IConstructor targetDeclaration,
         ICompilation sourceCompilation,
         string? layerName,
         string parameterName,
@@ -37,6 +37,8 @@ internal sealed class AppendConstructorParameterAdvice : Advice
         Func<IParameter, IConstructor, PullAction>? pullActionFunc,
         TypedConstant defaultValue ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )
     {
+        Invariant.AssertNot( targetDeclaration.IsPrimary );
+
         this._parameterName = parameterName;
         this._parameterType = parameterType;
         this._buildAction = buildAction;

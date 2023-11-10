@@ -193,9 +193,30 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
             this._facade,
             this.Compilation.GetConstructorCollection( this.TypeSymbol ) );
 
+    [Memo]
+    public IConstructor? PrimaryConstructor => this.GetPrimaryConstructorImpl();
+
+    [Memo]
     public IConstructor? StaticConstructor => this.GetStaticConstructorImpl();
 
     public IMethod? Finalizer => this.GetFinalizerImpl();
+
+    private IConstructor? GetPrimaryConstructorImpl()
+    {
+        var constructors = this.Compilation.GetConstructorCollection( this.TypeSymbol );
+
+        foreach (var constructor in constructors)
+        {
+            if (constructor.Target is IMethodSymbol methodSymbol && methodSymbol.IsPrimaryConstructor())
+            {
+                return this.Compilation.Factory.GetConstructor( methodSymbol );
+            }
+
+            // TODO: Builders? (In case we e.g. add a parameter)
+        }
+
+        return null;
+    }
 
     private IConstructor? GetStaticConstructorImpl()
     {

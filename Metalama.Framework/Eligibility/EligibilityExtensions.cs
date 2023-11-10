@@ -412,6 +412,14 @@ public static partial class EligibilityExtensions
     /// <summary>
     /// Forbids the target member or type from being static.
     /// </summary>
+    public static void MustNotBePrimary( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => !member.IsPrimary,
+            member => $"{member} must not be primary constructor" );
+
+    /// <summary>
+    /// Forbids the target member or type from being static.
+    /// </summary>
     public static void MustNotBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             member => !member.IsStatic,

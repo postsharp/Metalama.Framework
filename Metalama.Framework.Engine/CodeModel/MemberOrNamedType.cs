@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public string Name
+        public virtual string Name
         {
             get
             {

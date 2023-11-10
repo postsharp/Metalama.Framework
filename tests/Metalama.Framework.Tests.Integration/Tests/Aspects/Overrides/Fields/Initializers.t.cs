@@ -2,7 +2,6 @@
 internal class TargetClass
 {
   private global::System.Int32 _field = 42;
-  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.OverrideAttribute]
   public global::System.Int32 Field
   {
     get
@@ -17,18 +16,17 @@ internal class TargetClass
     }
   }
   private static global::System.Int32 _staticField = 42;
-  [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.OverrideAttribute]
   public static global::System.Int32 StaticField
   {
     get
     {
       global::System.Console.WriteLine("This is the overridden getter.");
-      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass._staticField;
+      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers.TargetClass._staticField;
     }
     set
     {
       global::System.Console.WriteLine("This is the overridden setter.");
-      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass._staticField = value;
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers.TargetClass._staticField = value;
     }
   }
   static TargetClass()
@@ -39,6 +37,32 @@ internal class TargetClass
   {
     Field = 27;
   }
-  public global::System.Int32 IntroducedField = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass.StaticField;
-  public static global::System.Int32 IntroducedStaticField = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.PropertyTemplate_Field.TargetClass.StaticField;
+  private global::System.Int32 _introducedField = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers.TargetClass.StaticField;
+  public global::System.Int32 IntroducedField
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._introducedField;
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is the overridden setter.");
+      this._introducedField = value;
+    }
+  }
+  private static global::System.Int32 _introducedStaticField = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers.TargetClass.StaticField;
+  public static global::System.Int32 IntroducedStaticField
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers.TargetClass._introducedStaticField;
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is the overridden setter.");
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers.TargetClass._introducedStaticField = value;
+    }
+  }
 }

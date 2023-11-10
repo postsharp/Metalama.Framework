@@ -1,7 +1,7 @@
+[Introduction]
 internal class TargetClass
 {
   private int _property = 42;
-  [Override]
   public int Property
   {
     get
@@ -16,7 +16,6 @@ internal class TargetClass
     }
   }
   private static int _staticProperty = 42;
-  [Override]
   public static int StaticProperty
   {
     get
@@ -28,6 +27,34 @@ internal class TargetClass
     {
       global::System.Console.WriteLine("This is the overridden setter.");
       global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers.TargetClass._staticProperty = value;
+    }
+  }
+  private global::System.Int32 _introducedProperty = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers.TargetClass.StaticProperty;
+  public global::System.Int32 IntroducedProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return this._introducedProperty;
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is the overridden setter.");
+      this._introducedProperty = value;
+    }
+  }
+  private static global::System.Int32 _introducedStaticProperty = (global::System.Int32)global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers.TargetClass.StaticProperty;
+  public static global::System.Int32 IntroducedStaticProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the overridden getter.");
+      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers.TargetClass._introducedStaticProperty;
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is the overridden setter.");
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers.TargetClass._introducedStaticProperty = value;
     }
   }
 }

@@ -14,6 +14,8 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
 {
     public ContractConstructorTransformation( Advice advice, IConstructor constructor ) : base( advice )
     {
+        Invariant.AssertNot( constructor.IsPrimary );
+
         this.TargetMember = constructor;
     }
 

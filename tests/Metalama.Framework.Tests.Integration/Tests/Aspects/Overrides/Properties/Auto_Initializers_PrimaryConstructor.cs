@@ -1,16 +1,17 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Testing.AspectTesting;
 using System;
 using System.Linq;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers_PrimaryConstructor;
 
 [assembly:AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers_PrimaryConstructor
 {
     /*
      * Tests a single OverrideProperty aspect on auto properties with initializers and that accesses in constructor bodies are properly rewritten to the backing field.
@@ -43,18 +44,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Introduce]
-        public int IntroducedProperty { get; set; } = meta.ThisType.StaticProperty;
-
-        [Introduce]
-        public static int IntroducedStaticProperty { get; set; } = meta.ThisType.StaticProperty;
+        public int IntroducedProperty { get; set; } = ExpressionFactory.Parse("x").Value;
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass
+    internal class TargetClass(int x)
     {
-        public int Property { get; set; } = 42;
-
-        public static int StaticProperty { get; set; } = 42;
+        public int Property { get; set; } = x;
     }
 }

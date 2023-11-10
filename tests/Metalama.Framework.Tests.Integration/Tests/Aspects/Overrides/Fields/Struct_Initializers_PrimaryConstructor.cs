@@ -2,18 +2,18 @@
 using System;
 using System.Linq;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers_PrimaryConstructor;
 
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
-
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers_PrimaryConstructor
 {
     /*
-     * Tests that overriding of fields with initializers in structs correctly retains the initializer.
+     * Tests that overriding of fields with initializers in structs with primary constructor correctly retains the initializer.
      */
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
@@ -43,20 +43,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         }
 
         [Introduce]
-        public int IntroducedField = meta.ThisType.StaticField;
-
-        [Introduce]
-        public static int IntroducedStaticField = meta.ThisType.StaticField;
+        public int IntroducedField = ExpressionFactory.Parse("x").Value;
     }
 
     // <target>
     [Introduction]
-    internal struct TargetStruct
+    internal struct TargetStruct(int x)
     {
-        public int Field = 42;
-
-        public static int StaticField = 42;
-
-        public TargetStruct() { }
+        public int Field = x;
     }
 }

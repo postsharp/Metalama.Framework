@@ -1,8 +1,9 @@
-﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects;
 using System;
 using System.Linq;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers_PrimaryConstructor;
 
 [assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
@@ -10,10 +11,10 @@ using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.S
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers_PrimaryConstructor
 {
     /*
-     * Tests that overriding of fields with initializers in structs correctly retains the initializer.
+     * Tests that overriding of fields with initializers that reference primary constructor parameter correctly retains the initializer.
      */
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
@@ -22,14 +23,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine( "This is the overridden getter." );
+                Console.WriteLine("This is the overridden getter.");
 
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine( "This is the overridden setter." );
+                Console.WriteLine("This is the overridden setter.");
                 meta.Proceed();
             }
         }
@@ -42,21 +43,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
             builder.Outbound.SelectMany(x => x.Fields.Where(x => !x.IsImplicitlyDeclared)).AddAspect(x => new OverrideAttribute());
         }
 
+        // TODO: CodeModel for primary constructor?
         [Introduce]
-        public int IntroducedField = meta.ThisType.StaticField;
-
-        [Introduce]
-        public static int IntroducedStaticField = meta.ThisType.StaticField;
+        public int IntroducedField = ExpressionFactory.Parse("x").Value;
     }
 
     // <target>
     [Introduction]
-    internal struct TargetStruct
+    internal class TargetClass(int x)
     {
-        public int Field = 42;
-
-        public static int StaticField = 42;
-
-        public TargetStruct() { }
+        public int Field = x;
     }
 }

@@ -27,14 +27,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ConstructorInitializerKind InitializerKind
-            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax() switch
+            => this.GetPrimaryDeclarationSyntax() switch
             {
                 null => ConstructorInitializerKind.None,
-                { Initializer: null } => ConstructorInitializerKind.None,
-                { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.ThisConstructorInitializer ) =>
+                ConstructorDeclarationSyntax { Initializer: null } => ConstructorInitializerKind.None,
+                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.ThisConstructorInitializer ) =>
                     ConstructorInitializerKind.This,
-                { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
+                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
                     ConstructorInitializerKind.Base,
+#if ROSLYN_4_8_0_OR_GREATER
+                ClassDeclarationSyntax { BaseList: { } baseList } =>
+                    baseList.Types.Any( bt => bt.IsKind( SyntaxKind.PrimaryConstructorBaseType ) )
+                        ? ConstructorInitializerKind.Base
+                        : ConstructorInitializerKind.None,
+#endif
                 _ => throw new AssertionFailedException( "Unexpected initializer for '{this}'." )
             };
 
@@ -45,6 +51,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool IsExplicitInterfaceImplementation => false;
 
         public override bool IsAsync => false;
+
+        [Memo]
+        public bool IsPrimary => this.MethodSymbol.IsPrimaryConstructor();
 
         public IMember? OverriddenMember => null;
 
