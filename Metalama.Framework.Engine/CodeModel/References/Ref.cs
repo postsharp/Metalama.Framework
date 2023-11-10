@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -470,7 +471,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             var value = this.Target switch
             {
                 null => "null",
-                ISymbol symbol => symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat ),
+                ISymbol symbol => MetalamaStringFormatter.Instance.Format( null, symbol, null ),
                 _ => this.Target.ToString() ?? "null"
             };
 

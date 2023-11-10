@@ -70,6 +70,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             var metadata = this._metadataReader.GetMetadata( this._assembly );
 
             return new TestProjectProperties(
+                this._assembly.Name,
                 metadata.ProjectDirectory,
                 metadata.ParserSymbols,
                 metadata.TargetFramework,

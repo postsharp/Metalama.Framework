@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.UnitTesting;
 using System;
 using Xunit.Abstractions;
@@ -38,7 +39,14 @@ namespace Metalama.Testing.AspectTesting
 
                 try
                 {
-                    factoryType = Type.GetType( testInput.Options.TestRunnerFactoryType!, true )!;
+                    var typeName = testInput.Options.TestRunnerFactoryType!;
+
+                    if ( !typeName.ContainsOrdinal( ',' ) && testInput.ProjectProperties.AssemblyName != null )
+                    {
+                        typeName = $"{typeName}, {testInput.ProjectProperties.AssemblyName}";
+                    }
+
+                    factoryType = Type.GetType( typeName, true )!;
                 }
                 catch ( Exception e )
                 {

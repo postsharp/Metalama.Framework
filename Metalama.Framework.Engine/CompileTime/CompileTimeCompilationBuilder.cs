@@ -173,7 +173,31 @@ internal sealed partial class CompileTimeCompilationBuilder
         this._logger.Trace?.Log( $"ProjectHash: Source={sourceHash:x}" );
 
         h.Update( redistributionLicenseKey );
-        this._logger.Trace?.Log( $"RedistributionLicenseKey: {redistributionLicenseKey ?? "null"}" );
+        this._logger.Trace?.Log( $"ProjectHash: RedistributionLicenseKey={redistributionLicenseKey ?? "null"}" );
+
+        if ( this._projectOptions != null )
+        {
+            h.Update( this._projectOptions.FormatCompileTimeCode );
+            this._logger.Trace?.Log( $"ProjectHash: FormatCompileTimeCode={this._projectOptions.FormatCompileTimeCode}" );
+
+            h.Update( this._projectOptions.AllowPreviewLanguageFeatures );
+            this._logger.Trace?.Log( $"ProjectHash: AllowPreviewLanguageFeatures={this._projectOptions.AllowPreviewLanguageFeatures}" );
+
+            h.Update( this._projectOptions.RequireOrderedAspects );
+            this._logger.Trace?.Log( $"ProjectHash: RequireOrderedAspects={this._projectOptions.RequireOrderedAspects}" );
+
+            h.Update( this._projectOptions.RoslynIsCompileTimeOnly );
+            this._logger.Trace?.Log( $"ProjectHash: RoslynIsCompileTimeOnly={this._projectOptions.RoslynIsCompileTimeOnly}" );
+
+            h.Update( this._projectOptions.CompileTimeTargetFrameworks );
+            this._logger.Trace?.Log( $"ProjectHash: CompileTimeTargetFrameworks={this._projectOptions.CompileTimeTargetFrameworks}" );
+
+            h.Update( this._projectOptions.TemplateLanguageVersion );
+            this._logger.Trace?.Log( $"ProjectHash: TemplateLanguageVersion={this._projectOptions.TemplateLanguageVersion}" );
+        }
+
+        h.Update( RoslynApiVersion.Current );
+        this._logger.Trace?.Log( $"ProjectHash: RoslynApiVersion={RoslynApiVersion.Current}" );
 
         var digest = h.Digest();
 

@@ -1,6 +1,8 @@
 ﻿#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 // @LanguageVersion(8.0)
 #endif
+
 using Metalama.Framework.Aspects;
 
 // This reproduces #30669.

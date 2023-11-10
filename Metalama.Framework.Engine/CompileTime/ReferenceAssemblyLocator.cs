@@ -121,8 +121,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var projectHash =
                 additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks && additionalNugetSources is null
+                && RoslynApiVersion.Current == RoslynApiVersion.Highest
                     ? "default"
-                    : HashUtilities.HashString( $"{additionalPackageReferences}\n{targetFrameworksString}\n{additionalNugetSources}" );
+                    : HashUtilities.HashString(
+                        $"{additionalPackageReferences}\n{targetFrameworksString}\n{additionalNugetSources}\n{RoslynApiVersion.Current}" );
 
             this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
                 .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, projectHash );
@@ -338,9 +340,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
                 // dynamic code at compile time. We prefer compilation errors.
 
-                // We intentionally refer to the lowest supported Roslyn API version.
-                // When we will support higher Roslyn features in templates, we will have to have reference assemblies for several versions.
-
                 var projectText =
                     $"""
                      <Project>
@@ -357,8 +356,7 @@ namespace Metalama.Framework.Engine.CompileTime
                          <RestoreAdditionalProjectSources>{additionalNugetSources}</RestoreAdditionalProjectSources>
                        </PropertyGroup>
                        <ItemGroup>
-                         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" />
-                         <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+                         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="{RoslynApiVersion.Current.ToNuGetVersionString()}" />
                          <PackageReference Include="Metalama.Framework.RunTime" Version="{AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly ).GetPackageVersion( "Metalama.Framework.RunTime" )}" />
                          {additionalPackageReferences}
                        </ItemGroup>
