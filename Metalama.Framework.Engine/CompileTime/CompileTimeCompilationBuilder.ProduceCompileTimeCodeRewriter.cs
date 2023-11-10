@@ -149,12 +149,27 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var attribute in node.Attributes )
                 {
-                    var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( attribute.Name ).Symbol;
+                    var semanticModel = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+                    var attributeSymbol = semanticModel.GetSymbolInfo( attribute.Name ).Symbol;
 
-                    if ( symbol != null )
+                    if ( attributeSymbol != null )
                     {
-                        if ( this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.RunTimeOnly )
+                        if ( this.SymbolClassifier.GetTemplatingScope( attributeSymbol ) == TemplatingScope.RunTimeOnly )
                         {
+                            var attributeTypeSymbol = attributeSymbol.GetClosestContainingType();
+
+                            if ( attributeTypeSymbol?.GetFullName() == "System.Runtime.CompilerServices.InlineArrayAttribute" )
+                            {
+                                var containingDeclaration = node.Parent == null ? null : semanticModel.GetDeclaredSymbol( node.Parent );
+
+                                this._diagnosticAdder.Report(
+                                    TemplatingDiagnosticDescriptors.AttributeNotAllowedOnCompileTimeCode.CreateRoslynDiagnostic(
+                                        attribute.GetDiagnosticLocation(),
+                                        (attributeTypeSymbol, containingDeclaration) ) );
+
+                                this.Success = false;
+                            }
+
                             continue;
                         }
                     }

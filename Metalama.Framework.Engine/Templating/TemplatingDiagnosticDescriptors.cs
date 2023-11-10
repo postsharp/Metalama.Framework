@@ -580,5 +580,13 @@ namespace Metalama.Framework.Engine.Templating
                 "Cannot set the compile-time expression '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}'.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol Attribute, ISymbol? Target)> AttributeNotAllowedOnCompileTimeCode
+            = new(
+                "LAMA0281",
+                "Attribute is not allowed on compile-time code.",
+                "The attribute '{0}' is not allowed on the compile-time declaration '{1}', because it wouldn't have the expected effect.",
+                _category,
+                Error );
     }
 }

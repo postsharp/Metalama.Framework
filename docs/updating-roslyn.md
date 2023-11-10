@@ -17,7 +17,7 @@
     1. Many `InternalsVisibleTo`, including one in the `Metalama.Framework.RunTime` repo
     2. `ResourceExtractor.GetRoslynVersion`
     3. `JsonSerializationBinder`
-12. Update `Metalama.Framework.CompilerExtensions.csproj` to include the new assemblies.
+12. Update `Metalama.Framework.CompilerExtensions.Resources.csproj` to include the new assemblies.
 13. Don't forget that Metalama.Framework.Private is a separate repo, so it needs its own PR.
 
 The testing should include:
