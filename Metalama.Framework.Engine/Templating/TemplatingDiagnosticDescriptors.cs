@@ -589,11 +589,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(IMemberOrNamedType Template, IDeclaration? Target, string RequiredCSharpVersion, string TargetCSharpVersion)> TemplateRequiresHigherCSharpVersion
+        internal static readonly DiagnosticDefinition<(string Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)> AspectUsesHigherCSharpVersion
             = new(
                 "LAMA0282",
-                "Template requires higher C# version than what is allowed in the project.",
-                "The template '{0}' may not be applicable to '{1}', because it uses C# {2}, while the project uses C# {3}. Consider specifying <LangVersion>{2}</LangVersion> in this project, or removing newer language features from the template and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
+                "Aspect uses higher C# version than what is allowed in the project.",
+                "The aspect '{0}' uses features of C# {1}, but it is used in a project built with C# {2}. Consider specifying <LangVersion>{1}</LangVersion> in this project or removing newer language features from the template '{3}' and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
                 _category,
                 Warning );
     }

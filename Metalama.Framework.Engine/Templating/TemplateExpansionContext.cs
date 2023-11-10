@@ -677,7 +677,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         return this._otherTemplateClassProvider.Get( templateProvider );
     }
 
-    public void CheckTemplateLanguageVersion<T>( TemplateMember<T> templateMember )
+    public void CheckTemplateLanguageVersion<T>( TemplateExpansionContext context, TemplateMember<T> templateMember )
         where T : class, IMemberOrNamedType
     {
         var requiredLanguageVersion = templateMember.TemplateClassMember.TemplateInfo.UsedApiVersion?.ToLanguageVersion();
@@ -685,11 +685,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
         if ( requiredLanguageVersion > targetLanguageVersion )
         {
+            // TODO: deduplicate
             this.Diagnostics.Report(
-                TemplatingDiagnosticDescriptors.TemplateRequiresHigherCSharpVersion.CreateRoslynDiagnostic(
+                TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
-                    (templateMember.Declaration, this.TargetDeclaration,
-                     requiredLanguageVersion.Value.ToDisplayString(), targetLanguageVersion.Value.ToDisplayString()) ) );
+                    (context.MetaApi.AspectInstance.AspectClass.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
+                    targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration) ) );
         }
     }
 
