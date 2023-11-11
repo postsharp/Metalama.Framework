@@ -1,8 +1,13 @@
+#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+// @LangVersion(12)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using MyTuple = (int, int Name);
-using unsafe IntPointer = int*;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.PrimaryConstructor_Runtime;
 
@@ -37,3 +42,5 @@ public class C(int x) : B(x)
         _ = new C(42);
     }
 }
+
+#endif

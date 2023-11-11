@@ -10,6 +10,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Workspaces" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
@@ -22,10 +29,4 @@
       <PackageReference Include="xunit.abstractions" Version="2.0.3" />
     </ItemGroup>
     
-    <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.$(ThisRoslynVersionNoPreview)" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Workspaces" />
-    </ItemGroup>
 </Project>

@@ -1,7 +1,12 @@
-using Metalama.Framework.Advising;
+#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+// @LangVersion(12)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_TargetNonPrimary;
 
@@ -34,3 +39,5 @@ public class C(int x) : A(42)
     {
     }
 }
+
+#endif

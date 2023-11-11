@@ -1,7 +1,12 @@
-using Metalama.Framework.Advising;
+#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+// @LangVersion(12)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using System.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor;
@@ -29,3 +34,5 @@ public class C(int x) : A(42)
 {
     public int Y { get; } = x;
 }
+
+#endif

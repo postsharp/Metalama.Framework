@@ -11,17 +11,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
         <ProjectReference Include="..\Metalama.Framework.DesignTime.Rpc\Metalama.Framework.DesignTime.Rpc.csproj" />
         <ProjectReference Include="..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
     </ItemGroup>
-
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)\Metalama.Framework.DesignTime\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
         <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)-stubs\Metalama.Framework.DesignTime\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
     </ItemGroup>
-
 
 </Project>

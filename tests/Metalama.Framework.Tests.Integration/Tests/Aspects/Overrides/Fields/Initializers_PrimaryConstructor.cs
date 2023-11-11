@@ -1,3 +1,10 @@
+#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+// @LangVersion(12)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
 using Metalama.Framework.Aspects;
 using System;
 using System.Linq;
@@ -55,3 +62,5 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         public int Field = x;
     }
 }
+
+#endif

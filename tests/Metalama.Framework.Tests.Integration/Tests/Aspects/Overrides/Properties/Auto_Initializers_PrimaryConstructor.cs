@@ -1,4 +1,11 @@
-﻿using Metalama.Framework.Aspects;
+﻿#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+// @LangVersion(12)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Testing.AspectTesting;
@@ -54,3 +61,5 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         public int Property { get; set; } = x;
     }
 }
+
+#endif

@@ -6,6 +6,7 @@
         <TargetFrameworks>netframework4.8;net8.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RootNamespace>Metalama.Framework.Tests.UnitTests</RootNamespace>
+        <AssemblyName>Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)</AssemblyName>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <!-- It must be preview and not 12.0 because of Rider. -->
         <LangVersion>preview</LangVersion>
