@@ -42,10 +42,15 @@ internal sealed class TestProjectProperties
         ImmutableArray<string> ignoredWarnings,
         TestFrameworkLicenseStatus? license = null )
     {
-        // Remove trailing separator from directory path.
+        // Remove trailing separator from directory paths.
         if ( projectDirectory != null && projectDirectory[^1] == Path.DirectorySeparatorChar )
         {
             projectDirectory = projectDirectory[..^1];
+        }
+
+        if ( sourceDirectory != null && sourceDirectory[^1] == Path.DirectorySeparatorChar )
+        {
+            sourceDirectory = sourceDirectory[..^1];
         }
 
         this._projectDirectory = projectDirectory;
