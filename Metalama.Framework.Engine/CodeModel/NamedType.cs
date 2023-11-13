@@ -385,6 +385,16 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public IConstructor? PrimaryConstructor
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.PrimaryConstructor;
+            }
+        }
+
         public IConstructor? StaticConstructor
         {
             get

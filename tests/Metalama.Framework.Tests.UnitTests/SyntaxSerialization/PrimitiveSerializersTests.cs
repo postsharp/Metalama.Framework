@@ -171,9 +171,15 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
             using var testContext = this.CreateSerializationTestContext( "" );
 
             var pointer = (int*) 300;
+#if NET7_0_OR_GREATER
+            Assert.Equal( "new nint(-400L)", testContext.Serialize( new IntPtr( -400L ) ).NormalizeWhitespace().ToString() );
+            Assert.Equal( "new nint(-200L)", testContext.Serialize( new IntPtr( -200 ) ).NormalizeWhitespace().ToString() );
+            Assert.Equal( "new nint(300L)", testContext.Serialize( new IntPtr( pointer ) ).NormalizeWhitespace().ToString() );
+#else
             Assert.Equal( "new global::System.UIntPtr(400UL)", testContext.Serialize( new UIntPtr( 400UL ) ).NormalizeWhitespace().ToString() );
             Assert.Equal( "new global::System.UIntPtr(200UL)", testContext.Serialize( new UIntPtr( 200 ) ).NormalizeWhitespace().ToString() );
             Assert.Equal( "new global::System.UIntPtr(300UL)", testContext.Serialize( new UIntPtr( pointer ) ).NormalizeWhitespace().ToString() );
+#endif
         }
 
         [Fact]
@@ -182,9 +188,15 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
             using var testContext = this.CreateSerializationTestContext( "" );
 
             var pointer = (int*) 300;
+#if NET7_0_OR_GREATER
+            Assert.Equal( "new nint(-400L)", testContext.Serialize( new IntPtr( -400L ) ).NormalizeWhitespace().ToString() );
+            Assert.Equal( "new nint(-200L)", testContext.Serialize( new IntPtr( -200 ) ).NormalizeWhitespace().ToString() );
+            Assert.Equal( "new nint(300L)", testContext.Serialize( new IntPtr( pointer ) ).NormalizeWhitespace().ToString() );
+#else
             Assert.Equal( "new global::System.IntPtr(-400L)", testContext.Serialize( new IntPtr( -400L ) ).NormalizeWhitespace().ToString() );
             Assert.Equal( "new global::System.IntPtr(-200L)", testContext.Serialize( new IntPtr( -200 ) ).NormalizeWhitespace().ToString() );
             Assert.Equal( "new global::System.IntPtr(300L)", testContext.Serialize( new IntPtr( pointer ) ).NormalizeWhitespace().ToString() );
+#endif
         }
     }
 }

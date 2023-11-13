@@ -596,5 +596,14 @@ namespace Metalama.Framework.Engine.Templating
                 "The aspect '{0}' uses features of C# {1}, but it is used in a project built with C# {2}. Consider specifying <LangVersion>{1}</LangVersion> in this project or removing newer language features from the template '{3}' and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
                 _category,
                 Warning );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> NonRecordPrimaryConstructorsNotSupported 
+            = new(
+                "LAMA0283",
+                _category,
+                "Compile-time type '{0}' uses non-record primary constructors which is not currently supported. " +
+                "You should remove the parameter list from the type and use explicitly defined constructors instead.",
+                Error,
+                "Non-record primary constructors are not currently supported in compile-time code." );
     }
 }

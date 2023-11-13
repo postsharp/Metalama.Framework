@@ -11,6 +11,7 @@
         <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+    
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
@@ -20,9 +21,15 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.4.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0" />
         
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
-        <InternalsVisibleTo Include="Metalama.Roslyn" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
+        
+        <InternalsVisibleTo Include="Metalama.Roslyn" />        
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+    
+    <ItemGroup>
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
         <PackageReference Include="Metalama.Framework.RunTime" Version="$(MetalamaFrameworkRunTimeVersion)" />
     </ItemGroup>

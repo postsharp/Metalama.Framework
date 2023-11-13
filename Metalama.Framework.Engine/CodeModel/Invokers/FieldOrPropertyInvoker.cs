@@ -23,7 +23,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             fieldOrProperty,
             options,
             target,
-            syntaxGenerationContext ) { }
+            syntaxGenerationContext ) 
+        {
+        }
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {

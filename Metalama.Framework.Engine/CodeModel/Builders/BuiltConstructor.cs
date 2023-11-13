@@ -25,6 +25,8 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     public ConstructorInitializerKind InitializerKind => this.ConstructorBuilder.InitializerKind;
 
+    bool IConstructor.IsPrimary => false;
+
     public ConstructorBuilder ConstructorBuilder { get; }
 
     public ConstructorInfo ToConstructorInfo() => this.ConstructorBuilder.ToConstructorInfo();

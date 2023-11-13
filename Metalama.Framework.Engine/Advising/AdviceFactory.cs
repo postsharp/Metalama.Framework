@@ -1531,6 +1531,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 throw new InvalidOperationException();
             }
 
+            this.CheckEligibility( targetConstructor, AdviceKind.AddInitializer );
+
             var advice = new SyntaxBasedInitializeAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
