@@ -264,13 +264,6 @@ public sealed partial class CompilationModel
             null );
     }
 
-    internal IConstructorBuilder? GetPrimaryConstructor( INamedTypeSymbol declaringType )
-    {
-        this._staticConstructors.TryGetValue( declaringType, out var value );
-
-        return value;
-    }
-
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
         this._staticConstructors.TryGetValue( declaringType, out var value );

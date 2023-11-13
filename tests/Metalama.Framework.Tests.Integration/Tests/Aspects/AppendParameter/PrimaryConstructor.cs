@@ -16,7 +16,6 @@ public class MyAspect : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            Debugger.Break();
             builder.Advice.IntroduceParameter( constructor, "p", typeof(int), TypedConstant.Create( 15 ) );
         }
     }

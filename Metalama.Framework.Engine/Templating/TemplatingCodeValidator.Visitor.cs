@@ -320,7 +320,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     // C#12 primary constructors (non-record types) are not supported.
                     this.Report(
-                        SerializationDiagnosticDescriptors.NonRecordPrimaryConstructorsNotSupported.CreateRoslynDiagnostic(
+                        TemplatingDiagnosticDescriptors.NonRecordPrimaryConstructorsNotSupported.CreateRoslynDiagnostic(
                             node.Identifier.GetLocation(),
                             symbol ) );
                 }

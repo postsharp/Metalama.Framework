@@ -36,6 +36,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
                     ConstructorInitializerKind.Base,
 #if ROSLYN_4_8_0_OR_GREATER
+                ClassDeclarationSyntax { BaseList: null } =>
+                    ConstructorInitializerKind.None,
                 ClassDeclarationSyntax { BaseList: { } baseList } =>
                     baseList.Types.Any( bt => bt.IsKind( SyntaxKind.PrimaryConstructorBaseType ) )
                         ? ConstructorInitializerKind.Base
