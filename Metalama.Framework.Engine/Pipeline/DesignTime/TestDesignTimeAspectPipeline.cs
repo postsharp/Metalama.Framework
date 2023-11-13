@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
-internal sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
+public sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     public TestDesignTimeAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, domain ) { }
 
@@ -24,7 +24,7 @@ internal sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipelin
 
         if ( !this.TryInitialize( diagnosticList, partialCompilation.Compilation, null, null, CancellationToken.None, out var configuration ) )
         {
-            return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
+            return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(),  ImmutableArray<ScopedSuppression>.Empty, ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
 
         // Inject a DependencyCollector so we can test exceptions based on its presence.
@@ -34,12 +34,13 @@ internal sealed class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipelin
 
         if ( !stageResult.IsSuccessful )
         {
-            return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
+            return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(),  ImmutableArray<ScopedSuppression>.Empty, ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
 
         return new TestDesignTimeAspectPipelineResult(
             true,
             stageResult.Value.Diagnostics.ReportedDiagnostics,
+            stageResult.Value.Diagnostics.DiagnosticSuppressions,
             stageResult.Value.AdditionalSyntaxTrees );
     }
 
