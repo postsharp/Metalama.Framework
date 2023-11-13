@@ -41,23 +41,27 @@
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>ProjectDirectory</_Parameter1>
-                <_Parameter2>$(MetalamaTestProjectDirectory)</_Parameter2>
+                <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>ProjectPath</_Parameter1>
                 <_Parameter2>$(MSBuildProjectFullPath)</_Parameter2>
             </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(MetalamaTestSourceDirectory)'!=''">
+                <_Parameter1>SourceDirectory</_Parameter1>
+                <_Parameter2>$(MetalamaTestSourceDirectory)</_Parameter2>
+            </AssemblyAttribute>
             <!-- Sets up the default Xunit test framework, which is the custom test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='' OR '$(MetalamaTestFramework)'=='Auto'">
                 <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
-                <_Parameter2>Metalama.Testing.AspectTesting.$(ThisRoslynVersionNoPreview)</_Parameter2>
+                <_Parameter2>Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)</_Parameter2>
             </AssemblyAttribute>
             <!-- Sets up the custom Xunit test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='Custom'">
                 <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
-                <_Parameter2>Metalama.Testing.AspectTesting.$(ThisRoslynVersionNoPreview)</_Parameter2>
+                <_Parameter2>Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)</_Parameter2>
             </AssemblyAttribute>
             <!-- Sets up the original Xunit test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"

@@ -19,7 +19,11 @@ internal sealed class TestProjectProperties
 
     private readonly string? _projectDirectory;
 
-    public string ProjectDirectory => this._projectDirectory ?? throw new InvalidOperationException();
+    public string ProjectDirectory => this._projectDirectory ?? throw new InvalidOperationException( "Project directory is null." );
+
+    private readonly string? _sourceDirectory;
+
+    public string SourceDirectory => this._sourceDirectory ?? throw new InvalidOperationException( "Source directory is null." );
 
     public ImmutableArray<string> PreprocessorSymbols { get; }
 
@@ -32,18 +36,25 @@ internal sealed class TestProjectProperties
     internal TestProjectProperties(
         string? assemblyName,
         string? projectDirectory,
+        string? sourceDirectory,
         ImmutableArray<string> preprocessorSymbols,
         string targetFramework,
         ImmutableArray<string> ignoredWarnings,
         TestFrameworkLicenseStatus? license = null )
     {
-        // Remove trailing separator from directory path.
+        // Remove trailing separator from directory paths.
         if ( projectDirectory != null && projectDirectory[^1] == Path.DirectorySeparatorChar )
         {
             projectDirectory = projectDirectory[..^1];
         }
 
+        if ( sourceDirectory != null && sourceDirectory[^1] == Path.DirectorySeparatorChar )
+        {
+            sourceDirectory = sourceDirectory[..^1];
+        }
+
         this._projectDirectory = projectDirectory;
+        this._sourceDirectory = sourceDirectory;
         this.AssemblyName = assemblyName;
         this.PreprocessorSymbols = preprocessorSymbols;
         this.TargetFramework = targetFramework;

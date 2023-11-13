@@ -35,6 +35,7 @@ namespace Metalama.AspectWorkbench.ViewModels
         private static readonly TestProjectProperties _projectProperties = new(
             assemblyName: null,
             projectDirectory: null,
+            sourceDirectory: null,
             ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
             "net6.0",
             ImmutableArray<string>.Empty,
@@ -296,7 +297,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
         public void NewTest( string path )
         {
-            var projectDirectory = TestInput.Factory.Default.FromSource( _projectProperties, "", path ).ProjectDirectory;
+            var projectDirectory = TestInput.Factory.Default.FromSource( _projectProperties, "", path ).SourceDirectory;
             var pathParts = Path.GetRelativePath( projectDirectory, path ).Split( "\\" ).SelectAsImmutableArray( Path.GetFileNameWithoutExtension ).Skip( 1 );
             var ns = Path.GetFileName( projectDirectory ) + "." + string.Join( ".", pathParts );
             this.SourceCode = NewTestDefaults.TemplateSource.Replace( "$ns", ns, StringComparison.OrdinalIgnoreCase );

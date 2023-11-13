@@ -8,7 +8,7 @@
         <!-- Packaging -->
         <Description>Test framework for Metalama aspects and fabrics. This is not your typical test framework. When referencing this package, every _file_ is turned into a test by default. Please read the documentation before use.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <AssemblyName>Metalama.Testing.AspectTesting.$(ThisRoslynVersionNoPreview)</AssemblyName>
+        <AssemblyName>Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)</AssemblyName>
 		<PackageId>Metalama.Testing.AspectTesting</PackageId>
     </PropertyGroup>
 

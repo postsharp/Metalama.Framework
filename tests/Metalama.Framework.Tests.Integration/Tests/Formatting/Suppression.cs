@@ -2,12 +2,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
-
-namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Suppression;
-
-#if !TESTRUNNER
+#if !TESTRUNNER // Disable the warning in the main build, not during tests.
 #pragma warning disable CS0414
 #endif
+
+namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Suppression;
 
 [Suppress]
 public class C

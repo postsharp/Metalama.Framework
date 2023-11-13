@@ -689,7 +689,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             this.Diagnostics.Report(
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
-                    (context.MetaApi.AspectInstance.AspectClass.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
+                    (context.MetaApi.AspectInstance?.AspectClass.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
                     targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration) ) );
         }
     }

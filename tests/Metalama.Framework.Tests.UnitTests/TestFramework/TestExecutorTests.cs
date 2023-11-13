@@ -41,7 +41,7 @@ public sealed class TestExecutorTests : UnitTestClass
             .WithUntypedService( typeof(IFileSystem), fileSystem )
             .WithService( new FakeMetadataReader( directory ) );
 
-        var testProperties = new TestProjectProperties( assemblyName: null, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
+        var testProperties = new TestProjectProperties( assemblyName: null, directory, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
         var assemblyInfo = new TestAssemblyInfo( $"test.dll" );
         var testFactory = new TestFactory( serviceProvider, testProperties, new TestDirectoryOptionsReader( serviceProvider, directory ), assemblyInfo );
         var messageSink = new TestMessageSink();

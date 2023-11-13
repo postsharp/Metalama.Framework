@@ -37,6 +37,7 @@ namespace Metalama.Testing.AspectTesting
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
             this.ProjectDirectory = projectDirectory ?? projectProperties.ProjectDirectory;
+            this.SourceDirectory = projectProperties.SourceDirectory;
 
             if ( directoryOptionsReader != null )
             {
@@ -83,6 +84,7 @@ namespace Metalama.Testing.AspectTesting
             string testName,
             string sourceCode,
             string projectDirectory,
+            string sourceDirectory,
             string? relativePath,
             string? fullPath,
             TestOptions options,
@@ -92,6 +94,7 @@ namespace Metalama.Testing.AspectTesting
             this.TestName = testName;
             this.SourceCode = sourceCode;
             this.ProjectDirectory = projectDirectory;
+            this.SourceDirectory = sourceDirectory;
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
             this.Options = options;
@@ -105,6 +108,7 @@ namespace Metalama.Testing.AspectTesting
                 this.TestName,
                 newSource,
                 this.ProjectDirectory,
+                this.SourceDirectory,
                 this.RelativePath,
                 this.FullPath,
                 this.Options,
@@ -127,12 +131,17 @@ namespace Metalama.Testing.AspectTesting
         public string SourceCode { get; }
 
         /// <summary>
+        /// Gets the directory containing test source files.
+        /// </summary>
+        public string SourceDirectory { get; }
+
+        /// <summary>
         /// Gets the directory containing the project (<c>csproj</c>) file.
         /// </summary>
         public string ProjectDirectory { get; }
 
         /// <summary>
-        /// Gets the path of the current test file relatively to <see cref="ProjectDirectory"/>.
+        /// Gets the path of the current test file relatively to <see cref="SourceDirectory"/>.
         /// </summary>
         public string? RelativePath { get; }
 
@@ -234,7 +243,7 @@ namespace Metalama.Testing.AspectTesting
                     Path.GetFileNameWithoutExtension( relativePath ),
                     sourceCode,
                     directoryOptionsReader,
-                    projectProperties.ProjectDirectory,
+                    null,
                     relativePath,
                     fullPath );
             }

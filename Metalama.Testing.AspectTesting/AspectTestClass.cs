@@ -54,7 +54,7 @@ public abstract class AspectTestClass
 
                 return new AssemblyAssets(
                     projectProperties,
-                    new TestDirectoryOptionsReader( serviceProvider, projectProperties.ProjectDirectory ) );
+                    new TestDirectoryOptionsReader( serviceProvider, projectProperties.SourceDirectory ) );
             } );
 
     protected AspectTestClass( ITestOutputHelper logger )
@@ -102,7 +102,7 @@ public abstract class AspectTestClass
         var fullPath = Path.Combine( directory, relativePath );
 
         this._logger.WriteLine( "Test input file: " + fullPath );
-        var projectRelativePath = this._fileSystem.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
+        var projectRelativePath = this._fileSystem.GetRelativePath( assemblyAssets.ProjectProperties.SourceDirectory, fullPath );
 
         var testInputFactory = new TestInput.Factory();
         var testInput = testInputFactory.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );

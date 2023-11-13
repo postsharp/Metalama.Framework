@@ -11,6 +11,7 @@ namespace Metalama.Testing.AspectTesting;
 /// </summary>
 internal sealed record TestAssemblyMetadata(
     string ProjectDirectory,
+    string SourceDirectory,
     ImmutableArray<string> ParserSymbols,
     string TargetFramework,
     bool MustLaunchDebugger,
