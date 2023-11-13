@@ -31,6 +31,8 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
 
     protected override void AddTransformation( IMemberOrNamedType targetDeclaration, IConstructor targetCtor, Action<ITransformation> addTransformation )
     {
+        Invariant.AssertNot( targetCtor.IsPrimary && targetCtor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct );
+
         addTransformation( new SyntaxBasedInitializationTransformation( this, targetDeclaration, targetCtor, _ => ((UserStatement) this._statement).Syntax ) );
     }
 }

@@ -35,13 +35,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this._symbol = symbol;
         }
 
-        // TODO: This is not enough, we also need to change the collection logic and ToDisplayString.
-        [Memo]
-        public override string Name =>
-            this._symbol.Name.StartsWith( "<" ) && this._symbol.Name.EndsWith( ">P" )
-            ? this._symbol.Name.Substring( 1, this._symbol.Name.Length - 3 )
-            : base.Name;
-
         [Memo]
         public IType Type => this.Compilation.Factory.GetIType( this._symbol.Type );
 

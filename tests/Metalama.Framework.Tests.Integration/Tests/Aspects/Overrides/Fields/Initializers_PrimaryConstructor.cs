@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
 // @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
-// @LangVersion(12)
 #endif
 
 #if ROSLYN_4_8_0_OR_GREATER
@@ -50,7 +49,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
             builder.Outbound.SelectMany(x => x.Fields.Where(x => !x.IsImplicitlyDeclared)).AddAspect(x => new OverrideAttribute());
         }
 
-        // TODO: CodeModel for primary constructor?
         [Introduce]
         public int IntroducedField = ExpressionFactory.Parse("x").Value;
     }

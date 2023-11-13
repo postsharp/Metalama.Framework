@@ -95,6 +95,7 @@ public static partial class EligibilityRuleFactory
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
                         AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
+                        parameter.DeclaringMember().Convert().When<IConstructor>().MustNotBeCSharp12PrimaryConstructor();
                     }) );
 
             var parameterEligibilityOutput =
@@ -107,6 +108,7 @@ public static partial class EligibilityRuleFactory
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
                         AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
+                        parameter.DeclaringMember().Convert().When<IConstructor>().MustNotBeCSharp12PrimaryConstructor();
                     } );
 
             var parameterEligibilityBoth =
@@ -120,6 +122,7 @@ public static partial class EligibilityRuleFactory
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
                         AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
+                        parameter.DeclaringMember().Convert().When<IConstructor>().MustNotBeCSharp12PrimaryConstructor();
                     } );
 
             var parameterEligibilityDefault =
@@ -133,6 +136,7 @@ public static partial class EligibilityRuleFactory
                             _ => $"output contracts on constructors are not supported" );
 
                         parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
+                        parameter.DeclaringMember().Convert().When<IConstructor>().MustNotBeCSharp12PrimaryConstructor();
                         AddCommonReturnParameterRules( parameter );
                     } );
 

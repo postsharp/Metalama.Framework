@@ -1,1 +1,2 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0041 on `C`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [MyAspect] applied to 'C': Cannot add an IntroduceParameter advice to 'C.C(int)' because 'C.C(int)' must not be a C# 12 primary constructor. Check the IsAdviceEligible(AdviceKind.IntroduceParameter) method. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

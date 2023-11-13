@@ -5,6 +5,10 @@ using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Suppression;
 
+#if !TESTRUNNER
+#pragma warning disable CS0414
+#endif
+
 [Suppress]
 public class C
 {

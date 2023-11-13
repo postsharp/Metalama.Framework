@@ -1,8 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-
-#define ROSLYN_4_8_0_OR_GREATER
-
 using Metalama.Testing.UnitTesting;
 using System.Linq;
 using Xunit;
@@ -299,7 +296,11 @@ struct B(int x) {}
         {
             using var testContext = this.CreateTestContext();
 
-            const string code = @"
+            const string code =
+#if NETFRAMEWORK
+                @"namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" +
+#endif
+                @"
 record class C(int x) {}
 ";
 

@@ -1,12 +1,2 @@
-[Aspect]
-public class TargetCode
-{
-  private int Method(int a)
-  {
-    return a;
-  }
-  public TargetCode()
-  {
-    global::System.Console.WriteLine("TargetCode: Aspect");
-  }
-}
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0041 on `TargetCode`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [Aspect] applied to 'TargetCode': Cannot add an AddInitializer advice to 'TargetCode' because 'TargetCode' must not have a C# 12 primary constructor. Check the IsAdviceEligible(AdviceKind.AddInitializer) method. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`

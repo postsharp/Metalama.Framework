@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
 // @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
-// @LangVersion(12)
 #endif
 
 #if ROSLYN_4_8_0_OR_GREATER
@@ -49,6 +48,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
     }
 
     // <target>
+    [Override]
     internal class TargetClass(int x)
     {
         public int Foo()

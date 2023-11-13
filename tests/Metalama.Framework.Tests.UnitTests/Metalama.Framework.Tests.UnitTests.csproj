@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\..\Build\RoslynVersion\Latest.imports" />
     <Import Project="..\..\eng\Coverage.props" />
 
     <PropertyGroup>
@@ -29,6 +30,9 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
         <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework.DesignTime.VisualStudio$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime.VisualStudio$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
@@ -37,9 +41,5 @@
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
     </ItemGroup>
-
-
-
-     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 
 </Project>

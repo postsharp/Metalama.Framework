@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
 // @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
-// @LangVersion(12)
 #endif
 
 #if ROSLYN_4_8_0_OR_GREATER
@@ -31,11 +30,6 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     public class TargetCode(int x)
     {
         public int X { get; } = x;
-
-        private int Method( int a )
-        {
-            return a;
-        }
     }
 }
 

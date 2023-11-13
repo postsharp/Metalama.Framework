@@ -410,12 +410,20 @@ public static partial class EligibilityExtensions
             member => $"{member} must be static" );
 
     /// <summary>
-    /// Forbids the target member or type from being static.
+    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
     /// </summary>
-    public static void MustNotBePrimary( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+    internal static void MustNotBeCSharp12PrimaryConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
-            member => !member.IsPrimary,
-            member => $"{member} must not be primary constructor" );
+            member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
+            member => $"{member} must not be a C# 12 primary constructor" );
+
+    /// <summary>
+    /// Forbids the target type from having a primary constructor while the type is a type or a struct (C# 12.0).
+    /// </summary>
+    internal static void MustNotHaveCSharp12PrimaryConstructor( this IEligibilityBuilder<INamedType> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            type => type is not { PrimaryConstructor: not null, TypeKind: TypeKind.Class or TypeKind.Struct },
+            type => $"{type} must not have a C# 12 primary constructor" );
 
     /// <summary>
     /// Forbids the target member or type from being static.

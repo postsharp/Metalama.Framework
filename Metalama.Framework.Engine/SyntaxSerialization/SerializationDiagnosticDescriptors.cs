@@ -93,5 +93,13 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             "You can provide a manual serializer (public nested class) derived from ReferenceTypeSerializer (record classes) or ValueTypeSerializer (record structs) instead.",
             Error,
             "Generated serializers are not currently supported for records." );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> NonRecordPrimaryConstructorsNotSupported = new(
+            "LAMA0211",
+            _category,
+            "Compile-time type '{0}' uses C# 12 primary constructors which is not currently supported. " +
+            "You should remove the parameter list from the type and use explicitly defined constructors instead.",
+            Error,
+            "C# 12 primary constructors are not currently supported in compile-time code." );
     }
 }

@@ -37,7 +37,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
         Func<IParameter, IConstructor, PullAction>? pullActionFunc,
         TypedConstant defaultValue ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )
     {
-        Invariant.AssertNot( targetDeclaration.IsPrimary );
+        Invariant.AssertNot( targetDeclaration is { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct } );
 
         this._parameterName = parameterName;
         this._parameterType = parameterType;
