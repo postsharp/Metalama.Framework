@@ -34,11 +34,11 @@
 
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.0.1"/>
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting"/>
 
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.0.1"/>
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting"/>
     </ItemGroup>
     
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>
