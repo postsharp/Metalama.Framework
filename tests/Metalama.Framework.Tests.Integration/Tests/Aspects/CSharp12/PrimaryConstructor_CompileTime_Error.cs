@@ -7,7 +7,6 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.PrimaryConstructor_CompileTime;
 
