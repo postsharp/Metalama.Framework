@@ -589,7 +589,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)> AspectUsesHigherCSharpVersion
+        internal static readonly DiagnosticDefinition<(string? Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)> AspectUsesHigherCSharpVersion
             = new(
                 "LAMA0282",
                 "Aspect uses higher C# version than what is allowed in the project.",
