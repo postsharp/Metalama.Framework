@@ -99,14 +99,14 @@ object DebugBuild : BuildType({
                 artifactRules = "+:artifacts/publish/private/**/*=>dependencies/Metalama.Backstage"
             }
         }
-        dependency(AbsoluteId("Metalama_Metalama20240_MetalamaCompiler_DebugBuild")) {
+        dependency(AbsoluteId("Metalama_Metalama20240_MetalamaCompiler_ReleaseBuild")) {
             snapshot {
                      onDependencyFailure = FailureAction.FAIL_TO_START
             }
 
             artifacts {
                 cleanDestination = true
-                artifactRules = "+:artifacts/packages/Debug/Shipping/**/*=>dependencies/Metalama.Compiler"
+                artifactRules = "+:artifacts/packages/Release/Shipping/**/*=>dependencies/Metalama.Compiler"
             }
         }
         dependency(AbsoluteId("Metalama_Metalama20240_MetalamaFrameworkRunTime_DebugBuild")) {
