@@ -221,7 +221,7 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.DependencyLicenseFile != null )
         {
             // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.DependencyLicenseFile ) );
         }
         else if ( testInput.Options.DependencyLicenseExpression != null )
         {
@@ -350,7 +350,7 @@ internal abstract partial class BaseTestRunner
             {
                 if ( this._references.GlobalUsingsFile != null )
                 {
-                    var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
+                    var path = Path.Combine( testInput.SourceDirectory, this._references.GlobalUsingsFile );
 
                     if ( this._fileSystem.FileExists( path ) )
                     {

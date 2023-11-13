@@ -72,6 +72,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             return new TestProjectProperties(
                 this._assembly.Name,
                 metadata.ProjectDirectory,
+                metadata.SourceDirectory,
                 metadata.ParserSymbols,
                 metadata.TargetFramework,
                 metadata.IgnoredWarnings,
@@ -97,7 +98,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._messageSink?.Trace( $"Discovering tests in directory '{subDirectory}'." );
 
             var projectProperties = this.GetTestProjectProperties();
-            TestDirectoryOptionsReader reader = new( this._serviceProvider, projectProperties.ProjectDirectory );
+            TestDirectoryOptionsReader reader = new( this._serviceProvider, projectProperties.SourceDirectory );
             TestFactory factory = new( this._serviceProvider, projectProperties, reader, this._assembly );
 
             ConcurrentBag<Task> tasks = new();
@@ -154,7 +155,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                         this._messageSink?.Trace( $"Including the file '{testPath}'" );
 
-                        var testCase = new TestCase( factory, this.FileSystem.GetRelativePath( projectProperties.ProjectDirectory, testPath ) );
+                        var testCase = new TestCase( factory, this.FileSystem.GetRelativePath( projectProperties.SourceDirectory, testPath ) );
 
                         this._messageSink?.Trace(
                             $"    {((ITestCase) testCase).TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name} " +

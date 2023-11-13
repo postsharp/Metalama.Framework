@@ -14,7 +14,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
             
             if ( testInput.Options.LicenseFile != null )
             {
-                licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
+                licenseKey = File.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.LicenseFile ) );
             }
             else if ( testInput.Options.LicenseExpression != null )
             {
