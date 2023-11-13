@@ -35,9 +35,10 @@ namespace Metalama.AspectWorkbench.ViewModels
         private static readonly TestProjectProperties _projectProperties = new(
             assemblyName: null,
             projectDirectory: null,
-            ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
+            sourceDirectory: null,
+            ["NET5_0_OR_GREATER", "NET6_0_OR_GREATER"],
             "net6.0",
-            ImmutableArray<string>.Empty,
+            [],
             new TestFrameworkLicenseStatus( typeof(MainViewModel).Assembly.GetName().Name!, null, false ) );
 
         private TemplateTest? _currentTest;
