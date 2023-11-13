@@ -1,8 +1,10 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET8_0_OR_GREATER)
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif
 
-#if NET8_0_OR_GREATER
+#if NET8_0_OR_GREATER && ROSLYN_4_8_0_OR_GREATER
+
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -60,4 +62,5 @@ public class C
         }
     }
 }
+
 #endif

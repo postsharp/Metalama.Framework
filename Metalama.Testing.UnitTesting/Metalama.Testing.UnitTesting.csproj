@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="..\Build\RoslynVersion\Latest.imports" />
+
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net472;net6.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AssemblyName>Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix)</AssemblyName>
+        <PackageId>Metalama.Testing.UnitTesting</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
 
@@ -19,8 +23,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration" />
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Workspaces" />
     </ItemGroup>

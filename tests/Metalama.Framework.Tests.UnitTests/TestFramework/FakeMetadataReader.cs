@@ -19,6 +19,7 @@ internal sealed class FakeMetadataReader : ITestAssemblyMetadataReader
     public TestAssemblyMetadata GetMetadata( IAssemblyInfo assembly )
         => new(
             this._projectDirectory,
+            this._projectDirectory,
             ImmutableArray<string>.Empty,
             "net6.0",
             false,

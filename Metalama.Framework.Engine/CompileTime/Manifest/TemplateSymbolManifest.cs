@@ -25,6 +25,8 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
 
     public TemplateInfoManifest? TemplateInfo { get; }
 
+    public RoslynApiVersion? UsedApiVersion { get; }
+
     /// <summary>
     /// Gets a dictionary of children, mapped by name.
     /// </summary>
@@ -35,11 +37,13 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
         string id,
         ExecutionScope? scope,
         TemplateInfoManifest? templateInfo,
+        RoslynApiVersion? usedApiVersion,
         IReadOnlyDictionary<string, IReadOnlyList<TemplateSymbolManifest>>? children )
     {
         this.Id = id;
         this.Scope = scope;
         this.TemplateInfo = templateInfo;
+        this.UsedApiVersion = usedApiVersion;
         this.Children = children;
     }
 
@@ -49,15 +53,17 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
         private Dictionary<string, List<Builder>>? _children;
         private TemplatingScope? _scope;
         private TemplateInfo? _templateInfo;
+        private RoslynApiVersion? _usedApiVersion;
 
-        public Builder( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null )
+        public Builder( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null, RoslynApiVersion? usedApiVersion = null )
         {
             this._symbol = symbol.Assert( s => s is not IMethodSymbol { MethodKind: MethodKind.LocalFunction } );
             this._scope = scope;
             this._templateInfo = templateInfo;
+            this._usedApiVersion = usedApiVersion;
         }
 
-        public Builder AddOrUpdateSymbol( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null )
+        public Builder AddOrUpdateSymbol( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null, RoslynApiVersion? usedApiVersion = null )
         {
             Builder parentBuilder;
 
@@ -74,11 +80,11 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
                 parentBuilder = this.AddOrUpdateSymbol( symbol.ContainingSymbol );
             }
 
-            parentBuilder._children ??= new Dictionary<string, List<Builder>>();
+            parentBuilder._children ??= [];
 
             if ( !parentBuilder._children.TryGetValue( symbol.Name, out var childrenList ) )
             {
-                childrenList = new List<Builder>();
+                childrenList = [];
                 parentBuilder._children[symbol.Name] = childrenList;
             }
 
@@ -98,11 +104,16 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
                 {
                     builder._templateInfo = templateInfo;
                 }
+
+                if ( usedApiVersion != null )
+                {
+                    builder._usedApiVersion = usedApiVersion;
+                }
             }
             else
             {
                 // Create a new node.
-                builder = new Builder( symbol, scope, templateInfo );
+                builder = new Builder( symbol, scope, templateInfo, usedApiVersion );
                 childrenList.Add( builder );
             }
 
@@ -114,6 +125,7 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
                 this._symbol.GetSerializableId().Id,
                 this._scope?.ToExecutionScope(),
                 this._templateInfo == null ? null : new TemplateInfoManifest( this._templateInfo.AttributeType, this._templateInfo.IsAbstract ),
+                this._usedApiVersion,
                 this._children?.ToDictionary( x => x.Key, x => (IReadOnlyList<TemplateSymbolManifest>) x.Value.SelectAsArray( b => b.Build() ) ) );
     }
 

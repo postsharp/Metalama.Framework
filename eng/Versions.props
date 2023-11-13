@@ -12,7 +12,7 @@
 
     <!-- Set the default versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>2023.2.57</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>2023.2.58</PostSharpEngineeringVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
         <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
@@ -42,7 +42,7 @@
         <CoverletVersion>3.1.0</CoverletVersion>
         <DiffPlexVersion>1.7.1</DiffPlexVersion>
         <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
-        <PostSharpPackageVersion>6.11.2-rc</PostSharpPackageVersion>
+        <PostSharpPackageVersion>2024.0.2-preview</PostSharpPackageVersion>
     </PropertyGroup>
 
     <!-- Set the deafult versions of auto-updated dependencies -->

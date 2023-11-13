@@ -36,7 +36,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._factory = new TestFactory(
                 serviceProvider,
                 projectProperties,
-                new TestDirectoryOptionsReader( serviceProvider, projectProperties.ProjectDirectory ),
+                new TestDirectoryOptionsReader( serviceProvider, projectProperties.SourceDirectory ),
                 assemblyInfo );
 
             this._serviceProvider = serviceProvider;
@@ -73,7 +73,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             ITestFrameworkExecutionOptions executionOptions )
         {
             var hasLaunchedDebugger = false;
-            var directoryOptionsReader = new TestDirectoryOptionsReader( this._serviceProvider, this._factory.ProjectProperties.ProjectDirectory );
+            var directoryOptionsReader = new TestDirectoryOptionsReader( this._serviceProvider, this._factory.ProjectProperties.SourceDirectory );
 
             var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 

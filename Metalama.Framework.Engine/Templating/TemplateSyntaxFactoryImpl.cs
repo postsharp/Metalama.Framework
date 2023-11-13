@@ -516,6 +516,8 @@ namespace Metalama.Framework.Engine.Templating
 
             var context = this._templateExpansionContext.ForTemplate( templateMember, templateProvider );
 
+            context.CheckTemplateLanguageVersion( context, templateMember );
+
             return context.SyntaxFactory;
         }
 

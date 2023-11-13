@@ -28,10 +28,17 @@
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.8.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.8.0"/>
 
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.0.1"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.4.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0"/>
+
+        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.0.1"/>
+        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.4.0"/>
         <InternalsVisibleTo Include="Metalama.Testing.UnitTesting"/>
+
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.0.1"/>
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.4.0"/>
         <InternalsVisibleTo Include="Metalama.Testing.AspectTesting"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration"/>
-        <InternalsVisibleTo Include="Metalama.Framework.UnitTests.Integration"/>    
     </ItemGroup>
     
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>

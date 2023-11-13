@@ -3,6 +3,7 @@
 using Metalama.Testing.AspectTesting.Licensing;
 using System;
 using System.Collections.Immutable;
+using System.IO;
 
 namespace Metalama.Testing.AspectTesting;
 
@@ -14,9 +15,15 @@ namespace Metalama.Testing.AspectTesting;
 /// <param name="TargetFramework">Identifier of the target framework, as set in MSBuild (e.g. <c>net6.0</c>, <c>netframework4.8</c>, ...</param>
 internal sealed class TestProjectProperties
 {
+    public string? AssemblyName { get; }
+
     private readonly string? _projectDirectory;
 
-    public string ProjectDirectory => this._projectDirectory ?? throw new InvalidOperationException();
+    public string ProjectDirectory => this._projectDirectory ?? throw new InvalidOperationException( "Project directory is null." );
+
+    private readonly string? _sourceDirectory;
+
+    public string SourceDirectory => this._sourceDirectory ?? throw new InvalidOperationException( "Source directory is null." );
 
     public ImmutableArray<string> PreprocessorSymbols { get; }
 
@@ -27,13 +34,28 @@ internal sealed class TestProjectProperties
     internal TestFrameworkLicenseStatus? License { get; }
 
     internal TestProjectProperties(
+        string? assemblyName,
         string? projectDirectory,
+        string? sourceDirectory,
         ImmutableArray<string> preprocessorSymbols,
         string targetFramework,
         ImmutableArray<string> ignoredWarnings,
         TestFrameworkLicenseStatus? license = null )
     {
+        // Remove trailing separator from directory paths.
+        if ( projectDirectory != null && projectDirectory[^1] == Path.DirectorySeparatorChar )
+        {
+            projectDirectory = projectDirectory[..^1];
+        }
+
+        if ( sourceDirectory != null && sourceDirectory[^1] == Path.DirectorySeparatorChar )
+        {
+            sourceDirectory = sourceDirectory[..^1];
+        }
+
         this._projectDirectory = projectDirectory;
+        this._sourceDirectory = sourceDirectory;
+        this.AssemblyName = assemblyName;
         this.PreprocessorSymbols = preprocessorSymbols;
         this.TargetFramework = targetFramework;
         this.IgnoredWarnings = ignoredWarnings;

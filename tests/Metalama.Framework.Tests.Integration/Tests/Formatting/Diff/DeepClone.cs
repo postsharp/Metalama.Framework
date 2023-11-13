@@ -1,12 +1,12 @@
 #if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER) - Return type covariance not supported in .NET Framework
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif
 
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 
 #pragma warning disable CS0067, CS8618, CS8602, CS8603, CS0169
 

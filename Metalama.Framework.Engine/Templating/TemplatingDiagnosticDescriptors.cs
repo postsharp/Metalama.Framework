@@ -588,5 +588,13 @@ namespace Metalama.Framework.Engine.Templating
                 "The attribute '{0}' is not allowed on the compile-time declaration '{1}', because it wouldn't have the expected effect.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string? Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)> AspectUsesHigherCSharpVersion
+            = new(
+                "LAMA0282",
+                "Aspect uses higher C# version than what is allowed in the project.",
+                "The aspect '{0}' uses features of C# {1}, but it is used in a project built with C# {2}. Consider specifying <LangVersion>{1}</LangVersion> in this project or removing newer language features from the template '{3}' and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
+                _category,
+                Warning );
     }
 }

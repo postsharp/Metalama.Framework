@@ -29,6 +29,8 @@ namespace Metalama.Framework.Engine.Templating
             object?[] templateArguments,
             [NotNullWhen( true )] out BlockSyntax? block )
         {
+            templateExpansionContext.CheckTemplateLanguageVersion( templateExpansionContext, templateExpansionContext.MetaApi.Template );
+
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             // Add the first template argument.

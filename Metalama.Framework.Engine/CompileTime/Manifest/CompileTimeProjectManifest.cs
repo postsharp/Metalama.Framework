@@ -3,6 +3,7 @@
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
@@ -150,7 +151,10 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             return manifest;
         }
 
-        public static CompileTimeProjectManifest FromJson( string json ) => JsonConvert.DeserializeObject<CompileTimeProjectManifest>( json ).AssertNotNull();
+        private static readonly JsonConverter[] _converters = [new StringEnumConverter()];
+
+        public static CompileTimeProjectManifest FromJson( string json )
+            => JsonConvert.DeserializeObject<CompileTimeProjectManifest>( json, _converters ).AssertNotNull();
 
         public void Serialize( Stream stream )
         {
@@ -159,6 +163,6 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             manifestWriter.Write( manifestJson );
         }
 
-        public string ToJson() => JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented );
+        public string ToJson() => JsonConvert.SerializeObject( this, Newtonsoft.Json.Formatting.Indented, _converters );
     }
 }

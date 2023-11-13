@@ -21,7 +21,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
             // If the directory contains both files and subdirectories, we have to generate a class name with a "Tests" suffix.
 
-            var directory = factory.ProjectProperties.ProjectDirectory;
+            var directory = factory.ProjectProperties.SourceDirectory;
 
             if ( !string.IsNullOrEmpty( relativePath ) )
             {

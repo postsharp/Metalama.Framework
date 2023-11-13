@@ -40,18 +40,15 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // Note that Roslyn does not properly set the language version at design time, so we don't check the language version
             // in other pipelines.
 
-            var languageVersion =
-                (((CSharpParseOptions?) compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
-                .MapSpecifiedToEffectiveVersion();
-
-            static string[] FormatSupportedVersions() => SupportedCSharpVersions.All.SelectAsArray( x => x.ToDisplayString() );
+            var languageVersion = ((CSharpParseOptions?) compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion.MapSpecifiedToEffectiveVersion()
+                                  ?? SupportedCSharpVersions.Default;
 
             if ( languageVersion == LanguageVersion.Preview )
             {
                 if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, FormatSupportedVersions() ) );
+                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, SupportedCSharpVersions.FormatSupportedVersions() ) );
 
                     return false;
                 }
@@ -61,7 +58,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        (languageVersion.ToDisplayString(), FormatSupportedVersions()) ) );
+                        (languageVersion.ToDisplayString(), "LangVersion", SupportedCSharpVersions.FormatSupportedVersions()) ) );
 
                 return false;
             }

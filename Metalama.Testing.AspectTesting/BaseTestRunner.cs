@@ -222,7 +222,7 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.DependencyLicenseFile != null )
         {
             // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.DependencyLicenseFile ) );
         }
         else if ( testInput.Options.DependencyLicenseExpression != null )
         {
@@ -238,19 +238,21 @@ internal abstract partial class BaseTestRunner
                 .Add( "METALAMA" );
 
             var defaultParseOptions = SupportedCSharpVersions.DefaultParseOptions;
+            var mainParseOptions = defaultParseOptions;
 
             if ( testInput.Options.LanguageVersion != null )
             {
-                defaultParseOptions = defaultParseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
+                mainParseOptions = mainParseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
             }
 
             if ( testInput.Options.LanguageFeatures.Count > 0 )
             {
-                defaultParseOptions = defaultParseOptions.WithFeatures( testInput.Options.LanguageFeatures );
+                mainParseOptions = mainParseOptions.WithFeatures( testInput.Options.LanguageFeatures );
             }
 
+            mainParseOptions = mainParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
+
             var emptyProject = this.CreateProject( testInput.Options );
-            var mainParseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
             var mainProject = emptyProject.WithParseOptions( mainParseOptions );
 
             async Task<(Project Project, Document? Document)> AddDocumentAsync(
@@ -349,7 +351,7 @@ internal abstract partial class BaseTestRunner
             {
                 if ( this._references.GlobalUsingsFile != null )
                 {
-                    var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
+                    var path = Path.Combine( testInput.SourceDirectory, this._references.GlobalUsingsFile );
 
                     if ( this._fileSystem.FileExists( path ) )
                     {
@@ -396,8 +398,13 @@ internal abstract partial class BaseTestRunner
                 // Add documents to the dependency project.
                 var includedText = this._fileSystem.ReadAllText( dependencyPath );
 
-                var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
-                    preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+                var dependencyParseOptions = defaultParseOptions
+                    .WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+
+                if ( testInput.Options.DependencyLanguageVersion != null )
+                {
+                    dependencyParseOptions = dependencyParseOptions.WithLanguageVersion( testInput.Options.DependencyLanguageVersion.Value );
+                }
 
                 var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
                 dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );

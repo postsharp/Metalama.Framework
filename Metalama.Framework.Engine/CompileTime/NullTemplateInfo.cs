@@ -18,5 +18,7 @@ internal sealed class NullTemplateInfo : ITemplateInfo
 
     public bool IsNone => true;
 
+    public RoslynApiVersion? UsedApiVersion => null;
+
     public override string ToString() => "(None)";
 }
