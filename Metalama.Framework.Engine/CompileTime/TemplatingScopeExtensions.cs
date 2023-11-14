@@ -71,27 +71,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 _ => scope.ToString()
             };
 
-        public static TemplatingScope GetAccessMemberScope( TemplatingScope executionScope, TemplatingScope valueScope )
-            => (executionScope.GetExpressionExecutionScope(), valueScope.GetExpressionValueScope()) switch
-            {
-                (CompileTimeOnly, CompileTimeOnly) => CompileTimeOnly,
-                (CompileTimeOnly, RunTimeOnly) => CompileTimeOnlyReturningRuntimeOnly,
-                (CompileTimeOnly, RunTimeOrCompileTime) => CompileTimeOnlyReturningBoth,
-                (RunTimeOnly, _) => RunTimeOnly,
-                (RunTimeOrCompileTime, CompileTimeOnly) => CompileTimeOnly,
-                (RunTimeOrCompileTime, RunTimeOrCompileTime) => RunTimeOrCompileTime,
-                (TypeOfRunTimeType, RunTimeOrCompileTime) => RunTimeOnly,
-                (TypeOfTemplateTypeParameter, RunTimeOrCompileTime) => RunTimeOnly,
-
-                // Unknown scopes happen in dynamic code that cannot be resolved to symbols.
-                (LateBound, _) => valueScope,
-
-                // Conflicts are ignored. They should be reported elsewhere.
-                (_, Conflict) => executionScope,
-
-                _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
-            };
-
         public static TemplatingScope GetCombinedExecutionScope( this TemplatingScope a, TemplatingScope b ) => a.GetCombinedScope( b, true );
 
         public static TemplatingScope GetCombinedValueScope( this TemplatingScope a, TemplatingScope b )

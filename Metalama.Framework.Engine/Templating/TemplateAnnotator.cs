@@ -962,7 +962,33 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             if ( scope == RunTimeOrCompileTime )
             {
                 var leftScope = this.GetNodeScope( transformedLeft );
-                scope = TemplatingScopeExtensions.GetAccessMemberScope( leftScope, rightScope );
+
+                if ( rightScope == Conflict )
+                {
+                    // Conflicts are ignored. They should be reported elsewhere.
+                    scope = leftScope;
+                }
+                else
+                {
+                    Invariant.Assert( rightScope == RunTimeOrCompileTime );
+
+                    if ( leftScope is CompileTimeOnlyReturningRuntimeOnly )
+                    {
+                        // Special case: we need to force run-time-only scope here.
+                        scope = RunTimeOnly;
+                    }
+                    else
+                    {
+                        scope = leftScope.GetExpressionExecutionScope() switch
+                        {
+                            RunTimeOnly => RunTimeOnly,
+                            CompileTimeOnly => CompileTimeOnlyReturningBoth,
+                            RunTimeOrCompileTime => RunTimeOrCompileTime,
+                            LateBound => RunTimeOrCompileTime,
+                            _ => throw new AssertionFailedException( $"Invalid combination: {leftScope}, {rightScope}." )
+                        };
+                    }
+                }
             }
 
             // If both sides of the member are template keywords, display the . as a template keyword too.
