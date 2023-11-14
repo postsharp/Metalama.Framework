@@ -3093,6 +3093,20 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     public override SyntaxNode VisitInitializerExpression( InitializerExpressionSyntax node )
         => base.VisitInitializerExpression( node )!.AddTargetScopeAnnotation( TemplatingScope.MustFollowParent );
 
+#if ROSLYN_4_8_0_OR_GREATER
+
+    public override SyntaxNode VisitCollectionExpression( CollectionExpressionSyntax node )
+    {
+        var elements = node.Elements.SelectAsImmutableArray( e => this.Visit( e ).AssertNotNull() );
+
+        var combinedScope = this.GetExpressionScope( elements, node );
+
+        return node.WithElements( SeparatedList( elements ) )
+            .AddScopeAnnotation( combinedScope );
+    }
+
+#endif
+
     public override SyntaxNode? VisitDefaultExpression( DefaultExpressionSyntax node )
     {
         if ( this._templateMemberClassifier.IsNodeOfDynamicType( node.Type ) )
