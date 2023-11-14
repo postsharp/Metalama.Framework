@@ -15,8 +15,8 @@ internal sealed class TemplateProjectManifestBuilder
         this._rootSymbolBuilder = new TemplateSymbolManifest.Builder( ns );
     }
 
-    public void AddOrUpdateSymbol( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null )
-        => this._rootSymbolBuilder.AddOrUpdateSymbol( symbol, scope, templateInfo );
+    public void AddOrUpdateSymbol( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null, RoslynApiVersion? usedApiVersion = null )
+        => this._rootSymbolBuilder.AddOrUpdateSymbol( symbol, scope, templateInfo, usedApiVersion );
 
     public TemplateProjectManifest Build()
     {

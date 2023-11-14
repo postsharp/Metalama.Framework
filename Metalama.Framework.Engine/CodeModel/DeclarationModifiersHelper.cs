@@ -223,19 +223,31 @@ namespace Metalama.Framework.Engine.CodeModel
                 tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
             }
 
-            if ( parameter.RefKind == RefKind.In )
+            switch ( parameter.RefKind )
             {
-                AddToken( SyntaxKind.InKeyword );
-            }
+                case RefKind.None:
+                    // Do nothing.
+                    break;
 
-            if ( parameter.RefKind == RefKind.Ref )
-            {
-                AddToken( SyntaxKind.RefKeyword );
-            }
+                case RefKind.In:
+                    AddToken( SyntaxKind.InKeyword );
+                    break;
 
-            if ( parameter.RefKind == RefKind.Out )
-            {
-                AddToken( SyntaxKind.OutKeyword );
+                case RefKind.RefReadOnly:
+                    AddToken( SyntaxKind.RefKeyword );
+                    AddToken( SyntaxKind.ReadOnlyKeyword );
+                    break;
+
+                case RefKind.Ref:
+                    AddToken( SyntaxKind.RefKeyword );
+                    break;
+
+                case RefKind.Out:
+                    AddToken( SyntaxKind.OutKeyword );
+                    break;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected parameter RefKind {parameter.RefKind}." );
             }
 
             return TokenList( tokens );

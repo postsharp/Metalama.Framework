@@ -19,7 +19,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this._relativePath = relativePath;
         }
 
-        public string FullPath => Path.Combine( this._factory.ProjectProperties.ProjectDirectory, this._relativePath );
+        public string FullPath => Path.Combine( this._factory.ProjectProperties.SourceDirectory, this._relativePath );
 
         void IXunitSerializable.Deserialize( IXunitSerializationInfo info )
         {
@@ -60,7 +60,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         string ISourceInformation.FileName
         {
-            get => Path.Combine( this._factory.ProjectProperties.ProjectDirectory, this._relativePath );
+            get => Path.Combine( this._factory.ProjectProperties.SourceDirectory, this._relativePath );
             set => throw new NotSupportedException();
         }
 

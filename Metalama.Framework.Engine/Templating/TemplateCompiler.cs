@@ -5,10 +5,13 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -23,6 +26,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly ITemplateCompilerObserver? _observer;
         private readonly SerializableTypes _serializableTypes;
         private readonly ILogger _logger;
+        private readonly IProjectOptions _options;
 
         public TemplateCompiler(
             ProjectServiceProvider serviceProvider,
@@ -38,6 +42,8 @@ namespace Metalama.Framework.Engine.Templating
             this._serializableTypes = syntaxSerializationService.GetSerializableTypes( compilationContext.CompilationContext );
 
             this._observer = serviceProvider.GetService<ITemplateCompilerObserver>();
+
+            this._options = serviceProvider.GetRequiredService<IProjectOptions>();
         }
 
         public ILocationAnnotationMapBuilder LocationAnnotationMap => this._syntaxTreeAnnotationMap;
@@ -65,8 +71,27 @@ namespace Metalama.Framework.Engine.Templating
                 currentSyntaxRoot = annotatedTree.GetAnnotatedNodes( markerAnnotation ).Single();
             }
 
-            // Verify the language version of the template. We now support only C# 10.0.
-            var versionVerifier = new RoslynVersionSyntaxVerifier( diagnostics, RoslynApiVersion.V4_0_1, "10.0" );
+            var maximalAcceptableLanguageVersion = SupportedCSharpVersions.Default;
+
+            if ( !string.IsNullOrWhiteSpace( this._options.TemplateLanguageVersion ) )
+            {
+                if ( LanguageVersionFacts.TryParse( this._options.TemplateLanguageVersion, out var templateLanguageVersion )
+                     && SupportedCSharpVersions.All.Contains( templateLanguageVersion ) )
+                {
+                    maximalAcceptableLanguageVersion = templateLanguageVersion;
+                }
+                else
+                {
+                    diagnostics.Report(
+                        GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
+                            null,
+                            (this._options.TemplateLanguageVersion, "MetalamaTemplateLanguageVersion",
+                             SupportedCSharpVersions.FormatSupportedVersions()) ) );
+                }
+            }
+
+            // Verify the language version of the template.
+            var versionVerifier = new RoslynVersionSyntaxVerifier( diagnostics, maximalAcceptableLanguageVersion );
             versionVerifier.Visit( sourceSyntaxRoot );
             usedApiVersion = versionVerifier.MaximalUsedVersion;
 
@@ -96,12 +121,7 @@ namespace Metalama.Framework.Engine.Templating
             this._observer?.OnAnnotatedSyntaxNode( sourceSyntaxRoot, annotatedSyntaxRoot );
 
             // Stop if we have any error.
-            if ( !annotatorRewriter.Success || usedApiVersion > RoslynApiVersion.V4_0_1 )
-            {
-                return false;
-            }
-
-            return true;
+            return annotatorRewriter.Success;
         }
 
         public bool TryCompile(
@@ -113,9 +133,10 @@ namespace Metalama.Framework.Engine.Templating
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,
-            [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot )
+            [NotNullWhen( true )] out SyntaxNode? transformedSyntaxRoot,
+            out RoslynApiVersion usedApiVersion )
         {
-            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out annotatedSyntaxRoot, out var usedApiVersion ) )
+            if ( !this.TryAnnotate( sourceSyntaxRoot, semanticModel, diagnostics, cancellationToken, out annotatedSyntaxRoot, out usedApiVersion ) )
             {
                 transformedSyntaxRoot = null;
 

@@ -13,7 +13,7 @@ namespace Metalama.Testing.AspectTesting.Utilities
         /// </summary>
         public static string GetRelativePath( this IFileSystem fileSystem, string relativeTo, string path )
         {
-            if ( fileSystem.DirectoryExists( relativeTo ) )
+            if ( relativeTo[^1] != Path.DirectorySeparatorChar && fileSystem.DirectoryExists( relativeTo ) )
             {
                 relativeTo += Path.DirectorySeparatorChar;
             }

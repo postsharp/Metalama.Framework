@@ -580,5 +580,30 @@ namespace Metalama.Framework.Engine.Templating
                 "Cannot set the compile-time expression '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}'.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol Attribute, ISymbol? Target)> AttributeNotAllowedOnCompileTimeCode
+            = new(
+                "LAMA0281",
+                "Attribute is not allowed on compile-time code.",
+                "The attribute '{0}' is not allowed on the compile-time declaration '{1}', because it wouldn't have the expected effect.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string? Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)> AspectUsesHigherCSharpVersion
+            = new(
+                "LAMA0282",
+                "Aspect uses higher C# version than what is allowed in the project.",
+                "The aspect '{0}' uses features of C# {1}, but it is used in a project built with C# {2}. Consider specifying <LangVersion>{1}</LangVersion> in this project or removing newer language features from the template '{3}' and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
+                _category,
+                Warning );
+
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> NonRecordPrimaryConstructorsNotSupported 
+            = new(
+                "LAMA0283",
+                _category,
+                "Compile-time type '{0}' uses non-record primary constructors which is not currently supported. " +
+                "You should remove the parameter list from the type and use explicitly defined constructors instead.",
+                Error,
+                "Non-record primary constructors are not currently supported in compile-time code." );
     }
 }

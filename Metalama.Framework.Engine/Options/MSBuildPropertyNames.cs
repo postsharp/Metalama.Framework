@@ -37,6 +37,7 @@ public static class MSBuildPropertyNames
     public const string MetalamaRoslynIsCompileTimeOnly = nameof(MetalamaRoslynIsCompileTimeOnly);
     public const string MetalamaCompileTimeTargetFrameworks = nameof(MetalamaCompileTimeTargetFrameworks);
     public const string MetalamaRestoreSources = nameof(MetalamaRestoreSources);
+    public const string MetalamaTemplateLanguageVersion = nameof(MetalamaTemplateLanguageVersion);
 
     public static ImmutableArray<string> All { get; } = ImmutableArray.Create(
         MetalamaBuildTouchFile,
@@ -65,5 +66,6 @@ public static class MSBuildPropertyNames
         MetalamaWriteLicenseUsageData,
         MetalamaRoslynIsCompileTimeOnly,
         MetalamaCompileTimeTargetFrameworks,
-        MetalamaRestoreSources );
+        MetalamaRestoreSources,
+        MetalamaTemplateLanguageVersion );
 }

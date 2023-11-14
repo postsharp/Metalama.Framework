@@ -30,6 +30,7 @@ namespace Metalama.Framework.Code
                 RefKind.In => false,
                 RefKind.Ref => true,
                 RefKind.Out => true,
+                RefKind.RefReadOnly => false,
                 _ => throw new ArgumentOutOfRangeException( nameof(kind) )
             };
 

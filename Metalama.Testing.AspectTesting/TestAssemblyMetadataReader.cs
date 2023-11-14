@@ -50,6 +50,8 @@ namespace Metalama.Testing.AspectTesting
 
             string GetProjectDirectory() => GetRequiredAssemblyMetadataValue( "ProjectDirectory" );
 
+            string GetSourceDirectory() => GetOptionalAssemblyMetadataValue( "SourceDirectory" ) ?? GetProjectDirectory();
+
             string GetProjectPath() => GetRequiredAssemblyMetadataValue( "ProjectPath" );
 
             string GetProjectName() => Path.GetFileNameWithoutExtension( GetProjectPath() );
@@ -92,6 +94,7 @@ namespace Metalama.Testing.AspectTesting
 
             return new TestAssemblyMetadata(
                 projectDirectory,
+                GetSourceDirectory(),
                 GetParserSymbols(),
                 GetTargetFramework(),
                 GetMustLaunchDebugger(),

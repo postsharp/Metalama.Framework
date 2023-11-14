@@ -20,7 +20,7 @@ namespace Metalama.Testing.AspectTesting
             var assemblyInfo = new ReflectionAssemblyInfo( this.GetType().Assembly );
             var discoverer = new TestDiscoverer( assemblyInfo );
 
-            return discoverer.GetTestProjectProperties().ProjectDirectory;
+            return discoverer.GetTestProjectProperties().SourceDirectory;
         }
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <Import Project="..\Build\RoslynVersion\Latest.imports" />
 
@@ -7,13 +7,16 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-        <AssemblyName>Metalama.Framework.DesignTime.VisualStudio.$(ThisRoslynVersion)</AssemblyName>
+        <AssemblyName>Metalama.Framework.DesignTime.VisualStudio.$(ThisRoslynVersionNoPreview)</AssemblyName>
     </PropertyGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
         <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
         <ProjectReference Include="..\Metalama.Framework.DesignTime.Rpc\Metalama.Framework.DesignTime.Rpc.csproj" />
         <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" />
     </ItemGroup>

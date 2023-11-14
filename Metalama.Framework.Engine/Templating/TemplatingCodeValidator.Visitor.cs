@@ -310,10 +310,23 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
                 }
-
-                // Verify serialization conditions.
                 var symbol = this._semanticModel.GetDeclaredSymbol( node );
 
+#if ROSLYN_4_8_0_OR_GREATER
+                if ( symbol is not null 
+                    && this._currentScope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.CompileTimeOnly
+                    && node is TypeDeclarationSyntax { ParameterList: not null }
+                    && node is ClassDeclarationSyntax or StructDeclarationSyntax )
+                {
+                    // C#12 primary constructors (non-record types) are not supported.
+                    this.Report(
+                        TemplatingDiagnosticDescriptors.NonRecordPrimaryConstructorsNotSupported.CreateRoslynDiagnostic(
+                            node.Identifier.GetLocation(),
+                            symbol ) );
+                }
+#endif
+
+                // Verify serialization conditions.
                 if ( symbol is not null
                      && this._compilationContext.SourceCompilation.HasImplicitConversion( symbol, this._iCompileTimeSerializableType ) )
                 {

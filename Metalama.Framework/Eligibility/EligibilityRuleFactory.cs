@@ -82,6 +82,8 @@ public static partial class EligibilityRuleFactory
     private static readonly IEligibilityRule<IDeclaration> _introduceParameterRule = CreateRule<IDeclaration, IConstructor>(
         builder =>
         {
+            builder.MustNotBePrimaryConstructorOfNonRecordType();
+
             builder.DeclaringType().MustBeRunTimeOnly();
             builder.MustNotBeStatic();
         } );
@@ -100,6 +102,8 @@ public static partial class EligibilityRuleFactory
                             t => t.TypeKind is TypeKind.Class or TypeKind.RecordClass or TypeKind.Struct or TypeKind.RecordStruct,
                             t => $"'{t}' must be a class, record class, struct, or record struct" );
 
+                        typeEligibilityBuilder.MustNotBeNonRecordTypeWithPrimaryConstructor();
+
                         typeEligibilityBuilder.MustBeExplicitlyDeclared();
                         typeEligibilityBuilder.MustBeRunTimeOnly();
                     } );
@@ -110,7 +114,9 @@ public static partial class EligibilityRuleFactory
                     constructorEligibilityBuilder =>
                     {
                         constructorEligibilityBuilder.MustNotBeStatic();
-                        constructorEligibilityBuilder.MustNotBeStatic();
+
+                        constructorEligibilityBuilder.MustNotBePrimaryConstructorOfNonRecordType();
+
                         constructorEligibilityBuilder.DeclaringType().MustBeExplicitlyDeclared();
                         constructorEligibilityBuilder.DeclaringType().MustBeRunTimeOnly();
                     } );

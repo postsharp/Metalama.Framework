@@ -7,10 +7,10 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
-        <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
+        <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersionNoPreview)</AssemblyName>
         <PackageId>Metalama.Framework.Engine</PackageId>
-		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
-		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
+        <!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
+        <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
         <!-- Packaging -->
         <PackageDescription>The main implementation of Metalama.Framework. It should normally never be referenced in any user project.</PackageDescription>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -22,7 +22,7 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
 
 
     <ItemGroup>
-		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false" />
 
         <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
              the compile-time assembly. See ReferenceAssemblyLocator. -->
@@ -44,21 +44,21 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersion)')" />
-        <Compile Include="..\.generated\$(ThisRoslynVersion)-stubs\Metalama.Framework.Engine\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersion)')" />
+        <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)\Metalama.Framework.Engine\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
+        <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)-stubs\Metalama.Framework.Engine\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
     </ItemGroup>
 
     <ItemGroup>
         <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.$(ThisRoslynVersionNoPreview)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.$(ThisRoslynVersionNoPreview)" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(ThisRoslynVersion)" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(ThisRoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(ThisRoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(ThisRoslynVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)">
             <GeneratePathProperty>True</GeneratePathProperty>
@@ -71,6 +71,9 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
         <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
         <ProjectReference Include="..\Metalama.Framework.CompileTimeContracts\Metalama.Framework.CompileTimeContracts.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
@@ -79,7 +82,6 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
         <!-- The following references handle [Memo] -->
         <ProjectReference Include="..\source-dependencies\Metalama.Framework.Private\src\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"  Condition="Exists('..\source-dependencies\Metalama.Framework.Private')" />
         <ProjectReference Include="..\Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
     </ItemGroup>
 
     <!-- This is a work-around of PostSharp not preserving the public-signing flag. (#29763) -->

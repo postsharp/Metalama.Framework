@@ -57,7 +57,7 @@ namespace Metalama.Testing.AspectTesting
         public bool? IncludeAllSeverities { get; set; }
 
         /// <summary>
-        /// Gets or sets the fully-qualified name of the test runner factory type (implementing <see cref="ITestRunnerFactory"/>).
+        /// Gets or sets the name of the test runner factory type (implementing <see cref="ITestRunnerFactory"/>).
         /// You can only define this option in the <c>metalamaTests.json</c> file of a directory. This setting is for Metalama internal use only.
         /// </summary>
         public string? TestRunnerFactoryType { get; set; }
@@ -233,6 +233,12 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
         /// </summary>
         public LanguageVersion? LanguageVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the version of the C# language that the dependencies of the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @DependencyLanguageVersion(version)</c>.
+        /// </summary>
+        public LanguageVersion? DependencyLanguageVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the list of C# language features that the test should be compiled with.
@@ -470,7 +476,7 @@ namespace Metalama.Testing.AspectTesting
 
                     case "DesignTime":
                         this.TestRunnerFactoryType =
-                            "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory, Metalama.Framework.Tests.Integration";
+                            "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory";
 
                         break;
 
@@ -483,13 +489,13 @@ namespace Metalama.Testing.AspectTesting
                             {
                                 case AspectTesting.TestScenario.PreviewLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
 
                                     break;
 
                                 case AspectTesting.TestScenario.ApplyLiveTemplate:
                                     this.TestRunnerFactoryType =
-                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory, Metalama.Framework.Tests.Integration";
+                                        "Metalama.Framework.Tests.Integration.Runners.LiveTemplateTestRunnerFactory";
 
                                     break;
                             }
@@ -615,13 +621,43 @@ namespace Metalama.Testing.AspectTesting
                         break;
 
                     case "LanguageVersion":
-                        if ( LanguageVersionFacts.TryParse( optionArg, out var result ) )
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var languageVersion ) )
                         {
-                            this.LanguageVersion = result;
+                            this.LanguageVersion = languageVersion;
                         }
                         else
                         {
-                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                            // The version may be a valid number but still not recognized by the current version of Roslyn.
+                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor( n ) )
+                            {
+                                this.SkipReason = $"@LanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
+                            }
+                            else
+                            {
+                                // Throwing here may kill test discovery. 
+                                throw new InvalidOperationException( $"@LanguageVersion '{optionArg}' is not a valid language version." );
+                            }
+                        }
+
+                        break;
+
+                    case "DependencyLanguageVersion":
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var dependencyLanguageVersion ) )
+                        {
+                            this.DependencyLanguageVersion = dependencyLanguageVersion;
+                        }
+                        else
+                        {
+                            // The version may be a valid number but still not recognized by the current version of Roslyn.
+                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor(n) )
+                            {
+                                this.SkipReason = $"@DependencyLanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
+                            }
+                            else
+                            {
+                                // Throwing here may kill test discovery. 
+                                throw new InvalidOperationException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version." );
+                            }
                         }
 
                         break;

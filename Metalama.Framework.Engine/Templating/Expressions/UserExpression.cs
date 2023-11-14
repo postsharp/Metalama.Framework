@@ -23,13 +23,20 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         /// Creates a <see cref="TypedExpressionSyntaxImpl"/> for the given <see cref="SyntaxGenerationContext"/>.
         /// </summary>
         internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxSerializationContext syntaxSerializationContext )
-            => new( this.ToSyntax( syntaxSerializationContext ), this.Type, syntaxSerializationContext.SyntaxGenerationContext, false, this.CanBeNull );
+            => new(
+                this.ToSyntax( syntaxSerializationContext ),
+                this.Type,
+                syntaxSerializationContext.SyntaxGenerationContext,
+                this.IsReferenceable,
+                this.CanBeNull );
 
         public abstract IType Type { get; }
 
-        public RefKind RefKind => RefKind.None;
+        public virtual RefKind RefKind => RefKind.None;
 
         public virtual bool IsAssignable => false;
+
+        internal virtual bool IsReferenceable => false;
 
         public ref object? Value => ref RefHelper.Wrap( this );
 

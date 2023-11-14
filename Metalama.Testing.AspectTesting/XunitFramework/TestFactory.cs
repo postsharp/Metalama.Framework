@@ -46,7 +46,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             this.DirectoryOptionsReader = directoryOptionsReader;
 
             this.ProjectProperties = projectProperties;
-            this.ProjectName = Path.GetFileName( this.ProjectProperties.ProjectDirectory );
+            this.ProjectName = Path.GetFileName( this.ProjectProperties.SourceDirectory );
             this.Collection = new TestCollection( this );
             this.AssemblyInfo = assemblyInfo;
             this.ServiceProvider = serviceProvider;
