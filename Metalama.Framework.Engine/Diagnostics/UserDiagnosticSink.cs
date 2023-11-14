@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -168,8 +169,44 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
+        internal const string DeduplicationPropertyKey = "Metalama.Deduplication";
+
         public ImmutableUserDiagnosticList ToImmutable()
-            => new( this._diagnostics?.ToImmutableArray(), this._suppressions?.ToImmutableArray(), this._codeFixes?.ToImmutableArray() );
+        {
+            ImmutableArray<Diagnostic>? immutableDiagnostics = null;
+
+            var diagnostics = this._diagnostics;
+
+            if ( diagnostics != null )
+            {
+                HashSet<string>? deduplicationKeys = null;
+                var arrayBuilder = ImmutableArray.CreateBuilder<Diagnostic>( diagnostics.Count );
+
+                var orderedDiagnostics = diagnostics.OrderBy( d => d.Location.SourceTree?.FilePath )
+                    .ThenBy( d => d.Location.SourceSpan )
+                    .ThenBy( d => d.GetLocalizedMessage() );
+
+                foreach ( var diagnostic in orderedDiagnostics )
+                {
+                    if ( diagnostic.Properties?.TryGetValue( DeduplicationPropertyKey, out var deduplicationKey ) == true
+                         && deduplicationKey != null )
+                    {
+                        deduplicationKeys ??= [];
+
+                        if ( !deduplicationKeys.Add( deduplicationKey ) )
+                        {
+                            continue;
+                        }
+                    }
+
+                    arrayBuilder.Add( diagnostic );
+                }
+
+                immutableDiagnostics = arrayBuilder.ToImmutable();
+            }
+
+            return new( immutableDiagnostics, this._suppressions?.ToImmutableArray(), this._codeFixes?.ToImmutableArray() );
+        }
 
         public override string ToString()
             => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";

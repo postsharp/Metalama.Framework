@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Collections;
 internal sealed class ConcurrentSet<T> : IReadOnlyCollectionWithContains<T>
     where T : notnull
 {
-    private readonly ConcurrentDictionary<T, int> _dictionary = new();
+    private readonly ConcurrentDictionary<T, byte> _dictionary = new();
 
     public bool Add( T value ) => this._dictionary.TryAdd( value, 0 );
 
