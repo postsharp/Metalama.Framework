@@ -15,6 +15,8 @@ internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, I
 {
     public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
+    bool IConstructor.IsPrimary => false;
+
     IParameterList IHasParameters.Parameters => (IParameterList) this.Parameters;
 
     public IParameterBuilderList Parameters => ParameterBuilderList.Empty;

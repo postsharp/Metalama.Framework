@@ -627,7 +627,16 @@ namespace Metalama.Testing.AspectTesting
                         }
                         else
                         {
-                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                            // The version may be a valid number but still not recognized by the current version of Roslyn.
+                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor( n ) )
+                            {
+                                this.SkipReason = $"@LanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
+                            }
+                            else
+                            {
+                                // Throwing here may kill test discovery. 
+                                throw new InvalidOperationException( $"@LanguageVersion '{optionArg}' is not a valid language version." );
+                            }
                         }
 
                         break;
@@ -639,7 +648,16 @@ namespace Metalama.Testing.AspectTesting
                         }
                         else
                         {
-                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                            // The version may be a valid number but still not recognized by the current version of Roslyn.
+                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor(n) )
+                            {
+                                this.SkipReason = $"@DependencyLanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
+                            }
+                            else
+                            {
+                                // Throwing here may kill test discovery. 
+                                throw new InvalidOperationException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version." );
+                            }
                         }
 
                         break;

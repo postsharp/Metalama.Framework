@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var expectedTypeName = type.FullName.AssertNotNull()
 #if NET5_0_OR_GREATER
-                .ReplaceOrdinal( ", System.Private.CoreLib, Version=6.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e", "" )
+                .ReplaceOrdinal( ", System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e", "" )
 #else
                 .ReplaceOrdinal( ", mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", "" )
 #endif

@@ -17,8 +17,17 @@ public sealed class SerializableDeclarationIdForIntroducedTests : UnitTestClass
     {
         const string code = """
                             using Metalama.Framework.Aspects;
-
+                            """ +
+#if !ROSLYN_4_4_0_OR_GREATER
+                            """
+                            class Aspect : TypeAspect
+                            """ +
+#else
+                            """
                             class Aspect<T> : TypeAspect
+                            """ +
+#endif
+                            """
                             {
                               [Introduce]
                               void M<T2>(int p) {}
@@ -31,8 +40,18 @@ public sealed class SerializableDeclarationIdForIntroducedTests : UnitTestClass
                               [Introduce]
                               ~Aspect() {}
                             }
-
+                            
+                            """ +
+#if !ROSLYN_4_4_0_OR_GREATER
+                            """
+                            [Aspect]
+                            """ +
+#else
+                            """
                             [Aspect<int>]
+                            """ +
+#endif
+                            """
                             class C { }
                             """;
 

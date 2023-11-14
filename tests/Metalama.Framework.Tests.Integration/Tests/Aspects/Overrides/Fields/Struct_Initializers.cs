@@ -1,6 +1,11 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
 using System;
+using System.Linq;
+using Metalama.Framework.Code;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Struct_Initializers;
+
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -30,13 +35,26 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         }
     }
 
+    public class IntroductionAttribute : TypeAspect
+    {
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        {
+            builder.Outbound.SelectMany(x => x.Fields.Where(x => !x.IsImplicitlyDeclared)).AddAspect(x => new OverrideAttribute());
+        }
+
+        [Introduce]
+        public int IntroducedField = meta.ThisType.StaticField;
+
+        [Introduce]
+        public static int IntroducedStaticField = meta.ThisType.StaticField;
+    }
+
     // <target>
+    [Introduction]
     internal struct TargetStruct
     {
-        [Override]
         public int Field = 42;
 
-        [Override]
         public static int StaticField = 42;
 
         public TargetStruct() { }

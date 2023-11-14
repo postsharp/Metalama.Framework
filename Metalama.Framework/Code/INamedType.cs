@@ -128,6 +128,14 @@ namespace Metalama.Framework.Code
         IMethodCollection AllMethods { get; }
 
         /// <summary>
+        /// Gets the primary constructor if it is defined, otherwise returns <c>null</c>.
+        /// </summary>
+        /// <remarks>
+        /// Primary constructors are recognized only for the current compilation.
+        /// </remarks>
+        IConstructor? PrimaryConstructor { get; }
+
+        /// <summary>
         /// Gets the list of constructors, including the implicit default constructor if any, but not the static constructor. 
         /// </summary>
         IConstructorCollection Constructors { get; }
