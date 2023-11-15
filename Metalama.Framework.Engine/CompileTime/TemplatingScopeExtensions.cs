@@ -1,74 +1,72 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using static Metalama.Framework.Engine.CompileTime.TemplatingScope;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class TemplatingScopeExtensions
     {
         public static bool MustBeTransformed( this TemplatingScope scope )
-            => scope != TemplatingScope.RunTimeTemplateParameter && scope.GetExpressionExecutionScope() is TemplatingScope.RunTimeOnly;
+            => scope != RunTimeTemplateParameter && scope.GetExpressionExecutionScope() is RunTimeOnly;
 
         public static bool IsCompileTimeMemberReturningRunTimeValue( this TemplatingScope scope )
-            => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic or TemplatingScope.RunTimeTemplateParameter;
+            => scope is CompileTimeOnlyReturningRuntimeOnly or Dynamic or RunTimeTemplateParameter;
 
-        public static bool EvaluatesToRunTimeValue( this TemplatingScope scope )
-            => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.RunTimeOnly;
+        public static bool EvaluatesToRunTimeValue( this TemplatingScope scope ) => scope is Dynamic or CompileTimeOnlyReturningRuntimeOnly or RunTimeOnly;
 
         public static bool MustExecuteAtCompileTime( this TemplatingScope scope )
-            => scope is TemplatingScope.CompileTimeOnly or TemplatingScope.CompileTimeOnlyReturningBoth or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
-                or TemplatingScope.Dynamic or TemplatingScope.TypeOfRunTimeType or TemplatingScope.TypeOfTemplateTypeParameter;
+            => scope is CompileTimeOnly or CompileTimeOnlyReturningBoth or CompileTimeOnlyReturningRuntimeOnly
+                or Dynamic or TypeOfRunTimeType or TypeOfTemplateTypeParameter;
 
-        public static bool CanExecuteAtCompileTime( this TemplatingScope scope )
-            => scope.MustExecuteAtCompileTime() || scope == TemplatingScope.RunTimeOrCompileTime;
+        public static bool CanExecuteAtCompileTime( this TemplatingScope scope ) => scope.MustExecuteAtCompileTime() || scope == RunTimeOrCompileTime;
 
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => IsUndetermined( scope ) ? defaultScope : scope;
 
-        public static bool IsUndetermined( this TemplatingScope scope )
-            => scope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.LateBound or TemplatingScope.MustFollowParent;
+        public static bool IsUndetermined( this TemplatingScope scope ) => scope is RunTimeOrCompileTime or LateBound or MustFollowParent;
 
         public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope, bool preferCompileTime = false )
             => scope switch
             {
-                TemplatingScope.CompileTimeOnlyReturningBoth => TemplatingScope.CompileTimeOnly,
-                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.CompileTimeOnly,
-                TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
-                TemplatingScope.DynamicTypeConstruction => TemplatingScope.RunTimeOnly,
-                TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
-                TemplatingScope.TypeOfRunTimeType => TemplatingScope.RunTimeOrCompileTime,
-                TemplatingScope.TypeOfTemplateTypeParameter => TemplatingScope.RunTimeOnly,
-                TemplatingScope.RunTimeOrCompileTime when preferCompileTime => TemplatingScope.CompileTimeOnly,
+                CompileTimeOnlyReturningBoth => CompileTimeOnly,
+                CompileTimeOnlyReturningRuntimeOnly => CompileTimeOnly,
+                Dynamic => RunTimeOnly,
+                DynamicTypeConstruction => RunTimeOnly,
+                RunTimeTemplateParameter => RunTimeOnly,
+                TypeOfRunTimeType => RunTimeOrCompileTime,
+                TypeOfTemplateTypeParameter => RunTimeOnly,
+                RunTimeOrCompileTime when preferCompileTime => CompileTimeOnly,
                 _ => scope
             };
 
         public static TemplatingScope GetExpressionValueScope( this TemplatingScope scope, bool preferCompileTime = false )
             => scope switch
             {
-                TemplatingScope.CompileTimeOnlyReturningBoth when preferCompileTime => TemplatingScope.CompileTimeOnly,
-                TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.RunTimeOrCompileTime,
-                TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
-                TemplatingScope.DynamicTypeConstruction => TemplatingScope.RunTimeOnly,
-                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.RunTimeOnly,
-                TemplatingScope.RunTimeTemplateParameter => TemplatingScope.RunTimeOnly,
-                TemplatingScope.TypeOfRunTimeType => TemplatingScope.RunTimeOrCompileTime,
-                TemplatingScope.TypeOfTemplateTypeParameter => TemplatingScope.RunTimeOnly,
+                CompileTimeOnlyReturningBoth when preferCompileTime => CompileTimeOnly,
+                CompileTimeOnlyReturningBoth when !preferCompileTime => RunTimeOrCompileTime,
+                Dynamic => RunTimeOnly,
+                DynamicTypeConstruction => RunTimeOnly,
+                CompileTimeOnlyReturningRuntimeOnly => RunTimeOnly,
+                RunTimeTemplateParameter => RunTimeOnly,
+                TypeOfRunTimeType => RunTimeOrCompileTime,
+                TypeOfTemplateTypeParameter => RunTimeOnly,
                 _ => scope
             };
 
         public static string ToDisplayString( this TemplatingScope scope )
             => scope switch
             {
-                TemplatingScope.RunTimeOnly => "run-time",
-                TemplatingScope.CompileTimeOnly => "compile-time",
-                TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => "compile-time-returning-run-time",
-                TemplatingScope.CompileTimeOnlyReturningBoth => "compile-time",
-                TemplatingScope.RunTimeOrCompileTime => "run-time-or-compile-time",
-                TemplatingScope.TypeOfRunTimeType => "run-time-or-compile-time",
-                TemplatingScope.TypeOfTemplateTypeParameter => "run-time",
-                TemplatingScope.LateBound => "unbound",
-                TemplatingScope.Dynamic => "run-time",
-                TemplatingScope.DynamicTypeConstruction => "run-time",
+                RunTimeOnly => "run-time",
+                CompileTimeOnly => "compile-time",
+                CompileTimeOnlyReturningRuntimeOnly => "compile-time-returning-run-time",
+                CompileTimeOnlyReturningBoth => "compile-time",
+                RunTimeOrCompileTime => "run-time-or-compile-time",
+                TypeOfRunTimeType => "run-time-or-compile-time",
+                TypeOfTemplateTypeParameter => "run-time",
+                LateBound => "unbound",
+                Dynamic => "run-time",
+                DynamicTypeConstruction => "run-time",
 
                 _ => scope.ToString()
             };
@@ -76,20 +74,20 @@ namespace Metalama.Framework.Engine.CompileTime
         public static TemplatingScope GetAccessMemberScope( TemplatingScope executionScope, TemplatingScope valueScope )
             => (executionScope.GetExpressionExecutionScope(), valueScope.GetExpressionValueScope()) switch
             {
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.CompileTimeOnlyReturningBoth,
-                (TemplatingScope.RunTimeOnly, _) => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
-                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
-                (TemplatingScope.TypeOfRunTimeType, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.TypeOfTemplateTypeParameter, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
+                (CompileTimeOnly, CompileTimeOnly) => CompileTimeOnly,
+                (CompileTimeOnly, RunTimeOnly) => CompileTimeOnlyReturningRuntimeOnly,
+                (CompileTimeOnly, RunTimeOrCompileTime) => CompileTimeOnlyReturningBoth,
+                (RunTimeOnly, _) => RunTimeOnly,
+                (RunTimeOrCompileTime, CompileTimeOnly) => CompileTimeOnly,
+                (RunTimeOrCompileTime, RunTimeOrCompileTime) => RunTimeOrCompileTime,
+                (TypeOfRunTimeType, RunTimeOrCompileTime) => RunTimeOnly,
+                (TypeOfTemplateTypeParameter, RunTimeOrCompileTime) => RunTimeOnly,
 
                 // Unknown scopes happen in dynamic code that cannot be resolved to symbols.
-                (TemplatingScope.LateBound, _) => valueScope,
+                (LateBound, _) => valueScope,
 
                 // Conflicts are ignored. They should be reported elsewhere.
-                (_, TemplatingScope.Conflict) => executionScope,
+                (_, Conflict) => executionScope,
 
                 _ => throw new AssertionFailedException( $"Invalid combination: {executionScope}, {valueScope}." )
             };
@@ -104,26 +102,26 @@ namespace Metalama.Framework.Engine.CompileTime
         private static TemplatingScope GetCombinedScope( this TemplatingScope a, TemplatingScope b, bool isExecutionScope )
             => (a, b) switch
             {
-                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOrCompileTime,
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.CompileTimeOnly,
+                (RunTimeOrCompileTime, RunTimeOrCompileTime) => RunTimeOrCompileTime,
+                (CompileTimeOnly, CompileTimeOnly) => CompileTimeOnly,
+                (CompileTimeOnly, RunTimeOrCompileTime) => CompileTimeOnly,
 
                 // Propagate conflicts.
-                (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
-                (_, TemplatingScope.Conflict) => TemplatingScope.Conflict,
+                (Conflict, _) => Conflict,
+                (_, Conflict) => Conflict,
 
                 // If any part of an expression is late bound, the whole expression is also.
-                (_, TemplatingScope.LateBound) => TemplatingScope.LateBound,
-                (TemplatingScope.LateBound, _) => TemplatingScope.LateBound,
+                (_, LateBound) => LateBound,
+                (LateBound, _) => LateBound,
 
-                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.CompileTimeOnly) => TemplatingScope.CompileTimeOnly,
-                (TemplatingScope.RunTimeOrCompileTime, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.RunTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) when isExecutionScope => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.Conflict,
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) when isExecutionScope => TemplatingScope.RunTimeOnly,
-                (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.Conflict,
+                (RunTimeOrCompileTime, CompileTimeOnly) => CompileTimeOnly,
+                (RunTimeOrCompileTime, RunTimeOnly) => RunTimeOnly,
+                (RunTimeOnly, RunTimeOrCompileTime) => RunTimeOnly,
+                (RunTimeOnly, RunTimeOnly) => RunTimeOnly,
+                (RunTimeOnly, CompileTimeOnly) when isExecutionScope => RunTimeOnly,
+                (RunTimeOnly, CompileTimeOnly) => Conflict,
+                (CompileTimeOnly, RunTimeOnly) when isExecutionScope => RunTimeOnly,
+                (CompileTimeOnly, RunTimeOnly) => Conflict,
 
                 _ => throw new AssertionFailedException( $"Invalid combination: {a}, {b}." )
             };
@@ -131,9 +129,9 @@ namespace Metalama.Framework.Engine.CompileTime
         public static ExecutionScope ToExecutionScope( this TemplatingScope templatingScope )
             => templatingScope.GetExpressionExecutionScope() switch
             {
-                TemplatingScope.CompileTimeOnly => ExecutionScope.CompileTime,
-                TemplatingScope.RunTimeOnly => ExecutionScope.RunTime,
-                TemplatingScope.RunTimeOrCompileTime => ExecutionScope.RunTimeOrCompileTime,
+                CompileTimeOnly => ExecutionScope.CompileTime,
+                RunTimeOnly => ExecutionScope.RunTime,
+                RunTimeOrCompileTime => ExecutionScope.RunTimeOrCompileTime,
                 _ => throw new AssertionFailedException( $"Unexpected scope." )
             };
     }
