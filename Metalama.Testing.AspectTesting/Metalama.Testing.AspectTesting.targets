@@ -71,13 +71,15 @@
             </AssemblyAttribute>
             
             <!-- Additional attributes -->
+            <!-- In .Net 8 when "artifacts" output paths are enabled, IntermediateOutputPath is an absolute path. -->
+            <!-- To handle both that and the more common relative IntermediateOutputPath, we use Path.Combine. -->
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>ReferenceAssemblyList</_Parameter1>
-                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
+                <_Parameter2>$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)','$(IntermediateOutputPath)','assemblies.txt'))</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>AnalyzerAssemblyList</_Parameter1>
-                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)analyzers.txt</_Parameter2>
+                <_Parameter2>$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)','$(IntermediateOutputPath)','analyzers.txt'))</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
