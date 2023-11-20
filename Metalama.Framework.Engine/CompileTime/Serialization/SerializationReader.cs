@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     {
         private const byte _version = 1;
 
-        private readonly Dictionary<int, SerializationQueueItem<ObjRef>> _referenceTypeInstances = new();
+        private readonly Dictionary<int, SerializationQueueItem<ObjRef>> _referenceTypeInstances = [];
 
         private readonly CompileTimeSerializer _formatter;
         private readonly bool _shouldReportExceptionCause;

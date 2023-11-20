@@ -75,8 +75,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             UserDiagnosticsConfiguration file,
             DiagnosticManifest diagnosticManifest )
         {
-            List<string> missingSuppressions = new();
-            List<IDiagnosticDefinition> missingDiagnostics = new();
+            List<string> missingSuppressions = [];
+            List<IDiagnosticDefinition> missingDiagnostics = [];
 
             foreach ( var suppression in diagnosticManifest.SuppressionDefinitions.Select( s => s.SuppressedDiagnosticId )
                          .Distinct() )

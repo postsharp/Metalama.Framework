@@ -44,7 +44,7 @@ internal partial class TemplateAnnotator
     /// </remarks>
     private sealed class RedundantReturnVisitor : SafeSyntaxVisitor
     {
-        private List<ReturnStatementSyntax>? _returnStatements = new();
+        private List<ReturnStatementSyntax>? _returnStatements = [];
 
         public static void ReportErrors( TemplateAnnotator templateAnnotator, StatementSyntax statement )
         {

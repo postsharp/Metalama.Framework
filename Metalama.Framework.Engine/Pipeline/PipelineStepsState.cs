@@ -35,10 +35,10 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
     private readonly PipelineStepIdComparer _comparer;
     private readonly UserDiagnosticSink _diagnostics;
-    private readonly ConcurrentLinkedList<ITransformation> _transformations = new();
-    private readonly ConcurrentLinkedList<IAspectInstance> _inheritableAspectInstances = new();
-    private readonly ConcurrentLinkedList<AspectInstanceResult> _aspectInstanceResults = new();
-    private readonly ConcurrentLinkedList<IValidatorSource> _validatorSources = new();
+    private readonly ConcurrentLinkedList<ITransformation> _transformations = [];
+    private readonly ConcurrentLinkedList<IAspectInstance> _inheritableAspectInstances = [];
+    private readonly ConcurrentLinkedList<AspectInstanceResult> _aspectInstanceResults = [];
+    private readonly ConcurrentLinkedList<IValidatorSource> _validatorSources = [];
     private readonly OverflowAspectSource _overflowAspectSource = new();
     private readonly IntrospectionPipelineListener? _introspectionListener;
     private readonly bool _shouldDetectUnorderedAspects;
