@@ -1,15 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#if !DEBUG
-using System.Runtime.CompilerServices;
-#else
-#endif
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine
 {
@@ -24,37 +21,43 @@ namespace Metalama.Framework.Engine
         /// Checks that a given condition is true and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-#if !DEBUG
+#if DEBUG
+        [DebuggerStepThrough]
+        public static void Assert( [DoesNotReturnIf( false )] bool condition, [CallerArgumentExpression( nameof(condition) )] string? expression = null )
+        {
+            if ( !condition )
+            {
+                throw new AssertionFailedException( $"Assert({expression})" );
+            }
+        }
+#else
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-#endif
         [DebuggerStepThrough]
         public static void Assert( [DoesNotReturnIf( false )] bool condition )
         {
-#if DEBUG
-            if ( !condition )
-            {
-                throw new AssertionFailedException();
-            }
-#endif
         }
+#endif
 
         /// <summary>
         /// Checks that a given condition is false and throws an <see cref="AssertionFailedException"/> in case it is not.
         /// </summary>
         /// <param name="condition">The condition that must be true.</param>
-#if !DEBUG
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-#endif
-        [DebuggerStepThrough]
-        public static void AssertNot( [DoesNotReturnIf( true )] bool condition )
-        {
 #if DEBUG
+        [DebuggerStepThrough]
+        public static void AssertNot( [DoesNotReturnIf( false )] bool condition, [CallerArgumentExpression( nameof(condition) )] string? expression = null )
+        {
             if ( condition )
             {
-                throw new AssertionFailedException();
+                throw new AssertionFailedException( $"AssertNot({expression})" );
             }
-#endif
         }
+#else
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [DebuggerStepThrough]
+        public static void AssertNot( [DoesNotReturnIf( false )] bool condition )
+        {
+        }
+#endif
 
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -67,7 +70,7 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             if ( obj != null && obj is not T )
             {
-                throw new AssertionFailedException( "" );
+                throw new AssertionFailedException( $"Can't cast {obj} to {typeof(T)}." );
             }
 #endif
             return (T?) obj;
