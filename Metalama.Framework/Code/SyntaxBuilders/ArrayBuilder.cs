@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     [CompileTime]
     public sealed class ArrayBuilder : INotNullExpressionBuilder
     {
-        private readonly List<object?> _items = new();
+        private readonly List<object?> _items = [];
 
         internal IType ItemType { get; }
 

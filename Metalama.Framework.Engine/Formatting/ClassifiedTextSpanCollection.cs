@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Formatting
     public sealed class ClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
     {
         private readonly SourceText? _sourceText;
-        private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
+        private readonly SkipListDictionary<int, MarkedTextSpan> _spans = [];
         private readonly int _length;
 
         // For test only.

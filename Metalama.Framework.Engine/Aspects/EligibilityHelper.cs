@@ -23,7 +23,7 @@ internal partial class EligibilityHelper
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly object _requester;
     private readonly UserCodeInvoker _userCodeInvoker;
-    private readonly List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules = new();
+    private readonly List<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules = [];
 
     private readonly ConcurrentDictionary<Type, Func<EligibilityHelper, IDiagnosticAdder, bool>>
         _tryInitializeEligibilityMethods = new();

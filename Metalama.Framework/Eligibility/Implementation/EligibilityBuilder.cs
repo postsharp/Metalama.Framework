@@ -9,7 +9,7 @@ namespace Metalama.Framework.Eligibility.Implementation
     internal sealed class EligibilityBuilder<T> : IEligibilityBuilder<T>
         where T : class
     {
-        private readonly List<IEligibilityRule<T>> _predicates = new();
+        private readonly List<IEligibilityRule<T>> _predicates = [];
         private readonly BooleanCombinationOperator _combinationOperator;
 
         public EligibilityBuilder( BooleanCombinationOperator combinationOperator = BooleanCombinationOperator.And )

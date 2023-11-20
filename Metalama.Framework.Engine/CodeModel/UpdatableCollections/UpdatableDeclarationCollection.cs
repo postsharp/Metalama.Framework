@@ -40,7 +40,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
                 return;
             }
 
-            this._allItems = new List<TRef>();
+            this._allItems = [];
 
 #if DEBUG
             this.PopulateAllItems(

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Advising
             this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
 
-            Dictionary<string, Func<object, object?>> properties = new();
+            Dictionary<string, Func<object, object?>> properties = [];
 
             if ( type.IsInterface )
             {

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization.Serializers
 
             if ( comparerCode == 0 && comparer == null )
             {
-                dictionary = new Dictionary<TKey, TValue>();
+                dictionary = [];
             }
             else
             {

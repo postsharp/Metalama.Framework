@@ -9,8 +9,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     internal sealed class SerializationBinaryReader
     {
         private readonly BinaryReader _reader;
-        private readonly List<string> _strings = new();
-        private readonly List<string> _dottedStrings = new();
+        private readonly List<string> _strings = [];
+        private readonly List<string> _dottedStrings = [];
 
         public SerializationBinaryReader( BinaryReader reader )
         {

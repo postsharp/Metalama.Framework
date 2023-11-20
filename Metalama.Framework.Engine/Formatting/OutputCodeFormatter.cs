@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Formatting
             Compilation compilation,
             CancellationToken cancellationToken )
         {
-            Dictionary<SyntaxTree, DocumentId> syntaxTreeMap = new();
+            Dictionary<SyntaxTree, DocumentId> syntaxTreeMap = [];
             var workspace = new AdhocWorkspace();
 
             var project = workspace.AddProject(
