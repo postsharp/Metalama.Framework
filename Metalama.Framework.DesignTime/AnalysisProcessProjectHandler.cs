@@ -21,7 +21,7 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 /// <remarks>
 /// The implementation works by providing a cached result whenever one is available, and to schedule
-/// an asynchronous task to refresh the task. When the task is completed, a touch file is modified,
+/// an asynchronous task to refresh the result. When the task is completed, a touch file is modified,
 /// which causes the compiler to call the <see cref="ProjectHandler"/> again, and to receive
 /// a fresh copy of the cache.
 /// </remarks>
@@ -37,7 +37,6 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     private volatile bool _disposed;
     private volatile TestableCancellationTokenSource? _currentCancellationSource;
-    private long _pipelineSnapshotIdWhenLastDirty;
 
     protected SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
@@ -69,26 +68,18 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         if ( projectKey == this.ProjectKey )
         {
-            if ( this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
-            {
-                this._pipelineSnapshotIdWhenLastDirty = pipeline.SnapshotId;
-                this._dirtyProjectQuietPeriodTimer.Restart();
-            }
+            this._dirtyProjectQuietPeriodTimer.Restart();
         }
     }
 
     private void OnDirtyProjectDelayed( object? sender, EventArgs e )
     {
-        if ( this._pipelineFactory.TryGetPipeline( this.ProjectKey, out var pipeline ) && pipeline.SnapshotId <= this._pipelineSnapshotIdWhenLastDirty )
-        {
-            this.Logger.Trace?.Log( "Updating the touch file because of a change in a master project (delayed)." );
-            this.UpdateTouchFile();
-        }
-        else
-        {
-            this.Logger.Trace?.Log(
-                "Not updating the touch file after a change in a master project because the dependent pipeline has been executed in the meantime." );
-        }
+        // Note that we can't skip updating the touch file if the pipeline has been executed in the meantime,
+        // because updating the touch file has side-effects like rerunning the source generator and invalidating CodeLens,
+        // which are not guaranteed to have happened when the pipeline has been run for some other purpose (like accessing CodeLens details).
+
+        this.Logger.Trace?.Log( "Updating the touch file because of a change in a master project (delayed)." );
+        this.UpdateTouchFile();
     }
 
     public override SourceGeneratorResult GenerateSources( Compilation compilation, TestableCancellationToken cancellationToken )
