@@ -60,14 +60,14 @@ namespace Metalama.Framework.Engine.Linking
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
-            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
-            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
+            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = [];
+            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = [];
             ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap = new();
-            ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
+            ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = [];
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {

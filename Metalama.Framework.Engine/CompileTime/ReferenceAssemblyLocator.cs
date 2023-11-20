@@ -419,7 +419,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 // Build the list of exported files.
-                List<MetadataInfo> assemblyMetadatas = new();
+                List<MetadataInfo> assemblyMetadatas = [];
 
                 foreach ( var assemblyPath in assemblies )
                 {

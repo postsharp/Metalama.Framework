@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// </summary>
     public sealed class CodeActionMenuModel : CodeActionBaseModel
     {
-        public List<CodeActionBaseModel> Items { get; } = new();
+        public List<CodeActionBaseModel> Items { get; } = [];
 
         public CodeActionMenuModel( string title ) : base( title ) { }
 

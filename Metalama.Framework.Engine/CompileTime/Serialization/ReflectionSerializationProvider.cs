@@ -13,9 +13,9 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     internal sealed class ReflectionSerializationProvider : ISerializerFactoryProvider, ISerializerDiscoverer
     {
         private readonly ProjectServiceProvider _serviceProvider;
-        private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = new();
-        private readonly Dictionary<Type, bool> _inspectedTypes = new();
-        private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
+        private readonly Dictionary<Type, ISerializerFactory> _serializerTypes = [];
+        private readonly Dictionary<Type, bool> _inspectedTypes = [];
+        private readonly Dictionary<Assembly, bool> _inspectedAssemblies = [];
         private readonly object _sync = new();
 
         public ReflectionSerializationProvider( ProjectServiceProvider serviceProvider )

@@ -36,12 +36,12 @@ namespace Metalama.Framework.Engine.Formatting
                                     .Select( m => (Member: m, Name: m.Attribute( "name" )?.Value) )
                                     .Where( x => x.Name != null )
                                     .ToDictionary( x => x.Name!, x => x.Member )
-                                ?? new Dictionary<string, XElement>();
+                                ?? [];
             }
             else
             {
                 // Coverage: ignore.
-                this._members = new Dictionary<string, XElement>();
+                this._members = [];
             }
         }
 
