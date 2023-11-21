@@ -25,8 +25,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly CompileTimeSerializer _formatter;
         private readonly bool _shouldReportExceptionCause;
 
-        private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = new();
-        private readonly Dictionary<ITypeSymbol, AssemblyTypeName> _typeSymbolNameCache = new();
+        private readonly Dictionary<Type, AssemblyTypeName> _typeNameCache = [];
+        private readonly Dictionary<ITypeSymbol, AssemblyTypeName> _typeSymbolNameCache = [];
         private readonly Dictionary<object, ObjectInfo> _objects = new( new CanonicalComparer() );
 
         private readonly UserCodeInvoker _userCodeInvoker;

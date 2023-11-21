@@ -263,7 +263,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( !bySource.TryGetValue( reference.ContainingSemantic, out var list2 ) )
                         {
-                            bySource[reference.ContainingSemantic] = list2 = new List<ResolvedAspectReference>();
+                            bySource[reference.ContainingSemantic] = list2 = [];
                         }
 
                         list2.Add( reference );
@@ -272,7 +272,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( !byTarget.TryGetValue( target, out var list3 ) )
                         {
-                            byTarget[target] = list3 = new List<ResolvedAspectReference>();
+                            byTarget[target] = list3 = [];
                         }
 
                         list3.Add( reference );
@@ -301,7 +301,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( !result.TryGetValue( reachableReference.ContainingSemantic, out var list ) )
                     {
-                        result[reachableReference.ContainingSemantic] = list = new List<ResolvedAspectReference>();
+                        result[reachableReference.ContainingSemantic] = list = [];
                     }
 
                     list.Add( reachableReference );
@@ -407,7 +407,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( !byDeclaringType.TryGetValue( declaringType, out var list ) )
                 {
-                    byDeclaringType[declaringType] = list = new List<ISymbol>();
+                    byDeclaringType[declaringType] = list = [];
                 }
 
                 list.Add( symbol );
@@ -422,7 +422,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( !constructors.TryGetValue( type, out var list ) )
                     {
-                        constructors[type] = list = new List<IntermediateSymbolSemantic<IMethodSymbol>>();
+                        constructors[type] = list = [];
                     }
 
                     list.Add( new IntermediateSymbolSemantic<IMethodSymbol>( ctor, IntermediateSymbolSemanticKind.Default ) );

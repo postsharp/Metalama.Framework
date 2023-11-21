@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._semanticModel = semanticModel;
                 this._typeDeclaration = typeDeclaration;
                 this._cancellationToken = cancellationToken;
-                this._serializableFieldsOrProperties = new List<ISymbol>();
+                this._serializableFieldsOrProperties = [];
                 this._nonSerializedAttribute = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(NonCompileTimeSerializedAttribute) );
                 this._templateAttribute = compilationContext.ReflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
             }

@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.SecondaryInstancesOrderingWithInheritance;
 
-// Tests that secondary instances are sorted propertly according to the declaration depth.
+// Tests that secondary instances are sorted properly according to the declaration depth.
 
 [assembly: MyAspect( "Assembly" )]
 
@@ -42,7 +42,6 @@ public class MyAspect : OverrideMethodAspect, IAspect<ICompilation>, IAspect<INa
             x =>
                 $"{( (MyAspect)x.Aspect )._tag}({x.Predecessors[0].Kind},{x.Predecessors[0].Instance.PredecessorDegree})" );
 
-        meta.DebugBreak();
         Console.WriteLine( $"Aspect order: {_tag}, {string.Join( ", ", otherInstances )}" );
 
         return meta.Proceed();

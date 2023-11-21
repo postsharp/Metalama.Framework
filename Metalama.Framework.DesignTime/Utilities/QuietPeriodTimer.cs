@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Utilities;
 internal sealed class QuietPeriodTimer : IDisposable
 {
     private readonly ILogger _logger;
-    private readonly List<PauseCookie> _pauseCookies = new();
+    private readonly List<PauseCookie> _pauseCookies = [];
     private readonly object _sync = new();
 
     private Timer? _timer;

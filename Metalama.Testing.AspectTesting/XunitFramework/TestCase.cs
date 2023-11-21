@@ -50,7 +50,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             set => throw new NotSupportedException();
         }
 
-        Dictionary<string, List<string>> ITestCase.Traits { get; } = new();
+        Dictionary<string, List<string>> ITestCase.Traits { get; } = [];
 
         string ITestCase.UniqueID => this._relativePath;
 

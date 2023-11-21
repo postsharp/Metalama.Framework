@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// </summary>
 internal sealed class OverflowAspectSource : IAspectSource
 {
-    private readonly ConcurrentLinkedList<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = new();
+    private readonly ConcurrentLinkedList<(IAspectSource Source, IAspectClass AspectClass)> _aspectSources = [];
 
     public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsReadOnlyCollection( a => a.AspectClass ).Distinct().ToImmutableArray();
 

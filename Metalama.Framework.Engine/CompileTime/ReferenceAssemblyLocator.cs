@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -33,8 +34,31 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
-        private static readonly ImmutableArray<string> _defaultNugetSources =
-            ImmutableArray.Create( "https://api.nuget.org/v3/index.json", @"C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\" );
+        private static readonly ImmutableArray<string> _defaultNugetSources = GetDefaultNuGetSources().ToImmutableArray();
+
+        private static IEnumerable<string> GetDefaultNuGetSources()
+        {
+            yield return "https://api.nuget.org/v3/index.json";
+
+            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
+            {
+                var programFilesX86 = string.Empty;
+
+                try
+                {
+                    programFilesX86 = Environment.GetFolderPath( Environment.SpecialFolder.ProgramFilesX86 );
+                }
+                catch ( PlatformNotSupportedException )
+                {
+                    // Do nothing, the variable stays Empty.
+                }
+
+                if ( programFilesX86 != string.Empty )
+                {
+                    yield return Path.Combine( programFilesX86, "Microsoft SDKs\\NuGetPackages" );
+                }
+            }
+        }
 
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
@@ -395,7 +419,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 // Build the list of exported files.
-                List<MetadataInfo> assemblyMetadatas = new();
+                List<MetadataInfo> assemblyMetadatas = [];
 
                 foreach ( var assemblyPath in assemblies )
                 {

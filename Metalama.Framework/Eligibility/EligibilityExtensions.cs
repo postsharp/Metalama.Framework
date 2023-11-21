@@ -23,30 +23,30 @@ namespace Metalama.Framework.Eligibility;
 [PublicAPI]
 public static partial class EligibilityExtensions
 {
-    private static readonly List<(Type Type, string Name)> _interfaceNames = new()
-    {
-        // The order is significant: the most significant should come first.
+    private static readonly List<(Type Type, string Name)> _interfaceNames =
+        [
+            // The order is significant: the most significant should come first.
 
-        (typeof(IMethod), "method"),
-        (typeof(IField), "field"),
-        (typeof(INamedType), "type"),
-        (typeof(IProperty), "property"),
-        (typeof(IEvent), "event"),
-        (typeof(IConstructor), "constructor"),
-        (typeof(IMethodBase), "method or constructor"),
-        (typeof(IParameter), "parameter"),
-        (typeof(ICompilation), "compilation"),
-        (typeof(INamespace), "namespace"),
-        (typeof(ITypeParameter), "type parameter"),
-        (typeof(IAttribute), "custom attribute"),
-        (typeof(IPropertyOrIndexer), "property or indexer"),
-        (typeof(IFieldOrProperty), "field or a property"),
-        (typeof(IFieldOrPropertyOrIndexer), "field, property or indexer"),
-        (typeof(IHasAccessors), "field, property, indexer or event"),
-        (typeof(IHasParameters), "property, indexer or event"),
-        (typeof(IMember), "method, constructor, field, property, indexer or event"),
-        (typeof(IMemberOrNamedType), "method, constructor, field, property, indexer, event or type")
-    };
+            (typeof(IMethod), "method"),
+            (typeof(IField), "field"),
+            (typeof(INamedType), "type"),
+            (typeof(IProperty), "property"),
+            (typeof(IEvent), "event"),
+            (typeof(IConstructor), "constructor"),
+            (typeof(IMethodBase), "method or constructor"),
+            (typeof(IParameter), "parameter"),
+            (typeof(ICompilation), "compilation"),
+            (typeof(INamespace), "namespace"),
+            (typeof(ITypeParameter), "type parameter"),
+            (typeof(IAttribute), "custom attribute"),
+            (typeof(IPropertyOrIndexer), "property or indexer"),
+            (typeof(IFieldOrProperty), "field or a property"),
+            (typeof(IFieldOrPropertyOrIndexer), "field, property or indexer"),
+            (typeof(IHasAccessors), "field, property, indexer or event"),
+            (typeof(IHasParameters), "property, indexer or event"),
+            (typeof(IMember), "method, constructor, field, property, indexer or event"),
+            (typeof(IMemberOrNamedType), "method, constructor, field, property, indexer, event or type")
+        ];
 
     /// <summary>
     /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the given <see cref="IEligibilityBuilder"/>.

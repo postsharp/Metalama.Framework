@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Introspection;
 
 internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance
 {
-    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
+    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = [];
     private readonly IAspectInstance _aspectInstance;
 
     public AspectInstanceResult? AspectInstanceResult { get; internal set; }
@@ -38,7 +38,7 @@ internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance
     [Memo]
     public IIntrospectionAspectClass AspectClass => this.Factory.GetIntrospectionAspectClass( this._aspectInstance.AspectClass );
 
-    public List<IntrospectionAdvice> Advice { get; } = new();
+    public List<IntrospectionAdvice> Advice { get; } = [];
 
     IReadOnlyList<IIntrospectionAdvice> IIntrospectionAspectInstance.Advice => this.Advice;
 
