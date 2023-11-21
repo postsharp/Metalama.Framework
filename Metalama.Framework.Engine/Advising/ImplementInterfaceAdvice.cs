@@ -41,7 +41,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
     {
         this._interfaceType = interfaceType;
         this._overrideStrategy = overrideStrategy;
-        this._interfaceSpecifications = new List<InterfaceSpecification>();
+        this._interfaceSpecifications = [];
         this._tags = tags;
     }
 
@@ -106,7 +106,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         foreach ( var pair in interfacesToIntroduce )
         {
             var introducedInterface = pair.Key;
-            List<MemberSpecification> memberSpecifications = new();
+            List<MemberSpecification> memberSpecifications = [];
 
             void TryAddMember<T>( T interfaceMember, Func<T, TemplateMember<T>?> getAspectInterfaceMember, Func<T, bool> membersMatch )
                 where T : class, IMember

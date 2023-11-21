@@ -22,7 +22,7 @@ internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerI
 
     public bool HasInitOnlySetter { get; private set; }
 
-    public ParameterBuilderList Parameters { get; } = new();
+    public ParameterBuilderList Parameters { get; } = [];
 
     public RefKind RefKind { get; set; }
 

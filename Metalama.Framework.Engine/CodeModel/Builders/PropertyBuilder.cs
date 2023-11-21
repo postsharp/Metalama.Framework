@@ -159,7 +159,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
         this.IsAutoPropertyOrField = isAutoProperty;
         this.InitializerTags = initializerTags;
         this.HasInitOnlySetter = hasInitOnlySetter;
-        this._fieldAttributes = new List<IAttributeData>();
+        this._fieldAttributes = [];
     }
 
     public void AddFieldAttribute( IAttributeData attributeData )

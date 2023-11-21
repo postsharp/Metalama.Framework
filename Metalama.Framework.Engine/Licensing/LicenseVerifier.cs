@@ -33,8 +33,8 @@ public sealed class LicenseVerifier : IProjectService
 
     private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
     private readonly IProjectOptions _projectOptions;
-    private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
-    private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = new();
+    private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = [];
+    private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = [];
 
     private readonly ITempFileManager _tempFileManager;
 

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Templating
     internal sealed class TemplateLexicalScope
     {
         private readonly ImmutableHashSet<string> _sourceSymbols;
-        private readonly HashSet<string> _newSymbols = new();
+        private readonly HashSet<string> _newSymbols = [];
 
         public TemplateLexicalScope( ImmutableHashSet<string> sourceSymbols )
         {
