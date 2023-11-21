@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
             if ( diagnostics != null )
             {
-                HashSet<string>? deduplicationKeys = null;
+                HashSet<(string DiagnosticId, string DeduplicationKey)>? deduplicatedDiagnostics = null;
                 var arrayBuilder = ImmutableArray.CreateBuilder<Diagnostic>( diagnostics.Count );
 
                 var orderedDiagnostics = diagnostics.OrderBy( d => d.Location.SourceTree?.FilePath )
@@ -191,9 +191,9 @@ namespace Metalama.Framework.Engine.Diagnostics
                     if ( diagnostic.Properties?.TryGetValue( DeduplicationPropertyKey, out var deduplicationKey ) == true
                          && deduplicationKey != null )
                     {
-                        deduplicationKeys ??= [];
+                        deduplicatedDiagnostics ??= new();
 
-                        if ( !deduplicationKeys.Add( deduplicationKey ) )
+                        if ( !deduplicatedDiagnostics.Add( (diagnostic.Id, deduplicationKey) ) )
                         {
                             continue;
                         }
