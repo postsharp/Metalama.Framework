@@ -1,8 +1,6 @@
-using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31234;
 
 [assembly:AspectOrder(typeof(OverrideAttribute), typeof(InitializerAttribute))]

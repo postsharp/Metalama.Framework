@@ -1,8 +1,4 @@
-using System;
-using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TwoTransitiveProjectFabrics
 {

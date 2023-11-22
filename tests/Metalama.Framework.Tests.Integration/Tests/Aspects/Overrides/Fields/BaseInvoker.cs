@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 #pragma warning disable CS0169
 

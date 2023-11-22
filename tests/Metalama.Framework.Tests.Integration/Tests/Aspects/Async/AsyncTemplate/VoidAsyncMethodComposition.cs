@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.VoidAsyncMethodComposition;
 
 [assembly: AspectOrder(typeof(Aspect1), typeof(Aspect2))]

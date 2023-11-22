@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.ProceedCustomConfigureAwait;
 

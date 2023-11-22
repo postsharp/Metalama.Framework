@@ -3,10 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Inheritance.IntroducedMembers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
 
 [assembly: AspectOrder(typeof(NopAspect), typeof(IntroduceMembersAttribute))]
 

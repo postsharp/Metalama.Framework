@@ -2,7 +2,6 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
 

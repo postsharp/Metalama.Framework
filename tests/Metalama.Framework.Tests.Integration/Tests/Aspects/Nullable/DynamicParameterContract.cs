@@ -3,10 +3,6 @@
 #endif
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicParameterContract;
 

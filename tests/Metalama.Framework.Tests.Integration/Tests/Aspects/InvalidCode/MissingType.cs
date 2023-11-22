@@ -1,7 +1,4 @@
-using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
+
 
 // Test that using a type that does not exist produces only C# errors, and not confusing Metalama errors.
 

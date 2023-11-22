@@ -1,7 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.CodeModel.IntroductionsFromGenericBaseClass;

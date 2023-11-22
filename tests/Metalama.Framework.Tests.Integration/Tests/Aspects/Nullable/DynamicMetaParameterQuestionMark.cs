@@ -3,7 +3,6 @@
 #endif
 
 using Metalama.Framework.Aspects;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicMetaParameterQuestionMark;

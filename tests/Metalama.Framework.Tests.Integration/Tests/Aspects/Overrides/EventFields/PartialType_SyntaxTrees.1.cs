@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Linq;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 

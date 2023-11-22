@@ -1,7 +1,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Templating;
-using System;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.IfDynamic;
 

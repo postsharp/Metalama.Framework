@@ -1,6 +1,4 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Serialization;
-using System;
+﻿using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32493;
 

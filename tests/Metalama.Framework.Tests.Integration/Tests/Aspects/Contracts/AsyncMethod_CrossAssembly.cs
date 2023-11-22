@@ -1,10 +1,7 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMethod_CrossAssembly;
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 // <target>
 [Test]

@@ -1,4 +1,3 @@
-using System.Threading;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

@@ -1,5 +1,4 @@
-﻿using Castle.Components.DictionaryAdapter;
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 using System;
 

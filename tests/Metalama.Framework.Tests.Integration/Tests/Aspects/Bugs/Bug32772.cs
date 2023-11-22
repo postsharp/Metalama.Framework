@@ -3,7 +3,6 @@
 # endif 
 
 using Metalama.Framework.Aspects;
-using System.Reflection;
 
 #if TESTRUNNER
 [assembly: AssemblyVersion("0.0.*")]

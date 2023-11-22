@@ -1,6 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
 using System;
 using System.Linq;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers;
