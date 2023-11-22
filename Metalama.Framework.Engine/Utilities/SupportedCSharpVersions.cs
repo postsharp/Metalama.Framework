@@ -65,7 +65,7 @@ public static class SupportedCSharpVersions
         {
             RoslynApiVersion.V4_0_1 => "4.0.1",
             RoslynApiVersion.V4_4_0 => "4.4.0",
-            RoslynApiVersion.V4_8_0 => "4.8.0-3.final",
+            RoslynApiVersion.V4_8_0 => "4.8.0",
             _ => throw new AssertionFailedException( $"Unexpected Roslyn version {roslynVersion}." )
         };
 }
