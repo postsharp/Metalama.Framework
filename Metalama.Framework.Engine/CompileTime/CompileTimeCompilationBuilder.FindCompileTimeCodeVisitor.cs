@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         private sealed class FindCompileTimeCodeVisitor : SafeSyntaxWalker
         {
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;
             private readonly CancellationToken _cancellationToken;
             private readonly ImmutableArray<UsingDirectiveSyntax>.Builder _globalUsings = ImmutableArray.CreateBuilder<UsingDirectiveSyntax>();
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public ImmutableArray<UsingDirectiveSyntax> GlobalUsings => this._globalUsings.ToImmutable();
 
-            public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier, CancellationToken cancellationToken )
+            public FindCompileTimeCodeVisitor( ISemanticModel semanticModel, ISymbolClassifier classifier, CancellationToken cancellationToken )
             {
                 this._semanticModel = semanticModel;
                 this._classifier = classifier;

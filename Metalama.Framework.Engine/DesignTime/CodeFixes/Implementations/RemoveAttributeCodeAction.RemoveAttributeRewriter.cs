@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,10 +14,10 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes.Implementations
     {
         private sealed class RemoveAttributeRewriter : SafeSyntaxRewriter
         {
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly ITypeSymbol _attributeType;
 
-            public RemoveAttributeRewriter( SemanticModel semanticModel, ITypeSymbol attributeType )
+            public RemoveAttributeRewriter( ISemanticModel semanticModel, ITypeSymbol attributeType )
             {
                 this._semanticModel = semanticModel;
                 this._attributeType = attributeType;

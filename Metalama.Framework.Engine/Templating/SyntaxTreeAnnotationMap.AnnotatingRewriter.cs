@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         private sealed class AnnotatingRewriter : SafeSyntaxRewriter
         {
-            private readonly SemanticModel? _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly SyntaxTreeAnnotationMap _map;
             private readonly bool _isTemplate;
             private readonly IDiagnosticAdder _diagnosticAdder;
@@ -28,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating
             private HashSet<SyntaxNode>? _nodesWithErrorReports;
 
             public AnnotatingRewriter(
-                SemanticModel? semanticModel,
+                ISemanticModel semanticModel,
                 SyntaxTreeAnnotationMap map,
                 bool isTemplate,
                 IDiagnosticAdder diagnosticAdder,

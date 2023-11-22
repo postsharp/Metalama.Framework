@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -24,6 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal partial class OurSyntaxGenerator
 {
+    private ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typesCache = new();
     public static OurSyntaxGenerator NullOblivious { get; }
 
     public static OurSyntaxGenerator Default { get; }
@@ -99,13 +101,18 @@ internal partial class OurSyntaxGenerator
         return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
     }
 
-    public TypeSyntax Type( ITypeSymbol symbol )
+    public TypeSyntax Type( ITypeSymbol symbol ) 
+        => this._typesCache.GetOrAdd(
+        symbol,
+        this.TypeCore );
+
+    private TypeSyntax TypeCore( ITypeSymbol s )
     {
-        var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
+        var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( s ).WithAdditionalAnnotations( Simplifier.Annotation );
 
         if ( !this.IsNullAware )
         {
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( s ).Visit( typeSyntax ).AssertNotNull();
         }
 
         return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();

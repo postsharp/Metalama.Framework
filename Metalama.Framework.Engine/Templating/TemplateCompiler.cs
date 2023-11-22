@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
@@ -10,6 +11,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
@@ -50,7 +52,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public bool TryAnnotate(
             SyntaxNode sourceSyntaxRoot,
-            SemanticModel semanticModel,
+            ISemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
             out SyntaxNode annotatedSyntaxRoot,
@@ -129,7 +131,7 @@ namespace Metalama.Framework.Engine.Templating
             Compilation compileTimeCompilation,
             SyntaxNode sourceSyntaxRoot,
             TemplateCompilerSemantics templateSyntaxKind,
-            SemanticModel semanticModel,
+            ISemanticModel semanticModel,
             IDiagnosticAdder diagnostics,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out SyntaxNode? annotatedSyntaxRoot,

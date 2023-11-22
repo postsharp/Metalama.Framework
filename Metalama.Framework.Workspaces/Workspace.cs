@@ -224,7 +224,7 @@ namespace Metalama.Framework.Workspaces
                 .Add( "MSBuildSDKsPath", "" );
 
             var roslynWorkspace = MSBuildWorkspace.Create( allProperties );
-
+            
             string? name = null;
 
             foreach ( var path in projects )

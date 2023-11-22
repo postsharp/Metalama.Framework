@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         private ImplicitLastOverrideReferenceInliner() { }
 
-        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
+        public override bool CanInline( ResolvedAspectReference aspectReference, ISemanticModel semanticModel )
         {
             return true;
         }

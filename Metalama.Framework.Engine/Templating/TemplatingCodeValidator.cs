@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System;
@@ -43,7 +45,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public static void Validate(
             ProjectServiceProvider serviceProvider,
-            SemanticModel semanticModel,
+            ISemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,
@@ -63,7 +65,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private static void ValidateCoreAndHandleExceptions(
             ProjectServiceProvider serviceProvider,
-            SemanticModel semanticModel,
+            ISemanticModel semanticModel,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,
             bool isDesignTime,
@@ -101,7 +103,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private static bool ValidateCore(
             ProjectServiceProvider serviceProvider,
-            SemanticModel semanticModel,
+            ISemanticModel semanticModel,
             ClassifyingCompilationContext compilationContext,
             Action<Diagnostic> reportDiagnostic,
             bool reportCompileTimeTreeOutdatedError,

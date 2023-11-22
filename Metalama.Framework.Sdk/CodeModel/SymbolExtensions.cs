@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
@@ -67,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static Compilation GetRoslynCompilation( this ICompilation compilation ) => ((ISdkCompilation) compilation).RoslynCompilation;
 
-        public static SemanticModel GetSemanticModel( this ICompilation compilation, SyntaxTree syntaxTree )
+        public static ISemanticModel GetSemanticModel( this ICompilation compilation, SyntaxTree syntaxTree )
             => ((ISdkCompilation) compilation).GetCachedSemanticModel( syntaxTree );
 
         public static bool TryGetDeclaration( this ICompilation compilation, ISymbol symbol, out IDeclaration? declaration )

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -91,7 +92,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                             this._compileTimeCompilation,
                             node,
                             TemplateCompilerSemantics.Default,
-                            this._parent._semanticModel,
+                            SemanticModelProvider.GetSemanticModel( this._parent._semanticModel ),
                             this._parent._diagnosticAdder,
                             CancellationToken.None,
                             out var annotatedNode,

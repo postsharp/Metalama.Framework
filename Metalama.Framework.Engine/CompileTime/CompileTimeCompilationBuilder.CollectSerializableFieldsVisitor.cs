@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         private sealed class CollectSerializableFieldsVisitor : SafeSyntaxWalker
         {
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly SyntaxNode _typeDeclaration;
             private readonly CancellationToken _cancellationToken;
             private readonly List<ISymbol> _serializableFieldsOrProperties;
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public CollectSerializableFieldsVisitor(
                 ClassifyingCompilationContext compilationContext,
-                SemanticModel semanticModel,
+                ISemanticModel semanticModel,
                 SyntaxNode typeDeclaration,
                 CancellationToken cancellationToken )
             {

@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -17,7 +18,7 @@ internal static class DesignTimeReferenceValidatorRunner
 
     public static ImmutableUserDiagnosticList Validate(
         ProjectServiceProvider serviceProvider,
-        SemanticModel model,
+        ISemanticModel model,
         AspectPipelineResultAndState aspectPipelineResultAndState,
         CancellationToken cancellationToken = default )
     {

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,13 +17,13 @@ namespace Metalama.Framework.Engine.Linking
         private sealed class AspectReferenceWalker : SafeSyntaxWalker
         {
             private readonly AspectReferenceResolver _referenceResolver;
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly IMethodSymbol _containingSymbol;
             private readonly Stack<IMethodSymbol> _localFunctionStack;
 
             public List<ResolvedAspectReference> AspectReferences { get; }
 
-            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, IMethodSymbol containingSymbol )
+            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, ISemanticModel semanticModel, IMethodSymbol containingSymbol )
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;

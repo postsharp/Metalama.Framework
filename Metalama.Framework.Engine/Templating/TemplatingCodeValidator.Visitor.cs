@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Templating
             private readonly bool _reportCompileTimeTreeOutdatedError;
             private readonly bool _isDesignTime;
             private readonly ProjectServiceProvider _serviceProvider;
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly ClassifyingCompilationContext _compilationContext;
             private readonly Action<Diagnostic> _reportDiagnostic;
             private readonly CancellationToken _cancellationToken;
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Templating
 
             public Visitor(
                 ProjectServiceProvider serviceProvider,
-                SemanticModel semanticModel,
+                ISemanticModel semanticModel,
                 ClassifyingCompilationContext compilationContext,
                 Action<Diagnostic> reportDiagnostic,
                 bool reportCompileTimeTreeOutdatedError,
@@ -273,7 +273,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     foreach ( var baseTypeNode in node.BaseList.Types )
                     {
-                        var baseType = (INamedTypeSymbol?) ModelExtensions.GetSymbolInfo( this._semanticModel, baseTypeNode.Type ).Symbol;
+                        var baseType = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( baseTypeNode.Type ).Symbol;
 
                         if ( baseType == null )
                         {

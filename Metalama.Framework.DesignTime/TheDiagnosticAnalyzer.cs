@@ -145,7 +145,7 @@ namespace Metalama.Framework.DesignTime
                 // We execute this after the pipeline so we allow it to get to paused state in case of compile-time change.
                 TemplatingCodeValidator.Validate(
                     pipeline.ServiceProvider,
-                    context.SemanticModel,
+                    SemanticModelProvider.GetSemanticModel( context.SemanticModel ),
                     ReportDiagnostic,
                     pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
                     true,
@@ -156,7 +156,7 @@ namespace Metalama.Framework.DesignTime
                 {
                     var validationResults = DesignTimeReferenceValidatorRunner.Validate(
                         pipelineResult.Value.Configuration.ServiceProvider,
-                        context.SemanticModel,
+                        SemanticModelProvider.GetSemanticModel( context.SemanticModel ),
                         pipelineResult.Value,
                         context.CancellationToken );
 

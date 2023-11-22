@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal sealed class MethodLocalDeclarationInliner : MethodInliner
     {
-        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
+        public override bool CanInline( ResolvedAspectReference aspectReference, ISemanticModel semanticModel )
         {
             if ( !base.CanInline( aspectReference, semanticModel ) )
             {

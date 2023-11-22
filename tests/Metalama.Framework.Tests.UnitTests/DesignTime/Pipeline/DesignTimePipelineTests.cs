@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -355,7 +356,7 @@ Target.cs:
         // There must be an error on the aspect.
         List<Diagnostic> diagnostics4 = new();
 
-        pipeline.ValidateTemplatingCode( compilation4.GetSemanticModel( aspect4 ), diagnostics4.Add );
+        pipeline.ValidateTemplatingCode( compilation4.GetISemanticModel( aspect4 ), diagnostics4.Add );
 
         Assert.Contains(
             diagnostics4,
@@ -382,7 +383,7 @@ Target.cs:
 
         List<Diagnostic> diagnostics5 = new();
 
-        pipeline.ValidateTemplatingCode( compilation5.GetSemanticModel( aspect5 ), diagnostics5.Add );
+        pipeline.ValidateTemplatingCode( compilation5.GetISemanticModel( aspect5 ), diagnostics5.Add );
 
         Assert.Contains(
             diagnostics5,
@@ -403,7 +404,7 @@ Target.cs:
 
         List<Diagnostic> diagnostics6 = new();
 
-        pipeline.ValidateTemplatingCode( compilation5.GetSemanticModel( aspect5 ), diagnostics6.Add );
+        pipeline.ValidateTemplatingCode( compilation5.GetISemanticModel( aspect5 ), diagnostics6.Add );
 
         Assert.DoesNotContain(
             diagnostics6,

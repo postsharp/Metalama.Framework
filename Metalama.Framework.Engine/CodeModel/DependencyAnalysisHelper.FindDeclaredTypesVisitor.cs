@@ -11,10 +11,10 @@ public static partial class DependencyAnalysisHelper
 {
     private sealed class FindDeclaredTypesVisitor : SafeSyntaxWalker
     {
-        private readonly SemanticModel _semanticModel;
+        private readonly ISemanticModel _semanticModel;
         private readonly Action<INamedTypeSymbol> _addDeclaredType;
 
-        public FindDeclaredTypesVisitor( SemanticModel semanticModel, Action<INamedTypeSymbol> addDeclaredType )
+        public FindDeclaredTypesVisitor( ISemanticModel semanticModel, Action<INamedTypeSymbol> addDeclaredType )
         {
             this._semanticModel = semanticModel;
             this._addDeclaredType = addDeclaredType;

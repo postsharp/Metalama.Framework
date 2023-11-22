@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
             visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
         }
 
-        public static void FindDeclaredTypes( SemanticModel semanticModel, Action<INamedTypeSymbol> addDeclaredType )
+        public static void FindDeclaredTypes( ISemanticModel semanticModel, Action<INamedTypeSymbol> addDeclaredType )
         {
             var visitor = new FindDeclaredTypesVisitor( semanticModel, addDeclaredType );
             visitor.Visit( semanticModel.SyntaxTree.GetRoot() );

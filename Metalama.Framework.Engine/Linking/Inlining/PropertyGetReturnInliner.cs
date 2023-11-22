@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -8,7 +9,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal sealed class PropertyGetReturnInliner : PropertyGetInliner
     {
-        public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
+        public override bool CanInline( ResolvedAspectReference aspectReference, ISemanticModel semanticModel )
         {
             if ( !base.CanInline( aspectReference, semanticModel ) )
             {

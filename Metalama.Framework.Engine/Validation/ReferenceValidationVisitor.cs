@@ -31,7 +31,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private readonly UserCodeExecutionContext _userCodeExecutionContext;
     private readonly DisposeAction _disposeExecutionContext;
     private readonly ISymbolClassificationService _symbolClassifier;
-    private SemanticModel? _semanticModel;
+    private ISemanticModel _semanticModel;
     private int _stackIndex = -1;
     private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
@@ -61,7 +61,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         this.Visit( syntaxTree.GetRoot() );
     }
 
-    public void Visit( SemanticModel semanticModel )
+    public void Visit( ISemanticModel semanticModel )
     {
         this._semanticModel = semanticModel;
         this.Visit( semanticModel.SyntaxTree.GetRoot() );

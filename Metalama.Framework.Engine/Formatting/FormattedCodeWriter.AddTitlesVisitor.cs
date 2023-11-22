@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,9 +14,9 @@ namespace Metalama.Framework.Engine.Formatting
         private sealed class AddTitlesVisitor : SafeSyntaxWalker
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
 
-            public AddTitlesVisitor( ClassifiedTextSpanCollection textSpans, SemanticModel semanticModel )
+            public AddTitlesVisitor( ClassifiedTextSpanCollection textSpans, ISemanticModel semanticModel )
             {
                 this._textSpans = textSpans;
                 this._semanticModel = semanticModel;

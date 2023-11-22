@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -151,13 +153,13 @@ namespace Metalama.Framework.Engine.Linking
             private sealed class BodyWalker : CSharpSyntaxWalker
             {
                 private readonly CompilationContext _compilationContext;
-                private readonly SemanticModel _semanticModel;
+                private readonly ISemanticModel _semanticModel;
                 private readonly IMethodSymbol _contextSymbol;
                 private readonly List<IntermediateSymbolSemanticReference> _symbolReferences;
 
                 public BodyWalker(
                     CompilationContext compilationContext,
-                    SemanticModel semanticModel,
+                    ISemanticModel semanticModel,
                     IMethodSymbol contextSymbol,
                     List<IntermediateSymbolSemanticReference> symbolReferences )
                 {

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
@@ -45,7 +46,7 @@ internal sealed class DesignTimeClassificationService : IClassificationService, 
 
         var classificationService = this._projectClassificationServices.GetOrAdd( projectOptions, this.CreateClassificationService );
 
-        return new DesignTimeClassifiedTextSpansCollection( classificationService.GetClassifiedTextSpans( semanticModel, cancellationToken ) );
+        return new DesignTimeClassifiedTextSpansCollection( classificationService.GetClassifiedTextSpans( SemanticModelProvider.GetSemanticModel( semanticModel ), cancellationToken ) );
     }
 
     private ClassificationService CreateClassificationService( MSBuildProjectOptions options )

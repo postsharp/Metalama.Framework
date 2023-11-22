@@ -4,6 +4,8 @@
 // @Skipped(#31108)
 #endif
 
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
@@ -28,7 +30,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             new EventRemoveAssignmentInliner()
         };
 
-        public bool TryGetInliner( ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner )
+        public bool TryGetInliner( ResolvedAspectReference aspectReference, ISemanticModel semanticModel, out Inliner? inliner )
         {
             // TODO: Optimize.
             inliner = this._inliners

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
@@ -19,13 +20,13 @@ namespace Metalama.Framework.Engine.CompileTime
         private sealed class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
             private readonly ClassifyingCompilationContext _compilationContext;
-            private readonly SemanticModel _semanticModel;
+            private readonly ISemanticModel _semanticModel;
             private readonly CancellationToken _cancellationToken;
             private readonly Action<SerializableTypeInfo> _onSerializableTypeDiscovered;
             
             public CollectSerializableTypesVisitor(
                 ClassifyingCompilationContext compilationContext,
-                SemanticModel semanticModel,
+                ISemanticModel semanticModel,
                 Action<SerializableTypeInfo> onSerializableTypeDiscovered,
                 CancellationToken cancellationToken )
             {

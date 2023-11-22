@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
             AspectReferenceSpecification referenceSpecification,
-            SemanticModel semanticModel )
+            ISemanticModel semanticModel )
         {
             // Get the reference root node, the local symbol that is referenced, and the node that was the source for the symbol.
             //   1) Normal reference:
@@ -468,7 +468,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol containingSymbol,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
-            SemanticModel semanticModel,
+            ISemanticModel semanticModel,
             out ExpressionSyntax rootNode,
             out ISymbol targetSymbol,
             out ExpressionSyntax targetSymbolSource )

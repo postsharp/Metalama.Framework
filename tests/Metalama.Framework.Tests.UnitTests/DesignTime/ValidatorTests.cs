@@ -5,6 +5,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -379,7 +380,7 @@ public interface I {}
                     .SelectMany(
                         t => DesignTimeReferenceValidatorRunner.Validate(
                                 compilationResult.Value.Configuration.ServiceProvider,
-                                compilation.GetSemanticModel( t ),
+                                compilation.GetISemanticModel(  t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
                     .ToReadOnlyList();
@@ -464,7 +465,7 @@ public interface I {}
                     .SelectMany(
                         t => DesignTimeReferenceValidatorRunner.Validate(
                                 compilationResult.Value.Configuration.ServiceProvider,
-                                compilation.GetSemanticModel( t ),
+                                compilation.GetISemanticModel( t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
                     .ToReadOnlyList();
@@ -548,7 +549,7 @@ public interface I {}
                     .SelectMany(
                         t => DesignTimeReferenceValidatorRunner.Validate(
                                 compilationResult.Value.Configuration.ServiceProvider,
-                                compilation.GetSemanticModel( t ),
+                                compilation.GetISemanticModel( t ),
                                 compilationResult.Value )
                             .ReportedDiagnostics )
                     .ToReadOnlyList();
@@ -612,7 +613,7 @@ public interface I {}
                 .SelectMany(
                     t => DesignTimeReferenceValidatorRunner.Validate(
                             compilationResult.Value.Configuration.ServiceProvider,
-                            compilation.GetSemanticModel( t ),
+                            compilation.GetISemanticModel( t ),
                             compilationResult.Value )
                         .ReportedDiagnostics )
                 .ToReadOnlyList();
@@ -697,7 +698,7 @@ public interface I {}
                 .SelectMany(
                     t => DesignTimeReferenceValidatorRunner.Validate(
                             compilationResult.Value.Configuration.ServiceProvider,
-                            compilation.GetSemanticModel( t ),
+                            compilation.GetISemanticModel( t ),
                             compilationResult.Value )
                         .ReportedDiagnostics )
                 .ToReadOnlyList();

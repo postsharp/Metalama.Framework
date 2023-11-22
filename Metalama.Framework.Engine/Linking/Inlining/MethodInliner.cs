@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining;
 internal abstract class MethodInliner : Inliner
 {
     protected static bool IsInlineableInvocation(
-        SemanticModel semanticModel,
+        ISemanticModel semanticModel,
         IMethodSymbol contextMethod,
         InvocationExpressionSyntax invocationExpression )
         => invocationExpression.ArgumentList.Arguments.Count == contextMethod.Parameters.Length

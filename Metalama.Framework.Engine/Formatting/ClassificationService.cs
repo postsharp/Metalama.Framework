@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
@@ -24,12 +26,12 @@ namespace Metalama.Framework.Engine.Formatting
 
         public static bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeFastDetector.HasCompileTimeCode( syntaxRoot );
 
-        public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
+        public ClassifiedTextSpanCollection GetClassifiedTextSpans( ISemanticModel model, CancellationToken cancellationToken )
         {
             return this.GetClassifiedTextSpans( model, polish: true, cancellationToken );
         }
 
-        internal ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, bool polish, CancellationToken cancellationToken )
+        internal ClassifiedTextSpanCollection GetClassifiedTextSpans( ISemanticModel model, bool polish, CancellationToken cancellationToken )
         {
             var syntaxRoot = model.SyntaxTree.GetRoot();
             var diagnostics = new DiagnosticBag();

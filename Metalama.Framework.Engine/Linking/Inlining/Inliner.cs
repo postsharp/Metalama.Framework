@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// <param name="aspectReference">Resolved aspect reference.</param>
         /// <param name="semanticModel">Semantic model of the syntax tree that contains the reference.</param>
         /// <returns></returns>
-        public virtual bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
+        public virtual bool CanInline( ResolvedAspectReference aspectReference, ISemanticModel semanticModel )
         {
             if ( !SymbolEqualityComparer.Default.Equals(
                     aspectReference.ContainingSemantic.Symbol.ContainingType,

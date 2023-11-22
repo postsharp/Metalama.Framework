@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Project;
+using Metalama.Framework.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -28,6 +29,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a equality comparers that can be used with declarations of this compilation.
         /// </summary>
+        [Hidden]
         ICompilationComparers Comparers { get; }
 
         /// <summary>
@@ -70,6 +72,7 @@ namespace Metalama.Framework.Code
         /// Gets a service that caches declarations of the current compilation. It is typically used to cache often-used declarations
         /// across aspect instances.
         /// </summary>
+        [Hidden]
         IDeclarationCache Cache { get; }
     }
 }

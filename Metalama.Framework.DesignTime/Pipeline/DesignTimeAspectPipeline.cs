@@ -1097,7 +1097,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         }
     }
 
-    public void ValidateTemplatingCode( SemanticModel semanticModel, Action<Diagnostic> addDiagnostic )
+    public void ValidateTemplatingCode( ISemanticModel semanticModel, Action<Diagnostic> addDiagnostic )
         => TemplatingCodeValidator.Validate(
             this.ServiceProvider,
             semanticModel,

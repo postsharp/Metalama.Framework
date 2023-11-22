@@ -117,5 +117,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 return typeSymbol.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
             }
         }
+
+        public static ISemanticModel GetISemanticModel( this Compilation compilation, SyntaxTree syntaxTree, bool ignoreAccessibility = false )
+            => SemanticModelProvider.GetInstance( compilation ).GetSemanticModel( syntaxTree, ignoreAccessibility );
+
     }
 }
