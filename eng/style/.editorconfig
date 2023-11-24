@@ -46,7 +46,7 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
 # Expression-level preferences
 csharp_style_deconstructed_variable_declaration = true:none
 dotnet_style_coalesce_expression = true:warning
-dotnet_style_collection_initializer = true:warning
+dotnet_style_collection_initializer = true:suggestion
 dotnet_style_explicit_tuple_names = true:warning
 dotnet_style_null_propagation = true:warning
 dotnet_style_object_initializer = true:suggestion
@@ -460,7 +460,7 @@ dotnet_diagnostic.IDE0026.severity = warning
 dotnet_diagnostic.IDE0027.severity = warning
 
 # IDE0028: Simplify collection initialization
-dotnet_diagnostic.IDE0028.severity = warning
+dotnet_diagnostic.IDE0028.severity = suggestion
 
 # IDE0031: Use null propagation
 dotnet_diagnostic.IDE0031.severity = warning
