@@ -49,7 +49,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
     private readonly TypeOfRewriter _typeOfRewriter;
     private readonly TypeSyntax _templateTypeArgumentType;
-    private readonly HashSet<string> _templateCompileTimeTypeParameterNames = [];
+    private readonly HashSet<string> _templateCompileTimeTypeParameterNames = new();
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;

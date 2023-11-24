@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// </summary>
 internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 {
-    private readonly List<AspectInstance> _aspectInstances = [];
+    private readonly List<AspectInstance> _aspectInstances = new();
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
     public ExecuteAspectLayerPipelineStep( PipelineStepsState parent, PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base(

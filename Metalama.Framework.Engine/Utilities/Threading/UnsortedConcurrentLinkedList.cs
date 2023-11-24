@@ -12,7 +12,7 @@ internal readonly struct UnsortedConcurrentLinkedList<T>
 
     public UnsortedConcurrentLinkedList()
     {
-        this._linkedList = [];
+        this._linkedList = new ConcurrentLinkedList<T>();
     }
 
     public void Add( T item ) => this._linkedList.Add( item );

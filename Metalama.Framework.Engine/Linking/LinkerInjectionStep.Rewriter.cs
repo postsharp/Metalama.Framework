@@ -612,7 +612,7 @@ internal sealed partial class LinkerInjectionStep
                         case IMember member:
                             if ( !memberStatements.TryGetValue( member, out var list ) )
                             {
-                                memberStatements[member] = list = [];
+                                memberStatements[member] = list = new List<LinkerInsertedStatement>();
                             }
 
                             list.Add( mark );
@@ -883,8 +883,8 @@ internal sealed partial class LinkerInjectionStep
         public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
         {
             SyntaxGenerationContext? syntaxGenerationContext = null;
-            List<AttributeListSyntax> outputLists = [];
-            List<SyntaxTrivia> outputTrivias = [];
+            List<AttributeListSyntax> outputLists = new();
+            List<SyntaxTrivia> outputTrivias = new();
 
             this.RewriteAttributeLists(
                 this._compilation.ToTypedRef<IDeclaration>(),

@@ -29,7 +29,7 @@ internal sealed class TestResult : IDisposable
 {
     private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
-    private readonly List<TestSyntaxTree> _syntaxTrees = [];
+    private readonly List<TestSyntaxTree> _syntaxTrees = new();
     private bool _frozen;
 
     public TestInput? TestInput { get; set; }
@@ -248,7 +248,7 @@ internal sealed class TestResult : IDisposable
             throw new InvalidOperationException();
         }
 
-        List<SyntaxTree> result = [];
+        List<SyntaxTree> result = new();
 
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
@@ -332,7 +332,7 @@ internal sealed class TestResult : IDisposable
             }
 
             // Adding the diagnostics as trivia.
-            List<SyntaxTrivia> comments = [];
+            List<SyntaxTrivia> comments = new();
 
             if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
                                    || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )

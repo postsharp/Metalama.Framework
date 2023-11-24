@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 {
                     if ( this.TryGetSerializer( interfaceImplementation, contractTypeDeclaration, out var interfaceSerializer ) )
                     {
-                        serializers ??= [];
+                        serializers ??= new List<ObjectSerializer>();
                         serializers.Add( interfaceSerializer );
                     }
                 }

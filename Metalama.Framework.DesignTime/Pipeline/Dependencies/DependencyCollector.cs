@@ -25,7 +25,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
     private readonly bool _storeTypeName;
 
     private readonly ConcurrentDictionary<(ISymbol, ISymbol), bool> _processedDependencies = new();
-    private readonly Dictionary<AssemblyIdentity, ProjectKey> _referencesProjects = [];
+    private readonly Dictionary<AssemblyIdentity, ProjectKey> _referencesProjects = new();
     private readonly SafeSymbolComparer _symbolEqualityComparer;
 
     public DependencyCollector( ProjectServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :

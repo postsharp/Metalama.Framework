@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     public sealed class UnloadableCompileTimeDomain : CompileTimeDomain
     {
-        private readonly List<WeakReference> _loadedAssemblies = [];
+        private readonly List<WeakReference> _loadedAssemblies = new();
         private readonly TaskCompletionSource<bool> _unloadedTask = new();
         private readonly ITaskRunner _taskRunner;
         private volatile int _disposeStatus;

@@ -22,7 +22,7 @@ namespace Metalama.Testing.AspectTesting
     public class TestOptions
     {
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
-        private readonly List<string> _invalidSourceOptions = [];
+        private readonly List<string> _invalidSourceOptions = new();
         private bool? _writeOutputHtml;
 
         /// <summary>
@@ -66,13 +66,13 @@ namespace Metalama.Testing.AspectTesting
         /// Gets the list of assembly names that should be included in the compilation.
         /// To add a named assembly reference, add this comment to your test file: <c>// @AssemblyReference(assemblyName)</c>.
         /// </summary>
-        public List<TestAssemblyReference> References { get; } = [];
+        public List<TestAssemblyReference> References { get; } = new();
 
         /// <summary>
         /// Gets the list of source code files that should be included in the compilation.
         /// To enable this option in a test, add this comment to your test file: <c>// @Include(relativePath)</c>. 
         /// </summary>
-        public List<string> IncludedFiles { get; } = [];
+        public List<string> IncludedFiles { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for input files. If <c>true</c>, these files
@@ -136,7 +136,7 @@ namespace Metalama.Testing.AspectTesting
         /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @IgnoredDiagnostic(id)</c>.
         /// </summary>
-        public List<string> IgnoredDiagnostics { get; } = [];
+        public List<string> IgnoredDiagnostics { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether the list of <see cref="IgnoredDiagnostics"/> inherited from the parent level (directory or base directory)
@@ -178,7 +178,7 @@ namespace Metalama.Testing.AspectTesting
         /// Gets the set of preprocessor symbols that are required for this test, otherwise the test would be skipped.
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @RequiredConstant(constant)</c>.
         /// </summary>
-        public List<string> RequiredConstants { get; } = [];
+        public List<string> RequiredConstants { get; } = new();
 
         /// <summary>
         /// Gets the set of preprocessor symbols that are defined for this test.
@@ -186,7 +186,7 @@ namespace Metalama.Testing.AspectTesting
         /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
         /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
         /// </summary>
-        public List<string> DefinedConstants { get; } = [];
+        public List<string> DefinedConstants { get; } = new();
 
         /// <summary>
         /// Gets the set of preprocessor symbols that are defined for this test dependency.
@@ -194,7 +194,7 @@ namespace Metalama.Testing.AspectTesting
         /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
         /// Constants added via <see cref="DefinedConstants"/> option are not added.
         /// </summary>
-        public List<string> DependencyDefinedConstants { get; } = [];
+        public List<string> DependencyDefinedConstants { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating the test scenario.

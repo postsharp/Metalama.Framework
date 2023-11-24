@@ -10,7 +10,7 @@ public sealed partial class HierarchicalOptionsManager
 {
     private sealed class DeclarationNode
     {
-        private readonly ConcurrentLinkedList<DeclarationNode> _children = [];
+        private readonly ConcurrentLinkedList<DeclarationNode> _children = new();
 
         public bool HasCachedMergedOptions { get; private set; }
 

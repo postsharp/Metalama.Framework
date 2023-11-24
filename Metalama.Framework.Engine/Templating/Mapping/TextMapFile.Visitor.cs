@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
 
             public string? SourcePath { get; private set; }
 
-            public SkipListDictionary<int, TextPointMapping> TextPointMappings { get; } = [];
+            public SkipListDictionary<int, TextPointMapping> TextPointMappings { get; } = new();
 
             private enum PointKind
             {

@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 internal sealed class DependencyCollectorByDependentSyntaxTreeAndMasterProject
 {
     private readonly Dictionary<string, ulong> _masterFilePathsAndHashes = new( StringComparer.Ordinal );
-    private readonly HashSet<TypeDependencyKey> _masterPartialTypes = [];
+    private readonly HashSet<TypeDependencyKey> _masterPartialTypes = new();
     private int _hashCode;
 
     public string DependentFilePath { get; }

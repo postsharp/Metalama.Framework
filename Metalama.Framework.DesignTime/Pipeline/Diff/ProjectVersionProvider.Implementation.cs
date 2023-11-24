@@ -18,7 +18,7 @@ internal sealed partial class ProjectVersionProvider
     private sealed partial class Implementation
     {
         private readonly ConditionalWeakTable<Compilation, ChangeList> _cache = new();
-        private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = [];
+        private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();
         private readonly DiffStrategy _metalamaDiffStrategy;
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
         private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;

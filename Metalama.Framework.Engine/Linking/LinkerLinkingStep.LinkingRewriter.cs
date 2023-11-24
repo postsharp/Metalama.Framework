@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Linking
                     for ( var i = 0; i < node.ParameterList.Parameters.Count; i++ )
                     {
                         var parameter = node.ParameterList.Parameters[i];
-                        newMembers ??= [];
+                        newMembers ??= new List<MemberDeclarationSyntax>();
 
                         var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
 

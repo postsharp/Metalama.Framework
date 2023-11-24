@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// </summary>
 internal sealed class EvaluateAspectSourcesPipelineStep : PipelineStep
 {
-    private readonly ConcurrentLinkedList<IAspectSource> _aspectSources = [];
+    private readonly ConcurrentLinkedList<IAspectSource> _aspectSources = new();
 
     public EvaluateAspectSourcesPipelineStep( PipelineStepsState parent, OrderedAspectLayer aspectLayer ) : base(
         parent,

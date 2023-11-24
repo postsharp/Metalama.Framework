@@ -765,7 +765,8 @@ internal abstract partial class BaseTestRunner
             inputTextWriter = new StreamWriter( this._fileSystem.Open( testSyntaxTree.HtmlInputPath, FileMode.Create ) );
 
             // Add diagnostics to the input tree.
-            inputDiagnostics = [.. testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath )];
+            inputDiagnostics = new List<Diagnostic>();
+            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
             var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
 
             foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )

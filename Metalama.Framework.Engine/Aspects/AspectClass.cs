@@ -116,7 +116,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
         this.GeneratedCodeAnnotation = MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( $"aspect '{this.ShortName}'" );
 
-        List<string?> layers = [];
+        List<string?> layers = new();
 
         if ( baseClass != null )
         {

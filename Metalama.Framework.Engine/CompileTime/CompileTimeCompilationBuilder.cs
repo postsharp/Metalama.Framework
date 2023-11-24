@@ -50,7 +50,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompileTimeDomain _domain;
-    private readonly Dictionary<ulong, CompileTimeProject> _cache = [];
+    private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
     private readonly IProjectOptions? _projectOptions;
     private readonly ICompileTimeCompilationBuilderObserver? _observer;
     private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
@@ -669,7 +669,7 @@ internal sealed partial class CompileTimeCompilationBuilder
     {
         var runTimeCompilation = compilationContext.SourceCompilation;
 
-        List<SyntaxTree> compileTimeTrees = [];
+        List<SyntaxTree> compileTimeTrees = new();
         var globalUsings = GetUsingsFromOptions( runTimeCompilation );
         var classifier = compilationContext.SymbolClassifier;
 
