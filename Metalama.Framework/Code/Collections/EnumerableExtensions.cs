@@ -61,7 +61,7 @@ namespace Metalama.Framework.Code.Collections
             var recursionCheck = 0;
 
             // Create a list for the results.
-            List<T> results = new();
+            List<T> results = [];
 
             if ( includeRoot )
             {
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Code.Collections
             var recursionCheck = 0;
 
             // Create a list for the results.
-            List<T> results = new();
+            List<T> results = [];
 
             foreach ( var item in roots )
             {

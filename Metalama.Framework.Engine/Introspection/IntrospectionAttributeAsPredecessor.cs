@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Introspection;
 internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPredecessor
 {
     private readonly IntrospectionFactory _factory;
-    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
+    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = [];
 
     public IntrospectionAttributeAsPredecessor( IAttribute attribute, IntrospectionFactory factory )
     {

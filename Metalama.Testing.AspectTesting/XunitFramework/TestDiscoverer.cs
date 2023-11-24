@@ -81,7 +81,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
         {
-            List<TestCase> testCases = new();
+            List<TestCase> testCases = [];
             this.Discover( c => testCases.Add( c ), subDirectory, false, excludedDirectories );
 
             return testCases;
@@ -101,7 +101,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             TestDirectoryOptionsReader reader = new( this._serviceProvider, projectProperties.SourceDirectory );
             TestFactory factory = new( this._serviceProvider, projectProperties, reader, this._assembly );
 
-            ConcurrentBag<Task> tasks = new();
+            ConcurrentBag<Task> tasks = [];
             var pendingTasks = new StrongBox<int>( 0 );
 
             void AddTestsInDirectory( string directory )

@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.InjectionRegistry,
                 input.AnalysisRegistry );
 
-            ConcurrentBag<SyntaxTreeTransformation> transformations = new();
+            ConcurrentBag<SyntaxTreeTransformation> transformations = [];
 
             async Task ProcessTransformationAsync( SyntaxTreeTransformation modifiedSyntaxTree )
             {

@@ -223,7 +223,7 @@ internal partial class OurSyntaxGenerator
             switch ( genericParameter.TypeKindConstraint )
             {
                 case TypeKindConstraint.Class:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     var constraint = ClassOrStructConstraint( SyntaxKind.ClassConstraint );
 
                     if ( genericParameter.HasDefaultConstructorConstraint )
@@ -236,13 +236,13 @@ internal partial class OurSyntaxGenerator
                     break;
 
                 case TypeKindConstraint.Struct:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( ClassOrStructConstraint( SyntaxKind.StructConstraint ) );
 
                     break;
 
                 case TypeKindConstraint.Unmanaged:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
 
                     constraints.Add(
                         TypeConstraint(
@@ -251,13 +251,13 @@ internal partial class OurSyntaxGenerator
                     break;
 
                 case TypeKindConstraint.NotNull:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( TypeConstraint( SyntaxFactory.IdentifierName( "notnull" ) ) );
 
                     break;
 
                 case TypeKindConstraint.Default:
-                    constraints ??= new List<TypeParameterConstraintSyntax>();
+                    constraints ??= [];
                     constraints.Add( DefaultConstraint() );
 
                     break;
@@ -265,20 +265,20 @@ internal partial class OurSyntaxGenerator
 
             foreach ( var typeConstraint in genericParameter.TypeConstraints )
             {
-                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints ??= [];
 
                 constraints.Add( TypeConstraint( this.Type( typeConstraint.GetSymbol() ) ) );
             }
 
             if ( genericParameter.HasDefaultConstructorConstraint )
             {
-                constraints ??= new List<TypeParameterConstraintSyntax>();
+                constraints ??= [];
                 constraints.Add( ConstructorConstraint() );
             }
 
             if ( constraints != null )
             {
-                clauses ??= new List<TypeParameterConstraintClauseSyntax>();
+                clauses ??= [];
 
                 clauses.Add(
                     TypeParameterConstraintClause(

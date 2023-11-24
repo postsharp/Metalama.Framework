@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Services;
 public class ServiceProviderBuilder<TService>
     where TService : class
 {
-    private readonly List<Func<ServiceProvider<TService>, ServiceProvider<TService>>> _buildActions = new();
+    private readonly List<Func<ServiceProvider<TService>, ServiceProvider<TService>>> _buildActions = [];
 
     public ServiceProviderBuilder() { }
 

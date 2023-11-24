@@ -33,7 +33,7 @@ internal sealed class AdviceFactoryState
 
     public IntrospectionPipelineListener? IntrospectionListener { get; }
 
-    public List<ITransformation> Transformations { get; } = new();
+    public List<ITransformation> Transformations { get; } = [];
     
     public IAspectBuilder? AspectBuilder { get; set; }
 

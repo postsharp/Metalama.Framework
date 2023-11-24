@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
-                this.AspectReferences = new List<ResolvedAspectReference>();
+                this.AspectReferences = [];
                 this._containingSymbol = containingSymbol;
                 this._localFunctionStack = new Stack<IMethodSymbol>();
             }

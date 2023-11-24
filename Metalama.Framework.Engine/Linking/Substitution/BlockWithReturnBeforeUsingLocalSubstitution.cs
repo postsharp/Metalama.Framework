@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                              && encounteredStatementContainingGotoStatement )
                         {
                             segments.Add( (tailStatements, localDeclaration) );
-                            tailStatements = new List<StatementSyntax>();
+                            tailStatements = [];
                             encounteredStatementContainingGotoStatement = false;
                         }
                         else
@@ -151,8 +151,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
             public GotoAndLabeledStatementWalker()
             {
-                this.GotoStatements = new List<GotoStatementSyntax>();
-                this.LabeledStatements = new List<LabeledStatementSyntax>();
+                this.GotoStatements = [];
+                this.LabeledStatements = [];
             }
 
             public override void VisitGotoStatement( GotoStatementSyntax node )

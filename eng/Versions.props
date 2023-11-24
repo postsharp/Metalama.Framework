@@ -16,8 +16,8 @@
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
         <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
-        <RoslynApiMaxVersion>4.8.0-3.final</RoslynApiMaxVersion>
-        <RoslynVersion>4.8.0-3.final</RoslynVersion>
+        <RoslynApiMaxVersion>4.8.0</RoslynApiMaxVersion>
+        <RoslynVersion>4.8.0</RoslynVersion>
         <!-- We should match the versions used by the lowest version of Roslyn we support.-->
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <StreamJsonRpcVersion>2.8.28</StreamJsonRpcVersion>

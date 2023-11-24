@@ -20,9 +20,9 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     private bool _isReadOnly;
     private bool _isIteratorMethod;
 
-    public ParameterBuilderList Parameters { get; } = new();
+    public ParameterBuilderList Parameters { get; } = [];
 
-    public GenericParameterBuilderList TypeParameters { get; } = new();
+    public GenericParameterBuilderList TypeParameters { get; } = [];
 
     public bool IsReadOnly
     {

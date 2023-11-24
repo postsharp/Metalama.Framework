@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         {
             try
             {
-                result = new List<T>();
+                result = [];
 
                 try
                 {

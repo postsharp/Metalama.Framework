@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// </summary>
 internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarationImpl
 {
-    private readonly AttributeBuilderCollection _attributes = new();
+    private readonly AttributeBuilderCollection _attributes = [];
 
     protected DeclarationBuilder( Advice parentAdvice )
     {
