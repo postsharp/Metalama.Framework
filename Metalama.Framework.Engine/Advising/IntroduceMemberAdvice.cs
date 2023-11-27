@@ -138,8 +138,8 @@ namespace Metalama.Framework.Engine.Advising
 
         protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
         {
-            // Check that static member is not virtual.
-            if ( this.Builder is { IsStatic: true, IsVirtual: true } )
+            // Check that static member is not virtual (except for interfaces).
+            if ( this.Builder is { IsStatic: true, IsVirtual: true } && targetDeclaration is not { TypeKind: TypeKind.Interface } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticVirtualMember.CreateRoslynDiagnostic(
@@ -148,8 +148,8 @@ namespace Metalama.Framework.Engine.Advising
                         this ) );
             }
 
-            // Check that static member is not sealed.
-            if ( this.Builder is { IsStatic: true, IsSealed: true } )
+            // Check that static member is not sealed (except for interfaces).
+            if ( this.Builder is { IsStatic: true, IsSealed: true } && targetDeclaration is not { TypeKind: TypeKind.Interface } )
             {
                 diagnosticAdder.Report(
                     AdviceDiagnosticDescriptors.CannotIntroduceStaticSealedMember.CreateRoslynDiagnostic(

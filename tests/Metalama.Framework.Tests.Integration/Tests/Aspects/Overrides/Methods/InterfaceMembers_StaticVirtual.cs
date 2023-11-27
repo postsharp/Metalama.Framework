@@ -1,8 +1,9 @@
 ﻿#if TEST_OPTIONS
-// @RequiredConstant(NET5_0_OR_GREATER) - Default interface members need to be supported by the runtime.
+// @RequiredConstant(NET7_0_OR_GREATER) - Not available on .NET Framework
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
-#if NET5_0_OR_GREATER
+#if NET7_0_OR_GREATER && ROSLYN_4_4_0_OR_GREATER
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -12,10 +13,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceMembers
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceMembers_StaticVirtual
 {
     /*
-     * Tests overriding of interface non-abstract methods.
+     * Tests overriding of interface static virtual methods.
      */
 
     internal class OverrideAttribute : OverrideMethodAspect
@@ -31,16 +32,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     public interface Interface
     {
         [Override]
-        private int PrivateMethod()
+        public static virtual int StaticVirtualMethod()
         {
-            Console.WriteLine("Original implementation");
-            return 42;
-        }
-
-        [Override]
-        public static int StaticMethod()
-        {
-            Console.WriteLine("Original implementation");
             return 42;
         }
     }

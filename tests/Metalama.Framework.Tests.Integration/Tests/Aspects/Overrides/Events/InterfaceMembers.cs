@@ -51,6 +51,34 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
         }
 
         [Override]
+        public virtual event EventHandler VirtualEvent
+        {
+            add
+            {
+                Console.WriteLine("Original implementation");
+            }
+
+            remove
+            {
+                Console.WriteLine("Original implementation");
+            }
+        }
+
+        [Override]
+        public sealed event EventHandler SealedEvent
+        {
+            add
+            {
+                Console.WriteLine("Original implementation");
+            }
+
+            remove
+            {
+                Console.WriteLine("Original implementation");
+            }
+        }
+
+        [Override]
         public static event EventHandler StaticEvent
         {
             add

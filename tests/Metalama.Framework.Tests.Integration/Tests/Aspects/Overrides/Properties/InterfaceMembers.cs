@@ -2,6 +2,7 @@
 // @RequiredConstant(NET5_0_OR_GREATER) - Default interface members need to be supported by the runtime.
 #endif
 
+#if NET5_0_OR_GREATER
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
@@ -37,7 +38,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     // <target>
     public interface Interface
     {
-#if NET5_0_OR_GREATER
 
         [Override]
         private int PrivateProperty
@@ -71,7 +71,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
                 Console.WriteLine("Original implementation");
             }
         }
-#endif
     }
 
     // <target>
@@ -79,3 +78,4 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     {
     }
 }
+#endif
