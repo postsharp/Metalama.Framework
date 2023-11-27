@@ -61,17 +61,25 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IConstructor? GetBaseConstructor()
         {
-            var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax();
+            var declaration = this.GetPrimaryDeclarationSyntax();
 
-            if ( declaration?.Initializer == null )
+            SyntaxNode? initializer = declaration switch
+            {
+                null => null,
+                ConstructorDeclarationSyntax constructorDeclaration => constructorDeclaration.Initializer,
+                TypeDeclarationSyntax typeDeclarationSyntax => typeDeclarationSyntax.BaseList?.Types.FirstOrDefault() as PrimaryConstructorBaseTypeSyntax,
+                _ => throw new AssertionFailedException( $"Unexpected constructor syntax {declaration.GetType()}." )
+            };
+
+            if ( initializer == null )
             {
                 // This is necessarily the default constructor of the base type, if any.
                 return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
             }
             else
             {
-                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetCachedSemanticModel( declaration.SyntaxTree );
-                var symbol = (IMethodSymbol?) semanticModel.GetSymbolInfo( declaration.Initializer ).Symbol;
+                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetCachedSemanticModel( declaration!.SyntaxTree );
+                var symbol = (IMethodSymbol?) semanticModel.GetSymbolInfo( initializer ).Symbol;
 
                 if ( symbol == null )
                 {

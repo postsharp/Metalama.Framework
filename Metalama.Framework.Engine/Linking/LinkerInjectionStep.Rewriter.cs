@@ -375,7 +375,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
             {
-                this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
+                this.ApplyMemberLevelTransformationsToPrimaryConstructor( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
             }
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
@@ -427,8 +427,12 @@ internal sealed partial class LinkerInjectionStep
                             BaseList(
                                 baseList.Types.AddRange(
                                     additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
+                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )! ) ) );
                     }
+                }
+                else if ( baseList != null )
+                {
+                    node = (T) node.WithBaseList( baseList );
                 }
 
                 node = (T) node.WithParameterList( parameterList );
@@ -456,7 +460,7 @@ internal sealed partial class LinkerInjectionStep
 
                     injectedNode = injectedNode
                         .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )!;
 
                     // Insert inserted statements into 
                     switch ( injectedNode )
@@ -524,7 +528,7 @@ internal sealed partial class LinkerInjectionStep
             return constructorDeclaration;
         }
 
-        private void ApplyMemberLevelTransformations(
+        private void ApplyMemberLevelTransformationsToPrimaryConstructor(
             TypeDeclarationSyntax typeDeclaration,
             MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext,
@@ -547,26 +551,13 @@ internal sealed partial class LinkerInjectionStep
             Invariant.AssertNotNull( typeDeclaration.ParameterList );
 
             newParameterList = AppendParameters( typeDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext );
-            newBaseList = typeDeclaration.BaseList.AssertNotNull();
+            newBaseList = typeDeclaration.BaseList;
 
             if ( memberLevelTransformations.Arguments.Length > 0 )
             {
-                // NB: Base list is not currently changed because primary constructor never has any pull action.
                 var semanticModel = this._semanticModelProvider.GetSemanticModel( typeDeclaration.SyntaxTree );
                 var baseType = semanticModel.GetDeclaredSymbol( typeDeclaration );
-                BaseTypeSyntax? baseTypeSyntax = null;
-                
-                foreach (var baseListItem in typeDeclaration.BaseList.Types)
-                {
-                    var symbolInfo = semanticModel.GetSymbolInfo( baseListItem );
-                    
-                    if (SymbolEqualityComparer.Default.Equals( symbolInfo.Symbol, baseType ) )
-                    {
-                        baseTypeSyntax = baseListItem;
-                    }
-                }
-
-                Invariant.AssertNotNull( baseTypeSyntax );
+                var baseTypeSyntax = typeDeclaration.BaseList.AssertNotNull().Types[0];
 
                 BaseTypeSyntax newBaseTypeSyntax;
 
