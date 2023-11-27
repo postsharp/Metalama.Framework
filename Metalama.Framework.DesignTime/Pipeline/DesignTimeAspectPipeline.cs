@@ -76,8 +76,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
-    public long SnapshotId => this._currentState.SnapshotId;
-
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
