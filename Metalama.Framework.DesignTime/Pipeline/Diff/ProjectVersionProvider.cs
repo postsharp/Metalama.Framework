@@ -64,7 +64,7 @@ internal sealed partial class ProjectVersionProvider : IGlobalService, IDisposab
     {
         using ( await this.WithLockAsync( cancellationToken ) )
         {
-            HashSet<Compilation> processedCompilations = [];
+            HashSet<Compilation> processedCompilations = new();
             var dependencyGraphBuilder = dependencyGraph.ToBuilder();
 
             await ProcessCompilationRecursiveAsync( changes );

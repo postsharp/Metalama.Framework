@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     /// </summary>
     internal sealed class CodeActionContext : ISdkCodeActionContext
     {
-        private readonly HashSet<string> _changedSyntaxTrees = [];
+        private readonly HashSet<string> _changedSyntaxTrees = new();
 
         public PartialCompilation Compilation { get; private set; }
 

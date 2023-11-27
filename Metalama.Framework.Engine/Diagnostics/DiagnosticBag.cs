@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
             else
             {
-                Interlocked.CompareExchange( ref this._bag, [], null );
+                Interlocked.CompareExchange( ref this._bag, new ConcurrentBag<Diagnostic>(), null );
 
                 return this._bag;
             }

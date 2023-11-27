@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                finalStatements = [];
+                finalStatements = new List<StatementSyntax>();
                 overflowingTrivia = SyntaxTriviaList.Empty;
 
                 // Process statements, cleaning empty labeled statements, and trivia empty statements and invocations with empty empty expressions.

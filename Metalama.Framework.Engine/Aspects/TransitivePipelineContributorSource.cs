@@ -118,7 +118,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        List<AspectInstance> aspectInstances = [];
+        List<AspectInstance> aspectInstances = new();
 
         foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
         {

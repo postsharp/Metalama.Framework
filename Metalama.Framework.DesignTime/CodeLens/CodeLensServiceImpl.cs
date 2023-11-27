@@ -244,14 +244,14 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
 
             if ( !aspectInstances.TryGetValue( aspectInstance, out var transformationList ) )
             {
-                aspectInstances[aspectInstance] = transformationList = [];
+                aspectInstances[aspectInstance] = transformationList = new List<IIntrospectionTransformation>();
             }
 
             transformationList.Add( transformation );
         }
 
         // Create the logical table.
-        List<CodeLensDetailsEntry> entries = [];
+        List<CodeLensDetailsEntry> entries = new();
 
         CodeLensDetailsField CreateOriginField( IIntrospectionAspectInstance aspectInstance )
         {

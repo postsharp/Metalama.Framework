@@ -408,7 +408,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     else
                     {
                         // This happens with cross-project validators i.e. validator
-                        externalValidators ??= [];
+                        externalValidators ??= new List<DesignTimeReferenceValidatorInstance>();
                         externalValidators.Add( designTimeValidator );
                     }
                 }

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking
         // TODO: This is temporary for unneeded label removal until the linker uses control flow analysis results for inlining.
         private sealed class CountLabelUsesWalker : SafeSyntaxWalker
         {
-            public Dictionary<string, int> ObservedLabelCounters { get; } = [];
+            public Dictionary<string, int> ObservedLabelCounters { get; } = new();
 
             public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
             {

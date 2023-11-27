@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     [CompileTime]
     public sealed partial class InterpolatedStringBuilder : INotNullExpressionBuilder
     {
-        private readonly List<object?> _items = [];
+        private readonly List<object?> _items = new();
 
         internal IReadOnlyList<object?> Items => this._items;
 

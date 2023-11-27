@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        public List<Contract> Contracts { get; } = [];
+        public List<Contract> Contracts { get; } = new();
 
         public bool TryExecuteTemplates(
             IDeclaration targetMember,
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Advising
                 ExpressionSyntax parameterExpression = IdentifierName( parameterName );
                 parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
 
-                statements ??= [];
+                statements ??= new List<StatementSyntax>();
 
                 var metaApiProperties = new MetaApiProperties(
                     this.SourceCompilation,

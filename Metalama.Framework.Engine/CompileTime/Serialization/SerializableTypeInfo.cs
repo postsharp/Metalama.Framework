@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <summary>
         /// Gets a list of serializable fields an properties.
         /// </summary>
-        public List<ISymbol> SerializedMembers { get; } = [];
+        public List<ISymbol> SerializedMembers { get; } = new();
 
         public SerializableTypeInfo( INamedTypeSymbol type, IReadOnlyList<ISymbol> serializedMembers )
         {

@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             void Append( INamespaceOrTypeSymbol symbol, List<ITypeSymbol>? typeArguments = null )
             {
-                var currentTypeArguments = typeArguments ?? [];
+                var currentTypeArguments = typeArguments ?? new List<ITypeSymbol>();
 
                 // Append the containing namespace or type.
                 if ( kind != TypeNameKind.Name && symbol is not ITypeParameterSymbol )

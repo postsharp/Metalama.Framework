@@ -19,7 +19,7 @@ internal partial class AccessorBuilder
         public IndexerAccessorParameterBuilderList( AccessorBuilder accessor )
         {
             this._accessor = accessor;
-            this._parameters = [];
+            this._parameters = new List<IndexerParameterBuilder>();
 
             if ( this._accessor.MethodKind == MethodKind.PropertySet )
             {

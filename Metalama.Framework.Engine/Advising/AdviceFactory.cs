@@ -244,7 +244,7 @@ internal sealed class AdviceFactory : IAdviceFactory
     private AdviceResult<T> ExecuteAdvice<T>( Advice advice )
         where T : class, IDeclaration
     {
-        List<ITransformation> transformations = [];
+        List<ITransformation> transformations = new();
 
         // Initialize the advice. It should report errors for any situation that does not depend on the target declaration.
         // These errors are reported as exceptions.

@@ -59,7 +59,7 @@ internal sealed partial class CompileTimeProjectRepository
         private readonly ProjectServiceProvider _serviceProvider;
 
         // The dictionary may contain null values when the assembly does not reference Metalama.Framework.
-        private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = [];
+        private readonly Dictionary<AssemblyIdentity, CompileTimeProject?> _projects = new();
         private readonly CompileTimeDomain _domain;
         private readonly IAssemblyLocator _runTimeAssemblyLocator;
         private readonly CacheableTemplateDiscoveryContextProvider _cacheableTemplateDiscoveryContextProvider;
@@ -176,7 +176,7 @@ internal sealed partial class CompileTimeProjectRepository
                 return true;
             }
 
-            List<CompileTimeProject> referencedProjects = [this._frameworkProject];
+            List<CompileTimeProject> referencedProjects = new() { this._frameworkProject };
 
             foreach ( var reference in runTimeCompilation.References )
             {
@@ -395,7 +395,7 @@ internal sealed partial class CompileTimeProjectRepository
             // Read source files.
             var parseOptions = SupportedCSharpVersions.DefaultParseOptions;
 
-            List<SyntaxTree> syntaxTrees = [];
+            List<SyntaxTree> syntaxTrees = new();
 
             foreach ( var entry in archive.Entries.Where( e => string.Equals( Path.GetExtension( e.Name ), ".cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
@@ -406,7 +406,7 @@ internal sealed partial class CompileTimeProjectRepository
             }
 
             // Resolve references.
-            List<CompileTimeProject> referenceProjects = [];
+            List<CompileTimeProject> referenceProjects = new();
 
             if ( manifest.References != null )
             {

@@ -845,7 +845,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                     // type arguments
                     if ( PeekNextChar( id, index ) == '{' )
                     {
-                        typeArguments = [];
+                        typeArguments = new List<IType>();
 
                         if ( !ParseTypeArguments( id, ref index, compilation, typeParameterContext, typeArguments ) )
                         {
@@ -1202,7 +1202,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         {
                             if ( parameters == null )
                             {
-                                parameters = [];
+                                parameters = new List<ParameterInfo>();
                             }
                             else
                             {

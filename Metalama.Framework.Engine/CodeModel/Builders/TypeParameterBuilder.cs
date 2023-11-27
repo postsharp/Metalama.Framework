@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterBuilder, ISdkType
 {
-    private readonly List<IType> _typeConstraints = [];
+    private readonly List<IType> _typeConstraints = new();
 
     public string Name { get; set; }
 

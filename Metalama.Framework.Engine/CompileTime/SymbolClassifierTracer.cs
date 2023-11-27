@@ -23,7 +23,7 @@ internal sealed class SymbolClassifierTracer
 
     public void SetResult( TemplatingScope? result ) => this.Result = result;
 
-    public List<SymbolClassifierTracer> Children { get; } = [];
+    public List<SymbolClassifierTracer> Children { get; } = new();
 
     public SymbolClassifierTracer CreateChild( ISymbol symbol )
     {

@@ -480,7 +480,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             compilation,
             cancellationToken );
 
-        List<DesignTimeProjectReference> compilationReferences = [];
+        List<DesignTimeProjectReference> compilationReferences = new();
 
         foreach ( var reference in compilationVersion.ReferencedProjectVersions.Values )
         {
@@ -827,7 +827,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         // Computes the set of semantic models that need to be processed.
 
-        List<SyntaxTree> uncachedSyntaxTrees = [];
+        List<SyntaxTree> uncachedSyntaxTrees = new();
 
         foreach ( var syntaxTree in compilation.SyntaxTrees )
         {

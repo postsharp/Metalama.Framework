@@ -221,8 +221,8 @@ namespace Metalama.Framework.Engine.Formatting
 
                 if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
                 {
-                    List<string> classes = [];
-                    List<string> titles = [];
+                    List<string> classes = new();
+                    List<string> titles = new();
 
                     const bool isLeadingTrivia = false; // string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
 
