@@ -371,12 +371,15 @@ internal sealed partial class LinkerInjectionStep
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
             var baseList = node.BaseList;
+
+#if ROSLYN_4_8_0_OR_GREATER
             var parameterList = node.ParameterList;
 
             if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
             {
                 this.ApplyMemberLevelTransformationsToPrimaryConstructor( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
             }
+#endif
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -435,7 +438,9 @@ internal sealed partial class LinkerInjectionStep
                     node = (T) node.WithBaseList( baseList );
                 }
 
+#if ROSLYN_4_8_0_OR_GREATER
                 node = (T) node.WithParameterList( parameterList );
+#endif
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -528,6 +533,7 @@ internal sealed partial class LinkerInjectionStep
             return constructorDeclaration;
         }
 
+#if ROSLYN_4_8_0_OR_GREATER
         private void ApplyMemberLevelTransformationsToPrimaryConstructor(
             TypeDeclarationSyntax typeDeclaration,
             MemberLevelTransformations memberLevelTransformations,
@@ -543,9 +549,6 @@ internal sealed partial class LinkerInjectionStep
                 return;
             }
 
-#if !ROSLYN_4_8_0_OR_GREATER
-            throw new AssertionFailedException( "Primary constructors should not have any transformations on Roslyn < 4.8." );
-#else
             Invariant.AssertNot( memberLevelTransformations.Statements.Length > 0 );
             Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
             Invariant.AssertNotNull( typeDeclaration.ParameterList );
@@ -586,8 +589,8 @@ internal sealed partial class LinkerInjectionStep
                 // TODO: This may be slower than replacing specific index.
                 newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
             }
-#endif
         }
+#endif
 
         private static ParameterListSyntax AppendParameters(
             ParameterListSyntax existingParameters,
