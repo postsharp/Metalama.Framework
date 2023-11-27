@@ -370,6 +370,14 @@ internal sealed partial class LinkerInjectionStep
             var additionalBaseList = this._syntaxTransformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
+            var baseList = node.BaseList;
+            var parameterList = node.ParameterList;
+
+            if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
+            {
+                this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
+            }
+
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
                 // Process the type members.
@@ -404,7 +412,7 @@ internal sealed partial class LinkerInjectionStep
                 // Process the type bases.
                 if ( additionalBaseList.Any() )
                 {
-                    if ( node.BaseList == null )
+                    if ( baseList == null )
                     {
                         node = (T) node
                             .WithIdentifier( node.Identifier.WithTrailingTrivia() )
@@ -417,11 +425,13 @@ internal sealed partial class LinkerInjectionStep
                     {
                         node = (T) node.WithBaseList(
                             BaseList(
-                                node.BaseList.Types.AddRange(
+                                baseList.Types.AddRange(
                                     additionalBaseList.SelectAsReadOnlyList(
                                         i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                     }
                 }
+
+                node = (T) node.WithParameterList( parameterList );
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -512,6 +522,80 @@ internal sealed partial class LinkerInjectionStep
                 AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
 
             return constructorDeclaration;
+        }
+
+        private void ApplyMemberLevelTransformations(
+            TypeDeclarationSyntax typeDeclaration,
+            MemberLevelTransformations memberLevelTransformations,
+            SyntaxGenerationContext syntaxGenerationContext,
+            out BaseListSyntax? newBaseList,
+            out ParameterListSyntax? newParameterList )
+        {
+            if (typeDeclaration is RecordDeclarationSyntax)
+            {
+                // Record declarations are currently handled differently.
+                newBaseList = typeDeclaration.BaseList;
+                newParameterList = typeDeclaration.ParameterList;
+                return;
+            }
+
+#if !ROSLYN_4_8_0_OR_GREATER
+            throw new AssertionFailedException( "Primary constructors should not have any transformations on Roslyn < 4.8." );
+#else
+            Invariant.AssertNot( memberLevelTransformations.Statements.Length > 0 );
+            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
+            Invariant.AssertNotNull( typeDeclaration.ParameterList );
+
+            newParameterList = AppendParameters( typeDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            newBaseList = typeDeclaration.BaseList.AssertNotNull();
+
+            if ( memberLevelTransformations.Arguments.Length > 0 )
+            {
+                // NB: Base list is not currently changed because primary constructor never has any pull action.
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( typeDeclaration.SyntaxTree );
+                var baseType = semanticModel.GetDeclaredSymbol( typeDeclaration );
+                BaseTypeSyntax? baseTypeSyntax = null;
+                
+                foreach (var baseListItem in typeDeclaration.BaseList.Types)
+                {
+                    var symbolInfo = semanticModel.GetSymbolInfo( baseListItem );
+                    
+                    if (SymbolEqualityComparer.Default.Equals( symbolInfo.Symbol, baseType ) )
+                    {
+                        baseTypeSyntax = baseListItem;
+                    }
+                }
+
+                Invariant.AssertNotNull( baseTypeSyntax );
+
+                BaseTypeSyntax newBaseTypeSyntax;
+
+                switch ( baseTypeSyntax )
+                {
+                    case SimpleBaseTypeSyntax simpleBaseType:
+                        newBaseTypeSyntax =
+                            PrimaryConstructorBaseType(
+                                simpleBaseType.Type,
+                                ArgumentList( SeparatedList(
+                                    memberLevelTransformations.Arguments.Select( x => x.ToSyntax() ) ) ) );
+
+                        break;
+
+                    case PrimaryConstructorBaseTypeSyntax primaryCtorBaseType:
+                        newBaseTypeSyntax =
+                            primaryCtorBaseType
+                                .WithArgumentList(
+                                    primaryCtorBaseType.ArgumentList.AddArguments( memberLevelTransformations.Arguments.SelectAsArray( x => x.ToSyntax() ) ) );
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax.Kind()}" );
+                }
+
+                // TODO: This may be slower than replacing specific index.
+                newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
+            }
+#endif
         }
 
         private static ParameterListSyntax AppendParameters(

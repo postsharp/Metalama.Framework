@@ -82,8 +82,6 @@ public static partial class EligibilityRuleFactory
     private static readonly IEligibilityRule<IDeclaration> _introduceParameterRule = CreateRule<IDeclaration, IConstructor>(
         builder =>
         {
-            builder.MustNotBePrimaryConstructorOfNonRecordType();
-
             builder.DeclaringType().MustBeRunTimeOnly();
             builder.MustNotBeStatic();
         } );
