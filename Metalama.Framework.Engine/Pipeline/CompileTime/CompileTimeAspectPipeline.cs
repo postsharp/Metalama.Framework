@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, SupportedCSharpVersions.FormatSupportedVersions() ) );
+                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, new[] { SupportedCSharpVersions.FormatSupportedVersions() } ) );
 
                     return false;
                 }
