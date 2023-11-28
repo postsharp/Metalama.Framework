@@ -1,15 +1,8 @@
-#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
-#endif
-
-#if ROSLYN_4_8_0_OR_GREATER
-
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_Record;
 
 public class MyAspect : TypeAspect
 {
@@ -22,16 +15,14 @@ public class MyAspect : TypeAspect
     }
 }
 
-public class A(int x)
+public record A(int x)
 {
     public int X { get; set; } = x;
 }
 
 // <target>
 [MyAspect]
-public class C(int x) : A(42)
+public record C(int x) : A(42)
 {
     public int Y { get; } = x;
 }
-
-#endif

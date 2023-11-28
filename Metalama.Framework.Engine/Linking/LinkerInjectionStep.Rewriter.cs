@@ -370,6 +370,17 @@ internal sealed partial class LinkerInjectionStep
             var additionalBaseList = this._syntaxTransformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
+            var baseList = node.BaseList;
+
+#if ROSLYN_4_8_0_OR_GREATER
+            var parameterList = node.ParameterList;
+
+            if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
+            {
+                this.ApplyMemberLevelTransformationsToPrimaryConstructor( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
+            }
+#endif
+
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
                 // Process the type members.
@@ -404,7 +415,7 @@ internal sealed partial class LinkerInjectionStep
                 // Process the type bases.
                 if ( additionalBaseList.Any() )
                 {
-                    if ( node.BaseList == null )
+                    if ( baseList == null )
                     {
                         node = (T) node
                             .WithIdentifier( node.Identifier.WithTrailingTrivia() )
@@ -417,11 +428,19 @@ internal sealed partial class LinkerInjectionStep
                     {
                         node = (T) node.WithBaseList(
                             BaseList(
-                                node.BaseList.Types.AddRange(
+                                baseList.Types.AddRange(
                                     additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
+                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )! ) ) );
                     }
                 }
+                else if ( baseList != null )
+                {
+                    node = (T) node.WithBaseList( baseList );
+                }
+
+#if ROSLYN_4_8_0_OR_GREATER
+                node = (T) node.WithParameterList( parameterList );
+#endif
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -446,7 +465,7 @@ internal sealed partial class LinkerInjectionStep
 
                     injectedNode = injectedNode
                         .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )!;
 
                     // Insert inserted statements into 
                     switch ( injectedNode )
@@ -513,6 +532,65 @@ internal sealed partial class LinkerInjectionStep
 
             return constructorDeclaration;
         }
+
+#if ROSLYN_4_8_0_OR_GREATER
+        private void ApplyMemberLevelTransformationsToPrimaryConstructor(
+            TypeDeclarationSyntax typeDeclaration,
+            MemberLevelTransformations memberLevelTransformations,
+            SyntaxGenerationContext syntaxGenerationContext,
+            out BaseListSyntax? newBaseList,
+            out ParameterListSyntax? newParameterList )
+        {
+            if (typeDeclaration is RecordDeclarationSyntax)
+            {
+                // Record declarations are currently handled differently.
+                newBaseList = typeDeclaration.BaseList;
+                newParameterList = typeDeclaration.ParameterList;
+                return;
+            }
+
+            Invariant.AssertNot( memberLevelTransformations.Statements.Length > 0 );
+            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
+            Invariant.AssertNotNull( typeDeclaration.ParameterList );
+
+            newParameterList = AppendParameters( typeDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            newBaseList = typeDeclaration.BaseList;
+
+            if ( memberLevelTransformations.Arguments.Length > 0 )
+            {
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( typeDeclaration.SyntaxTree );
+                var baseType = semanticModel.GetDeclaredSymbol( typeDeclaration );
+                var baseTypeSyntax = typeDeclaration.BaseList.AssertNotNull().Types[0];
+
+                BaseTypeSyntax newBaseTypeSyntax;
+
+                switch ( baseTypeSyntax )
+                {
+                    case SimpleBaseTypeSyntax simpleBaseType:
+                        newBaseTypeSyntax =
+                            PrimaryConstructorBaseType(
+                                simpleBaseType.Type,
+                                ArgumentList( SeparatedList(
+                                    memberLevelTransformations.Arguments.Select( x => x.ToSyntax() ) ) ) );
+
+                        break;
+
+                    case PrimaryConstructorBaseTypeSyntax primaryCtorBaseType:
+                        newBaseTypeSyntax =
+                            primaryCtorBaseType
+                                .WithArgumentList(
+                                    primaryCtorBaseType.ArgumentList.AddArguments( memberLevelTransformations.Arguments.SelectAsArray( x => x.ToSyntax() ) ) );
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax.Kind()}" );
+                }
+
+                // TODO: This may be slower than replacing specific index.
+                newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
+            }
+        }
+#endif
 
         private static ParameterListSyntax AppendParameters(
             ParameterListSyntax existingParameters,

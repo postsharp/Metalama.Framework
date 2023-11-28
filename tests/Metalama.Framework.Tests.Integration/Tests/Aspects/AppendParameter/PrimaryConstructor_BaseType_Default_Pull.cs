@@ -9,27 +9,27 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_BaseType_Default_Pull;
 
 public class MyAspect : TypeAspect
 {
-    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter( constructor, "p", typeof(int), TypedConstant.Create( 15 ) );
+            builder.Advice.IntroduceParameter(constructor, "p", typeof(int), TypedConstant.Create(15), (p, c) => PullAction.UseExpression(TypedConstant.Create(51)));
         }
     }
 }
 
-public class A(int x)
+// <target>
+[MyAspect]
+public class A()
 {
-    public int X { get; set; } = x;
 }
 
 // <target>
-[MyAspect]
-public class C(int x) : A(42)
+public class C(int x) : A
 {
     public int Y { get; } = x;
 }

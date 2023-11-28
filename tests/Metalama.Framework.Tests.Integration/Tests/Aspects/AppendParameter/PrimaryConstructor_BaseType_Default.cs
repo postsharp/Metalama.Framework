@@ -9,7 +9,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_BaseType_Default;
 
 public class MyAspect : TypeAspect
 {
@@ -22,14 +22,14 @@ public class MyAspect : TypeAspect
     }
 }
 
-public class A(int x)
+// <target>
+[MyAspect]
+public class A()
 {
-    public int X { get; set; } = x;
 }
 
 // <target>
-[MyAspect]
-public class C(int x) : A(42)
+public class C(int x) : A
 {
     public int Y { get; } = x;
 }

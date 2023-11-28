@@ -1,15 +1,9 @@
-#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
-#endif
-
-#if ROSLYN_4_8_0_OR_GREATER
-
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.BaseType;
 
 public class MyAspect : TypeAspect
 {
@@ -22,16 +16,25 @@ public class MyAspect : TypeAspect
     }
 }
 
-public class A(int x)
+// <target>
+[MyAspect]
+public class A
 {
-    public int X { get; set; } = x;
+    public A(int x)
+    {
+        X = x;
+    }
+
+    public int X { get; set; }
 }
 
 // <target>
-[MyAspect]
-public class C(int x) : A(42)
+public class C : A
 {
-    public int Y { get; } = x;
-}
+    public C(int x) : base(42)
+    {
+        Y = x;
+    }
 
-#endif
+    public int Y { get; }
+}
