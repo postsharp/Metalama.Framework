@@ -361,6 +361,12 @@ public sealed partial class CompilationModel
 
                 break;
 
+            case IProperty replacedProperty:
+                var properties = this.GetPropertyCollection( replacedProperty.DeclaringType.GetSymbol().AssertNotNull(), true );
+                properties.Remove( replaced.As<IProperty>() );
+
+                break;
+
             default:
                 throw new AssertionFailedException( $"Unexpected declaration: '{replaced.GetTarget( this )}'." );
         }

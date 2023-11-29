@@ -213,11 +213,11 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Constructor)>
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Record)>
             CannotAddInitializerToRecord = new(
                 "LAMA0524",
-                "Cannot add an initializer to a record.",
-                "The aspect '{0}' cannot add an initializer to '{1}' because it is a record.",
+                "Cannot add an initializer to all constructors of a record.",
+                "The aspect '{0}' cannot add an initializer to all constructors of the record '{1}', because the copy constructor cannot be changed. Consider adding initializers directly to the relevant constructors.",
                 _category,
                 Error );
 
@@ -258,6 +258,14 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0529",
                 "Cannot override an interface member because it is not virtual.",
                 "The aspect '{0}' cannot override the member '{1}' because it is not virtual.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType? Type)>
+            CannotAddTemplateInitializerToPrimaryConstructor = new(
+                "LAMA0530",
+                "Cannot add a template-based initializer to a primary constructor.",
+                "The aspect '{0}' cannot add a template-based initializer to the primary constructor of type '{1}'.",
                 _category,
                 Error );
     }

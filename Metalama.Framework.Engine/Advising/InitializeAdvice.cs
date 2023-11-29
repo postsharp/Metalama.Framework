@@ -40,7 +40,7 @@ internal abstract class InitializeAdvice : Advice
 
         var containingType = targetDeclaration.GetClosestNamedType().AssertNotNull();
 
-        if ( containingType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct )
+        if ( targetDeclaration is INamedType && containingType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct )
         {
             return AdviceImplementationResult.Failed(
                 AdviceDiagnosticDescriptors.CannotAddInitializerToRecord.CreateRoslynDiagnostic(

@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override IInjectMemberTransformation ToTransformation() => new PromoteFieldTransformation( this.ParentAdvice, this.Field, this );
+        public override IInjectMemberTransformation ToTransformation() => new ReplaceWithPropertyTransformation( this.ParentAdvice, this.Field, this );
 
         public override bool Equals( IDeclaration? other )
             => ReferenceEquals( this, other ) || (other is PromotedField otherPromotedField && otherPromotedField.Field.Equals( this.Field ));

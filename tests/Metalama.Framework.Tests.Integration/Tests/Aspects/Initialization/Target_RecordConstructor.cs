@@ -1,15 +1,16 @@
 using System;
+using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_Record_InstanceConstructing_Implicit
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_RecordConstructor
 {
     public class Aspect : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor );
+            builder.Advice.AddInitializer(builder.Target.Constructors.OfExactSignature(new IType[0]), nameof(Template), InitializerKind.BeforeInstanceConstructor);
         }
 
         [Template]

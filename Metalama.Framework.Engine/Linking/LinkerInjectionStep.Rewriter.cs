@@ -508,7 +508,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 ConstructorDeclarationSyntax constructor => Singleton( this.VisitConstructorDeclarationCore( constructor ) ),
                 MethodDeclarationSyntax method => Singleton( this.VisitMethodDeclarationCore( method ) ),
-                PropertyDeclarationSyntax property => Singleton( this.VisitPropertyDeclarationCore( property ) ),
+                PropertyDeclarationSyntax property => this.VisitPropertyDeclarationCore( property ),
                 OperatorDeclarationSyntax @operator => Singleton( this.VisitOperatorDeclarationCore( @operator ) ),
                 EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
                 FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
@@ -718,7 +718,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
+        private IReadOnlyList<FieldDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
         {
             var originalNode = node;
 
@@ -727,7 +727,7 @@ internal sealed partial class LinkerInjectionStep
                  && originalNode.Declaration.Variables.Any( this._nodesWithModifiedAttributes.Contains ) )
             {
                 // TODO: This needs to use rewritten variable declaration or do removal in place.
-                var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
+                var members = new List<FieldDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
                 // If we have changes in attributes and several members, we have to split them.
                 foreach ( var variable in originalNode.Declaration.Variables )
@@ -782,7 +782,7 @@ internal sealed partial class LinkerInjectionStep
                     }
                     else
                     {
-                        return Array.Empty<MemberDeclarationSyntax>();
+                        return Array.Empty<FieldDeclarationSyntax>();
                     }
                 }
                 else
@@ -865,9 +865,14 @@ internal sealed partial class LinkerInjectionStep
             return node;
         }
 
-        private PropertyDeclarationSyntax VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
+        private IReadOnlyList<PropertyDeclarationSyntax> VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
         {
             var originalNode = node;
+
+            if ( this._syntaxTransformationCollection.IsRemovedSyntax( originalNode ) )
+            {
+                return Array.Empty<PropertyDeclarationSyntax>();
+            }
 
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 
@@ -886,7 +891,7 @@ internal sealed partial class LinkerInjectionStep
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
             node = ReplaceAttributes( node, rewrittenAttributes );
 
-            return node;
+            return new[] { node };
         }
 
         public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
