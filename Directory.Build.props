@@ -15,7 +15,6 @@
     <Import Project="eng\Versions.props"/>
     <Import Project="eng\StrongName.props"/>
     <Import Project="eng\Packaging.props"/>
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="TeamCity.props"/>
 
     <!-- We don't want nullability warnings in the Release build since the inlining AssertNotNull creates issues to analyzers -->
     <PropertyGroup Condition="'$(Configuration)'=='Release' OR ( '$(TargetFramework)'!='net6.0' AND '$(TargetFramework)'!='net7.0' )">
