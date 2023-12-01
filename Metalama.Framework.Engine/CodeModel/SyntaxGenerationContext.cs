@@ -19,6 +19,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
 
+        internal LanguageVersion LanguageVersion => this.Compilation.GetLanguageVersion();
+
+        internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
+
         private SyntaxGenerationContext( CompilationContext compilationContext, OurSyntaxGenerator syntaxGenerator, bool isPartial )
         {
             this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );

@@ -16,18 +16,22 @@ namespace Metalama.Framework.Engine.Linking
         public StatementSyntax Statement { get; }
 
         /// <summary>
-        /// Gets the declaration to which the statement relates to. Statements are first ordered by hierarchy and then by aspect order.
+        /// Gets the declaration to which the statement relates to. Statements are first ordered by kind, then by hierarchy and then by aspect order.
         /// </summary>
         public IDeclaration ContextDeclaration { get; }
+
+        public InsertedStatementKind Kind { get; }
 
         public LinkerInsertedStatement(
             ITransformation parentTransformation,
             StatementSyntax statement,
-            IDeclaration contextDeclaration )
+            IDeclaration contextDeclaration,
+            InsertedStatementKind kind )
         {
             this.ParentTransformation = parentTransformation;
             this.Statement = statement;
             this.ContextDeclaration = contextDeclaration;
+            this.Kind = kind;
         }
     }
 }

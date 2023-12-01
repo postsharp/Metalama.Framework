@@ -10,13 +10,15 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ReplaceDefaultConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation
+internal sealed class ReplaceDefaultConstructorTransformation
+    : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation, IInsertStatementTransformation
 {
     public ReplaceDefaultConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
     {
@@ -35,6 +37,8 @@ internal sealed class ReplaceDefaultConstructorTransformation : IntroduceMemberT
     {
         var constructorBuilder = this.IntroducedDeclaration;
 
+        var statements = Array.Empty<StatementSyntax>();
+
         var syntax =
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
@@ -42,7 +46,7 @@ internal sealed class ReplaceDefaultConstructorTransformation : IntroduceMemberT
                 ((TypeDeclarationSyntax) constructorBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                 ParameterList(),
                 null,
-                SyntaxFactoryEx.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                SyntaxFactoryEx.FormattedBlock( statements ).WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                 null );
 
         return new[]
@@ -61,4 +65,30 @@ internal sealed class ReplaceDefaultConstructorTransformation : IntroduceMemberT
     public override InsertPosition InsertPosition => this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
+
+    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    {
+        // See https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11#auto-default-struct.
+        if ( this.IntroducedDeclaration.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct &&
+             context.SyntaxGenerationContext.RequiresStructFieldInitialization )
+        {
+            return new[]
+            {
+                // this = default;
+                new InsertedStatement(
+                    ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                ThisExpression(),
+                                LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) )
+                        .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                    this.IntroducedDeclaration,
+                    InsertedStatementKind.WholeTypeInitialization )
+            };
+        }
+
+        return Array.Empty<InsertedStatement>();
+    }
+
+    IMember IMemberLevelTransformation.TargetMember => this.IntroducedDeclaration;
 }

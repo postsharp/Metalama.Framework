@@ -1,3 +1,8 @@
+#if TEST_OPTIONS
+// In C# 10, we need to generate slightly different code.
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+#endif
+
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
