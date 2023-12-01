@@ -12,6 +12,7 @@ public class Aspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, StatementFactory.Parse("x = 42;") );
+        builder.Advice.AddInitializer( builder.Target.PrimaryConstructor, StatementFactory.Parse("Y = 24;") );
     }
 }
 
@@ -19,4 +20,5 @@ public class Aspect : TypeAspect
 [Aspect]
 public record TargetRecord(int x)
 {
+    int Y => 42;
 }

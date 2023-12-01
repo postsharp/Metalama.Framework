@@ -17,9 +17,9 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        for (int i = 1; i <= 17; i++)
+        for (int i = 1; i <= 19; i++)
         {
-            builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"x{i} = 42;"), InitializerKind.BeforeInstanceConstructor);
+            builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse($"x{i} = {i};"), InitializerKind.BeforeInstanceConstructor);
         }
     }
 }
@@ -62,6 +62,8 @@ abstract class TargetCode() : Base
     int x16 { get; }
     [field: MyAttribute]
     int x17 { get; }
+
+    int x18, x19;
 }
 
 #endif

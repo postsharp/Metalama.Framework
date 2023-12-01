@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -34,15 +33,6 @@ namespace Metalama.Framework.Engine.Advising
         public override AdviceImplementationResult Implement( ProjectServiceProvider serviceProvider, CompilationModel compilation, Action<ITransformation> addTransformation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-
-            if ( targetDeclaration is IConstructor { IsPrimary: true } or INamedType { PrimaryConstructor: not null } )
-            {
-                return AdviceImplementationResult.Failed(
-                    AdviceDiagnosticDescriptors.CannotAddTemplateInitializerToPrimaryConstructor.CreateRoslynDiagnostic(
-                        targetDeclaration.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, targetDeclaration.GetClosestNamedType()),
-                        this ) );
-            }
 
             return base.Implement( serviceProvider, compilation, addTransformation );
         }

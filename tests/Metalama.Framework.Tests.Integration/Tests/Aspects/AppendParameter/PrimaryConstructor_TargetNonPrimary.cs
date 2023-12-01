@@ -9,6 +9,8 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_TargetNonPrimary;
 
+#pragma warning disable CS9113 // Parameter is unread.
+
 public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )

@@ -7,6 +7,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_RecordPrimaryConstructor_Statement;
 
+#pragma warning disable CS0169 // field is never used
+
 public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )

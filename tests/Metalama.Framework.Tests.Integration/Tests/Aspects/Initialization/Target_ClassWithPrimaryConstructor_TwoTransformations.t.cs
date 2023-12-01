@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `TargetCode`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [Aspect] applied to 'TargetCode': The property 'TargetCode.Property' can't be used as the the assignment target for an initializer of a primary constructor, because it already has an initializer. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Error LAMA0653 on `Property`: `The property 'TargetCode.Property' can't be used as the assignment target for an initializer of a primary constructor on type 'TargetCode' more than once.`

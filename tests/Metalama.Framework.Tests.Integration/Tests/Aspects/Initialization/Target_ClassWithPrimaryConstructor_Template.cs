@@ -13,6 +13,8 @@ using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialization.Target_ClassWithPrimaryConstructor_Template;
 
+#pragma warning disable CS0169 // field is never used
+
 public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
@@ -23,7 +25,13 @@ public class Aspect : TypeAspect
     [Template]
     void InitializerTemplate()
     {
-        meta.Target.Type.Fields.OfName("x").Single().Value = 42;
+        foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties)
+        {
+            if (!fieldOrProperty.IsImplicitlyDeclared)
+            {
+                fieldOrProperty.Value = fieldOrProperty.Name;
+            }
+        }
     }
 }
 
@@ -31,7 +39,11 @@ public class Aspect : TypeAspect
 [Aspect]
 class TargetCode()
 {
-    int x;
+    string? f;
+    string? f1, f2;
+
+    public string? Property1 { get; }
+    public string? Property2 { get; set; }
 }
 
 #endif

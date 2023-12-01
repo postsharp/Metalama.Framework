@@ -43,6 +43,8 @@ internal sealed partial class LinkerInjectionStep
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
 #pragma warning restore IDE0052
 
+        private readonly IUserDiagnosticSink _diagnostics;
+
         // Maps a diagnostic id to the number of times it has been suppressed.
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
@@ -55,7 +57,8 @@ internal sealed partial class LinkerInjectionStep
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
             IReadOnlyCollectionWithContains<SyntaxNode> nodesWithModifiedAttributes,
             SyntaxTree syntaxTreeForGlobalAttributes,
-            IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
+            IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations,
+            IUserDiagnosticSink diagnostics )
         {
             this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
             this._diagnosticSuppressions = diagnosticSuppressions;
@@ -67,6 +70,7 @@ internal sealed partial class LinkerInjectionStep
             this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
             this._typeLevelTransformations = typeLevelTransformations;
+            this._diagnostics = diagnostics;
         }
 
         public override bool VisitIntoStructuredTrivia => true;
@@ -471,17 +475,44 @@ internal sealed partial class LinkerInjectionStep
                     switch ( injectedNode )
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
-                            if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    injectedMember.DeclarationBuilder.AssertNotNull(),
-                                    out var memberLevelTransformations ) )
                             {
-                                injectedNode = this.ApplyMemberLevelTransformations(
-                                    constructorDeclaration,
-                                    memberLevelTransformations,
-                                    syntaxGenerationContext );
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        injectedMember.DeclarationBuilder.AssertNotNull(),
+                                        out var memberLevelTransformations ) )
+                                {
+                                    injectedNode = this.ApplyMemberLevelTransformations(
+                                        constructorDeclaration,
+                                        memberLevelTransformations,
+                                        syntaxGenerationContext );
+                                }
+
+                                break;
                             }
 
-                            break;
+                        case FieldDeclarationSyntax fieldDeclaration:
+                            {
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        injectedMember.DeclarationBuilder.AssertNotNull(),
+                                        out var memberLevelTransformations ) )
+                                {
+                                    injectedNode = this.ApplyMemberLevelTransformations( fieldDeclaration, memberLevelTransformations );
+                                }
+
+                                break;
+                            }
+
+                        case PropertyDeclarationSyntax propertyDeclaration:
+                            {
+                                if ( injectedMember.DeclarationBuilder != null &&
+                                    this._introductionMemberLevelTransformations.TryGetValue(
+                                        injectedMember.DeclarationBuilder,
+                                        out var memberLevelTransformations ) )
+                                {
+                                    injectedNode = this.ApplyMemberLevelTransformations( propertyDeclaration, memberLevelTransformations );
+                                }
+
+                                break;
+                            }
                     }
 
                     if ( injectedMember.Declaration != null )
@@ -517,11 +548,103 @@ internal sealed partial class LinkerInjectionStep
             };
         }
 
+        private FieldDeclarationSyntax ApplyMemberLevelTransformations(
+            FieldDeclarationSyntax fieldDeclaration,
+            MemberLevelTransformations memberLevelTransformations )
+        {
+            Invariant.Assert( fieldDeclaration.Declaration.Variables.Count == 1 );
+
+            var originalFieldVariableDeclarator = fieldDeclaration.Declaration.Variables[0];
+            var newFieldVariableDeclarator = this.ApplyMemberLevelTransformations( originalFieldVariableDeclarator, memberLevelTransformations );
+
+            return fieldDeclaration.ReplaceNode( originalFieldVariableDeclarator, newFieldVariableDeclarator );
+        }
+
+        private VariableDeclaratorSyntax ApplyMemberLevelTransformations(
+            VariableDeclaratorSyntax fieldVariableDeclarator,
+            MemberLevelTransformations memberLevelTransformations )
+        {
+            Invariant.Assert( memberLevelTransformations.Statements.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Parameters.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Arguments.Length == 0 );
+
+            var transformation = memberLevelTransformations.Expressions[0];
+
+            if ( memberLevelTransformations.Expressions.Length == 1 )
+            {
+                if ( fieldVariableDeclarator.Initializer != null )
+                {
+                    this._diagnostics.Report(
+                        AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                            fieldVariableDeclarator.GetDiagnosticLocation(),
+                            (fieldVariableDeclarator.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The field already has an initializer.") ) );
+                }
+                else
+                {
+                    fieldVariableDeclarator = fieldVariableDeclarator.WithInitializer( EqualsValueClause( transformation.InitializerExpression ) );
+                }
+            }
+            else if ( memberLevelTransformations.Expressions.Length > 1 )
+            {
+                this._diagnostics.Report(
+                    AspectLinkerDiagnosticDescriptors.CantAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        fieldVariableDeclarator.GetDiagnosticLocation(),
+                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType) ) );
+            }
+
+            return fieldVariableDeclarator;
+        }
+
+        private PropertyDeclarationSyntax ApplyMemberLevelTransformations(
+            PropertyDeclarationSyntax propertyDeclaration,
+            MemberLevelTransformations memberLevelTransformations )
+        {
+            Invariant.Assert( memberLevelTransformations.Statements.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Parameters.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Arguments.Length == 0 );
+
+            var transformation = memberLevelTransformations.Expressions[0];
+
+            if ( memberLevelTransformations.Expressions.Length == 1 )
+            {
+                if ( propertyDeclaration.Initializer != null )
+                {
+                    this._diagnostics.Report(
+                        AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                            propertyDeclaration.GetDiagnosticLocation(),
+                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The property already has an initializer.") ) );
+                }
+
+                if ( propertyDeclaration.ExpressionBody != null || propertyDeclaration.AccessorList?.Accessors.Any( a => a.Body != null || a.ExpressionBody != null ) == true )
+                {
+                    this._diagnostics.Report(
+                        AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                            propertyDeclaration.GetDiagnosticLocation(),
+                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "Is is not an auto-property.") ) );
+                }
+
+                propertyDeclaration = propertyDeclaration
+                    .WithInitializer( EqualsValueClause( memberLevelTransformations.Expressions[0].InitializerExpression ) )
+                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) );
+            }
+            else if ( memberLevelTransformations.Expressions.Length > 1 )
+            {
+                this._diagnostics.Report(
+                    AspectLinkerDiagnosticDescriptors.CantAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        propertyDeclaration.GetDiagnosticLocation(),
+                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType) ) );
+            }
+
+            return propertyDeclaration;
+        }
+
         private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
             ConstructorDeclarationSyntax constructorDeclaration,
             MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext )
         {
+            Invariant.Assert( memberLevelTransformations.Expressions.Length == 0 );
+
             constructorDeclaration = this.InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
 
             constructorDeclaration = constructorDeclaration.WithParameterList(
@@ -722,6 +845,19 @@ internal sealed partial class LinkerInjectionStep
         {
             var originalNode = node;
 
+            if (node.Declaration.Variables.Any(this._symbolMemberLevelTransformations.ContainsKey))
+            {
+                node = node.ReplaceNodes( node.Declaration.Variables, ( variableDeclarator, _ ) =>
+                {
+                    if ( this._symbolMemberLevelTransformations.TryGetValue( variableDeclarator, out var memberLevelTransformations ) )
+                    {
+                        variableDeclarator = this.ApplyMemberLevelTransformations( variableDeclarator, memberLevelTransformations );
+                    }
+
+                    return variableDeclarator;
+                } );
+            }
+
             // Rewrite attributes.
             if ( originalNode.Declaration.Variables.Count > 1
                  && originalNode.Declaration.Variables.Any( this._nodesWithModifiedAttributes.Contains ) )
@@ -872,6 +1008,11 @@ internal sealed partial class LinkerInjectionStep
             if ( this._syntaxTransformationCollection.IsRemovedSyntax( originalNode ) )
             {
                 return Array.Empty<PropertyDeclarationSyntax>();
+            }
+
+            if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
+            {
+                node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations );
             }
 
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;

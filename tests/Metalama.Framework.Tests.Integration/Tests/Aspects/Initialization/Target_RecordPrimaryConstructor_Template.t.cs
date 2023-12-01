@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0530 on `TargetRecord`: `The aspect 'Aspect' cannot add a template-based initializer to the primary constructor of type 'TargetRecord'.`
+// Error LAMA0651 on `TargetRecord`: `The statement 'global::System.Console.WriteLine("TargetRecord: Aspect");' can't be added as an initializer to a primary constructor on type 'TargetRecord'. Only simple assignment is supported.`

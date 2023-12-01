@@ -260,13 +260,5 @@ namespace Metalama.Framework.Engine.Advising
                 "The aspect '{0}' cannot override the member '{1}' because it is not virtual.",
                 _category,
                 Error );
-
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType? Type)>
-            CannotAddTemplateInitializerToPrimaryConstructor = new(
-                "LAMA0530",
-                "Cannot add a template-based initializer to a primary constructor.",
-                "The aspect '{0}' cannot add a template-based initializer to the primary constructor of type '{1}'.",
-                _category,
-                Error );
     }
 }

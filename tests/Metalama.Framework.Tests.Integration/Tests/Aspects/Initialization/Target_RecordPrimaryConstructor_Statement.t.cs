@@ -2,5 +2,5 @@
 [Aspect]
 public record TargetRecord()
 {
-    private global::System.Int32 x = 13;
+    int x = 13;
 }
