@@ -31,7 +31,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>>
             _injectedInterfacesByTargetTypeDeclaration;
 
-        private readonly ConcurrentSet<SyntaxNode> _removedSyntax;
+        private readonly ConcurrentSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly ConcurrentSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
 
@@ -48,7 +48,7 @@ internal sealed partial class LinkerInjectionStep
             this._injectedInterfacesByTargetTypeDeclaration =
                 new ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>>();
 
-            this._removedSyntax = new ConcurrentSet<SyntaxNode>();
+            this._removedVariableDeclaratorSyntax = new ConcurrentSet<VariableDeclaratorSyntax>();
             this._autoPropertyWithSynthesizedSetterSyntax = new ConcurrentSet<PropertyDeclarationSyntax>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
         }
@@ -109,8 +109,8 @@ internal sealed partial class LinkerInjectionStep
         {
             switch ( removedSyntax )
             {
-                case VariableDeclaratorSyntax or PropertyDeclarationSyntax:
-                    this._removedSyntax.Add( removedSyntax );
+                case VariableDeclaratorSyntax variableDeclarator:
+                    this._removedVariableDeclaratorSyntax.Add( variableDeclarator );
 
                     break;
 
@@ -119,7 +119,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public bool IsRemovedSyntax( SyntaxNode node ) => this._removedSyntax.Contains( node );
+        public bool IsRemovedSyntax( VariableDeclaratorSyntax variableDeclarator ) => this._removedVariableDeclaratorSyntax.Contains( variableDeclarator );
 
         public bool IsAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax propertyDeclaration )
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );

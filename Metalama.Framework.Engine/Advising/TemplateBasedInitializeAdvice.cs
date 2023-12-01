@@ -4,8 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
@@ -28,13 +26,6 @@ namespace Metalama.Framework.Engine.Advising
         {
             this._boundTemplate = boundTemplate;
             this._tags = tags;
-        }
-
-        public override AdviceImplementationResult Implement( ProjectServiceProvider serviceProvider, CompilationModel compilation, Action<ITransformation> addTransformation )
-        {
-            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-
-            return base.Implement( serviceProvider, compilation, addTransformation );
         }
 
         protected override void AddTransformation( IMemberOrNamedType targetDeclaration, IConstructor targetCtor, Action<ITransformation> addTransformation )

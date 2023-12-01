@@ -11,7 +11,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilder>
+internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformation<FieldBuilder>
 {
     public IntroduceFieldTransformation( Advice advice, FieldBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 

@@ -539,7 +539,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 ConstructorDeclarationSyntax constructor => Singleton( this.VisitConstructorDeclarationCore( constructor ) ),
                 MethodDeclarationSyntax method => Singleton( this.VisitMethodDeclarationCore( method ) ),
-                PropertyDeclarationSyntax property => this.VisitPropertyDeclarationCore( property ),
+                PropertyDeclarationSyntax property => Singleton( this.VisitPropertyDeclarationCore( property ) ),
                 OperatorDeclarationSyntax @operator => Singleton( this.VisitOperatorDeclarationCore( @operator ) ),
                 EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
                 FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
@@ -845,7 +845,7 @@ internal sealed partial class LinkerInjectionStep
         {
             var originalNode = node;
 
-            if (node.Declaration.Variables.Any(this._symbolMemberLevelTransformations.ContainsKey))
+            if ( node.Declaration.Variables.Any( this._symbolMemberLevelTransformations.ContainsKey ) )
             {
                 node = node.ReplaceNodes( node.Declaration.Variables, ( variableDeclarator, _ ) =>
                 {
@@ -1001,14 +1001,9 @@ internal sealed partial class LinkerInjectionStep
             return node;
         }
 
-        private IReadOnlyList<PropertyDeclarationSyntax> VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
+        private PropertyDeclarationSyntax VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
         {
             var originalNode = node;
-
-            if ( this._syntaxTransformationCollection.IsRemovedSyntax( originalNode ) )
-            {
-                return Array.Empty<PropertyDeclarationSyntax>();
-            }
 
             if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
             {
@@ -1032,7 +1027,7 @@ internal sealed partial class LinkerInjectionStep
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
             node = ReplaceAttributes( node, rewrittenAttributes );
 
-            return new[] { node };
+            return node;
         }
 
         public override SyntaxNode VisitAccessorDeclaration( AccessorDeclarationSyntax node )
