@@ -410,22 +410,6 @@ public static partial class EligibilityExtensions
             member => $"{member} must be static" );
 
     /// <summary>
-    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
-    /// </summary>
-    public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
-        => eligibilityBuilder.MustSatisfy(
-            member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
-            member => $"{member} must not be a primary constructor of non-record type" );
-
-    /// <summary>
-    /// Forbids the target type from having a primary constructor while the type is a type or a struct (C# 12.0).
-    /// </summary>
-    public static void MustNotBeNonRecordTypeWithPrimaryConstructor( this IEligibilityBuilder<INamedType> eligibilityBuilder )
-        => eligibilityBuilder.MustSatisfy(
-            type => type is not { PrimaryConstructor: not null, TypeKind: TypeKind.Class or TypeKind.Struct },
-            type => $"{type} must not be a non-record type with primary constructor" );
-
-    /// <summary>
     /// Forbids the target member or type from being static.
     /// </summary>
     public static void MustNotBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
@@ -456,6 +440,14 @@ public static partial class EligibilityExtensions
         => eligibilityBuilder.MustSatisfy(
             member => member.TypeKind != TypeKind.Interface,
             member => $"{member} must not an interface" );
+
+    /// <summary>
+    /// Forbids the target constructor from being a primary constructor.
+    /// </summary>
+    public static void MustNotBePrimaryConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member is not { IsPrimary: true },
+            member => $"{member} must not be a primary constructor" );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
