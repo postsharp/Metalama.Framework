@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -52,7 +53,9 @@ namespace Metalama.Framework.Engine.Linking
             }
              */
 
-        public static PropertyDeclarationSyntax WithSynthesizedSetter( this PropertyDeclarationSyntax propertyDeclaration )
+        public static PropertyDeclarationSyntax WithSynthesizedSetter(
+            this PropertyDeclarationSyntax propertyDeclaration,
+            SyntaxGenerationContext syntaxGenerationContext )
         {
             Invariant.Assert(
                 propertyDeclaration
@@ -60,20 +63,20 @@ namespace Metalama.Framework.Engine.Linking
                     .Accessors
                     .All( a => !a.IsKind( SyntaxKind.InitAccessorDeclaration ) && !a.IsKind( SyntaxKind.SetAccessorDeclaration ) ) );
 
+            var isInit = syntaxGenerationContext.SupportsInitAccessors && !propertyDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.StaticKeyword ) );
+
             return propertyDeclaration
                 .WithAccessorList(
                     propertyDeclaration.AccessorList.AssertNotNull()
                         .AddAccessors(
                             AccessorDeclaration(
-                                SyntaxKind.InitAccessorDeclaration,
+                                isInit ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
                                 List<AttributeListSyntax>(),
                                 propertyDeclaration.Modifiers.Any( t => t.IsKind( SyntaxKind.PrivateKeyword ) )
                                 || propertyDeclaration.Modifiers.All( t => !t.IsAccessModifierKeyword() )
                                     ? TokenList()
                                     : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
-                                propertyDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.StaticKeyword ) )
-                                    ? Token( SyntaxKind.SetKeyword )
-                                    : Token( SyntaxKind.InitKeyword ),
+                                Token( isInit ? SyntaxKind.InitKeyword : SyntaxKind.SetKeyword ),
                                 null,
                                 null,
                                 Token( SyntaxKind.SemicolonToken ) ) ) );

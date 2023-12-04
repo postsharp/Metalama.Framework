@@ -1,9 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -18,6 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel
         internal bool IsPartial { get; }
 
         internal ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
+
+        [Memo]
+        internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof(IsExternalInit).FullName! ) != null;
 
         private SyntaxGenerationContext( CompilationContext compilationContext, OurSyntaxGenerator syntaxGenerator, bool isPartial )
         {

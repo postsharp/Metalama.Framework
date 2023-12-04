@@ -414,7 +414,8 @@ namespace Metalama.Framework.Engine.Linking
                                                 Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
                                                 Syntax: PropertyDeclarationSyntax propertyDeclaration
                                             }:
-                                                return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
+                                                return im.WithSyntax(
+                                                    propertyDeclaration.WithSynthesizedSetter( this._compilationContext.DefaultSyntaxGenerationContext ) );
 
                                             case { Semantic: InjectedMemberSemantic.InitializerMethod }:
                                                 return im;
