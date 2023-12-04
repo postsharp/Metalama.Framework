@@ -21,13 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Construct
     }
 
     // <target>
-    internal class TargetClass( [NotNull]int x )
-    {
-        public int X { get; set; } = x;
-    }
-
-    // <target>
-    internal record TargetRecord([NotNull] int x)
+    internal class Target( [NotNull]int x )
     {
         public int X { get; set; } = x;
     }

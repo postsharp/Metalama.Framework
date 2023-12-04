@@ -434,20 +434,20 @@ public static partial class EligibilityExtensions
             member => $"{member} must not be abstract" );
 
     /// <summary>
+    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
+    /// </summary>
+    public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
+            member => $"{member} must not be a primary constructor of non-record type" );
+
+    /// <summary>
     /// Forbids the target type from being an interface.
     /// </summary>
     public static void MustNotBeInterface( this IEligibilityBuilder<INamedType> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             member => member.TypeKind != TypeKind.Interface,
             member => $"{member} must not an interface" );
-
-    /// <summary>
-    /// Forbids the target constructor from being a primary constructor.
-    /// </summary>
-    public static void MustNotBePrimaryConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
-        => eligibilityBuilder.MustSatisfy(
-            member => member is not { IsPrimary: true },
-            member => $"{member} must not be a primary constructor" );
 
     /// <summary>
     /// Requires the target type to be convertible to a given type (specified as a reflection <see cref="System.Type"/>).
