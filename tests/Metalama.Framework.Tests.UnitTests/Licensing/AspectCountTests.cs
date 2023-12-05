@@ -25,63 +25,63 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
         [Theory]
         [TestLicensesInlineData( null, 1, _arbitraryNamespace, _arbitraryNamespace, _noLicenseKeyErrorId )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpEssentials), 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpFramework), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpFramework), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpUltimate), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), 5, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.PostSharpEssentials ), 1, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.PostSharpFramework ), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.PostSharpFramework ), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.PostSharpUltimate ), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaFreePersonal ), 3, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaFreePersonal ), 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaStarterBusiness ), 5, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaStarterBusiness ), 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaProfessionalBusiness ), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaProfessionalBusiness),
+            nameof( TestLicenseKeys.MetalamaProfessionalBusiness ),
             11,
             _arbitraryNamespace,
             _arbitraryNamespace,
             _tooManyAspectClassesErrorId )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaUltimateBusiness ), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution ),
             1,
             _arbitraryNamespace,
             _arbitraryNamespace,
             _redistributionInvalidErrorId )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution ),
             1,
             _arbitraryNamespace,
             TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
             _redistributionInvalidErrorId )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution ),
             11,
             TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
             _arbitraryNamespace,
             null )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution ),
             11,
             TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
             TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
             null )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound),
+            nameof( TestLicenseKeys.MetalamaUltimatePersonalProjectBound ),
             1,
             _arbitraryNamespace,
             _arbitraryNamespace,
             _tooManyAspectClassesErrorId )]
         [TestLicensesInlineData(
-            nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound),
+            nameof( TestLicenseKeys.MetalamaUltimatePersonalProjectBound ),
             11,
             _arbitraryNamespace,
             _arbitraryNamespace,
             null,
             0,
             TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaFreePersonal ), 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaFreePersonal ), 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [TestLicensesInlineData( nameof( TestLicenseKeys.MetalamaFreePersonal ), 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(
             string? licenseKey,
             int numberOfAspects,
@@ -424,6 +424,227 @@ class TargetClass
             var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Single( diagnostics, d => d.Id == _tooManyAspectClassesErrorId );
+        }
+
+        [Fact]
+        public async Task AbstractAspectInstancesDontCountAsync()
+        {
+            const string code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+
+[Inheritable]
+public class Aspect1 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect1));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect2 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect2));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect3 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect3));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect4 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect4));
+        return meta.Proceed();
+    }
+}
+
+interface ITargetInterface
+{
+    [Aspect1]
+    [Aspect2]
+    [Aspect3]
+    [Aspect4]
+    void TargetMethod();
+}
+";
+
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+
+            AssertEmptyOrSdkOnly( diagnostics );
+        }
+
+        [Theory]
+        [TestLicensesInlineData( "None", null, _noLicenseKeyErrorId )]
+        [TestLicensesInlineData( "PostSharp Essentials", nameof( TestLicenseKeys.PostSharpEssentials ), _tooManyAspectClassesErrorId )]
+        [TestLicensesInlineData( "PostSharp Framework", nameof( TestLicenseKeys.PostSharpFramework ), null )]
+        [TestLicensesInlineData( "PostSharp Ultimate", nameof( TestLicenseKeys.PostSharpUltimate ), null )]
+        [TestLicensesInlineData( "Metalama Free Personal", nameof( TestLicenseKeys.MetalamaFreePersonal ), _tooManyAspectClassesErrorId )]
+        [TestLicensesInlineData( "Metalama Starter Business", nameof( TestLicenseKeys.MetalamaStarterBusiness ), null )]
+        [TestLicensesInlineData( "Metalama Professional Business", nameof( TestLicenseKeys.MetalamaProfessionalBusiness ), null )]
+        [TestLicensesInlineData( "Metalama Ultimate Business", nameof( TestLicenseKeys.MetalamaUltimateBusiness ), null )]
+        public async Task InheritedAspectsCountAsync( string licenseKeyName, string licenseKey, string? expectedErrorId )
+        {
+            _ = licenseKeyName;
+
+            const string code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+
+[Inheritable]
+public class Aspect1 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect1));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect2 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect2));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect3 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect3));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect4 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect4));
+        return meta.Proceed();
+    }
+}
+
+interface ITargetInterface
+{
+    [Aspect1]
+    [Aspect2]
+    [Aspect3]
+    [Aspect4]
+    void TargetMethod();
+}
+
+class TargetClass : ITargetInterface
+{
+    public void TargetMethod()
+    {
+    }
+}
+";
+
+            var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey );
+
+            if ( expectedErrorId == null )
+            {
+                AssertEmptyOrSdkOnly( diagnostics );
+            }
+            else
+            {
+                Assert.Single( diagnostics, d => d.Id == expectedErrorId );
+            }
+        }
+
+        [Fact]
+        public async Task ExcludedAspectInstancesDontCountAsync()
+        {
+            const string code = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using System;
+
+[Inheritable]
+public class Aspect1 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect1));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect2 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect2));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect3 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect3));
+        return meta.Proceed();
+    }
+}
+
+[Inheritable]
+public class Aspect4 : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect4));
+        return meta.Proceed();
+    }
+}
+
+interface ITargetInterface
+{
+    [Aspect1]
+    [Aspect2]
+    [Aspect3]
+    [Aspect4]
+    void TargetMethod();
+}
+
+class TargetClass : ITargetInterface
+{
+    [ExcludeAspect(typeof(Aspect4))]
+    public void TargetMethod()
+    {
+    }
+}
+";
+
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+
+            AssertEmptyOrSdkOnly( diagnostics );
         }
     }
 }

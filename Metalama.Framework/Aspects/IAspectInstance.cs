@@ -33,7 +33,6 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets a value indicating whether the current aspect instance can be inherited by derived declarations.
         /// </summary>
-        /// <see cref="IsAbstract"/>
         bool IsInheritable { get; }
 
         /// <summary>
