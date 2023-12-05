@@ -1,10 +1,10 @@
 #if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
-# endif
+// @LanguageVersion(10)
+#endif
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.Struct_ParameterlessCtor
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.Struct_NoCtor_CSharp10
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -25,12 +25,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.S
     [Introduction]
     internal struct TargetStruct
     {
-        public TargetStruct()
-        {
-        }
+        public int ExistingField;
 
-        public int ExistingField = 42;
-
-        public int ExistingProperty { get; set; } = 42;
+        public int ExistingProperty { get; set; }
     }
 }

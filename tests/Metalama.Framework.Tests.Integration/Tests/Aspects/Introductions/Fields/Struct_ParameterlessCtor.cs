@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+# endif
+
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_ParameterlessCtor

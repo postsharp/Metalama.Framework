@@ -21,6 +21,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
 
+        internal LanguageVersion LanguageVersion => this.Compilation.GetLanguageVersion();
+
+        internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
+
         [Memo]
         internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof(IsExternalInit).FullName! ) != null;
 

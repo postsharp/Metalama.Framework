@@ -16,14 +16,17 @@ namespace Metalama.Framework.Engine.Transformations
         public StatementSyntax Statement { get; }
 
         /// <summary>
-        /// Gets the declaration to which the statement relates to. Statements are first ordered by hierarchy and then by aspect order.
+        /// Gets the declaration to which the statement relates to. Statements are first ordered by statement kind, then by hierarchy and then by aspect order.
         /// </summary>
         public IDeclaration ContextDeclaration { get; }
 
-        public InsertedStatement( StatementSyntax newNode, IDeclaration contextDeclaration )
+        public InsertedStatementKind Kind { get; }
+
+        public InsertedStatement( StatementSyntax newNode, IDeclaration contextDeclaration, InsertedStatementKind kind = InsertedStatementKind.Regular )
         {
             this.Statement = newNode;
             this.ContextDeclaration = contextDeclaration;
+            this.Kind = kind;
         }
     }
 }

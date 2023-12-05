@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
-// In C# 10, we need to generate slightly different code.
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+// @LanguageVersion(10)
 #endif
 
 using System;
@@ -8,7 +7,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_Struct_InstanceConstructing_Implicit
+namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_Struct_InstanceConstructing_Implicit_CSharp10
 {
     public class Aspect : TypeAspect
     {
