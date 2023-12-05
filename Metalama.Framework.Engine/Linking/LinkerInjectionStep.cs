@@ -646,7 +646,8 @@ namespace Metalama.Framework.Engine.Linking
                                     new LinkerInsertedStatement(
                                         transformation,
                                         insertedStatement.Statement,
-                                        insertedStatement.ContextDeclaration ) );
+                                        insertedStatement.ContextDeclaration,
+                                        insertedStatement.Kind ) );
                             }
                         }
 
@@ -672,7 +673,8 @@ namespace Metalama.Framework.Engine.Linking
                                 new LinkerInsertedStatement(
                                     transformation,
                                     insertedStatement.Statement,
-                                    insertedStatement.ContextDeclaration ) );
+                                    insertedStatement.ContextDeclaration,
+                                    insertedStatement.Kind ) );
                         }
 
                         break;

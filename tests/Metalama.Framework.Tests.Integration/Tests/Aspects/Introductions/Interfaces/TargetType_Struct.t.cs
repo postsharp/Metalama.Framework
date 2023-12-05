@@ -1,43 +1,42 @@
-// Warning CS0414 on `EventField`: `The field 'TargetStruct.EventField' is assigned but its value is never used`
 [IntroduceAspect]
 public struct TargetStruct : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.TargetType_Struct.IInterface
 {
-  public int ExistingField;
-  public int ExistingProperty { get; set; }
-  public void ExistingMethod()
-  {
-    Console.WriteLine("Original struct member");
-  }
-  public TargetStruct()
-  {
-  }
-  public global::System.Int32 AutoProperty { get; set; } = default;
-  public global::System.Int32 Property
-  {
-    get
+    public int ExistingField;
+    public int ExistingProperty { get; set; }
+    public void ExistingMethod()
     {
-      global::System.Console.WriteLine("Introduced interface member");
-      return (global::System.Int32)42;
+        Console.WriteLine("Original struct member");
     }
-    set
+    public TargetStruct()
     {
-      global::System.Console.WriteLine("Introduced interface member");
     }
-  }
-  public void IntroducedMethod()
-  {
-    global::System.Console.WriteLine("Introduced interface member");
-  }
-  public event global::System.EventHandler? Event
-  {
-    add
+    public global::System.Int32 AutoProperty { get; set; }
+    public global::System.Int32 Property
     {
-      global::System.Console.WriteLine("Introduced interface member");
+        get
+        {
+            global::System.Console.WriteLine("Introduced interface member");
+            return (global::System.Int32)42;
+        }
+        set
+        {
+            global::System.Console.WriteLine("Introduced interface member");
+        }
     }
-    remove
+    public void IntroducedMethod()
     {
-      global::System.Console.WriteLine("Introduced interface member");
+        global::System.Console.WriteLine("Introduced interface member");
     }
-  }
-  public event global::System.EventHandler? EventField = default;
+    public event global::System.EventHandler? Event
+    {
+        add
+        {
+            global::System.Console.WriteLine("Introduced interface member");
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Introduced interface member");
+        }
+    }
+    public event global::System.EventHandler? EventField;
 }

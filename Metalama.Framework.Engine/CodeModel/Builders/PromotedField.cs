@@ -107,9 +107,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 {
                     initializerExpression = fieldDeclaration.Initializer.Value;
                 }
-                else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+                else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && context.SyntaxGenerationContext.RequiresStructFieldInitialization )
                 {
-                    // In structs, we have to initialize all introduced fields.
+                    // In structs in C# 10, we have to initialize all introduced fields.
                     initializerExpression = SyntaxFactoryEx.Default;
                 }
                 else

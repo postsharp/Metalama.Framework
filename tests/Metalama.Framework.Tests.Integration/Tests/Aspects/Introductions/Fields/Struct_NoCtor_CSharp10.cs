@@ -1,11 +1,10 @@
 #if TEST_OPTIONS
-// In C# 10, we need to generate slightly different code.
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+// @LanguageVersion(10)
 #endif
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Target_ReadOnlyStruct_Empty
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_NoCtor_CSharp10
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -24,7 +23,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
 
     // <target>
     [Introduction]
-    internal readonly struct TargetStruct
+    internal struct TargetStruct
     {
+        public int ExistingField;
+
+        public int ExistingProperty { get; set; }
     }
 }

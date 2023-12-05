@@ -38,8 +38,10 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
         Invariant.Assert( !(!eventBuilder.IsEventField && initializerExpression != null) );
 
         // TODO: This should be handled by the linker.
-        // If we are introducing a field into a struct, it must have an explicit default value.
-        if ( initializerExpression == null && eventBuilder is { IsEventField: true, DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct } )
+        // If we are introducing a field into a struct in C# 10, it must have an explicit default value.
+        if ( initializerExpression == null
+             && eventBuilder is { IsEventField: true, DeclaringType.TypeKind: TypeKind.Struct or TypeKind.RecordStruct }
+             && context.SyntaxGenerationContext.RequiresStructFieldInitialization )
         {
             initializerExpression = SyntaxFactoryEx.Default;
         }
