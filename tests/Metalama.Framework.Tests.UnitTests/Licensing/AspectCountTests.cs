@@ -464,12 +464,15 @@ public class Aspect3 : OverrideMethodAspect
     }
 }
 
-[Inheritable]
-public class Aspect4 : OverrideMethodAspect
+public class ConditionallyInheritableAspect1 : OverrideMethodAspect, IConditionallyInheritableAspect
 {
+    public bool IsInheritable { get; init; }
+
+    bool IConditionallyInheritableAspect.IsInheritable(IDeclaration targetDeclaration, IAspectInstance aspectInstance) => IsInheritable;
+
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect4));
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(ConditionallyInheritableAspect1));
         return meta.Proceed();
     }
 }
@@ -479,7 +482,7 @@ interface ITargetInterface
     [Aspect1]
     [Aspect2]
     [Aspect3]
-    [Aspect4]
+    [ConditionallyInheritableAspect1(IsInheritable = true)]
     void TargetMethod();
 }
 ";
@@ -537,12 +540,15 @@ public class Aspect3 : OverrideMethodAspect
     }
 }
 
-[Inheritable]
-public class Aspect4 : OverrideMethodAspect
+public class ConditionallyInheritableAspect1 : OverrideMethodAspect, IConditionallyInheritableAspect
 {
+    public bool IsInheritable { get; init; }
+
+    bool IConditionallyInheritableAspect.IsInheritable(IDeclaration targetDeclaration, IAspectInstance aspectInstance) => IsInheritable;
+
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect4));
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(ConditionallyInheritableAspect1));
         return meta.Proceed();
     }
 }
@@ -552,7 +558,7 @@ interface ITargetInterface
     [Aspect1]
     [Aspect2]
     [Aspect3]
-    [Aspect4]
+    [ConditionallyInheritableAspect1(IsInheritable = true)]
     void TargetMethod();
 }
 
