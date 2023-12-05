@@ -83,7 +83,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IExpression? GetInitializerExpressionCore()
         {
-            var initializer = ((PropertyDeclarationSyntax?) this.PropertySymbol.GetPrimaryDeclaration())?.Initializer;
+            // The declaration for properties created from record primary constructor parameters is ParameterSyntax.
+            // Since those don't have a normal initializer, ignore them here.
+            var initializer = (this.PropertySymbol.GetPrimaryDeclaration() as PropertyDeclarationSyntax)?.Initializer;
 
             if ( initializer == null )
             {

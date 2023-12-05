@@ -4,10 +4,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Fabrics;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
@@ -45,7 +42,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
             }
 
             foreach (var constructor in builder.Target.Constructors.Where(
-                         c => !c.IsImplicitlyDeclared && (
+                         c => !c.IsImplicitlyDeclared && !c.IsPrimary && (
                              c.Accessibility == Accessibility.Public || c.Accessibility == Accessibility.Protected ) ))
             {
                 foreach (var parameter in constructor.Parameters.Where(

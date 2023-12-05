@@ -28,8 +28,7 @@ internal sealed class ReplaceDefaultConstructorTransformation
 
         if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
         {
-            Invariant.Assert( targetType.Constructors.Count == 1 );
-            this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMember>();
+            this.ReplacedMember = targetType.Constructors.OfExactSignature( Array.Empty<IType>() ).AssertNotNull().ToMemberRef<IMember>();
         }
     }
 
