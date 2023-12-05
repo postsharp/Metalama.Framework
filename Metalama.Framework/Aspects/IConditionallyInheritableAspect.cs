@@ -6,7 +6,7 @@ namespace Metalama.Framework.Aspects;
 
 /// <summary>
 /// An interface that can be implemented by aspect that can be inheritable or non-inheritable
-/// based of a field or property of the aspect. When the all instances of the aspect class are unconditionally inheritable,
+/// based of a field or property of the aspect. When all the instances of the aspect class are unconditionally inheritable,
 /// the class must be annotated with the <see cref="InheritableAttribute"/> instead.
 /// </summary>
 public interface IConditionallyInheritableAspect : IAspect

@@ -25,10 +25,14 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets a value indicating whether the current aspect instance has been skipped. This value is <c>true</c> if
         /// the aspect evaluation resulted in an error or if the <see cref="IAspect{T}.BuildAspect"/> method invoked
-        /// <see cref="IAspectBuilder.SkipAspect"/>.
+        /// <see cref="IAspectBuilder.SkipAspect"/>, if it has been excluded using <see cref="ExcludeAspectAttribute"/>,
+        /// or when the target declaration was not eligible.
         /// </summary>
         bool IsSkipped { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the current aspect instance can be inherited by derived declarations.
+        /// </summary>
         bool IsInheritable { get; }
 
         /// <summary>
