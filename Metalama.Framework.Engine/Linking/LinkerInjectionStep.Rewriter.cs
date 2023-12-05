@@ -841,7 +841,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._syntaxTransformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
             {
-                node = node.WithSynthesizedSetter();
+                node = node.WithSynthesizedSetter( this._syntaxGenerationContextFactory.Default );
             }
 
             if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
