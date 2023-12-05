@@ -433,6 +433,15 @@ class TargetClass
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
+using System.ComponentModel;
+using System.Reflection;
+
+namespace System.Runtime.CompilerServices
+{
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    [Obfuscation( Exclude = true )]
+    internal static class IsExternalInit { }
+}
 
 [Inheritable]
 public class Aspect1 : OverrideMethodAspect
@@ -509,6 +518,15 @@ interface ITargetInterface
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
+using System.ComponentModel;
+using System.Reflection;
+
+namespace System.Runtime.CompilerServices
+{
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    [Obfuscation( Exclude = true )]
+    internal static class IsExternalInit { }
+}
 
 [Inheritable]
 public class Aspect1 : OverrideMethodAspect
