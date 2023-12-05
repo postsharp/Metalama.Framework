@@ -321,8 +321,12 @@ internal abstract partial class BaseTestRunner
                 await testResult.AddInputDocumentAsync( includedDocument, includedFullPath );
             }
 
-            // Add system files.
-            mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
+            if ( testInput.Options.SkipAddingSystemFiles != true )
+            {
+                // Add system files.
+                mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
+            }
+
             mainProject = await AddAdditionalDocuments( mainProject, mainParseOptions );
 
             // We are done creating the project.
@@ -407,7 +411,12 @@ internal abstract partial class BaseTestRunner
                 }
 
                 var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+
+                if ( testInput.Options.SkipAddingSystemFiles != true )
+                {
+                    dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+                }
+
                 dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
 
                 // Add dependencies recursively.
