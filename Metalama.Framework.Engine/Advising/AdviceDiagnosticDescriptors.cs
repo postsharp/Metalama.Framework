@@ -205,14 +205,6 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
-            CannotIntroduceParameterIntoNonClassConstructor = new(
-                "LAMA0523",
-                "Cannot introduce a parameter into a constructor of a type that is not a class.",
-                "The aspect '{0}' cannot introduce a parameter into '{1}' because the target type is not a class.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType Record)>
             CannotAddInitializerToRecord = new(
                 "LAMA0524",

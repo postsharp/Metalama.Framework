@@ -442,6 +442,14 @@ public static partial class EligibilityExtensions
             member => $"{member} must not be a primary constructor of non-record type" );
 
     /// <summary>
+    /// Forbids the target constructor from being the copy constructor of a record.
+    /// </summary>
+    public static void MustNotBeRecordCopyConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => !member.IsRecordCopyConstructor(),
+            member => $"{member} must not be the copy constructor of record type" );
+
+    /// <summary>
     /// Forbids the target type from being an interface.
     /// </summary>
     public static void MustNotBeInterface( this IEligibilityBuilder<INamedType> eligibilityBuilder )

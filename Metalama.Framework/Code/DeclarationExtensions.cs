@@ -119,5 +119,15 @@ namespace Metalama.Framework.Code
                 return (IFieldOrProperty) ((ICompilationInternal) compilation).Factory.Translate( fieldOrProperty, options );
             }
         }
+
+        public static bool IsRecordCopyConstructor( this IConstructor constructor )
+            => constructor is
+            {
+                IsStatic: false,
+                IsImplicitlyDeclared: true,
+                IsPrimary: false,
+                Parameters: [_],
+                DeclaringType.TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct
+            };
     }
 }

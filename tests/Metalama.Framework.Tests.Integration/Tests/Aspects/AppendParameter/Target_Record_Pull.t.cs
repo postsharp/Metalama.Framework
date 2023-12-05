@@ -4,13 +4,16 @@ public record R
     public R(global::System.Int32 p = 15)
     {
     }
-    public R(string s) : this()
+    public R(string s) : this(51)
     {
     }
 }
-public record S : R
+public record S1 : R
 {
-    public S()
+    public S1() : base(51)
     {
     }
+}
+public record S2() : R(51)
+{
 }
