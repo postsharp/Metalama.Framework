@@ -108,6 +108,9 @@ namespace Metalama.Framework.Engine.Aspects
             this.TargetDeclarationDepth = targetDeclaration.GetCompilationModel().GetDepth( targetDeclaration );
 
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
+
+            this.IsInheritable = aspectClass.IsInheritable
+                                 ?? ((IConditionallyInheritableAspect) aspect).IsInheritable( targetDeclaration, this );
         }
 
         public EligibleScenarios ComputeEligibility( IDeclaration declaration )
