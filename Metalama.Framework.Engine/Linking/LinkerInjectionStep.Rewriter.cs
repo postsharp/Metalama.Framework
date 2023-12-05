@@ -480,7 +480,7 @@ internal sealed partial class LinkerInjectionStep
                                         injectedMember.DeclarationBuilder.AssertNotNull(),
                                         out var memberLevelTransformations ) )
                                 {
-                                    injectedNode = this.ApplyMemberLevelTransformations(
+                                    injectedNode = ApplyMemberLevelTransformations(
                                         constructorDeclaration,
                                         memberLevelTransformations,
                                         syntaxGenerationContext );
@@ -642,14 +642,14 @@ internal sealed partial class LinkerInjectionStep
             return propertyDeclaration;
         }
 
-        private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
+        private static ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
             ConstructorDeclarationSyntax constructorDeclaration,
             MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext )
         {
             Invariant.Assert( memberLevelTransformations.Expressions.Length == 0 );
 
-            constructorDeclaration = this.InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
+            constructorDeclaration = InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
 
             constructorDeclaration = constructorDeclaration.WithParameterList(
                 AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
@@ -759,7 +759,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private ConstructorDeclarationSyntax InsertStatements(
+        private static ConstructorDeclarationSyntax InsertStatements(
             ConstructorDeclarationSyntax constructorDeclaration,
             ImmutableArray<LinkerInsertedStatement> insertedStatements )
         {
@@ -799,50 +799,18 @@ internal sealed partial class LinkerInjectionStep
 
             return constructorDeclaration;
 
-            IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
-            {
-                // TODO: This sort is intended only for beginning statements.
-                var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.Comparers.Default );
-                var typeStatements = new List<LinkerInsertedStatement>();
-
-                foreach ( var mark in statements )
-                {
-                    switch ( mark.ContextDeclaration )
-                    {
-                        case INamedType:
-                            typeStatements.Add( mark );
-
-                            break;
-
-                        case IMember member:
-                            if ( !memberStatements.TryGetValue( member, out var list ) )
-                            {
-                                memberStatements[member] = list = new List<LinkerInsertedStatement>();
-                            }
-
-                            list.Add( mark );
-
-                            break;
-
-                        default:
-                            throw new AssertionFailedException( $"Unexpected declaration: '{mark.ContextDeclaration}'." );
-                    }
-                }
-
-                // TODO: This sorting is suboptimal, but needed for stable order since we are using a dictionary.
-                foreach ( var pair in memberStatements.OrderBy( p => p.Key.ToDisplayString() ) )
-                {
-                    foreach ( var mark in pair.Value )
-                    {
-                        yield return mark;
-                    }
-                }
-
-                foreach ( var mark in typeStatements )
-                {
-                    yield return mark;
-                }
-            }
+            // TODO: This sort is intended only for beginning statements.
+            static IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
+                => statements
+                    .OrderBy( s => s.Kind )
+                    .ThenBy(
+                        s => s.ContextDeclaration switch
+                        {
+                            IMember => 0,
+                            INamedType => 1,
+                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
+                        } )
+                    .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
         }
 
         private IReadOnlyList<FieldDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
@@ -939,7 +907,7 @@ internal sealed partial class LinkerInjectionStep
             if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
             {
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
-                node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
+                node = ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
             }
 
             // Rewrite attributes.

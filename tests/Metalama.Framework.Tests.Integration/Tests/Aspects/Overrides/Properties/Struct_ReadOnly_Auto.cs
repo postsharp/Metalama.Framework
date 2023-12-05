@@ -1,5 +1,9 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
+﻿#if TEST_OPTIONS
+// In C# 10, we need to generate slightly different code.
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+#endif
+
+using Metalama.Framework.Aspects;
 using System;
 
 #pragma warning disable CS0169
