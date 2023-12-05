@@ -75,6 +75,13 @@ namespace Metalama.Testing.AspectTesting
         public List<string> IncludedFiles { get; } = new();
 
         /// <summary>
+        /// Gets or sets a value indicating whether adding system files to the test compilation should be skipped.
+        /// Namely, there is one file that adds the <c>System.Runtime.CompilerServices.IsExternalInit</c> type on .Net Framework.
+        /// To enable this option in a test, add this comment to your test file: <c>// @SkipAddingSystemFiles</c>. 
+        /// </summary>
+        public bool? SkipAddingSystemFiles { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for input files. If <c>true</c>, these files
         /// are created to the <c>obj/html</c> directory.
         /// To enable this option in a test, add this comment to your test file: <c>// @WriteInputHtml</c>. 
@@ -471,6 +478,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "Include":
                         this.IncludedFiles.Add( optionArg );
+
+                        break;
+
+                    case "SkipAddingSystemFiles":
+                        this.SkipAddingSystemFiles = true;
 
                         break;
 

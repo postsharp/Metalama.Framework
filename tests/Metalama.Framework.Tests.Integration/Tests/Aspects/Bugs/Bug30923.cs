@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Newtonsoft.Json.Linq;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30923
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30923
 {
     public sealed class TestAspect : TypeAspect
     {
