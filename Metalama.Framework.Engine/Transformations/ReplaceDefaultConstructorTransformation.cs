@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -26,8 +27,7 @@ internal sealed class ReplaceDefaultConstructorTransformation : IntroduceMemberT
 
         if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
         {
-            Invariant.Assert( targetType.Constructors.Count == 1 );
-            this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMember>();
+            this.ReplacedMember = targetType.Constructors.OfExactSignature( Array.Empty<IType>() ).AssertNotNull().ToMemberRef<IMember>();
         }
     }
 

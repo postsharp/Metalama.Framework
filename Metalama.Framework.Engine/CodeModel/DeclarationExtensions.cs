@@ -25,7 +25,6 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using OperatorKind = Metalama.Framework.Code.OperatorKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -558,9 +557,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         internal static bool IsImplicitInstanceConstructor( this IConstructor ctor )
-        {
-            return !ctor.IsStatic && ctor is { IsImplicitlyDeclared: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct };
-        }
+            => ctor is { IsStatic: false, IsImplicitlyDeclared: true, IsPrimary: false };
 
         internal static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
 
