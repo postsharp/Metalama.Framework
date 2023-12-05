@@ -39,7 +39,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
 
         if ( aspectReference is { HasCustomReceiver: true, ResolvedSemantic.Symbol.IsStatic: false } )
         {
-            throw AspectLinkerDiagnosticDescriptors.CantInvokeAnotherInstanceBaseRequired.CreateException( aspectReference.OriginalSymbol );
+            throw AspectLinkerDiagnosticDescriptors.CannotInvokeAnotherInstanceBaseRequired.CreateException( aspectReference.OriginalSymbol );
         }
     }
 

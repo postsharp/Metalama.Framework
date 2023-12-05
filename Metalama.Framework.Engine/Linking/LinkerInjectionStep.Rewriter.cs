@@ -575,7 +575,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( fieldVariableDeclarator.Initializer != null )
                 {
                     this._diagnostics.Report(
-                        AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                             fieldVariableDeclarator.GetDiagnosticLocation(),
                             (fieldVariableDeclarator.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The field already has an initializer.") ) );
                 }
@@ -586,10 +586,12 @@ internal sealed partial class LinkerInjectionStep
             }
             else if ( memberLevelTransformations.Expressions.Length > 1 )
             {
+                var aspects = memberLevelTransformations.Expressions.SelectAsArray( e => e.ParentAdvice.Aspect.ToString() );
+
                 this._diagnostics.Report(
-                    AspectLinkerDiagnosticDescriptors.CantAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
+                    AspectLinkerDiagnosticDescriptors.CannotAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
                         fieldVariableDeclarator.GetDiagnosticLocation(),
-                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType) ) );
+                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType, aspects) ) );
             }
 
             return fieldVariableDeclarator;
@@ -610,7 +612,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( propertyDeclaration.Initializer != null )
                 {
                     this._diagnostics.Report(
-                        AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                             propertyDeclaration.GetDiagnosticLocation(),
                             (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The property already has an initializer.") ) );
                 }
@@ -618,7 +620,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( propertyDeclaration.ExpressionBody != null || propertyDeclaration.AccessorList?.Accessors.Any( a => a.Body != null || a.ExpressionBody != null ) == true )
                 {
                     this._diagnostics.Report(
-                        AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                             propertyDeclaration.GetDiagnosticLocation(),
                             (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "Is is not an auto-property.") ) );
                 }
@@ -629,10 +631,12 @@ internal sealed partial class LinkerInjectionStep
             }
             else if ( memberLevelTransformations.Expressions.Length > 1 )
             {
+                var aspects = memberLevelTransformations.Expressions.SelectAsArray( e => e.ParentAdvice.Aspect.ToString() );
+
                 this._diagnostics.Report(
-                    AspectLinkerDiagnosticDescriptors.CantAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
+                    AspectLinkerDiagnosticDescriptors.CannotAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
                         propertyDeclaration.GetDiagnosticLocation(),
-                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType) ) );
+                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType, aspects) ) );
             }
 
             return propertyDeclaration;

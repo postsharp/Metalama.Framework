@@ -579,7 +579,7 @@ namespace Metalama.Framework.Engine.Linking
                                         } )
                                     {
                                         diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CantAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
                                                 constructor.DiagnosticLocation, (statement, constructor.DeclaringType) ) );
 
                                         break;
@@ -600,7 +600,7 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( identifier == null )
                                     {
                                         diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                                                 constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
 
                                         break;
@@ -612,7 +612,7 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( fieldOrProperty.RefKind != RefKind.None )
                                     {
                                         diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                                                 constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is a ref member.") ) );
 
                                         break;
@@ -621,7 +621,7 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( fieldOrProperty.IsAutoPropertyOrField == false )
                                     {
                                         diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CantAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                                                 constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is not an auto-property.") ) );
 
                                         break;
