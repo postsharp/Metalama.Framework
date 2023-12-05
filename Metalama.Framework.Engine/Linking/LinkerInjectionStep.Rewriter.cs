@@ -348,25 +348,9 @@ internal sealed partial class LinkerInjectionStep
 
         public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
-            => this.VisitTypeDeclaration(
-                node,
-                ( syntax, members ) =>
-                {
-                    // If the record has no braces, add them.
-                    if ( syntax.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
-                    {
-                        // TODO: trivias.
-                        syntax = syntax
-                            .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                            .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                            .WithSemicolonToken( default );
-                    }
+        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-                    return syntax.WithMembers( List( members ) );
-                } );
-
-        private SyntaxNode VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
+        private SyntaxNode VisitTypeDeclaration<T>( T node )
             where T : TypeDeclarationSyntax
         {
             var originalNode = node;
@@ -405,14 +389,17 @@ internal sealed partial class LinkerInjectionStep
 
                 node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
-                if ( withMembers != null )
+                // If the type has no braces, add them.
+                if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
                 {
-                    node = withMembers( node, members );
+                    // TODO: trivias.
+                    node = (T) node
+                        .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                        .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                        .WithSemicolonToken( default );
                 }
-                else
-                {
-                    node = (T) node.WithMembers( List( members ) );
-                }
+
+                node = (T) node.WithMembers( List( members ) );
 
                 // Process the type bases.
                 if ( additionalBaseList.Any() )
