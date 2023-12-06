@@ -20,6 +20,9 @@
 
         <!-- Disable the customization done by Metalama.Compiler.Sdk -->
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
+
+        <!-- Avoid creating a package that has no dependencies nor content. -->
+        <IncludeSymbols>false</IncludeSymbols>
     </PropertyGroup>
 
     <ItemGroup>
