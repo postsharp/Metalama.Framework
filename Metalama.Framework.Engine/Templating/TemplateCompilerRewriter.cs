@@ -2326,6 +2326,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         case SymbolKind.Method:
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
 
+                            if ( symbol is IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
+                            {
+                                // If the method is a static local function, don't qualify it.
+                                break;
+                            }
+
                             if ( !this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).IsNone )
                             {
                                 // If the field is a template, assume it's an introduction and don't qualify it.
