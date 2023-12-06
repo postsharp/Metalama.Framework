@@ -34,7 +34,6 @@ public sealed class LicenseVerifier : IProjectService
     private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
     private readonly IProjectOptions _projectOptions;
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
-    private readonly HashSet<AspectClass> _inheritableAspectsWithoutLicense = new();
 
     private readonly ITempFileManager _tempFileManager;
 
@@ -248,40 +247,6 @@ public sealed class LicenseVerifier : IProjectService
                 EngineAssemblyMetadataReader.Instance.BuildDate );
 
             file.WriteToDirectory( directory );
-        }
-
-        // Report inheritance license warning
-        if ( this._inheritableAspectsWithoutLicense.Count > 0 )
-        {
-            // Don't report aspects that have not been instantiated
-            var instantiatedInheritableAspectsWithoutLicense = aspectInstanceResults
-                .Select( r => r.AspectInstance.AspectClass )
-                .Where( ac => this._inheritableAspectsWithoutLicense.Contains( ac ) )
-                .ToArray();
-
-            if ( instantiatedInheritableAspectsWithoutLicense.Length > 0 )
-            {
-                var suffix = instantiatedInheritableAspectsWithoutLicense.Length > 1 ? "s" : "";
-
-                diagnostics.Report(
-                    LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
-                        null,
-                        $"'{string.Join( "', '", instantiatedInheritableAspectsWithoutLicense.SelectAsArray( a => a.FullName ) )}' aspect{suffix}" ) );
-            }
-        }
-    }
-
-    internal bool VerifyCanBeInherited( AspectClass aspectClass )
-    {
-        if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) )
-        {
-            this._inheritableAspectsWithoutLicense.Add( aspectClass );
-
-            return false;
-        }
-        else
-        {
-            return true;
         }
     }
 
