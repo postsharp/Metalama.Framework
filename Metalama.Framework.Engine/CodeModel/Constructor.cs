@@ -35,15 +35,13 @@ namespace Metalama.Framework.Engine.CodeModel
                     ConstructorInitializerKind.This,
                 ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
                     ConstructorInitializerKind.Base,
-#if ROSLYN_4_8_0_OR_GREATER
-                ClassDeclarationSyntax { BaseList: null } =>
+                TypeDeclarationSyntax { BaseList: null } =>
                     ConstructorInitializerKind.None,
-                ClassDeclarationSyntax { BaseList: { } baseList } =>
+                TypeDeclarationSyntax { BaseList: { } baseList } =>
                     baseList.Types.Any( bt => bt.IsKind( SyntaxKind.PrimaryConstructorBaseType ) )
                         ? ConstructorInitializerKind.Base
                         : ConstructorInitializerKind.None,
-#endif
-                _ => throw new AssertionFailedException( "Unexpected initializer for '{this}'." )
+                _ => throw new AssertionFailedException( $"Unexpected initializer for '{this}'." )
             };
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;

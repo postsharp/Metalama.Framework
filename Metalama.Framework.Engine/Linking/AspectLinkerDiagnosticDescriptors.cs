@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Linking
             CannotAssignToExpressionFromPrimaryConstructor = new(
                 "LAMA0652",
                 "Expression can't be used as the assignment target for an initializer of a primary constructor.",
-                "The expression '{0}' can't be used as the assignment target for an initializer of a primary constructor on type '{1}' {2}.",
+                "The expression '{0}' can't be used as the assignment target for an initializer of a primary constructor on type '{1}'. {2}",
                 _category,
                 Error );
 

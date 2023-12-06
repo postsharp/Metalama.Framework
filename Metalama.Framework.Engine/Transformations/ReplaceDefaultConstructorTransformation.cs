@@ -23,10 +23,11 @@ internal sealed class ReplaceDefaultConstructorTransformation
     public ReplaceDefaultConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
     {
         Invariant.Assert( !introducedDeclaration.IsStatic );
+        Invariant.Assert( !introducedDeclaration.IsRecordCopyConstructor() );
 
         var targetType = introducedDeclaration.DeclaringType;
 
-        if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
+        if ( targetType.Constructors.Any( c => c.GetSymbol() is { Parameters: [] } symbol && symbol.GetPrimarySyntaxReference() == null ) )
         {
             this.ReplacedMember = targetType.Constructors.OfExactSignature( Array.Empty<IType>() ).AssertNotNull().ToMemberRef<IMember>();
         }

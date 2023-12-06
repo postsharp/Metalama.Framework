@@ -348,25 +348,9 @@ internal sealed partial class LinkerInjectionStep
 
         public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
-            => this.VisitTypeDeclaration(
-                node,
-                ( syntax, members ) =>
-                {
-                    // If the record has no braces, add them.
-                    if ( syntax.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
-                    {
-                        // TODO: trivias.
-                        syntax = syntax
-                            .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                            .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                            .WithSemicolonToken( default );
-                    }
+        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-                    return syntax.WithMembers( List( members ) );
-                } );
-
-        private SyntaxNode VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
+        private SyntaxNode VisitTypeDeclaration<T>( T node )
             where T : TypeDeclarationSyntax
         {
             var originalNode = node;
@@ -376,14 +360,12 @@ internal sealed partial class LinkerInjectionStep
 
             var baseList = node.BaseList;
 
-#if ROSLYN_4_8_0_OR_GREATER
-            var parameterList = node.ParameterList;
+            var parameterList = node.GetParameterList();
 
             if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
             {
                 this.ApplyMemberLevelTransformationsToPrimaryConstructor( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
             }
-#endif
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -407,14 +389,17 @@ internal sealed partial class LinkerInjectionStep
 
                 node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
-                if ( withMembers != null )
+                // If the type has no braces, add them.
+                if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
                 {
-                    node = withMembers( node, members );
+                    // TODO: trivias.
+                    node = (T) node
+                        .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                        .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                        .WithSemicolonToken( default );
                 }
-                else
-                {
-                    node = (T) node.WithMembers( List( members ) );
-                }
+
+                node = (T) node.WithMembers( List( members ) );
 
                 // Process the type bases.
                 if ( additionalBaseList.Any() )
@@ -442,9 +427,7 @@ internal sealed partial class LinkerInjectionStep
                     node = (T) node.WithBaseList( baseList );
                 }
 
-#if ROSLYN_4_8_0_OR_GREATER
                 node = (T) node.WithParameterList( parameterList );
-#endif
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -572,7 +555,14 @@ internal sealed partial class LinkerInjectionStep
 
             if ( memberLevelTransformations.Expressions.Length == 1 )
             {
-                if ( fieldVariableDeclarator.Initializer != null )
+                // The expressions 'default' and 'default!' in the initializer are considered the same as if there was no initializer.
+                if ( fieldVariableDeclarator.Initializer?.Value is not (null or
+                    { RawKind: (int) SyntaxKind.DefaultLiteralExpression } or
+                    PostfixUnaryExpressionSyntax
+                    {
+                        RawKind: (int) SyntaxKind.SuppressNullableWarningExpression,
+                        Operand.RawKind: (int) SyntaxKind.DefaultLiteralExpression
+                    }) )
                 {
                     this._diagnostics.Report(
                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
@@ -660,7 +650,6 @@ internal sealed partial class LinkerInjectionStep
             return constructorDeclaration;
         }
 
-#if ROSLYN_4_8_0_OR_GREATER
         private void ApplyMemberLevelTransformationsToPrimaryConstructor(
             TypeDeclarationSyntax typeDeclaration,
             MemberLevelTransformations memberLevelTransformations,
@@ -668,19 +657,11 @@ internal sealed partial class LinkerInjectionStep
             out BaseListSyntax? newBaseList,
             out ParameterListSyntax? newParameterList )
         {
-            if (typeDeclaration is RecordDeclarationSyntax)
-            {
-                // Record declarations are currently handled differently.
-                newBaseList = typeDeclaration.BaseList;
-                newParameterList = typeDeclaration.ParameterList;
-                return;
-            }
-
             Invariant.AssertNot( memberLevelTransformations.Statements.Length > 0 );
             Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
-            Invariant.AssertNotNull( typeDeclaration.ParameterList );
+            Invariant.AssertNotNull( typeDeclaration.GetParameterList() );
 
-            newParameterList = AppendParameters( typeDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            newParameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
             newBaseList = typeDeclaration.BaseList;
 
             if ( memberLevelTransformations.Arguments.Length > 0 )
@@ -717,7 +698,6 @@ internal sealed partial class LinkerInjectionStep
                 newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
             }
         }
-#endif
 
         private static ParameterListSyntax AppendParameters(
             ParameterListSyntax existingParameters,

@@ -83,11 +83,31 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             => node.Expression.Kind() == SyntaxKind.NameOfKeyword ||
                (node.Expression is IdentifierNameSyntax identifierName && string.Equals( identifierName.Identifier.Text, "nameof", StringComparison.Ordinal ));
 
-        internal static TypeSyntax GetNamespaceOrType( this UsingDirectiveSyntax usingDirective ) =>
+        internal static TypeSyntax GetNamespaceOrType( this UsingDirectiveSyntax usingDirective )
 #if ROSLYN_4_8_0_OR_GREATER
-            usingDirective.NamespaceOrType;
+            => usingDirective.NamespaceOrType;
 #else
-            usingDirective.Name;
+            => usingDirective.Name;
+#endif
+
+        internal static ParameterListSyntax? GetParameterList( this TypeDeclarationSyntax typeDeclaration )
+        {
+#if ROSLYN_4_8_0_OR_GREATER
+            return typeDeclaration.ParameterList;
+#else
+            return typeDeclaration switch
+            {
+                RecordDeclarationSyntax record => record.ParameterList,
+                _ => null
+            };
+#endif
+        }
+
+#if !ROSLYN_4_8_0_OR_GREATER
+        internal static TypeDeclarationSyntax WithParameterList( this TypeDeclarationSyntax typeDeclaration, ParameterListSyntax? parameterList )
+            => typeDeclaration is RecordDeclarationSyntax record ? record.WithParameterList( parameterList ) :
+                parameterList == null ? typeDeclaration :
+                throw new InvalidOperationException( $"Can't add parameter list to a non-record type before C# 12." );
 #endif
     }
 }

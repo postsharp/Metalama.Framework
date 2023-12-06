@@ -556,8 +556,8 @@ namespace Metalama.Framework.Engine.CodeModel
             return false;
         }
 
-        internal static bool IsImplicitInstanceConstructor( this IConstructor ctor )
-            => ctor is { IsStatic: false, IsImplicitlyDeclared: true, IsPrimary: false };
+        internal static bool IsImplicitInstanceConstructor( this IConstructor constructor )
+            => constructor is { IsStatic: false, IsImplicitlyDeclared: true, IsPrimary: false };
 
         internal static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
 

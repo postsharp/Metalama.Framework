@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_Record;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.PrimaryConstructor_Record_CopyConstructor;
 
 public class MyAspect : TypeAspect
 {
@@ -10,11 +10,6 @@ public class MyAspect : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            if (constructor.IsRecordCopyConstructor())
-            {
-                continue;
-            }
-
             builder.Advice.IntroduceParameter( constructor, "p", typeof(int), TypedConstant.Create( 15 ) );
         }
     }

@@ -84,6 +84,7 @@ public static partial class EligibilityRuleFactory
         {
             builder.DeclaringType().MustBeRunTimeOnly();
             builder.MustNotBeStatic();
+            builder.MustNotBeRecordCopyConstructor();
         } );
 
     private static readonly IEligibilityRule<IDeclaration> _addInitializerRule = CreateRule<IDeclaration, IMemberOrNamedType>(
