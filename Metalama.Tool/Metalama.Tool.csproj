@@ -19,6 +19,9 @@
 		-->
 
 		<NoWarn>$(NoWarn);CS8002</NoWarn>
+
+        <!-- Avoid error NU5017: Cannot create a package that has no dependencies nor content. -->
+        <DebugType>Portable</DebugType>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -47,5 +50,12 @@
       <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
       <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
     </ItemGroup>
+
+    <!-- Exclude full pdbs from packing so the .snupkg doesn't get refused by nuget.org. -->
+    <Target Name="_ExcludeFullPdbs" AfterTargets="Build" BeforeTargets="GenerateNuspec">
+        <ItemGroup>
+            <_PackageFilesToExclude Include="$(PublishDir)\runtimes\**\*.pdb" />
+        </ItemGroup>
+    </Target>
 
 </Project>
