@@ -48,4 +48,11 @@
       <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
     </ItemGroup>
 
+    <!-- Exclude full pdbs from packing so the .snupkg doesn't get refused by nuget.org. -->
+    <Target Name="_ExcludeFullPdbs" AfterTargets="Build" BeforeTargets="GenerateNuspec">
+        <ItemGroup>
+            <_PackageFilesToExclude Include="$(PublishDir)\runtimes\**\*.pdb" />
+        </ItemGroup>
+    </Target>
+
 </Project>
