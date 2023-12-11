@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Tests;
 
-public partial class Test
+public partial class IntroducePrivateMembersTest
 {
     [Fact]
     public void HasAllExpectedMembers()
@@ -21,14 +21,4 @@ public partial class Test
 
     [IntroducePrivateMembers]
     public void Foo() { }
-}
-
-
-[OverrideWithPrivateTemplates]
-class SomeClass
-{
-    private int _field;
-    public void SomeMethod() { }
-    public int SomeProperty { get; set; }
-
 }

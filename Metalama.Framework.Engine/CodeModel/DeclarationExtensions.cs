@@ -563,6 +563,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static T Translate<T>( this T declaration, ICompilation newCompilation )
             where T : IDeclaration
-            => declaration.Compilation == newCompilation ? declaration : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration );
+            => declaration.Compilation == newCompilation ? declaration : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration ).AssertNotNull();
     }
 }
