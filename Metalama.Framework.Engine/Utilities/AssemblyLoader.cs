@@ -182,7 +182,7 @@ internal sealed class AssemblyLoader : IDisposable
     public Assembly LoadAssembly( string assemblyPath ) => this._loadAssembly( assemblyPath );
 
     // .NET 5.0 has collectible assemblies, but collectible assemblies cannot be returned to AppDomain.AssemblyResolve.
-    internal static bool IsCollectible( Assembly assembly ) => _isCollectibleProperty == null || (bool) _isCollectibleProperty.GetValue( assembly )!;
+    internal static bool IsCollectible( Assembly assembly ) => _isCollectibleProperty != null && (bool) _isCollectibleProperty.GetValue( assembly )!;
 
     public void Dispose() => this._assemblyResolveUnsubscribe?.Invoke();
 }
