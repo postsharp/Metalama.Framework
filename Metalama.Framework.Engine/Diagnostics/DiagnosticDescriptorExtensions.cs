@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 definition.Severity.ToRoslynSeverity(),
                 true,
                 definition.Severity == Severity.Error ? 0 : 1,
-                new NonLocalizedString( definition.Title ),
+                new NonLocalizedString( definition.Title, arguments ),
                 location: location,
                 additionalLocations: additionalLocations,
                 properties: propertiesWithAdditions,
