@@ -272,7 +272,7 @@ internal abstract partial class BaseTestRunner
                             .Visit( await parsedSyntaxTree.GetRootAsync() )!
                         : await parsedSyntaxTree.GetRootAsync();
 
-                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
+                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0, AttributeLists.Count: 0 } )
                 {
                     return (project, null);
                 }
