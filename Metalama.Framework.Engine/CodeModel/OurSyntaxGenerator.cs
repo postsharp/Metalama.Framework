@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -43,12 +45,22 @@ internal partial class OurSyntaxGenerator
 
     private readonly SyntaxGenerator _syntaxGenerator;
 
+    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache;
+    private readonly ConcurrentDictionary<SpecialType, TypeSyntax> _specialTypeSyntaxCache;
+
     public bool IsNullAware { get; }
 
     private OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
     {
         this._syntaxGenerator = syntaxGenerator;
         this.IsNullAware = nullAware;
+
+        this._typeSyntaxCache = new ConcurrentDictionary<ITypeSymbol, TypeSyntax>(
+            nullAware
+            ? StructuralSymbolComparer.IncludeNullability
+            : StructuralSymbolComparer.Default );
+
+        this._specialTypeSyntaxCache = new ConcurrentDictionary<SpecialType, TypeSyntax>();
     }
 
     protected OurSyntaxGenerator( OurSyntaxGenerator prototype ) : this( prototype._syntaxGenerator, prototype.IsNullAware ) { }
@@ -101,14 +113,28 @@ internal partial class OurSyntaxGenerator
 
     public TypeSyntax Type( ITypeSymbol symbol )
     {
-        var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
+        return this._typeSyntaxCache.GetOrAdd(
+            symbol,
+            static ( s, c ) =>
+            {
+                var typeSyntax = (TypeSyntax) c.SyntaxGenerator.TypeExpression( s ).WithAdditionalAnnotations( Simplifier.Annotation );
 
-        if ( !this.IsNullAware )
-        {
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
-        }
+                if ( !c.IsNullAware )
+                {
+                    typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( s ).Visit( typeSyntax ).AssertNotNull();
+                }
 
-        return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();
+                return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();
+            },
+            new { SyntaxGenerator = this._syntaxGenerator, this.IsNullAware } );
+    }
+
+    public TypeSyntax Type( SpecialType specialType )
+    {
+        return this._specialTypeSyntaxCache.GetOrAdd(
+            specialType,
+            ( s, c ) => (TypeSyntax) c.SyntaxGenerator.TypeExpression( specialType ).WithAdditionalAnnotations( Simplifier.Annotation ),
+            new { SyntaxGenerator = this._syntaxGenerator } );
     }
 
     public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
@@ -122,10 +148,6 @@ internal partial class OurSyntaxGenerator
         return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) )
             .NormalizeWhitespace( indentation: "", eol: "", elasticTrivia: true );
     }
-
-    public TypeSyntax Type( SpecialType specialType )
-        => (TypeSyntax) this._syntaxGenerator.TypeExpression( specialType )
-            .WithAdditionalAnnotations( Simplifier.Annotation );
 
     public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
     {
