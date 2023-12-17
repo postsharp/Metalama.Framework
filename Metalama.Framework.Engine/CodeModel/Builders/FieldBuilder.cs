@@ -56,7 +56,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public override IMember? OverriddenMember => null;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
+    public IInjectMemberOrNamedTypeTransformation ToTransformation() => new IntroduceFieldTransformation( this.ParentAdvice, this );
 
     public Writeability Writeability
     {

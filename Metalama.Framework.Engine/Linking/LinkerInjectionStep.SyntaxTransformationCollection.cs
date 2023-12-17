@@ -53,7 +53,7 @@ internal sealed partial class LinkerInjectionStep
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
         }
 
-        public void Add( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
+        public void Add( IInjectMemberOrNamedTypeTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
         {
             foreach ( var injectedMember in injectedMembers )
             {

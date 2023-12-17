@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if ( transformation is IInjectMemberTransformation injectMemberTransformation )
+                    if ( transformation is IInjectMemberOrNamedTypeTransformation injectMemberTransformation )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         // TODO: Implement support for initializable transformations.

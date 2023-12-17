@@ -28,5 +28,6 @@ public enum AdviceKind
     AddInitializer,
     AddContract,
     ImplementInterface,
-    AddAnnotation
+    AddAnnotation,
+    IntroduceType,
 }

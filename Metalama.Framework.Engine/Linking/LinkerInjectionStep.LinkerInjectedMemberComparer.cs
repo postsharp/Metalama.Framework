@@ -188,7 +188,7 @@ internal sealed partial class LinkerInjectionStep
         private static int GetAccessibilityOrder( Accessibility accessibility )
             => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-        private static int GetTransformationTypeOrder( IInjectMemberTransformation injectMemberTransformation )
+        private static int GetTransformationTypeOrder( IInjectMemberOrNamedTypeTransformation injectMemberTransformation )
             => injectMemberTransformation is IOverrideDeclarationTransformation ? 0 : 1;
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;

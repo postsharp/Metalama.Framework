@@ -18,9 +18,9 @@ namespace Metalama.Framework.Engine.Transformations
         public DeclarationKind Kind { get; }
 
         /// <summary>
-        /// Gets the <see cref="IInjectMemberTransformation" /> that created this object.
+        /// Gets the <see cref="IInjectMemberOrNamedTypeTransformation" /> that created this object.
         /// </summary>
-        public IInjectMemberTransformation Transformation { get; }
+        public IInjectMemberOrNamedTypeTransformation Transformation { get; }
 
         public IDeclarationBuilder? DeclarationBuilder => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilder;
 
@@ -47,11 +47,11 @@ namespace Metalama.Framework.Engine.Transformations
         public IMemberOrNamedType? Declaration { get; }
 
         public InjectedMember(
-            IInjectMemberTransformation injectMemberTransformation,
+            IInjectMemberOrNamedTypeTransformation injectMemberTransformation,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             InjectedMemberSemantic semantic,
-            MemberBuilder declaration ) : this(
+            MemberOrNamedTypeBuilder declaration ) : this(
             injectMemberTransformation,
             declaration.DeclarationKind,
             syntax,
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Engine.Transformations
             prototype.Declaration ) { }
 
         internal InjectedMember(
-            IInjectMemberTransformation transformation,
+            IInjectMemberOrNamedTypeTransformation transformation,
             DeclarationKind kind,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,

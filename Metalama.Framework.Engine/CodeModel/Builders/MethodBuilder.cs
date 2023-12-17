@@ -200,5 +200,5 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
+    public IInjectMemberOrNamedTypeTransformation ToTransformation() => new IntroduceMethodTransformation( this.ParentAdvice, this );
 }

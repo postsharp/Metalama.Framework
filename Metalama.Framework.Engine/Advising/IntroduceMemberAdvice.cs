@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -14,18 +13,15 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
+    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : IntroduceMemberOrNamedTypeAdvice<TMember, TBuilder>
         where TMember : class, IMember
         where TBuilder : MemberBuilder
     {
-        private readonly Action<TBuilder>? _buildAction;
         private readonly IntroductionScope _scope;
 
         protected OverrideStrategy OverrideStrategy { get; }
 
         protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
-
-        protected TBuilder Builder { get; init; }
 
         protected TemplateMember<TMember>? Template { get; }
 
@@ -44,7 +40,7 @@ namespace Metalama.Framework.Engine.Advising
             OverrideStrategy overrideStrategy,
             Action<TBuilder>? buildAction,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
         {
             var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
             var templateAttributeProperties = templateAttribute?.Properties;
@@ -64,12 +60,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             this.OverrideStrategy = overrideStrategy;
-            this._buildAction = buildAction;
             this.Tags = tags;
-
-            // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
-            // constructor. Other designs are more cumbersome.
-            this.Builder = null!;
         }
 
         protected virtual void InitializeCore(
@@ -131,7 +122,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
-            this._buildAction?.Invoke( this.Builder );
+            this.BuildAction?.Invoke( this.Builder );
 
             this.ValidateBuilder( targetDeclaration, diagnosticAdder );
         }
@@ -177,19 +168,6 @@ namespace Metalama.Framework.Engine.Advising
                         targetDeclaration.GetDiagnosticLocation(),
                         (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration),
                         this ) );
-            }
-        }
-
-        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, ProjectServiceProvider serviceProvider )
-        {
-            var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
-
-            foreach ( var codeElementAttribute in declaration.Attributes )
-            {
-                if ( classificationService.MustCopyTemplateAttribute( codeElementAttribute ) )
-                {
-                    builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
-                }
             }
         }
 

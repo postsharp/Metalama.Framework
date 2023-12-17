@@ -25,7 +25,7 @@ internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, I
 
     public override IMember? OverriddenMember => null;
 
-    public IInjectMemberTransformation ToTransformation()
+    public IInjectMemberOrNamedTypeTransformation ToTransformation()
         => this.IsStatic
             ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this )
             : new ReplaceDefaultConstructorTransformation( this.ParentAdvice, this );

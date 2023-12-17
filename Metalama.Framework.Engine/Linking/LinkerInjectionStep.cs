@@ -361,7 +361,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( transformation )
                 {
-                    case IInjectMemberTransformation injectMemberTransformation:
+                    case IInjectMemberOrNamedTypeTransformation injectMemberTransformation:
                         // Transformed syntax tree must match insert position.
                         Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
 

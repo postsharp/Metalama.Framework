@@ -8,6 +8,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
@@ -17,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using static System.Formats.Asn1.AsnWriter;
 using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -566,6 +568,48 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
 
             return this.ExecuteAdvice<IMethod>( advice );
+        }
+    }
+
+    public IIntroductionAdviceResult<INamedType> IntroduceType( INamespace targetNamespace, string typeName, Action<ITypeBuilder>? buildType = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            var advice = new IntroduceTypeAdvice(
+                this._state.AspectInstance,
+                this._templateInstance,
+                targetNamespace,
+                this._compilation,
+                buildType,
+                this._layerName );
+
+            return this.ExecuteAdvice<INamedType>( advice );
+        }
+    }
+
+    public IIntroductionAdviceResult<INamedType> IntroduceType( INamedType targetType, string typeName, Action<ITypeBuilder>? buildType = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            var advice = new IntroduceTypeAdvice(
+                this._state.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                buildType,
+                this._layerName );
+
+            return this.ExecuteAdvice<INamedType>( advice );
         }
     }
 

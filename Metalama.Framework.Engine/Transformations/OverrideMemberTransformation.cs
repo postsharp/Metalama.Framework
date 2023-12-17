@@ -16,7 +16,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
+internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberOrNamedTypeTransformation, IOverrideDeclarationTransformation
 {
     protected IObjectReader Tags { get; }
 
