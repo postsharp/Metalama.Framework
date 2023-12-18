@@ -14,13 +14,13 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class TypeBuilder : MemberOrNamedTypeBuilder, ITypeBuilder
+    internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, ITypeBuilder
     {
-        public TypeBuilder( Advice advice, INamespace declaringNamespace, string name) : base(advice, null, name)
+        public NamedTypeBuilder( Advice advice, INamespace declaringNamespace, string name) : base(advice, null, name)
         {
             this.Namespace = declaringNamespace;
         }
-        public TypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice, declaringType, name )
+        public NamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice, declaringType, name )
         {
             this.Namespace = this.DeclaringType!.Namespace;
         }

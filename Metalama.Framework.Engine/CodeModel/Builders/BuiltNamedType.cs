@@ -9,15 +9,15 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltType : BuiltMemberOrNamedType, INamedType
+internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType
 {
-    public TypeBuilder TypeBuilder { get; set; }
+    public NamedTypeBuilder TypeBuilder { get; set; }
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.TypeBuilder;
 
     public override DeclarationBuilder Builder => this.TypeBuilder;
 
-    public BuiltType(CompilationModel compilation, TypeBuilder builder) : base(compilation, builder)
+    public BuiltNamedType( NamedTypeBuilder builder, CompilationModel compilation) : base(compilation, builder)
     {
         this.TypeBuilder = builder;
     }

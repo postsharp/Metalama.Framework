@@ -12,7 +12,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class IntroduceTypeAdvice : IntroduceMemberOrNamedTypeAdvice<INamedType, TypeBuilder>
+    internal class IntroduceTypeAdvice : IntroduceMemberOrNamedTypeAdvice<INamedType, NamedTypeBuilder>
     {
         public override AdviceKind AdviceKind => AdviceKind.IntroduceType;
 
@@ -22,11 +22,11 @@ namespace Metalama.Framework.Engine.Advising
             IDeclaration? targetDeclaration,
             string? explicitName,
             ICompilation sourceCompilation,
-            Action<TypeBuilder>? buildAction,
+            Action<NamedTypeBuilder>? buildAction,
             string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
         {
 
-            this.Builder = new TypeBuilder( this, (INamedType) targetDeclaration, explicitName );
+            this.Builder = new NamedTypeBuilder( this, (INamedType) targetDeclaration, explicitName );
         }
 
         public override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )

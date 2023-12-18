@@ -30,6 +30,7 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
     private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
+    private ImmutableDictionary<ISymbol, TypeUpdatableCollection> _namedTypes;
 
     public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
@@ -74,6 +75,9 @@ public sealed partial class CompilationModel
             _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToTypedRef(), out var parameters )
                  && parameters.Contains( parameterBuilder.ToTypedRef<IParameter>() )
         };
+    internal bool Contains( NamedTypeBuilder namedTypeBuilder )
+        => this._namedTypes.TryGetValue( namedTypeBuilder.DeclaringType?.GetSymbol() ?? namedTypeBuilder.Namespace.GetSymbol() ?? throw new AssertionFailedException(), out var namedTypes )
+           && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
 
     private bool Contains( DeclarationBuilder builder )
         => builder switch

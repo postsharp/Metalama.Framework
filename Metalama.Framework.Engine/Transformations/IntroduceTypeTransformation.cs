@@ -8,9 +8,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTransformation<TypeBuilder>
+internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTransformation<NamedTypeBuilder>
 {
-    public IntroduceTypeTransformation( Advice advice, TypeBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceTypeTransformation( Advice advice, NamedTypeBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
