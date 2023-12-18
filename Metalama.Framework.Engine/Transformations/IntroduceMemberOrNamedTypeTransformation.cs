@@ -20,7 +20,7 @@ internal abstract class IntroduceMemberOrNamedTypeTransformation<T> : BaseTransf
         this.IntroducedDeclaration = introducedDeclaration.AssertNotNull();
     }
 
-    public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
+    public abstract IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
 
     public virtual InsertPosition InsertPosition => this.IntroducedDeclaration.ToInsertPosition();
 

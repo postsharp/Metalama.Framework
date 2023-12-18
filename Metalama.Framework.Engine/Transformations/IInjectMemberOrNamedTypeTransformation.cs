@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
+        IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
 
         /// <summary>
         /// Gets the node after which the new members should be inserted.

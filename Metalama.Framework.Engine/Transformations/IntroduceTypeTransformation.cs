@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -13,11 +14,12 @@ internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTr
 
     public override TransformationObservability Observability => TransformationObservability.None;
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         var type =
-            ClassDeclaration( this.IntroducedDeclaration.Name );
+            ClassDeclaration( this.IntroducedDeclaration.Name )
+            .NormalizeWhitespace();
 
-        return new[] { new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
+        return new[] { new InjectedMemberOrNamedType( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
     }
 }

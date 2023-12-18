@@ -24,7 +24,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
         this._targetMethodKind = targetMethodKind;
     }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
         BlockSyntax? getterBody, setterBody;
@@ -183,7 +183,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
         // Return if we have no filter at this point. This may be an error condition.
         if ( getterBody == null && setterBody == null )
         {
-            return Array.Empty<InjectedMember>();
+            return Array.Empty<InjectedMemberOrNamedType>();
         }
 
         if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )

@@ -20,7 +20,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
 {
     public IntroduceEventTransformation( Advice advice, EventBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
         var eventBuilder = this.IntroducedDeclaration;
@@ -99,8 +99,8 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
         {
             return new[]
             {
-                new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, eventBuilder ),
-                new InjectedMember(
+                new InjectedMemberOrNamedType( this, @event, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, eventBuilder ),
+                new InjectedMemberOrNamedType(
                     this,
                     initializerMethod,
                     this.ParentAdvice.AspectLayerId,
@@ -110,7 +110,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
         }
         else
         {
-            return new[] { new InjectedMember( this, @event, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, eventBuilder ) };
+            return new[] { new InjectedMemberOrNamedType( this, @event, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, eventBuilder ) };
         }
 
         AccessorListSyntax GenerateAccessorList()

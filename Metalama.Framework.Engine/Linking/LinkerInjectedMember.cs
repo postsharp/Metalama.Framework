@@ -10,14 +10,14 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Extended <see cref="InjectedMember"/> used by <see cref="AspectLinker"/>.
     /// </summary>
-    internal sealed class LinkerInjectedMember : InjectedMember
+    internal sealed class LinkerInjectedMember : InjectedMemberOrNamedType
     {
         /// <summary>
         /// Gets id, which can be used to identify syntax node with the original transformation.
         /// </summary>
         public string LinkerNodeId { get; }
 
-        public LinkerInjectedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, InjectedMember original )
+        public LinkerInjectedMember( string linkerNodeId, MemberDeclarationSyntax linkerAnnotatedSyntax, InjectedMemberOrNamedType original )
             : base( original, linkerAnnotatedSyntax )
         {
             this.LinkerNodeId = linkerNodeId;

@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.BoundTemplate = boundTemplate;
         }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind ) => this.CreateProceedExpression( context, kind );
 
@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Transformations
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
             {
                 // Template expansion error.
-                return Enumerable.Empty<InjectedMember>();
+                return Enumerable.Empty<InjectedMemberOrNamedType>();
             }
 
             return this.GetInjectedMembersImpl( context, newMethodBody, this.BoundTemplate.TemplateMember.MustInterpretAsAsyncTemplate() );

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// Represents a member to be introduced in a type and encapsulates the information needed by the <see cref="AspectLinker"/>
     /// to perform the linking.
     /// </summary>
-    internal class InjectedMember
+    internal class InjectedMemberOrNamedType
     {
         public DeclarationKind Kind { get; }
 
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
         public MemberDeclarationSyntax Syntax { get; }
 
         /// <summary>
-        /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMember"/>.
+        /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMemberOrNamedType"/>.
         /// </summary>
         public AspectLayerId AspectLayerId { get; }
 
@@ -40,13 +40,13 @@ namespace Metalama.Framework.Engine.Transformations
         public InjectedMemberSemantic Semantic { get; }
 
         /// <summary>
-        /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMember"/>.
+        /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMemberOrNamedType"/>.
         /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
         /// are not suppressed from the introduced member.
         /// </summary>
         public IMemberOrNamedType? Declaration { get; }
 
-        public InjectedMember(
+        public InjectedMemberOrNamedType(
             IInjectMemberOrNamedTypeTransformation injectMemberTransformation,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Transformations
             semantic,
             declaration ) { }
 
-        public InjectedMember(
+        public InjectedMemberOrNamedType(
             OverrideMemberTransformation overrideMemberTransformation,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
@@ -72,8 +72,8 @@ namespace Metalama.Framework.Engine.Transformations
             semantic,
             declaration ) { }
 
-        protected InjectedMember(
-            InjectedMember prototype,
+        protected InjectedMemberOrNamedType(
+            InjectedMemberOrNamedType prototype,
             MemberDeclarationSyntax syntax ) : this(
             prototype.Transformation,
             prototype.Kind,
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Transformations
             prototype.Semantic,
             prototype.Declaration ) { }
 
-        internal InjectedMember(
+        internal InjectedMemberOrNamedType(
             IInjectMemberOrNamedTypeTransformation transformation,
             DeclarationKind kind,
             MemberDeclarationSyntax syntax,
@@ -100,9 +100,9 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override string? ToString() => this.Transformation.ToString();
 
-        internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax )
+        internal InjectedMemberOrNamedType WithSyntax( MemberDeclarationSyntax newSyntax )
         {
-            return new InjectedMember( this, newSyntax );
+            return new InjectedMemberOrNamedType( this, newSyntax );
         }
     }
 }

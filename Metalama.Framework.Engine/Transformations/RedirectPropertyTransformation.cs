@@ -29,11 +29,11 @@ namespace Metalama.Framework.Engine.Transformations
             this._targetProperty = targetProperty;
         }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             return new[]
             {
-                new InjectedMember(
+                new InjectedMemberOrNamedType(
                     this,
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),

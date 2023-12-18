@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
-            ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
+            ConcurrentDictionary<IMemberOrNamedTypeBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
@@ -348,115 +348,113 @@ namespace Metalama.Framework.Engine.Linking
             LinkerInjectionNameProvider nameProvider,
             LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
-            ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
+            ConcurrentDictionary<IMemberOrNamedTypeBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
         {
+            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation
+                    && replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation ) )
             {
-                if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation
-                     && replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation ) )
-                {
-                    return;
-                }
-
-                switch ( transformation )
-                {
-                    case IInjectMemberOrNamedTypeTransformation injectMemberTransformation:
-                        // Transformed syntax tree must match insert position.
-                        Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
-
-                        // Create the SyntaxGenerationContext for the insertion point.
-                        var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
-
-                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                            injectMemberTransformation.TransformedSyntaxTree,
-                            positionInSyntaxTree );
-
-                        // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
-                        //       For introduction, this should be a compilation that INCLUDES the builder.
-
-                        // Call GetInjectedMembers
-                        var injectionContext = new MemberInjectionContext(
-                            this._serviceProvider,
-                            diagnostics,
-                            nameProvider,
-                            aspectReferenceSyntaxProvider,
-                            lexicalScopeFactory,
-                            syntaxGenerationContext,
-                            input.CompilationModel );
-
-                        var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
-
-                        injectedMembers = PostProcessInjectedMembers( injectedMembers );
-
-                        syntaxTransformationCollection.Add( injectMemberTransformation, injectedMembers );
-
-                        break;
-
-                    case IInjectInterfaceTransformation injectInterfaceTransformation:
-                        var introducedInterface = injectInterfaceTransformation.GetSyntax();
-                        syntaxTransformationCollection.Add( injectInterfaceTransformation, introducedInterface );
-
-                        break;
-                }
-
-                IEnumerable<InjectedMember> PostProcessInjectedMembers( IEnumerable<InjectedMember> injectedMembers )
-                {
-                    if ( transformation is IntroducePropertyTransformation introducePropertyTransformation
-                         && buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration ) )
-                    {
-                        // This is a property which should have a synthesized setter added.
-                        injectedMembers =
-                            injectedMembers
-                                .Select(
-                                    im =>
-                                    {
-                                        switch ( im )
-                                        {
-                                            // ReSharper disable once MissingIndent
-                                            case
-                                            {
-                                                Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
-                                                Syntax: PropertyDeclarationSyntax propertyDeclaration
-                                            }:
-                                                return im.WithSyntax(
-                                                    propertyDeclaration.WithSynthesizedSetter( this._compilationContext.DefaultSyntaxGenerationContext ) );
-
-                                            case { Semantic: InjectedMemberSemantic.InitializerMethod }:
-                                                return im;
-
-                                            default:
-                                                throw new AssertionFailedException( $"Unexpected semantic for '{im.Declaration}'." );
-                                        }
-                                    } );
-                    }
-
-                    if ( transformation is IIntroduceDeclarationTransformation introduceMemberTransformation
-                         && buildersWithAdditionalDeclarationFlags.TryGetValue(
-                             (IMemberBuilder) introduceMemberTransformation.DeclarationBuilder,
-                             out var additionalFlagsList ) )
-                    {
-                        // This is a member builder that should have linker declaration flags added.
-                        injectedMembers =
-                            injectedMembers
-                                .Select(
-                                    im =>
-                                    {
-                                        var flags = im.Syntax.GetLinkerDeclarationFlags();
-
-                                        foreach ( var additionalFlags in additionalFlagsList )
-                                        {
-                                            flags &= additionalFlags;
-                                        }
-
-                                        return
-                                            im.WithSyntax( im.Syntax.WithLinkerDeclarationFlags( flags ) );
-                                    } );
-                    }
-
-                    return injectedMembers;
-                }
+                return;
             }
+
+            switch ( transformation )
+            {
+                case IInjectMemberOrNamedTypeTransformation injectMemberTransformation:
+                    // Transformed syntax tree must match insert position.
+                    Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
+
+                    // Create the SyntaxGenerationContext for the insertion point.
+                    var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
+
+                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                        injectMemberTransformation.TransformedSyntaxTree,
+                        positionInSyntaxTree );
+
+                    // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
+                    //       For introduction, this should be a compilation that INCLUDES the builder.
+
+                    // Call GetInjectedMembers
+                    var injectionContext = new MemberInjectionContext(
+                        this._serviceProvider,
+                        diagnostics,
+                        nameProvider,
+                        aspectReferenceSyntaxProvider,
+                        lexicalScopeFactory,
+                        syntaxGenerationContext,
+                        input.CompilationModel );
+
+                    var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
+
+                    injectedMembers = PostProcessInjectedMembers( injectedMembers );
+
+                    syntaxTransformationCollection.Add( injectMemberTransformation, injectedMembers );
+
+                    break;
+
+                case IInjectInterfaceTransformation injectInterfaceTransformation:
+                    var introducedInterface = injectInterfaceTransformation.GetSyntax();
+                    syntaxTransformationCollection.Add( injectInterfaceTransformation, introducedInterface );
+
+                    break;
+            }
+
+            IEnumerable<InjectedMemberOrNamedType> PostProcessInjectedMembers( IEnumerable<InjectedMemberOrNamedType> injectedMembers )
+            {
+                if ( transformation is IntroducePropertyTransformation introducePropertyTransformation
+                        && buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration ) )
+                {
+                    // This is a property which should have a synthesized setter added.
+                    injectedMembers =
+                        injectedMembers
+                            .Select(
+                                im =>
+                                {
+                                    switch ( im )
+                                    {
+                                        // ReSharper disable once MissingIndent
+                                        case
+                                        {
+                                            Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                            Syntax: PropertyDeclarationSyntax propertyDeclaration
+                                        }:
+                                            return im.WithSyntax(
+                                                propertyDeclaration.WithSynthesizedSetter( this._compilationContext.DefaultSyntaxGenerationContext ) );
+
+                                        case { Semantic: InjectedMemberSemantic.InitializerMethod }:
+                                            return im;
+
+                                        default:
+                                            throw new AssertionFailedException( $"Unexpected semantic for '{im.Declaration}'." );
+                                    }
+                                } );
+                }
+
+                if ( transformation is IIntroduceDeclarationTransformation introduceMemberTransformation
+                        && buildersWithAdditionalDeclarationFlags.TryGetValue(
+                            (IMemberOrNamedTypeBuilder) introduceMemberTransformation.DeclarationBuilder,
+                            out var additionalFlagsList ) )
+                {
+                    // This is a member builder that should have linker declaration flags added.
+                    injectedMembers =
+                        injectedMembers
+                            .Select(
+                                im =>
+                                {
+                                    var flags = im.Syntax.GetLinkerDeclarationFlags();
+
+                                    foreach ( var additionalFlags in additionalFlagsList )
+                                    {
+                                        flags &= additionalFlags;
+                                    }
+
+                                    return
+                                        im.WithSyntax( im.Syntax.WithLinkerDeclarationFlags( flags ) );
+                                } );
+                }
+
+                return injectedMembers;
+            }            
         }
 
         private static int GetSyntaxTreePosition( InsertPosition insertPosition )

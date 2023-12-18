@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Transformations
             this._targetMethod = targetMethod;
         }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             var body =
                 SyntaxFactoryEx.FormattedBlock(
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             return new[]
             {
-                new InjectedMember(
+                new InjectedMemberOrNamedType(
                     this,
                     MethodDeclaration(
                         List<AttributeListSyntax>(),

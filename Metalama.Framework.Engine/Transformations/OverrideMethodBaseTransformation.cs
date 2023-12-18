@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration );
         }
 
-        protected InjectedMember[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
+        protected InjectedMemberOrNamedType[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
         {
             TypeSyntax? returnType = null;
 
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             return new[]
             {
-                new InjectedMember(
+                new InjectedMemberOrNamedType(
                     this,
                     introducedMethod,
                     this.ParentAdvice.AspectLayerId,

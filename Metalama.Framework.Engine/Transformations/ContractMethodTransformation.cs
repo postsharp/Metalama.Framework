@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Transformations
         public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
             base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             var advice = (ContractAdvice) this.ParentAdvice;
 

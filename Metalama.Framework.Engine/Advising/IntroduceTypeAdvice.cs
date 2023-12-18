@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -19,10 +20,18 @@ namespace Metalama.Framework.Engine.Advising
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IDeclaration? targetDeclaration,
+            string? explicitName,
             ICompilation sourceCompilation,
             Action<TypeBuilder>? buildAction,
             string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
         {
+
+            this.Builder = new TypeBuilder( this, (INamedType) targetDeclaration, explicitName );
+        }
+
+        public override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        {
+            base.Initialize( serviceProvider, diagnosticAdder );
         }
 
         public override AdviceImplementationResult Implement( ProjectServiceProvider serviceProvider, CompilationModel compilation, Action<ITransformation> addTransformation )

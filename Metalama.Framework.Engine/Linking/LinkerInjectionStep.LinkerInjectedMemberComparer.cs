@@ -193,7 +193,7 @@ internal sealed partial class LinkerInjectionStep
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
-        private static IMemberOrNamedType GetDeclaration( InjectedMember injectedMember )
+        private static IMemberOrNamedType GetDeclaration( InjectedMemberOrNamedType injectedMember )
         {
             var declaration = injectedMember.Declaration ?? injectedMember.DeclarationBuilder as IMember;
 

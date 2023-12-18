@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.BoundTemplate = boundTemplate;
         }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             var proceedExpression = this.CreateProceedExpression( context );
 
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Transformations
                     out var newMethodBody ) )
             {
                 // Template expansion error.
-                return Enumerable.Empty<InjectedMember>();
+                return Enumerable.Empty<InjectedMemberOrNamedType>();
             }
 
             var syntax =
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
                     newMethodBody,
                     null );
 
-            return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
+            return new[] { new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
         private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )

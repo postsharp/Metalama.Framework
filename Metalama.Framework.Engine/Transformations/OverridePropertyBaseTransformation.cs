@@ -25,7 +25,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 
-    protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
+    protected IEnumerable<InjectedMemberOrNamedType> GetInjectedMembersImpl(
         MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
@@ -50,7 +50,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
 
         var overrides = new[]
         {
-            new InjectedMember(
+            new InjectedMemberOrNamedType(
                 this,
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),

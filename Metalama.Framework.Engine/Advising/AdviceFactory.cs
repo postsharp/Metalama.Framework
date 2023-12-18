@@ -8,7 +8,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
@@ -18,7 +17,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using static System.Formats.Asn1.AsnWriter;
 using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -584,6 +582,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetNamespace,
+                typeName,
                 this._compilation,
                 buildType,
                 this._layerName );
@@ -605,6 +604,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
+                typeName,
                 this._compilation,
                 buildType,
                 this._layerName );

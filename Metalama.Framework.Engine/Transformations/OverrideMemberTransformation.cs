@@ -35,7 +35,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
         this.Tags = tags;
     }
 
-    public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
+    public abstract IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
     {

@@ -482,7 +482,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .Returns(
                         new[]
                         {
-                            new InjectedMember(
+                            new InjectedMemberOrNamedType(
                                 transformation,
                                 declarationKind,
                                 introductionSyntax,
@@ -680,7 +680,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .Returns(
                         new[]
                         {
-                            new InjectedMember(
+                            new InjectedMemberOrNamedType(
                                 transformation,
                                 declarationKind,
                                 overrideSyntax,

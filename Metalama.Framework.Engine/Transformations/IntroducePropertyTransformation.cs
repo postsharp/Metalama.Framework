@@ -19,7 +19,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 {
     public IntroducePropertyTransformation( Advice advice, PropertyBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         var propertyBuilder = this.IntroducedDeclaration;
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
@@ -59,7 +59,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     ? Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) )
                     : default );
 
-        var introducedProperty = new InjectedMember(
+        var introducedProperty = new InjectedMemberOrNamedType(
             this,
             property,
             this.ParentAdvice.AspectLayerId,
@@ -68,7 +68,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
 
         var introducedInitializerMethod =
             initializerMethod != null
-                ? new InjectedMember(
+                ? new InjectedMemberOrNamedType(
                     this,
                     initializerMethod,
                     this.ParentAdvice.AspectLayerId,

@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.RemoveTemplate = removeTemplate;
         }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             var eventName = context.InjectionNameProvider.GetOverrideName(
                 this.OverriddenDeclaration.DeclaringType,
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Transformations
             if ( templateExpansionError )
             {
                 // Template expansion error.
-                return Enumerable.Empty<InjectedMember>();
+                return Enumerable.Empty<InjectedMemberOrNamedType>();
             }
 
             var modifiers = this.OverriddenDeclaration
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Transformations
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]
             {
-                new InjectedMember(
+                new InjectedMemberOrNamedType(
                     this,
                     EventDeclaration(
                         List<AttributeListSyntax>(),
