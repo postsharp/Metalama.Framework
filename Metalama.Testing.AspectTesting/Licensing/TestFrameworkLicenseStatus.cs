@@ -35,9 +35,9 @@ namespace Metalama.Testing.AspectTesting.Licensing
                 }
             };
 
-            var serviceProvider = new ServiceProviderBuilder()
-                .AddBackstageServices( options )
-                .ServiceProvider;
+            var builder = new SimpleServiceProviderBuilder();
+            builder.AddBackstageServices( options );
+            var serviceProvider = builder.ServiceProvider;
 
             var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 

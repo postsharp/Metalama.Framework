@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Testing.AspectTesting.Utilities;

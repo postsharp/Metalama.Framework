@@ -32,7 +32,7 @@
         <SystemCollectionsImmutableMaxVersion>6.0.0</SystemCollectionsImmutableMaxVersion>
         <MicrosoftBclHashCodeVersion>1.1.1</MicrosoftBclHashCodeVersion>
         <SystemReflectionMetadataLoadContextVersion>4.7.2</SystemReflectionMetadataLoadContextVersion>
-        <K4osHashxxHashVersion>1.0.6</K4osHashxxHashVersion>
+        <K4osHashxxHashVersion>1.0.8</K4osHashxxHashVersion>
         <MicrosoftNETTestSdkVersion>17.0.0</MicrosoftNETTestSdkVersion>
         <!-- xUnitVersion is the latest version of xUnit, which we execute -->
         <xUnitVersion>2.5.0</xUnitVersion>

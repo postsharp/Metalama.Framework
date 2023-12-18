@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;

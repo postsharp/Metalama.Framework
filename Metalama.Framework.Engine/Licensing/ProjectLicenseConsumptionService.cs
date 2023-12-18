@@ -39,6 +39,8 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
     public bool ValidateRedistributionLicenseKey( string redistributionLicenseKey, string aspectClassNamespace )
         => this._impl.ValidateRedistributionLicenseKey( redistributionLicenseKey, aspectClassNamespace );
 
+    void ILicenseConsumptionService.Initialize() { }
+
     public IReadOnlyList<LicensingMessage> Messages => this._impl.Messages;
 
     public bool IsTrialLicense => this._impl.IsTrialLicense;
