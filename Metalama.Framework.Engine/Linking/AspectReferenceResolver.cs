@@ -383,12 +383,16 @@ namespace Metalama.Framework.Engine.Linking
             return
                 referencedDeclarationOverrides
                     .SelectAsReadOnlyList(
-                        x => (
-                            Index: new MemberLayerIndex(
-                                this._layerIndex[x.AspectLayerId],
-                                x.Transformation.OrderWithinPipelineStepAndType + 1,
-                                x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ),
-                            Override: x) )
+                        x =>
+                        {
+                            var injectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( x );
+                            return (
+                                Index: new MemberLayerIndex(
+                                    this._layerIndex[injectedMember.AspectLayerId],
+                                    injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
+                                    injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ),
+                                Override: injectedMember);
+                        } )
                     .OrderBy( x => x.Index )
                     .ToReadOnlyList();
         }

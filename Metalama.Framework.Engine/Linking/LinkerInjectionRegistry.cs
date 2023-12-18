@@ -3,20 +3,15 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities.Comparers;
-using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
@@ -31,13 +26,14 @@ namespace Metalama.Framework.Engine.Linking
 
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly PartialCompilation _intermediateCompilation;
-        private readonly IReadOnlyDictionary<string, LinkerInjectedMember> _injectedMemberLookup;
-        private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _overrideMap;
-        private readonly IReadOnlyDictionary<LinkerInjectedMember, IDeclaration> _overrideTargetMap;
-        private readonly IReadOnlyDictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
-        private readonly IReadOnlyDictionary<IDeclaration, LinkerInjectedMember> _builderLookup;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
-        private readonly IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
+        private readonly IReadOnlyList<LinkerInjectedMember> _injectedMembers;
+        private readonly IReadOnlyList<ISymbol> _overrideTargets;
+        private readonly IReadOnlyDictionary<IDeclarationBuilder, LinkerInjectedMember> _builderToInjectedMemberMap;
+        private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
+        private readonly IReadOnlyDictionary<ISymbol, LinkerInjectedMember> _symbolToInjectedMemberMap;
+        private readonly IReadOnlyDictionary<LinkerInjectedMember, ISymbol> _injectedMemberToSymbolMap;
+        private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
 
         public LinkerInjectionRegistry(
             TransformationLinkerOrderComparer comparer,
@@ -47,51 +43,128 @@ namespace Metalama.Framework.Engine.Linking
             IReadOnlyCollection<LinkerInjectedMember> injectedMembers,
             IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap )
         {
-            Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>> overrideMap;
-            Dictionary<LinkerInjectedMember, IDeclaration> overrideTargetMap;
-            Dictionary<ISymbol, IDeclaration> overrideTargetsByOriginalSymbol;
-            Dictionary<IDeclaration, LinkerInjectedMember> builderLookup;
+            List<ISymbol> overrideTargets;
+            Dictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
+            Dictionary<ISymbol, ISymbol> overrideTargetMap;
+            Dictionary<ISymbol, LinkerInjectedMember> symbolToInjectedMemberMap;
+            Dictionary<LinkerInjectedMember, ISymbol> injectedMemberToSymbolMap;
+            Dictionary<IDeclarationBuilder, LinkerInjectedMember> builderToInjectedMemberMap;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
-            this._injectedMemberLookup = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
 
             this._transformedSyntaxTreeMap = transformations
                 .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
                 .ToDictionary( m => m.OldTree.AssertNotNull(), m => m.NewTree.AssertNotNull() );
+            this._injectedMembers = injectedMembers.ToList();
 
-            this._overrideMap = overrideMap =
-                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerInjectedMember>>( finalCompilationModel.Comparers.Default );
-
-            this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerInjectedMember, IDeclaration>();
-            this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
-            this._builderToTransformationMap = builderToTransformationMap;
-            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerInjectedMember>( ReferenceEqualityComparer<IDeclaration>.Instance );
+            var injectedMemberByNodeId = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
+            this._overrideTargets = overrideTargets = new List<ISymbol>();
+            this._builderToInjectedMemberMap = builderToInjectedMemberMap = new Dictionary<IDeclarationBuilder, LinkerInjectedMember>();
+            this._overrideTargetToOverrideListMap = overrideMap = new Dictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._overrideToOverrideTargetMap = overrideTargetMap = new Dictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new Dictionary<ISymbol, LinkerInjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new Dictionary<LinkerInjectedMember, ISymbol>();
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
-            // the same spirit as the Index* methods.
+            //       the same spirit as the Index* methods.
+            //       However, even for very large projects it seems to would have very small impact.
 
-            foreach ( var injectedMember in injectedMembers )
+            var overriddenDeclarations = new Dictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
+
+            foreach ( var injectedMember in this._injectedMembers )
             {
+                var symbol = GetSymbolForInjectedMember( injectedMember );
+
+                // Basic maps.
+                symbolToInjectedMemberMap[symbol] = injectedMember;
+                injectedMemberToSymbolMap[injectedMember] = symbol;
+
                 if ( injectedMember.Transformation is IOverrideDeclarationTransformation overrideTransformation )
                 {
-                    if ( !overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
+                    if ( !overriddenDeclarations.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideInjectedMembers ) )
                     {
-                        overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new UnsortedConcurrentLinkedList<LinkerInjectedMember>();
+                        overriddenDeclarations[overrideTransformation.OverriddenDeclaration] = overrideInjectedMembers = new List<ISymbol>();
                     }
 
-                    overrideTargetMap[injectedMember] = overrideTransformation.OverriddenDeclaration;
-                    overrideList.Add( injectedMember );
-
-                    if ( overrideTransformation.OverriddenDeclaration is Declaration declaration )
-                    {
-                        overrideTargetsByOriginalSymbol[declaration.Symbol] = declaration;
-                    }
+                    overrideInjectedMembers.Add( symbol );
                 }
 
                 if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
                 {
-                    builderLookup[introduceTransformation.DeclarationBuilder] = injectedMember;
+                    builderToInjectedMemberMap[introduceTransformation.DeclarationBuilder] = injectedMember;
+                }
+            }
+
+            foreach ( var overriddenDeclaration in overriddenDeclarations )
+            {
+                var overrideTargetSymbol = GetOverrideTargetSymbol( overriddenDeclaration.Key );
+
+                overriddenDeclaration.Value.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
+
+                overrideTargets.Add( overrideTargetSymbol );
+                overrideMap.Add( overrideTargetSymbol, overriddenDeclaration.Value );
+
+                foreach(var overrideSymbol in overriddenDeclaration.Value)
+                {
+                    overrideTargetMap.Add( overrideSymbol, overrideTargetSymbol );
+                }
+            }
+
+            ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
+            {
+                var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
+                var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
+
+                SyntaxNode symbolSyntax = intermediateSyntax switch
+                {
+                    EventFieldDeclarationSyntax eventFieldSyntax => eventFieldSyntax.Declaration.Variables.First(),
+                    FieldDeclarationSyntax fieldSyntax => fieldSyntax.Declaration.Variables.First(),
+                    _ => intermediateSyntax
+                };
+
+                return this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
+                    .GetDeclaredSymbol( symbolSyntax )
+                    .AssertNotNull();
+            }
+
+            ISymbol? GetOverrideTargetSymbol( IDeclaration overrideTarget )
+            {
+                if ( overrideTarget is Declaration originalDeclaration )
+                {
+                    return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull(), true );
+                }
+                else if ( overrideTarget is IDeclarationBuilder builder )
+                {
+                    return GetFromBuilder( builder );
+                }
+                else if ( overrideTarget is BuiltMember builtMember )
+                {
+                    return GetFromBuilder( builtMember.Builder );
+                }
+                else
+                {
+                    throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
+                }
+
+                ISymbol? GetFromBuilder( IDeclarationBuilder builder )
+                {
+                    var introducedBuilder = builderToInjectedMemberMap[builder];
+                    var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
+                    var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
+                    var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
+
+                    var intermediateSemanticModel =
+                        this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
+
+                    var symbolNode = intermediateNode.AssertNotNull() switch
+                    {
+                        EventFieldDeclarationSyntax eventFieldNode => (SyntaxNode) eventFieldNode.Declaration.Variables.First(),
+                        _ => intermediateNode!
+                    };
+
+                    return intermediateSemanticModel.GetDeclaredSymbol( symbolNode );
+
                 }
             }
         }
@@ -101,113 +174,27 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="referencedSymbol">Symbol.</param>
         /// <returns>List of introduced members.</returns>
-        public IReadOnlyList<LinkerInjectedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
+        public IReadOnlyList<ISymbol> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
-            IReadOnlyList<LinkerInjectedMember> Sort( UnsortedConcurrentLinkedList<LinkerInjectedMember> list )
-                => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
-
-            // TODO: Optimize.
-            var declaringSyntax = referencedSymbol.GetPrimaryDeclaration();
-
-            if ( declaringSyntax == null )
+            if (this._overrideTargetToOverrideListMap.TryGetValue(referencedSymbol, out var overrideSymbolList))
             {
-                // Code is outside of the current compilation, so it cannot have overrides.
-                // TODO: This should be checked more thoroughly.
-                return Array.Empty<LinkerInjectedMember>();
-            }
-
-            var memberDeclaration = GetMemberDeclaration( declaringSyntax );
-
-            var annotation = memberDeclaration.GetAnnotations( InjectedNodeIdAnnotationId ).SingleOrDefault();
-
-            if ( annotation == null )
-            {
-                // Original code declaration - we should be able to get IDeclaration by symbol name.
-
-                if ( !this._overrideTargetsByOriginalSymbol.TryGetValue( referencedSymbol.OriginalDefinition, out var originalElement ) )
-                {
-                    return Array.Empty<LinkerInjectedMember>();
-                }
-
-                return Sort( this._overrideMap[originalElement] );
+                return overrideSymbolList;
             }
             else
             {
-                // Introduced declaration - we should get IDeclaration from introduced member.
-                var injectedMember = this._injectedMemberLookup[annotation.Data.AssertNotNull()];
-
-                if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introductionTransformation )
-                {
-                    if ( this._overrideMap.TryGetValue( introductionTransformation.DeclarationBuilder, out var overrides ) )
-                    {
-                        return Sort( overrides );
-                    }
-                    else
-                    {
-                        return Array.Empty<LinkerInjectedMember>();
-                    }
-                }
-                else
-                {
-                    return Array.Empty<LinkerInjectedMember>();
-                }
+                return Array.Empty<ISymbol>();
             }
-        }
-
-        private static SyntaxNode GetMemberDeclaration( SyntaxNode declaringSyntax )
-        {
-            return declaringSyntax switch
-            {
-                VariableDeclaratorSyntax { Parent.Parent: MemberDeclarationSyntax memberDeclaration } => memberDeclaration,
-                MemberDeclarationSyntax memberDeclaration => memberDeclaration,
-                ParameterSyntax { Parent.Parent: RecordDeclarationSyntax } => declaringSyntax,
-                _ => throw new AssertionFailedException( $"Unexpected node of kind {declaringSyntax.Kind()} at '{declaringSyntax.GetLocation()}'." )
-            };
         }
 
         private ISymbol? GetOverrideTarget( LinkerInjectedMember overrideInjectedMember )
         {
-            if ( !this._overrideTargetMap.TryGetValue( overrideInjectedMember, out var overrideTarget ) )
+            if ( !this._overrideToOverrideTargetMap.TryGetValue( this._injectedMemberToSymbolMap[overrideInjectedMember], out var overrideTarget ) )
             {
                 // Coverage: ignore (coverage is irrelevant, needed for correctness)
                 return null;
             }
 
-            if ( overrideTarget is Declaration originalDeclaration )
-            {
-                return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull(), true );
-            }
-            else if ( overrideTarget is IDeclarationBuilder builder )
-            {
-                return GetFromBuilder( builder );
-            }
-            else if ( overrideTarget is BuiltMember builtMember )
-            {
-                return GetFromBuilder( builtMember.Builder );
-            }
-            else
-            {
-                throw new AssertionFailedException( $"Unexpected declaration: '{overrideTarget}'." );
-            }
-
-            ISymbol? GetFromBuilder( IDeclarationBuilder builder )
-            {
-                var introducedBuilder = this._builderLookup[builder];
-                var sourceSyntaxTree = ((IDeclarationImpl) builder).PrimarySyntaxTree.AssertNotNull();
-                var intermediateSyntaxTree = this._transformedSyntaxTreeMap[sourceSyntaxTree];
-                var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
-
-                var intermediateSemanticModel =
-                    this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree );
-
-                var symbolNode = intermediateNode.AssertNotNull() switch
-                {
-                    EventFieldDeclarationSyntax eventFieldNode => (SyntaxNode) eventFieldNode.Declaration.Variables.First(),
-                    _ => intermediateNode!
-                };
-
-                return intermediateSemanticModel.GetDeclaredSymbol( symbolNode );
-            }
+            return overrideTarget;
         }
 
         /// <summary>
@@ -228,39 +215,22 @@ namespace Metalama.Framework.Engine.Linking
                     return this.GetInjectedMemberForSymbol( eventAccessorSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            var declaringSyntax = symbol.GetPrimaryDeclaration();
-
-            if ( declaringSyntax == null )
+            if (this._symbolToInjectedMemberMap.TryGetValue( symbol, out var injectedMember))
+            {
+                return injectedMember;
+            }
+            else
             {
                 return null;
             }
-
-            if ( symbol is IEventSymbol or IFieldSymbol && declaringSyntax is VariableDeclaratorSyntax )
-            {
-                declaringSyntax = declaringSyntax.Parent?.Parent.AssertNotNull();
-            }
-
-            var annotation = declaringSyntax.AssertNotNull().GetAnnotations( InjectedNodeIdAnnotationId ).SingleOrDefault();
-
-            if ( annotation == null )
-            {
-                return null;
-            }
-
-            if ( !this._injectedMemberLookup.TryGetValue( annotation.Data.AssertNotNull(), out var injectedMember ) )
-            {
-                throw new AssertionFailedException( $"Unable to find injected member for {symbol}." );
-            }
-
-            return injectedMember;
         }
 
         public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
         {
-            if ( this._builderToTransformationMap.TryGetValue( builder, out var transformation ) )
+            if ( this._builderToInjectedMemberMap.TryGetValue( builder, out var injectedMember ) )
             {
                 // Builder that was removed.
-                return transformation;
+                return (IIntroduceDeclarationTransformation) injectedMember.Transformation;
             }
             else
             {
@@ -275,19 +245,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
         {
-            var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
-            var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
-
-            SyntaxNode symbolSyntax = intermediateSyntax switch
-            {
-                EventFieldDeclarationSyntax eventFieldSyntax => eventFieldSyntax.Declaration.Variables.First(),
-                FieldDeclarationSyntax fieldSyntax => fieldSyntax.Declaration.Variables.First(),
-                _ => intermediateSyntax
-            };
-
-            return this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
-                .GetDeclaredSymbol( symbolSyntax )
-                .AssertNotNull();
+            return this._injectedMemberToSymbolMap[injectedMember];
         }
 
         /// <summary>
@@ -296,65 +254,27 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>Enumeration of introduced members.</returns>
         public IEnumerable<LinkerInjectedMember> GetInjectedMembers()
         {
-            return this._injectedMemberLookup.Values;
+            return this._injectedMembers;
         }
 
         /// <summary>
         /// Gets all symbols for overridden members.
         /// </summary>
         /// <returns>Enumeration of symbols.</returns>
-        public IEnumerable<ISymbol> GetOverriddenMembers()
+        public IReadOnlyList<ISymbol> GetOverriddenMembers()
         {
-            // TODO: This is not efficient.
-            var returned = new HashSet<ISymbol>( this._intermediateCompilation.CompilationContext.SymbolComparer );
-
-            foreach ( var injectedMember in this.GetInjectedMembers() )
-            {
-                var symbol = this.GetSymbolForInjectedMember( injectedMember );
-
-                if ( this.IsOverride( symbol ) )
-                {
-                    var overrideTarget = this.GetOverrideTarget( symbol ).AssertNotNull();
-
-                    if ( returned.Add( overrideTarget ) )
-                    {
-                        Invariant.Assert( overrideTarget.BelongsToCompilation( this._intermediateCompilation.CompilationContext ) != false );
-
-                        yield return overrideTarget;
-                    }
-                }
-            }
+            return this._overrideTargets;
         }
 
-        public ISymbol? GetOverrideTarget( ISymbol symbol )
+        public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
         {
-            switch ( symbol )
+            if (this._overrideToOverrideTargetMap.TryGetValue(overrideSymbol, out var overrideTargetSymbol))
             {
-                case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
-                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
-                    return ((IPropertySymbol?) this.GetOverrideTarget( getterSymbol.AssociatedSymbol.AssertNotNull() ))?.GetMethod;
-
-                case IMethodSymbol { MethodKind: MethodKind.PropertySet } setterSymbol:
-                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
-                    return ((IPropertySymbol?) this.GetOverrideTarget( setterSymbol.AssociatedSymbol.AssertNotNull() ))?.SetMethod;
-
-                case IMethodSymbol { MethodKind: MethodKind.EventAdd } adderSymbol:
-                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
-                    return ((IEventSymbol?) this.GetOverrideTarget( adderSymbol.AssociatedSymbol.AssertNotNull() ))?.AddMethod;
-
-                case IMethodSymbol { MethodKind: MethodKind.EventRemove } removerSymbol:
-                    // Coverage: ignore (coverage is irrelevant, needed for correctness).
-                    return ((IEventSymbol?) this.GetOverrideTarget( removerSymbol.AssociatedSymbol.AssertNotNull() ))?.RemoveMethod;
-
-                default:
-                    var injectedMember = this.GetInjectedMemberForSymbol( symbol );
-
-                    if ( injectedMember == null )
-                    {
-                        return null;
-                    }
-
-                    return this.GetOverrideTarget( injectedMember );
+                return overrideTargetSymbol;
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -380,7 +300,8 @@ namespace Metalama.Framework.Engine.Linking
                     return ((IEventSymbol) this.GetLastOverride( removerSymbol.AssociatedSymbol.AssertNotNull() )).RemoveMethod.AssertNotNull();
 
                 default:
-                    var lastOverride = this.GetOverridesForSymbol( symbol ).LastOrDefault();
+                    var overrides = this.GetOverridesForSymbol( symbol );
+                    var lastOverride = overrides.Count > 0 ? overrides[overrides.Count - 1] : null;
 
                     if ( lastOverride == null )
                     {
@@ -388,7 +309,7 @@ namespace Metalama.Framework.Engine.Linking
                         return symbol;
                     }
 
-                    return this.GetSymbolForInjectedMember( lastOverride );
+                    return lastOverride;
             }
         }
 
@@ -442,7 +363,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            return this.GetOverridesForSymbol( symbol ).Count > 0;
+            return this._overrideTargetToOverrideListMap.ContainsKey( symbol );
         }
 
         /// <summary>
@@ -460,22 +381,17 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            var injectedMember = this.GetInjectedMemberForSymbol( symbol );
-
-            if ( injectedMember == null )
-            {
-                return false;
-            }
-
-            return injectedMember.Semantic == InjectedMemberSemantic.Override;
+            return this._overrideTargetToOverrideListMap.ContainsKey( symbol );
         }
 
         // Resharper disable once UnusedMember.Global
         public bool IsLastOverride( ISymbol symbol )
         {
-            return this.IsOverride( symbol ) && this._intermediateCompilation.CompilationContext.SymbolComparer.Equals(
-                symbol,
-                this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
+            return 
+                this.IsOverride( symbol ) && 
+                this._intermediateCompilation.CompilationContext.SymbolComparer.Equals(
+                    symbol,
+                    this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );
         }
 
         public IAspectClass? GetSourceAspect( ISymbol symbol )
@@ -483,41 +399,6 @@ namespace Metalama.Framework.Engine.Linking
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
             return injectedMember?.Transformation.ParentAdvice.Aspect.AspectClass;
-        }
-
-        // Not yet used.
-        // Resharper disable once UnusedMember.Global
-        [ExcludeFromCodeCoverage]
-        public ISymbol? GetPreviousOverride( ISymbol symbol )
-        {
-            var overrideTarget = this.GetOverrideTarget( symbol );
-
-            if ( overrideTarget != null )
-            {
-                var overrides = this.GetOverridesForSymbol( overrideTarget );
-                var matched = false;
-
-                foreach ( var injectedMember in overrides.Reverse() )
-                {
-                    var overrideSymbol = this.GetSymbolForInjectedMember( injectedMember );
-
-                    if ( matched )
-                    {
-                        return overrideSymbol;
-                    }
-
-                    if ( this._intermediateCompilation.CompilationContext.SymbolComparer.Equals( overrideSymbol, symbol ) )
-                    {
-                        matched = true;
-                    }
-                }
-
-                return null;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }
