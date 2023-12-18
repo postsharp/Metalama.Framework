@@ -52,6 +52,8 @@ namespace Metalama.Framework.Engine.Linking
 
         public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
         {
+            // TODO: Consider parallelizing based on containing type and not syntax tree. This would remove non-determinism in name selection.
+
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 

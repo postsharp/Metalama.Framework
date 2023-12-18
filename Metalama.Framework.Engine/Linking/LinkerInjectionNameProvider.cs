@@ -11,24 +11,32 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
     {
+        private readonly Regex _interfaceMemberReplaceRegex = new Regex("_|\\.", RegexOptions.Compiled);
+
+        private readonly CompilationModel _finalCompilation;
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;
         private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
+        private readonly ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>> _nameCollisionCounters;
         private readonly OurSyntaxGenerator _syntaxGenerator;
 
         public LinkerInjectionNameProvider(
-            CompilationModel finalCompilationModel,
+            CompilationModel finalCompilation,
             LinkerInjectionHelperProvider injectionHelperProvider,
             OurSyntaxGenerator syntaxGenerator )
         {
+            this._finalCompilation = finalCompilation;
             this._injectionHelperProvider = injectionHelperProvider;
-            this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilationModel.Comparers.Default );
+            this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilation.Comparers.Default );
             this._overriddenByCounters = new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>();
+            this._nameCollisionCounters = new ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>>();
             this._syntaxGenerator = syntaxGenerator;
         }
 
@@ -42,7 +50,16 @@ namespace Metalama.Framework.Engine.Linking
             if ( overriddenMember.IsExplicitInterfaceImplementation )
             {
                 var interfaceMember = overriddenMember.GetExplicitInterfaceImplementation();
-                var cleanInterfaceName = interfaceMember.DeclaringType.Name.ReplaceOrdinal( "_", "__" ).ReplaceOrdinal( ".", "_" );
+                var cleanInterfaceName = 
+                    this._interfaceMemberReplaceRegex.Replace( 
+                        interfaceMember.DeclaringType.Name, 
+                        m => 
+                            m.Value switch 
+                            { 
+                                "_" => "__", 
+                                "." => "_", 
+                                _ => throw new AssertionFailedException() 
+                            } );
 
                 nameHint =
                     shortLayerName != null
@@ -51,8 +68,6 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                // TODO: Obviously these replace methods are not very efficient.
-
                 nameHint =
                     shortLayerName != null
                         ? $"{overriddenMember.Name}_{shortAspectName}_{shortLayerName}"
@@ -108,6 +123,8 @@ namespace Metalama.Framework.Engine.Linking
 
         internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember )
         {
+            // TODO: COunter update can be optimized but having multiple indexer overrides is not likely.
+
             var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
 
             return this._injectionHelperProvider.GetOverriddenByType( this._syntaxGenerator, aspect.AspectClass, ordinal );
@@ -115,61 +132,102 @@ namespace Metalama.Framework.Engine.Linking
 
         private string FindUniqueName( INamedType containingType, string hint )
         {
-            int? hintIndex = null;
+            // PERF: Do not add into cache until the second collision is encountered.
+            //       We want to be optimistic for that most of time one of the following happens:
+            //          1) Hint does not collide.
+            //          2) Hint does collide, but appending "1" resolves the collision.
+            //       In other cases we allocate the cache and next time we work with it.
 
-            while ( true )
+            // THR:  This method may get called on multiple threads. If parallelization is using by-type grouping instead of by-syntax tree, 
+            //       most of the synchronization (allocating and accessing the strong box) can be removed.
+
+            if ( !this._nameCollisionCounters.TryGetValue( (containingType, hint), out var counter ) )
             {
-                if ( hintIndex == null )
+                var finalContainingType = containingType.Translate( this._finalCompilation );
+                var injectedMemberNames = this._injectedMemberNames.GetOrAdd( finalContainingType, _ => new ConcurrentSet<string>() );
+
+                // Collision counter was not yet initialized, therefore final compilation members need to be checked.
+                if ( CheckFinalMemberNames( finalContainingType, hint ) )
                 {
-                    if ( CheckAndAddName( hint ) )
+                    if ( injectedMemberNames.Add( hint ) )
                     {
+                        // There is no collision with compilation members and we have reserved the name.
+                        this._nameCollisionCounters.AddOrUpdate(
+                            (finalContainingType, hint),
+                            new StrongBox<int>( 1 ),
+                            ( k, v ) =>
+                            {
+                                // If the strong box is already present, it means that other thread ran through before us, we have to only assert.
+                                Invariant.Assert( v.Value > 1 );
+                                return v;
+                            } );
+
                         return hint;
                     }
                     else
                     {
-                        hintIndex = 1;
+                        // There was collision with a name that was already added by this algorithm.
+                        // Example: "foo", "foo1" declared in code, FindUniqueName executes 11 times for "foo".
+                        //          When FindUniqueName executes for "foo1", it will try to start the chain with "foo11".
+                        // Resolution: add a counter for "2" and proceed to the slow path.
+                        counter = this._nameCollisionCounters.AddOrUpdate( (finalContainingType, hint), new StrongBox<int>( 2 ), ( k, v ) => v );
+
+                        return FindAndUpdate( finalContainingType, injectedMemberNames, hint, counter );
                     }
                 }
                 else
                 {
-                    var candidate = hint + hintIndex.Value;
+                    counter = this._nameCollisionCounters.AddOrUpdate( (finalContainingType, hint), new StrongBox<int>( 2 ), (k, v) => v );
 
-                    if ( CheckAndAddName( candidate ) )
+                    return FindAndUpdate( finalContainingType, injectedMemberNames, hint, counter );
+                }
+            }
+            else
+            {
+                var injectedMemberNames = this._injectedMemberNames.GetOrAdd( containingType, _ => new ConcurrentSet<string>() );
+
+                return FindAndUpdate( containingType, injectedMemberNames, hint, counter );
+            }
+
+            static string FindAndUpdate( INamedType finalContainingType, ConcurrentSet<string> injectedMemberNames, string hint, StrongBox<int> counter )
+            {
+                lock ( counter )
+                {
+                    while (true)
                     {
-                        return candidate;
-                    }
-                    else
-                    {
-                        hintIndex++;
+                        var candidate = $"{hint}{counter.Value++}";
+
+                        if ( CheckFinalMemberNames( finalContainingType, hint ) && injectedMemberNames.Add( hint ) )
+                        {
+                            return candidate;
+                        }
                     }
                 }
             }
 
-            bool CheckAndAddName( string name )
+            static bool CheckFinalMemberNames( INamedType type, string name )
             {
-                if ( containingType.FieldsAndProperties.OfName( name ).Any() )
+                if ( type.FieldsAndProperties.OfName( name ).Any() )
                 {
                     return false;
                 }
 
-                if ( containingType.Methods.OfName( name ).Any() )
+                if ( type.Methods.OfName( name ).Any() )
                 {
                     return false;
                 }
 
-                if ( containingType.Events.OfName( name ).Any() )
+                if ( type.Events.OfName( name ).Any() )
                 {
                     return false;
                 }
 
-                if ( containingType.NestedTypes.OfName( name ).Any() )
+                if ( type.NestedTypes.OfName( name ).Any() )
                 {
                     return false;
                 }
 
-                var injectedNames = this._injectedMemberNames.GetOrAddNew( containingType );
-
-                return injectedNames.Add( name );
+                return true;
             }
         }
     }
