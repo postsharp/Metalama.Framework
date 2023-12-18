@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Tools;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
                 return;
             }
 
-            if ( BackstageServiceFactory.Initialize( options, options.ApplicationInfo.Name ) )
+            if ( BackstageServiceFactory.Initialize( options with { AddToolsExtractor = builder => builder.AddTools() }, options.ApplicationInfo.Name ) )
             {
                 Logger.Initialize();
             }
