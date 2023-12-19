@@ -39,16 +39,12 @@ public sealed class LicenseVerifier : IProjectService
 
     private readonly struct RedistributionLicenseFeatures { }
 
-    private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
-    {
-        return tempFileManager.GetTempDirectory( _licenseUsageSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
-    }
+    private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager ) 
+        => tempFileManager.GetTempDirectory( _licenseUsageSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionScope: TempFileVersionScope.None );
 
     [PublicAPI]
-    public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
-    {
-        return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
-    }
+    public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager ) 
+        => Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
 
     internal LicenseVerifier( ProjectServiceProvider serviceProvider )
     {

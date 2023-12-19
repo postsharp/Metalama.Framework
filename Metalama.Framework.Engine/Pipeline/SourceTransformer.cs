@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
@@ -72,29 +71,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 ReportException( e, serviceProvider, false );
 
                 // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
-            }
-            
-            // Enforce licensing.
-            if ( serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
-            {
-                var projectPath = MSBuildProjectOptionsFactory.Default.GetProjectOptions( context.AnalyzerConfigOptionsProvider ).ProjectPath;
-                var projectName = Path.GetFileNameWithoutExtension( projectPath ) ?? "unknown";
-
-                if ( !licenseManager.CanConsume( LicenseRequirement.Free, projectName ) )
-                {
-                    // We only emit the generic invalid license error when no specific error message
-                    // comes from the license manager to avoid confusion of users.
-                    if ( !licenseManager.Messages.Any( m => m.IsError ) )
-                    {
-                        context.ReportDiagnostic( LicensingDiagnosticDescriptors.InvalidLicenseOverall.CreateRoslynDiagnostic( null, default ) );
-                    }
-                    else
-                    {
-                        // Errors are emitted by the MetalamaFrameworkServicesHolder.DisposeServices() method.
-                    }
-
-                    return null;
-                }
             }
 
             return new CompilerServiceProvider( serviceProvider );
