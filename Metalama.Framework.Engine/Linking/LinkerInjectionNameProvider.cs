@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var candidate = $"{hint}{counter.Value++}";
 
-                        if ( CheckFinalMemberNames( finalContainingType, hint ) && injectedMemberNames.Add( hint ) )
+                        if ( CheckFinalMemberNames( finalContainingType, hint ) && injectedMemberNames.Add( candidate ) )
                         {
                             return candidate;
                         }

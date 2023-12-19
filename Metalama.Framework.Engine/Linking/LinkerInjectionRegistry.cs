@@ -10,6 +10,8 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Elfie.Model;
+using Microsoft.CodeAnalysis.FindSymbols;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +32,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyList<LinkerInjectedMember> _injectedMembers;
         private readonly IReadOnlyList<ISymbol> _overrideTargets;
         private readonly IReadOnlyDictionary<IDeclarationBuilder, LinkerInjectedMember> _builderToInjectedMemberMap;
+        private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
         private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
         private readonly IReadOnlyDictionary<ISymbol, LinkerInjectedMember> _symbolToInjectedMemberMap;
         private readonly IReadOnlyDictionary<LinkerInjectedMember, ISymbol> _injectedMemberToSymbolMap;
@@ -57,6 +60,7 @@ namespace Metalama.Framework.Engine.Linking
                 .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
                 .ToDictionary( m => m.OldTree.AssertNotNull(), m => m.NewTree.AssertNotNull() );
             this._injectedMembers = injectedMembers.ToList();
+            this._builderToTransformationMap = (IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>) builderToTransformationMap;
 
             var injectedMemberByNodeId = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._overrideTargets = overrideTargets = new List<ISymbol>();
@@ -70,35 +74,37 @@ namespace Metalama.Framework.Engine.Linking
             //       the same spirit as the Index* methods.
             //       However, even for very large projects it seems to would have very small impact.
 
+
             var overriddenDeclarations = new Dictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
 
             foreach ( var injectedMember in this._injectedMembers )
             {
-                var symbol = GetSymbolForInjectedMember( injectedMember );
+                var injectedMemberSymbol = GetSymbolForInjectedMember( injectedMember );
+
+                injectedMemberSymbol = GetCanonicalSymbol( injectedMemberSymbol );
 
                 // Basic maps.
-                symbolToInjectedMemberMap[symbol] = injectedMember;
-                injectedMemberToSymbolMap[injectedMember] = symbol;
+                symbolToInjectedMemberMap[injectedMemberSymbol] = injectedMember;
+                injectedMemberToSymbolMap[injectedMember] = injectedMemberSymbol;
 
                 if ( injectedMember.Transformation is IOverrideDeclarationTransformation overrideTransformation )
                 {
-                    if ( !overriddenDeclarations.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideInjectedMembers ) )
-                    {
-                        overriddenDeclarations[overrideTransformation.OverriddenDeclaration] = overrideInjectedMembers = new List<ISymbol>();
-                    }
-
-                    overrideInjectedMembers.Add( symbol );
+                    overriddenDeclarations
+                        .GetOrAdd( overrideTransformation.OverriddenDeclaration, _ => new List<ISymbol>() )
+                        .Add( injectedMemberSymbol );
                 }
 
                 if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
                 {
-                    builderToInjectedMemberMap[introduceTransformation.DeclarationBuilder] = injectedMember;
+                    builderToInjectedMemberMap.TryAdd(introduceTransformation.DeclarationBuilder, injectedMember);
                 }
             }
 
             foreach ( var overriddenDeclaration in overriddenDeclarations )
             {
                 var overrideTargetSymbol = GetOverrideTargetSymbol( overriddenDeclaration.Key );
+
+                overrideTargetSymbol = GetCanonicalSymbol( overrideTargetSymbol );
 
                 overriddenDeclaration.Value.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
@@ -176,6 +182,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>List of introduced members.</returns>
         public IReadOnlyList<ISymbol> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
+            referencedSymbol = GetCanonicalSymbol( referencedSymbol );
+
             if (this._overrideTargetToOverrideListMap.TryGetValue(referencedSymbol, out var overrideSymbolList))
             {
                 return overrideSymbolList;
@@ -227,10 +235,10 @@ namespace Metalama.Framework.Engine.Linking
 
         public IIntroduceDeclarationTransformation? GetTransformationForBuilder( IDeclarationBuilder builder )
         {
-            if ( this._builderToInjectedMemberMap.TryGetValue( builder, out var injectedMember ) )
+            if ( this._builderToTransformationMap.TryGetValue( builder, out var transformation ) )
             {
                 // Builder that was removed.
-                return (IIntroduceDeclarationTransformation) injectedMember.Transformation;
+                return transformation;
             }
             else
             {
@@ -268,6 +276,8 @@ namespace Metalama.Framework.Engine.Linking
 
         public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
         {
+            overrideSymbol = GetCanonicalSymbol( overrideSymbol );
+
             if (this._overrideToOverrideTargetMap.TryGetValue(overrideSymbol, out var overrideTargetSymbol))
             {
                 return overrideTargetSymbol;
@@ -338,6 +348,8 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsIntroduced( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
+            symbol = GetCanonicalSymbol( symbol );
+
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
             if ( injectedMember == null )
@@ -363,6 +375,8 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
+            symbol = GetCanonicalSymbol( symbol );
+
             return this._overrideTargetToOverrideListMap.ContainsKey( symbol );
         }
 
@@ -381,7 +395,9 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            return this._overrideTargetToOverrideListMap.ContainsKey( symbol );
+            symbol = GetCanonicalSymbol( symbol );
+
+            return this._overrideToOverrideTargetMap.ContainsKey( symbol );
         }
 
         // Resharper disable once UnusedMember.Global
@@ -399,6 +415,21 @@ namespace Metalama.Framework.Engine.Linking
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
             return injectedMember?.Transformation.ParentAdvice.Aspect.AspectClass;
+        }
+
+        private static ISymbol GetCanonicalSymbol(ISymbol symbol)
+        {
+            if ( symbol is IMethodSymbol { IsGenericMethod: true, ConstructedFrom: { } genericDefinition } )
+            {
+                symbol = genericDefinition;
+            }
+
+            if ( symbol is IMethodSymbol { PartialDefinitionPart : { } partialDefinition } )
+            {
+                symbol = partialDefinition;
+            }
+
+            return symbol;
         }
     }
 }
