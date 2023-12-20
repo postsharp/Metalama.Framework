@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+  </ItemGroup>
+
+  <Target Name="_ValidateMetalamaBuildConfiguration" BeforeTargets="Build">
+	<Error Text="Property 'MetalamaBuildConfiguration' is not set." Condition="'$(MetalamaBuildConfiguration)'==''" />
+  </Target>
+	
+  <!-- Skip the test for non-public build, as non-public assemblies are not strong-name-signed. -->
+  <!-- The test is skipped by removing the app configuration file, that enforces strong name validation. -->
+  <Target Name="_Run" AfterTargets="Build" Condition="'$(MetalamaBuildConfiguration)'=='Public'">
+	<Exec Command="$(OutDir)$(AssemblyName).exe" />
+  </Target>
+	
+</Project>
