@@ -81,7 +81,6 @@ object DebugBuild : BuildType({
         }
         perfmon {}
     }
-    }
 
     triggers {
         vcs {
