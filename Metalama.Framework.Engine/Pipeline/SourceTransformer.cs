@@ -24,6 +24,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using IExceptionReporter = Metalama.Backstage.Telemetry.IExceptionReporter;
+using ILogger = Metalama.Compiler.Services.ILogger;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -47,13 +48,14 @@ namespace Metalama.Framework.Engine.Pipeline
             var backstageOptions = new BackstageInitializationOptions( applicationInfo, context.Compilation.AssemblyName )
             {
                 AddLicensing = true,
+                AddUserInterface = true,
                 AddSupportServices = true,
                 LicensingOptions = licenseOptions,
                 DotNetSdkDirectory = dotNetSdkDirectory
             };
-           
+
             BackstageServiceFactoryInitializer.Initialize( backstageOptions );
-            
+
             var serviceProvider = BackstageServiceFactory.ServiceProvider;
 
             // Initialize usage reporting.
@@ -89,8 +91,8 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             public object? GetService( Type serviceType )
-                => serviceType == typeof(Metalama.Compiler.Services.ILogger) ? this._logger
-                    : serviceType == typeof(Metalama.Compiler.Services.IExceptionReporter) ? this._exceptionReporter
+                => serviceType == typeof(ILogger) ? this._logger
+                    : serviceType == typeof(Compiler.Services.IExceptionReporter) ? this._exceptionReporter
                     : null;
 
             public void DisposeServices( Action<Diagnostic> reportDiagnostic )
@@ -155,12 +157,10 @@ namespace Metalama.Framework.Engine.Pipeline
 
             return new LicensingInitializationOptions
             {
-                ProjectLicense = projectLicense,
-                IgnoreUserProfileLicenses = ignoreUserLicenses,
-                IgnoreUnattendedProcessLicense = ignoreUserLicenses
+                ProjectLicense = projectLicense, IgnoreUserProfileLicenses = ignoreUserLicenses, IgnoreUnattendedProcessLicense = ignoreUserLicenses
             };
         }
-        
+
         private static void ReportException( Exception e, IServiceProvider serviceProvider, bool throwReporterExceptions )
         {
             try
@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
         }
-        
+
         public void Execute( TransformerContext context )
         {
             var serviceProvider = ServiceProviderFactory.GetServiceProvider();
@@ -197,8 +197,10 @@ namespace Metalama.Framework.Engine.Pipeline
                     context.AnalyzerConfigOptionsProvider,
                     context.Options );
 
-                var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, context.Compilation );
-
+                var projectServiceProvider = serviceProvider
+                    .WithProjectScopedServices( projectOptions, context.Compilation )
+                    .WithService<IProjectLicenseConsumptionService>( sp => new ProjectLicenseConsumptionService( sp ) );
+                
                 using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
                 var taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();

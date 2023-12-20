@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             string projectName = "TestProject" )
         {
             var mocks = new AdditionalServiceCollection();
-            mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManager( licenseKey ) );
+            mocks.ProjectServices.Add( sp => sp.AddProjectLicenseConsumptionManagerForTest( licenseKey ) );
 
             var testContextOptions = this.GetDefaultTestContextOptions() with { ProjectName = projectName };
 

@@ -133,12 +133,6 @@ public static class ServiceProviderFactory
             projectServiceProvider = projectServiceProvider.WithService( concurrentTaskRunner );
         }
 
-        if ( serviceProvider.GetBackstageService<ILicenseConsumptionService>() != null )
-        {
-            projectServiceProvider = projectServiceProvider
-                .WithServiceConditional<IProjectLicenseConsumptionService>( sp => new ProjectLicenseConsumptionService( sp ) );
-        }
-
         projectServiceProvider = projectServiceProvider
             .WithServiceConditional<SerializerFactoryProvider>( sp => new BuiltInSerializerFactoryProvider( sp ) )
             .WithServiceConditional<IAssemblyLocator>( sp => new AssemblyLocator( sp, metadataReferences ) )

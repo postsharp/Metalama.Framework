@@ -92,11 +92,11 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
             else
             {
-                var standardDirectories = context.ServiceProvider.Global.GetRequiredBackstageService<IStandardDirectories>();
+                var standardDirectories = context.ServiceProvider.Global.GetBackstageService<IStandardDirectories>();
                 var applicationInfoProvider = context.ServiceProvider.Global.GetRequiredBackstageService<IApplicationInfoProvider>();
                 string reportFile;
 
-                if ( applicationInfoProvider.CurrentApplication.ShouldCreateLocalCrashReports )
+                if ( applicationInfoProvider.CurrentApplication.ShouldCreateLocalCrashReports && standardDirectories != null )
                 {
                     try
                     {

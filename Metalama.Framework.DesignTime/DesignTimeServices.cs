@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Tools;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
@@ -16,11 +15,10 @@ internal static class DesignTimeServices
             throw new InvalidOperationException( "This method cannot be called from the Metalama Compiler process." );
         }
 
-        BackstageServiceFactoryInitializer.Initialize( 
+        BackstageServiceFactoryInitializer.Initialize(
             new BackstageInitializationOptions( new MetalamaDesignTimeApplicationInfo() )
             {
-                AddUserInterface = true,
-                AddLicensing = true
-            });
+                AddSupportServices = true, AddUserInterface = true, AddLicensing = true
+            } );
     }
 }
