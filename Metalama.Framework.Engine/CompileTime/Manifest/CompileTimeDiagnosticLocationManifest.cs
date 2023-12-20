@@ -22,6 +22,13 @@ internal sealed class CompileTimeDiagnosticLocationManifest
 
     public CompileTimeDiagnosticLocationManifest( Location location, Dictionary<string, int> sourceFilePathIndexes )
     {
+        if ( location == Location.None )
+        {
+            this.FileIndex = -1;
+
+            return;
+        }
+
         // Paths of compile-time source files are always changing, so the cache uses an index as a persistent identifier for a file when possible.
         var path = location.SourceTree.AssertNotNull().FilePath;
 
@@ -39,7 +46,10 @@ internal sealed class CompileTimeDiagnosticLocationManifest
     }
 
     public Location ToLocation( SyntaxTree[] sourceTrees )
-        => this.FileIndex is { } index
-            ? Location.Create( sourceTrees[index], this.TextSpan )
-            : Location.Create( this.FilePath.AssertNotNull(), this.TextSpan, this.LineSpan.AssertNotNull() );
+        => this.FileIndex switch
+        {
+            -1 => Location.None,
+            { } index => Location.Create( sourceTrees[index], this.TextSpan ),
+            null => Location.Create( this.FilePath.AssertNotNull(), this.TextSpan, this.LineSpan.AssertNotNull() )
+        };
 }

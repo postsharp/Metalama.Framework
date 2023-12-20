@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     IArrayTypeSymbol arrayType => OurSyntaxGenerator.CompileTime.ArrayTypeExpression(
                         OurSyntaxGenerator.CompileTime.Type( arrayType.ElementType ) ),
-                    _ => (TypeSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
+                    _ => OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
                 };
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
@@ -77,25 +77,20 @@ namespace Metalama.Framework.Engine.Templating
             public ExpressionSyntax Literal( ExpressionSyntax expression )
             {
                 var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
-                    .WithArgumentList(
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( expression ) } ) ) );
+                    .AddArgumentListArguments( SyntaxFactory.Argument( expression ) );
 
                 return result;
             }
 
-            public ExpressionSyntax Literal( SyntaxToken token ) => token.IsKind( SyntaxKind.NullKeyword ) ? this.Null : this.Literal( token.Value! );
+            public ExpressionSyntax Literal( SyntaxToken token )
+                => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
+                    .AddArgumentListArguments(
+                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Text ) ),
+                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Value, ObjectDisplayOptions.IncludeTypeSuffix ) ) );
 
             public ExpressionSyntax Literal( object value )
-            {
-                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
-                    .WithArgumentList(
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SeparatedList<ArgumentSyntax>(
-                                new SyntaxNodeOrToken[] { SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( value ) ) } ) ) );
-
-                return result;
-            }
+                => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
+                    .AddArgumentListArguments( SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( value ) ) );
 
             public ExpressionSyntax SingletonSeparatedList<T>( ExpressionSyntax item )
                 where T : SyntaxNode
@@ -103,9 +98,7 @@ namespace Metalama.Framework.Engine.Templating
                 var itemType = this.Type( typeof(T) );
 
                 var result = SyntaxFactory.InvocationExpression( this.GenericSyntaxFactoryMethod( nameof(SyntaxFactory.SingletonSeparatedList), itemType ) )
-                    .WithArgumentList(
-                        SyntaxFactory.ArgumentList(
-                            SyntaxFactory.SeparatedList<ArgumentSyntax>( new SyntaxNodeOrToken[] { SyntaxFactory.Argument( item ) } ) ) );
+                    .AddArgumentListArguments( SyntaxFactory.Argument( item ) );
 
                 return result;
             }

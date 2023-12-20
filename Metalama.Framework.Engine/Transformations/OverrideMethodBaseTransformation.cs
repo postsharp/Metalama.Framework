@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +14,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
-using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -106,19 +106,7 @@ namespace Metalama.Framework.Engine.Transformations
                         ArgumentList(
                             SeparatedList(
                                 this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList(
-                                    p =>
-                                    {
-                                        var refKind = p.RefKind switch
-                                        {
-                                            RefKind.None => default,
-                                            RefKind.In => default,
-                                            RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                            RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                            _ => throw new AssertionFailedException( $"Unexpected RefKind: {p.RefKind}." )
-                                        };
-
-                                        return Argument( null, refKind, IdentifierName( p.Name ) );
-                                    } ) ) ) ),
+                                    p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) ),
                 MethodKind.Finalizer =>
                     referenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
                 MethodKind.Operator =>

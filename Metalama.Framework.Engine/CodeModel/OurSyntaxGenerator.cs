@@ -143,9 +143,9 @@ internal partial class OurSyntaxGenerator
         return SyntaxFactoryEx.SafeCastExpression( this.Type( targetTypeSymbol ), expression );
     }
 
-    public ExpressionSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
+    public TypeSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
     {
-        ExpressionSyntax expression;
+        TypeSyntax expression;
 
         switch ( symbol )
         {
@@ -153,7 +153,7 @@ internal partial class OurSyntaxGenerator
                 return this.Type( typeSymbol );
 
             case INamespaceSymbol namespaceSymbol:
-                expression = (ExpressionSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
+                expression = (NameSyntax) this._syntaxGenerator.NameExpression( namespaceSymbol );
 
                 break;
 

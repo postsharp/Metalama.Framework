@@ -78,4 +78,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public string? CompileTimeTargetFrameworks => this.Wrapped.CompileTimeTargetFrameworks;
 
     public string? RestoreSources => this.Wrapped.RestoreSources;
+
+    public string? TemplateLanguageVersion => this.Wrapped.TemplateLanguageVersion;
 }

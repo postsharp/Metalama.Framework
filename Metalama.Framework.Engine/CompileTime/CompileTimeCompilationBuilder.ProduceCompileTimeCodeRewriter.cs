@@ -149,12 +149,27 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var attribute in node.Attributes )
                 {
-                    var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( attribute.Name ).Symbol;
+                    var semanticModel = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree );
+                    var attributeSymbol = semanticModel.GetSymbolInfo( attribute.Name ).Symbol;
 
-                    if ( symbol != null )
+                    if ( attributeSymbol != null )
                     {
-                        if ( this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.RunTimeOnly )
+                        if ( this.SymbolClassifier.GetTemplatingScope( attributeSymbol ) == TemplatingScope.RunTimeOnly )
                         {
+                            var attributeTypeSymbol = attributeSymbol.GetClosestContainingType();
+
+                            if ( attributeTypeSymbol?.GetFullName() == "System.Runtime.CompilerServices.InlineArrayAttribute" )
+                            {
+                                var containingDeclaration = node.Parent == null ? null : semanticModel.GetDeclaredSymbol( node.Parent );
+
+                                this._diagnosticAdder.Report(
+                                    TemplatingDiagnosticDescriptors.AttributeNotAllowedOnCompileTimeCode.CreateRoslynDiagnostic(
+                                        attribute.GetDiagnosticLocation(),
+                                        (attributeTypeSymbol, containingDeclaration) ) );
+
+                                this.Success = false;
+                            }
+
                             continue;
                         }
                     }
@@ -387,6 +402,11 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            private void AddToManifest( ISymbol symbol, RoslynApiVersion? usedApiVersion )
+            {
+                this._compileTimeManifestBuilder.AddOrUpdateSymbol( symbol, usedApiVersion: usedApiVersion );
+            }
+
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
@@ -576,7 +596,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                     else if ( existingSerializer == null )
                     {
-                        var serializedTypeName = this.CreateNameExpression( serializableType.Type );
+                        var serializedTypeName = this.CreateTypeSyntax( serializableType.Type ).AssertCast<NameSyntax>();
+                        var constructorName = GetConstructorNameToken( serializedTypeName );
 
                         if ( !serializableType.Type.IsValueType
                              && !serializableType.Type.GetMembers()
@@ -587,7 +608,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 ConstructorDeclaration(
                                         List<AttributeListSyntax>(),
                                         TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( ElasticSpace ) ),
-                                        serializedTypeName.ShortName,
+                                        constructorName,
                                         ParameterList(),
                                         null,
                                         SyntaxFactoryEx.FormattedBlock(),
@@ -595,7 +616,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     .NormalizeWhitespace() );
                         }
 
-                        var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, serializedTypeName );
+                        var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, constructorName );
                         var serializerType = this._serializerGenerator.CreateSerializerType( serializableType, serializedTypeName );
 
                         if ( deserializingConstructor != null && serializerType != null )
@@ -744,7 +765,10 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._diagnosticAdder,
                         this._cancellationToken,
                         out _,
-                        out var transformedNode );
+                        out var transformedNode,
+                        out var usedApiVersion );
+
+                this.AddToManifest( methodSymbol, usedApiVersion );
 
                 if ( success )
                 {
@@ -809,57 +833,82 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         // Auto properties don't have bodies and so we don't need templates.
 
+                        RoslynApiVersion? maxApiVersion = null;
+
                         if ( getterIsTemplate && (getAccessor!.Body != null || getAccessor.ExpressionBody != null) )
                         {
-                            success =
-                                success &&
-                                this._templateCompiler.TryCompile(
-                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
-                                    this._compileTimeCompilation,
-                                    getAccessor,
-                                    TemplateCompilerSemantics.Default,
-                                    this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                    this._diagnosticAdder,
-                                    this._cancellationToken,
-                                    out _,
-                                    out transformedGetDeclaration );
+                            if ( success )
+                            {
+                                success =
+                                    this._templateCompiler.TryCompile(
+                                        TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
+                                        this._compileTimeCompilation,
+                                        getAccessor,
+                                        TemplateCompilerSemantics.Default,
+                                        this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnosticAdder,
+                                        this._cancellationToken,
+                                        out _,
+                                        out transformedGetDeclaration,
+                                        out var getterApiVersion );
+
+                                maxApiVersion ??= getterApiVersion;
+                            }
 
                             templateAccessorCount++;
                         }
 
                         if ( setterIsTemplate && (setAccessor!.Body != null || setAccessor.ExpressionBody != null) )
                         {
-                            success =
-                                success &&
-                                this._templateCompiler.TryCompile(
-                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
-                                    this._compileTimeCompilation,
-                                    setAccessor,
-                                    TemplateCompilerSemantics.Default,
-                                    this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                    this._diagnosticAdder,
-                                    this._cancellationToken,
-                                    out _,
-                                    out transformedSetDeclaration );
+                            if ( success )
+                            {
+                                success =
+                                    this._templateCompiler.TryCompile(
+                                        TemplateNameHelper.GetCompiledTemplateName( propertySymbol.SetMethod.AssertNotNull() ),
+                                        this._compileTimeCompilation,
+                                        setAccessor,
+                                        TemplateCompilerSemantics.Default,
+                                        this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnosticAdder,
+                                        this._cancellationToken,
+                                        out _,
+                                        out transformedSetDeclaration,
+                                        out var setterApiVersion );
+
+                                if ( maxApiVersion == null || setterApiVersion > maxApiVersion )
+                                {
+                                    maxApiVersion = setterApiVersion;
+                                }
+                            }
 
                             templateAccessorCount++;
                         }
 
                         if ( propertyIsTemplate && node is PropertyDeclarationSyntax { Initializer: not null } )
                         {
-                            success =
-                                success &&
-                                this._templateCompiler.TryCompile(
-                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol ),
-                                    this._compileTimeCompilation,
-                                    node,
-                                    TemplateCompilerSemantics.Initializer,
-                                    this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                    this._diagnosticAdder,
-                                    this._cancellationToken,
-                                    out _,
-                                    out transformedGetDeclaration );
+                            if ( success )
+                            {
+                                success =
+                                    this._templateCompiler.TryCompile(
+                                        TemplateNameHelper.GetCompiledTemplateName( propertySymbol ),
+                                        this._compileTimeCompilation,
+                                        node,
+                                        TemplateCompilerSemantics.Initializer,
+                                        this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnosticAdder,
+                                        this._cancellationToken,
+                                        out _,
+                                        out transformedGetDeclaration,
+                                        out var initializerApiVersion );
+
+                                if ( maxApiVersion == null || initializerApiVersion > maxApiVersion )
+                                {
+                                    maxApiVersion = initializerApiVersion;
+                                }
+                            }
                         }
+
+                        this.AddToManifest( propertySymbol, maxApiVersion );
 
                         if ( templateAccessorCount > 0 )
                         {
@@ -875,18 +924,23 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         // Expression bodied property.
                         // TODO: Does this preserve trivia in expression body?
-                        success =
-                            success &&
-                            this._templateCompiler.TryCompile(
-                                TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
-                                this._compileTimeCompilation,
-                                propertyNode,
-                                TemplateCompilerSemantics.Default,
-                                this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                this._diagnosticAdder,
-                                this._cancellationToken,
-                                out _,
-                                out transformedGetDeclaration );
+                        if ( success )
+                        {
+                            success =
+                                this._templateCompiler.TryCompile(
+                                        TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
+                                        this._compileTimeCompilation,
+                                        propertyNode,
+                                        TemplateCompilerSemantics.Default,
+                                        this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                        this._diagnosticAdder,
+                                        this._cancellationToken,
+                                        out _,
+                                        out transformedGetDeclaration,
+                                        out var getterApiVersion );
+
+                            this.AddToManifest( propertySymbol, getterApiVersion );
+                        }
                     }
                 }
 
@@ -1126,8 +1180,11 @@ namespace Metalama.Framework.Engine.CompileTime
                             this._diagnosticAdder,
                             this._cancellationToken,
                             out _,
-                            out var transformedFieldDeclaration ) )
+                            out var transformedFieldDeclaration,
+                            out var usedApiVersion ) )
                     {
+                        this.AddToManifest( symbol, usedApiVersion );
+
                         yield return (MethodDeclarationSyntax) transformedFieldDeclaration;
                     }
                     else
@@ -1192,8 +1249,12 @@ namespace Metalama.Framework.Engine.CompileTime
                         var addAccessor = node.AccessorList.Accessors.Single( a => a.Kind() == SyntaxKind.AddAccessorDeclaration );
                         var removeAccessor = node.AccessorList.Accessors.Single( a => a.Kind() == SyntaxKind.RemoveAccessorDeclaration );
 
-                        success = success &&
-                                  this._templateCompiler.TryCompile(
+                        RoslynApiVersion? maxApiVersion = null;
+
+                        if ( success )
+                        {
+                            success =
+                                this._templateCompiler.TryCompile(
                                       TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
                                       this._compileTimeCompilation,
                                       addAccessor,
@@ -1202,9 +1263,15 @@ namespace Metalama.Framework.Engine.CompileTime
                                       this._diagnosticAdder,
                                       this._cancellationToken,
                                       out _,
-                                      out transformedAddDeclaration );
+                                      out transformedAddDeclaration,
+                                      out var addApiVersion );
 
-                        success = success &&
+                            maxApiVersion ??= addApiVersion;
+                        }
+
+                        if ( success )
+                        {
+                            success =
                                   this._templateCompiler.TryCompile(
                                       TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
                                       this._compileTimeCompilation,
@@ -1214,7 +1281,16 @@ namespace Metalama.Framework.Engine.CompileTime
                                       this._diagnosticAdder,
                                       this._cancellationToken,
                                       out _,
-                                      out transformedRemoveDeclaration );
+                                      out transformedRemoveDeclaration,
+                                      out var removeApiVersion );
+
+                            if ( maxApiVersion == null || removeApiVersion > maxApiVersion )
+                            {
+                                maxApiVersion = removeApiVersion;
+                            }
+                        }
+
+                        this.AddToManifest( eventSymbol, maxApiVersion );
                     }
                 }
 
@@ -1333,7 +1409,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     var usings = this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
                         .Select( u => u.WithGlobalKeyword( default ) )
-                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertNotNull() ) );
+                        .Concat( node.Usings.SelectAsReadOnlyList( x => this.Visit( x ).AssertCast<UsingDirectiveSyntax>() ).WhereNotNull() );
 
                     // Filter attributes. It is important to visit all nodes so we also process preprocessor directives.
                     var attributes = this.VisitAttributeLists( node.AttributeLists );
@@ -1351,6 +1427,18 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     return CompilationUnit( default, default, default, default );
                 }
+            }
+
+            public override SyntaxNode? VisitUsingDirective( UsingDirectiveSyntax node )
+            {
+#if ROSLYN_4_8_0_OR_GREATER
+                if ( !node.UnsafeKeyword.IsKind( SyntaxKind.None ) )
+                {
+                    return null;
+                }
+#endif
+
+                return base.VisitUsingDirective( node );
             }
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -1409,10 +1497,19 @@ namespace Metalama.Framework.Engine.CompileTime
             public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
                 => InterpolationSyntaxHelper.Fix( (InterpolationSyntax) base.VisitInterpolation( node ).AssertNotNull() );
 
-            private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
+            private static SyntaxToken GetConstructorNameToken( NameSyntax typeName )
+                => typeName switch
+                {
+                    AliasQualifiedNameSyntax aliasQualifiedNameSyntax => aliasQualifiedNameSyntax.Name.Identifier,
+                    QualifiedNameSyntax qualifiedNameSyntax => qualifiedNameSyntax.Right.Identifier,
+                    SimpleNameSyntax simpleNameSyntax => simpleNameSyntax.Identifier,
+                    _ => throw new AssertionFailedException( $"Unexpected syntax kind {typeName.Kind()} at '{typeName.GetLocation()}'." )
+                };
+
+            private TypeSyntax CreateTypeSyntax( INamespaceOrTypeSymbol symbol )
             {
                 var unnestedType = this._currentContext.NestedType;
-                var fullyQualifiedName = (NameSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
+                var type = OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
 
                 static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
                     => syntax switch
@@ -1427,14 +1524,17 @@ namespace Metalama.Framework.Engine.CompileTime
                         _ => throw new AssertionFailedException( $"Unexpected syntax kind {syntax.Kind()} at '{syntax.GetDiagnosticLocation()}'." )
                     };
 
-                if ( unnestedType != null && symbol.Equals( unnestedType ) )
+                if ( symbol.Equals( unnestedType ) )
                 {
-                    return new QualifiedTypeNameInfo(
-                        RenameType( fullyQualifiedName, this._currentContext.NestedTypeNewName!, this._currentContext.NestingLevel ),
-                        this._currentContext.NestedTypeNewName! );
+                    if ( type is not NameSyntax typeName )
+                    {
+                        throw new AssertionFailedException( $"Attempting to rename type '{type}' that doesn't have a name." );
+                    }
+
+                    return RenameType( typeName, this._currentContext.NestedTypeNewName!, this._currentContext.NestingLevel );
                 }
 
-                return new QualifiedTypeNameInfo( fullyQualifiedName );
+                return type;
             }
 
             public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
@@ -1447,7 +1547,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var nodeWithoutPreprocessorDirectives = base.VisitQualifiedName( node ).AssertNotNull();
 
-                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                    return this.CreateTypeSyntax( namespaceOrType ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
 
                 return base.VisitQualifiedName( node );
@@ -1463,7 +1563,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var nodeWithoutPreprocessorDirectives = base.VisitMemberAccessExpression( node ).AssertNotNull();
 
-                    return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                    return this.CreateTypeSyntax( namespaceOrType ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
 
                 return base.VisitMemberAccessExpression( node );
@@ -1489,7 +1589,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     switch ( symbol )
                     {
                         case INamespaceOrTypeSymbol namespaceOrType:
-                            return this.CreateNameExpression( namespaceOrType ).QualifiedName.WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                            return this.CreateTypeSyntax(namespaceOrType).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
 
                         case { IsStatic: true }
                             when node.Parent is not MemberAccessExpressionSyntax
@@ -1504,7 +1604,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                     return MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
-                                            this.CreateNameExpression( symbol.ContainingType ).QualifiedName,
+                                            this.CreateTypeSyntax(symbol.ContainingType),
                                             IdentifierName( node.Identifier.Text ) )
                                         .WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                             }

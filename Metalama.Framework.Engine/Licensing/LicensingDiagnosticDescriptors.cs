@@ -26,14 +26,6 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Cannot {1} using fabrics." );
 
-    internal static readonly DiagnosticDefinition<string> InheritanceNotAvailable =
-        new(
-            "LAMA0802",
-            _category,
-            "The {0} shall not be automatically inherited because this feature is not covered by your license. Aspects must be explicitly added to all derived types using custom attributes.",
-            Severity.Warning,
-            "Cannot inherit aspects." );
-
     internal static readonly DiagnosticDefinition<string> RedistributionLicenseInvalid =
         new(
             "LAMA0803",

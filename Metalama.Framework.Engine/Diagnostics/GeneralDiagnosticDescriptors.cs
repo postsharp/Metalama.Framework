@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         internal static readonly DiagnosticDefinition<(string Message, string File)> IgnorableUnhandledException =
             new(
-                "LAMA00049",
+                "LAMA0049",
                 _category,
                 "Unexpected exception occurred in Metalama: {0} Exception details are in '{1}'. " +
                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
@@ -215,7 +215,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         internal static readonly DiagnosticDefinition<(string WeaverType, string AspectType)> CannotFindAspectWeaver =
             new(
-                "LAMA00050",
+                "LAMA0050",
                 _category,
                 "The weaver type '{0}' required to weave aspect '{1}' is not found in the project.",
                 Error,
@@ -223,25 +223,25 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         internal static readonly DiagnosticDefinition<string[]> PreviewCSharpVersionNotSupported =
             new(
-                "LAMA00051",
+                "LAMA0051",
                 Error,
                 "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to one of the following supported values: {0}. "
                 + "If you want to use preview features at your own risks, set the MSBuild property 'MetalamaAllowPreviewLanguageFeatures' to 'true'. It may work if you don't use preview features in templates.",
                 "Metalama does not support the 'preview' C# language version",
                 _category );
 
-        internal static readonly DiagnosticDefinition<(string SelectedVersion, string[] SupportedVersions)> CSharpVersionNotSupported =
+        internal static readonly DiagnosticDefinition<(string SelectedVersion, string PropertyName, string[] SupportedVersions)> CSharpVersionNotSupported =
             new(
-                "LAMA00052",
+                "LAMA0052",
                 Error,
-                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}."
+                "The C# language version '{0}' is not supported. Change the <{1}> property of your project file to one of the following supported values: {2}."
                 + " Do not use 'latest' or `latestMajor` because it will be inconsistently interpreted if you use a more recent .NET SDK or IDE than Metalama.",
                 "The selected C# language version is not supported",
                 _category );
 
         internal static readonly DiagnosticDefinition MissingMetalamaPreprocessorSymbol =
             new(
-                "LAMA00053",
+                "LAMA0053",
                 Error,
                 "Metalama is enabled in this project, but the METALAMA preprocessor symbol is not defined.",
                 "Metalama is enabled in this project, but the METALAMA preprocessor symbol is not defined.",
@@ -249,7 +249,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         internal static readonly DiagnosticDefinition<(string[] SelectedVersions, string SupportedVersion)> MetalamaVersionNotSupported =
             new(
-                "LAMA00054",
+                "LAMA0054",
                 Error,
                 "The project references the version(s) {0} of Metalama.Framework, but the current compiler version requires the version '{1}' or lower.",
                 "The project has referenced to unsupported versions of Metalama",

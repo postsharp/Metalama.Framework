@@ -1,8 +1,9 @@
 #if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 // @RequiredConstant(NET7_0_OR_GREATER)
 #endif
 
-#if NET7_0_OR_GREATER
+#if NET7_0_OR_GREATER && ROSLYN_4_4_0_OR_GREATER
 
 using System;
 using System.Collections.Generic;

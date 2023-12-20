@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
@@ -14,6 +15,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -673,6 +675,25 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         }
 
         return this._otherTemplateClassProvider.Get( templateProvider );
+    }
+
+    public void CheckTemplateLanguageVersion<T>( TemplateExpansionContext context, TemplateMember<T> templateMember )
+        where T : class, IMemberOrNamedType
+    {
+        var requiredLanguageVersion = templateMember.TemplateClassMember.TemplateInfo.UsedApiVersion?.ToLanguageVersion();
+        var targetLanguageVersion = ((CSharpParseOptions?) this.TargetDeclaration?.GetPrimarySyntaxTree()?.Options)?.LanguageVersion;
+
+        if ( requiredLanguageVersion > targetLanguageVersion )
+        {
+            var aspectClass = context.MetaApi.AspectInstance?.AspectClass;
+
+            this.Diagnostics.Report(
+                TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
+                    this.TargetDeclaration?.GetDiagnosticLocation(),
+                    (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
+                    targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
+                    deduplicationKey: aspectClass?.FullName ) );
+        }
     }
 
     private sealed class DisposeCookie : IDisposable

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegula
         {
             public override SyntaxNode? VisitBlock(BlockSyntax node)
             {
-                return node.WithStatements(node.Statements.Insert(0, SyntaxFactory.ParseStatement("""Console.WriteLine("Added by weaver.");""")));
+                return node.WithStatements(node.Statements.Insert(0, SyntaxFactory.ParseStatement("Console.WriteLine(\"Added by weaver.\");")));
             }
         }
     }

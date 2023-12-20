@@ -12,7 +12,9 @@
     </ItemGroup>
     
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
     </ItemGroup>
     
     <ItemGroup>

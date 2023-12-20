@@ -205,19 +205,11 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
-            CannotIntroduceParameterIntoNonClassConstructor = new(
-                "LAMA0523",
-                "Cannot introduce a parameter into a constructor of a type that is not a class.",
-                "The aspect '{0}' cannot introduce a parameter into '{1}' because the target type is not a class.",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Constructor)>
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Record)>
             CannotAddInitializerToRecord = new(
                 "LAMA0524",
-                "Cannot add an initializer to a record.",
-                "The aspect '{0}' cannot add an initializer to '{1}' because it is a record.",
+                "Cannot add an initializer to all constructors of a record.",
+                "The aspect '{0}' cannot add an initializer to all constructors of the record '{1}', because the copy constructor cannot be changed. Consider adding initializers directly to the relevant constructors.",
                 _category,
                 Error );
 

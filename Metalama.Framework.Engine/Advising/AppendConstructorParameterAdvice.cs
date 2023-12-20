@@ -28,7 +28,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
     public AppendConstructorParameterAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
-        IDeclaration targetDeclaration,
+        IConstructor targetDeclaration,
         ICompilation sourceCompilation,
         string? layerName,
         string parameterName,
@@ -66,16 +66,6 @@ internal sealed class AppendConstructorParameterAdvice : Advice
                     this ) );
         }
 
-        // Introducing parameters into anything else than a class is not allowed.
-        if ( constructor.DeclaringType.TypeKind != TypeKind.Class )
-        {
-            return AdviceImplementationResult.Failed(
-                AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoNonClassConstructor.CreateRoslynDiagnostic(
-                    constructor.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, constructor),
-                    this ) );
-        }
-
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
@@ -106,14 +96,14 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
-            // Identity constructors that call the current constructor.
+            // Identify constructors that call the current constructor.
             var sameTypeConstructors =
                 baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
 
             var derivedConstructors = compilation
                 .GetDerivedTypes( baseConstructor.DeclaringType, DerivedTypesOptions.DirectOnly )
                 .SelectMany( t => t.Constructors )
-                .Where( c => c.InitializerKind != ConstructorInitializerKind.This );
+                .Where( c => c.InitializerKind != ConstructorInitializerKind.This && !c.IsRecordCopyConstructor() );
 
             var chainedConstructors =
                 sameTypeConstructors.Concat( derivedConstructors )

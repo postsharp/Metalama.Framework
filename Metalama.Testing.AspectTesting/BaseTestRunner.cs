@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -221,7 +222,7 @@ internal abstract partial class BaseTestRunner
         if ( testInput.Options.DependencyLicenseFile != null )
         {
             // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.DependencyLicenseFile ) );
         }
         else if ( testInput.Options.DependencyLicenseExpression != null )
         {
@@ -237,19 +238,21 @@ internal abstract partial class BaseTestRunner
                 .Add( "METALAMA" );
 
             var defaultParseOptions = SupportedCSharpVersions.DefaultParseOptions;
+            var mainParseOptions = defaultParseOptions;
 
             if ( testInput.Options.LanguageVersion != null )
             {
-                defaultParseOptions = defaultParseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
+                mainParseOptions = mainParseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
             }
 
             if ( testInput.Options.LanguageFeatures.Count > 0 )
             {
-                defaultParseOptions = defaultParseOptions.WithFeatures( testInput.Options.LanguageFeatures );
+                mainParseOptions = mainParseOptions.WithFeatures( testInput.Options.LanguageFeatures );
             }
 
+            mainParseOptions = mainParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
+
             var emptyProject = this.CreateProject( testInput.Options );
-            var mainParseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
             var mainProject = emptyProject.WithParseOptions( mainParseOptions );
 
             async Task<(Project Project, Document? Document)> AddDocumentAsync(
@@ -269,7 +272,7 @@ internal abstract partial class BaseTestRunner
                             .Visit( await parsedSyntaxTree.GetRootAsync() )!
                         : await parsedSyntaxTree.GetRootAsync();
 
-                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
+                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0, AttributeLists.Count: 0 } )
                 {
                     return (project, null);
                 }
@@ -318,8 +321,12 @@ internal abstract partial class BaseTestRunner
                 await testResult.AddInputDocumentAsync( includedDocument, includedFullPath );
             }
 
-            // Add system files.
-            mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
+            if ( testInput.Options.SkipAddingSystemFiles != true )
+            {
+                // Add system files.
+                mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
+            }
+
             mainProject = await AddAdditionalDocuments( mainProject, mainParseOptions );
 
             // We are done creating the project.
@@ -348,7 +355,7 @@ internal abstract partial class BaseTestRunner
             {
                 if ( this._references.GlobalUsingsFile != null )
                 {
-                    var path = Path.Combine( this.ProjectDirectory!, this._references.GlobalUsingsFile );
+                    var path = Path.Combine( testInput.SourceDirectory, this._references.GlobalUsingsFile );
 
                     if ( this._fileSystem.FileExists( path ) )
                     {
@@ -395,11 +402,21 @@ internal abstract partial class BaseTestRunner
                 // Add documents to the dependency project.
                 var includedText = this._fileSystem.ReadAllText( dependencyPath );
 
-                var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
-                    preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+                var dependencyParseOptions = defaultParseOptions
+                    .WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+
+                if ( testInput.Options.DependencyLanguageVersion != null )
+                {
+                    dependencyParseOptions = dependencyParseOptions.WithLanguageVersion( testInput.Options.DependencyLanguageVersion.Value );
+                }
 
                 var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+
+                if ( testInput.Options.SkipAddingSystemFiles != true )
+                {
+                    dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+                }
+
                 dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
 
                 // Add dependencies recursively.
@@ -686,7 +703,8 @@ internal abstract partial class BaseTestRunner
 
     private protected async Task WriteHtmlAsync( TestInput testInput, TestResult testResult )
     {
-        var htmlCodeWriter = this.CreateHtmlCodeWriter( testResult.TestContext.AssertNotNull().ServiceProvider, testInput.Options );
+        var serviceProvider = testResult.TestContext.AssertNotNull().ServiceProvider;
+        var htmlCodeWriter = this.CreateHtmlCodeWriter( serviceProvider, testInput.Options );
 
         var htmlDirectory = Path.Combine(
             this.ProjectDirectory!,
@@ -703,11 +721,26 @@ internal abstract partial class BaseTestRunner
         // Write each document individually.
         if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
         {
+            var pipeline = new TestDesignTimeAspectPipeline( serviceProvider, testResult.TestContext.AssertNotNull().Domain );
+            var inputCompilation = testResult.InputCompilation.AssertNotNull();
+            var designTimePipelineResult = await pipeline.ExecuteAsync( inputCompilation );
+
+            var compilationWithDesignTimeTrees =
+                inputCompilation
+                    .AddSyntaxTrees( designTimePipelineResult.AdditionalSyntaxTrees.Select( x => x.GeneratedSyntaxTree ) );
+
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
                 var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
 
-                await this.WriteHtmlAsync( testResult, syntaxTree, htmlDirectory, htmlCodeWriter, isTargetCode );
+                await this.WriteHtmlAsync(
+                    compilationWithDesignTimeTrees,
+                    testResult,
+                    syntaxTree,
+                    htmlDirectory,
+                    htmlCodeWriter,
+                    isTargetCode,
+                    designTimePipelineResult.Suppressions );
             }
         }
     }
@@ -718,11 +751,13 @@ internal abstract partial class BaseTestRunner
     protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );
 
     private async Task WriteHtmlAsync(
+        Compilation compilationWithDesignTimeTrees,
         TestResult testResult,
         TestSyntaxTree testSyntaxTree,
         string htmlDirectory,
         HtmlCodeWriter htmlCodeWriter,
-        bool writeDiff )
+        bool writeDiff,
+        ImmutableArray<ScopedSuppression> suppressions )
     {
         StreamWriter? inputTextWriter = null;
         StreamWriter? outputTextWriter = null;
@@ -741,8 +776,25 @@ internal abstract partial class BaseTestRunner
             // Add diagnostics to the input tree.
             inputDiagnostics = new List<Diagnostic>();
             inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
-            var semanticModel = testResult.InputCompilation.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
-            inputDiagnostics.AddRange( semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) );
+            var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
+
+            foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )
+            {
+                // Check if any suppression applies to this diagnostic.
+                if ( suppressions.Any(
+                        s => s.Definition.SuppressedDiagnosticId == diagnostic.Id
+                             && s.GetScopeSymbolOrNull( compilationWithDesignTimeTrees )
+                                 ?.DeclaringSyntaxReferences.Any(
+                                     r =>
+                                         r.SyntaxTree == diagnostic.Location.SourceTree &&
+                                         r.Span.Contains( diagnostic.Location.SourceSpan ) ) == true ) )
+                {
+                    return;
+                }
+
+                // Add the diagnostic.
+                inputDiagnostics.Add( diagnostic );
+            }
         }
 
         if ( testResult.TestInput.Options.WriteOutputHtml == true && testResult.OutputProject != null )

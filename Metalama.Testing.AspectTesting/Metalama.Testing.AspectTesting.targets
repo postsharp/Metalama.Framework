@@ -28,6 +28,11 @@
         
         <Error Text="The MetalamaTestReplaceFramework property is no longer supported. Set the MetalamaTestFramework property to Original instead."
                Condition="'$(MetalamaTestReplaceFramework)'!=''"/>
+
+        <PropertyGroup>
+            <!-- When this is referenced as a NuGet package, the latest version of Roslyn is used. -->
+            <ThisRoslynVersionNoPreview Condition="'$(ThisRoslynVersionNoPreview)'==''">4.8.0</ThisRoslynVersionNoPreview>
+        </PropertyGroup>
         
         <ItemGroup>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
@@ -42,17 +47,21 @@
                 <_Parameter1>ProjectPath</_Parameter1>
                 <_Parameter2>$(MSBuildProjectFullPath)</_Parameter2>
             </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(MetalamaTestSourceDirectory)'!=''">
+                <_Parameter1>SourceDirectory</_Parameter1>
+                <_Parameter2>$(MetalamaTestSourceDirectory)</_Parameter2>
+            </AssemblyAttribute>
             <!-- Sets up the default Xunit test framework, which is the custom test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='' OR '$(MetalamaTestFramework)'=='Auto'">
                 <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
-                <_Parameter2>Metalama.Testing.AspectTesting</_Parameter2>
+                <_Parameter2>Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)</_Parameter2>
             </AssemblyAttribute>
             <!-- Sets up the custom Xunit test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
                                Condition="'$(MetalamaTestFramework)'=='Custom'">
                 <_Parameter1>Metalama.Testing.AspectTesting.AspectTestFramework</_Parameter1>
-                <_Parameter2>Metalama.Testing.AspectTesting</_Parameter2>
+                <_Parameter2>Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)</_Parameter2>
             </AssemblyAttribute>
             <!-- Sets up the original Xunit test framework -->
             <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
@@ -62,13 +71,15 @@
             </AssemblyAttribute>
             
             <!-- Additional attributes -->
+            <!-- In .Net 8 when "artifacts" output paths are enabled, IntermediateOutputPath is an absolute path. -->
+            <!-- To handle both that and the more common relative IntermediateOutputPath, we use Path.Combine. -->
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>ReferenceAssemblyList</_Parameter1>
-                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
+                <_Parameter2>$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)','$(IntermediateOutputPath)','assemblies.txt'))</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>AnalyzerAssemblyList</_Parameter1>
-                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)analyzers.txt</_Parameter2>
+                <_Parameter2>$([System.IO.Path]::Combine('$(MSBuildProjectDirectory)','$(IntermediateOutputPath)','analyzers.txt'))</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>MetalamaDebugTestFramework</_Parameter1>

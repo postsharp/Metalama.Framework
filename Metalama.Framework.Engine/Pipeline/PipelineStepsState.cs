@@ -258,6 +258,9 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
                     if ( !x.Predecessors.IsDefaultOrEmpty && x.Predecessors[0].Kind != AspectPredecessorKind.Attribute && IsExcluded( target ) )
                     {
+                        // We mark the instance as Skipped so that it is not included in licensing enforcement.
+                        x.Skip();
+
                         return default;
                     }
 
@@ -298,9 +301,20 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         // We assume that all aspect instances are eligible, but some are eligible only for inheritance.
 
         // Get the aspects that can be processed, i.e. they are not abstract-only.
-        var concreteAspectInstances = aspectInstances
-            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Default ) )
-            .ToReadOnlyList();
+        List<ResolvedAspectInstance> concreteAspectInstances = new( aspectInstances.Count );
+
+        foreach ( var aspectInstance in aspectInstances )
+        {
+            if ( aspectInstance.Eligibility.IncludesAll( EligibleScenarios.Default ) )
+            {
+                concreteAspectInstances.Add( aspectInstance );
+            }
+            else
+            {
+                // We mark the instance as Skipped so that it is not included in licensing enforcement.
+                aspectInstance.AspectInstance.Skip();
+            }
+        }
 
         // Gets aspects that can be inherited.
         var inheritableAspectInstances = aspectInstances

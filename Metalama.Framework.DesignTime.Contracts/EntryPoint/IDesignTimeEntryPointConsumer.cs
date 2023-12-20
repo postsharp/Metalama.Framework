@@ -20,15 +20,11 @@ public interface IDesignTimeEntryPointConsumer
     /// Gets the <see cref="ICompilerServiceProvider"/> for a specific project. This method is called by the VSX.
     /// </summary>
     /// <param name="version">Version of Metalama for which the service is required.</param>
-    /// <param name="result"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     ValueTask GetServiceProviderAsync( Version version, ICompilerServiceProvider?[] result, CancellationToken cancellationToken );
 
     /// <summary>
     /// Gets all compatible registered service providers.
     /// </summary>
-    /// <returns></returns>
     ICompilerServiceProvider[] GetRegisteredProviders();
 
     /// <summary>

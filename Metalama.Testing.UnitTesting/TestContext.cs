@@ -63,7 +63,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         {
             if ( this._timeout == null )
             {
-                if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 120 ) ), null ) == null )
+                if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 240 ) ), null ) == null )
                 {
                     this._timeoutAction = this._timeout.Token.Register(
                         () => this.ServiceProvider.GetLoggerFactory()

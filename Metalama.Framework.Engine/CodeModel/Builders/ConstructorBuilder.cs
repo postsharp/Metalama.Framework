@@ -15,6 +15,8 @@ internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, I
 {
     public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
+    bool IConstructor.IsPrimary => false;
+
     IParameterList IHasParameters.Parameters => (IParameterList) this.Parameters;
 
     public IParameterBuilderList Parameters => ParameterBuilderList.Empty;
@@ -40,8 +42,7 @@ internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, I
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
     public ConstructorBuilder( INamedType targetType, Advice advice )
-        : 
-        base( targetType, null!, advice ) { }
+        : base( targetType, null!, advice ) { }
 
     public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
     {

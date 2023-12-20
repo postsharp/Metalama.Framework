@@ -6,15 +6,17 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Metalama.Framework.Engine.CompileTime;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Templating;
+namespace Metalama.Framework.Engine.CompileTime;
 
 internal enum RoslynApiVersion 
 {
 	V4_0_1 = 0,
 	V4_4_0 = 1,
+	V4_8_0 = 2,
 	Current = V4_0_1,
 	Lowest = V4_0_1,
-	Highest = V4_4_0
+	Highest = V4_8_0
 }

@@ -95,7 +95,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                             this._parent._diagnosticAdder,
                             CancellationToken.None,
                             out var annotatedNode,
-                            out var transformedNode ) )
+                            out var transformedNode,
+                            out _ ) )
                     {
                         this._parent._hasError = true;
                     }

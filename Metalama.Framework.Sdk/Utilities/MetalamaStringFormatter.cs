@@ -24,6 +24,6 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static string Format( FormattableString message ) => message.ToString( Instance );
 
-        public abstract string Format( string format, object arg, IFormatProvider? formatProvider );
+        public abstract string Format( string? format, object arg, IFormatProvider? formatProvider );
     }
 }

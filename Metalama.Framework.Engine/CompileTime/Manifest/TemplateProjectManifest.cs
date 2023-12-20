@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest;
 internal sealed class TemplateProjectManifest
 {
     public static TemplateProjectManifest Empty { get; } =
-        new( new TemplateSymbolManifest( "", ExecutionScope.RunTime, null, null ) );
+        new( new TemplateSymbolManifest( "", ExecutionScope.RunTime, null, null, null ) );
 
     [JsonProperty]
     public TemplateSymbolManifest RootSymbol { get; }

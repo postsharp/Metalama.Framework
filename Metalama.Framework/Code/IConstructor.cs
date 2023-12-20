@@ -10,6 +10,14 @@ namespace Metalama.Framework.Code
     public interface IConstructor : IMethodBase
     {
         /// <summary>
+        /// Gets a value indicating whether this constructor is the primary constructor of the type.
+        /// </summary>
+        /// <remarks>
+        /// Primary constructors are recognized only for the current compilation.
+        /// </remarks>
+        bool IsPrimary { get; }
+
+        /// <summary>
         /// Gets a <see cref="ConstructorInitializerKind" /> that specifies the initializer semantics of the constructor.
         /// </summary>
         public ConstructorInitializerKind InitializerKind { get; }

@@ -1,16 +1,12 @@
 <Project>
 
-    <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    </PropertyGroup>
-    
-    <Import Project="..\Build\RoslynVersion\Roslyn.4.0.1.props" />
-
-    <Import Project="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
-
     <ItemGroup>
         <Compile Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\bin\**\*.cs;..\Metalama.Framework.DesignTime\obj\**\*.cs" />
         <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
     </ItemGroup>
+
+    <Import Project="..\Build\RoslynVersion\Roslyn.4.0.1.props" />
+
+    <Import Project="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
 
 </Project>

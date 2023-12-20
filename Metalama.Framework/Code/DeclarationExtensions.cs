@@ -101,23 +101,18 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                return (T) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+                return (T) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )!;
             }
         }
 
-        public static IFieldOrProperty? ForCompilation(
-            this IFieldOrProperty? fieldOrProperty,
-            ICompilation compilation,
-            ReferenceResolutionOptions options = default )
-        {
-            if ( fieldOrProperty == null )
+        public static bool IsRecordCopyConstructor( this IConstructor constructor )
+            => constructor is
             {
-                return null;
-            }
-            else
-            {
-                return (IFieldOrProperty) ((ICompilationInternal) compilation).Factory.Translate( fieldOrProperty, options );
-            }
-        }
+                IsStatic: false,
+                IsImplicitlyDeclared: true,
+                IsPrimary: false,
+                Parameters: [_],
+                DeclaringType.TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct
+            };
     }
 }

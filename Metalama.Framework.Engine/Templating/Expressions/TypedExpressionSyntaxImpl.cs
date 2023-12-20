@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             ExpressionSyntax syntax,
             ITypeSymbol? expressionType,
             SyntaxGenerationContext generationContext,
-            bool isReferenceable = false,
+            bool? isReferenceable = null,
             bool canBeNull = true )
         {
             if ( expressionType == null )
@@ -67,7 +67,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             this.Syntax = syntax;
             this.ExpressionType = expressionType;
-            this.IsReferenceable = isReferenceable;
+
+            // If IsReferenceable is not specified explicitly, attempt to infer it.
+            // The inference is currently very simple: it's referenceable only of it's just an identifier.
+            this.IsReferenceable = isReferenceable ?? syntax is IdentifierNameSyntax;
             this.CanBeNull = canBeNull;
         }
 
@@ -75,14 +78,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             ExpressionSyntax syntax,
             IType type,
             SyntaxGenerationContext generationContext,
-            bool isReferenceable = false,
+            bool? isReferenceable = null,
             bool canBeNull = true )
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable, canBeNull ) { }
 
         internal TypedExpressionSyntaxImpl(
             ExpressionSyntax syntax,
             SyntaxGenerationContext syntaxGenerationContext,
-            bool isReferenceable = false )
+            bool? isReferenceable = null )
             : this(
                 syntax,
                 (ITypeSymbol) null!,

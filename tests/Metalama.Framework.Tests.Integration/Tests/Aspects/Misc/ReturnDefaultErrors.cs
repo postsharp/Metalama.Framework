@@ -1,4 +1,5 @@
 #if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 // @RequiredConstant(NET5_0_OR_GREATER)
 #endif
 
@@ -53,6 +54,7 @@ public class TestClass
     }
 
 #if NET5_0_OR_GREATER
+
     [IgnoreException]
     public IAsyncEnumerable<int> IAsyncEnumerableMethod()
     {
@@ -66,5 +68,7 @@ public class TestClass
         yield return 42;
         throw new InvalidOperationException();
     }
+
 #endif
+
 }

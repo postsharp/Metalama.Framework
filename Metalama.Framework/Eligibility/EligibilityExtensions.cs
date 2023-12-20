@@ -434,6 +434,22 @@ public static partial class EligibilityExtensions
             member => $"{member} must not be abstract" );
 
     /// <summary>
+    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
+    /// </summary>
+    public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
+            member => $"{member} must not be a primary constructor of non-record type" );
+
+    /// <summary>
+    /// Forbids the target constructor from being the copy constructor of a record.
+    /// </summary>
+    public static void MustNotBeRecordCopyConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => !member.IsRecordCopyConstructor(),
+            member => $"{member} must not be the copy constructor of record type" );
+
+    /// <summary>
     /// Forbids the target type from being an interface.
     /// </summary>
     public static void MustNotBeInterface( this IEligibilityBuilder<INamedType> eligibilityBuilder )

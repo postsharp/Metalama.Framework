@@ -16,6 +16,11 @@ namespace Metalama.Framework.Engine.Diagnostics
     /// </summary>
     internal sealed class MetalamaStringFormatterImpl : MetalamaStringFormatter
     {
+#if !ROSLYN_4_8_0_OR_GREATER
+        private static readonly SymbolDisplayFormat _parameterSymbolDisplayFormat =
+            SymbolDisplayFormat.CSharpShortErrorMessageFormat.AddParameterOptions( SymbolDisplayParameterOptions.IncludeName );
+#endif
+
         public override string Format( string? format, object? arg, IFormatProvider? formatProvider )
         {
             try
@@ -91,6 +96,13 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                     case SymbolKind symbolKind:
                         return symbolKind.ToDisplayName();
+
+#if !ROSLYN_4_8_0_OR_GREATER
+                    // Newer versions of Roslyn use the internal SymbolDisplayCompilerInternalOptions.IncludeParameterNameIfStandalone in CSharpShortErrorMessageFormat.
+                    // This is done to emulate that.
+                    case IParameterSymbol parameterSymbol:
+                        return parameterSymbol.ToDisplayString( _parameterSymbolDisplayFormat );
+#endif
 
                     case ISymbol symbol:
                         return symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );

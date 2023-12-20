@@ -365,9 +365,7 @@ internal static class TemplateBindingHelper
         IObjectReader arguments,
         AsyncInfo? toMethodAsyncInfo = null )
     {
-        fromType = fromType.ForCompilation( toType.Compilation );
-
-        // Replace type parameters by arguments.
+        // Replace type parameters by arguments. Do this before translation, in case fromType is a type parameter that can't be translated.
         if ( fromType is ITypeParameter genericParameter && template.TemplateClassMember.TypeParameters[genericParameter.Index].IsCompileTime )
         {
             fromType = arguments[genericParameter.Name] switch
@@ -376,6 +374,30 @@ internal static class TemplateBindingHelper
                 Type type => TypeFactory.GetType( type ),
                 _ => throw new AssertionFailedException( $"Unexpected value of type '{arguments[genericParameter.Name]?.GetType()}'." )
             };
+        }
+
+        var translatedFromType = fromType.ForCompilation( toType.Compilation );
+
+        if ( translatedFromType != null )
+        {
+            fromType = translatedFromType;
+        }
+        else
+        {
+            // This can happen when fromType is private, because toType compilation does not import private members.
+            // In that case, try to translate the other way around.
+            var translatedToType = toType.ForCompilation( fromType.Compilation );
+
+            if ( translatedToType != null )
+            {
+                toType = translatedToType;
+            }
+            else
+            {
+                // There is no compilation that the two types have in common, so we can't verify them.
+                // We have to return true here and will (hopefully) get a confusing error at a later stage.
+                return true;
+            }
         }
 
         if ( fromType is ITypeParameter fromGenericParameter && toType is ITypeParameter toGenericParameter

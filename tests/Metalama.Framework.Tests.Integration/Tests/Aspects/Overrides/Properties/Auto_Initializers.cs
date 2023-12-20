@@ -1,6 +1,11 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 using System;
+using System.Linq;
+using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers;
+
+[assembly:AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -30,13 +35,26 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
     }
 
+    public class IntroductionAttribute : TypeAspect
+    {
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        {
+            builder.Outbound.SelectMany(x => x.Properties.Where(x => !x.IsImplicitlyDeclared)).AddAspect(x => new OverrideAttribute());
+        }
+
+        [Introduce]
+        public int IntroducedProperty { get; set; } = meta.ThisType.StaticProperty;
+
+        [Introduce]
+        public static int IntroducedStaticProperty { get; set; } = meta.ThisType.StaticProperty;
+    }
+
     // <target>
+    [Introduction]
     internal class TargetClass
     {
-        [Override]
         public int Property { get; set; } = 42;
 
-        [Override]
         public static int StaticProperty { get; set; } = 42;
     }
 }
