@@ -29,7 +29,6 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
         private readonly IReadOnlyList<LinkerInjectedMember> _injectedMembers;
         private readonly IReadOnlyList<ISymbol> _overrideTargets;
-        private readonly IReadOnlyDictionary<IDeclarationBuilder, LinkerInjectedMember> _builderToInjectedMemberMap;
         private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
         private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
         private readonly IReadOnlyDictionary<ISymbol, LinkerInjectedMember> _symbolToInjectedMemberMap;
@@ -49,7 +48,6 @@ namespace Metalama.Framework.Engine.Linking
             Dictionary<ISymbol, ISymbol> overrideTargetMap;
             Dictionary<ISymbol, LinkerInjectedMember> symbolToInjectedMemberMap;
             Dictionary<LinkerInjectedMember, ISymbol> injectedMemberToSymbolMap;
-            Dictionary<IDeclarationBuilder, LinkerInjectedMember> builderToInjectedMemberMap;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
@@ -62,7 +60,6 @@ namespace Metalama.Framework.Engine.Linking
 
             var injectedMemberByNodeId = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._overrideTargets = overrideTargets = new List<ISymbol>();
-            this._builderToInjectedMemberMap = builderToInjectedMemberMap = new Dictionary<IDeclarationBuilder, LinkerInjectedMember>();
             this._overrideTargetToOverrideListMap = overrideMap = new Dictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
             this._overrideToOverrideTargetMap = overrideTargetMap = new Dictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
             this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new Dictionary<ISymbol, LinkerInjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
@@ -72,8 +69,8 @@ namespace Metalama.Framework.Engine.Linking
             //       the same spirit as the Index* methods.
             //       However, even for very large projects it seems to would have very small impact.
 
-
             var overriddenDeclarations = new Dictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
+            var builderToInjectedMemberMap = new Dictionary<IDeclarationBuilder, LinkerInjectedMember>();
 
             foreach ( var injectedMember in this._injectedMembers )
             {
@@ -98,14 +95,14 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var overriddenDeclaration in overriddenDeclarations )
             {
-                var overrideTargetSymbol = GetOverrideTargetSymbol( overriddenDeclaration.Key );
+                var overrideTargetSymbol = GetOverrideTargetSymbol( overriddenDeclaration.Key ).AssertNotNull();
 
                 overriddenDeclaration.Value.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
                 overrideTargets.Add( overrideTargetSymbol );
                 overrideMap.Add( overrideTargetSymbol, overriddenDeclaration.Value );
 
-                foreach(var overrideSymbol in overriddenDeclaration.Value)
+                foreach (var overrideSymbol in overriddenDeclaration.Value)
                 {
                     overrideTargetMap.Add( overrideSymbol, overrideTargetSymbol );
                 }
@@ -124,17 +121,17 @@ namespace Metalama.Framework.Engine.Linking
                 };
 
                 return 
-                    GetCanonicalDefinitionSymbol( 
-                        this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
-                        .GetDeclaredSymbol( symbolSyntax )
-                        .AssertNotNull() );
+                    this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
+                    .GetDeclaredSymbol( symbolSyntax )
+                    .AssertNotNull()
+                    .GetCanonicalDefinition();
             }
 
             ISymbol? GetOverrideTargetSymbol( IDeclaration overrideTarget )
             {
                 if ( overrideTarget is Declaration originalDeclaration )
                 {
-                    return GetCanonicalDefinitionSymbol( this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull(), true ) );
+                    return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition(), true );
                 }
                 else if ( overrideTarget is IDeclarationBuilder builder )
                 {
@@ -165,8 +162,7 @@ namespace Metalama.Framework.Engine.Linking
                         _ => intermediateNode!
                     };
 
-                    return GetCanonicalDefinitionSymbol( intermediateSemanticModel.GetDeclaredSymbol( symbolNode ) );
-
+                    return intermediateSemanticModel.GetDeclaredSymbol( symbolNode ).GetCanonicalDefinition();
                 }
             }
         }
@@ -178,7 +174,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>List of introduced members.</returns>
         public IReadOnlyList<ISymbol> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
-            referencedSymbol = GetCanonicalDefinitionSymbol( referencedSymbol );
+            referencedSymbol = referencedSymbol.GetCanonicalDefinition();
 
             if (this._overrideTargetToOverrideListMap.TryGetValue(referencedSymbol, out var overrideSymbolList))
             {
@@ -188,17 +184,6 @@ namespace Metalama.Framework.Engine.Linking
             {
                 return Array.Empty<ISymbol>();
             }
-        }
-
-        private ISymbol? GetOverrideTarget( LinkerInjectedMember overrideInjectedMember )
-        {
-            if ( !this._overrideToOverrideTargetMap.TryGetValue( this._injectedMemberToSymbolMap[overrideInjectedMember], out var overrideTarget ) )
-            {
-                // Coverage: ignore (coverage is irrelevant, needed for correctness)
-                return null;
-            }
-
-            return overrideTarget;
         }
 
         /// <summary>
@@ -272,7 +257,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
         {
-            overrideSymbol = GetCanonicalDefinitionSymbol( overrideSymbol );
+            overrideSymbol = overrideSymbol.GetCanonicalDefinition();
 
             if (this._overrideToOverrideTargetMap.TryGetValue(overrideSymbol, out var overrideTargetSymbol))
             {
@@ -291,7 +276,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>Symbol.</returns>
         public ISymbol GetLastOverride( ISymbol symbol )
         {
-            symbol = GetCanonicalDefinitionSymbol( symbol );
+            symbol = symbol.GetCanonicalDefinition();
 
             switch ( symbol )
             {
@@ -346,7 +331,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsIntroduced( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            symbol = GetCanonicalDefinitionSymbol( symbol );
+            symbol = symbol.GetCanonicalDefinition();
 
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
@@ -373,7 +358,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            symbol = GetCanonicalDefinitionSymbol( symbol );
+            symbol = symbol.GetCanonicalDefinition();
 
             return this._overrideTargetToOverrideListMap.ContainsKey( symbol );
         }
@@ -393,7 +378,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            symbol = GetCanonicalDefinitionSymbol( symbol );
+            symbol = symbol.GetCanonicalDefinition();
 
             return this._overrideToOverrideTargetMap.ContainsKey( symbol );
         }
@@ -401,7 +386,7 @@ namespace Metalama.Framework.Engine.Linking
         // Resharper disable once UnusedMember.Global
         public bool IsLastOverride( ISymbol symbol )
         {
-            symbol = GetCanonicalDefinitionSymbol( symbol );
+            symbol = symbol.GetCanonicalDefinition();
 
             return 
                 this.IsOverride( symbol ) && 
@@ -412,26 +397,11 @@ namespace Metalama.Framework.Engine.Linking
 
         public IAspectClass? GetSourceAspect( ISymbol symbol )
         {
-            symbol = GetCanonicalDefinitionSymbol( symbol );
+            symbol = symbol.GetCanonicalDefinition();
 
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
             return injectedMember?.Transformation.ParentAdvice.Aspect.AspectClass;
-        }
-
-        private static ISymbol GetCanonicalDefinitionSymbol(ISymbol symbol)
-        {
-            if ( symbol is IMethodSymbol { IsGenericMethod: true, ConstructedFrom: { } genericDefinition } )
-            {
-                symbol = genericDefinition;
-            }
-
-            if ( symbol is IMethodSymbol { PartialDefinitionPart : { } partialDefinition } )
-            {
-                symbol = partialDefinition;
-            }
-
-            return symbol;
         }
     }
 }

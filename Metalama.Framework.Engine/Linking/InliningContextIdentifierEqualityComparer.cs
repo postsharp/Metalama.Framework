@@ -23,12 +23,15 @@ namespace Metalama.Framework.Engine.Linking
             return new InliningContextIdentifierEqualityComparer( context.SymbolComparer );
         }
 
-        public bool Equals( InliningContextIdentifier x, InliningContextIdentifier y )
+        public bool Equals( InliningContextIdentifier? x, InliningContextIdentifier? y )
         {
-            return 
-                x.InliningId == y.InliningId
-                && this._symbolComparer.Equals( x.DestinationSemantic.Symbol, y.DestinationSemantic.Symbol )
-                && x.DestinationSemantic.Kind == y.DestinationSemantic.Kind;
+            return
+                ( x == null && y == null )
+                || (
+                    x != null && y != null &&
+                    x.InliningId == y.InliningId
+                    && this._symbolComparer.Equals( x.DestinationSemantic.Symbol, y.DestinationSemantic.Symbol )
+                    && x.DestinationSemantic.Kind == y.DestinationSemantic.Kind );
         }
 
         public int GetHashCode( InliningContextIdentifier x )

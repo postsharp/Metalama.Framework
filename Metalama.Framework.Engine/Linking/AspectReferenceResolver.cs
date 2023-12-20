@@ -385,7 +385,7 @@ namespace Metalama.Framework.Engine.Linking
                     .SelectAsReadOnlyList(
                         x =>
                         {
-                            var injectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( x );
+                            var injectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( x ).AssertNotNull();
                             return (
                                 Index: new MemberLayerIndex(
                                     this._layerIndex[injectedMember.AspectLayerId],

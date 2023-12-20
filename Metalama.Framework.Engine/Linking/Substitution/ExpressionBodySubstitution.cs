@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             string? returnVariableIdentifier = null ) : base( compilationContext )
         {
             Invariant.Implies( usingSimpleInlining, returnVariableIdentifier == null );
-            Invariant.Implies( usingSimpleInlining, SymbolEqualityComparer.Default.Equals( referencingSymbol.ReturnType, originalContainingSymbol.ReturnType ) );
+            Invariant.Implies( usingSimpleInlining, StructuralSymbolComparer.Signature.Equals( referencingSymbol.ReturnType, originalContainingSymbol.ReturnType ) );
             Invariant.Implies( originalContainingSymbol.ReturnsVoid, this._returnVariableIdentifier == null );
 
             this._rootNode = rootNode;
