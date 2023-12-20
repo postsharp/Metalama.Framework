@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Elfie.Serialization;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -128,7 +127,8 @@ namespace Metalama.Framework.Engine.Linking
 
             var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences(
                 input.IntermediateCompilation.CompilationContext, 
-                reachableReferencesByContainingSemantic, inlinedReferences );
+                reachableReferencesByContainingSemantic, 
+                inlinedReferences );
 
             VerifyUnsupportedInlineability(
                 input.InjectionRegistry,
