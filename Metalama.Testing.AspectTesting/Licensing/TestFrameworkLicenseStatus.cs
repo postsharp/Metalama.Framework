@@ -25,7 +25,6 @@ namespace Metalama.Testing.AspectTesting.Licensing
             {
                 AddLicensing = true,
                 AddSupportServices = false,
-                OpenWelcomePage = false,
                 LicensingOptions = new LicensingInitializationOptions()
                 {
                     ProjectLicense = projectLicense,

@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Application;
-using Metalama.Backstage.Maintenance;
+using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
             else
             {
-                var tempFileManager = context.ServiceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
+                var standardDirectories = context.ServiceProvider.Global.GetRequiredBackstageService<IStandardDirectories>();
                 var applicationInfoProvider = context.ServiceProvider.Global.GetRequiredBackstageService<IApplicationInfoProvider>();
                 string reportFile;
 
@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                     try
                     {
                         reportFile = Path.Combine(
-                            tempFileManager.GetTempDirectory( "CrashReports", CleanUpStrategy.Always ),
+                            standardDirectories.CrashReportsDirectory,
                             $"exception-{Guid.NewGuid()}.txt" );
 
                         File.WriteAllText( reportFile, e.ToString() );

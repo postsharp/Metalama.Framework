@@ -469,7 +469,7 @@ internal abstract partial class BaseTestRunner
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey! );
+            serviceProvider = serviceProvider.Underlying.AddLicenseConsumptionManager( licenseKey! );
         }
 
         // Transform with Metalama.

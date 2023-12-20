@@ -202,11 +202,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
         {
             // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
-            projectServiceProvider = projectServiceProvider.AddLicenseConsumptionManager(
-                new LicensingInitializationOptions()
-                {
-                    ProjectLicense = projectOptions.License, IgnoreUserProfileLicenses = projectOptions.IsTest, IgnoreUnattendedProcessLicense = true
-                } );
+            projectServiceProvider = projectServiceProvider.AddLicenseConsumptionManager( projectOptions.License );
         }
 
         return projectServiceProvider;

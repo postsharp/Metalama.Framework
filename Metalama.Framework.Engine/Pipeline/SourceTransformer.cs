@@ -46,7 +46,6 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var backstageOptions = new BackstageInitializationOptions( applicationInfo, context.Compilation.AssemblyName )
             {
-                OpenWelcomePage = true,
                 AddLicensing = true,
                 AddSupportServices = true,
                 LicensingOptions = licenseOptions,

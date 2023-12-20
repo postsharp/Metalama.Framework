@@ -21,7 +21,11 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
             }
 
             if ( BackstageServiceFactory.Initialize(
-                    options with { AddUserInterface = true, AddToolsExtractor = builder => builder.AddTools() },
+                    options with
+                    {
+                        AddSupportServices = true, 
+                        AddToolsExtractor = builder => builder.AddTools()
+                    },
                     options.ApplicationInfo.Name ) )
             {
                 Logger.Initialize();
