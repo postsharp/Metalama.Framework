@@ -79,8 +79,6 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var injectedMemberSymbol = GetSymbolForInjectedMember( injectedMember );
 
-                injectedMemberSymbol = GetCanonicalSymbol( injectedMemberSymbol );
-
                 // Basic maps.
                 symbolToInjectedMemberMap[injectedMemberSymbol] = injectedMember;
                 injectedMemberToSymbolMap[injectedMember] = injectedMemberSymbol;
@@ -101,8 +99,6 @@ namespace Metalama.Framework.Engine.Linking
             foreach ( var overriddenDeclaration in overriddenDeclarations )
             {
                 var overrideTargetSymbol = GetOverrideTargetSymbol( overriddenDeclaration.Key );
-
-                overrideTargetSymbol = GetCanonicalSymbol( overrideTargetSymbol );
 
                 overriddenDeclaration.Value.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
@@ -127,16 +123,18 @@ namespace Metalama.Framework.Engine.Linking
                     _ => intermediateSyntax
                 };
 
-                return this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
-                    .GetDeclaredSymbol( symbolSyntax )
-                    .AssertNotNull();
+                return 
+                    GetCanonicalDefinitionSymbol( 
+                        this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
+                        .GetDeclaredSymbol( symbolSyntax )
+                        .AssertNotNull() );
             }
 
             ISymbol? GetOverrideTargetSymbol( IDeclaration overrideTarget )
             {
                 if ( overrideTarget is Declaration originalDeclaration )
                 {
-                    return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull(), true );
+                    return GetCanonicalDefinitionSymbol( this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull(), true ) );
                 }
                 else if ( overrideTarget is IDeclarationBuilder builder )
                 {
@@ -167,7 +165,7 @@ namespace Metalama.Framework.Engine.Linking
                         _ => intermediateNode!
                     };
 
-                    return intermediateSemanticModel.GetDeclaredSymbol( symbolNode );
+                    return GetCanonicalDefinitionSymbol( intermediateSemanticModel.GetDeclaredSymbol( symbolNode ) );
 
                 }
             }
@@ -180,7 +178,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>List of introduced members.</returns>
         public IReadOnlyList<ISymbol> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
-            referencedSymbol = GetCanonicalSymbol( referencedSymbol );
+            referencedSymbol = GetCanonicalDefinitionSymbol( referencedSymbol );
 
             if (this._overrideTargetToOverrideListMap.TryGetValue(referencedSymbol, out var overrideSymbolList))
             {
@@ -274,7 +272,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public ISymbol? GetOverrideTarget( ISymbol overrideSymbol )
         {
-            overrideSymbol = GetCanonicalSymbol( overrideSymbol );
+            overrideSymbol = GetCanonicalDefinitionSymbol( overrideSymbol );
 
             if (this._overrideToOverrideTargetMap.TryGetValue(overrideSymbol, out var overrideTargetSymbol))
             {
@@ -293,6 +291,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>Symbol.</returns>
         public ISymbol GetLastOverride( ISymbol symbol )
         {
+            symbol = GetCanonicalDefinitionSymbol( symbol );
+
             switch ( symbol )
             {
                 case IMethodSymbol { MethodKind: MethodKind.PropertyGet } getterSymbol:
@@ -346,7 +346,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsIntroduced( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            symbol = GetCanonicalSymbol( symbol );
+            symbol = GetCanonicalDefinitionSymbol( symbol );
 
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
@@ -373,7 +373,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverrideTarget( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            symbol = GetCanonicalSymbol( symbol );
+            symbol = GetCanonicalDefinitionSymbol( symbol );
 
             return this._overrideTargetToOverrideListMap.ContainsKey( symbol );
         }
@@ -393,7 +393,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.IsOverride( methodSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            symbol = GetCanonicalSymbol( symbol );
+            symbol = GetCanonicalDefinitionSymbol( symbol );
 
             return this._overrideToOverrideTargetMap.ContainsKey( symbol );
         }
@@ -401,6 +401,8 @@ namespace Metalama.Framework.Engine.Linking
         // Resharper disable once UnusedMember.Global
         public bool IsLastOverride( ISymbol symbol )
         {
+            symbol = GetCanonicalDefinitionSymbol( symbol );
+
             return 
                 this.IsOverride( symbol ) && 
                 this._intermediateCompilation.CompilationContext.SymbolComparer.Equals(
@@ -410,12 +412,14 @@ namespace Metalama.Framework.Engine.Linking
 
         public IAspectClass? GetSourceAspect( ISymbol symbol )
         {
+            symbol = GetCanonicalDefinitionSymbol( symbol );
+
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
             return injectedMember?.Transformation.ParentAdvice.Aspect.AspectClass;
         }
 
-        private static ISymbol GetCanonicalSymbol(ISymbol symbol)
+        private static ISymbol GetCanonicalDefinitionSymbol(ISymbol symbol)
         {
             if ( symbol is IMethodSymbol { IsGenericMethod: true, ConstructedFrom: { } genericDefinition } )
             {
