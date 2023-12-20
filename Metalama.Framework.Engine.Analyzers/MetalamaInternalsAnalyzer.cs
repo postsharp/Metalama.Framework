@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Analyzers;
 [UsedImplicitly]
 public partial class MetalamaInternalsAnalyzer : DiagnosticAnalyzer
 {
-    // Range: 820-839
+    // Range: 820-829
     private static readonly DiagnosticDescriptor _cannotConsumeApi = new(
         "LAMA0820",
         "Cannot reference an internal Metalama API.",
