@@ -5,6 +5,10 @@
     <TargetFramework>net48</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <SignAssembly>True</SignAssembly>
+	<PublicSign>False</PublicSign>
+	<DelaySign>False</DelaySign>
+	<AssemblyOriginatorKeyFile>StrongNameValidation.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
