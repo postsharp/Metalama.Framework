@@ -2,13 +2,15 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
     internal sealed class SubstitutionContext
     {
-        private readonly InliningContextIdentifier _inliningContextId;
+
+        private readonly Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>?> _substitutionDictionary;
 
         public LinkerRewritingDriver RewritingDriver { get; }
 
@@ -19,9 +21,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             SyntaxGenerationContext syntaxGenerationContext,
             InliningContextIdentifier inliningContextId )
         {
-            this._inliningContextId = inliningContextId;
             this.RewritingDriver = rewritingDriver;
             this.SyntaxGenerationContext = syntaxGenerationContext;
+            this._substitutionDictionary = new( () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
         }
 
         internal SubstitutionContext WithInliningContext( InliningContextIdentifier inliningContextId )
@@ -31,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions()
         {
-            return this.RewritingDriver.GetSubstitutions( this._inliningContextId );
+            return this._substitutionDictionary.Value;
         }
     }
 }

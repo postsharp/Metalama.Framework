@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,17 +18,19 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>> _substitutions;
 
         public LinkerAnalysisRegistry(
-            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics,
-            IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
+            CompilationContext intermediateCompilation,
+            HashSet<IntermediateSymbolSemantic> reachableSemantics,
+            HashSet<IntermediateSymbolSemantic> inlinedSemantics,
             IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>> substitutions )
         {
-            this._reachableSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSemantics );
-            this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
+            this._reachableSemantics = reachableSemantics;
+            this._inlinedSemantics = inlinedSemantics;
 
             this._substitutions =
                 substitutions.ToDictionary(
                     x => x.Key,
-                    x => (IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>) x.Value.ToDictionary( y => y.TargetNode, y => y ) );
+                    x => (IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>) x.Value.ToDictionary( y => y.TargetNode, y => y ),
+                    InliningContextIdentifierEqualityComparer.ForCompilation( intermediateCompilation ) );
         }
 
         public bool IsReachable( IntermediateSymbolSemantic semantic ) => this._reachableSemantics.Contains( semantic );

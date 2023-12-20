@@ -7,10 +7,8 @@ namespace System.Collections.Generic;
 public static class DictionaryExtensions
 {
 #if !NET6_0_OR_GREATER
-    public static bool TryAdd<TKey, TValue>(
-        this Dictionary<TKey, TValue> dictionary,
-        TKey key,
-        TValue value)
+    public static bool TryAdd<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, TValue value )
+        where TKey : notnull
     {
         if ( dictionary.TryGetValue( key, out _) )
         {
@@ -24,9 +22,8 @@ public static class DictionaryExtensions
         }
     }
 
-    public static TValue GetValueOrDefault<TKey, TValue>(
-        this Dictionary<TKey, TValue> dictionary,
-        TKey key )
+    public static TValue GetValueOrDefault<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key )
+        where TKey : notnull
     {
         if ( dictionary.TryGetValue( key, out var value ) )
         {
@@ -39,10 +36,8 @@ public static class DictionaryExtensions
     }
 #endif
 
-    public static TValue GetOrAdd<TKey, TValue>(
-        this Dictionary<TKey, TValue> dictionary,
-        TKey key,
-        Func<TKey, TValue> valueFactory )
+    public static TValue GetOrAdd<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> valueFactory )
+        where TKey : notnull
     {
         if ( !dictionary.TryGetValue( key, out var value ) )
         {

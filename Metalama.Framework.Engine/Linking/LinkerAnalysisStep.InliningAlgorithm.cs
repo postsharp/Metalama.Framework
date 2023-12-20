@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>
                 _aspectReferencesByContainingSemantic;
 
-            private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
+            private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
             private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyDictionary<ResolvedAspectReference, Inliner> _inlinedReferences;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
@@ -30,15 +30,15 @@ namespace Metalama.Framework.Engine.Linking
             public InliningAlgorithm(
                 ProjectServiceProvider serviceProvider,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
-                IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics,
-                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
+                HashSet<IntermediateSymbolSemantic> reachableSemantics,
+                HashSet<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults )
             {
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
                 this._aspectReferencesByContainingSemantic = aspectReferencesByContainingSemantic;
                 this._reachableSemantics = reachableSemantics;
-                this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
+                this._inlinedSemantics = inlinedSemantics;
                 this._inlinedReferences = inlinedReferences;
                 this._bodyAnalysisResults = bodyAnalysisResults;
             }

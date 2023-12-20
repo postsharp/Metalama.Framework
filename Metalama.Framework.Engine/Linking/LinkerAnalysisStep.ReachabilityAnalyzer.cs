@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -12,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class ReachabilityAnalyzer
         {
-            private readonly CompilationContext _compilationContext;
+            private readonly CompilationContext _intermediateCompilationContext;
             private readonly LinkerInjectionRegistry _injectionRegistry;
 
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
@@ -21,22 +20,24 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _additionalNonDiscardableSemantics;
 
             public ReachabilityAnalyzer(
-                CompilationContext compilationContext,
+                CompilationContext intermediateCompilationContext,
                 LinkerInjectionRegistry injectionRegistry,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic,
                 IReadOnlyList<IntermediateSymbolSemantic> additionalNonDiscardableSemantics )
             {
-                this._compilationContext = compilationContext;
+                this._intermediateCompilationContext = intermediateCompilationContext;
                 this._injectionRegistry = injectionRegistry;
                 this._aspectReferencesBySemantic = aspectReferencesBySemantic;
                 this._additionalNonDiscardableSemantics = additionalNonDiscardableSemantics;
             }
 
-            public IReadOnlyList<IntermediateSymbolSemantic> Run()
+            public HashSet<IntermediateSymbolSemantic> Run()
             {
                 // TODO: Optimize (should not allocate closures).
                 // TODO: Is using call stack reliable enough?
-                var visited = new HashSet<IntermediateSymbolSemantic>();
+                var visited =
+                    new HashSet<IntermediateSymbolSemantic>(
+                        IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
                 // Assume G(V, E) is a graph where vertices V are semantics of overridden declarations and overrides.
                 // Determine which semantics are reachable from final semantics using DFS.                
@@ -120,7 +121,7 @@ namespace Metalama.Framework.Engine.Linking
                     DepthFirstSearch( semantic );
                 }
 
-                return visited.ToReadOnlyList();
+                return visited;
 
                 void DepthFirstSearch( IntermediateSymbolSemantic current )
                 {
@@ -161,7 +162,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Edges representing resolved aspect references.
                         foreach ( var aspectReference in aspectReferences )
                         {
-                            if ( !this._compilationContext.SymbolComparer.Equals(
+                            if ( !this._intermediateCompilationContext.SymbolComparer.Equals(
                                     current.Symbol.ContainingType,
                                     aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
                             {

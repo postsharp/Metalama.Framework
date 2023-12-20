@@ -19,19 +19,19 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public sealed class InlineabilityAnalyzer
         {
-            private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
-            private readonly CompilationContext _compilationContext;
+            private readonly HashSet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
+            private readonly CompilationContext _intermediateCompilationContext;
             private readonly InlinerProvider _inlinerProvider;
             private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
 
             public InlineabilityAnalyzer(
-                CompilationContext compilationContext,
-                IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
+                CompilationContext intermediateCompilationContext,
+                HashSet<IntermediateSymbolSemantic> reachableSymbolSemantics,
                 InlinerProvider inlinerProvider,
                 IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
             {
-                this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );
-                this._compilationContext = compilationContext;
+                this._reachableSymbolSemantics = reachableSymbolSemantics;
+                this._intermediateCompilationContext = intermediateCompilationContext;
                 this._inlinerProvider = inlinerProvider;
                 this._reachableReferencesByTarget = reachableReferencesByTarget;
             }
@@ -50,11 +50,15 @@ namespace Metalama.Framework.Engine.Linking
             /// Gets semantics that are inlineable, i.e. are not referenced too many times and don't have inlineability explicitly suppressed.
             /// </summary>
             /// <returns></returns>
-            public IReadOnlyList<IntermediateSymbolSemantic> GetInlineableSemantics(
+            public HashSet<IntermediateSymbolSemantic> GetInlineableSemantics(
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols )
             {
-                var redirectionTargets = new HashSet<IntermediateSymbolSemantic>( redirectedSymbols.Values );
-                var inlineableSemantics = new List<IntermediateSymbolSemantic>();
+                var redirectionTargets = 
+                    new HashSet<IntermediateSymbolSemantic>( 
+                        redirectedSymbols.Values, 
+                        IntermediateSymbolSemanticEqualityComparer.ForCompilation(this._intermediateCompilationContext) );
+
+                var inlineableSemantics = new HashSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
                 foreach ( var semantic in this._reachableSymbolSemantics )
                 {
@@ -95,7 +99,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     if ( semantic.Kind is IntermediateSymbolSemanticKind.Base
-                         && (semantic.Symbol.IsOverride || semantic.Symbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ )) )
+                         && (semantic.Symbol.IsOverride || semantic.Symbol.TryGetHiddenSymbol( this._intermediateCompilationContext.Compilation, out _ )) )
                     {
                         // Base semantics are not inlineable if they point to a base member.
                         return false;
@@ -211,7 +215,7 @@ namespace Metalama.Framework.Engine.Linking
             /// </summary>
             /// <returns>Aspect references with selected inliners.</returns>
             public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlineableReferences(
-                IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics )
+                HashSet<IntermediateSymbolSemantic> inlineableSemantics )
             {
                 var inlineableReferences = new Dictionary<ResolvedAspectReference, Inliner>();
 
@@ -246,7 +250,7 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
-                    if ( !this._compilationContext.SymbolComparer.Equals(
+                    if ( !this._intermediateCompilationContext.SymbolComparer.Equals(
                             reference.ContainingSemantic.Symbol.ContainingType,
                             reference.ResolvedSemantic.Symbol.ContainingType ) )
                     {
@@ -264,7 +268,7 @@ namespace Metalama.Framework.Engine.Linking
                         return true;
                     }
 
-                    var semanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( reference.RootExpression.SyntaxTree );
+                    var semanticModel = this._intermediateCompilationContext.SemanticModelProvider.GetSemanticModel( reference.RootExpression.SyntaxTree );
 
                     return this._inlinerProvider.TryGetInliner( reference, semanticModel, out inliner );
                 }
@@ -276,12 +280,11 @@ namespace Metalama.Framework.Engine.Linking
             /// <param name="inlineableSemantics"></param>
             /// <param name="inlineableReferences"></param>
             /// <returns></returns>
-            public IReadOnlyList<IntermediateSymbolSemantic> GetInlinedSemantics(
-                IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics,
+            public HashSet<IntermediateSymbolSemantic> GetInlinedSemantics(
+                HashSet<IntermediateSymbolSemantic> inlineableSemantics,
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences )
             {
-                var inlineableSemanticHashSet = new HashSet<IntermediateSymbolSemantic>( inlineableSemantics );
-                var inlinedSemantics = new List<IntermediateSymbolSemantic>();
+                var inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
                 foreach ( var inlineableSemantic in inlineableSemantics )
                 {
@@ -345,7 +348,7 @@ namespace Metalama.Framework.Engine.Linking
                                 && !IsInlinedSemanticBody( semantic.WithSymbol( property.SetMethod ) )
                                 && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.SetMethod ) );
 
-                            return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedGet && !hasNonInlinedSet;
+                            return inlineableSemantics.Contains( semantic ) && !hasNonInlinedGet && !hasNonInlinedSet;
 
                         case IEventSymbol @event:
                             // Event is inlined if at least one of the accessors is reachable and not inlineable.
@@ -357,7 +360,7 @@ namespace Metalama.Framework.Engine.Linking
                                 !IsInlinedSemanticBody( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) )
                                 && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) );
 
-                            return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedAdd && !hasNonInlinedRemove;
+                            return inlineableSemantics.Contains( semantic ) && !hasNonInlinedAdd && !hasNonInlinedRemove;
 
                         default:
                             throw new AssertionFailedException( $"Unexpected symbol: '{semantic.Symbol}'." );
@@ -373,7 +376,7 @@ namespace Metalama.Framework.Engine.Linking
             /// <returns></returns>
             public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlinedReferences(
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences,
-                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics )
+                HashSet<IntermediateSymbolSemantic> inlinedSemantics )
             {
                 var inlinedReferences = new Dictionary<ResolvedAspectReference, Inliner>();
 
