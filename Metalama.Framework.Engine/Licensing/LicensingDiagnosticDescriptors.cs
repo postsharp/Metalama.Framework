@@ -75,8 +75,8 @@ public static class LicensingDiagnosticDescriptors
         = new(
             "LAMA0809",
             Severity.Error,
-            "No Metalama license key is registered. To register a license key, see https://postsharp.net/links/metalama-register-license.",
-            "No Metalama license key",
+            "You must activate Metalama or register a license key before building your project. See https://postsharp.net/links/metalama-register-license.",
+            "You must activate Metalama or register a license key before building your project.",
             _category );
 
     internal static readonly DiagnosticDefinition RoslynApiNotAvailable =

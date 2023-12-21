@@ -208,7 +208,7 @@ public sealed class LicenseVerifier : IProjectService
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) => 10,
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) => 5,
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Free ) => 3,
-            _ => 0
+            _ => -1 // We want an error when no license is registered even if there is no aspect in the project. 
         };
 
         var hasLicenseError = consumedAspectClassNames.Count > maxAspectClasses;

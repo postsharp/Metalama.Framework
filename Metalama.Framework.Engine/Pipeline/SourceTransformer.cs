@@ -200,7 +200,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var projectServiceProvider = serviceProvider
                     .WithProjectScopedServices( projectOptions, context.Compilation )
                     .WithService<IProjectLicenseConsumptionService>( sp => new ProjectLicenseConsumptionService( sp ) );
-                
+
                 using CompileTimeAspectPipeline pipeline = new( projectServiceProvider );
 
                 var taskRunner = serviceProvider.GetRequiredService<ITaskRunner>();
@@ -233,6 +233,10 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     throw;
                 }
+            }
+            finally
+            {
+                serviceProvider.GetLoggerFactory().Flush();
             }
         }
 
