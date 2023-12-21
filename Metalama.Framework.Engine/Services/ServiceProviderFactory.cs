@@ -2,13 +2,11 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
-using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
