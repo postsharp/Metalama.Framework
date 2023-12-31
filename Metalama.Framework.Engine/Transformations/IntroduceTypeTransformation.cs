@@ -12,7 +12,7 @@ internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTr
 {
     public IntroduceTypeTransformation( Advice advice, NamedTypeBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override TransformationObservability Observability => TransformationObservability.None;
+    public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {

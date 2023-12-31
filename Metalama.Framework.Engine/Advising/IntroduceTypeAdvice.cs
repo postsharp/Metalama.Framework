@@ -25,8 +25,7 @@ namespace Metalama.Framework.Engine.Advising
             Action<NamedTypeBuilder>? buildAction,
             string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
         {
-
-            this.Builder = new NamedTypeBuilder( this, (INamedType) targetDeclaration, explicitName );
+            this.Builder = new NamedTypeBuilder( this, (INamedType) targetDeclaration.AssertNotNull(), explicitName.AssertNotNull() );
         }
 
         public override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )

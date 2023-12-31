@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType
+internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType, ISdkType, ISdkDeclaration
 {
     public NamedTypeBuilder TypeBuilder { get; set; }
 
@@ -98,6 +98,10 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType
 
     public ExecutionScope ExecutionScope => this.TypeBuilder.ExecutionScope;
 
+    public Microsoft.CodeAnalysis.ITypeSymbol TypeSymbol => this.TypeBuilder.TypeSymbol;
+
+    public Microsoft.CodeAnalysis.ISymbol Symbol => this.TypeSymbol;
+
     public bool Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
@@ -114,6 +118,8 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType
     {
         throw new NotSupportedException();
     }
+
+    protected override Microsoft.CodeAnalysis.ISymbol? GetSymbol() => this.TypeSymbol;
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, out IMember? implementationMember )
     {

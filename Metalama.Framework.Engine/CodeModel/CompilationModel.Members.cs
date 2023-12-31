@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -12,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Xml.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
@@ -282,6 +284,39 @@ public sealed partial class CompilationModel
         return value;
     }
 
+    internal TypeUpdatableCollection GetNamedTypeCollection( INamespaceOrTypeSymbol declaringNamespaceOrType, bool mutable = false )
+    {
+        if ( mutable && !this.IsMutable )
+        {
+            // Cannot get a mutable collection when the model is immutable.
+            throw new InvalidOperationException();
+        }
+
+        // If the model is mutable, we need to return a mutable collection because it may be mutated after the
+        // front-end collection is returned.
+        var returnMutableCollection = mutable || this.IsMutable;
+
+        if ( this._namedTypes.TryGetValue( declaringNamespaceOrType, out var collection ) )
+        {
+            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
+            {
+                // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
+                // We need to take a copy of it.
+                collection = (TypeUpdatableCollection) collection.Clone( this.Compilation );
+                this._namedTypes = this._namedTypes.SetItem( declaringNamespaceOrType, collection );
+            }
+
+            return collection;
+        }
+        else
+        {
+            collection = new TypeUpdatableCollection(this, declaringNamespaceOrType);
+            this._namedTypes = this._namedTypes.SetItem( declaringNamespaceOrType, collection );
+        }
+
+        return collection;
+    }
+
     internal void AddTransformation( ITransformation transformation )
     {
         if ( !this.IsMutable )
@@ -460,6 +495,12 @@ public sealed partial class CompilationModel
             case AttributeBuilder attribute:
                 var attributes = this.GetAttributeCollection( attribute.ContainingDeclaration.ToTypedRef(), true );
                 attributes.Add( attribute );
+
+                break;
+
+            case INamedType namedType:
+                var types = this.GetNamedTypeCollection( (INamespaceOrTypeSymbol)namedType.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull(), true );
+                types.Add( namedType.ToMemberRef() );
 
                 break;
 

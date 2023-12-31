@@ -200,6 +200,8 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
+            this._namedTypes = ImmutableDictionary.Create<ISymbol, TypeUpdatableCollection>().WithComparers( this.CompilationContext.SymbolComparer );
+
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( RefEqualityComparer<IHasParameters>.Default );
 
@@ -307,6 +309,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Annotations = prototype.Annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
+            this._namedTypes = prototype._namedTypes;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;

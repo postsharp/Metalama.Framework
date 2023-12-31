@@ -10,7 +10,7 @@ public class IntroductionAttribute : TypeAspect
     {
         var result = builder.Advice.IntroduceType(builder.Target, "TestNestedType");
 
-        builder.Advice.IntroduceMethod(builder.Target, nameof(MethodTemplate), buildMethod: b => b.AddParameter("p", result.Declaration));
+        builder.Advice.IntroduceMethod(builder.Target.ForCompilation(builder.Advice.MutableCompilation), nameof(MethodTemplate), buildMethod: b => b.AddParameter("p", result.Declaration));
     }
 
     [Template]
