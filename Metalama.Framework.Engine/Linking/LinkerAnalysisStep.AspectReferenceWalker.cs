@@ -19,16 +19,22 @@ namespace Metalama.Framework.Engine.Linking
             private readonly SemanticModel _semanticModel;
             private readonly IMethodSymbol _containingSymbol;
             private readonly Stack<IMethodSymbol> _localFunctionStack;
+            private readonly HashSet<SyntaxNode> _nodesContainingAspectReferences;
 
             public List<ResolvedAspectReference> AspectReferences { get; }
 
-            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, IMethodSymbol containingSymbol )
+            public AspectReferenceWalker( 
+                AspectReferenceResolver referenceResolver,
+                SemanticModel semanticModel, 
+                IMethodSymbol containingSymbol,
+                HashSet<SyntaxNode> nodesContainingAspectReferences )
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
                 this.AspectReferences = new List<ResolvedAspectReference>();
                 this._containingSymbol = containingSymbol;
                 this._localFunctionStack = new Stack<IMethodSymbol>();
+                this._nodesContainingAspectReferences = nodesContainingAspectReferences;
             }
 
             public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
@@ -100,7 +106,11 @@ namespace Metalama.Framework.Engine.Linking
                     this.AspectReferences.Add( resolvedReference );
                 }
 
-                base.VisitCore( node );
+                if (this._nodesContainingAspectReferences.Contains(node))
+                {
+                    // Visit only when an aspect reference exists in the subtree of the node.
+                    base.VisitCore( node );
+                }
 
                 static MemberBindingExpressionSyntax GetConditionalMemberName( ConditionalAccessExpressionSyntax conditionalAccess )
                 {

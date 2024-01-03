@@ -250,10 +250,27 @@ namespace Metalama.Framework.Engine.Linking
                     var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
                     var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
 
+                    var nodesWithAspectReference = syntax.GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind );
+
+                    var nodesContainingAspectReferences = new HashSet<SyntaxNode>();
+
+                    foreach ( var nodeWithAspectReference in nodesWithAspectReference )
+                    {
+                        var currentNode = nodeWithAspectReference.Parent.AssertNotNull();
+
+                        while ( currentNode != syntax.Parent )
+                        {
+                            nodesContainingAspectReferences.Add( currentNode );
+
+                            currentNode = currentNode.Parent.AssertNotNull();
+                        }
+                    }
+
                     var aspectReferenceCollector = new AspectReferenceWalker(
                         this._referenceResolver,
                         this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
-                        symbol );
+                        symbol,
+                        nodesContainingAspectReferences );
 
                     aspectReferenceCollector.Visit( syntax );
 
