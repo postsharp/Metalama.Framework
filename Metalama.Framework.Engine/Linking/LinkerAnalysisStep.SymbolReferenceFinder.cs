@@ -1,9 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +19,18 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class SymbolReferenceFinder
         {
+            // PERF - Use cases:
+            //   1) GetCallerAttributeReferencesAsync:
+            //          get all references from a overridden method source to any other method - caller attributes have to be fixed on call site.
+            //          This is optimized by indexing all invocation expressions.
+            //   2) GetRedirectedGetOnlyAutoPropertyReferencesAsync:
+            //          get all references to get-only auto property setters that were overridden - setter reference has to be changed to backing storage reference.
+            //   3) GetEventFieldRaiseReferencesAsync:
+            //          get all reference to overridden event field raise (e.g. invocation expression, Invoke, BeginInvoke, etc.) - these expressions should reference the backing event field instead.
+
             private readonly CompilationContext _compilationContext;
             private readonly IConcurrentTaskRunner _concurrentTaskRunner;
-            private readonly ConcurrentDictionary<IMethodSymbol, IReadOnlyList<IntermediateSymbolSemanticReference>> _cache;
+            private readonly ConcurrentDictionary<IMethodSymbol, MethodCacheRecord> _methodCache;
 
             public SymbolReferenceFinder(
                 ProjectServiceProvider serviceProvider,
@@ -26,27 +38,29 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._compilationContext = compilationContext;
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-                this._cache = new ConcurrentDictionary<IMethodSymbol, IReadOnlyList<IntermediateSymbolSemanticReference>>( SymbolEqualityComparer.Default );
+                this._methodCache = new();
             }
 
-            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync<T>(
-                IEnumerable<(T ReferencedSymbol, INamedTypeSymbol ReferencingType)> symbolReferenceSources,
+            internal async Task<IEnumerable<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync<TSymbol, TSource>(
+                IReadOnlyList<TSource> sources,
+                Func<TSource, (TSymbol ReferencedSymbol, INamedTypeSymbol ReferencingType)> getSourceRecord,
+                Func<ISymbol, bool> referencingSymbolPredicate,
                 CancellationToken cancellationToken )
-                where T : ISymbol
+                where TSymbol : ISymbol
             {
-                // TODO: Caching.
                 var referencingTypes = new Dictionary<INamedTypeSymbol, HashSet<ISymbol>>( this._compilationContext.SymbolComparer );
 
-                // Currently limit the search to specified referencing types (for general call site transformations we would need to specify reference in any type).
-                foreach ( var symbolReferenceSource in symbolReferenceSources )
+                foreach ( var source in sources )
                 {
-                    if ( !referencingTypes.TryGetValue( symbolReferenceSource.ReferencingType, out var referencedSymbol ) )
+                    var sourceRecord = getSourceRecord( source );
+
+                    if ( !referencingTypes.TryGetValue( sourceRecord.ReferencingType, out var referencedSymbol ) )
                     {
-                        referencingTypes[symbolReferenceSource.ReferencingType] =
+                        referencingTypes[sourceRecord.ReferencingType] =
                             referencedSymbol = new HashSet<ISymbol>( this._compilationContext.SymbolComparer );
                     }
 
-                    referencedSymbol.Add( symbolReferenceSource.ReferencedSymbol );
+                    referencedSymbol.Add( sourceRecord.ReferencedSymbol );
                 }
 
                 var methodsToAnalyze = new List<(IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind)>();
@@ -60,133 +74,212 @@ namespace Metalama.Framework.Engine.Linking
                         switch ( member )
                         {
                             case IMethodSymbol method:
-                                methodsToAnalyze.Add( (method, referencingType.Value) );
+                                if ( referencingSymbolPredicate( method ) )
+                                {
+                                    methodsToAnalyze.Add( (method, referencingType.Value) );
+                                }
 
                                 break;
                         }
                     }
                 }
 
-                void Analyze( (IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind) input )
+                void ProcessMethod( (IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind) input )
                 {
-                    var references = this.AnalyzeMethod( input.Method, input.SymbolsToFind );
+                    var record = this._methodCache.GetOrAdd(input.Method, AnalyzeMethod);
 
-                    foreach ( var reference in references )
+                    foreach (var symbolToFind in input.SymbolsToFind)
                     {
-                        symbolReferences.Add( reference );
+                        foreach (var referencingIdentifierName in this.GetReferencingIdentifierNames( input.Method, symbolToFind ))
+                        {
+                            symbolReferences.Add(
+                                new IntermediateSymbolSemanticReference(
+                                    input.Method.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                    symbolToFind.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                    referencingIdentifierName ) );
+                        }
                     }
                 }
 
-                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
 
                 return symbolReferences.ToReadOnlyList();
             }
 
-            internal async Task<IReadOnlyList<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
+            internal async Task<IEnumerable<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
                 IEnumerable<IMethodSymbol> methodsToAnalyze,
                 CancellationToken cancellationToken )
             {
-                // TODO: Caching.
                 var symbolReferences = new ConcurrentBag<IntermediateSymbolSemanticReference>();
 
-                void Analyze( IMethodSymbol method )
+                void ProcessMethod( IMethodSymbol method )
                 {
-                    var references = this.AnalyzeMethod( method );
+                    var invocationExpressionRecords = this.GetContainedInvocations( method );
+                    SyntaxTree? currentSyntaxTree = null;
+                    SemanticModel? currentSemanticModel = null;
 
-                    foreach ( var reference in references )
+                    foreach ( var invocationExpressionRecord in invocationExpressionRecords )
                     {
-                        symbolReferences.Add( reference );
+                        if ( invocationExpressionRecord.Node.SyntaxTree != currentSyntaxTree )
+                        {
+                            currentSemanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( invocationExpressionRecord.Node.SyntaxTree );
+                        }
+
+                        symbolReferences.Add(
+                            new IntermediateSymbolSemanticReference(
+                                method.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                invocationExpressionRecord.GetSymbol( currentSemanticModel! ).ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                invocationExpressionRecord.Node ) );
                     }
                 }
 
-                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, Analyze, cancellationToken );
+                await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
 
                 return symbolReferences.ToReadOnlyList();
             }
 
-            private IReadOnlyList<IntermediateSymbolSemanticReference> AnalyzeMethod( IMethodSymbol method, HashSet<ISymbol>? symbolsToFind = null )
+            private IEnumerable<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> GetContainedInvocations( IMethodSymbol containingMethod )
             {
-                var allReferences = this._cache.GetOrAdd( method, Analyze );
+                var methodRecord = this._methodCache.GetOrAdd( containingMethod, static ( cm, t ) => AnalyzeMethod( cm ), this );
+                return methodRecord.InvocationExpressions;
+            }
 
-                if ( symbolsToFind == null )
+            private IEnumerable<IdentifierNameSyntax> GetReferencingIdentifierNames( IMethodSymbol containingMethod, ISymbol targetSymbol )
+            {
+                var methodRecord = this._methodCache.GetOrAdd( containingMethod, static (cm, t) => AnalyzeMethod( cm), this );
+
+                if (methodRecord.IdentifierLookup.TryGetValue(targetSymbol.Name, out var identifierList))
                 {
-                    return allReferences;
+                    // The semantic model is unlikely to change and therefore we can cache it in a variable.
+                    SyntaxTree? currentSyntaxTree = null;
+                    SemanticModel? currentSemanticModel = null;
+                    var comparer = this._compilationContext.SymbolComparer;
+
+                    foreach (var identifierRecord in identifierList)
+                    {
+                        if (identifierRecord.Node.SyntaxTree != currentSyntaxTree)
+                        { 
+                            currentSemanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( identifierRecord.Node.SyntaxTree );
+                        }
+
+                        var foundSymbol = identifierRecord.GetSymbol( currentSemanticModel! );
+
+                        if (comparer.Equals(targetSymbol, LinkerSymbolHelper.GetCanonicalDefinition(foundSymbol)))
+                        {
+                            yield return identifierRecord.Node;
+                        }
+                    }
                 }
                 else
                 {
-                    var result = new List<IntermediateSymbolSemanticReference>();
-
-                    foreach ( var reference in allReferences )
-                    {
-                        if ( symbolsToFind.Contains( reference.TargetSemantic.Symbol )
-                             && reference.TargetSemantic.Kind == IntermediateSymbolSemanticKind.Default )
-                        {
-                            result.Add( reference );
-                        }
-                    }
-
-                    return result;
-                }
-
-                IReadOnlyList<IntermediateSymbolSemanticReference> Analyze( IMethodSymbol analyzedMethod )
-                {
-                    var symbolReferences = new List<IntermediateSymbolSemanticReference>();
-
-                    foreach ( var declaration in analyzedMethod.DeclaringSyntaxReferences.Select( x => x.GetSyntax() ) )
-                    {
-                        var walker =
-                            new BodyWalker(
-                                this._compilationContext,
-                                this._compilationContext.SemanticModelProvider.GetSemanticModel( declaration.SyntaxTree ),
-                                analyzedMethod,
-                                symbolReferences );
-
-                        walker.Visit( declaration );
-                    }
-
-                    return symbolReferences;
+                    yield break;
                 }
             }
 
-            private sealed class BodyWalker : CSharpSyntaxWalker
+            private static MethodCacheRecord AnalyzeMethod( IMethodSymbol method )
             {
-                private readonly CompilationContext _compilationContext;
-                private readonly SemanticModel _semanticModel;
-                private readonly IMethodSymbol _contextSymbol;
-                private readonly List<IntermediateSymbolSemanticReference> _symbolReferences;
+                var walker = new BodyWalker();
 
-                public BodyWalker(
-                    CompilationContext compilationContext,
-                    SemanticModel semanticModel,
-                    IMethodSymbol contextSymbol,
-                    List<IntermediateSymbolSemanticReference> symbolReferences )
+                foreach ( var declaration in method.DeclaringSyntaxReferences.Select( x => x.GetSyntax() ) )
                 {
-                    this._compilationContext = compilationContext;
-                    this._semanticModel = semanticModel;
-                    this._contextSymbol = contextSymbol;
-                    this._symbolReferences = symbolReferences;
+                    walker.Visit( method.GetPrimaryDeclaration() );
                 }
 
-                public override void Visit( SyntaxNode? node )
+                return new MethodCacheRecord( method, walker.IdentifierSyntaxSymbolLookup, walker.InvocationExpressionSyntaxSymbolLookup );
+            }
+
+            /// <summary>
+            /// Finds IdentifierNameSyntax and initializes per-method cache.
+            /// </summary>
+            private sealed class BodyWalker : CSharpSyntaxWalker
+            {
+                // TODO: Both caches should use unified symbols.
+                public Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> IdentifierSyntaxSymbolLookup { get; }
+
+                public List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> InvocationExpressionSyntaxSymbolLookup { get; }
+
+                public BodyWalker()
                 {
-                    if ( node != null )
+                    this.IdentifierSyntaxSymbolLookup = new();
+                    this.InvocationExpressionSyntaxSymbolLookup = new();
+                }
+
+                public override void VisitIdentifierName( IdentifierNameSyntax node )
+                {
+                    var text = node.Identifier.ValueText;
+
+                    this.IdentifierSyntaxSymbolLookup
+                        .GetOrAdd( text, _ => new List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>() )
+                        .Add(new SyntaxSymbolCacheRecord<IdentifierNameSyntax>( node));
+
+                    base.VisitIdentifierName( node );
+                }
+
+                public override void VisitInvocationExpression( InvocationExpressionSyntax node )
+                {
+                    if (node is not { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } )
                     {
-                        var symbolInfo = this._semanticModel.GetSymbolInfo( node );
+                        this.InvocationExpressionSyntaxSymbolLookup.Add(
+                            new SyntaxSymbolCacheRecord<InvocationExpressionSyntax>( node ) );
+                    }
 
-                        // The search is limited to symbols declared in the type they are referenced from.
+                    base.VisitInvocationExpression( node );
+                }
+            }
 
-                        if ( symbolInfo.Symbol != null
-                             && this._compilationContext.SymbolComparer.Equals( this._contextSymbol.ContainingType, symbolInfo.Symbol.ContainingType ) )
+            private class MethodCacheRecord
+            {
+                public IMethodSymbol Method { get; }
+
+                public Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> IdentifierLookup { get; }
+
+                public List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> InvocationExpressions { get; }
+
+                public MethodCacheRecord(
+                    IMethodSymbol method,
+                    Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> identifierLookup,
+                    List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> invocationExpressions )
+                {
+                    this.Method = method;
+                    this.IdentifierLookup = identifierLookup;
+                    this.InvocationExpressions = invocationExpressions;
+                }
+            }
+
+            private class SyntaxSymbolCacheRecord<TSyntax>
+                where TSyntax : SyntaxNode
+            {
+                private volatile ISymbol? _cachedSymbol;
+
+                public TSyntax Node { get; }
+
+                public SyntaxSymbolCacheRecord( TSyntax name )
+                {
+                    this.Node = name;
+                }
+
+                public ISymbol GetSymbol(SemanticModel semanticModel)
+                {
+                    if ( this._cachedSymbol == null )
+                    {
+                        var symbolInfo = semanticModel.GetSymbolInfo( this.Node );
+
+                        // Lock after getting the symbol to lower the probability of blocking the thread.
+                        lock ( this )
                         {
-                            this._symbolReferences.Add(
-                                new IntermediateSymbolSemanticReference(
-                                    this._contextSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                    symbolInfo.Symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                    node ) );
+                            if ( this._cachedSymbol == null )
+                            {
+                                this._cachedSymbol = symbolInfo.Symbol.AssertNotNull();
+                                return this._cachedSymbol;
+                            }
+                            else
+                            {
+                                return this._cachedSymbol;
+                            }
                         }
                     }
 
-                    base.Visit( node );
+                    return this._cachedSymbol;
                 }
             }
         }

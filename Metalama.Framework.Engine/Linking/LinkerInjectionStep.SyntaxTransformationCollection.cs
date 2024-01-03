@@ -28,8 +28,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentBag<LinkerInjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerInjectedMember>> _injectedMembersByInsertPosition;
 
-        private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>>
-            _injectedInterfacesByTargetTypeDeclaration;
+        private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeDeclaration;
 
         private readonly ConcurrentSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly ConcurrentSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;

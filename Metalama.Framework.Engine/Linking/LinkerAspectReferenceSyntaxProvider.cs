@@ -95,11 +95,11 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxGenerator.ArgumentList( targetOperator, p => IdentifierName( p.Name ) ) );
         }
 
-        public override ExpressionSyntax GetEventFieldInitializerExpression( ExpressionSyntax initializerExpression )
+        public override ExpressionSyntax GetEventFieldInitializerExpression( TypeSyntax eventFieldType, ExpressionSyntax initializerExpression )
         {
             return
                 InvocationExpression(
-                    LinkerInjectionHelperProvider.GetEventFieldInitializerExpressionMemberExpression(),
+                    LinkerInjectionHelperProvider.GetEventFieldInitializerExpressionMemberExpression( eventFieldType ),
                     ArgumentList( SingletonSeparatedList( Argument( null, default, initializerExpression ) ) ) );
         }
 

@@ -446,7 +446,9 @@ namespace Metalama.Framework.Engine.Linking
             var list = new List<IntermediateSymbolSemanticReference>();
 
             var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync(
-                redirectedGetOnlyAutoProperties.SelectAsReadOnlyList( x => (x.Property, x.Property.ContainingType) ),
+                redirectedGetOnlyAutoProperties,
+                x => (x.Property, x.Property.ContainingType),
+                _ => true,
                 cancellationToken );
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
@@ -472,7 +474,9 @@ namespace Metalama.Framework.Engine.Linking
 
             var allEventFieldReferences =
                 await symbolReferenceFinder.FindSymbolReferencesAsync(
-                    overriddenEventFields.SelectAsReadOnlyList( x => (x, x.ContainingType) ),
+                    overriddenEventFields,
+                    x => (x, x.ContainingType),
+                    _ => true,
                     cancellationToken );
 
             foreach ( var reference in allEventFieldReferences )
@@ -565,7 +569,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( reference.ReferencingNode )
                 {
-                    case { Parent: InvocationExpressionSyntax invocationExpression }:
+                    case InvocationExpressionSyntax invocationExpression:
                         ProcessReference( reference, invocationExpression );
 
                         break;

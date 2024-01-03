@@ -14,8 +14,6 @@ using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using OperatorKind = Metalama.Framework.Code.OperatorKind;
 
-#pragma warning disable CA1822
-
 namespace Metalama.Framework.Engine.Linking
 {
     internal sealed class LinkerInjectionHelperProvider
@@ -71,13 +69,16 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( AsyncVoidMethodMemberName ) );
         }
 
-        public static ExpressionSyntax GetEventFieldInitializerExpressionMemberExpression()
+        public static ExpressionSyntax GetEventFieldInitializerExpressionMemberExpression( TypeSyntax eventFieldType )
         {
             return
                 MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName( HelperTypeName ),
-                    IdentifierName( _eventFieldInitializationExpressionMemberName ) );
+                    GenericName(
+                        Identifier( _eventFieldInitializationExpressionMemberName ),
+                        TypeArgumentList(
+                            SingletonSeparatedList( eventFieldType ) ) ) );
         }
 
         public static ExpressionSyntax GetOperatorMemberExpression(
