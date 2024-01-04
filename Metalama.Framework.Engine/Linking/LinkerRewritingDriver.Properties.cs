@@ -289,7 +289,6 @@ namespace Metalama.Framework.Engine.Linking
                                 Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 initializer ) ) ) )
-                .NormalizeWhitespace()
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
@@ -439,8 +438,7 @@ namespace Metalama.Framework.Engine.Linking
                                             SyntaxFactoryEx.FormattedBlock() )
                                         : null
                                 }.Where( a => a != null )
-                                .AssertNoneNull() ) )
-                    .NormalizeWhitespace();
+                                .AssertNoneNull() ) );
 
             return this.GetSpecialImplProperty( attributes, type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -485,7 +483,6 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null,
                         null )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithAccessorList( cleanAccessorList?.WithTrailingTrivia( ElasticLineFeed ) )
                     .WithExpressionBody( expressionBody )
@@ -516,7 +513,6 @@ namespace Metalama.Framework.Engine.Linking
                                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                         GetInvocationTarget(),
                                                         Token( SyntaxKind.SemicolonToken ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null,
                                     setAccessor != null
                                         ? AccessorDeclaration(
@@ -527,7 +523,6 @@ namespace Metalama.Framework.Engine.Linking
                                                             SyntaxKind.SimpleAssignmentExpression,
                                                             GetInvocationTarget(),
                                                             IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )

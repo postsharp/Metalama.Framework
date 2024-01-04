@@ -27,10 +27,6 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
             {
                 await RegisterNormalizeWhitespaceCodeFixAsync( context, diagnostic );
             }
-            else if ( diagnostic.Id == MetalamaPerformanceAnalyzer._syntaxNodeWith.Id )
-            {
-                await RegisterSyntaxNodeWithCodeFixAsync( context, diagnostic );
-            }
         }
     }
 
@@ -46,19 +42,10 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
 
             context.RegisterCodeFix( CodeAction.Create( Title, ct =>
             {
-                var newRoot = root.ReplaceNode( node, expression );
+                var newRoot = root.ReplaceNode( node, expression.WithTrailingTrivia( node.GetTrailingTrivia() ) );
 
                 return Task.FromResult( document.WithSyntaxRoot( newRoot ) );
             }, equivalenceKey: Title ), diagnostic );
         }
-    }
-
-    private static async Task RegisterSyntaxNodeWithCodeFixAsync( CodeFixContext context, Diagnostic diagnostic )
-    {
-        var document = context.Document;
-        var root = await document.GetSyntaxRootAsync( context.CancellationToken );
-        var node = root.FindNode( diagnostic.Location.SourceSpan );
-
-
     }
 }

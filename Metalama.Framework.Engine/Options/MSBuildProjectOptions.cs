@@ -124,6 +124,12 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override string? TemplateLanguageVersion => this.GetStringOption( MSBuildPropertyNames.MetalamaTemplateLanguageVersion );
 
+        [Memo]
+        public override bool? DebugTransformedCode => this.GetBooleanOption( MSBuildPropertyNames.MetalamaDebugTransformedCode );
+
+        [Memo]
+        public override string? TransformedFilesOutputPath => this.GetStringOption( MSBuildPropertyNames.MetalamaCompilerTransformedFilesOutputPath );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );

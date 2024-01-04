@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace Metalama.Framework.Engine.Services;
 
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
+    private static readonly ConcurrentDictionary<string, bool> _normalizeWhitespaceDictionary = new();
+
     internal CompilationContext( Compilation compilation )
     {
         this.Compilation = compilation;
@@ -124,4 +127,29 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
 
     [Memo]
     internal SymbolTranslator SymbolTranslator => new( this );
+
+    /// <summary>
+    /// Sets whether <see cref="SyntaxNodeExtensions.NormalizeWhitespace{TNode}(TNode, string, bool)"/> should be called on nodes generated for this compilation
+    /// and other compilations with the same <see cref="Compilation.AssemblyName"/>.
+    /// This is not necessary when the syntax tree is not saved to disk, or when the code is formatted before saving.
+    /// </summary>
+    public static void SetNormalizeWhitespace( Compilation compilation, bool normalizeWhitespace )
+        => _normalizeWhitespaceDictionary.AddOrUpdate( compilation.AssemblyName.AssertNotNull(), normalizeWhitespace, ( _, _ ) => normalizeWhitespace );
+
+    private bool GetNormalizeWhitespace()
+    {
+        if ( _normalizeWhitespaceDictionary.TryGetValue( this.Compilation.AssemblyName.AssertNotNull(), out var normalizeWhitespace ) )
+        {
+            return normalizeWhitespace;
+        }
+        else
+        {
+            // This shouldn't happen. If it does, default to the safer, but less efficient option.
+            Invariant.Assert( false );
+            return true;
+        }
+    }
+
+    [Memo]
+    internal bool NormalizeWhitespace => this.GetNormalizeWhitespace();
 }

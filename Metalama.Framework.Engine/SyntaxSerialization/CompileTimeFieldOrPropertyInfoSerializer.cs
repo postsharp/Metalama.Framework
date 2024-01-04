@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
@@ -27,9 +26,12 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 _ => throw new NotImplementedException()
             };
 
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
-                .AddArgumentListArguments( Argument( fieldInfoOrPropertyInfo ) )
-                .NormalizeWhitespace();
+            return ObjectCreationExpression(
+                serializationContext.GetTypeSyntax( typeof( FieldOrPropertyInfo ) ),
+                ArgumentList(
+                    SingletonSeparatedList(
+                        Argument( fieldInfoOrPropertyInfo ) ) ),
+                null );
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

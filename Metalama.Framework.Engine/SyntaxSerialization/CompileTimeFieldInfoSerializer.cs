@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
@@ -28,17 +27,14 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
         var allBindingFlags = SyntaxUtility.CreateBindingFlags( field, serializationContext );
 
         ExpressionSyntax fieldInfo = InvocationExpression(
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    typeCreation,
-                    IdentifierName( "GetField" ) ) )
-            .AddArgumentListArguments(
-                Argument(
-                    LiteralExpression(
-                        SyntaxKind.StringLiteralExpression,
-                        Literal( field.Name ) ) ),
-                Argument( allBindingFlags ) )
-            .NormalizeWhitespace();
+            MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetField" ) ),
+            ArgumentList(
+                SeparatedList(
+                    new[]
+                    {
+                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( field.Name ) ) ),
+                        Argument( allBindingFlags )
+                    } ) ) );
 
         // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
         fieldInfo = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, fieldInfo );

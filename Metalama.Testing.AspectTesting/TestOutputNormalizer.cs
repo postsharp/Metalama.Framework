@@ -28,7 +28,9 @@ public static class TestOutputNormalizer
         }
         else
         {
+#pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
             var s = syntaxNode.NormalizeWhitespace( "  ", "\n" ).ToFullString();
+#pragma warning restore LAMA0830
 
             s = NormalizeEndOfLines( s, forComparison );
 

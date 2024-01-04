@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -25,17 +24,14 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( @event.DeclaringType.GetSymbol(), serializationContext );
 
             ExpressionSyntax result = InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        typeCreation,
-                        IdentifierName( "GetEvent" ) ) )
-                .AddArgumentListArguments(
-                    Argument(
-                        LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            Literal( eventName ) ) ),
-                    Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) ) )
-                .NormalizeWhitespace();
+                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetEvent" ) ),
+                ArgumentList(
+                    SeparatedList(
+                        new[]
+                        {
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ),
+                            Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) )
+                        } ) ) );
 
             // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
             result = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, result );

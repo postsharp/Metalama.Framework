@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
@@ -27,8 +26,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             return MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     memberExpression,
-                    IdentifierName( "ReturnParameter" ) )
-                .NormalizeWhitespace();
+                    IdentifierName( "ReturnParameter" ) );
         }
 
         public CompileTimeReturnParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

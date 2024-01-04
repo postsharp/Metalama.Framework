@@ -119,10 +119,6 @@ internal sealed partial class LinkerInjectionStep
         /// around the node and by updating (or even suppressing) the <c>#pragma warning</c>
         /// inside the node.
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="suppressionsOnThisElement"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         private T AddSuppression<T>( T node, IReadOnlyList<string> suppressionsOnThisElement )
             where T : SyntaxNode
         {
@@ -142,21 +138,16 @@ internal sealed partial class LinkerInjectionStep
                 var errorCodes = SeparatedList<ExpressionSyntax>( suppressionsOnThisElement.Distinct().OrderBy( e => e ).Select( IdentifierName ) );
 
                 var disable = Trivia(
-                        PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
-                            .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace()
+                        SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, errorCodes )
                             .WithLeadingTrivia( ElasticLineFeed )
                             .WithTrailingTrivia( ElasticLineFeed ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
-                var restore =
-                    Trivia(
-                            PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
-                                .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace()
-                                .WithLeadingTrivia( ElasticLineFeed )
-                                .WithTrailingTrivia( ElasticLineFeed ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
+                var restore = Trivia(
+                        SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes )
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
                 transformedNode =
                     transformedNode

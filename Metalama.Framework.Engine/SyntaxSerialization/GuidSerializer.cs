@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
-                .NormalizeWhitespace();
+                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
         }
 
         public GuidSerializer( SyntaxSerializationService service ) : base( service ) { }

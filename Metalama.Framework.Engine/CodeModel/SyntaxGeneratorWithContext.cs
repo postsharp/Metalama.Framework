@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,6 +27,8 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
     {
         this._context = context;
     }
+
+    protected override bool NormalizeWhitespace => this._context.NormalizeWhitespace;
 
     public AttributeSyntax Attribute( IAttributeData attribute )
     {
@@ -303,7 +306,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
             if ( constraints.Count > 0 )
             {
-                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespace();
+                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespaceIfNecessary( this.NormalizeWhitespace );
                 list = list.Add( clause );
             }
         }

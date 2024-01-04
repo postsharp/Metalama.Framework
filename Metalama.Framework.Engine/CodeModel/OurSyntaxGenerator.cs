@@ -45,6 +45,8 @@ internal partial class OurSyntaxGenerator
 
     public bool IsNullAware { get; }
 
+    protected virtual bool NormalizeWhitespace => true;
+
     private OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
     {
         this._syntaxGenerator = syntaxGenerator;
@@ -108,7 +110,7 @@ internal partial class OurSyntaxGenerator
             typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
         }
 
-        return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();
+        return typeSyntax.NormalizeWhitespaceIfNecessary( this.NormalizeWhitespace );
     }
 
     public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
@@ -120,7 +122,7 @@ internal partial class OurSyntaxGenerator
         var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( elementType, elements );
 
         return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) )
-            .NormalizeWhitespace( indentation: "", eol: "", elasticTrivia: true );
+            .NormalizeWhitespaceIfNecessary( this.NormalizeWhitespace );
     }
 
     public TypeSyntax Type( SpecialType specialType )

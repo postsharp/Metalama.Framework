@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
@@ -42,18 +41,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             return ElementAccessExpression(
                     InvocationExpression(
-                        MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            memberExpression,
-                            IdentifierName( getParametersMethodName ) ) ) )
-                .WithArgumentList(
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, memberExpression, IdentifierName( getParametersMethodName ) ) ),
                     BracketedArgumentList(
                         SingletonSeparatedList(
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.NumericLiteralExpression,
-                                    Literal( parameter.Index ) ) ) ) ) )
-                .NormalizeWhitespace();
+                            Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( parameter.Index ) ) ) ) ) );
         }
 
         public CompileTimeParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

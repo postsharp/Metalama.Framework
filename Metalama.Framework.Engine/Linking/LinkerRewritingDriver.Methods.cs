@@ -258,7 +258,6 @@ namespace Metalama.Framework.Engine.Linking
                         constraints,
                         null,
                         null )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
@@ -282,7 +281,6 @@ namespace Metalama.Framework.Engine.Linking
             return method
                 .WithBody( GetBody() )
                 .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                .NormalizeWhitespace()
                 .WithLeadingTrivia( method.GetLeadingTrivia() )
                 .WithTrailingTrivia( method.GetTrailingTrivia() );
 
