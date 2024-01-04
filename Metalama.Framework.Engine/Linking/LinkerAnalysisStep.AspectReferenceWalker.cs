@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Linking
                     this.AspectReferences.Add( resolvedReference );
                 }
 
-                if (this._nodesContainingAspectReferences.Contains(node))
+                if ( this._nodesContainingAspectReferences.Contains(node) )
                 {
                     // Visit only when an aspect reference exists in the subtree of the node.
                     base.VisitCore( node );
