@@ -63,7 +63,7 @@ public static class LicensingDiagnosticDescriptors
         "{0}",
         "Licensing error.",
         _category );
-    
+
     internal static readonly DiagnosticDefinition InvalidLicenseOverall = new(
         "LAMA0808",
         Severity.Error,
@@ -85,5 +85,13 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Accessing the Roslyn API via Metalama.Framework.Sdk package is not covered by your license.",
             "Roslyn API not available.",
+            _category );
+
+    internal static readonly DiagnosticDefinition<string> InvalidLicenseKeyRegistered
+        = new(
+            "LAMA0812",
+            Severity.Error,
+            "The registered license key '{0}' cannot be used with Metalama.",
+            "The registered license key cannot be used with Metalama.",
             _category );
 }

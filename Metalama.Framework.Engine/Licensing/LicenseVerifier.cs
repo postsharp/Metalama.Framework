@@ -39,11 +39,14 @@ public sealed class LicenseVerifier : IProjectService
 
     private readonly struct RedistributionLicenseFeatures { }
 
-    private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager ) 
-        => tempFileManager.GetTempDirectory( _licenseUsageSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionScope: TempFileVersionScope.None );
+    private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
+        => tempFileManager.GetTempDirectory(
+            _licenseUsageSubdirectoryName,
+            CleanUpStrategy.FileOneMonthAfterCreation,
+            versionScope: TempFileVersionScope.None );
 
     [PublicAPI]
-    public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager ) 
+    public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
         => Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
 
     internal LicenseVerifier( ProjectServiceProvider serviceProvider )
@@ -92,7 +95,7 @@ public sealed class LicenseVerifier : IProjectService
             // The project has no aspect class and no reference with aspects.
             return true;
         }
-        
+
         foreach ( var closureProject in project.ClosureProjects )
         {
             if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
@@ -169,7 +172,7 @@ public sealed class LicenseVerifier : IProjectService
 
         // List all aspect classed, that are used.
         var aspectClasses = aspectInstanceResults
-            
+
             // Don't count skipped instances.
             .Where(
                 r => !r.AspectInstance.IsSkipped
@@ -208,23 +211,41 @@ public sealed class LicenseVerifier : IProjectService
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) => 10,
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) => 5,
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Free ) => 3,
-            _ => -1 // We want an error when no license is registered even if there is no aspect in the project. 
+            _ => 0
         };
 
-        var hasLicenseError = consumedAspectClassNames.Count > maxAspectClasses;
+        var hasLicenseError = false;
 
-        if ( hasLicenseError )
+        if ( maxAspectClasses == 0 )
         {
-            if ( string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) )
+            hasLicenseError = true;
+
+            var diagnostic = string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString )
+                ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
+                : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
+                    null,
+                    this._licenseConsumptionService.LicenseString! );
+
+            diagnostics.Report(
+                diagnostic );
+        }
+        else
+        {
+            if ( consumedAspectClassNames.Count > maxAspectClasses )
             {
-                diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
-            }
-            else
-            {
-                diagnostics.Report(
-                    LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
-                        null,
-                        (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
+                hasLicenseError = true;
+
+                if ( string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) )
+                {
+                    diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
+                }
+                else
+                {
+                    diagnostics.Report(
+                        LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
+                            null,
+                            (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
+                }
             }
         }
 

@@ -12,17 +12,21 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpEssentials) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpFramework) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpUltimate) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
-        public async Task CompilationPassesWithValidLicenseAsync( string licenseKey, string projectName = "TestProject" )
+        [TestLicensesInlineData( "PostSharp Framework", nameof(TestLicenseKeys.PostSharpFramework) )]
+        [TestLicensesInlineData( "PostSharp Ultimate", nameof(TestLicenseKeys.PostSharpUltimate) )]
+        [TestLicensesInlineData( "Metalama Free Personal", nameof(TestLicenseKeys.MetalamaFreePersonal) )]
+        [TestLicensesInlineData( "Metalama Started Business", nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
+        [TestLicensesInlineData( "Metalama Professional Business", nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
+        [TestLicensesInlineData( "Metalama Ultimate Business", nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
+        [TestLicensesInlineData( "Metalama Ultimate Open-Source Redistribution", nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
+        [TestLicensesInlineData(
+            "Metalama Ultimate Personal Project-Bound",
+            nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound),
+            TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        public async Task CompilationPassesWithValidLicenseAsync( string licenseName, string licenseKey, string projectName = "TestProject" )
         {
+            _ = licenseName;
+
             const string code = @"
 using System;
 

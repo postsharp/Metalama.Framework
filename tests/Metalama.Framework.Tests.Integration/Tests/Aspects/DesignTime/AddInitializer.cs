@@ -11,6 +11,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
+#pragma warning disable CS0169
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DesignTime.AddInitializer;
 
 // This tests that adding initializer is not visible at deisgn time.
