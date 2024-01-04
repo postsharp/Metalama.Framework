@@ -87,15 +87,17 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
                     };
 
+                var body = Block( linkedBody )
+                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
+                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+
                 var ret = destructorDeclaration
                     .WithExpressionBody( null )
                     .WithModifiers( destructorDeclaration.Modifiers )
                     .WithBody(
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
+                        body )
                     .WithSemicolonToken( default );
 
                 return ret;

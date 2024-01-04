@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CodeActions;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Analyzers;
 
@@ -59,6 +60,15 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
         var root = await document.GetSyntaxRootAsync( context.CancellationToken );
         var node = root.FindNode( diagnostic.Location.SourceSpan );
 
+        var semanticModel = await document.GetSemanticModelAsync();
 
+        IEnumerable<object> GetSyntaxNodeWithInvocations( SyntaxNode node )
+        {
+            var operation = semanticModel.GetOperation( node );
+
+            if (node is )
+        }
+
+        var syntaxNodeWithInvocations = 
     }
 }

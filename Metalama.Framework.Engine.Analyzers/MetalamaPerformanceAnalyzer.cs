@@ -45,9 +45,9 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
 
     private void InitializeCompilation( CompilationStartAnalysisContext context )
     {
-        var syntaxNodeTypeSymbol = context.Compilation.GetTypeByMetadataName( typeof(SyntaxNode).FullName! )!;
-
         context.RegisterOperationAction( AnalyzeNormalizeWhitespace, OperationKind.Invocation, OperationKind.MethodReference );
+
+        var syntaxNodeTypeSymbol = context.Compilation.GetTypeByMetadataName( typeof(SyntaxNode).FullName! )!;
 
         context.RegisterOperationAction(
             operationContext => AnalyzeSyntaxNodeWithChains( operationContext, syntaxNodeTypeSymbol ),
@@ -76,16 +76,21 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic( Diagnostic.Create( _normalizeWhitespace, location ) );
         }
     }
+
+    internal static bool IsSyntaxNodeWithMethod(IOperation operation)
+    {
+
+    }
     
-    private static void AnalyzeSyntaxNodeWithChains( OperationAnalysisContext context, INamedTypeSymbol syntaxNodeTypeSymbol )
+    private static void AnalyzeSyntaxNodeWithChains( OperationAnalysisContext context, INamedTypeSymbol syntaxNodeSymbol )
     {
         bool IsSyntaxNodeWithInvocation( IOperation operation, out IInvocationOperation? invocation )
         {
             if ( operation is IInvocationOperation { TargetMethod: var method } invocationOperation &&
                  method.Name.StartsWith( "With", StringComparison.Ordinal ) &&
                  method.ContainingType != null &&
-                 context.Compilation.ClassifyConversion( method.ContainingType, syntaxNodeTypeSymbol ) is
-                     { IsIdentity: true } or { IsImplicit: true, IsReference: true } )
+                 context.Compilation.ClassifyConversion( method.ContainingType, syntaxNodeSymbol ) is
+                    { IsIdentity: true } or { IsImplicit: true, IsReference: true } )
             {
                 invocation = invocationOperation;
 
