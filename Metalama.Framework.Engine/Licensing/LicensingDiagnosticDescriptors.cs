@@ -6,6 +6,8 @@ namespace Metalama.Framework.Engine.Licensing;
 
 public static class LicensingDiagnosticDescriptors
 {
+    internal const string InvalidLicenseKeyRegisteredId = "LAMA0812";
+    
     // Reserved range: 800-819
 
     private const string _category = "Metalama.Licensing";
@@ -86,8 +88,6 @@ public static class LicensingDiagnosticDescriptors
             "Accessing the Roslyn API via Metalama.Framework.Sdk package is not covered by your license.",
             "Roslyn API not available.",
             _category );
-
-    internal const string InvalidLicenseKeyRegisteredId = "LAMA0812";
 
     internal static readonly DiagnosticDefinition<string> InvalidLicenseKeyRegistered
         = new(
