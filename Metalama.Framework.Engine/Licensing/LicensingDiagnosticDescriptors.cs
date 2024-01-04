@@ -87,11 +87,13 @@ public static class LicensingDiagnosticDescriptors
             "Roslyn API not available.",
             _category );
 
+    internal const string InvalidLicenseKeyRegisteredId = "LAMA0812";
+
     internal static readonly DiagnosticDefinition<string> InvalidLicenseKeyRegistered
         = new(
-            "LAMA0812",
+            InvalidLicenseKeyRegisteredId,
             Severity.Error,
-            "The registered license key '{0}' cannot be used with Metalama.",
-            "The registered license key cannot be used with Metalama.",
+            "The registered license key '{0}' is not valid for Metalama or for this project.",
+            "The registered license key is not valid for Metalama or for this project.",
             _category );
 }

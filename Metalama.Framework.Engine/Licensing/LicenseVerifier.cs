@@ -220,14 +220,18 @@ public sealed class LicenseVerifier : IProjectService
         {
             hasLicenseError = true;
 
+            // Possible causes can be:
+            // 1. No license string has been registered.
+            // 2. We have a license string, but one not eligible for Metalama.
+            // 3. We have a project-bound license string and the project name does not match.
+
             var diagnostic = string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString )
                 ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
                 : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
                     null,
                     this._licenseConsumptionService.LicenseString! );
 
-            diagnostics.Report(
-                diagnostic );
+            diagnostics.Report( diagnostic );
         }
         else
         {
