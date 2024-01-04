@@ -163,7 +163,6 @@ namespace Metalama.Framework.Engine.Linking
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
@@ -180,7 +179,6 @@ namespace Metalama.Framework.Engine.Linking
             return
                 @operator
                     .WithBody( GetBody() )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( @operator.GetLeadingTrivia() )
                     .WithTrailingTrivia( @operator.GetTrailingTrivia() );
 

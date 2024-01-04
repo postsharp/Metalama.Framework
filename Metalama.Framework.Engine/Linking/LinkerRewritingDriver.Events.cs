@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Linking
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
-                    members.Add( GetEventBackingField( eventDeclaration, symbol ) );
+                    members.Add( this.GetEventBackingField( eventDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new MemberDeclarationSyntax[]
                 {
-                    GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace()
+                    this.GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
                 };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
@@ -194,7 +194,7 @@ namespace Metalama.Framework.Engine.Linking
                             IdentifierName( "value" ) ) )
                     .WithTrailingTrivia( TriviaList( ElasticLineFeed ) ) );
 
-        private static EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
             EqualsValueClauseSyntax? initializerExpression;
 
@@ -229,11 +229,11 @@ namespace Metalama.Framework.Engine.Linking
                     break;
             }
 
-            return GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
+            return this.GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
         }
 
         // Event backing field is intentionally an event field to handle thread-safety.
-        private static EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
         {
             if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
             {
@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.Linking
                                     Identifier( GetBackingFieldName( symbol ) ),
                                     null,
                                     initializer ) ) ) )
-                    .NormalizeWhitespace()
+                    .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.DefaultSyntaxGenerationContext.NormalizeWhitespace )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
@@ -352,7 +352,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null )
-                    .NormalizeWhitespace()
+                    .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.DefaultSyntaxGenerationContext.NormalizeWhitespace )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( cleanAccessorList )
@@ -385,7 +385,6 @@ namespace Metalama.Framework.Engine.Linking
                                                             SyntaxKind.AddAssignmentExpression,
                                                             GetInvocationTarget(),
                                                             IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null,
                                     removeAccessor != null
                                         ? AccessorDeclaration(
@@ -396,7 +395,6 @@ namespace Metalama.Framework.Engine.Linking
                                                             SyntaxKind.SubtractAssignmentExpression,
                                                             GetInvocationTarget(),
                                                             IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )

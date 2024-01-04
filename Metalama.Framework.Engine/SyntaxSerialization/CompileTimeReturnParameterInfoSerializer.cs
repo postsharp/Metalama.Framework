@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
@@ -24,11 +23,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 _ => throw new AssertionFailedException( $"Unexpected declaration type for '{parameter.DeclaringMember}'." )
             };
 
-            return MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    memberExpression,
-                    IdentifierName( "ReturnParameter" ) )
-                .NormalizeWhitespace();
+            return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, memberExpression, IdentifierName( "ReturnParameter" ) );
         }
 
         public CompileTimeReturnParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

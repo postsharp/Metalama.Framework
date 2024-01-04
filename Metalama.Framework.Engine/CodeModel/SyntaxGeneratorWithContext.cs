@@ -48,6 +48,8 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
         return base.Type( symbol );
     }
 
+    protected override bool NormalizeWhitespace => this._context.NormalizeWhitespace;
+
     public AttributeSyntax Attribute( IAttributeData attribute )
     {
         var constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
@@ -324,7 +326,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
             if ( constraints.Count > 0 )
             {
-                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespace();
+                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespaceIfNecessary( this.NormalizeWhitespace );
                 list = list.Add( clause );
             }
         }

@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Linking
             DestructorDeclarationSyntax destructor,
             IMethodSymbol symbol )
         {
-            var emptyBody = SyntaxFactoryEx.FormattedBlock().NormalizeWhitespace();
+            var emptyBody = SyntaxFactoryEx.FormattedBlock();
 
             return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -163,7 +163,6 @@ namespace Metalama.Framework.Engine.Linking
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
@@ -178,7 +177,6 @@ namespace Metalama.Framework.Engine.Linking
             return
                 destructor
                     .WithBody( GetBody() )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( destructor.GetLeadingTrivia() )
                     .WithTrailingTrivia( destructor.GetTrailingTrivia() );
 

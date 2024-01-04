@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -74,7 +75,9 @@ namespace Metalama.Framework.Engine.Linking
                         new CleanupRewriter( input.ProjectOptions )
                             .Visit( linkedRoot )!;
 
-                    var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
+                    var fixedRoot = PreprocessorFixer.Fix( cleanRoot );
+
+                    var newSyntaxTree = syntaxTree.WithRootAndOptions( fixedRoot, syntaxTree.Options );
 
                     transformations.Add( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
                 }

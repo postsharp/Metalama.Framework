@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -33,13 +32,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             }
 
             return ArrayCreationExpression(
-                    ArrayType( serializationContext.GetTypeSyntax( elementType ) )
-                        .WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
-                .WithInitializer(
-                    InitializerExpression(
-                        SyntaxKind.ArrayInitializerExpression,
-                        SeparatedList( lt ) ) )
-                .NormalizeWhitespace();
+                    ArrayType(
+                        serializationContext.GetTypeSyntax( elementType ),
+                        SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ),
+                    InitializerExpression( SyntaxKind.ArrayInitializerExpression, SeparatedList( lt ) ) );
         }
 
         public override Type InputType => typeof(Array);

@@ -75,9 +75,13 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool RoslynIsCompileTimeOnly => this.Wrapped.RoslynIsCompileTimeOnly;
 
-    public string? CompileTimeTargetFrameworks => this.Wrapped.CompileTimeTargetFrameworks;
+    public virtual string? CompileTimeTargetFrameworks => this.Wrapped.CompileTimeTargetFrameworks;
 
-    public string? RestoreSources => this.Wrapped.RestoreSources;
+    public virtual string? RestoreSources => this.Wrapped.RestoreSources;
 
-    public string? TemplateLanguageVersion => this.Wrapped.TemplateLanguageVersion;
+    public virtual string? TemplateLanguageVersion => this.Wrapped.TemplateLanguageVersion;
+
+    public virtual bool? DebugTransformedCode => this.Wrapped.DebugTransformedCode;
+
+    public virtual string? TransformedFilesOutputPath => this.Wrapped.TransformedFilesOutputPath;
 }

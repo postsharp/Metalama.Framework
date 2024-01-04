@@ -245,4 +245,19 @@ internal static partial class SyntaxFactoryEx
             Code.RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
+
+    private static SyntaxToken KeywordTokenWithSpace( SyntaxKind kind )
+        => SyntaxFactory.Token( default, kind, new( SyntaxFactory.Space ) );
+
+    public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
+        SyntaxKind disableOrRestoreKind,
+        SeparatedSyntaxList<ExpressionSyntax> errorCodes )
+        => SyntaxFactory.PragmaWarningDirectiveTrivia(
+            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
+            KeywordTokenWithSpace( SyntaxKind.PragmaKeyword ),
+            KeywordTokenWithSpace( SyntaxKind.WarningKeyword ),
+            KeywordTokenWithSpace( disableOrRestoreKind ),
+            errorCodes,
+            SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new( SyntaxFactory.ElasticLineFeed ) ),
+            isActive: true );
 }

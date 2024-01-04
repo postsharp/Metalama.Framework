@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
+                    members.Add( this.GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -130,12 +130,12 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static EventFieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
             var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
 
             return
-                GetEventBackingField(
+                this.GetEventBackingField(
                     eventFieldDeclaration.Declaration.Type,
                     declarator.Initializer,
                     symbol );
@@ -150,8 +150,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
                                 AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
-                            } ) )
-                    .NormalizeWhitespace();
+                            } ) );
 
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -179,8 +178,7 @@ namespace Metalama.Framework.Engine.Linking
                                                     AssignmentExpression(
                                                         SyntaxKind.AddAssignmentExpression,
                                                         GetInvocationTarget(),
-                                                        IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace(),
+                                                        IdentifierName( "value" ) ) ) ) ),
                                     AccessorDeclaration(
                                             SyntaxKind.RemoveAccessorDeclaration,
                                             SyntaxFactoryEx.FormattedBlock(
@@ -189,7 +187,6 @@ namespace Metalama.Framework.Engine.Linking
                                                         SyntaxKind.SubtractAssignmentExpression,
                                                         GetInvocationTarget(),
                                                         IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace()
                                 }.WhereNotNull() ) ),
                         default )
                     .WithLeadingTrivia( eventField.GetLeadingTrivia() )

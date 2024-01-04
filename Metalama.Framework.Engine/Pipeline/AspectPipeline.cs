@@ -218,6 +218,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
             }
 
+            // Set NormalizeWhitespace setting for the compilation.
+            var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
+            var whitespaceMatters = !string.IsNullOrWhiteSpace( projectOptions.TransformedFilesOutputPath ) || projectOptions.DebugTransformedCode == true || projectOptions.IsTest;
+            var normalizeWhitespace = whitespaceMatters && !projectOptions.FormatOutput;
+            CompilationContext.SetNormalizeWhitespace( compilation, normalizeWhitespace );
+
             // Add MetricsManager.
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
 

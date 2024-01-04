@@ -160,6 +160,16 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         string? TemplateLanguageVersion { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the transformed code should be debugged, as opposed to original user code.
+        /// </summary>
+        bool? DebugTransformedCode { get; }
+
+        /// <summary>
+        /// Gets the path to the directory where transformed files should be written.
+        /// </summary>
+        string? TransformedFilesOutputPath { get; }
+
         bool IsTest { get; }
     }
 }
