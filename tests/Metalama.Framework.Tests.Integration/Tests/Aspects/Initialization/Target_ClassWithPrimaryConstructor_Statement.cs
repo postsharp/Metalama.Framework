@@ -5,6 +5,8 @@
 
 #if ROSLYN_4_8_0_OR_GREATER && NET7_0_OR_GREATER
 
+#pragma warning disable CS0169
+
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;

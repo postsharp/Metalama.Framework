@@ -21,7 +21,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
                 licenseKey = TestOptions.ReadLicenseExpression( testInput.Options.LicenseExpression );
             }
 
-            return licenseKey == null ? serviceProvider : serviceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey );
+            return licenseKey == null ? serviceProvider : serviceProvider.Underlying.AddProjectLicenseConsumptionManagerForTest( licenseKey );
         }
     }
 }

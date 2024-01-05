@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using System;
@@ -258,7 +259,7 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
         /// </summary>
         public string? LicenseFile { get; set; }
-        
+
         public string? LicenseExpression { get; set; }
 
         /// <summary>
@@ -266,7 +267,7 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
         /// </summary>
         public string? DependencyLicenseFile { get; set; }
-        
+
         public string? DependencyLicenseExpression { get; set; }
 
         /// <summary>
@@ -344,6 +345,12 @@ namespace Metalama.Testing.AspectTesting
         /// Gets or sets the project of the test. By default, the test file name without extension is used.
         /// </summary>
         public string? ProjectName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the licenses registered in the user profile should be ignored.
+        /// The default value is <c>false</c>. When this property is set to <c>true</c>, user-profile licenses are not loaded for this test.
+        /// </summary>
+        public bool? IgnoreUserProfileLicenses { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -435,6 +442,8 @@ namespace Metalama.Testing.AspectTesting
             this.FormatCompileTimeCode ??= baseOptions.FormatCompileTimeCode;
 
             this.CompareProgramOutput ??= baseOptions.CompareProgramOutput;
+
+            this.IgnoreUserProfileLicenses ??= baseOptions.IgnoreUserProfileLicenses;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -661,7 +670,7 @@ namespace Metalama.Testing.AspectTesting
                         else
                         {
                             // The version may be a valid number but still not recognized by the current version of Roslyn.
-                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor(n) )
+                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor( n ) )
                             {
                                 this.SkipReason = $"@DependencyLanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
                             }
@@ -695,7 +704,7 @@ namespace Metalama.Testing.AspectTesting
                         this.LicenseFile = optionArg;
 
                         break;
-                    
+
                     case "LicenseExpression":
 
                         this.LicenseExpression = optionArg;
@@ -801,5 +810,13 @@ namespace Metalama.Testing.AspectTesting
 
             return Type.GetType( type ).AssertNotNull().GetProperty( property ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
         }
+
+        internal TestContextOptions ApplyToTestContextOptions( TestContextOptions testContextOptions )
+            => testContextOptions with
+            {
+                RequireOrderedAspects = this.RequireOrderedAspects ?? testContextOptions.RequireOrderedAspects,
+                FormatCompileTimeCode = this.FormatCompileTimeCode ?? testContextOptions.FormatCompileTimeCode,
+                IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses
+            };
     }
 }

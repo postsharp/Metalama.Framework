@@ -2,7 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Testing.AspectTesting.Utilities;
@@ -107,12 +107,7 @@ public abstract class AspectTestClass
         var testInputFactory = new TestInput.Factory();
         var testInput = testInputFactory.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
 
-        var testOptions = new TestContextOptions
-        {
-            References = projectReferences.MetadataReferences,
-            RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault(),
-            FormatCompileTimeCode = testInput.Options.FormatCompileTimeCode ?? false
-        };
+        var testOptions = testInput.Options.ApplyToTestContextOptions( new TestContextOptions { References = projectReferences.MetadataReferences } );
 
         var testRunner = TestRunnerFactory.CreateTestRunner( testInput, this._serviceProvider, projectReferences, this._logger );
         await testRunner.RunAndAssertAsync( testInput, testOptions );

@@ -66,4 +66,6 @@ public sealed record TestContextOptions
     public TimeSpan Timeout { get; init; } = TimeSpan.FromSeconds( 30 );
 
     public string? ProjectName { get; init; }
+
+    public bool IgnoreUserProfileLicenses { get; init; }
 }

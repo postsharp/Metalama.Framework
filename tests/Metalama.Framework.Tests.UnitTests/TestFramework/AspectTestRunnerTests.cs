@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #if NET5_0_OR_GREATER
+using Metalama.Backstage.Infrastructure;
 using Metalama.Backstage.Testing;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
@@ -125,7 +126,7 @@ public class Program
             fileSystem.WriteAllText( Path.Combine( directory, "Test.t.cs" ), source );
 
             var serviceProvider = (GlobalServiceProvider) testContext.ServiceProvider.Global.Underlying
-                .WithUntypedService( typeof(Backstage.Extensibility.IFileSystem), fileSystem )
+                .WithUntypedService( typeof(IFileSystem), fileSystem )
                 .WithService( new FakeMetadataReader( directory ) );
 
             var messageSink = new TestMessageSink();
