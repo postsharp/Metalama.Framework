@@ -5,6 +5,7 @@ using Metalama.Backstage.Application;
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Infrastructure;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -117,6 +118,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         var backstageServices = ServiceProvider<IBackstageService>.Empty
             .WithService( this )
             .WithService( platformInfo )
+            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>() )
             .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() );
 
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
@@ -253,7 +255,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 #if NET5_0_OR_GREATER
         => new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
 #else
-        => new CompileTimeDomain( this.ServiceProvider.Global );
+        => new( this.ServiceProvider.Global );
 #endif
 
     internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();

@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
-using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Immutable;
@@ -56,8 +55,6 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         // We don't use input.Project.Name, because it can return the assembly name or an empty string when the project path is unknown. 
         var projectName = Path.GetFileNameWithoutExtension( input.Project.Path );
-
-        LicenseVerifier.VerifyCanUseSdk( projectName, projectServiceProvider, this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var sdkOptionsManager = new SdkHierarchicalOptionsManager( compilationModel );
 

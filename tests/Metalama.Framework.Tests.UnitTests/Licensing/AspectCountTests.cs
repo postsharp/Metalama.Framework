@@ -13,9 +13,9 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
     public sealed class AspectCountTests : LicensingTestsBase
     {
         private const string _arbitraryNamespace = "AspectCountTests.ArbitraryNamespace";
-        private const string _tooManyAspectClassesErrorId = "LAMA0800";
-        private const string _redistributionInvalidErrorId = "LAMA0803";
-        private const string _noLicenseKeyErrorId = "LAMA0809";
+        private const string _tooManyAspectClassesErrorId = LicensingDiagnosticDescriptors.TooManyAspectClassesId;
+        private const string _redistributionInvalidErrorId = LicensingDiagnosticDescriptors.RedistributionLicenseInvalidId;
+        private const string _noLicenseKeyErrorId = LicensingDiagnosticDescriptors.NoLicenseKeyRegisteredId;
 
         private readonly ITestOutputHelper _logger;
 

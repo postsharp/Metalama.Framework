@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <summary>
         /// Gets the eligibility of a an aspect instance of the current aspect class without when knowing whether the aspect instance is inheritable.
         /// </summary>
-        public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable );
+        EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable );
 
         ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext );
     }

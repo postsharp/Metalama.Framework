@@ -7,14 +7,17 @@ namespace Metalama.Framework.Engine.Licensing;
 public static class LicensingDiagnosticDescriptors
 {
     internal const string InvalidLicenseKeyRegisteredId = "LAMA0812";
-    
+    internal const string NoLicenseKeyRegisteredId = "LAMA0809";
+    internal const string RedistributionLicenseInvalidId = "LAMA0803";
+    internal const string TooManyAspectClassesId = "LAMA0800";
+
     // Reserved range: 800-819
 
     private const string _category = "Metalama.Licensing";
 
     internal static readonly DiagnosticDefinition<(int ActualCount, int MaxAspectsCount, string ProjectName)> TooManyAspectClasses =
         new(
-            "LAMA0800",
+            TooManyAspectClassesId,
             _category,
             "This project uses {0} aspect classes, but only {1} are allowed by your license. For details, use the following command: `metalama license usage details --project {2}`.",
             Severity.Error,
@@ -30,19 +33,11 @@ public static class LicensingDiagnosticDescriptors
 
     internal static readonly DiagnosticDefinition<string> RedistributionLicenseInvalid =
         new(
-            "LAMA0803",
+            RedistributionLicenseInvalidId,
             _category,
             "The redistribution license of '{0}' assembly is invalid.",
             Severity.Error,
             "Invalid redistribution license of '{0}' assembly." );
-
-    internal static readonly DiagnosticDefinition<(string WeaverType, string AspectClasses)> SdkNotAvailable =
-        new(
-            "LAMA0804",
-            _category,
-            "The '{0}' aspect weaver cannot be used to weave aspects as Metalama SDK is not covered by your license. The aspect classes are: {1}.",
-            Severity.Error,
-            "Metalama SDK not available." );
 
     internal static readonly DiagnosticDefinition<(string Title, string Origin)> CodeActionNotAvailable =
         new(
@@ -75,7 +70,7 @@ public static class LicensingDiagnosticDescriptors
 
     internal static readonly DiagnosticDefinition NoLicenseKeyRegistered
         = new(
-            "LAMA0809",
+            NoLicenseKeyRegisteredId,
             Severity.Error,
             "You must activate Metalama or register a license key before building your project. See https://postsharp.net/links/metalama-register-license.",
             "You must activate Metalama or register a license key before building your project.",
