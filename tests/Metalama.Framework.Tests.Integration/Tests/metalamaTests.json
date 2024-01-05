@@ -4,5 +4,6 @@
  "ReportOutputWarnings": true,
  "IgnoredDiagnostics" : [ "CS8603", "CS0219", "CS0067", "CS8602", "CS8600", "CS8604", "CS0649", "CS8767", "CS0169", "CS8765", "CS8625", "CS8424", "CS8425" ],
  "MainMethod": "TestMain",
- "CheckMemoryLeaks": true
+ "CheckMemoryLeaks": true,
+ "IgnoreUserProfileLicenses": true
  }

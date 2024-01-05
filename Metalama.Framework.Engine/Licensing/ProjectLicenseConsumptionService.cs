@@ -39,7 +39,9 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
     public bool ValidateRedistributionLicenseKey( string redistributionLicenseKey, string aspectClassNamespace )
         => this._impl.ValidateRedistributionLicenseKey( redistributionLicenseKey, aspectClassNamespace );
 
-    public ILicenseConsumptionService WithAdditionalLicense( string? licenseKey ) => throw new NotSupportedException();
+    ILicenseConsumptionService ILicenseConsumptionService.WithAdditionalLicense( string? licenseKey ) => throw new NotSupportedException();
+
+    ILicenseConsumptionService ILicenseConsumptionService.WithoutLicense() => throw new NotSupportedException();
 
     public IReadOnlyList<LicensingMessage> Messages => this._impl.Messages;
 

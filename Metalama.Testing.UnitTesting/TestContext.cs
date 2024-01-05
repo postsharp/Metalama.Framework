@@ -5,6 +5,7 @@ using Metalama.Backstage.Application;
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Infrastructure;
+using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Code;
@@ -118,9 +119,16 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         var backstageServices = ServiceProvider<IBackstageService>.Empty
             .WithService( this )
             .WithService( platformInfo )
-            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>() )
             .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() );
 
+        var licenseConsumptionService = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
+
+        if ( contextOptions.IgnoreUserProfileLicenses )
+        {
+            licenseConsumptionService = licenseConsumptionService.WithoutLicense();
+        }
+
+        backstageServices = backstageServices.WithService( licenseConsumptionService );
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
         var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
