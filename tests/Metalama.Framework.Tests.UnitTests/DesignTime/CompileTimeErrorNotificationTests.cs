@@ -50,7 +50,7 @@ public sealed class CompileTimeErrorNotificationTests : DistributedDesignTimeTes
 
         // Register a synchronization point.
         var hasCompilerErrorData = new TaskCompletionSource<bool>();
-        testContext.UserProcessServiceHubEndpoint.Endpoints.Single().CompileTimeErrorsChanged += _ => hasCompilerErrorData.SetResult( true );
+        testContext.UserProcessServiceHubEndpoint.Endpoints.Single().CompileTimeErrorsChanged += _ => hasCompilerErrorData.TrySetResult( true );
 
         // Execute the pipeline to get the errors.
         var project = testContext.WorkspaceProvider.GetProject( "project" );

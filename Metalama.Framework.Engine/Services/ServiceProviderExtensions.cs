@@ -22,4 +22,8 @@ public static class ServiceProviderExtensions
     public static T GetRequiredBackstageService<T>( this GlobalServiceProvider serviceProvider )
         where T : class, IBackstageService
         => serviceProvider.Underlying.GetRequiredBackstageService<T>();
+
+    public static T? GetBackstageService<T>( this GlobalServiceProvider serviceProvider )
+        where T : class, IBackstageService
+        => serviceProvider.Underlying.GetBackstageService<T>();
 }

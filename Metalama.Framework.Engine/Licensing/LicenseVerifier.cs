@@ -5,7 +5,6 @@ using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
@@ -40,15 +39,14 @@ public sealed class LicenseVerifier : IProjectService
     private readonly struct RedistributionLicenseFeatures { }
 
     private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
-    {
-        return tempFileManager.GetTempDirectory( _licenseUsageSubdirectoryName, CleanUpStrategy.FileOneMonthAfterCreation, versionNeutral: true );
-    }
+        => tempFileManager.GetTempDirectory(
+            _licenseUsageSubdirectoryName,
+            CleanUpStrategy.FileOneMonthAfterCreation,
+            versionScope: TempFileVersionScope.None );
 
     [PublicAPI]
     public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
-    {
-        return Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
-    }
+        => Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
 
     internal LicenseVerifier( ProjectServiceProvider serviceProvider )
     {
@@ -96,7 +94,7 @@ public sealed class LicenseVerifier : IProjectService
             // The project has no aspect class and no reference with aspects.
             return true;
         }
-        
+
         foreach ( var closureProject in project.ClosureProjects )
         {
             if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
@@ -162,18 +160,9 @@ public sealed class LicenseVerifier : IProjectService
 
     internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        // Verify SDK license
-        if ( compilation.References.Any( r => r.Display?.EndsWith( "metalama.framework.sdk.dll", StringComparison.OrdinalIgnoreCase ) ?? false ) )
-        {
-            if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
-            {
-                diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
-            }
-        }
-
         // List all aspect classed, that are used.
         var aspectClasses = aspectInstanceResults
-            
+
             // Don't count skipped instances.
             .Where(
                 r => !r.AspectInstance.IsSkipped
@@ -205,7 +194,7 @@ public sealed class LicenseVerifier : IProjectService
                 .OrderBy( x => x )
                 .ToReadOnlyList();
 
-        // Enforce the license.
+        // Check availability of a license and enforce maximal number of classes.
         var maxAspectClasses = this switch
         {
             _ when this.CanConsumeForCurrentProject( LicenseRequirement.Ultimate ) => int.MaxValue,
@@ -215,20 +204,57 @@ public sealed class LicenseVerifier : IProjectService
             _ => 0
         };
 
-        var hasLicenseError = consumedAspectClassNames.Count > maxAspectClasses;
+        var hasLicenseError = false;
 
-        if ( hasLicenseError )
+        if ( maxAspectClasses == 0 )
         {
-            if ( string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) )
+            hasLicenseError = true;
+
+            // Possible causes can be:
+            // 1. No license string has been registered.
+            // 2. We have a license string, but one not eligible for Metalama.
+            // 3. We have a project-bound license string and the project name does not match.
+
+            var diagnostic = string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString )
+                ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
+                : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
+                    null,
+                    this._licenseConsumptionService.LicenseString! );
+
+            diagnostics.Report( diagnostic );
+        }
+        else
+        {
+            if ( consumedAspectClassNames.Count > maxAspectClasses )
             {
-                diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
+                hasLicenseError = true;
+
+                if ( string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) )
+                {
+                    diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
+                }
+                else
+                {
+                    diagnostics.Report(
+                        LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
+                            null,
+                            (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
+                }
             }
-            else
+        }
+
+        // Check the use of Metalama.Framework.Sdk.
+        if ( !hasLicenseError )
+        {
+            // Verify SDK license
+            if ( compilation.References.Any( r => r.Display?.EndsWith( "metalama.framework.sdk.dll", StringComparison.OrdinalIgnoreCase ) ?? false ) )
             {
-                diagnostics.Report(
-                    LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
-                        null,
-                        (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
+                if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
+                {
+                    diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
+                }
+
+                hasLicenseError = true;
             }
         }
 
@@ -247,30 +273,6 @@ public sealed class LicenseVerifier : IProjectService
                 EngineAssemblyMetadataReader.Instance.BuildDate );
 
             file.WriteToDirectory( directory );
-        }
-    }
-
-    internal static void VerifyCanUseSdk(
-        string? projectName,
-        ProjectServiceProvider serviceProvider,
-        IAspectWeaver aspectWeaver,
-        IEnumerable<IAspectInstance> aspectInstances,
-        IDiagnosticAdder diagnostics )
-    {
-        // ILicenseConsumptionService is hacked: this is a project-scoped service because it is instantiate with the license key in the project file,
-        // but its interface is backstage because it is implemented in the backstage assembly.
-        var manager = serviceProvider.GetService<IProjectLicenseConsumptionService>();
-
-        if ( manager == null )
-        {
-            return;
-        }
-
-        if ( !manager.CanConsume( LicenseRequirement.Professional, projectName ) )
-        {
-            var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
-
-            diagnostics.Report( LicensingDiagnosticDescriptors.SdkNotAvailable.CreateRoslynDiagnostic( null, (aspectWeaver.GetType().Name, aspectClasses) ) );
         }
     }
 }

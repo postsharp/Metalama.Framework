@@ -146,7 +146,7 @@ namespace Metalama.Framework.Tests.UnitTests
                 }
             }
 
-            public string GetTempDirectory( string directory, CleanUpStrategy cleanUpStrategy, string? subdirectory, bool versionNeutral )
+            public string GetTempDirectory( string directory, CleanUpStrategy cleanUpStrategy, string? subdirectory, TempFileVersionScope versionScope )
                 => throw new NotImplementedException();
         }
     }

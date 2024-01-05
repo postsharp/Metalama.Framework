@@ -15,9 +15,10 @@ internal static class DesignTimeServices
             throw new InvalidOperationException( "This method cannot be called from the Metalama Compiler process." );
         }
 
-        // We don't initialize licensing because it depends on the project license key, which is not known at that time.
-
         BackstageServiceFactoryInitializer.Initialize(
-            new BackstageInitializationOptions( new MetalamaDesignTimeApplicationInfo() ) { AddSupportServices = true } );
+            new BackstageInitializationOptions( new MetalamaDesignTimeApplicationInfo() )
+            {
+                AddSupportServices = true, AddUserInterface = true, AddLicensing = true
+            } );
     }
 }

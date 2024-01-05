@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Maintenance;
+using Metalama.Backstage.Infrastructure;
 using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
@@ -17,12 +17,12 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
     internal sealed class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {
         private readonly IExceptionReporter? _exceptionReporter;
-        private readonly ITempFileManager _tempFileManager;
+        private readonly IStandardDirectories _standardDirectories;
 
         public CompileTimeExceptionHandler( IServiceProvider serviceProvider )
         {
             this._exceptionReporter = (IExceptionReporter?) serviceProvider.GetService( typeof(IExceptionReporter) );
-            this._tempFileManager = serviceProvider.GetRequiredBackstageService<ITempFileManager>();
+            this._standardDirectories = serviceProvider.GetRequiredBackstageService<IStandardDirectories>();
         }
 
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled )
@@ -40,9 +40,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 node = syntaxProcessingException.SyntaxNode;
             }
 
-            var reportFile = Path.Combine(
-                this._tempFileManager.GetTempDirectory( "CrashReports", CleanUpStrategy.Always ),
-                $"exception-{Guid.NewGuid()}.txt" );
+            var reportFile = Path.Combine( this._standardDirectories.CrashReportsDirectory, $"exception-{Guid.NewGuid()}.txt" );
 
             var exceptionText = new StringBuilder();
 
@@ -78,7 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( node?.GetLocation(), (exception.Message, reportFile) ) );
 
-            this._exceptionReporter?.ReportException( exception );
+            this._exceptionReporter?.ReportException( exception,  localReportPath: reportFile );
 
             isHandled = true;
         }

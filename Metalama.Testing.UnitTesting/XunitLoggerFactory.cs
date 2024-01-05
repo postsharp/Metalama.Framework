@@ -23,6 +23,8 @@ internal sealed class XunitLoggerFactory : ILoggerFactory
     public ILogger GetLogger( string category )
         => this._loggers.GetOrAdd( category, static ( c, me ) => new Logger( c, me._testOutputHelper, me._verbose ), this );
 
+    void ILoggerFactory.Flush() { }
+
     private sealed class Logger : ILogger
     {
         private readonly string _prefix;
