@@ -125,10 +125,17 @@ namespace Metalama.Framework.Engine.Linking
                             currentSemanticModel = this._compilationContext.SemanticModelProvider.GetSemanticModel( invocationExpressionRecord.Node.SyntaxTree );
                         }
 
+                        var symbol = invocationExpressionRecord.GetSymbol( currentSemanticModel! );
+
+                        if (symbol == null)
+                        {
+                            continue;
+                        }
+
                         symbolReferences.Add(
                             new IntermediateSymbolSemanticReference(
                                 method.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                invocationExpressionRecord.GetSymbol( currentSemanticModel! ).ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                 invocationExpressionRecord.Node ) );
                     }
                 }
@@ -249,6 +256,7 @@ namespace Metalama.Framework.Engine.Linking
             private class SyntaxSymbolCacheRecord<TSyntax>
                 where TSyntax : SyntaxNode
             {
+                private volatile bool _isInitialized;
                 private volatile ISymbol? _cachedSymbol;
 
                 public TSyntax Node { get; }
@@ -258,9 +266,10 @@ namespace Metalama.Framework.Engine.Linking
                     this.Node = name;
                 }
 
-                public ISymbol GetSymbol(SemanticModel semanticModel)
+                public ISymbol? GetSymbol(SemanticModel semanticModel)
                 {
-                    if ( this._cachedSymbol == null )
+                    // PERF: In most cases, symbol will not be null so we can check it first.
+                    if ( this._cachedSymbol == null && !this._isInitialized )
                     {
                         var symbolInfo = semanticModel.GetSymbolInfo( this.Node );
 
@@ -269,7 +278,8 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             if ( this._cachedSymbol == null )
                             {
-                                this._cachedSymbol = symbolInfo.Symbol.AssertNotNull();
+                                this._cachedSymbol = symbolInfo.Symbol;
+                                this._isInitialized = true;
                                 return this._cachedSymbol;
                             }
                             else
