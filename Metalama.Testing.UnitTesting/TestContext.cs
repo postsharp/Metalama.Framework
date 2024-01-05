@@ -5,7 +5,6 @@ using Metalama.Backstage.Application;
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Infrastructure;
-using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Code;
