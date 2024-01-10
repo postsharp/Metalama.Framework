@@ -144,7 +144,6 @@ internal sealed partial class LinkerInjectionStep
                 var disable = Trivia(
                         PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
                             .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace()
                             .WithLeadingTrivia( ElasticLineFeed )
                             .WithTrailingTrivia( ElasticLineFeed ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
@@ -153,7 +152,6 @@ internal sealed partial class LinkerInjectionStep
                     Trivia(
                             PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
                                 .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace()
                                 .WithLeadingTrivia( ElasticLineFeed )
                                 .WithTrailingTrivia( ElasticLineFeed ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );

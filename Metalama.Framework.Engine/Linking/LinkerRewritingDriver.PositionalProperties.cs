@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Linking
                             null,
                             null,
                             default )
-                        .NormalizeWhitespace();
+;
             }
 
             AccessorDeclarationSyntax GetLinkedAccessor(
@@ -160,7 +160,6 @@ namespace Metalama.Framework.Engine.Linking
                             null,
                             null,
                             default )
-                        .NormalizeWhitespace()
                         .WithBody( body );
             }
         }
@@ -197,7 +196,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null,
                         default )
-                    .NormalizeWhitespace();
+;
 
             ExpressionSyntax GetInvocationTarget()
             {

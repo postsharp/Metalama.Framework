@@ -38,7 +38,7 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
                         SyntaxKind.StringLiteralExpression,
                         Literal( field.Name ) ) ),
                 Argument( allBindingFlags ) )
-            .NormalizeWhitespace();
+;
 
         // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
         fieldInfo = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, fieldInfo );

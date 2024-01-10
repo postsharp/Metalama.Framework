@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 LiteralExpression(
                                     SyntaxKind.NumericLiteralExpression,
                                     Literal( parameter.Index ) ) ) ) ) )
-                .NormalizeWhitespace();
+;
         }
 
         public CompileTimeParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

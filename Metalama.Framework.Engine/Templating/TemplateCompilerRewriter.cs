@@ -164,12 +164,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var localDeclaration =
             LocalDeclarationStatement(
-                    VariableDeclaration( this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ) )
-                        .WithVariables(
-                            SingletonSeparatedList(
-                                VariableDeclarator( metaVariableIdentifier )
-                                    .WithInitializer( EqualsValueClause( callGetUniqueIdentifier ) ) ) ) )
-                .NormalizeWhitespace();
+                SyntaxFactoryEx.VariableDeclaration(
+                    this.MetaSyntaxFactory.Type( typeof(SyntaxToken) ),
+                    SingletonSeparatedList(
+                        VariableDeclarator( metaVariableIdentifier, default, EqualsValueClause( callGetUniqueIdentifier ) ) ) ) );
 
         this._currentMetaContext!.Statements.Add( localDeclaration );
     }
@@ -179,8 +177,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <see cref="MetaSyntaxRewriter.TransformationKind.None"/> for compile-time code
     /// or <see cref="MetaSyntaxRewriter.TransformationKind.Transform"/> for run-time code.
     /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
     protected override TransformationKind GetTransformationKind( SyntaxNode node )
         => IsCompileTimeCode( node ) ? TransformationKind.None : TransformationKind.Transform;
 
@@ -811,7 +807,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                             SyntaxKind.SimpleMemberAccessExpression,
                                             IdentifierName( name ),
                                             IdentifierName( propertyName ) ) ) ) ) ) )
-                .NormalizeWhitespace();
+;
         }
     }
 
@@ -1356,7 +1352,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     }
 
     private ParameterSyntax CreateTemplateSyntaxFactoryParameter()
-        => Parameter( default, default, this._templateSyntaxFactoryType, Identifier( _templateSyntaxFactoryParameterName ), null );
+        => SyntaxFactoryEx.Parameter( default, this._templateSyntaxFactoryType, Identifier( _templateSyntaxFactoryParameterName ), null );
 
     public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
     {
@@ -1381,7 +1377,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             {
                 templateParameter =
                     templateParameter
-                        .WithType( SyntaxFactoryEx.ExpressionSyntaxType )
+                        .WithType( SyntaxFactoryEx.AddTrailingSpaceIfNecessary( SyntaxFactoryEx.ExpressionSyntaxType ) )
                         .WithModifiers( TokenList() )
                         .WithAttributeLists( default );
 
@@ -1414,7 +1410,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 {
                     this._templateCompileTimeTypeParameterNames.Add( parameter.Identifier.ValueText );
 
-                    templateParameters.Add( Parameter( default, default, this._templateTypeArgumentType, parameter.Identifier, null ) );
+                    templateParameters.Add( SyntaxFactoryEx.Parameter( default, this._templateTypeArgumentType, parameter.Identifier, null ) );
                 }
             }
         }
@@ -1491,7 +1487,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             : new[]
             {
                 this.CreateTemplateSyntaxFactoryParameter(),
-                Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null )
+                SyntaxFactoryEx.Parameter( default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null )
             };
 
         // Create the method.
@@ -1560,14 +1556,18 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         BlockSyntax? body,
         ParameterSyntax[]? parameters = null,
         SyntaxToken[]? accessibilityModifiers = null )
-        => MethodDeclaration(
-                this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ).WithTrailingTrivia( Space ),
-                Identifier( this._templateName ) )
-            .AddParameterListParameters( parameters ?? new[] { this.CreateTemplateSyntaxFactoryParameter() } )
-            .WithModifiers( this.DetermineModifiers( accessibilityModifiers ) )
-            .NormalizeWhitespace()
-            .WithBody( body )
-            .WithSemicolonToken( Token( body == null ? SyntaxKind.SemicolonToken : SyntaxKind.None ) )
+        => SyntaxFactoryEx.MethodDeclaration(
+            default,
+            this.DetermineModifiers( accessibilityModifiers ),
+            this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
+            default,
+            Identifier( this._templateName ),
+            null,
+            ParameterList( SeparatedList( parameters ?? [this.CreateTemplateSyntaxFactoryParameter()] ) ),
+            default,
+            body,
+            default,
+            Token( body == null ? SyntaxKind.SemicolonToken : SyntaxKind.None ) )
             .WithLeadingTrivia( node.GetLeadingTrivia() )
             .WithTrailingTrivia( LineFeed, LineFeed );
 
@@ -1721,8 +1721,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                             .WithVariables(
                                 SingletonSeparatedList(
                                     VariableDeclarator( Identifier( this._currentMetaContext.StatementListVariableName ) )
-                                        .WithInitializer( EqualsValueClause( ObjectCreationExpression( listType, ArgumentList(), default ) ) ) ) ) )
-                    .NormalizeWhitespace()
+                                        .WithInitializer( EqualsValueClause( SyntaxFactoryEx.ObjectCreationExpression( listType, ArgumentList() ) ) ) ) ) )
                     .WithLeadingTrivia( this.GetIndentation() )
                     .WithTrailingTrivia( LineFeed ) );
 
@@ -1760,7 +1759,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                                         Argument( map ),
                                                                         Argument( SyntaxFactoryEx.LiteralExpression( localFunctionSymbol.IsAsync ) )
                                                                     } ) ) ) ) ) ) ) )
-                        .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
             }
 
@@ -1779,7 +1777,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             {
                 // return TemplateSyntaxFactory.ToStatementArray( __s1 );
 
-                var returnStatementSyntax = ReturnStatement( toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ).NormalizeWhitespace();
+                var returnStatementSyntax = SyntaxFactoryEx.ReturnStatement( toArrayStatementExpression, this.GetIndentation() );
                 this._currentMetaContext.Statements.Add( returnStatementSyntax );
 
                 // Block( Func<SyntaxList<StatementSyntax>>( delegate { ... } )
@@ -1787,23 +1785,21 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     this.MetaSyntaxFactory.Block(
                         SyntaxFactoryEx.Default,
                         InvocationExpression(
-                            ObjectCreationExpression( this.MetaSyntaxFactory.Type( typeof(Func<SyntaxList<StatementSyntax>>) ) )
-                                .NormalizeWhitespace()
-                                .WithArgumentList(
-                                    ArgumentList(
-                                        SingletonSeparatedList(
-                                            Argument(
-                                                AnonymousMethodExpression()
-                                                    .WithBody(
-                                                        Block( this._currentMetaContext.Statements )
-                                                            .AddNoDeepIndentAnnotation() ) ) ) ) ) ) ) );
+                            SyntaxFactoryEx.ObjectCreationExpression(
+                                this.MetaSyntaxFactory.Type( typeof(Func<SyntaxList<StatementSyntax>>) ),
+                                ArgumentList(
+                                    SingletonSeparatedList(
+                                        Argument(
+                                            AnonymousMethodExpression(
+                                                Block( this._currentMetaContext.Statements )
+                                                    .AddNoDeepIndentAnnotation() ) ) ) ) ) ) ) );
             }
             else
             {
                 // return __s;
                 this._currentMetaContext.Statements.Add(
-                    ReturnStatement(
-                        this.MetaSyntaxFactory.Block( SyntaxFactoryEx.Default, toArrayStatementExpression ).WithLeadingTrivia( this.GetIndentation() ) ) );
+                    SyntaxFactoryEx.ReturnStatement(
+                        this.MetaSyntaxFactory.Block( SyntaxFactoryEx.Default, toArrayStatementExpression), this.GetIndentation() ) );
 
                 return Block( this._currentMetaContext.Statements );
             }
@@ -2009,7 +2005,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var callRender = InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RenderInterpolatedString) ),
                 ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) )
-            .NormalizeWhitespace();
+;
 
         this.Unindent();
 
@@ -2023,7 +2019,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var fixedNode = InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.FixInterpolationSyntax) ),
                 ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) )
-            .NormalizeWhitespace();
+;
 
         return fixedNode;
     }

@@ -152,24 +152,12 @@ namespace Metalama.Compiler
         {
             leadingTrivia = leadingTrivia.InsertAfterFirstNonWhitespaceTrivia(
                 Trivia(
-                        PragmaWarningDirectiveTrivia(
-                                Token( SyntaxKind.DisableKeyword ),
-                                true )
-                            .WithErrorCodes( _suppressedWarnings )
-                            .NormalizeWhitespace()
-                            .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) )
+                        SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, _suppressedWarnings ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
 
             trailingTrivia = trailingTrivia.InsertBeforeLastNonWhitespaceTrivia(
                 Trivia(
-                        PragmaWarningDirectiveTrivia(
-                                Token( SyntaxKind.RestoreKeyword ),
-                                true )
-                            .WithErrorCodes( _suppressedWarnings )
-                            .NormalizeWhitespace()
-                            .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) )
+                        SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, _suppressedWarnings ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
         }
 

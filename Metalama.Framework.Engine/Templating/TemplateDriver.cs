@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Templating
             // Prevent that by adding `yield break;` at the end of the method body.
             block = templateExpansionContext.AddYieldBreakIfNecessary( block );
 
-            block = block.NormalizeWhitespace();
+            block = block;
 
             // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
             var aspectClass = templateExpansionContext.MetaApi.AspectInstance?.AspectClass;

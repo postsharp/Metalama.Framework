@@ -645,7 +645,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
     private static List<UsingDirectiveSyntax> GetUsingsFromOptions( Compilation compilation )
     {
-        return ((CSharpCompilation) compilation).Options.Usings.Select( x => SyntaxFactory.UsingDirective( ParseNamespace( x ) ).NormalizeWhitespace() )
+        return ((CSharpCompilation) compilation).Options.Usings.Select( x => SyntaxFactory.UsingDirective( ParseNamespace( x ) ))
             .ToMutableList();
 
         static NameSyntax ParseNamespace( string ns )

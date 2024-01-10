@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Linking
                                 AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
                                 AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
                             } ) )
-                    .NormalizeWhitespace();
+;
 
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Engine.Linking
                                                         SyntaxKind.AddAssignmentExpression,
                                                         GetInvocationTarget(),
                                                         IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace(),
+,
                                     AccessorDeclaration(
                                             SyntaxKind.RemoveAccessorDeclaration,
                                             SyntaxFactoryEx.FormattedBlock(
@@ -189,7 +189,6 @@ namespace Metalama.Framework.Engine.Linking
                                                         SyntaxKind.SubtractAssignmentExpression,
                                                         GetInvocationTarget(),
                                                         IdentifierName( "value" ) ) ) ) )
-                                        .NormalizeWhitespace()
                                 }.WhereNotNull() ) ),
                         default )
                     .WithLeadingTrivia( eventField.GetLeadingTrivia() )

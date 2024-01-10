@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     SyntaxKind.SimpleMemberAccessExpression,
                     memberExpression,
                     IdentifierName( "ReturnParameter" ) )
-                .NormalizeWhitespace();
+;
         }
 
         public CompileTimeReturnParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
                 .AddArgumentListArguments( Argument( fieldInfoOrPropertyInfo ) )
-                .NormalizeWhitespace();
+;
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

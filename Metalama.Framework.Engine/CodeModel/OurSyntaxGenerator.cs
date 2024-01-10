@@ -115,13 +115,10 @@ internal partial class OurSyntaxGenerator
         => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
             .WithAdditionalAnnotations( Simplifier.Annotation );
 
-    public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<SyntaxNode> elements )
-    {
-        var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( elementType, elements );
-
-        return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) )
-            .NormalizeWhitespace( indentation: "", eol: "", elasticTrivia: true );
-    }
+    public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<ExpressionSyntax> elements )
+        => SyntaxFactoryEx.ArrayCreationExpression(
+            this.ArrayTypeExpression( elementType ),
+            InitializerExpression( SyntaxKind.ArrayInitializerExpression, SeparatedList( elements ) ) );
 
     public TypeSyntax Type( SpecialType specialType )
         => (TypeSyntax) this._syntaxGenerator.TypeExpression( specialType )
@@ -180,14 +177,10 @@ internal partial class OurSyntaxGenerator
 
     public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) this._syntaxGenerator.IdentifierName( identifier );
 
-    public TypeSyntax ArrayTypeExpression( TypeSyntax type )
-    {
-        var arrayType = (ArrayTypeSyntax) this._syntaxGenerator.ArrayTypeExpression( type ).WithAdditionalAnnotations( Simplifier.Annotation );
-
-        // Roslyn does not specify the rank properly so it needs to be fixed up.
-
-        return arrayType.WithRankSpecifiers( SingletonList( ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) );
-    }
+#pragma warning disable CA1822 // Mark members as static
+    public ArrayTypeSyntax ArrayTypeExpression( TypeSyntax elementType )
+#pragma warning restore CA1822
+        => SyntaxFactoryEx.ArrayType( elementType ).WithAdditionalAnnotations( Simplifier.Annotation );
 
     public TypeSyntax ReturnType( IMethod method ) => this.Type( method.ReturnType.GetSymbol() );
 

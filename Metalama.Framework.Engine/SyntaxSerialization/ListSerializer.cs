@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
                         SeparatedList( serializedItems ) ) )
-                .NormalizeWhitespace();
+;
         }
 
         public override Type InputType => typeof(IEnumerable<>);

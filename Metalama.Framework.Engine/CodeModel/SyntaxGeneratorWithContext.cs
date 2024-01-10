@@ -303,7 +303,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
             if ( constraints.Count > 0 )
             {
-                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespace();
+                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints );
                 list = list.Add( clause );
             }
         }

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxKind.StringLiteralExpression,
                             Literal( obj.Name ) ) ),
                     Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) )
-                .NormalizeWhitespace();
+;
         }
 
         public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

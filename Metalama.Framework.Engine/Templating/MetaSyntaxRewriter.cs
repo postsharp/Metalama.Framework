@@ -82,9 +82,6 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Adds indentation to a <see cref="SyntaxNode"/> and all its children.
         /// </summary>
-        /// <param name="node"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         protected T DeepIndent<T>( T node )
             where T : SyntaxNode
         {
@@ -229,6 +226,8 @@ namespace Metalama.Framework.Engine.Templating
 
         protected virtual ExpressionSyntax Transform( SyntaxToken token )
         {
+            var hasTrailingTrivia = token.TrailingTrivia.Span.Length != 0;
+
             switch ( token.Kind() )
             {
                 case SyntaxKind.None:
@@ -248,7 +247,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                     else
                     {
-                        return this.MetaSyntaxFactory.Identifier( text );
+                        return this.MetaSyntaxFactory.Identifier( text, trailingSpace: hasTrailingTrivia );
                     }
 
                 case SyntaxKind.CharacterLiteralToken:
@@ -262,7 +261,21 @@ namespace Metalama.Framework.Engine.Templating
             if ( defaultToken.Value == token.Value )
             {
                 // No argument needed.
-                return this.MetaSyntaxFactory.Token( this.Transform( token.Kind() ) );
+                if ( hasTrailingTrivia )
+                {
+                    return this.MetaSyntaxFactory.Token(
+                        SyntaxFactoryEx.Default,
+                        this.Transform( token.Kind() ),
+                        SyntaxFactoryEx.LiteralExpression( token.Text ),
+                        SyntaxFactoryEx.LiteralExpression( token.ValueText ),
+                        ImplicitObjectCreationExpression(
+                            ArgumentList( SingletonSeparatedList( Argument( this.MetaSyntaxFactory.SyntaxFactoryMethod( nameof(Space) ) ) ) ),
+                            null ) );
+                }
+                else
+                {
+                    return this.MetaSyntaxFactory.Token( this.Transform( token.Kind() ) );
+                }
             }
 
             // Argument needed.
@@ -277,11 +290,11 @@ namespace Metalama.Framework.Engine.Templating
              */
 
             return this.MetaSyntaxFactory.Token(
-                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ),
+                SyntaxFactoryEx.Default,
                 this.Transform( token.Kind() ),
                 SyntaxFactoryEx.LiteralExpression( token.Text ),
                 SyntaxFactoryEx.LiteralExpression( token.ValueText ),
-                LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) ) );
+                SyntaxFactoryEx.Default );
         }
 
 #pragma warning disable CA1822 // Mark members as static

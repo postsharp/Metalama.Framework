@@ -56,19 +56,19 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
 
     private static async Task RegisterSyntaxNodeWithCodeFixAsync( CodeFixContext context, Diagnostic diagnostic )
     {
-        var document = context.Document;
-        var root = await document.GetSyntaxRootAsync( context.CancellationToken );
-        var node = root.FindNode( diagnostic.Location.SourceSpan );
+        //var document = context.Document;
+        //var root = await document.GetSyntaxRootAsync( context.CancellationToken );
+        //var node = root.FindNode( diagnostic.Location.SourceSpan );
 
-        var semanticModel = await document.GetSemanticModelAsync();
+        //var semanticModel = await document.GetSemanticModelAsync();
 
-        IEnumerable<object> GetSyntaxNodeWithInvocations( SyntaxNode node )
-        {
-            var operation = semanticModel.GetOperation( node );
+        //IEnumerable<object> GetSyntaxNodeWithInvocations( SyntaxNode node )
+        //{
+        //    var operation = semanticModel.GetOperation( node );
 
-            if (node is )
-        }
+        //    if (node is )
+        //}
 
-        var syntaxNodeWithInvocations = 
+        //var syntaxNodeWithInvocations = 
     }
 }

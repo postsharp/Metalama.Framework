@@ -554,7 +554,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                             if ( memberImplementation == null || memberImplementation.ContainingType.TypeKind == TypeKind.Interface )
                             {
-                                var newMethod = MethodDeclaration(
+                                var newMethod = SyntaxFactoryEx.MethodDeclaration(
                                         default,
                                         default,
                                         syntaxGenerator.Type( method.ReturnType ),
@@ -564,8 +564,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         ParameterList(
                                             SeparatedList(
                                                 method.Parameters.Select(
-                                                    p => Parameter(
-                                                        default,
+                                                    p => SyntaxFactoryEx.Parameter(
                                                         default,
                                                         syntaxGenerator.Type( p.Type ),
                                                         Identifier( p.Name ),
@@ -573,8 +572,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         default,
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? SyntaxFactoryEx.FormattedBlock() : null,
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
-                                        method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
-                                    .NormalizeWhitespace();
+                                        method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) );
 
                                 members.Add( newMethod );
                             }

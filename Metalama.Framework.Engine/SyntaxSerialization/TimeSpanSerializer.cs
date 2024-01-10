@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         LiteralExpression(
                             SyntaxKind.NumericLiteralExpression,
                             Literal( obj.Ticks ) ) ) )
-                .NormalizeWhitespace();
+;
         }
 
         public TimeSpanSerializer( SyntaxSerializationService service ) : base( service ) { }

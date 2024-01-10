@@ -77,10 +77,10 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    internal static bool IsSyntaxNodeWithMethod(IOperation operation)
-    {
+    //internal static bool IsSyntaxNodeWithMethod(IOperation operation)
+    //{
 
-    }
+    //}
     
     private static void AnalyzeSyntaxNodeWithChains( OperationAnalysisContext context, INamedTypeSymbol syntaxNodeSymbol )
     {

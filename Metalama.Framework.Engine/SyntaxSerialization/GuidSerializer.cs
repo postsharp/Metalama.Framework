@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
                     Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
-                .NormalizeWhitespace();
+;
         }
 
         public GuidSerializer( SyntaxSerializationService service ) : base( service ) { }

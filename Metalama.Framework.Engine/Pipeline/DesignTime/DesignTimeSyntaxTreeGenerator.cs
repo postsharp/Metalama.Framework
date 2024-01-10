@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             compilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
-                            .Select( m => m.Syntax.NormalizeWhitespace() );
+                            .Select( m => m.Syntax);
 
                         members = members.AddRange( injectedMembers );
                     }

@@ -62,9 +62,9 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
     public string GetText( in SourceReference sourceReference, bool normalized )
         => sourceReference.NodeOrToken switch
         {
-            SyntaxNode node when normalized => node.NormalizeWhitespace().ToString(),
+            SyntaxNode node when normalized => node.ToString(),
             SyntaxNode node when !normalized => node.ToFullString(),
-            SyntaxToken token when normalized => token.NormalizeWhitespace().ToString(),
+            SyntaxToken token when normalized => token.ToString(),
             SyntaxNode token when !normalized => token.ToFullString(),
             _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
         };

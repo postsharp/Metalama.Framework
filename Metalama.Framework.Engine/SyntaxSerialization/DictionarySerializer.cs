@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(StringComparer) ),
                             IdentifierName( comparerName ) )
-                        .NormalizeWhitespace();
+;
 
                     creationExpression = creationExpression.AddArgumentListArguments( Argument( comparerExpression ) );
                 }
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
                         SeparatedList<ExpressionSyntax>( lt ) ) )
-                .NormalizeWhitespace();
+;
 
             return creationExpression;
         }

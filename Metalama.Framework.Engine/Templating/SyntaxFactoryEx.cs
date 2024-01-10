@@ -2,12 +2,14 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
@@ -245,4 +247,109 @@ internal static partial class SyntaxFactoryEx
             Code.RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
+
+    public static ObjectCreationExpressionSyntax ObjectCreationExpression(
+        TypeSyntax type,
+        ArgumentListSyntax? arguments,
+        InitializerExpressionSyntax? initializer = null )
+        => SyntaxFactory.ObjectCreationExpression(
+            SyntaxFactory.Token( default, SyntaxKind.NewKeyword, new( SyntaxFactory.Space ) ),
+            type,
+            arguments,
+            initializer );
+
+    public static ArrayTypeSyntax ArrayType( TypeSyntax elementType )
+        => SyntaxFactory.ArrayType(
+            elementType,
+            SyntaxFactory.SingletonList(
+                SyntaxFactory.ArrayRankSpecifier( SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
+
+#pragma warning disable RS0030 // Do not use banned APIs
+
+    [return: NotNullIfNotNull( nameof(node) )]
+    public static T? AddTrailingSpaceIfNecessary<T>( T? node )
+        where T : CSharpSyntaxNode
+    {
+        if ( node?.GetTrailingTrivia().FullSpan.Length == 0 )
+        {
+            node = node.WithTrailingTrivia( SyntaxFactory.ElasticSpace );
+        }
+
+        return node;
+    }
+
+    public static ParameterSyntax Parameter( SyntaxTokenList modifiers, TypeSyntax? type, SyntaxToken identifier, EqualsValueClauseSyntax? @default )
+    {
+        type = AddTrailingSpaceIfNecessary( type );
+
+        return SyntaxFactory.Parameter( default, modifiers, type, identifier, @default );
+    }
+
+    private static SyntaxToken KeywordTokenWithSpace( SyntaxKind kind )
+        => SyntaxFactory.Token( default, kind, new( SyntaxFactory.Space ) );
+
+    public static ThrowExpressionSyntax ThrowExpression( ExpressionSyntax expression )
+        => SyntaxFactory.ThrowExpression( KeywordTokenWithSpace( SyntaxKind.ThrowKeyword ), expression );
+
+    public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
+        SyntaxKind disableOrRestoreKind,
+        SeparatedSyntaxList<ExpressionSyntax> errorCodes )
+        => SyntaxFactory.PragmaWarningDirectiveTrivia(
+            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
+            KeywordTokenWithSpace( SyntaxKind.PragmaKeyword ),
+            KeywordTokenWithSpace( SyntaxKind.WarningKeyword ),
+            KeywordTokenWithSpace( disableOrRestoreKind ),
+            errorCodes,
+            SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new( SyntaxFactory.ElasticLineFeed ) ),
+            isActive: true );
+
+    public static MethodDeclarationSyntax MethodDeclaration(
+        SyntaxList<AttributeListSyntax> attributeLists,
+        SyntaxTokenList modifiers,
+        TypeSyntax returnType,
+        ExplicitInterfaceSpecifierSyntax? explicitInterfaceSpecifier,
+        SyntaxToken identifier,
+        TypeParameterListSyntax? typeParameterList,
+        ParameterListSyntax parameterList,
+        SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses,
+        BlockSyntax? body,
+        ArrowExpressionClauseSyntax? expressionBody,
+        SyntaxToken semicolonToken )
+    {
+        returnType = AddTrailingSpaceIfNecessary( returnType );
+
+        return SyntaxFactory.MethodDeclaration(
+            attributeLists,
+            modifiers,
+            returnType,
+            explicitInterfaceSpecifier,
+            identifier,
+            typeParameterList,
+            parameterList,
+            constraintClauses,
+            body,
+            expressionBody,
+            semicolonToken );
+    }
+
+    public static ReturnStatementSyntax ReturnStatement( ExpressionSyntax expression, SyntaxTrivia[]? leadingTrivia = null )
+        => SyntaxFactory.ReturnStatement(
+            SyntaxFactory.Token( leadingTrivia == null ? default : new( leadingTrivia ), SyntaxKind.ReturnKeyword, new( SyntaxFactory.Space ) ),
+            expression,
+            SyntaxFactory.Token( SyntaxKind.SemicolonToken ) );
+
+    public static ArrayCreationExpressionSyntax ArrayCreationExpression( ArrayTypeSyntax type, InitializerExpressionSyntax? initializer )
+        => SyntaxFactory.ArrayCreationExpression(
+            SyntaxFactory.Token( default, SyntaxKind.NewKeyword, new( SyntaxFactory.Space ) ),
+            type,
+            initializer );
+
+    public static VariableDeclarationSyntax VariableDeclaration( TypeSyntax type, SeparatedSyntaxList<VariableDeclaratorSyntax> variables )
+    {
+        type = AddTrailingSpaceIfNecessary( type );
+
+        return SyntaxFactory.VariableDeclaration( type, variables );
+    }
+
+#pragma warning restore RS0030
 }

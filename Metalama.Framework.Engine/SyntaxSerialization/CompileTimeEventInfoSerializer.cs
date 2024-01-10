@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxKind.StringLiteralExpression,
                             Literal( eventName ) ) ),
                     Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) ) )
-                .NormalizeWhitespace();
+;
 
             // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
             result = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, result );

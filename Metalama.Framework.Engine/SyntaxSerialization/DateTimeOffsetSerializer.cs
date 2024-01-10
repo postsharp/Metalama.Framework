@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         LiteralExpression(
                             SyntaxKind.StringLiteralExpression,
                             Literal( isoTime ) ) ) )
-                .NormalizeWhitespace();
+;
         }
 
         public DateTimeOffsetSerializer( SyntaxSerializationService service ) : base( service ) { }

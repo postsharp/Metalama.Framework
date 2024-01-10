@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         private sealed class NormalizeSpaceRewriter : SafeSyntaxRewriter
         {
-            public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace();
+            public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!;
         }
 
         private sealed class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter

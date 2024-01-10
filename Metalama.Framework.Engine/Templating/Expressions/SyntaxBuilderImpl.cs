@@ -141,7 +141,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
             expression.ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
-                .NormalizeWhitespace()
                 .ToFullString() );
 
     public void AppendDynamic( object? expression, StringBuilder stringBuilder )
@@ -149,7 +148,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
             expression == null
                 ? "null"
                 : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
-                    .NormalizeWhitespace()
                     .ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )

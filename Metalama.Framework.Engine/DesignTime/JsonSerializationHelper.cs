@@ -26,6 +26,10 @@ public static partial class JsonSerializationHelper
 
     public static SerializableSyntaxTree CreateSerializableSyntaxTree( SyntaxNode syntaxRoot, string filePath )
     {
+#pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
+        syntaxRoot = syntaxRoot.NormalizeWhitespace();
+#pragma warning restore LAMA0830
+
         var annotationReader = new AnnotationReader();
         annotationReader.Visit( syntaxRoot );
 

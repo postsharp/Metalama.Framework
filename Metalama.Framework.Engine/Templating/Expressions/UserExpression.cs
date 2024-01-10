@@ -53,7 +53,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             return
                 this.ToSyntax( new( compilation, SyntaxGenerationContext.Create( compilation.CompilationContext, isNullOblivious: false ) ) )
-                    .NormalizeWhitespace()
                     .ToString();
         }
     }

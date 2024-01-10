@@ -77,6 +77,8 @@ namespace Metalama.Testing.AspectTesting
 
         public async Task SetRunTimeCodeAsync( SyntaxNode syntaxNode )
         {
+            //syntaxNode = syntaxNode.NormalizeWhitespace();
+
             CompilationUnitSyntax compilationUnit;
 
             switch ( syntaxNode )

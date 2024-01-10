@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
                                     setAccessorKind,
                                     SyntaxFactoryEx.FormattedBlock() )
                             } ) )
-                    .NormalizeWhitespace();
+;
 
             return
                 PropertyDeclaration(
@@ -81,7 +81,6 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null,
                         null )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList.WithTrailingTrivia( ElasticLineFeed ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );

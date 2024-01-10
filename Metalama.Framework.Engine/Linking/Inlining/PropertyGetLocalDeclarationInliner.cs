@@ -91,7 +91,6 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                             VariableDeclaration(
                                 syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
                                 SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
-                        .NormalizeWhitespace()
                         .WithTrailingTrivia( ElasticLineFeed ),
                     linkedTargetBody )
                 .WithFormattingAnnotationsFrom( currentStatement )

@@ -135,7 +135,6 @@ internal sealed class RewriterHelper
                                 ? null
                                 : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                         .WithSemicolonToken( isIterator ? default : Token( SyntaxKind.SemicolonToken ) )
-                        .NormalizeWhitespace()
                         .WithLeadingTrivia( method.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ),
                     suppressedWarnings.ToArray() ) );
@@ -156,7 +155,6 @@ internal sealed class RewriterHelper
                 return this.RewriteThrowNotSupported(
                     property
                         .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
-                        .NormalizeWhitespace()
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -174,7 +172,6 @@ internal sealed class RewriterHelper
                                             .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                             .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
                         .WithInitializer( null )
-                        .NormalizeWhitespace()
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -212,7 +209,6 @@ internal sealed class RewriterHelper
                                                     .WithBody( null )
                                                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                                     .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                        .NormalizeWhitespace()
                         .WithLeadingTrivia( @event.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -258,7 +254,7 @@ internal sealed class RewriterHelper
         =>
 
             // throw new System.NotSupportedException("message")
-            ThrowExpression(
-                ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ) )
+            SyntaxFactoryEx.ThrowExpression(
+                SyntaxFactoryEx.ObjectCreationExpression( ParseTypeName( "System.NotSupportedException" ), null )
                     .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( message ) ) ) ) );
 }

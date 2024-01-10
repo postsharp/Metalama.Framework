@@ -335,7 +335,6 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null,
                         default )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
@@ -363,7 +362,6 @@ namespace Metalama.Framework.Engine.Linking
                                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                         GetInvocationTarget(),
                                                         Token( SyntaxKind.SemicolonToken ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null,
                                     setAccessor != null
                                         ? AccessorDeclaration(
@@ -374,7 +372,6 @@ namespace Metalama.Framework.Engine.Linking
                                                             SyntaxKind.SimpleAssignmentExpression,
                                                             GetInvocationTarget(),
                                                             IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )

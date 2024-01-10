@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -32,7 +31,7 @@ internal sealed class ValueArrayExpression : UserExpression
                 p =>
                     p.RefKind.IsReadable()
                         ? SyntaxFactory.IdentifierName( p.Name )
-                        : (SyntaxNode) syntaxGenerator.DefaultExpression( p.Type.GetSymbol() ) ) );
+                        : (ExpressionSyntax) syntaxGenerator.DefaultExpression( p.Type.GetSymbol() ) ) );
     }
 
     public override IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );

@@ -41,6 +41,5 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28973
 
             set => meta.Proceed();
         }
-}
-
+    }
 }

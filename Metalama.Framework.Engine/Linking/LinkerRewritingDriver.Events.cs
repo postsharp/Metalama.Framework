@@ -77,8 +77,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new MemberDeclarationSyntax[]
                 {
-                    GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ).NormalizeWhitespace()
-                };
+                    GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )                };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
             {
@@ -261,7 +260,6 @@ namespace Metalama.Framework.Engine.Linking
                                     Identifier( GetBackingFieldName( symbol ) ),
                                     null,
                                     initializer ) ) ) )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
@@ -352,7 +350,6 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null )
-                    .NormalizeWhitespace()
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( cleanAccessorList )
@@ -385,7 +382,6 @@ namespace Metalama.Framework.Engine.Linking
                                                             SyntaxKind.AddAssignmentExpression,
                                                             GetInvocationTarget(),
                                                             IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null,
                                     removeAccessor != null
                                         ? AccessorDeclaration(
@@ -396,7 +392,6 @@ namespace Metalama.Framework.Engine.Linking
                                                             SyntaxKind.SubtractAssignmentExpression,
                                                             GetInvocationTarget(),
                                                             IdentifierName( "value" ) ) ) ) )
-                                            .NormalizeWhitespace()
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )
