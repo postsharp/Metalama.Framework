@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
             var semanticModel = this._semanticModelProvider.GetSemanticModel( type.SyntaxTree );
             var symbols = semanticModel.LookupSymbols( type.OpenBraceToken.Span.End );
 
-            var declaredTypeSymbol = (INamedTypeSymbol?) semanticModel.GetDeclaredSymbol( type );
+            var declaredTypeSymbol = semanticModel.GetDeclaredSymbol( type );
 
             if ( declaredTypeSymbol == null
                  || !this._compilationModel.TryGetDeclaration( declaredTypeSymbol, out var declaration )

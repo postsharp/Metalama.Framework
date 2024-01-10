@@ -120,6 +120,5 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public static ISemanticModel GetISemanticModel( this Compilation compilation, SyntaxTree syntaxTree, bool ignoreAccessibility = false )
             => SemanticModelProvider.GetInstance( compilation ).GetSemanticModel( syntaxTree, ignoreAccessibility );
-
     }
 }

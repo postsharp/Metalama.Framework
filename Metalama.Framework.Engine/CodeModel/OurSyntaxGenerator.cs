@@ -25,7 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal partial class OurSyntaxGenerator
 {
-    private ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typesCache = new();
+    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typesCache = new();
+    
     public static OurSyntaxGenerator NullOblivious { get; }
 
     public static OurSyntaxGenerator Default { get; }

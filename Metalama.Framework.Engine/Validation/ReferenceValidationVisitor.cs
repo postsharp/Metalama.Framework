@@ -31,7 +31,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     private readonly UserCodeExecutionContext _userCodeExecutionContext;
     private readonly DisposeAction _disposeExecutionContext;
     private readonly ISymbolClassificationService _symbolClassifier;
-    private ISemanticModel _semanticModel;
+    private ISemanticModel? _semanticModel;
     private int _stackIndex = -1;
     private SyntaxNode?[] _nodeStack = new SyntaxNode?[_initialStackSize];
     private IDeclaration?[] _declarationStack = new IDeclaration?[_initialStackSize];
