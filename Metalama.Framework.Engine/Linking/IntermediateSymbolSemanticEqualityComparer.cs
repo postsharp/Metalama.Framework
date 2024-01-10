@@ -59,6 +59,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public int GetHashCode( IntermediateSymbolSemantic<TSymbol> x )
         {
+            // PERF: Cast enum to int otherwise it will be boxed within the method.
             return HashCode.Combine(
                 this._symbolComparer.GetHashCode( x.Symbol ),
                 x.Kind );

@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -77,6 +78,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<AspectLayerId, int> _layerIndex;
         private readonly CompilationModel _finalCompilationModel;
         private readonly SafeSymbolComparer _comparer;
+        private readonly ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>> _overrideIndicesCache;
 
         public AspectReferenceResolver(
             LinkerInjectionRegistry injectionRegistry,
@@ -95,6 +97,7 @@ namespace Metalama.Framework.Engine.Linking
             this._layerIndex = indexedLayers.ToDictionary( x => x.AspectLayerId, x => x.Index );
             this._finalCompilationModel = finalCompilationModel;
             this._comparer = intermediateCompilationContext.SymbolComparer;
+            this._overrideIndicesCache = new ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>>( intermediateCompilationContext.SymbolComparer );
         }
 
         public ResolvedAspectReference Resolve(
@@ -288,7 +291,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol referencedSymbol,
             LinkerInjectedMember? targetIntroductionInjectedMember,
             MemberLayerIndex? targetIntroductionIndex,
-            IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> overrideIndices,
+            IReadOnlyList<OverrideIndex> overrideIndices,
             out MemberLayerIndex resolvedIndex,
             out LinkerInjectedMember? resolvedInjectedMember )
         {
@@ -375,26 +378,32 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private IReadOnlyList<(MemberLayerIndex Index, LinkerInjectedMember Override)> GetOverrideIndices( ISymbol referencedSymbol )
+        private IReadOnlyList<OverrideIndex> GetOverrideIndices( ISymbol referencedSymbol )
         {
-            var referencedDeclarationOverrides = this._injectionRegistry.GetOverridesForSymbol( referencedSymbol );
+            // PERF: Caching prevents reallocation for every override.
+            return this._overrideIndicesCache.GetOrAdd( referencedSymbol, Get, this );
 
-            // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
-            return
-                referencedDeclarationOverrides
-                    .SelectAsReadOnlyList(
-                        x =>
-                        {
-                            var injectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( x ).AssertNotNull();
-                            return (
-                                Index: new MemberLayerIndex(
-                                    this._layerIndex[injectedMember.AspectLayerId],
-                                    injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
-                                    injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ),
-                                Override: injectedMember);
-                        } )
-                    .OrderBy( x => x.Index )
-                    .ToReadOnlyList();
+            static IReadOnlyList<OverrideIndex> Get( ISymbol referencedSymbol, AspectReferenceResolver @this )
+            {
+                var referencedDeclarationOverrides = @this._injectionRegistry.GetOverridesForSymbol( referencedSymbol );
+
+                // Order coming from transformation needs to be incremented by 1, because 0 represents state before the aspect layer.
+                return
+                    referencedDeclarationOverrides
+                        .SelectAsReadOnlyList(
+                            x =>
+                            {
+                                var injectedMember = @this._injectionRegistry.GetInjectedMemberForSymbol( x ).AssertNotNull();
+                                return new OverrideIndex(
+                                    new MemberLayerIndex(
+                                        @this._layerIndex[injectedMember.AspectLayerId],
+                                        injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
+                                        injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ),
+                                    injectedMember );
+                            } )
+                        .Materialize()
+                        .AssertSorted( x => x.Index);
+            }
         }
 
         private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerInjectedMember? injectedMember )
@@ -702,6 +711,8 @@ namespace Metalama.Framework.Engine.Linking
                     throw new AssertionFailedException( $"Unexpected combination: ('{referencedSymbol}', '{resolvedSymbol}')" );
             }
         }
+
+        private record struct OverrideIndex(MemberLayerIndex Index, LinkerInjectedMember Override);
 
         private readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
         {

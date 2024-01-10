@@ -102,7 +102,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 1;
             }
 
-            var result = Comparer<SymbolKind>.Default.Compare( x.Kind, y.Kind );
+            // PERF: Cast enum to int otherwise it will be boxed.
+            var result = ((int)x.Kind).CompareTo( (int)y.Kind );
 
             if ( result != 0 )
             {
@@ -254,7 +255,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 }
             }
 
-            result = nsX.NamespaceKind.CompareTo( nsY.NamespaceKind );
+            // PERF: Cast enum to int otherwise it will be boxed.
+            result = ((int)nsX.NamespaceKind).CompareTo( (int)nsY.NamespaceKind );
 
             if ( result != 0 )
             {
@@ -455,7 +457,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
-                        result = Comparer<RefKind>.Default.Compare( parameterX.RefKind, parameterY.RefKind );
+                        result = ((int)parameterX.RefKind).CompareTo((int)parameterY.RefKind);
 
                         if ( result != 0 )
                         {
@@ -513,7 +515,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 1;
             }
 
-            var result = Comparer<TypeKind>.Default.Compare( typeX.TypeKind, typeY.TypeKind );
+            // PERF: Cast enum to int otherwise it will be boxed.
+            var result = ((int)typeX.TypeKind).CompareTo((int)typeY.TypeKind);
 
             if ( result != 0 )
             {
@@ -720,7 +723,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
-                                h = HashCode.Combine( h, parameter.RefKind );
+                                // PERF: Cast enum to int otherwise it will be boxed.
+                                h = HashCode.Combine( h, (int)parameter.RefKind );
                             }
                         }
                     }

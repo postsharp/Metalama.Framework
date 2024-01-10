@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Services;
 using System.Threading;
@@ -29,9 +30,15 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>Linker result.</returns>
         public async Task<AspectLinkerResult> ExecuteAsync( CancellationToken cancellationToken )
         {
+            var profilingService = BackstageServiceFactory.ServiceProvider.GetBackstageService<IProfilingService>();
+
+            profilingService?.CreateMemorySnapshot( "before-linker" );
+
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
             var injectionStepOutput =
                 await new LinkerInjectionStep( this._serviceProvider, this._compilationContext ).ExecuteAsync( this._input, cancellationToken );
+
+            profilingService?.CreateMemorySnapshot( "after-injection-step" );
 
             this._serviceProvider.GetService<ILinkerObserver>()
                 ?.OnIntermediateCompilationCreated( injectionStepOutput.IntermediateCompilation );
@@ -40,8 +47,12 @@ namespace Metalama.Framework.Engine.Linking
             var analysisStepOutput =
                 await new LinkerAnalysisStep( this._serviceProvider ).ExecuteAsync( injectionStepOutput, cancellationToken );
 
+            profilingService?.CreateMemorySnapshot( "after-analysis-step" );
+
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
             var linkingStepOutput = await new LinkerLinkingStep( this._serviceProvider ).ExecuteAsync( analysisStepOutput, cancellationToken );
+
+            profilingService?.CreateMemorySnapshot( "after-linker" );
 
             // Return the final compilation and all diagnostics from all linking steps.
             return linkingStepOutput;
