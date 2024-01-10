@@ -12,14 +12,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
     {
-        private readonly Regex _interfaceMemberReplaceRegex = new Regex("_|\\.", RegexOptions.Compiled);
-
         private readonly CompilationModel _finalCompilation;
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;
@@ -50,16 +47,7 @@ namespace Metalama.Framework.Engine.Linking
             if ( overriddenMember.IsExplicitInterfaceImplementation )
             {
                 var interfaceMember = overriddenMember.GetExplicitInterfaceImplementation();
-                var cleanInterfaceName = 
-                    this._interfaceMemberReplaceRegex.Replace( 
-                        interfaceMember.DeclaringType.Name, 
-                        m => 
-                            m.Value switch 
-                            { 
-                                "_" => "__", 
-                                "." => "_", 
-                                _ => throw new AssertionFailedException() 
-                            } );
+                var cleanInterfaceName = interfaceMember.DeclaringType.Name.ReplaceOrdinal( "_", "__" ).Replace( '.', '_' );
 
                 nameHint =
                     shortLayerName != null
@@ -170,14 +158,14 @@ namespace Metalama.Framework.Engine.Linking
                         // Example: "foo", "foo1" declared in code, FindUniqueName executes 11 times for "foo".
                         //          When FindUniqueName executes for "foo1", it will try to start the chain with "foo11".
                         // Resolution: add a counter for "2" and proceed to the slow path.
-                        counter = this._nameCollisionCounters.AddOrUpdate( (finalContainingType, hint), new StrongBox<int>( 2 ), ( k, v ) => v );
+                        counter = this._nameCollisionCounters.GetOrAdd( (finalContainingType, hint), new StrongBox<int>( 2 ) );
 
                         return FindAndUpdate( finalContainingType, injectedMemberNames, hint, counter );
                     }
                 }
                 else
                 {
-                    counter = this._nameCollisionCounters.AddOrUpdate( (finalContainingType, hint), new StrongBox<int>( 2 ), (k, v) => v );
+                    counter = this._nameCollisionCounters.GetOrAdd( (finalContainingType, hint), new StrongBox<int>( 2 ) );
 
                     return FindAndUpdate( finalContainingType, injectedMemberNames, hint, counter );
                 }

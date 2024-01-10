@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal sealed class InliningContextIdentifierEqualityComparer : IEqualityComparer<InliningContextIdentifier>
+    internal sealed class InliningContextIdentifierEqualityComparer : IEqualityComparer<InliningContextIdentifier?>
     {
         private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
@@ -34,12 +34,19 @@ namespace Metalama.Framework.Engine.Linking
                     && x.DestinationSemantic.Kind == y.DestinationSemantic.Kind );
         }
 
-        public int GetHashCode( InliningContextIdentifier x )
+        public int GetHashCode( InliningContextIdentifier? x )
         {
-            return HashCode.Combine(
-                x.InliningId,
-                this._symbolComparer.GetHashCode( x.DestinationSemantic.Symbol ),
-                x.DestinationSemantic.Kind );
+            if ( x == null )
+            {
+                return 0;
+            }
+            else
+            {
+                return HashCode.Combine(
+                    x.InliningId,
+                    this._symbolComparer.GetHashCode( x.DestinationSemantic.Symbol ),
+                    x.DestinationSemantic.Kind );
+            }
         }
     }
 }
