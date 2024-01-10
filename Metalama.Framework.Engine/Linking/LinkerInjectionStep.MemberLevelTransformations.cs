@@ -19,12 +19,15 @@ internal sealed partial class LinkerInjectionStep
         private ConcurrentLinkedList<LinkerInsertedStatement>? _unorderedStatements;
         private ConcurrentLinkedList<IntroduceParameterTransformation>? _unorderedParameters;
         private ConcurrentLinkedList<IntroduceConstructorInitializerArgumentTransformation>? _unorderedArguments;
+        private ConcurrentLinkedList<SetInitializerExpressionTransformation>? _unorderedExpressions;
 
         public ImmutableArray<LinkerInsertedStatement> Statements { get; private set; }
 
         public ImmutableArray<IntroduceParameterTransformation> Parameters { get; private set; }
 
         public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; }
+
+        public ImmutableArray<SetInitializerExpressionTransformation> Expressions { get; private set; }
 
         private static ImmutableArray<T> Sort<T>(
             ConcurrentLinkedList<T>? input,
@@ -60,15 +63,21 @@ internal sealed partial class LinkerInjectionStep
 
             this.Parameters = this._unorderedParameters?.OrderBy( p => p.Parameter.Index ).ToImmutableArray()
                               ?? ImmutableArray<IntroduceParameterTransformation>.Empty;
+
+            this.Expressions = this._unorderedExpressions?.ToImmutableArray() ?? ImmutableArray<SetInitializerExpressionTransformation>.Empty;
         }
 
-        public void Add( LinkerInsertedStatement statement ) => LazyInitializer.EnsureInitialized( ref this._unorderedStatements ).Add( statement );
+        public void Add( LinkerInsertedStatement statement )
+            => LazyInitializer.EnsureInitialized( ref this._unorderedStatements ).Add( statement );
 
         public void Add( IntroduceParameterTransformation transformation )
             => LazyInitializer.EnsureInitialized( ref this._unorderedParameters ).Add( transformation );
 
         public void Add( IntroduceConstructorInitializerArgumentTransformation argument )
             => LazyInitializer.EnsureInitialized( ref this._unorderedArguments ).Add( argument );
+
+        public void Add( SetInitializerExpressionTransformation transformation )
+            => LazyInitializer.EnsureInitialized( ref this._unorderedExpressions ).Add( transformation );
     }
 
     // Currently unused, but might be useful in the future.

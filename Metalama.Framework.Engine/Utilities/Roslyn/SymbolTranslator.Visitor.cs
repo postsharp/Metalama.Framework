@@ -64,21 +64,22 @@ internal sealed partial class SymbolTranslator
                 .Where( m => m.Kind == symbol.Kind && StructuralSymbolComparer.ContainingDeclarationOblivious.Equals( m, symbol ) )
                 .ToReadOnlyList();
 
-            if ( candidates.Count == 1 )
+            switch ( candidates.Count )
             {
-                return candidates[0];
-            }
-            else
-            {
-                if ( this._allowMultipleCandidates )
-                {
+                case 0:
+                    return null;
+                case 1:
                     return candidates[0];
-                }
-                else
-                {
-                    throw new AssertionFailedException(
-                        $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsReadOnlyList( x => $"'{x}'" ) )}." );
-                }
+                default:
+                    if ( this._allowMultipleCandidates )
+                    {
+                        return candidates[0];
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException(
+                            $"More than one symbol match '{symbol}': {string.Join( ", ", candidates.SelectAsReadOnlyList( x => $"'{x}'" ) )}." );
+                    }
             }
         }
 

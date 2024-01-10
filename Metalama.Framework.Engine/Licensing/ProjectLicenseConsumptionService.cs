@@ -17,9 +17,9 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
     private readonly ILicenseConsumptionService _impl;
 
     // This constructor is used in all scenarios but compile time.
-    public ProjectLicenseConsumptionService( LicensingInitializationOptions options )
+    public ProjectLicenseConsumptionService( ILicenseConsumptionService impl )
     {
-        this._impl = BackstageServiceFactory.CreateLicenseConsumptionService( options );
+        this._impl = impl;
         this._impl.Changed += this.OnChanged;
     }
 
@@ -38,6 +38,10 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
 
     public bool ValidateRedistributionLicenseKey( string redistributionLicenseKey, string aspectClassNamespace )
         => this._impl.ValidateRedistributionLicenseKey( redistributionLicenseKey, aspectClassNamespace );
+
+    ILicenseConsumptionService ILicenseConsumptionService.WithAdditionalLicense( string? licenseKey ) => throw new NotSupportedException();
+
+    ILicenseConsumptionService ILicenseConsumptionService.WithoutLicense() => throw new NotSupportedException();
 
     public IReadOnlyList<LicensingMessage> Messages => this._impl.Messages;
 

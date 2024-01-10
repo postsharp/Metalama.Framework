@@ -443,7 +443,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         return declaration;
     }
 
-    public ICompilationElement Translate( ICompilationElement compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+    public ICompilationElement? Translate( ICompilationElement compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
     {
         if ( ReferenceEquals( compilationElement.Compilation, this._compilationModel ) )
         {
@@ -454,11 +454,17 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             switch ( compilationElement )
             {
                 case IDeclaration declaration:
-                    return declaration.ToTypedRef().GetTarget( this._compilationModel, options );
+                    return declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
 
                 case IType type:
-                    return this._compilationModel.Factory.GetIType(
-                        this._compilationModel.CompilationContext.SymbolTranslator.Translate( type.GetSymbol() ).AssertNotNull() );
+                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate( type.GetSymbol() );
+
+                    if ( translatedSymbol == null )
+                    {
+                        return null;
+                    }
+
+                    return this._compilationModel.Factory.GetIType( translatedSymbol );
 
                 default:
                     throw new AssertionFailedException( $"Cannot translate a '{compilationElement.GetType().Name}'." );

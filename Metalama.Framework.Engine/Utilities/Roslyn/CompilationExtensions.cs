@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -43,4 +44,16 @@ public static class CompilationExtensions
         => SemanticModelProvider.GetInstance( compilation ).GetSemanticModel( syntaxTree, ignoreAccessibility );
 
     public static SemanticModelProvider GetSemanticModelProvider( this Compilation compilation ) => SemanticModelProvider.GetInstance( compilation );
+
+    public static LanguageVersion GetLanguageVersion( this Compilation compilation )
+    {
+        var tree = compilation.SyntaxTrees.FirstOrDefault();
+
+        if ( tree == null )
+        {
+            return LanguageVersionFacts.MapSpecifiedToEffectiveVersion( LanguageVersion.Default );
+        }
+
+        return ((CSharpParseOptions) tree.Options).LanguageVersion;
+    }
 }

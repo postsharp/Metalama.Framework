@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -75,8 +74,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
-
-    public long SnapshotId => this._currentState.SnapshotId;
 
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
@@ -204,11 +201,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
         {
             // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
-            projectServiceProvider = projectServiceProvider.AddLicenseConsumptionManager(
-                new LicensingInitializationOptions()
-                {
-                    ProjectLicense = projectOptions.License, IgnoreUserProfileLicenses = projectOptions.IsTest, IgnoreUnattendedProcessLicense = true
-                } );
+            projectServiceProvider = projectServiceProvider.AddProjectLicenseConsumptionManager( projectOptions.License );
         }
 
         return projectServiceProvider;
@@ -480,7 +473,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             compilation,
             cancellationToken );
 
-        List<DesignTimeProjectReference> compilationReferences = [];
+        List<DesignTimeProjectReference> compilationReferences = new();
 
         foreach ( var reference in compilationVersion.ReferencedProjectVersions.Values )
         {
@@ -827,7 +820,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     {
         // Computes the set of semantic models that need to be processed.
 
-        List<SyntaxTree> uncachedSyntaxTrees = [];
+        List<SyntaxTree> uncachedSyntaxTrees = new();
 
         foreach ( var syntaxTree in compilation.SyntaxTrees )
         {

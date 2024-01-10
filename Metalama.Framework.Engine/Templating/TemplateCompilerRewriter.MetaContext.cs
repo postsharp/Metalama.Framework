@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._generatedCodeSymbolNameLocals = generatedCodeSymbolNameLocals;
                 this._templateCodeSymbolNameLocals = templateCodeSymbolNameLocals;
                 this._templateUniqueNames = templateUniqueNames;
-                this.Statements = [];
+                this.Statements = new List<StatementSyntax>();
             }
 
             /// <summary>

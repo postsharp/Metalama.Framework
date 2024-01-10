@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -116,7 +115,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
         this.GeneratedCodeAnnotation = MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( $"aspect '{this.ShortName}'" );
 
-        List<string?> layers = [];
+        List<string?> layers = new();
 
         if ( baseClass != null )
         {
@@ -202,17 +201,6 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         }
 
         this.Layers = layers.SelectAsImmutableArray( l => new AspectLayer( this, l ) );
-
-        // This condition handles the IConditionallyInheritableAspect aspects as well.
-        if ( this.IsInheritable != false )
-        {
-            var licenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
-
-            if ( licenseVerifier != null && !licenseVerifier.VerifyCanBeInherited( this ) )
-            {
-                this.IsInheritable = false;
-            }
-        }
 
         if ( this.EditorExperienceOptions.SuggestAsLiveTemplate.GetValueOrDefault() )
         {

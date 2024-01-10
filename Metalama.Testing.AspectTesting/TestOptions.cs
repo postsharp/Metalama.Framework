@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
+using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
 using System;
@@ -22,7 +23,7 @@ namespace Metalama.Testing.AspectTesting
     public class TestOptions
     {
         private static readonly Regex _optionRegex = new( @"^\s*//\s*@(?<name>\w+)\s*(\((?<arg>[^\)]*)\))?", RegexOptions.Multiline );
-        private readonly List<string> _invalidSourceOptions = [];
+        private readonly List<string> _invalidSourceOptions = new();
         private bool? _writeOutputHtml;
 
         /// <summary>
@@ -66,13 +67,20 @@ namespace Metalama.Testing.AspectTesting
         /// Gets the list of assembly names that should be included in the compilation.
         /// To add a named assembly reference, add this comment to your test file: <c>// @AssemblyReference(assemblyName)</c>.
         /// </summary>
-        public List<TestAssemblyReference> References { get; } = [];
+        public List<TestAssemblyReference> References { get; } = new();
 
         /// <summary>
         /// Gets the list of source code files that should be included in the compilation.
         /// To enable this option in a test, add this comment to your test file: <c>// @Include(relativePath)</c>. 
         /// </summary>
-        public List<string> IncludedFiles { get; } = [];
+        public List<string> IncludedFiles { get; } = new();
+
+        /// <summary>
+        /// Gets or sets a value indicating whether adding system files to the test compilation should be skipped.
+        /// Namely, there is one file that adds the <c>System.Runtime.CompilerServices.IsExternalInit</c> type on .Net Framework.
+        /// To enable this option in a test, add this comment to your test file: <c>// @SkipAddingSystemFiles</c>. 
+        /// </summary>
+        public bool? SkipAddingSystemFiles { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether HTML of syntax-highlighted files should be produced for input files. If <c>true</c>, these files
@@ -136,7 +144,7 @@ namespace Metalama.Testing.AspectTesting
         /// Gets a list of warnings that are not reported even if <see cref="ReportOutputWarnings"/> is set to <c>true</c>.
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @IgnoredDiagnostic(id)</c>.
         /// </summary>
-        public List<string> IgnoredDiagnostics { get; } = [];
+        public List<string> IgnoredDiagnostics { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating whether the list of <see cref="IgnoredDiagnostics"/> inherited from the parent level (directory or base directory)
@@ -178,7 +186,7 @@ namespace Metalama.Testing.AspectTesting
         /// Gets the set of preprocessor symbols that are required for this test, otherwise the test would be skipped.
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @RequiredConstant(constant)</c>.
         /// </summary>
-        public List<string> RequiredConstants { get; } = [];
+        public List<string> RequiredConstants { get; } = new();
 
         /// <summary>
         /// Gets the set of preprocessor symbols that are defined for this test.
@@ -186,7 +194,7 @@ namespace Metalama.Testing.AspectTesting
         /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
         /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
         /// </summary>
-        public List<string> DefinedConstants { get; } = [];
+        public List<string> DefinedConstants { get; } = new();
 
         /// <summary>
         /// Gets the set of preprocessor symbols that are defined for this test dependency.
@@ -194,7 +202,7 @@ namespace Metalama.Testing.AspectTesting
         /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
         /// Constants added via <see cref="DefinedConstants"/> option are not added.
         /// </summary>
-        public List<string> DependencyDefinedConstants { get; } = [];
+        public List<string> DependencyDefinedConstants { get; } = new();
 
         /// <summary>
         /// Gets or sets a value indicating the test scenario.
@@ -251,7 +259,7 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
         /// </summary>
         public string? LicenseFile { get; set; }
-        
+
         public string? LicenseExpression { get; set; }
 
         /// <summary>
@@ -259,7 +267,7 @@ namespace Metalama.Testing.AspectTesting
         /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
         /// </summary>
         public string? DependencyLicenseFile { get; set; }
-        
+
         public string? DependencyLicenseExpression { get; set; }
 
         /// <summary>
@@ -337,6 +345,12 @@ namespace Metalama.Testing.AspectTesting
         /// Gets or sets the project of the test. By default, the test file name without extension is used.
         /// </summary>
         public string? ProjectName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the licenses registered in the user profile should be ignored.
+        /// The default value is <c>false</c>. When this property is set to <c>true</c>, user-profile licenses are not loaded for this test.
+        /// </summary>
+        public bool? IgnoreUserProfileLicenses { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -428,6 +442,8 @@ namespace Metalama.Testing.AspectTesting
             this.FormatCompileTimeCode ??= baseOptions.FormatCompileTimeCode;
 
             this.CompareProgramOutput ??= baseOptions.CompareProgramOutput;
+
+            this.IgnoreUserProfileLicenses ??= baseOptions.IgnoreUserProfileLicenses;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -471,6 +487,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "Include":
                         this.IncludedFiles.Add( optionArg );
+
+                        break;
+
+                    case "SkipAddingSystemFiles":
+                        this.SkipAddingSystemFiles = true;
 
                         break;
 
@@ -649,7 +670,7 @@ namespace Metalama.Testing.AspectTesting
                         else
                         {
                             // The version may be a valid number but still not recognized by the current version of Roslyn.
-                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor(n) )
+                            if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor( n ) )
                             {
                                 this.SkipReason = $"@DependencyLanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
                             }
@@ -683,7 +704,7 @@ namespace Metalama.Testing.AspectTesting
                         this.LicenseFile = optionArg;
 
                         break;
-                    
+
                     case "LicenseExpression":
 
                         this.LicenseExpression = optionArg;
@@ -789,5 +810,13 @@ namespace Metalama.Testing.AspectTesting
 
             return Type.GetType( type ).AssertNotNull().GetProperty( property ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
         }
+
+        internal TestContextOptions ApplyToTestContextOptions( TestContextOptions testContextOptions )
+            => testContextOptions with
+            {
+                RequireOrderedAspects = this.RequireOrderedAspects ?? testContextOptions.RequireOrderedAspects,
+                FormatCompileTimeCode = this.FormatCompileTimeCode ?? testContextOptions.FormatCompileTimeCode,
+                IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses
+            };
     }
 }

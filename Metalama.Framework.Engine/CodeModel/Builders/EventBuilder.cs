@@ -39,7 +39,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this.InitializerTags = initializerTags;
         this.IsEventField = isEventField;
         this._type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
-        this._fieldAttributes = [];
+        this._fieldAttributes = new List<IAttributeData>();
     }
 
     public void AddFieldAttribute( IAttributeData attributeData )

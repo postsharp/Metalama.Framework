@@ -11,6 +11,7 @@ public class MyAspect : ConstructorAspect
     }
 }
 
+// <target>
 public record R
 {
     [MyAspect]
@@ -19,4 +20,5 @@ public record R
     public R( string s ) : this() { }
 }
 
+// <target>
 public record S : R { }

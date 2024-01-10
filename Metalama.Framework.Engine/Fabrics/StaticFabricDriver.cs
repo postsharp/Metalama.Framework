@@ -32,9 +32,9 @@ namespace Metalama.Framework.Engine.Fabrics
         protected class StaticAmender<T> : BaseAmender<T>
             where T : class, IDeclaration
         {
-            private readonly List<IAspectSource> _aspectSources = [];
-            private readonly List<IValidatorSource> _validatorSources = [];
-            private readonly List<IHierarchicalOptionsSource> _optionsSources = [];
+            private readonly List<IAspectSource> _aspectSources = new();
+            private readonly List<IValidatorSource> _validatorSources = new();
+            private readonly List<IHierarchicalOptionsSource> _optionsSources = new();
 
             protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
                 base( project, fabricManager, fabricInstance, targetDeclaration ) { }

@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Infrastructure;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
@@ -272,7 +272,7 @@ internal abstract partial class BaseTestRunner
                             .Visit( await parsedSyntaxTree.GetRootAsync() )!
                         : await parsedSyntaxTree.GetRootAsync();
 
-                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0 } )
+                if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members.Count: 0, AttributeLists.Count: 0 } )
                 {
                     return (project, null);
                 }
@@ -321,8 +321,12 @@ internal abstract partial class BaseTestRunner
                 await testResult.AddInputDocumentAsync( includedDocument, includedFullPath );
             }
 
-            // Add system files.
-            mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
+            if ( testInput.Options.SkipAddingSystemFiles != true )
+            {
+                // Add system files.
+                mainProject = await AddPlatformDocuments( mainProject, mainParseOptions );
+            }
+
             mainProject = await AddAdditionalDocuments( mainProject, mainParseOptions );
 
             // We are done creating the project.
@@ -407,7 +411,12 @@ internal abstract partial class BaseTestRunner
                 }
 
                 var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
-                dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+
+                if ( testInput.Options.SkipAddingSystemFiles != true )
+                {
+                    dependencyProject = await AddPlatformDocuments( dependencyProject, dependencyParseOptions );
+                }
+
                 dependencyProject = await AddAdditionalDocuments( dependencyProject, dependencyParseOptions );
 
                 // Add dependencies recursively.
@@ -460,7 +469,7 @@ internal abstract partial class BaseTestRunner
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.Underlying.AddLicenseConsumptionManagerForLicenseKey( licenseKey! );
+            serviceProvider = serviceProvider.Underlying.AddProjectLicenseConsumptionManager( licenseKey! );
         }
 
         // Transform with Metalama.
@@ -765,7 +774,8 @@ internal abstract partial class BaseTestRunner
             inputTextWriter = new StreamWriter( this._fileSystem.Open( testSyntaxTree.HtmlInputPath, FileMode.Create ) );
 
             // Add diagnostics to the input tree.
-            inputDiagnostics = [.. testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath )];
+            inputDiagnostics = new List<Diagnostic>();
+            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
             var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
 
             foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )

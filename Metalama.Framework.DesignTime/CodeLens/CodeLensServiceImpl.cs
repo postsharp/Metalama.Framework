@@ -23,11 +23,11 @@ namespace Metalama.Framework.DesignTime.CodeLens;
 
 public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLensServiceImpl
 {
-    private static readonly ImmutableArray<CodeLensDetailsHeader> _detailsHeaders = ImmutableArray.Create(
-        new CodeLensDetailsHeader( "Aspect Class", "AspectShortName", width: 0.2 ),
-        new CodeLensDetailsHeader( "Aspect Target", "TargetDeclaration", width: 0.2 ),
-        new CodeLensDetailsHeader( "Aspect Origin", "Origin", width: 0.2 ),
-        new CodeLensDetailsHeader( "Transformation", "Transformation", width: 0.4 ) );
+    private static readonly ImmutableArray<CodeLensDetailsHeader> _detailsHeaders = ImmutableArray.Create<CodeLensDetailsHeader>(
+        new( "Aspect Class", "AspectShortName", width: 0.2 ),
+        new( "Aspect Target", "TargetDeclaration", width: 0.2 ),
+        new( "Aspect Origin", "Origin", width: 0.2 ),
+        new( "Transformation", "Transformation", width: 0.4 ) );
 
     private readonly ILogger _logger;
 
@@ -244,14 +244,14 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
 
             if ( !aspectInstances.TryGetValue( aspectInstance, out var transformationList ) )
             {
-                aspectInstances[aspectInstance] = transformationList = [];
+                aspectInstances[aspectInstance] = transformationList = new List<IIntrospectionTransformation>();
             }
 
             transformationList.Add( transformation );
         }
 
         // Create the logical table.
-        List<CodeLensDetailsEntry> entries = [];
+        List<CodeLensDetailsEntry> entries = new();
 
         CodeLensDetailsField CreateOriginField( IIntrospectionAspectInstance aspectInstance )
         {

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 
 internal sealed class Pool<T>
 {
-    private readonly ConcurrentBag<T> _bag = [];
+    private readonly ConcurrentBag<T> _bag = new();
     private readonly Func<T> _create;
 
     public Pool( Func<T> create )

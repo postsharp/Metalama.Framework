@@ -64,6 +64,7 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
+        <PackageReference Include="Metalama.Backstage.Tools" Version="$(MetalamaBackstageVersion)" />
 
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
         <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />

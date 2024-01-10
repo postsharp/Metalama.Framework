@@ -35,10 +35,10 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
     private readonly PipelineStepIdComparer _comparer;
     private readonly UserDiagnosticSink _diagnostics;
-    private readonly ConcurrentLinkedList<ITransformation> _transformations = [];
-    private readonly ConcurrentLinkedList<IAspectInstance> _inheritableAspectInstances = [];
-    private readonly ConcurrentLinkedList<AspectInstanceResult> _aspectInstanceResults = [];
-    private readonly ConcurrentLinkedList<IValidatorSource> _validatorSources = [];
+    private readonly ConcurrentLinkedList<ITransformation> _transformations = new();
+    private readonly ConcurrentLinkedList<IAspectInstance> _inheritableAspectInstances = new();
+    private readonly ConcurrentLinkedList<AspectInstanceResult> _aspectInstanceResults = new();
+    private readonly ConcurrentLinkedList<IValidatorSource> _validatorSources = new();
     private readonly OverflowAspectSource _overflowAspectSource = new();
     private readonly IntrospectionPipelineListener? _introspectionListener;
     private readonly bool _shouldDetectUnorderedAspects;
@@ -258,6 +258,9 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
                     if ( !x.Predecessors.IsDefaultOrEmpty && x.Predecessors[0].Kind != AspectPredecessorKind.Attribute && IsExcluded( target ) )
                     {
+                        // We mark the instance as Skipped so that it is not included in licensing enforcement.
+                        x.Skip();
+
                         return default;
                     }
 
@@ -298,9 +301,20 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         // We assume that all aspect instances are eligible, but some are eligible only for inheritance.
 
         // Get the aspects that can be processed, i.e. they are not abstract-only.
-        var concreteAspectInstances = aspectInstances
-            .Where( a => a.Eligibility.IncludesAll( EligibleScenarios.Default ) )
-            .ToReadOnlyList();
+        List<ResolvedAspectInstance> concreteAspectInstances = new( aspectInstances.Count );
+
+        foreach ( var aspectInstance in aspectInstances )
+        {
+            if ( aspectInstance.Eligibility.IncludesAll( EligibleScenarios.Default ) )
+            {
+                concreteAspectInstances.Add( aspectInstance );
+            }
+            else
+            {
+                // We mark the instance as Skipped so that it is not included in licensing enforcement.
+                aspectInstance.AspectInstance.Skip();
+            }
+        }
 
         // Gets aspects that can be inherited.
         var inheritableAspectInstances = aspectInstances

@@ -25,7 +25,6 @@ namespace Metalama.Testing.AspectTesting.Licensing
             {
                 AddLicensing = true,
                 AddSupportServices = false,
-                OpenWelcomePage = false,
                 LicensingOptions = new LicensingInitializationOptions()
                 {
                     ProjectLicense = projectLicense,
@@ -35,12 +34,12 @@ namespace Metalama.Testing.AspectTesting.Licensing
                 }
             };
 
-            var serviceProvider = new ServiceProviderBuilder()
-                .AddBackstageServices( options )
-                .ServiceProvider;
+            var builder = new SimpleServiceProviderBuilder();
+            builder.AddBackstageServices( options );
+            var serviceProvider = builder.ServiceProvider;
 
             var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
-
+            
             this.IsLicensed = licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, testProjectName );
 
             this.Messages = licenseConsumptionManager.Messages;

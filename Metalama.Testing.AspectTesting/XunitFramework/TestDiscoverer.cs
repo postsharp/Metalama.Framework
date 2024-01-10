@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Infrastructure;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Testing.AspectTesting.Utilities;
@@ -81,7 +81,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
         {
-            List<TestCase> testCases = [];
+            List<TestCase> testCases = new();
             this.Discover( c => testCases.Add( c ), subDirectory, false, excludedDirectories );
 
             return testCases;
@@ -101,7 +101,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             TestDirectoryOptionsReader reader = new( this._serviceProvider, projectProperties.SourceDirectory );
             TestFactory factory = new( this._serviceProvider, projectProperties, reader, this._assembly );
 
-            ConcurrentBag<Task> tasks = [];
+            ConcurrentBag<Task> tasks = new();
             var pendingTasks = new StrongBox<int>( 0 );
 
             void AddTestsInDirectory( string directory )

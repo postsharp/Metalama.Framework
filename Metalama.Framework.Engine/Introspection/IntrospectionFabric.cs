@@ -16,7 +16,7 @@ internal sealed class IntrospectionFabric : IIntrospectionFabric
     private readonly FabricInstance _fabric;
     private readonly ICompilation _compilation;
     private readonly IntrospectionFactory _factory;
-    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = [];
+    private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
 
     public IntrospectionFabric( FabricInstance fabric, ICompilation compilation, IntrospectionFactory factory )
     {

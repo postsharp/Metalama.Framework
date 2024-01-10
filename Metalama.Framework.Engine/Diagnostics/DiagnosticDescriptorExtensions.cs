@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -30,12 +31,13 @@ namespace Metalama.Framework.Engine.Diagnostics
             T arguments,
             IEnumerable<Location>? additionalLocations = null,
             CodeFixTitles codeFixes = default,
+            string? deduplicationKey = null,
             ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
             var argumentArray = ConvertDiagnosticArguments( arguments );
 
-            return definition.CreateRoslynDiagnostic( location, argumentArray, null, additionalLocations, codeFixes, properties );
+            return definition.CreateRoslynDiagnostic( location, argumentArray, null, additionalLocations, codeFixes, deduplicationKey, properties );
         }
         
         /// <summary>
@@ -48,12 +50,13 @@ namespace Metalama.Framework.Engine.Diagnostics
             IDiagnosticSource? diagnosticSource,
             IEnumerable<Location>? additionalLocations = null,
             CodeFixTitles codeFixes = default,
+            string? deduplicationKey = null,
             ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
             var argumentArray = ConvertDiagnosticArguments( arguments );
 
-            return definition.CreateRoslynDiagnostic( location, argumentArray, diagnosticSource, additionalLocations, codeFixes, properties );
+            return definition.CreateRoslynDiagnostic( location, argumentArray, diagnosticSource, additionalLocations, codeFixes, deduplicationKey, properties );
         }
 
         internal static Diagnostic CreateRoslynDiagnostic(
@@ -63,11 +66,12 @@ namespace Metalama.Framework.Engine.Diagnostics
             IDiagnosticSource? diagnosticSource = null,
             IEnumerable<Location>? additionalLocations = null,
             CodeFixTitles codeFixes = default,
+            string? deduplicationKey = null,
             ImmutableDictionary<string, string?>? properties = null )
         {
             var argumentArray = ConvertDiagnosticArguments( arguments );
 
-            return definition.CreateRoslynDiagnosticImpl( location, argumentArray, diagnosticSource, additionalLocations, codeFixes, properties );
+            return definition.CreateRoslynDiagnosticImpl( location, argumentArray, diagnosticSource, additionalLocations, codeFixes, deduplicationKey, properties );
         }
 
         private static object?[] ConvertDiagnosticArguments( object? arguments )
@@ -101,15 +105,22 @@ namespace Metalama.Framework.Engine.Diagnostics
             object?[] arguments,
             IDiagnosticSource? diagnosticSource,
             IEnumerable<Location>? additionalLocations,
-            CodeFixTitles codeFixes = default,
-            ImmutableDictionary<string, string?>? properties = null )
+            CodeFixTitles codeFixes,
+            string? deduplicationKey,
+            ImmutableDictionary<string, string?>? properties )
         {
-            var propertiesWithCodeFixes = properties;
+            var propertiesWithAdditions = properties;
 
             if ( codeFixes.Value != null )
             {
-                propertiesWithCodeFixes ??= ImmutableDictionary.Create<string, string?>();
-                propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixTitles.DiagnosticPropertyKey, codeFixes.Value );
+                ImmutableDictionaryExtensions.AddOrCreate(
+                    ref propertiesWithAdditions, CodeFixTitles.DiagnosticPropertyKey, codeFixes.Value );
+            }
+
+            if ( deduplicationKey != null )
+            {
+                ImmutableDictionaryExtensions.AddOrCreate(
+                    ref propertiesWithAdditions, UserDiagnosticSink.DeduplicationPropertyKey, deduplicationKey );
             }
 
             return Diagnostic.Create(
@@ -120,10 +131,10 @@ namespace Metalama.Framework.Engine.Diagnostics
                 definition.Severity.ToRoslynSeverity(),
                 true,
                 definition.Severity == Severity.Error ? 0 : 1,
-                new NonLocalizedString( definition.Title ),
+                new NonLocalizedString( definition.Title, arguments ),
                 location: location,
                 additionalLocations: additionalLocations,
-                properties: propertiesWithCodeFixes,
+                properties: propertiesWithAdditions,
                 description: diagnosticSource == null ? null : $"Reported by {diagnosticSource.DiagnosticSourceDescription}." );
         }
     }

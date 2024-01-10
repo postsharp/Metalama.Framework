@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `TargetCode`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [Aspect] applied to 'TargetCode': Cannot add an AddInitializer advice to 'TargetCode' because 'TargetCode' must not be a non-record type with primary constructor. Check the IsAdviceEligible(AdviceKind.AddInitializer) method. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Error LAMA0651 on `TargetCode`: `The statement 'global::System.Console.WriteLine("TargetCode: Aspect");' can't be added as an initializer to a primary constructor on type 'TargetCode'. Only simple assignment is supported.`

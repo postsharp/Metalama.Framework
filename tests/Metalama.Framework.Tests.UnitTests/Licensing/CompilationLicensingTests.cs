@@ -12,17 +12,18 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpEssentials) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpFramework) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.PostSharpUltimate) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaFreePersonal) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
-        [TestLicensesInlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
-        public async Task CompilationPassesWithValidLicenseAsync( string licenseKey, string projectName = "TestProject" )
+        [InlineData( nameof(TestLicenseKeys.PostSharpFramework) )]
+        [InlineData(  nameof(TestLicenseKeys.PostSharpUltimate) )]
+        [InlineData(  nameof(TestLicenseKeys.MetalamaFreePersonal) )]
+        [InlineData(  nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
+        [InlineData(  nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
+        [InlineData(  nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
+        [InlineData(  nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
+        [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        public async Task CompilationPassesWithValidLicenseAsync( string licenseKeyName, string projectName = "TestProject" )
         {
+            var licenseKey = GetLicenseKey( licenseKeyName );
+            
             const string code = @"
 using System;
 

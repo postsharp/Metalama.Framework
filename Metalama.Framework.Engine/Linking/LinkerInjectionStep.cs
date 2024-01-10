@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,8 +22,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
@@ -60,14 +63,14 @@ namespace Metalama.Framework.Engine.Linking
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
-            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = [];
-            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = [];
+            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
+            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
             ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap = new();
-            ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = [];
+            ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
@@ -193,7 +196,8 @@ namespace Metalama.Framework.Engine.Linking
                     introductionMemberLevelTransformations,
                     nodesWithModifiedAttributes,
                     syntaxTreeForGlobalAttributes,
-                    typeLevelTransformations );
+                    typeLevelTransformations,
+                    diagnostics );
 
                 var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
                 var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
@@ -414,7 +418,8 @@ namespace Metalama.Framework.Engine.Linking
                                                 Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
                                                 Syntax: PropertyDeclarationSyntax propertyDeclaration
                                             }:
-                                                return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
+                                                return im.WithSyntax(
+                                                    propertyDeclaration.WithSynthesizedSetter( this._compilationContext.DefaultSyntaxGenerationContext ) );
 
                                             case { Semantic: InjectedMemberSemantic.InitializerMethod }:
                                                 return im;
@@ -545,13 +550,104 @@ namespace Metalama.Framework.Engine.Linking
 
                         var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
-                        foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        if ( constructor.IsPrimary )
                         {
-                            memberLevelTransformations.Add(
-                                new LinkerInsertedStatement(
-                                    transformation,
-                                    insertedStatement.Statement,
-                                    insertedStatement.ContextDeclaration ) );
+                            // Convert each statement into a separate SetInitializerExpressionTransformation and index those.
+                            ProcessStatements( insertedStatements.Select( s => s.Statement ) );
+
+                            void ProcessStatements( IEnumerable<StatementSyntax> statements )
+                            {
+                                foreach ( var statement in statements )
+                                {
+                                    if ( statement is BlockSyntax block )
+                                    {
+                                        ProcessStatements( block.Statements );
+
+                                        return;
+                                    }
+
+                                    if ( statement is not ExpressionStatementSyntax
+                                        {
+                                            Expression: AssignmentExpressionSyntax
+                                            {
+                                                RawKind: (int) SyntaxKind.SimpleAssignmentExpression,
+                                                Left: var leftExpression,
+                                                Right: var rightExpression
+                                            }
+                                        } )
+                                    {
+                                        diagnostics.Report(
+                                            AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
+                                                constructor.DiagnosticLocation, (statement, constructor.DeclaringType) ) );
+
+                                        break;
+                                    }
+
+                                    var identifier = leftExpression switch
+                                    {
+                                        IdentifierNameSyntax identifierName => identifierName,
+                                        MemberAccessExpressionSyntax
+                                        {
+                                            RawKind: (int) SyntaxKind.SimpleMemberAccessExpression,
+                                            Expression: ThisExpressionSyntax,
+                                            Name: IdentifierNameSyntax thisIdentifierName
+                                        } => thisIdentifierName,
+                                        _ => null
+                                    };
+
+                                    if ( identifier == null )
+                                    {
+                                        diagnostics.Report(
+                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
+
+                                        break;
+                                    }
+
+                                    var memberName = identifier.Identifier.ValueText;
+                                    var fieldOrProperty = constructor.DeclaringType.FieldsAndProperties.OfName( memberName ).Single();
+
+                                    if ( fieldOrProperty.RefKind != RefKind.None )
+                                    {
+                                        diagnostics.Report(
+                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is a ref member.") ) );
+
+                                        break;
+                                    }
+
+                                    if ( fieldOrProperty.IsAutoPropertyOrField == false )
+                                    {
+                                        diagnostics.Report(
+                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is not an auto-property.") ) );
+
+                                        break;
+                                    }
+
+                                    this.IndexMemberLevelTransformation(
+                                        input,
+                                        diagnostics,
+                                        lexicalScopeFactory,
+                                        new SetInitializerExpressionTransformation( insertStatementTransformation.ParentAdvice, fieldOrProperty, rightExpression ),
+                                        symbolMemberLevelTransformations,
+                                        introductionMemberLevelTransformations );
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach ( var insertedStatement in insertedStatements )
+                            {
+                                memberLevelTransformations.Add(
+                                    new LinkerInsertedStatement(
+                                        transformation,
+                                        insertedStatement.Statement,
+                                        insertedStatement.ContextDeclaration,
+                                        insertedStatement.Kind ) );
+                            }
                         }
 
                         break;
@@ -561,6 +657,8 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var constructorBuilder = memberLevelTransformation.TargetMember as ConstructorBuilder
                                                  ?? ((BuiltConstructor) memberLevelTransformation.TargetMember).ConstructorBuilder;
+
+                        Invariant.Assert( !((IConstructor) constructorBuilder).IsPrimary );
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.ToInsertPosition() );
 
@@ -574,7 +672,8 @@ namespace Metalama.Framework.Engine.Linking
                                 new LinkerInsertedStatement(
                                     transformation,
                                     insertedStatement.Statement,
-                                    insertedStatement.ContextDeclaration ) );
+                                    insertedStatement.ContextDeclaration,
+                                    insertedStatement.Kind ) );
                         }
 
                         break;
@@ -587,6 +686,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 case (IntroduceConstructorInitializerArgumentTransformation appendArgumentTransformation, _):
                     memberLevelTransformations.Add( appendArgumentTransformation );
+
+                    break;
+
+                case (SetInitializerExpressionTransformation setInitializerExpressionTransformation, _ ):
+                    memberLevelTransformations.Add( setInitializerExpressionTransformation );
 
                     break;
 

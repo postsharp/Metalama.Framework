@@ -684,12 +684,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
         if ( requiredLanguageVersion > targetLanguageVersion )
         {
-            // TODO: deduplicate
+            var aspectClass = context.MetaApi.AspectInstance?.AspectClass;
+
             this.Diagnostics.Report(
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
-                    (context.MetaApi.AspectInstance?.AspectClass.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
-                    targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration) ) );
+                    (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
+                    targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
+                    deduplicationKey: aspectClass?.FullName ) );
         }
     }
 

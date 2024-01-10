@@ -34,7 +34,7 @@ internal readonly partial struct DependencyGraph
             {
                 if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( path, out var newDependencies ) )
                 {
-                    modifiedDependencies ??= [];
+                    modifiedDependencies ??= new List<DependencyGraphByDependentProject>();
                     modifiedDependencies.Add( newDependencies );
                 }
             }

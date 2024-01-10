@@ -13,6 +13,14 @@ namespace Metalama.Framework.Diagnostics
     /// <seealso href="@diagnostics"/>
     public sealed class DiagnosticDefinition : DiagnosticDefinition<None>, IDiagnostic
     {
+        // Constructor used by internal code.
+        internal DiagnosticDefinition( string id, string category, string messageFormat, Severity severity, string title )
+            : this( id, severity, messageFormat, title, category ) { }
+
+        // Constructor used by internal code.
+        internal DiagnosticDefinition( string id, string title, string messageFormat, string category, Severity severity )
+            : this( id, severity, messageFormat, title, category ) { }
+
         public DiagnosticDefinition( string id, Severity severity, string messageFormat, string? title = null, string? category = null ) : base(
             id,
             severity,

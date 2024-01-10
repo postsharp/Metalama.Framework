@@ -1,2 +1,6 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `C`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [MyAspect] applied to 'C': Cannot add an IntroduceParameter advice to 'C.C(int)' because 'C.C(int)' must not be a primary constructor of non-record type. Check the IsAdviceEligible(AdviceKind.IntroduceParameter) method. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Warning CS9113 on `p`: `Parameter 'p' is unread.`
+[MyAspect]
+public class C(int x, global::System.Int32 p = 15) : A(42)
+{
+  public int Y { get; } = x;
+}

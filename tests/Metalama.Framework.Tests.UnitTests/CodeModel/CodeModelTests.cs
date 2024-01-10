@@ -918,9 +918,9 @@ public record R( int A, int B )
 }
 ";
 
-#if NETFRAMEWORK
+#if !NET5_0_OR_GREATER
             code +=
-                "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
+                "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }";
 #endif
 
             var compilation = testContext.CreateCompilationModel( code );
@@ -1691,6 +1691,27 @@ public partial class C
             var partialMethod = type.Methods.OfName( "PartialNonVoid" ).Single();
             Assert.Equal( 2, partialMethod.Sources.Length );
             Assert.Single( partialMethod.Sources, s => s.IsImplementationPart );
+        }
+
+        [Fact]
+        public void RecordImplicitPropertyInitializer()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = """
+                record R(int P);
+
+                """;
+
+#if !NET5_0_OR_GREATER
+            code += "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }";
+#endif
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var record = compilation.Types.OfName( "R" ).Single();
+            var property = record.Properties.OfName( "P" ).Single();
+
+            Assert.Null( property.InitializerExpression );
         }
 
         /*

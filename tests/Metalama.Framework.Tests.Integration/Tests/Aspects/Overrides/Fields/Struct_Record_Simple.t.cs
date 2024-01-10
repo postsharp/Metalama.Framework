@@ -1,36 +1,36 @@
 internal record struct TargetRecordStruct
 {
-  private global::System.Int32 _field = default;
-  [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TestAttribute]
-  public global::System.Int32 Field
-  {
-    get
+    private global::System.Int32 _field;
+    [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TestAttribute]
+    public global::System.Int32 Field
     {
-      global::System.Console.WriteLine("This is aspect code.");
-      return this._field;
+        get
+        {
+            global::System.Console.WriteLine("This is aspect code.");
+            return this._field;
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is aspect code.");
+            this._field = value;
+        }
     }
-    set
+    private static global::System.Int32 _staticField;
+    [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TestAttribute]
+    public static global::System.Int32 StaticField
     {
-      global::System.Console.WriteLine("This is aspect code.");
-      this._field = value;
+        get
+        {
+            global::System.Console.WriteLine("This is aspect code.");
+            return global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TargetRecordStruct._staticField;
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is aspect code.");
+            global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TargetRecordStruct._staticField = value;
+        }
     }
-  }
-  private static global::System.Int32 _staticField = default;
-  [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TestAttribute]
-  public static global::System.Int32 StaticField
-  {
-    get
+    public TargetRecordStruct()
     {
-      global::System.Console.WriteLine("This is aspect code.");
-      return global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TargetRecordStruct._staticField;
     }
-    set
-    {
-      global::System.Console.WriteLine("This is aspect code.");
-      global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_Record_Simple.TargetRecordStruct._staticField = value;
-    }
-  }
-  public TargetRecordStruct()
-  {
-  }
 }

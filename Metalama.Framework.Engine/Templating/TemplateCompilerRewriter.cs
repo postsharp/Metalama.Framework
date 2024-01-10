@@ -49,7 +49,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
     private readonly TypeOfRewriter _typeOfRewriter;
     private readonly TypeSyntax _templateTypeArgumentType;
-    private readonly HashSet<string> _templateCompileTimeTypeParameterNames = [];
+    private readonly HashSet<string> _templateCompileTimeTypeParameterNames = new();
     private readonly TypeSyntax _templateSyntaxFactoryType;
     private readonly TypeSyntax _dictionaryOfITypeType;
     private readonly TypeSyntax _dictionaryOfTypeSyntaxType;
@@ -2325,6 +2325,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         case SymbolKind.Event:
                         case SymbolKind.Method:
                             // We have an access to a field or method with a "using static", or a non-qualified static member access.
+
+                            if ( symbol is IMethodSymbol { MethodKind: MethodKind.LocalFunction } )
+                            {
+                                // If the method is a static local function, don't qualify it.
+                                break;
+                            }
 
                             if ( !this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).IsNone )
                             {

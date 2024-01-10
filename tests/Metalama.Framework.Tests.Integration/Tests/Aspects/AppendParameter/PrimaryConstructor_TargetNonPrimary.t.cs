@@ -1,4 +1,3 @@
-// Warning CS9113 on `x`: `Parameter 'x' is unread.`
 [MyAspect]
 public class C(int x) : A(42)
 {

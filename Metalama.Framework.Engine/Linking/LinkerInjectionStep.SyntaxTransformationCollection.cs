@@ -42,14 +42,14 @@ internal sealed partial class LinkerInjectionStep
         public SyntaxTransformationCollection( TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._injectedMembers = [];
+            this._injectedMembers = new ConcurrentBag<LinkerInjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerInjectedMember>>();
 
             this._injectedInterfacesByTargetTypeDeclaration =
                 new ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerInjectedInterface>>();
 
-            this._removedVariableDeclaratorSyntax = [];
-            this._autoPropertyWithSynthesizedSetterSyntax = [];
+            this._removedVariableDeclaratorSyntax = new ConcurrentSet<VariableDeclaratorSyntax>();
+            this._autoPropertyWithSynthesizedSetterSyntax = new ConcurrentSet<PropertyDeclarationSyntax>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, ConcurrentLinkedList<AspectLinkerDeclarationFlags>>();
         }
 

@@ -35,11 +35,15 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
-        var setAccessorDeclarationKind =
-            this.OverriddenDeclaration.Writeability is Writeability.InitOnly or Writeability.ConstructorOnly
-                ? SyntaxKind.InitAccessorDeclaration
-                : SyntaxKind.SetAccessorDeclaration;
-
+        var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability switch
+        {
+            Writeability.ConstructorOnly =>
+                context.SyntaxGenerationContext.SupportsInitAccessors ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+            Writeability.InitOnly => SyntaxKind.InitAccessorDeclaration,
+            Writeability.All => SyntaxKind.SetAccessorDeclaration,
+            _ => SyntaxKind.None
+        };
+        
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static )
             .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( SyntaxFactory.Space ) );

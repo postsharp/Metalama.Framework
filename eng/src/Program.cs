@@ -9,7 +9,7 @@ using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System.IO;
-using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_0;
+using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_1;
 
 var product = new Product( MetalamaDependencies.Metalama )
 {
@@ -20,6 +20,9 @@ var product = new Product( MetalamaDependencies.Metalama )
             SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
             SupportsTestCoverage = true,
             CanFormatCode = true,
+            
+            // We don't run the tests for the whole solution because they are too slow and redundant. See #34277.
+            TestMethod = BuildMethod.None,
             FormatExclusions = new[]
             {
                 // Test payloads should not be formatted because it would break the test output comparison.
@@ -31,11 +34,20 @@ var product = new Product( MetalamaDependencies.Metalama )
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
             }
         },
+        new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
+        {
+            SupportsTestCoverage = false,
+            CanFormatCode = false,
+            IsTestOnly = true
+        },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" )
         {
             IsTestOnly = true, TestMethod = BuildMethod.Build
         },
-        new ManyDotNetSolutions( "Tests\\Standalone" ),
+        new ManyDotNetSolutions( "Tests\\Standalone" )
+        {
+            IsTestOnly = true
+        }
     },
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",

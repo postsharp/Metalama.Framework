@@ -1,8 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Backstage.Application;
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Infrastructure;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -63,7 +66,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         {
             if ( this._timeout == null )
             {
-                if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 120 ) ), null ) == null )
+                if ( Interlocked.CompareExchange( ref this._timeout, new CancellationTokenSource( TimeSpan.FromSeconds( 240 ) ), null ) == null )
                 {
                     this._timeoutAction = this._timeout.Token.Register(
                         () => this.ServiceProvider.GetLoggerFactory()
@@ -117,6 +120,14 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             .WithService( platformInfo )
             .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() );
 
+        var licenseConsumptionService = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
+
+        if ( contextOptions.IgnoreUserProfileLicenses )
+        {
+            licenseConsumptionService = licenseConsumptionService.WithoutLicense();
+        }
+
+        backstageServices = backstageServices.WithService( licenseConsumptionService );
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 
         var typedAdditionalServices = (AdditionalServiceCollection?) additionalServices ?? new AdditionalServiceCollection();
@@ -251,12 +262,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 #if NET5_0_OR_GREATER
         => new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
 #else
-        => new CompileTimeDomain( this.ServiceProvider.Global );
+        => new( this.ServiceProvider.Global );
 #endif
 
     internal CompileTimeDomain Domain => this._domain.Value ??= this.CreateDomain();
 
-    string ITempFileManager.GetTempDirectory( string directory, CleanUpStrategy cleanUpStrategy, string? subdirectory, bool versionNeutral )
+    string ITempFileManager.GetTempDirectory( string directory, CleanUpStrategy cleanUpStrategy, string? subdirectory, TempFileVersionScope versionScope )
     {
         if ( directory.StartsWith( TempDirectories.AssemblyLocator, StringComparison.Ordinal ) )
         {

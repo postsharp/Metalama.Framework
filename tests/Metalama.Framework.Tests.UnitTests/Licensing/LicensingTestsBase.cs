@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Testing;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
@@ -24,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             string projectName = "TestProject" )
         {
             var mocks = new AdditionalServiceCollection();
-            mocks.ProjectServices.Add( sp => sp.AddLicenseConsumptionManagerForLicenseKey( licenseKey ) );
+            mocks.ProjectServices.Add( sp => sp.AddProjectLicenseConsumptionManagerForTest( licenseKey ) );
 
             var testContextOptions = this.GetDefaultTestContextOptions() with { ProjectName = projectName };
 
@@ -69,6 +71,16 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             // First, we need to make sure there is only one diagnostic in total. Running the next assert only would ignore other diagnostics.
             Assert.Single( diagnostics );
             Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
+        }
+
+        protected static string? GetLicenseKey( string? name )
+        {
+            if ( name == null )
+            {
+                return null;
+            }
+
+            return TestLicenseKeys.GetLicenseKey( name );
         }
     }
 }

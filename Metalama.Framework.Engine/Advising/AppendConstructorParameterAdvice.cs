@@ -37,8 +37,6 @@ internal sealed class AppendConstructorParameterAdvice : Advice
         Func<IParameter, IConstructor, PullAction>? pullActionFunc,
         TypedConstant defaultValue ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )
     {
-        Invariant.AssertNot( targetDeclaration is { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct } );
-
         this._parameterName = parameterName;
         this._parameterType = parameterType;
         this._buildAction = buildAction;
@@ -63,16 +61,6 @@ internal sealed class AppendConstructorParameterAdvice : Advice
         {
             return AdviceImplementationResult.Failed(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoStaticConstructor.CreateRoslynDiagnostic(
-                    constructor.GetDiagnosticLocation(),
-                    (this.Aspect.AspectClass.ShortName, constructor),
-                    this ) );
-        }
-
-        // Introducing parameters into anything else than a class is not allowed.
-        if ( constructor.DeclaringType.TypeKind != TypeKind.Class )
-        {
-            return AdviceImplementationResult.Failed(
-                AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoNonClassConstructor.CreateRoslynDiagnostic(
                     constructor.GetDiagnosticLocation(),
                     (this.Aspect.AspectClass.ShortName, constructor),
                     this ) );
@@ -108,14 +96,14 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
-            // Identity constructors that call the current constructor.
+            // Identify constructors that call the current constructor.
             var sameTypeConstructors =
                 baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
 
             var derivedConstructors = compilation
                 .GetDerivedTypes( baseConstructor.DeclaringType, DerivedTypesOptions.DirectOnly )
                 .SelectMany( t => t.Constructors )
-                .Where( c => c.InitializerKind != ConstructorInitializerKind.This );
+                .Where( c => c.InitializerKind != ConstructorInitializerKind.This && !c.IsRecordCopyConstructor() );
 
             var chainedConstructors =
                 sameTypeConstructors.Concat( derivedConstructors )

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         private readonly SkipListDictionary<int, TextPointMapping> _mapsByTargetCharacter;
 
         // Map by line and column.
-        private readonly SkipListDictionary<LinePosition, TextPointMapping> _mapsByTargetLinePosition = [];
+        private readonly SkipListDictionary<LinePosition, TextPointMapping> _mapsByTargetLinePosition = new();
 
         /// <summary>
         /// Gets the path of the source file (typically the hand-written source code).
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         {
             this.SourcePath = sourcePath;
             this.TargetPath = targetPath;
-            this._mapsByTargetCharacter = [];
+            this._mapsByTargetCharacter = new SkipListDictionary<int, TextPointMapping>();
         }
 
         private TextMapFile(

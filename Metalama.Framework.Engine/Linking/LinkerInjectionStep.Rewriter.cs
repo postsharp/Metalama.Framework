@@ -43,6 +43,8 @@ internal sealed partial class LinkerInjectionStep
         private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
 #pragma warning restore IDE0052
 
+        private readonly IUserDiagnosticSink _diagnostics;
+
         // Maps a diagnostic id to the number of times it has been suppressed.
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
@@ -55,7 +57,8 @@ internal sealed partial class LinkerInjectionStep
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
             IReadOnlyCollectionWithContains<SyntaxNode> nodesWithModifiedAttributes,
             SyntaxTree syntaxTreeForGlobalAttributes,
-            IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
+            IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations,
+            IUserDiagnosticSink diagnostics )
         {
             this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
             this._diagnosticSuppressions = diagnosticSuppressions;
@@ -67,6 +70,7 @@ internal sealed partial class LinkerInjectionStep
             this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
             this._typeLevelTransformations = typeLevelTransformations;
+            this._diagnostics = diagnostics;
         }
 
         public override bool VisitIntoStructuredTrivia => true;
@@ -344,31 +348,24 @@ internal sealed partial class LinkerInjectionStep
 
         public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node )
-            => this.VisitTypeDeclaration(
-                node,
-                ( syntax, members ) =>
-                {
-                    // If the record has no braces, add them.
-                    if ( syntax.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
-                    {
-                        // TODO: trivias.
-                        syntax = syntax
-                            .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                            .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                            .WithSemicolonToken( default );
-                    }
+        public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-                    return syntax.WithMembers( List( members ) );
-                } );
-
-        private SyntaxNode VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
+        private SyntaxNode VisitTypeDeclaration<T>( T node )
             where T : TypeDeclarationSyntax
         {
             var originalNode = node;
             var members = new List<MemberDeclarationSyntax>( node.Members.Count );
             var additionalBaseList = this._syntaxTransformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+
+            var baseList = node.BaseList;
+
+            var parameterList = node.GetParameterList();
+
+            if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
+            {
+                this.ApplyMemberLevelTransformationsToPrimaryConstructor( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
+            }
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -392,19 +389,22 @@ internal sealed partial class LinkerInjectionStep
 
                 node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
-                if ( withMembers != null )
+                // If the type has no braces, add them.
+                if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
                 {
-                    node = withMembers( node, members );
+                    // TODO: trivias.
+                    node = (T) node
+                        .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                        .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                        .WithSemicolonToken( default );
                 }
-                else
-                {
-                    node = (T) node.WithMembers( List( members ) );
-                }
+
+                node = (T) node.WithMembers( List( members ) );
 
                 // Process the type bases.
                 if ( additionalBaseList.Any() )
                 {
-                    if ( node.BaseList == null )
+                    if ( baseList == null )
                     {
                         node = (T) node
                             .WithIdentifier( node.Identifier.WithTrailingTrivia() )
@@ -417,11 +417,17 @@ internal sealed partial class LinkerInjectionStep
                     {
                         node = (T) node.WithBaseList(
                             BaseList(
-                                node.BaseList.Types.AddRange(
+                                baseList.Types.AddRange(
                                     additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
+                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )! ) ) );
                     }
                 }
+                else if ( baseList != null )
+                {
+                    node = (T) node.WithBaseList( baseList );
+                }
+
+                node = (T) node.WithParameterList( parameterList );
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -446,23 +452,50 @@ internal sealed partial class LinkerInjectionStep
 
                     injectedNode = injectedNode
                         .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )!;
 
                     // Insert inserted statements into 
                     switch ( injectedNode )
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
-                            if ( this._introductionMemberLevelTransformations.TryGetValue(
-                                    injectedMember.DeclarationBuilder.AssertNotNull(),
-                                    out var memberLevelTransformations ) )
                             {
-                                injectedNode = this.ApplyMemberLevelTransformations(
-                                    constructorDeclaration,
-                                    memberLevelTransformations,
-                                    syntaxGenerationContext );
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        injectedMember.DeclarationBuilder.AssertNotNull(),
+                                        out var memberLevelTransformations ) )
+                                {
+                                    injectedNode = ApplyMemberLevelTransformations(
+                                        constructorDeclaration,
+                                        memberLevelTransformations,
+                                        syntaxGenerationContext );
+                                }
+
+                                break;
                             }
 
-                            break;
+                        case FieldDeclarationSyntax fieldDeclaration:
+                            {
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        injectedMember.DeclarationBuilder.AssertNotNull(),
+                                        out var memberLevelTransformations ) )
+                                {
+                                    injectedNode = this.ApplyMemberLevelTransformations( fieldDeclaration, memberLevelTransformations );
+                                }
+
+                                break;
+                            }
+
+                        case PropertyDeclarationSyntax propertyDeclaration:
+                            {
+                                if ( injectedMember.DeclarationBuilder != null &&
+                                    this._introductionMemberLevelTransformations.TryGetValue(
+                                        injectedMember.DeclarationBuilder,
+                                        out var memberLevelTransformations ) )
+                                {
+                                    injectedNode = this.ApplyMemberLevelTransformations( propertyDeclaration, memberLevelTransformations );
+                                }
+
+                                break;
+                            }
                     }
 
                     if ( injectedMember.Declaration != null )
@@ -498,12 +531,115 @@ internal sealed partial class LinkerInjectionStep
             };
         }
 
-        private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
+        private FieldDeclarationSyntax ApplyMemberLevelTransformations(
+            FieldDeclarationSyntax fieldDeclaration,
+            MemberLevelTransformations memberLevelTransformations )
+        {
+            Invariant.Assert( fieldDeclaration.Declaration.Variables.Count == 1 );
+
+            var originalFieldVariableDeclarator = fieldDeclaration.Declaration.Variables[0];
+            var newFieldVariableDeclarator = this.ApplyMemberLevelTransformations( originalFieldVariableDeclarator, memberLevelTransformations );
+
+            return fieldDeclaration.ReplaceNode( originalFieldVariableDeclarator, newFieldVariableDeclarator );
+        }
+
+        private VariableDeclaratorSyntax ApplyMemberLevelTransformations(
+            VariableDeclaratorSyntax fieldVariableDeclarator,
+            MemberLevelTransformations memberLevelTransformations )
+        {
+            Invariant.Assert( memberLevelTransformations.Statements.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Parameters.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Arguments.Length == 0 );
+
+            var transformation = memberLevelTransformations.Expressions[0];
+
+            if ( memberLevelTransformations.Expressions.Length == 1 )
+            {
+                // The expressions 'default' and 'default!' in the initializer are considered the same as if there was no initializer.
+                if ( fieldVariableDeclarator.Initializer?.Value is not (null or
+                    { RawKind: (int) SyntaxKind.DefaultLiteralExpression } or
+                    PostfixUnaryExpressionSyntax
+                    {
+                        RawKind: (int) SyntaxKind.SuppressNullableWarningExpression,
+                        Operand.RawKind: (int) SyntaxKind.DefaultLiteralExpression
+                    }) )
+                {
+                    this._diagnostics.Report(
+                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                            fieldVariableDeclarator.GetDiagnosticLocation(),
+                            (fieldVariableDeclarator.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The field already has an initializer.") ) );
+                }
+                else
+                {
+                    fieldVariableDeclarator = fieldVariableDeclarator.WithInitializer( EqualsValueClause( transformation.InitializerExpression ) );
+                }
+            }
+            else if ( memberLevelTransformations.Expressions.Length > 1 )
+            {
+                var aspects = memberLevelTransformations.Expressions.SelectAsArray( e => e.ParentAdvice.Aspect.ToString() );
+
+                this._diagnostics.Report(
+                    AspectLinkerDiagnosticDescriptors.CannotAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        fieldVariableDeclarator.GetDiagnosticLocation(),
+                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType, aspects) ) );
+            }
+
+            return fieldVariableDeclarator;
+        }
+
+        private PropertyDeclarationSyntax ApplyMemberLevelTransformations(
+            PropertyDeclarationSyntax propertyDeclaration,
+            MemberLevelTransformations memberLevelTransformations )
+        {
+            Invariant.Assert( memberLevelTransformations.Statements.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Parameters.Length == 0 );
+            Invariant.Assert( memberLevelTransformations.Arguments.Length == 0 );
+
+            var transformation = memberLevelTransformations.Expressions[0];
+
+            if ( memberLevelTransformations.Expressions.Length == 1 )
+            {
+                if ( propertyDeclaration.Initializer != null )
+                {
+                    this._diagnostics.Report(
+                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                            propertyDeclaration.GetDiagnosticLocation(),
+                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The property already has an initializer.") ) );
+                }
+
+                if ( propertyDeclaration.ExpressionBody != null || propertyDeclaration.AccessorList?.Accessors.Any( a => a.Body != null || a.ExpressionBody != null ) == true )
+                {
+                    this._diagnostics.Report(
+                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                            propertyDeclaration.GetDiagnosticLocation(),
+                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "Is is not an auto-property.") ) );
+                }
+
+                propertyDeclaration = propertyDeclaration
+                    .WithInitializer( EqualsValueClause( memberLevelTransformations.Expressions[0].InitializerExpression ) )
+                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) );
+            }
+            else if ( memberLevelTransformations.Expressions.Length > 1 )
+            {
+                var aspects = memberLevelTransformations.Expressions.SelectAsArray( e => e.ParentAdvice.Aspect.ToString() );
+
+                this._diagnostics.Report(
+                    AspectLinkerDiagnosticDescriptors.CannotAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
+                        propertyDeclaration.GetDiagnosticLocation(),
+                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType, aspects) ) );
+            }
+
+            return propertyDeclaration;
+        }
+
+        private static ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
             ConstructorDeclarationSyntax constructorDeclaration,
             MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext )
         {
-            constructorDeclaration = this.InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
+            Invariant.Assert( memberLevelTransformations.Expressions.Length == 0 );
+
+            constructorDeclaration = InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
 
             constructorDeclaration = constructorDeclaration.WithParameterList(
                 AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
@@ -512,6 +648,55 @@ internal sealed partial class LinkerInjectionStep
                 AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
 
             return constructorDeclaration;
+        }
+
+        private void ApplyMemberLevelTransformationsToPrimaryConstructor(
+            TypeDeclarationSyntax typeDeclaration,
+            MemberLevelTransformations memberLevelTransformations,
+            SyntaxGenerationContext syntaxGenerationContext,
+            out BaseListSyntax? newBaseList,
+            out ParameterListSyntax? newParameterList )
+        {
+            Invariant.AssertNot( memberLevelTransformations.Statements.Length > 0 );
+            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
+            Invariant.AssertNotNull( typeDeclaration.GetParameterList() );
+
+            newParameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            newBaseList = typeDeclaration.BaseList;
+
+            if ( memberLevelTransformations.Arguments.Length > 0 )
+            {
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( typeDeclaration.SyntaxTree );
+                var baseType = semanticModel.GetDeclaredSymbol( typeDeclaration );
+                var baseTypeSyntax = typeDeclaration.BaseList.AssertNotNull().Types[0];
+
+                BaseTypeSyntax newBaseTypeSyntax;
+
+                switch ( baseTypeSyntax )
+                {
+                    case SimpleBaseTypeSyntax simpleBaseType:
+                        newBaseTypeSyntax =
+                            PrimaryConstructorBaseType(
+                                simpleBaseType.Type,
+                                ArgumentList( SeparatedList(
+                                    memberLevelTransformations.Arguments.Select( x => x.ToSyntax() ) ) ) );
+
+                        break;
+
+                    case PrimaryConstructorBaseTypeSyntax primaryCtorBaseType:
+                        newBaseTypeSyntax =
+                            primaryCtorBaseType
+                                .WithArgumentList(
+                                    primaryCtorBaseType.ArgumentList.AddArguments( memberLevelTransformations.Arguments.SelectAsArray( x => x.ToSyntax() ) ) );
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax.Kind()}" );
+                }
+
+                // TODO: This may be slower than replacing specific index.
+                newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
+            }
         }
 
         private static ParameterListSyntax AppendParameters(
@@ -554,7 +739,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private ConstructorDeclarationSyntax InsertStatements(
+        private static ConstructorDeclarationSyntax InsertStatements(
             ConstructorDeclarationSyntax constructorDeclaration,
             ImmutableArray<LinkerInsertedStatement> insertedStatements )
         {
@@ -594,62 +779,43 @@ internal sealed partial class LinkerInjectionStep
 
             return constructorDeclaration;
 
-            IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
-            {
-                // TODO: This sort is intended only for beginning statements.
-                var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.Comparers.Default );
-                var typeStatements = new List<LinkerInsertedStatement>();
-
-                foreach ( var mark in statements )
-                {
-                    switch ( mark.ContextDeclaration )
-                    {
-                        case INamedType:
-                            typeStatements.Add( mark );
-
-                            break;
-
-                        case IMember member:
-                            if ( !memberStatements.TryGetValue( member, out var list ) )
-                            {
-                                memberStatements[member] = list = [];
-                            }
-
-                            list.Add( mark );
-
-                            break;
-
-                        default:
-                            throw new AssertionFailedException( $"Unexpected declaration: '{mark.ContextDeclaration}'." );
-                    }
-                }
-
-                // TODO: This sorting is suboptimal, but needed for stable order since we are using a dictionary.
-                foreach ( var pair in memberStatements.OrderBy( p => p.Key.ToDisplayString() ) )
-                {
-                    foreach ( var mark in pair.Value )
-                    {
-                        yield return mark;
-                    }
-                }
-
-                foreach ( var mark in typeStatements )
-                {
-                    yield return mark;
-                }
-            }
+            // TODO: This sort is intended only for beginning statements.
+            static IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
+                => statements
+                    .OrderBy( s => s.Kind )
+                    .ThenBy(
+                        s => s.ContextDeclaration switch
+                        {
+                            IMember => 0,
+                            INamedType => 1,
+                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
+                        } )
+                    .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
         }
 
-        private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
+        private IReadOnlyList<FieldDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
         {
             var originalNode = node;
+
+            if ( node.Declaration.Variables.Any( this._symbolMemberLevelTransformations.ContainsKey ) )
+            {
+                node = node.ReplaceNodes( node.Declaration.Variables, ( variableDeclarator, _ ) =>
+                {
+                    if ( this._symbolMemberLevelTransformations.TryGetValue( variableDeclarator, out var memberLevelTransformations ) )
+                    {
+                        variableDeclarator = this.ApplyMemberLevelTransformations( variableDeclarator, memberLevelTransformations );
+                    }
+
+                    return variableDeclarator;
+                } );
+            }
 
             // Rewrite attributes.
             if ( originalNode.Declaration.Variables.Count > 1
                  && originalNode.Declaration.Variables.Any( this._nodesWithModifiedAttributes.Contains ) )
             {
                 // TODO: This needs to use rewritten variable declaration or do removal in place.
-                var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
+                var members = new List<FieldDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
                 // If we have changes in attributes and several members, we have to split them.
                 foreach ( var variable in originalNode.Declaration.Variables )
@@ -704,7 +870,7 @@ internal sealed partial class LinkerInjectionStep
                     }
                     else
                     {
-                        return Array.Empty<MemberDeclarationSyntax>();
+                        return Array.Empty<FieldDeclarationSyntax>();
                     }
                 }
                 else
@@ -721,7 +887,7 @@ internal sealed partial class LinkerInjectionStep
             if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
             {
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
-                node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
+                node = ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
             }
 
             // Rewrite attributes.
@@ -791,11 +957,16 @@ internal sealed partial class LinkerInjectionStep
         {
             var originalNode = node;
 
+            if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
+            {
+                node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations );
+            }
+
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 
             if ( this._syntaxTransformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
             {
-                node = node.WithSynthesizedSetter();
+                node = node.WithSynthesizedSetter( this._syntaxGenerationContextFactory.Default );
             }
 
             if ( this._syntaxTransformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
@@ -883,8 +1054,8 @@ internal sealed partial class LinkerInjectionStep
         public override SyntaxNode VisitCompilationUnit( CompilationUnitSyntax node )
         {
             SyntaxGenerationContext? syntaxGenerationContext = null;
-            List<AttributeListSyntax> outputLists = [];
-            List<SyntaxTrivia> outputTrivias = [];
+            List<AttributeListSyntax> outputLists = new();
+            List<SyntaxTrivia> outputTrivias = new();
 
             this.RewriteAttributeLists(
                 this._compilation.ToTypedRef<IDeclaration>(),

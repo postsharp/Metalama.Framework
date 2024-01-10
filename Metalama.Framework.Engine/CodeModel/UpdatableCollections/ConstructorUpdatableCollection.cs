@@ -8,7 +8,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class ConstructorUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IConstructor>
+internal sealed class ConstructorUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IConstructor>
 {
     public ConstructorUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 

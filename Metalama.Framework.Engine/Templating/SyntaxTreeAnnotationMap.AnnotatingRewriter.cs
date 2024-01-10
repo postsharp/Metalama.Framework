@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Templating
                 void ReportError<T>( DiagnosticDefinition<T> diagnostic, T arg )
                     where T : notnull
                 {
-                    this._nodesWithErrorReports ??= [];
+                    this._nodesWithErrorReports ??= new HashSet<SyntaxNode>();
 
                     // Avoid reporting on the parent if we have reported anything on a child.
                     if ( !originalNode.DescendantNodes().Any( n => this._nodesWithErrorReports.Contains( n ) ) )

@@ -80,11 +80,11 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
                 parentBuilder = this.AddOrUpdateSymbol( symbol.ContainingSymbol );
             }
 
-            parentBuilder._children ??= [];
+            parentBuilder._children ??= new();
 
             if ( !parentBuilder._children.TryGetValue( symbol.Name, out var childrenList ) )
             {
-                childrenList = [];
+                childrenList = new();
                 parentBuilder._children[symbol.Name] = childrenList;
             }
 

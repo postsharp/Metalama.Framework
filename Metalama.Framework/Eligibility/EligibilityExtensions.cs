@@ -23,30 +23,30 @@ namespace Metalama.Framework.Eligibility;
 [PublicAPI]
 public static partial class EligibilityExtensions
 {
-    private static readonly List<(Type Type, string Name)> _interfaceNames =
-        [
-            // The order is significant: the most significant should come first.
+    private static readonly List<(Type Type, string Name)> _interfaceNames = new()
+    {
+        // The order is significant: the most significant should come first.
 
-            (typeof(IMethod), "method"),
-            (typeof(IField), "field"),
-            (typeof(INamedType), "type"),
-            (typeof(IProperty), "property"),
-            (typeof(IEvent), "event"),
-            (typeof(IConstructor), "constructor"),
-            (typeof(IMethodBase), "method or constructor"),
-            (typeof(IParameter), "parameter"),
-            (typeof(ICompilation), "compilation"),
-            (typeof(INamespace), "namespace"),
-            (typeof(ITypeParameter), "type parameter"),
-            (typeof(IAttribute), "custom attribute"),
-            (typeof(IPropertyOrIndexer), "property or indexer"),
-            (typeof(IFieldOrProperty), "field or a property"),
-            (typeof(IFieldOrPropertyOrIndexer), "field, property or indexer"),
-            (typeof(IHasAccessors), "field, property, indexer or event"),
-            (typeof(IHasParameters), "property, indexer or event"),
-            (typeof(IMember), "method, constructor, field, property, indexer or event"),
-            (typeof(IMemberOrNamedType), "method, constructor, field, property, indexer, event or type")
-        ];
+        (typeof(IMethod), "method"),
+        (typeof(IField), "field"),
+        (typeof(INamedType), "type"),
+        (typeof(IProperty), "property"),
+        (typeof(IEvent), "event"),
+        (typeof(IConstructor), "constructor"),
+        (typeof(IMethodBase), "method or constructor"),
+        (typeof(IParameter), "parameter"),
+        (typeof(ICompilation), "compilation"),
+        (typeof(INamespace), "namespace"),
+        (typeof(ITypeParameter), "type parameter"),
+        (typeof(IAttribute), "custom attribute"),
+        (typeof(IPropertyOrIndexer), "property or indexer"),
+        (typeof(IFieldOrProperty), "field or a property"),
+        (typeof(IFieldOrPropertyOrIndexer), "field, property or indexer"),
+        (typeof(IHasAccessors), "field, property, indexer or event"),
+        (typeof(IHasParameters), "property, indexer or event"),
+        (typeof(IMember), "method, constructor, field, property, indexer or event"),
+        (typeof(IMemberOrNamedType), "method, constructor, field, property, indexer, event or type")
+    };
 
     /// <summary>
     /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the given <see cref="IEligibilityBuilder"/>.
@@ -410,22 +410,6 @@ public static partial class EligibilityExtensions
             member => $"{member} must be static" );
 
     /// <summary>
-    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
-    /// </summary>
-    public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
-        => eligibilityBuilder.MustSatisfy(
-            member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
-            member => $"{member} must not be a primary constructor of non-record type" );
-
-    /// <summary>
-    /// Forbids the target type from having a primary constructor while the type is a type or a struct (C# 12.0).
-    /// </summary>
-    public static void MustNotBeNonRecordTypeWithPrimaryConstructor( this IEligibilityBuilder<INamedType> eligibilityBuilder )
-        => eligibilityBuilder.MustSatisfy(
-            type => type is not { PrimaryConstructor: not null, TypeKind: TypeKind.Class or TypeKind.Struct },
-            type => $"{type} must not be a non-record type with primary constructor" );
-
-    /// <summary>
     /// Forbids the target member or type from being static.
     /// </summary>
     public static void MustNotBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
@@ -448,6 +432,22 @@ public static partial class EligibilityExtensions
         => eligibilityBuilder.MustSatisfy(
             member => !member.IsAbstract,
             member => $"{member} must not be abstract" );
+
+    /// <summary>
+    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
+    /// </summary>
+    public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
+            member => $"{member} must not be a primary constructor of non-record type" );
+
+    /// <summary>
+    /// Forbids the target constructor from being the copy constructor of a record.
+    /// </summary>
+    public static void MustNotBeRecordCopyConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => !member.IsRecordCopyConstructor(),
+            member => $"{member} must not be the copy constructor of record type" );
 
     /// <summary>
     /// Forbids the target type from being an interface.

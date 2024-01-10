@@ -244,10 +244,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                 var testInput = this._factory.TestInputFactory.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 
-                var testOptions = new TestContextOptions
-                {
-                    References = projectReferences.MetadataReferences, RequireOrderedAspects = testInput.Options.RequireOrderedAspects.GetValueOrDefault()
-                };
+                var testOptions = testInput.Options.ApplyToTestContextOptions( new TestContextOptions { References = projectReferences.MetadataReferences } );
 
                 if ( testInput.IsSkipped )
                 {
