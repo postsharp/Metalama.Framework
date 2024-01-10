@@ -132,7 +132,7 @@ internal sealed class DiffStrategy
 
                 foreach ( var partialType in partialTypes )
                 {
-                    var symbol = (INamedTypeSymbol) semanticModel.GetDeclaredSymbol( partialType ).AssertNotNull();
+                    var symbol = semanticModel.GetDeclaredSymbol( partialType ).AssertNotNull();
                     partialTypeKeysBuilder.Add( new TypeDependencyKey( symbol, this._isTest ) );
                 }
 
