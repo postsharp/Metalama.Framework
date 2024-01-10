@@ -93,7 +93,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         this.Visit( node.Right );
 
-        var symbol = this._semanticModel!.GetSymbolInfo( node.Left ).Symbol;
+        var symbol = this._semanticModel.AssertNotNull().GetSymbolInfo( node.Left ).Symbol;
 
         if ( symbol != null )
         {
@@ -336,7 +336,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
     {
         using ( this.EnterContext( node ) )
         {
-            var symbol = this._semanticModel.GetDeclaredSymbol( node );
+            var symbol = this._semanticModel.AssertNotNull().GetDeclaredSymbol( node );
             this.ValidateSymbol( symbol?.OverriddenMethod, node, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
@@ -363,7 +363,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         {
             this.Visit( node.AttributeLists );
 
-            var symbol = this._semanticModel.GetDeclaredSymbol( node );
+            var symbol = this._semanticModel.AssertNotNull().GetDeclaredSymbol( node );
             this.ValidateSymbol( symbol?.OverriddenProperty, node, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
             this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
@@ -384,7 +384,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
         {
             this.Visit( node.AttributeLists );
 
-            var symbol = this._semanticModel.GetDeclaredSymbol( node );
+            var symbol = this._semanticModel.AssertNotNull().GetDeclaredSymbol( node );
             this.ValidateSymbol( symbol?.OverriddenEvent, node, ReferenceKinds.OverrideMember );
             this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
 
@@ -497,12 +497,12 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 
             if ( node.Initializer != null )
             {
-                baseConstructorSymbol = this._semanticModel.GetSymbolInfo( node.Initializer ).Symbol;
+                baseConstructorSymbol = this._semanticModel.AssertNotNull().GetSymbolInfo( node.Initializer ).Symbol;
                 baseConstructorNode = node.Initializer.ThisOrBaseKeyword;
             }
             else
             {
-                var symbol = this._semanticModel.GetDeclaredSymbol( node );
+                var symbol = this._semanticModel.AssertNotNull().GetDeclaredSymbol( node );
                 baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
                 baseConstructorNode = node.Identifier;
             }
@@ -856,7 +856,7 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax) type;
-                    var symbol = this._semanticModel.GetSymbolInfo( genericType ).Symbol;
+                    var symbol = this._semanticModel.AssertNotNull().GetSymbolInfo( genericType ).Symbol;
 
                     if ( symbol != null )
                     {
