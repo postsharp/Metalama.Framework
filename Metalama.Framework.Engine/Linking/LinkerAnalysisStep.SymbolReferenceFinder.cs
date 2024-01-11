@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
                 return symbolReferences.ToReadOnlyList();
             }
 
-            internal async Task<IEnumerable<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
+            internal async Task<IEnumerable<IntermediateSymbolSemanticReference>> FindMethodInvocationsAsync(
                 IEnumerable<IMethodSymbol> methodsToAnalyze,
                 CancellationToken cancellationToken )
             {
