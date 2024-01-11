@@ -333,9 +333,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-#pragma warning disable CA1822 // Mark members as static
         private static SyntaxNode RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
-#pragma warning restore CA1822 // Mark members as static
         {
             var rewriter = new SubstitutingRewriter( context );
 

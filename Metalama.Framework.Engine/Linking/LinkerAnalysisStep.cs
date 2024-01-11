@@ -101,8 +101,9 @@ namespace Metalama.Framework.Engine.Linking
             var reachableSemantics = reachabilityAnalyzer.Run();
 
             GetReachableReferences(
+                input.IntermediateCompilation.CompilationContext,
                 resolvedReferencesBySource,
-                new HashSet<IntermediateSymbolSemantic>( reachableSemantics ),
+                reachableSemantics,
                 out var reachableReferencesByContainingSemantic,
                 out var reachableReferencesByTarget );
 
@@ -113,14 +114,21 @@ namespace Metalama.Framework.Engine.Linking
                 reachableReferencesByTarget );
 
             var redirectedGetOnlyAutoProperties = GetRedirectedGetOnlyAutoProperties( input.InjectionRegistry, reachableSemantics );
-            var redirectedSymbols = GetRedirectedSymbols( redirectedGetOnlyAutoProperties );
+
+            var redirectedSymbols = GetRedirectedSymbols(
+                input.IntermediateCompilation.CompilationContext, 
+                redirectedGetOnlyAutoProperties );
 
             var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics( redirectedSymbols );
             var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
             var inlinedSemantics = inlineabilityAnalyzer.GetInlinedSemantics( inlineableSemantics, inlineableReferences );
             var inlinedReferences = inlineabilityAnalyzer.GetInlinedReferences( inlineableReferences, inlinedSemantics );
-            var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToReadOnlyList();
-            var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences( reachableReferencesByContainingSemantic, inlinedReferences );
+            var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToHashSet();
+
+            var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences(
+                input.IntermediateCompilation.CompilationContext, 
+                reachableReferencesByContainingSemantic, 
+                inlinedReferences );
 
             VerifyUnsupportedInlineability(
                 input.InjectionRegistry,
@@ -179,6 +187,7 @@ namespace Metalama.Framework.Engine.Linking
             var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
             var analysisRegistry = new LinkerAnalysisRegistry(
+                input.IntermediateCompilation.CompilationContext,
                 reachableSemantics,
                 inlinedSemantics,
                 substitutions );
@@ -197,7 +206,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private static IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> GetRedirectedGetOnlyAutoProperties(
             LinkerInjectionRegistry injectionRegistry,
-            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
+            HashSet<IntermediateSymbolSemantic> reachableSemantics )
         {
             var list = new List<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)>();
 
@@ -223,9 +232,10 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> GetRedirectedSymbols(
+            CompilationContext intermediateCompilationContext,
             IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> redirectedGetOnlyAutoProperties )
         {
-            var dict = new Dictionary<ISymbol, IntermediateSymbolSemantic>();
+            var dict = new Dictionary<ISymbol, IntermediateSymbolSemantic>( intermediateCompilationContext.SymbolComparer );
 
             foreach ( var redirectedProperty in redirectedGetOnlyAutoProperties )
             {
@@ -236,13 +246,19 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static void GetReachableReferences(
+            CompilationContext intermediateCompilationContext,
             IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> resolvedReferencesBySource,
             HashSet<IntermediateSymbolSemantic> reachableSemantics,
             out IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> reachableReferencesBySource,
             out IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
         {
-            var bySource = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<ResolvedAspectReference>>();
-            var byTarget = new Dictionary<AspectReferenceTarget, List<ResolvedAspectReference>>();
+            var bySource = 
+                new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>( 
+                    IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( intermediateCompilationContext ) );
+
+            var byTarget = 
+                new Dictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>>( 
+                    AspectReferenceTargetEqualityComparer.ForCompilation( intermediateCompilationContext ) );
 
             foreach ( var pair in resolvedReferencesBySource )
             {
@@ -261,21 +277,10 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         list.Add( reference );
 
-                        if ( !bySource.TryGetValue( reference.ContainingSemantic, out var list2 ) )
-                        {
-                            bySource[reference.ContainingSemantic] = list2 = new List<ResolvedAspectReference>();
-                        }
-
-                        list2.Add( reference );
+                        ((List<ResolvedAspectReference>) bySource.GetOrAdd( reference.ContainingSemantic, _ => new List<ResolvedAspectReference>() )).Add( reference );
 
                         var target = reference.ResolvedSemantic.ToAspectReferenceTarget( reference.TargetKind );
-
-                        if ( !byTarget.TryGetValue( target, out var list3 ) )
-                        {
-                            byTarget[target] = list3 = new List<ResolvedAspectReference>();
-                        }
-
-                        list3.Add( reference );
+                        ((List<ResolvedAspectReference>) byTarget.GetOrAdd( target, _ => new List<ResolvedAspectReference>() )).Add( reference );
                     }
                 }
 
@@ -285,30 +290,28 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            reachableReferencesBySource = bySource.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
-            reachableReferencesByTarget = byTarget.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
+            reachableReferencesBySource = bySource;
+            reachableReferencesByTarget = byTarget;
         }
 
         private static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> GetNonInlinedReferences(
+            CompilationContext intermediateCompilationContext,
             IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> reachableReferencesBySource,
             IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences )
         {
-            var result = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<ResolvedAspectReference>>();
+            var result = 
+                new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>(
+                    IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( intermediateCompilationContext ) );
 
             foreach ( var reachableReference in reachableReferencesBySource.Values.SelectMany( x => x ) )
             {
                 if ( !inlinedReferences.ContainsKey( reachableReference ) )
                 {
-                    if ( !result.TryGetValue( reachableReference.ContainingSemantic, out var list ) )
-                    {
-                        result[reachableReference.ContainingSemantic] = list = new List<ResolvedAspectReference>();
-                    }
-
-                    list.Add( reachableReference );
+                    ((List<ResolvedAspectReference>) result.GetOrAdd( reachableReference.ContainingSemantic, _ => new List<ResolvedAspectReference>() )).Add( reachableReference );
                 }
             }
 
-            return result.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
+            return result;
         }
 
         private static void VerifyUnsupportedInlineability(
@@ -363,7 +366,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
             LinkerInjectionRegistry injectionRegistry,
-            IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
+            HashSet<IntermediateSymbolSemantic> reachableSemantics )
         {
             var forcefullyInitializedSymbols = new List<ISymbol>();
 
@@ -443,7 +446,9 @@ namespace Metalama.Framework.Engine.Linking
             var list = new List<IntermediateSymbolSemanticReference>();
 
             var allGetOnlyAutoPropertyReferences = await symbolReferenceFinder.FindSymbolReferencesAsync(
-                redirectedGetOnlyAutoProperties.SelectAsReadOnlyList( x => (x.Property, x.Property.ContainingType) ),
+                redirectedGetOnlyAutoProperties,
+                x => (x.Property, x.Property.ContainingType),
+                _ => true,
                 cancellationToken );
 
             foreach ( var reference in allGetOnlyAutoPropertyReferences )
@@ -469,7 +474,9 @@ namespace Metalama.Framework.Engine.Linking
 
             var allEventFieldReferences =
                 await symbolReferenceFinder.FindSymbolReferencesAsync(
-                    overriddenEventFields.SelectAsReadOnlyList( x => (x, x.ContainingType) ),
+                    overriddenEventFields,
+                    x => (x, x.ContainingType),
+                    _ => true,
                     cancellationToken );
 
             foreach ( var reference in allEventFieldReferences )
@@ -540,7 +547,7 @@ namespace Metalama.Framework.Engine.Linking
                                 .OfType<IMethodSymbol>() )
                     .Where( m => !injectionRegistry.IsOverride( m ) );
 
-            var allContainedReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( methodsToAnalyze, cancellationToken );
+            var allContainedReferences = await symbolReferenceFinder.FindMethodInvocationsAsync( methodsToAnalyze, cancellationToken );
             var semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
 
             foreach ( var reference in allContainedReferences )
@@ -562,7 +569,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( reference.ReferencingNode )
                 {
-                    case { Parent: InvocationExpressionSyntax invocationExpression }:
+                    case InvocationExpressionSyntax invocationExpression:
                         ProcessReference( reference, invocationExpression );
 
                         break;

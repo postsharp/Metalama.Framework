@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class AspectReferenceCollector
         {
+            private readonly PartialCompilation _intermediateCompilation;
             private readonly IConcurrentTaskRunner _concurrentTaskRunner;
             private readonly LinkerInjectionRegistry _injectionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
@@ -36,15 +37,18 @@ namespace Metalama.Framework.Engine.Linking
                 this._injectionRegistry = injectionRegistry;
                 this._referenceResolver = referenceResolver;
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+                this._intermediateCompilation = intermediateCompilation;
             }
 
             public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
                 CancellationToken cancellationToken )
             {
-                ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferences = new();
+                var aspectReferences = 
+                    new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>( 
+                        IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( this._intermediateCompilation.CompilationContext ) );
 
                 // Add implicit references going from final semantic to the last override.
-                var overriddenMembers = this._injectionRegistry.GetOverriddenMembers().ToReadOnlyList();
+                var overriddenMembers = this._injectionRegistry.GetOverriddenMembers();
                 await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
 
                 void ProcessOverriddenMember( ISymbol overriddenMember )
@@ -246,10 +250,27 @@ namespace Metalama.Framework.Engine.Linking
                     var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
                     var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
 
+                    var nodesWithAspectReference = syntax.GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind );
+
+                    var nodesContainingAspectReferences = new HashSet<SyntaxNode>();
+
+                    foreach ( var nodeWithAspectReference in nodesWithAspectReference )
+                    {
+                        var currentNode = nodeWithAspectReference.Parent.AssertNotNull();
+
+                        while ( currentNode != syntax.Parent )
+                        {
+                            nodesContainingAspectReferences.Add( currentNode );
+
+                            currentNode = currentNode.Parent.AssertNotNull();
+                        }
+                    }
+
                     var aspectReferenceCollector = new AspectReferenceWalker(
                         this._referenceResolver,
                         this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
-                        symbol );
+                        symbol,
+                        nodesContainingAspectReferences );
 
                     aspectReferenceCollector.Visit( syntax );
 

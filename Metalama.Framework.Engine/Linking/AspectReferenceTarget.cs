@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -13,17 +12,17 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets the target symbol. For accessor reference this is always the target property, indexer or event.
         /// </summary>
-        private ISymbol Symbol { get; }
+        public ISymbol Symbol { get; }
 
         /// <summary>
         /// Gets the semantic of the symbol that is referenced.
         /// </summary>
-        private IntermediateSymbolSemanticKind SemanticKind { get; }
+        public IntermediateSymbolSemanticKind SemanticKind { get; }
 
         /// <summary>
         /// Gets the kind of target. For properties/events/indexers this specifies which accessor is referenced.
         /// </summary>
-        private AspectReferenceTargetKind TargetKind { get; }
+        public AspectReferenceTargetKind TargetKind { get; }
         
         public AspectReferenceTarget( ISymbol symbol, IntermediateSymbolSemanticKind semantic, AspectReferenceTargetKind targetKind )
         {
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking
         public override int GetHashCode()
         {
             return HashCode.Combine(
-                SignatureTypeSymbolComparer.Instance.GetHashCode( this.Symbol ),
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
                 this.SemanticKind,
                 this.TargetKind );
         }

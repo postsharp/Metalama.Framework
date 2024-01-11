@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public IntermediateSymbolSemantic( ISymbol symbol, IntermediateSymbolSemanticKind semantic )
         {
-            this.Symbol = symbol;
+            this.Symbol = symbol.GetCanonicalDefinition();
             this.Kind = semantic;
         }
 

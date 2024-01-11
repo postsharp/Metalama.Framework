@@ -24,10 +24,10 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private sealed class SubstitutionGenerator
         {
-            private readonly CompilationContext _compilationContext;
+            private readonly CompilationContext _intermediateCompilationContext;
             private readonly LinkerSyntaxHandler _syntaxHandler;
             private readonly LinkerInjectionRegistry _injectionRegistry;
-            private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;
+            private readonly HashSet<IntermediateSymbolSemantic> _nonInlinedSemantics;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
@@ -49,11 +49,11 @@ namespace Metalama.Framework.Engine.Linking
 
             public SubstitutionGenerator(
                 ProjectServiceProvider serviceProvider,
-                CompilationContext compilationContext,
+                CompilationContext intermediateCompilationContext,
                 LinkerSyntaxHandler syntaxHandler,
                 LinkerInjectionRegistry injectionRegistry,
-                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
-                IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
+                HashSet<IntermediateSymbolSemantic> inlinedSemantics,
+                HashSet<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,
                 IReadOnlyList<InliningSpecification> inliningSpecifications,
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyList<CallerAttributeReference> callerMemberReferences )
             {
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-                this._compilationContext = compilationContext;
+                this._intermediateCompilationContext = intermediateCompilationContext;
                 this._syntaxHandler = syntaxHandler;
                 this._injectionRegistry = injectionRegistry;
                 this._nonInlinedSemantics = nonInlinedSemantics;
@@ -81,16 +81,18 @@ namespace Metalama.Framework.Engine.Linking
                         .Distinct()
                         .ToReadOnlyList();
 
-                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( redirectedSymbolReferences, x => x.ContainingSemantic );
-                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( eventFieldRaiseReferences, x => x.ContainingSemantic );
-                this._callerMemberReferencesByContainingSemantic = IndexReferenceByContainingBody( callerMemberReferences, x => x.ContainingSemantic );
+                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( intermediateCompilationContext, redirectedSymbolReferences, x => x.ContainingSemantic );
+                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( intermediateCompilationContext, eventFieldRaiseReferences, x => x.ContainingSemantic );
+                this._callerMemberReferencesByContainingSemantic = IndexReferenceByContainingBody( intermediateCompilationContext, callerMemberReferences, x => x.ContainingSemantic );
 
-                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<T>>
-                    IndexReferenceByContainingBody<T>(
+                static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<T>> IndexReferenceByContainingBody<T>(
+                        CompilationContext compilationContext,
                         IReadOnlyList<T> references,
                         Func<T, IntermediateSymbolSemantic<IMethodSymbol>> getContainingSemanticFunc )
                 {
-                    var dict = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<T>>();
+                    var dict = 
+                        new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<T>>(
+                            IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( compilationContext ) );
 
                     foreach ( var data in references )
                     {
@@ -142,7 +144,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             var redirectionTarget = this._redirectedSymbols[reference.TargetSemantic.Symbol];
 
-                            AddSubstitution( context, new RedirectionSubstitution( this._compilationContext, reference.ReferencingNode, redirectionTarget ) );
+                            AddSubstitution( context, new RedirectionSubstitution( this._intermediateCompilationContext, reference.ReferencingNode, redirectionTarget ) );
                         }
                     }
 
@@ -154,7 +156,7 @@ namespace Metalama.Framework.Engine.Linking
                             AddSubstitution(
                                 context,
                                 new EventFieldRaiseSubstitution(
-                                    this._compilationContext,
+                                    this._intermediateCompilationContext,
                                     reference.ReferencingNode,
                                     (IEventSymbol) reference.TargetSemantic.Symbol ) );
                         }
@@ -168,7 +170,7 @@ namespace Metalama.Framework.Engine.Linking
                             AddSubstitution(
                                 context,
                                 new CallerMemberSubstitution(
-                                    this._compilationContext,
+                                    this._intermediateCompilationContext,
                                     reference.InvocationExpression,
                                     reference.ReferencingOverrideTarget,
                                     reference.TargetMethod,
@@ -188,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                     // Add the inlining substitution itself.
                     AddSubstitution(
                         inliningSpecification.ParentContextIdentifier,
-                        new InliningSubstitution( this._compilationContext, inliningSpecification ) );
+                        new InliningSubstitution( this._intermediateCompilationContext, inliningSpecification ) );
 
                     // If not simple inlining, add return statement substitutions.
                     if ( !inliningSpecification.UseSimpleInlining )
@@ -212,7 +214,7 @@ namespace Metalama.Framework.Engine.Linking
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
                                 new ReturnStatementSubstitution(
-                                    this._compilationContext,
+                                    this._intermediateCompilationContext,
                                     returnStatement,
                                     inliningSpecification.AspectReference.ContainingBody,
                                     inliningSpecification.TargetSemantic.Symbol,
@@ -229,7 +231,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 AddSubstitution(
                                     inliningSpecification.ContextIdentifier,
-                                    new BlockWithReturnBeforeUsingLocalSubstitution( this._compilationContext, block ) );
+                                    new BlockWithReturnBeforeUsingLocalSubstitution( this._intermediateCompilationContext, block ) );
                             }
                         }
                     }
@@ -274,7 +276,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
-                                new RedirectionSubstitution( this._compilationContext, reference.ReferencingNode, redirectionTarget ) );
+                                new RedirectionSubstitution( this._intermediateCompilationContext, reference.ReferencingNode, redirectionTarget ) );
                         }
                     }
 
@@ -288,7 +290,7 @@ namespace Metalama.Framework.Engine.Linking
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
                                 new EventFieldRaiseSubstitution(
-                                    this._compilationContext,
+                                    this._intermediateCompilationContext,
                                     reference.ReferencingNode,
                                     (IEventSymbol) reference.TargetSemantic.Symbol ) );
                         }
@@ -305,7 +307,7 @@ namespace Metalama.Framework.Engine.Linking
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
                                 new CallerMemberSubstitution(
-                                    this._compilationContext,
+                                    this._intermediateCompilationContext,
                                     reference.InvocationExpression,
                                     reference.ReferencingOverrideTarget,
                                     reference.TargetMethod,
@@ -335,7 +337,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         AddSubstitution(
                             context,
-                            new ForcedInitializationSubstitution( this._compilationContext, rootNode, forcefullyInitializedType.InitializedSymbols ) );
+                            new ForcedInitializationSubstitution( this._intermediateCompilationContext, rootNode, forcefullyInitializedType.InitializedSymbols ) );
                     }
                 }
 
@@ -355,24 +357,24 @@ namespace Metalama.Framework.Engine.Linking
                             // For default semantic of auto properties and event fields, generate substitution that redirects to the backing field..
                             AddSubstitution(
                                 context,
-                                new AspectReferenceBackingFieldSubstitution( this._compilationContext, nonInlinedReference ) );
+                                new AspectReferenceBackingFieldSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
 
                             break;
 
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: { IsVirtual: true } baseSymbol }
-                            when !this._compilationContext.SymbolComparer.Equals(
+                            when !this._intermediateCompilationContext.SymbolComparer.Equals(
                                 nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
                                 baseSymbol.ContainingType ):
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol.IsOverride: true }
                             when this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var potentiallyHidingSymbol }
-                            when potentiallyHidingSymbol.TryGetHiddenSymbol( this._compilationContext.Compilation, out _ )
+                            when potentiallyHidingSymbol.TryGetHiddenSymbol( this._intermediateCompilationContext.Compilation, out _ )
                                  && this._injectionRegistry.IsOverrideTarget( nonInlinedReference.ResolvedSemantic.Symbol ):
                             // Base reference to a virtual member of the parent that is not overridden.
                             // Base references to new slot or override members are rewritten to the base member call.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+                                new AspectReferenceBaseSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
 
                             break;
 
@@ -383,13 +385,13 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         case { Kind: IntermediateSymbolSemanticKind.Base, Symbol: var symbol }
-                            when !this._compilationContext.SymbolComparer.Is(
+                            when !this._intermediateCompilationContext.SymbolComparer.Is(
                                 nonInlinedReference.ContainingSemantic.Symbol.ContainingType,
                                 symbol.ContainingType ):
                             // Base references to a declaration in another type mean base member call.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceBaseSubstitution( this._compilationContext, nonInlinedReference ) );
+                                new AspectReferenceBaseSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
 
                             break;
 
@@ -401,7 +403,7 @@ namespace Metalama.Framework.Engine.Linking
                             // Default reference to override target is rewritten to "source" member call.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceSourceSubstitution( this._compilationContext, nonInlinedReference ) );
+                                new AspectReferenceSourceSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
 
                             break;
 
@@ -415,7 +417,7 @@ namespace Metalama.Framework.Engine.Linking
                             // Base references to other members are rewritten to "empty" member call.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceEmptySubstitution( this._compilationContext, nonInlinedReference ) );
+                                new AspectReferenceEmptySubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
 
                             break;
 
@@ -423,7 +425,7 @@ namespace Metalama.Framework.Engine.Linking
                             // Everything else targets the override.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceOverrideSubstitution( this._compilationContext, nonInlinedReference ) );
+                                new AspectReferenceOverrideSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
 
                             break;
                     }
@@ -452,7 +454,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
                         return new ExpressionBodySubstitution(
-                            this._compilationContext,
+                            this._intermediateCompilationContext,
                             arrowExpressionClause,
                             referencingSymbol,
                             targetSymbol,
@@ -462,10 +464,10 @@ namespace Metalama.Framework.Engine.Linking
                     case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         Invariant.Assert( returnVariableIdentifier == null );
 
-                        return new EmptyVoidPartialMethodSubstitution( this._compilationContext, emptyVoidPartialMethod );
+                        return new EmptyVoidPartialMethodSubstitution( this._intermediateCompilationContext, emptyVoidPartialMethod );
 
                     case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _):
-                        return new RecordParameterSubstitution( this._compilationContext, recordParameter, targetSymbol, returnVariableIdentifier );
+                        return new RecordParameterSubstitution( this._intermediateCompilationContext, recordParameter, targetSymbol, returnVariableIdentifier );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected combination: ('{root.GetLocation()}', '{targetSymbol}')." );

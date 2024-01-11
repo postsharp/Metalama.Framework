@@ -27,6 +27,6 @@ namespace Metalama.Framework.Engine.Transformations
 
         public abstract ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, OurSyntaxGenerator syntaxGenerator );
 
-        public abstract ExpressionSyntax GetEventFieldInitializerExpression( ExpressionSyntax initializerExpression );
+        public abstract ExpressionSyntax GetEventFieldInitializerExpression( TypeSyntax eventFieldType, ExpressionSyntax initializerExpression );
     }
 }
