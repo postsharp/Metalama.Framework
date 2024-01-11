@@ -547,7 +547,7 @@ namespace Metalama.Framework.Engine.Linking
                                 .OfType<IMethodSymbol>() )
                     .Where( m => !injectionRegistry.IsOverride( m ) );
 
-            var allContainedReferences = await symbolReferenceFinder.FindSymbolReferencesAsync( methodsToAnalyze, cancellationToken );
+            var allContainedReferences = await symbolReferenceFinder.FindMethodInvocationsAsync( methodsToAnalyze, cancellationToken );
             var semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
 
             foreach ( var reference in allContainedReferences )

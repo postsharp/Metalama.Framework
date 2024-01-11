@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -86,8 +85,6 @@ namespace Metalama.Framework.Engine.Linking
 
                 void ProcessMethod( (IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind) input )
                 {
-                    var record = this._methodCache.GetOrAdd(input.Method, AnalyzeMethod);
-
                     foreach (var symbolToFind in input.SymbolsToFind)
                     {
                         foreach (var referencingIdentifierName in this.GetReferencingIdentifierNames( input.Method, symbolToFind ))
@@ -106,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
                 return symbolReferences.ToReadOnlyList();
             }
 
-            internal async Task<IEnumerable<IntermediateSymbolSemanticReference>> FindSymbolReferencesAsync(
+            internal async Task<IEnumerable<IntermediateSymbolSemanticReference>> FindMethodInvocationsAsync(
                 IEnumerable<IMethodSymbol> methodsToAnalyze,
                 CancellationToken cancellationToken )
             {
@@ -147,13 +144,13 @@ namespace Metalama.Framework.Engine.Linking
 
             private IEnumerable<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> GetContainedInvocations( IMethodSymbol containingMethod )
             {
-                var methodRecord = this._methodCache.GetOrAdd( containingMethod, static ( cm, t ) => AnalyzeMethod( cm ), this );
+                var methodRecord = this._methodCache.GetOrAdd( containingMethod, AnalyzeMethod );
                 return methodRecord.InvocationExpressions;
             }
 
             private IEnumerable<IdentifierNameSyntax> GetReferencingIdentifierNames( IMethodSymbol containingMethod, ISymbol targetSymbol )
             {
-                var methodRecord = this._methodCache.GetOrAdd( containingMethod, static (cm, t) => AnalyzeMethod( cm), this );
+                var methodRecord = this._methodCache.GetOrAdd( containingMethod, AnalyzeMethod );
 
                 if (methodRecord.IdentifierLookup.TryGetValue(targetSymbol.Name, out var identifierList))
                 {
@@ -177,19 +174,15 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
                 }
-                else
-                {
-                    yield break;
-                }
             }
 
             private static MethodCacheRecord AnalyzeMethod( IMethodSymbol method )
             {
                 var walker = new BodyWalker();
 
-                foreach ( var declaration in method.DeclaringSyntaxReferences.Select( x => x.GetSyntax() ) )
+                foreach ( var declaration in method.DeclaringSyntaxReferences )
                 {
-                    walker.Visit( method.GetPrimaryDeclaration() );
+                    walker.Visit( declaration.GetSyntax() );
                 }
 
                 return new MethodCacheRecord( method, walker.IdentifierSyntaxSymbolLookup, walker.InvocationExpressionSyntaxSymbolLookup );
@@ -224,8 +217,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 public override void VisitInvocationExpression( InvocationExpressionSyntax node )
                 {
-                    if (node is not { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" } } )
+                    if (node is not { Expression: IdentifierNameSyntax { Identifier.ValueText: "nameof" }, ArgumentList.Arguments.Count: 1 } )
                     {
+                        // If there is a method named "nameof" with 1 argument, we may skip it too, but it's a very narrow edge-case.
                         this.InvocationExpressionSyntaxSymbolLookup.Add(
                             new SyntaxSymbolCacheRecord<InvocationExpressionSyntax>( node ) );
                     }
@@ -234,24 +228,10 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private class MethodCacheRecord
-            {
-                public IMethodSymbol Method { get; }
-
-                public Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> IdentifierLookup { get; }
-
-                public List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> InvocationExpressions { get; }
-
-                public MethodCacheRecord(
-                    IMethodSymbol method,
-                    Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> identifierLookup,
-                    List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> invocationExpressions )
-                {
-                    this.Method = method;
-                    this.IdentifierLookup = identifierLookup;
-                    this.InvocationExpressions = invocationExpressions;
-                }
-            }
+            private record struct MethodCacheRecord(
+                IMethodSymbol Method,
+                Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> IdentifierLookup,
+                List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> InvocationExpressions );
 
             private class SyntaxSymbolCacheRecord<TSyntax>
                 where TSyntax : SyntaxNode
@@ -268,22 +248,17 @@ namespace Metalama.Framework.Engine.Linking
 
                 public ISymbol? GetSymbol(SemanticModel semanticModel)
                 {
-                    // PERF: In most cases, symbol will not be null so we can check it first.
-                    if ( this._cachedSymbol == null && !this._isInitialized )
+                    if ( !this._isInitialized )
                     {
                         var symbolInfo = semanticModel.GetSymbolInfo( this.Node );
 
                         // Lock after getting the symbol to lower the probability of blocking the thread.
                         lock ( this )
                         {
-                            if ( this._cachedSymbol == null )
+                            if ( !this._isInitialized )
                             {
                                 this._cachedSymbol = symbolInfo.Symbol;
                                 this._isInitialized = true;
-                                return this._cachedSymbol;
-                            }
-                            else
-                            {
                                 return this._cachedSymbol;
                             }
                         }
