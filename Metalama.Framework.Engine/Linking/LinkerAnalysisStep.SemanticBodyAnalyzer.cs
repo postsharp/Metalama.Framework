@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -25,12 +26,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModelProvider _semanticModelProvider;
-            private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
+            private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSemantics;
 
             public BodyAnalyzer(
                 ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
-                HashSet<IntermediateSymbolSemantic> reachableSemantics )
+                ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics )
             {
                 this._serviceProvider = serviceProvider;
                 this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();

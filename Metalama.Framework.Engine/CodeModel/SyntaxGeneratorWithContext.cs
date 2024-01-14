@@ -4,10 +4,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -20,11 +22,30 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 {
+    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache;
     private readonly SyntaxGenerationContext _context;
 
     public SyntaxGeneratorWithContext( OurSyntaxGenerator prototype, SyntaxGenerationContext context ) : base( prototype )
     {
         this._context = context;
+        this._typeSyntaxCache = new ConcurrentDictionary<ITypeSymbol, TypeSyntax>( context.CompilationContext.SymbolComparerIncludingNullability );
+    }
+
+    public override TypeSyntax Type( ITypeSymbol symbol )
+    {
+        if ( symbol.BelongsToCompilation( this._context.CompilationContext ) == true )
+        {
+            return this._typeSyntaxCache.GetOrAdd( symbol, static ( s, x ) => x.TypeCore( s ), this );
+        }
+        else
+        {
+            return this.TypeCore( symbol );
+        }
+    }
+
+    private TypeSyntax TypeCore( ITypeSymbol symbol )
+    {
+        return base.Type( symbol );
     }
 
     public AttributeSyntax Attribute( IAttributeData attribute )

@@ -30,9 +30,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private SyntaxGenerationContext( CompilationContext compilationContext, OurSyntaxGenerator syntaxGenerator, bool isPartial )
         {
-            this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
             this.CompilationContext = compilationContext;
             this.IsPartial = isPartial;
+            this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
         }
 
         internal static SyntaxGenerationContext Create( CompilationContext compilationContext, SyntaxNode node, bool isPartial = false )

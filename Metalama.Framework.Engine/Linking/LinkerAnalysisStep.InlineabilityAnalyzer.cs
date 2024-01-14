@@ -2,13 +2,18 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -19,24 +24,27 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public sealed class InlineabilityAnalyzer
         {
-            private readonly HashSet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+            private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
             private readonly CompilationContext _intermediateCompilationContext;
             private readonly InlinerProvider _inlinerProvider;
-            private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
+            private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyCollection<ResolvedAspectReference>> _reachableReferencesByTarget;
 
             public InlineabilityAnalyzer(
+                ProjectServiceProvider serviceProvider,
                 CompilationContext intermediateCompilationContext,
-                HashSet<IntermediateSymbolSemantic> reachableSymbolSemantics,
+                ConcurrentSet<IntermediateSymbolSemantic> reachableSymbolSemantics,
                 InlinerProvider inlinerProvider,
-                IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
+                IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesByTarget )
             {
                 this._reachableSymbolSemantics = reachableSymbolSemantics;
                 this._intermediateCompilationContext = intermediateCompilationContext;
                 this._inlinerProvider = inlinerProvider;
                 this._reachableReferencesByTarget = reachableReferencesByTarget;
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             }
 
-            private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesByTarget( AspectReferenceTarget target )
+            private IReadOnlyCollection<ResolvedAspectReference> GetReachableReferencesByTarget( AspectReferenceTarget target )
             {
                 if ( !this._reachableReferencesByTarget.TryGetValue( target, out var references ) )
                 {
@@ -50,23 +58,26 @@ namespace Metalama.Framework.Engine.Linking
             /// Gets semantics that are inlineable, i.e. are not referenced too many times and don't have inlineability explicitly suppressed.
             /// </summary>
             /// <returns></returns>
-            public HashSet<IntermediateSymbolSemantic> GetInlineableSemantics(
-                IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols )
+            public async Task<ConcurrentSet<IntermediateSymbolSemantic>> GetInlineableSemanticsAsync(
+                IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
+                CancellationToken cancellationToken )
             {
                 var redirectionTargets = 
                     new HashSet<IntermediateSymbolSemantic>( 
                         redirectedSymbols.Values, 
                         IntermediateSymbolSemanticEqualityComparer.ForCompilation(this._intermediateCompilationContext) );
 
-                var inlineableSemantics = new HashSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
+                var inlineableSemantics = new ConcurrentSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
-                foreach ( var semantic in this._reachableSymbolSemantics )
+                void ProcessSemantic(IntermediateSymbolSemantic semantic)
                 {
                     if ( IsInlineable( semantic ) )
                     {
                         inlineableSemantics.Add( semantic );
                     }
                 }
+
+                await this._concurrentTaskRunner.RunInParallelAsync( this._reachableSymbolSemantics, ProcessSemantic, cancellationToken );
 
                 return inlineableSemantics;
 
@@ -214,21 +225,24 @@ namespace Metalama.Framework.Engine.Linking
             /// Determines which aspect references can be inlined.
             /// </summary>
             /// <returns>Aspect references with selected inliners.</returns>
-            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlineableReferences(
-                HashSet<IntermediateSymbolSemantic> inlineableSemantics )
+            public async Task<IReadOnlyDictionary<ResolvedAspectReference, Inliner>> GetInlineableReferencesAsync(
+                ConcurrentSet<IntermediateSymbolSemantic> inlineableSemantics,
+                CancellationToken cancellationToken )
             {
-                var inlineableReferences = new Dictionary<ResolvedAspectReference, Inliner>();
+                var inlineableReferences = new ConcurrentDictionary<ResolvedAspectReference, Inliner>();
 
-                foreach ( var inlineableSemantic in inlineableSemantics )
+                void ProcessSemantic( IntermediateSymbolSemantic inlineableSemantic )
                 {
                     foreach ( var reference in this.GetReachableReferencesByTarget( inlineableSemantic.ToAspectReferenceTarget() ) )
                     {
                         if ( IsInlineable( reference, out var inliner ) )
                         {
-                            inlineableReferences.Add( reference, inliner );
+                            inlineableReferences.TryAdd( reference, inliner );
                         }
                     }
                 }
+
+                await this._concurrentTaskRunner.RunInParallelAsync( inlineableSemantics, ProcessSemantic, cancellationToken );
 
                 return inlineableReferences;
 
@@ -280,19 +294,22 @@ namespace Metalama.Framework.Engine.Linking
             /// <param name="inlineableSemantics"></param>
             /// <param name="inlineableReferences"></param>
             /// <returns></returns>
-            public HashSet<IntermediateSymbolSemantic> GetInlinedSemantics(
-                HashSet<IntermediateSymbolSemantic> inlineableSemantics,
-                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences )
+            public async Task<ConcurrentSet<IntermediateSymbolSemantic>> GetInlinedSemanticsAsync(
+                ConcurrentSet<IntermediateSymbolSemantic> inlineableSemantics,
+                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences,
+                CancellationToken cancellationToken )
             {
-                var inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
+                var inlinedSemantics = new ConcurrentSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
-                foreach ( var inlineableSemantic in inlineableSemantics )
+                void ProcessSemantic( IntermediateSymbolSemantic inlineableSemantic )
                 {
                     if ( IsInlinedSemantic( inlineableSemantic ) )
                     {
                         inlinedSemantics.Add( inlineableSemantic );
                     }
                 }
+
+                await this._concurrentTaskRunner.RunInParallelAsync( inlineableSemantics, ProcessSemantic, cancellationToken );
 
                 return inlinedSemantics;
 
@@ -376,7 +393,7 @@ namespace Metalama.Framework.Engine.Linking
             /// <returns></returns>
             public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlinedReferences(
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences,
-                HashSet<IntermediateSymbolSemantic> inlinedSemantics )
+                ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics )
             {
                 var inlinedReferences = new Dictionary<ResolvedAspectReference, Inliner>();
 

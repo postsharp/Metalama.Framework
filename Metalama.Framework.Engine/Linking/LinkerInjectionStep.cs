@@ -225,7 +225,9 @@ namespace Metalama.Framework.Engine.Linking
                 intermediateCompilation,
                 transformations,
                 syntaxTransformationCollection.InjectedMembers,
-                builderToTransformationMap );
+                builderToTransformationMap,
+                this._concurrentTaskRunner,
+                cancellationToken );
 
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 

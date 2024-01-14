@@ -1,9 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -11,6 +15,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class ReachabilityAnalyzer
         {
+            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
             private readonly CompilationContext _intermediateCompilationContext;
             private readonly LinkerInjectionRegistry _injectionRegistry;
 
@@ -20,6 +25,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _additionalNonDiscardableSemantics;
 
             public ReachabilityAnalyzer(
+                ProjectServiceProvider serviceProvider,
                 CompilationContext intermediateCompilationContext,
                 LinkerInjectionRegistry injectionRegistry,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic,
@@ -29,21 +35,22 @@ namespace Metalama.Framework.Engine.Linking
                 this._injectionRegistry = injectionRegistry;
                 this._aspectReferencesBySemantic = aspectReferencesBySemantic;
                 this._additionalNonDiscardableSemantics = additionalNonDiscardableSemantics;
+                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             }
 
-            public HashSet<IntermediateSymbolSemantic> Run()
+            public async Task<ConcurrentSet<IntermediateSymbolSemantic>> RunAsync(CancellationToken cancellationToken)
             {
                 // TODO: Optimize (should not allocate closures).
                 // TODO: Is using call stack reliable enough?
                 var visited =
-                    new HashSet<IntermediateSymbolSemantic>(
+                    new ConcurrentSet<IntermediateSymbolSemantic>(
                         IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
                 // Assume G(V, E) is a graph where vertices V are semantics of overridden declarations and overrides.
                 // Determine which semantics are reachable from final semantics using DFS.                
 
                 // Run DFS from each overridden member's final semantic.
-                foreach ( var overriddenMember in this._injectionRegistry.GetOverriddenMembers() )
+                void ProcessOverriddenMember( ISymbol overriddenMember )
                 {
                     switch ( overriddenMember )
                     {
@@ -81,8 +88,10 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
+                await this._concurrentTaskRunner.RunInParallelAsync( this._injectionRegistry.GetOverriddenMembers(), ProcessOverriddenMember, cancellationToken );
+
                 // Run DFS from any non-discardable declaration.
-                foreach ( var injectedMember in this._injectionRegistry.GetInjectedMembers() )
+                void ProcessInjectedMember( LinkerInjectedMember injectedMember )
                 {
                     if ( injectedMember.Syntax.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotDiscardable ) )
                     {
@@ -115,11 +124,15 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
+                await this._concurrentTaskRunner.RunInParallelAsync( this._injectionRegistry.GetInjectedMembers(), ProcessInjectedMember, cancellationToken );
+
                 // Run DFS for additional non-discardable semantics
-                foreach ( var semantic in this._additionalNonDiscardableSemantics )
+                void ProcessAdditionalNonDiscardableSemantic( IntermediateSymbolSemantic semantic)
                 {
                     DepthFirstSearch( semantic );
                 }
+
+                await this._concurrentTaskRunner.RunInParallelAsync( this._additionalNonDiscardableSemantics, ProcessAdditionalNonDiscardableSemantic, cancellationToken );
 
                 return visited;
 

@@ -2,13 +2,16 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -93,21 +96,31 @@ namespace Metalama.Framework.Engine.Linking
             var resolvedReferencesBySource = await aspectReferenceCollector.RunAsync( cancellationToken );
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
+                this._serviceProvider,
                 input.IntermediateCompilation.CompilationContext,
                 input.InjectionRegistry,
                 resolvedReferencesBySource,
                 eventFieldRaiseReferences.SelectAsArray( x => x.TargetSemantic ) );
 
-            var reachableSemantics = reachabilityAnalyzer.Run();
+            var reachableSemantics = await reachabilityAnalyzer.RunAsync(cancellationToken);
 
-            GetReachableReferences(
-                input.IntermediateCompilation.CompilationContext,
+            var reachableReferencesByContainingSemantic =
+                new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>(
+                    IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( input.IntermediateCompilation.CompilationContext ) );
+
+            var reachableReferencesByTarget =
+                new ConcurrentDictionary<AspectReferenceTarget, IReadOnlyCollection<ResolvedAspectReference>>(
+                    AspectReferenceTargetEqualityComparer.ForCompilation( input.IntermediateCompilation.CompilationContext ) );
+
+            await this.GetReachableReferencesAsync(
                 resolvedReferencesBySource,
                 reachableSemantics,
-                out var reachableReferencesByContainingSemantic,
-                out var reachableReferencesByTarget );
+                reachableReferencesByContainingSemantic,
+                reachableReferencesByTarget,
+                cancellationToken );
 
             var inlineabilityAnalyzer = new InlineabilityAnalyzer(
+                this._serviceProvider,
                 input.IntermediateCompilation.CompilationContext,
                 reachableSemantics,
                 inlinerProvider,
@@ -119,9 +132,9 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.CompilationContext, 
                 redirectedGetOnlyAutoProperties );
 
-            var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics( redirectedSymbols );
-            var inlineableReferences = inlineabilityAnalyzer.GetInlineableReferences( inlineableSemantics );
-            var inlinedSemantics = inlineabilityAnalyzer.GetInlinedSemantics( inlineableSemantics, inlineableReferences );
+            var inlineableSemantics = await inlineabilityAnalyzer.GetInlineableSemanticsAsync( redirectedSymbols, cancellationToken );
+            var inlineableReferences = await inlineabilityAnalyzer.GetInlineableReferencesAsync( inlineableSemantics, cancellationToken );
+            var inlinedSemantics = await inlineabilityAnalyzer.GetInlinedSemanticsAsync( inlineableSemantics, inlineableReferences, cancellationToken );
             var inlinedReferences = inlineabilityAnalyzer.GetInlinedReferences( inlineableReferences, inlinedSemantics );
             var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToHashSet();
 
@@ -206,7 +219,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private static IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> GetRedirectedGetOnlyAutoProperties(
             LinkerInjectionRegistry injectionRegistry,
-            HashSet<IntermediateSymbolSemantic> reachableSemantics )
+            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics )
         {
             var list = new List<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)>();
 
@@ -245,25 +258,19 @@ namespace Metalama.Framework.Engine.Linking
             return dict;
         }
 
-        private static void GetReachableReferences(
-            CompilationContext intermediateCompilationContext,
+        private async Task GetReachableReferencesAsync(
             IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> resolvedReferencesBySource,
-            HashSet<IntermediateSymbolSemantic> reachableSemantics,
-            out IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> reachableReferencesBySource,
-            out IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
+            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics,
+            ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesBySource,
+            ConcurrentDictionary<AspectReferenceTarget, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesByTarget,
+            CancellationToken cancellationToken )
         {
-            var bySource = 
-                new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>( 
-                    IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( intermediateCompilationContext ) );
+            var concurrentTaskRunner = this._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            var byTarget = 
-                new Dictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>>( 
-                    AspectReferenceTargetEqualityComparer.ForCompilation( intermediateCompilationContext ) );
-
-            foreach ( var pair in resolvedReferencesBySource )
+            void Process( KeyValuePair<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> pair )
             {
                 // Aspect references originating in non-reachable semantics should be ignored.
-                var list = new List<ResolvedAspectReference>();
+                var bag = new ConcurrentBag<ResolvedAspectReference>();
 
                 foreach ( var reference in pair.Value )
                 {
@@ -275,28 +282,27 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( reachableSemantics.Contains( reference.ContainingSemantic ) )
                     {
-                        list.Add( reference );
+                        bag.Add( reference );
 
-                        ((List<ResolvedAspectReference>) bySource.GetOrAdd( reference.ContainingSemantic, _ => new List<ResolvedAspectReference>() )).Add( reference );
+                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd( reference.ContainingSemantic, _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
 
                         var target = reference.ResolvedSemantic.ToAspectReferenceTarget( reference.TargetKind );
-                        ((List<ResolvedAspectReference>) byTarget.GetOrAdd( target, _ => new List<ResolvedAspectReference>() )).Add( reference );
+                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd( target, _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
                     }
                 }
 
-                if ( list.Count > 0 )
+                if ( !bag.IsEmpty )
                 {
-                    bySource[pair.Key] = list;
+                    reachableReferencesBySource[pair.Key] = bag;
                 }
             }
 
-            reachableReferencesBySource = bySource;
-            reachableReferencesByTarget = byTarget;
+            await concurrentTaskRunner.RunInParallelAsync( resolvedReferencesBySource, Process, cancellationToken );
         }
 
         private static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> GetNonInlinedReferences(
             CompilationContext intermediateCompilationContext,
-            IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> reachableReferencesBySource,
+            IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesBySource,
             IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences )
         {
             var result = 
@@ -366,7 +372,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
             LinkerInjectionRegistry injectionRegistry,
-            HashSet<IntermediateSymbolSemantic> reachableSemantics )
+            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics )
         {
             var forcefullyInitializedSymbols = new List<ISymbol>();
 

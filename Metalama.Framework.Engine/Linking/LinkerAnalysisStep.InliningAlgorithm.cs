@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -19,19 +20,19 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
-            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
                 _aspectReferencesByContainingSemantic;
 
-            private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
-            private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
+            private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSemantics;
+            private readonly ConcurrentSet<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyDictionary<ResolvedAspectReference, Inliner> _inlinedReferences;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
             public InliningAlgorithm(
                 ProjectServiceProvider serviceProvider,
-                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
-                HashSet<IntermediateSymbolSemantic> reachableSemantics,
-                HashSet<IntermediateSymbolSemantic> inlinedSemantics,
+                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
+                ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics,
+                ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults )
             {

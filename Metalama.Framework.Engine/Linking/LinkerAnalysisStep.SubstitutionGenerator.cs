@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
@@ -52,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationContext intermediateCompilationContext,
                 LinkerSyntaxHandler syntaxHandler,
                 LinkerInjectionRegistry injectionRegistry,
-                HashSet<IntermediateSymbolSemantic> inlinedSemantics,
+                ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics,
                 HashSet<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,

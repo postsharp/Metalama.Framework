@@ -14,6 +14,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -118,22 +119,35 @@ namespace Metalama.Framework.Engine.AspectWeavers
 
             var taskScheduler = this.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            var nodesBySyntaxTree = this.AspectInstances.Values
-                .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
-                .Where( s => s != null )
-                .SelectMany( s => s!.DeclaringSyntaxReferences )
-                .GroupBy( r => r.SyntaxTree );
+            var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentBag<SyntaxReference>>();
+
+            await taskScheduler.RunInParallelAsync( this.AspectInstances.Values, ProcessAspectInstance, cancellationToken );
+
+            void ProcessAspectInstance(IAspectInstance aspectInstance)
+            {
+                var symbol = aspectInstance.TargetDeclaration.GetSymbol( this._compilation.Compilation );
+
+                if ( symbol != null )
+                {
+                    foreach ( var syntaxReference in symbol.DeclaringSyntaxReferences )
+                    {
+                        nodesBySyntaxTree
+                            .GetOrAdd( syntaxReference.SyntaxTree, _ => new ConcurrentBag<SyntaxReference>() )
+                            .Add( syntaxReference );
+                    }
+                }
+            }
 
             ConcurrentLinkedList<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
             await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
 
-            async Task ProcessSyntaxTreeAsync( IGrouping<SyntaxTree, SyntaxReference> group )
+            async Task ProcessSyntaxTreeAsync( KeyValuePair<SyntaxTree, ConcurrentBag<SyntaxReference>> group )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 var oldTree = @group.Key;
-                var outerRewriter = new Rewriter( group.Select( r => r.GetSyntax() ).ToImmutableHashSet(), rewriter );
+                var outerRewriter = new Rewriter( group.Value.Select( r => r.GetSyntax() ).ToImmutableHashSet(), rewriter );
                 var oldRoot = await oldTree.GetRootAsync( cancellationToken );
                 var newRoot = outerRewriter.Visit( oldRoot )!;
 

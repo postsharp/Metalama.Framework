@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
@@ -13,14 +14,14 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed class LinkerAnalysisRegistry
     {
-        private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
-        private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
+        private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSemantics;
+        private readonly ConcurrentSet<IntermediateSymbolSemantic> _inlinedSemantics;
         private readonly IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>> _substitutions;
 
         public LinkerAnalysisRegistry(
             CompilationContext intermediateCompilation,
-            HashSet<IntermediateSymbolSemantic> reachableSemantics,
-            HashSet<IntermediateSymbolSemantic> inlinedSemantics,
+            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics,
+            ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics,
             IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>> substitutions )
         {
             this._reachableSemantics = reachableSemantics;
