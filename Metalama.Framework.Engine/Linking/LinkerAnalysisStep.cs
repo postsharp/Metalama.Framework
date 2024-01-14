@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.CompilationContext,
                 input.InjectionRegistry,
                 resolvedReferencesBySource,
-                eventFieldRaiseReferences.SelectAsArray( x => x.TargetSemantic ) );
+                eventFieldRaiseReferences.SelectAsReadOnlyList( x => x.TargetSemantic ).Distinct().ToArray() );
 
             var reachableSemantics = await reachabilityAnalyzer.RunAsync(cancellationToken);
 
