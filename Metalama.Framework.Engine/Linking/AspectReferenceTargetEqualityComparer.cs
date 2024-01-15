@@ -30,10 +30,11 @@ namespace Metalama.Framework.Engine.Linking
 
         public int GetHashCode( AspectReferenceTarget x )
         {
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
             return HashCode.Combine(
                 this._symbolComparer.GetHashCode( x.Symbol ),
                 x.SemanticKind,
-                x.TargetKind );
+                (int) x.TargetKind );
         }
     }
 }

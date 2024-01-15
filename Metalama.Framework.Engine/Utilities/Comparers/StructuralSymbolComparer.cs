@@ -102,8 +102,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 1;
             }
 
-            // PERF: Cast enum to int otherwise it will be boxed.
-            var result = ((int)x.Kind).CompareTo( (int)y.Kind );
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            var result = Comparer<int>.Default.Compare( (int) x.Kind, (int) y.Kind );
 
             if ( result != 0 )
             {
@@ -255,8 +255,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 }
             }
 
-            // PERF: Cast enum to int otherwise it will be boxed.
-            result = ((int)nsX.NamespaceKind).CompareTo( (int)nsY.NamespaceKind );
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            result = Comparer<int>.Default.Compare( (int) nsX.NamespaceKind, (int) nsY.NamespaceKind );
 
             if ( result != 0 )
             {
@@ -311,7 +311,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability ) )
             {
-                result = Comparer<NullableAnnotation>.Default.Compare( namedTypeX.NullableAnnotation, namedTypeY.NullableAnnotation );
+                // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+                result = Comparer<byte>.Default.Compare( (byte)namedTypeX.NullableAnnotation, (byte) namedTypeY.NullableAnnotation );
 
                 if ( result != 0 )
                 {
@@ -457,7 +458,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
-                        result = ((int)parameterX.RefKind).CompareTo((int)parameterY.RefKind);
+                        // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+                        result = Comparer<byte>.Default.Compare((byte) parameterX.RefKind, (byte) parameterY.RefKind);
 
                         if ( result != 0 )
                         {
@@ -515,8 +517,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 1;
             }
 
-            // PERF: Cast enum to int otherwise it will be boxed.
-            var result = ((int)typeX.TypeKind).CompareTo((int)typeY.TypeKind);
+            // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+            var result = Comparer<byte>.Default.Compare((byte) typeX.TypeKind, (byte) typeY.TypeKind);
 
             if ( result != 0 )
             {
@@ -593,7 +595,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     return 1;
                 }
 
-                var result = Comparer<SymbolKind>.Default.Compare( currentX.Kind, currentY.Kind );
+                // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+                var result = Comparer<int>.Default.Compare( (int)currentX.Kind, (int)currentY.Kind );
 
                 if ( result != 0 )
                 {
@@ -723,8 +726,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
-                                // PERF: Cast enum to int otherwise it will be boxed.
-                                h = HashCode.Combine( h, (int)parameter.RefKind );
+                                // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+                                h = HashCode.Combine( h, (byte)parameter.RefKind );
                             }
                         }
                     }
@@ -751,7 +754,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
-                                h = HashCode.Combine( h, parameter.RefKind );
+                                h = HashCode.Combine( h, (byte) parameter.RefKind );
                             }
                         }
                     }
