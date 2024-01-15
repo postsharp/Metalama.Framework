@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly PartialCompilation _intermediateCompilation;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
         private readonly IReadOnlyList<LinkerInjectedMember> _injectedMembers;
-        private readonly IReadOnlyList<ISymbol> _overrideTargets;
+        private readonly IReadOnlyCollection<ISymbol> _overrideTargets;
         private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
         private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
         private readonly IReadOnlyDictionary<ISymbol, LinkerInjectedMember> _symbolToInjectedMemberMap;
@@ -48,11 +48,11 @@ namespace Metalama.Framework.Engine.Linking
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
-            List<ISymbol> overrideTargets;
+            ConcurrentBag<ISymbol> overrideTargets;
             ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
-            Dictionary<ISymbol, ISymbol> overrideTargetMap;
-            Dictionary<ISymbol, LinkerInjectedMember> symbolToInjectedMemberMap;
-            Dictionary<LinkerInjectedMember, ISymbol> injectedMemberToSymbolMap;
+            ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
+            ConcurrentDictionary<ISymbol, LinkerInjectedMember> symbolToInjectedMemberMap;
+            ConcurrentDictionary<LinkerInjectedMember, ISymbol> injectedMemberToSymbolMap;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
@@ -64,11 +64,11 @@ namespace Metalama.Framework.Engine.Linking
             this._builderToTransformationMap = (IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>) builderToTransformationMap;
 
             var injectedMemberByNodeId = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
-            this._overrideTargets = overrideTargets = new List<ISymbol>();
+            this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
             this._overrideTargetToOverrideListMap = overrideMap = new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._overrideToOverrideTargetMap = overrideTargetMap = new Dictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new Dictionary<ISymbol, LinkerInjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new Dictionary<LinkerInjectedMember, ISymbol>();
+            this._overrideToOverrideTargetMap = overrideTargetMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new ConcurrentDictionary<ISymbol, LinkerInjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<LinkerInjectedMember, ISymbol>();
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
             //       the same spirit as the Index* methods.
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach (var overrideSymbol in overrides )
                 {
-                    overrideTargetMap.Add( overrideSymbol, overrideTargetSymbol );
+                    overrideTargetMap.TryAdd( overrideSymbol, overrideTargetSymbol );
                 }
             }
 
@@ -269,7 +269,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets all symbols for overridden members.
         /// </summary>
         /// <returns>Enumeration of symbols.</returns>
-        public IReadOnlyList<ISymbol> GetOverriddenMembers()
+        public IReadOnlyCollection<ISymbol> GetOverriddenMembers()
         {
             return this._overrideTargets;
         }
