@@ -18,9 +18,6 @@ possible to produce the final compilation, which is the output of Metalama Frame
   uses `LinkerInjectionNameProvider`, `LinkerProceedImplementationFactory`, `LinkerProceedImpl`, `LinkerLexicalScope`
   and `LinkerInjectionNameProvides` to create `MemberInjectionContext` object, which is consumed by
   transformations.
-* Every `InjectedMember`'s syntax need to be marked so that we can translate between transformations and declarations
-  in the intermediate compilation. Resulting node with assigned identifier is wrapped into `LinkerInjectedMember`
-  object and stored (in `LinkerInjectionStep.InjectedMemberCollection`).
 * Original syntax trees are rewritten (using `LinkerInjectionStep.Rewriter` class) to include syntax of
   InjectedMember in the correct place.
 * All of collected information results in the creation of `LinkerInjectionRegistry`, which is used during the

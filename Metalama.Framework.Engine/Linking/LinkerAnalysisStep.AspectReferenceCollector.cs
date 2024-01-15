@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -161,7 +162,7 @@ namespace Metalama.Framework.Engine.Linking
                 var injectedMembers = this._injectionRegistry.GetInjectedMembers();
                 await this._concurrentTaskRunner.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
 
-                void ProcessInjectedMember( LinkerInjectedMember injectedMember )
+                void ProcessInjectedMember( InjectedMember injectedMember )
                 {
                     var symbol = this._injectionRegistry.GetSymbolForInjectedMember( injectedMember );
 

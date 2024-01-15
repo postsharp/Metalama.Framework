@@ -25,17 +25,15 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed class LinkerInjectionRegistry
     {
-        public const string InjectedNodeIdAnnotationId = "AspectLinker_InjectedNodeId";
-
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly PartialCompilation _intermediateCompilation;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
-        private readonly IReadOnlyList<LinkerInjectedMember> _injectedMembers;
+        private readonly IReadOnlyList<InjectedMember> _injectedMembers;
         private readonly IReadOnlyCollection<ISymbol> _overrideTargets;
         private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
         private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
-        private readonly IReadOnlyDictionary<ISymbol, LinkerInjectedMember> _symbolToInjectedMemberMap;
-        private readonly IReadOnlyDictionary<LinkerInjectedMember, ISymbol> _injectedMemberToSymbolMap;
+        private readonly IReadOnlyDictionary<ISymbol, InjectedMember> _symbolToInjectedMemberMap;
+        private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
         private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
 
         public LinkerInjectionRegistry(
@@ -43,7 +41,7 @@ namespace Metalama.Framework.Engine.Linking
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             IEnumerable<SyntaxTreeTransformation> transformations,
-            IReadOnlyCollection<LinkerInjectedMember> injectedMembers,
+            IReadOnlyCollection<InjectedMember> injectedMembers,
             IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
@@ -51,8 +49,8 @@ namespace Metalama.Framework.Engine.Linking
             ConcurrentBag<ISymbol> overrideTargets;
             ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
             ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
-            ConcurrentDictionary<ISymbol, LinkerInjectedMember> symbolToInjectedMemberMap;
-            ConcurrentDictionary<LinkerInjectedMember, ISymbol> injectedMemberToSymbolMap;
+            ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
+            ConcurrentDictionary<InjectedMember, ISymbol> injectedMemberToSymbolMap;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
@@ -63,21 +61,20 @@ namespace Metalama.Framework.Engine.Linking
             this._injectedMembers = injectedMembers.ToList();
             this._builderToTransformationMap = (IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>) builderToTransformationMap;
 
-            var injectedMemberByNodeId = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
             this._overrideTargetToOverrideListMap = overrideMap = new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
             this._overrideToOverrideTargetMap = overrideTargetMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new ConcurrentDictionary<ISymbol, LinkerInjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<LinkerInjectedMember, ISymbol>();
+            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new ConcurrentDictionary<ISymbol, InjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
             //       the same spirit as the Index* methods.
             //       However, even for very large projects it seems to would have very small impact.
 
             var overriddenDeclarations = new ConcurrentDictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
-            var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, LinkerInjectedMember>();
+            var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, InjectedMember>();
 
-            void ProcessLinkerInjectionMember( LinkerInjectedMember injectedMember )
+            void ProcessLinkerInjectionMember( InjectedMember injectedMember )
             {
                 var injectedMemberSymbol = GetSymbolForInjectedMember( injectedMember );
 
@@ -127,7 +124,7 @@ namespace Metalama.Framework.Engine.Linking
             concurrentTaskRunner.RunInParallelAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-            ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
+            ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember )
             {
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
                 var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
@@ -210,7 +207,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
-        public LinkerInjectedMember? GetInjectedMemberForSymbol( ISymbol symbol )
+        public InjectedMember? GetInjectedMemberForSymbol( ISymbol symbol )
         {
             switch ( symbol )
             {
@@ -251,7 +248,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="injectedMember"></param>
         /// <returns></returns>
-        public ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
+        public ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember )
         {
             return this._injectedMemberToSymbolMap[injectedMember];
         }
@@ -260,7 +257,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets introduced members for all transformations.
         /// </summary>
         /// <returns>Enumeration of introduced members.</returns>
-        public IEnumerable<LinkerInjectedMember> GetInjectedMembers()
+        public IEnumerable<InjectedMember> GetInjectedMembers()
         {
             return this._injectedMembers;
         }

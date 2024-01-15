@@ -289,11 +289,11 @@ namespace Metalama.Framework.Engine.Linking
             AspectReferenceSpecification referenceSpecification,
             MemberLayerIndex annotationLayerIndex,
             ISymbol referencedSymbol,
-            LinkerInjectedMember? targetIntroductionInjectedMember,
+            InjectedMember? targetIntroductionInjectedMember,
             MemberLayerIndex? targetIntroductionIndex,
             IReadOnlyList<OverrideIndex> overrideIndices,
             out MemberLayerIndex resolvedIndex,
-            out LinkerInjectedMember? resolvedInjectedMember )
+            out InjectedMember? resolvedInjectedMember )
         {
             resolvedInjectedMember = null;
 
@@ -406,7 +406,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private MemberLayerIndex? GetIntroductionLogicalIndex( LinkerInjectedMember? injectedMember )
+        private MemberLayerIndex? GetIntroductionLogicalIndex( InjectedMember? injectedMember )
         {
             // This supports only field promotions.
             if ( injectedMember == null )
@@ -654,7 +654,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="referencedSymbol"></param>
         /// <param name="resolvedInjectedMember"></param>
         /// <returns></returns>
-        private ISymbol GetSymbolFromInjectedMember( ISymbol referencedSymbol, LinkerInjectedMember resolvedInjectedMember )
+        private ISymbol GetSymbolFromInjectedMember( ISymbol referencedSymbol, InjectedMember resolvedInjectedMember )
         {
             var symbol = this._injectionRegistry.GetSymbolForInjectedMember( resolvedInjectedMember );
 
@@ -712,7 +712,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private record struct OverrideIndex(MemberLayerIndex Index, LinkerInjectedMember Override);
+        private record struct OverrideIndex(MemberLayerIndex Index, InjectedMember Override);
 
         private readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
         {

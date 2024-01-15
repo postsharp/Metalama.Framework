@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -91,7 +92,7 @@ namespace Metalama.Framework.Engine.Linking
                 await this._concurrentTaskRunner.RunInParallelAsync( this._injectionRegistry.GetOverriddenMembers(), ProcessOverriddenMember, cancellationToken );
 
                 // Run DFS from any non-discardable declaration.
-                void ProcessInjectedMember( LinkerInjectedMember injectedMember )
+                void ProcessInjectedMember( InjectedMember injectedMember )
                 {
                     if ( injectedMember.Syntax.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.NotDiscardable ) )
                     {

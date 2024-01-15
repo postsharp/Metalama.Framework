@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -8,11 +9,11 @@ namespace Metalama.Framework.Engine.Linking
     {
         private struct ForcefullyInitializedType
         {
-            public IntermediateSymbolSemantic<IMethodSymbol>[] Constructors { get; }
+            public IReadOnlyList<IntermediateSymbolSemantic<IMethodSymbol>> Constructors { get; }
 
-            public ISymbol[] InitializedSymbols { get; }
+            public IReadOnlyList<ISymbol> InitializedSymbols { get; }
 
-            public ForcefullyInitializedType( IntermediateSymbolSemantic<IMethodSymbol>[] constructors, ISymbol[] initializedSymbols )
+            public ForcefullyInitializedType( IReadOnlyList<IntermediateSymbolSemantic<IMethodSymbol>> constructors, IReadOnlyList<ISymbol> initializedSymbols )
             {
                 this.Constructors = constructors;
                 this.InitializedSymbols = initializedSymbols;
