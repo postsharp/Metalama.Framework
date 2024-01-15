@@ -823,7 +823,7 @@ internal sealed partial class LinkerInjectionStep
                         continue;
                     }
 
-                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                    var declaration = SyntaxFactoryEx.VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists, originalNode );
 
                     var fieldDeclaration = FieldDeclaration( default, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
@@ -1021,7 +1021,7 @@ internal sealed partial class LinkerInjectionStep
                 // If we have changes in attributes and several members, we have to split them.
                 foreach ( var variable in originalNode.Declaration.Variables )
                 {
-                    var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                    var declaration = SyntaxFactoryEx.VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
 
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists, node );
 

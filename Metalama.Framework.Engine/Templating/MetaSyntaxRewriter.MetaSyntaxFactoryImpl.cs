@@ -51,6 +51,12 @@ namespace Metalama.Framework.Engine.Templating
                     this.Type( typeof(SyntaxFactory) ),
                     SyntaxFactory.IdentifierName( name ) );
 
+            public MemberAccessExpressionSyntax SyntaxFactoryExMethod( string name )
+                => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    this.Type( typeof(SyntaxFactoryEx) ),
+                    SyntaxFactory.IdentifierName( name ) );
+
             public MemberAccessExpressionSyntax GenericSyntaxFactoryMethod( string name, params TypeSyntax[] typeArguments )
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,

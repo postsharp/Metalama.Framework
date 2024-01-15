@@ -226,7 +226,8 @@ namespace Metalama.Framework.Engine.Templating
 
         protected virtual ExpressionSyntax Transform( SyntaxToken token )
         {
-            var hasTrailingTrivia = token.TrailingTrivia.Span.Length != 0;
+            // TODO: remove
+            var hasTrailingTrivia = false;
 
             switch ( token.Kind() )
             {

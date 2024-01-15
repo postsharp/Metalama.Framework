@@ -253,7 +253,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
                                 Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                        VariableDeclaration(
+                        SyntaxFactoryEx.VariableDeclaration(
                             eventType.WithTrailingTrivia( Space ),
                             SingletonSeparatedList(
                                 VariableDeclarator(

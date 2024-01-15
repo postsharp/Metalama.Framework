@@ -204,14 +204,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var emptyBody =
                 isIterator
-                    ? SyntaxFactoryEx.FormattedBlock(
-                        YieldStatement(
-                            SyntaxKind.YieldBreakStatement,
-                            List<AttributeListSyntax>(),
-                            Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
-                            Token( TriviaList(), SyntaxKind.BreakKeyword, TriviaList( ElasticSpace ) ),
-                            null,
-                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
+                    ? SyntaxFactoryEx.FormattedBlock( SyntaxFactoryEx.YieldBreakStatement() )
                     : resultType.OriginalDefinition.SpecialType == SpecialType.System_Void
                         ? SyntaxFactoryEx.FormattedBlock()
                         : SyntaxFactoryEx.FormattedBlock(

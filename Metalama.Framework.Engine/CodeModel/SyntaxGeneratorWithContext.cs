@@ -231,10 +231,10 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
     private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation, bool removeDefaultValues )
         => SeparatedList(
             method.Parameters.SelectAsReadOnlyList(
-                p => Parameter(
+                p => SyntaxFactoryEx.Parameter(
                     this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                     p.GetSyntaxModifierList(),
-                    this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                    this.Type( p.Type.GetSymbol() ),
                     Identifier( p.Name ),
                     removeDefaultValues || p.DefaultValue == null
                         ? null

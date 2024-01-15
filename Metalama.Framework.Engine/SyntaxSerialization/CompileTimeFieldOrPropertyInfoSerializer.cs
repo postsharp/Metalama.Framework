@@ -2,8 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
@@ -27,9 +27,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 _ => throw new NotImplementedException()
             };
 
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ) )
-                .AddArgumentListArguments( Argument( fieldInfoOrPropertyInfo ) )
-;
+            return SyntaxFactoryEx.ObjectCreationExpression(
+                serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ),
+                Argument( fieldInfoOrPropertyInfo ) );
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

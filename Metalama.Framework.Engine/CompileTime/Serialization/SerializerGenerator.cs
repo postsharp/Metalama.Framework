@@ -430,15 +430,12 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             body =
                 SyntaxFactoryEx.FormattedBlock(
                     ThrowStatement(
-                        ObjectCreationExpression(
+                        SyntaxFactoryEx.ObjectCreationExpression(
                             this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(InvalidOperationException) ) ),
-                            ArgumentList(
-                                SingletonSeparatedList(
-                                    Argument(
-                                        LiteralExpression(
-                                            SyntaxKind.StringLiteralExpression,
-                                            Literal( "Attempting to instantiate abstract class." ) ) ) ) ),
-                            null ) ) );
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( "Attempting to instantiate abstract class." ) ) ) ) ) );
         }
         else
         {
@@ -446,10 +443,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                        ObjectCreationExpression(
+                        SyntaxFactoryEx.ObjectCreationExpression(
                             serializedTypeSyntax,
-                            ArgumentList( SingletonSeparatedList( Argument( IdentifierName( createInstanceMethod.Parameters[1].Name ) ) ) ),
-                            null ),
+                            Argument( IdentifierName( createInstanceMethod.Parameters[1].Name ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) );
         }
 
@@ -469,7 +465,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
         return
             LocalDeclarationStatement(
-                VariableDeclaration(
+                SyntaxFactoryEx.VariableDeclaration(
                     serializedTypeSyntax,
                     SingletonSeparatedList(
                         VariableDeclarator(
@@ -627,10 +623,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             Block(
                 ReturnStatement(
                     Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                    ObjectCreationExpression(
+                    SyntaxFactoryEx.ObjectCreationExpression(
                         serializedTypeSyntax,
-                        ArgumentList( SingletonSeparatedList( Argument( IdentifierName( deserializeMethod.Parameters[0].Name ) ) ) ),
-                        null ),
+                        Argument( IdentifierName( deserializeMethod.Parameters[0].Name ) ) ),
                     Token( SyntaxKind.SemicolonToken ) ) );
 
         return this.CreateOverrideMethod(

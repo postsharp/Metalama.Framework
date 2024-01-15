@@ -28,7 +28,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
     internal static readonly DiagnosticDescriptor _syntaxNodeWith = new(
         "LAMA0831",
         "Avoid chained With calls on SyntaxNodes.",
-        "Avoid chained With calls on SyntaxNodes, use the Update method instead to avoid allocating garbage nodes.",
+        "Avoid chained With calls on SyntaxNodes, use the PartialUpdate method instead to avoid allocating garbage nodes.",
         "Metalama",
         DiagnosticSeverity.Warning,
         true );

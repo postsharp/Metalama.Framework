@@ -388,17 +388,14 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         // performance overhead. It is more efficient to do a foreach than an `await foreach`, so we do it.
         // However, the user may have stored the result in a differently-typed variable, so we need to cast.
 
-        var forEach = ForEachStatement(
+        var forEach = SyntaxFactoryEx.ForEachStatement(
+                isAsync: true,
                 SyntaxFactoryEx.VarIdentifier(),
                 Identifier( resultItem ),
                 returnExpression,
                 Block(
                     SingletonList<StatementSyntax>(
-                        YieldStatement(
-                            SyntaxKind.YieldReturnStatement,
-                            IdentifierName( resultItem ) ) ) ) )
-            .WithAwaitKeyword( Token( SyntaxKind.AwaitKeyword ) )
-;
+                        SyntaxFactoryEx.YieldReturnStatement( IdentifierName( resultItem ) ) ) ) );
 
         return Block( forEach, CreateYieldBreakStatement() ).WithFlattenBlockAnnotation();
     }
@@ -445,11 +442,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             var enumerator = this.LexicalScope.GetUniqueIdentifier( "enumerator" );
 
-            local = VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                .WithVariables(
-                    SingletonSeparatedList(
-                        VariableDeclarator( Identifier( enumerator ) )
-                            .WithInitializer( EqualsValueClause( returnExpression ) ) ) );
+            local = SyntaxFactoryEx.VariableDeclaration(
+                SyntaxFactoryEx.VarIdentifier(),
+                SingletonSeparatedList(
+                    VariableDeclarator( Identifier( enumerator ) )
+                        .WithInitializer( EqualsValueClause( returnExpression ) ) ) );
 
             usingExpression = null;
             enumeratorIdentifier = IdentifierName( enumerator );
@@ -463,8 +460,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                         enumeratorIdentifier,
                         IdentifierName( "MoveNextAsync" ) ) ) ),
             Block(
-                YieldStatement(
-                    SyntaxKind.YieldReturnStatement,
+                SyntaxFactoryEx.YieldReturnStatement(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         enumeratorIdentifier,
@@ -484,7 +480,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     }
 
     private static YieldStatementSyntax CreateYieldBreakStatement()
-        => YieldStatement( SyntaxKind.YieldBreakStatement ).WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
+        => SyntaxFactoryEx.YieldBreakStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );
 
     private static StatementSyntax CreateReturnStatementVoid( ExpressionSyntax? returnExpression )
     {

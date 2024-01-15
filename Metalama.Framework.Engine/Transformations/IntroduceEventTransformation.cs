@@ -54,13 +54,13 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     eventBuilder.GetAttributeLists( context ).AddRange( GetAdditionalAttributeListsForEventField() ),
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                    VariableDeclaration(
-                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
+                    SyntaxFactoryEx.VariableDeclaration(
+                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ),
                         SeparatedList(
                             new[]
                             {
                                 VariableDeclarator(
-                                    Identifier( TriviaList(), eventBuilder.Name, TriviaList( ElasticSpace ) ),
+                                    Identifier( eventBuilder.Name ),
                                     null,
                                     initializerExpression != null
                                         ? EqualsValueClause( initializerExpression )

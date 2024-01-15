@@ -40,8 +40,9 @@ namespace Metalama.Framework.Engine.Templating
                 => SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     this._templateSyntaxFactoryIdentifier,
-                    SyntaxFactory.GenericName( SyntaxFactory.Identifier( name ) )
-                        .WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
+                    SyntaxFactory.GenericName(
+                        SyntaxFactory.Identifier( name ),
+                        SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( genericParameters ) ) ) );
 
             /// <summary>
             /// Generates a call to the <see cref="ITemplateSyntaxFactory.GetUniqueIdentifier"/> method.

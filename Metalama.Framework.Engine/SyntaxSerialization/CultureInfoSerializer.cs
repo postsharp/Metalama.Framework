@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Globalization;
@@ -12,14 +12,13 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         public override ExpressionSyntax Serialize( CultureInfo obj, SyntaxSerializationContext serializationContext )
         {
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(CultureInfo) ) )
-                .AddArgumentListArguments(
-                    Argument(
-                        LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            Literal( obj.Name ) ) ),
-                    Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) )
-;
+            return SyntaxFactoryEx.ObjectCreationExpression(
+                serializationContext.GetTypeSyntax( typeof(CultureInfo) ),
+                Argument(
+                    LiteralExpression(
+                        SyntaxKind.StringLiteralExpression,
+                        Literal( obj.Name ) ) ),
+                Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) );
         }
 
         public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

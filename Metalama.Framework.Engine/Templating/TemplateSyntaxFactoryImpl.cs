@@ -266,7 +266,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 var localDeclarationStatement = SyntaxFactory.LocalDeclarationStatement(
-                        SyntaxFactory.VariableDeclaration(
+                        SyntaxFactoryEx.VariableDeclaration(
                             variableType,
                             SyntaxFactory.SingletonSeparatedList(
                                 SyntaxFactory.VariableDeclarator(
@@ -291,7 +291,7 @@ namespace Metalama.Framework.Engine.Templating
             else
             {
                 return SyntaxFactory.LocalDeclarationStatement(
-                    SyntaxFactory.VariableDeclaration(
+                    SyntaxFactoryEx.VariableDeclaration(
                         type,
                         SyntaxFactory.SingletonSeparatedList(
                             SyntaxFactory.VariableDeclarator(
@@ -540,5 +540,11 @@ namespace Metalama.Framework.Engine.Templating
 
         public TemplateTypeArgument TemplateTypeArgument( string name, Type type )
             => TemplateBindingHelper.CreateTemplateTypeArgument( name, TypeFactory.Implementation.GetTypeByReflectionType( type ) );
+
+        public T? AddTrailingSpaceIfNecessary<T>( T? node )
+            where T : CSharpSyntaxNode
+            => SyntaxFactoryEx.AddTrailingSpaceIfNecessary( node );
+
+        public SyntaxToken AddTrailingSpaceIfNecessary( SyntaxToken token ) => SyntaxFactoryEx.AddTrailingSpaceIfNecessary( token );
     }
 }

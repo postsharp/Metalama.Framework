@@ -402,7 +402,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             case { Type: NullableTypeSyntax { ElementType: IdentifierNameSyntax { Identifier.Text: "dynamic" } } }:
                 // Variable of dynamic? type needs to become var type (without the ?).
                 return base.TransformVariableDeclaration(
-                    VariableDeclaration(
+                    SyntaxFactoryEx.VariableDeclaration(
                         SyntaxFactoryEx.VarIdentifier(),
                         node.Variables ) );
 
@@ -786,28 +786,27 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
         else
         {
-            return ObjectCreationExpression( dictionaryType )
-                .WithInitializer(
-                    InitializerExpression(
-                        SyntaxKind.ObjectInitializerExpression,
-                        SeparatedList<ExpressionSyntax>(
-                            this._templateCompileTimeTypeParameterNames.SelectAsReadOnlyCollection(
-                                name =>
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        ImplicitElementAccess()
-                                            .WithArgumentList(
-                                                BracketedArgumentList(
-                                                    SingletonSeparatedList(
-                                                        Argument(
-                                                            LiteralExpression(
-                                                                SyntaxKind.StringLiteralExpression,
-                                                                Literal( name ) ) ) ) ) ),
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            IdentifierName( name ),
-                                            IdentifierName( propertyName ) ) ) ) ) ) )
-;
+            return SyntaxFactoryEx.ObjectCreationExpression(
+                dictionaryType,
+                arguments: null,
+                InitializerExpression(
+                    SyntaxKind.ObjectInitializerExpression,
+                    SeparatedList<ExpressionSyntax>(
+                        this._templateCompileTimeTypeParameterNames.SelectAsReadOnlyCollection(
+                            name =>
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    ImplicitElementAccess(
+                                        BracketedArgumentList(
+                                            SingletonSeparatedList(
+                                                Argument(
+                                                    LiteralExpression(
+                                                        SyntaxKind.StringLiteralExpression,
+                                                        Literal( name ) ) ) ) ) ),
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        IdentifierName( name ),
+                                        IdentifierName( propertyName ) ) ) ) ) ) );
         }
     }
 
@@ -1155,8 +1154,9 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                     var variableIdentifier = this._currentMetaContext!.GetVariable( symbol.Name );
 
                     var variableDeclaration = LocalDeclarationStatement(
-                        VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                            .AddVariables( VariableDeclarator( variableIdentifier, default, EqualsValueClause( receiver ) ) ) );
+                        SyntaxFactoryEx.VariableDeclaration(
+                            SyntaxFactoryEx.VarIdentifier(),
+                            SingletonSeparatedList( VariableDeclarator( variableIdentifier, default, EqualsValueClause( receiver ) ) ) ) );
 
                     this._currentMetaContext.Statements.Add( variableDeclaration );
 
@@ -1717,13 +1717,13 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             this._currentMetaContext!.Statements.Add(
                 LocalDeclarationStatement(
-                        VariableDeclaration( listType )
-                            .WithVariables(
-                                SingletonSeparatedList(
-                                    VariableDeclarator( Identifier( this._currentMetaContext.StatementListVariableName ) )
-                                        .WithInitializer( EqualsValueClause( SyntaxFactoryEx.ObjectCreationExpression( listType, ArgumentList() ) ) ) ) ) )
-                    .WithLeadingTrivia( this.GetIndentation() )
-                    .WithTrailingTrivia( LineFeed ) );
+                        SyntaxFactoryEx.VariableDeclaration(
+                            listType,
+                            SingletonSeparatedList(
+                                VariableDeclarator(
+                                    Identifier( this._currentMetaContext.StatementListVariableName ),
+                                    default,
+                                    EqualsValueClause( SyntaxFactoryEx.ObjectCreationExpression( listType, ArgumentList() ) ) ) ) ) ) );
 
             var previousTemplateMetaSyntaxFactory = this._templateMetaSyntaxFactory;
 
@@ -1741,25 +1741,23 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 this._currentMetaContext!.Statements.Add(
                     LocalDeclarationStatement(
-                            VariableDeclaration( this._templateSyntaxFactoryType )
-                                .WithVariables(
-                                    SingletonSeparatedList(
-                                        VariableDeclarator( Identifier( _templateSyntaxFactoryLocalName ) )
-                                            .WithInitializer(
-                                                EqualsValueClause(
-                                                    InvocationExpression(
-                                                            previousTemplateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                                                                nameof(ITemplateSyntaxFactory.ForLocalFunction) ) )
-                                                        .WithArgumentList(
-                                                            ArgumentList(
-                                                                SeparatedList(
-                                                                    new[]
-                                                                    {
-                                                                        Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ),
-                                                                        Argument( map ),
-                                                                        Argument( SyntaxFactoryEx.LiteralExpression( localFunctionSymbol.IsAsync ) )
-                                                                    } ) ) ) ) ) ) ) )
-                        .WithLeadingTrivia( this.GetIndentation() ) );
+                            SyntaxFactoryEx.VariableDeclaration(
+                                this._templateSyntaxFactoryType,
+                                SingletonSeparatedList(
+                                    VariableDeclarator(
+                                        Identifier( _templateSyntaxFactoryLocalName ),
+                                        default,
+                                        EqualsValueClause(
+                                            InvocationExpression(
+                                                previousTemplateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.ForLocalFunction) ),
+                                                ArgumentList(
+                                                    SeparatedList(
+                                                        new[]
+                                                        {
+                                                            Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ),
+                                                            Argument( map ),
+                                                            Argument( SyntaxFactoryEx.LiteralExpression( localFunctionSymbol.IsAsync ) )
+                                                        } ) ) ) ) ) ) ) ) );
             }
 
             this.ReserveLocalFunctionNames( statements );
@@ -2196,12 +2194,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // The expression may contain typeof, nameof, ...
         var expression = this.TransformCompileTimeCode( node.Expression );
 
-        // It seems that trivia can be lost upstream, there can be a missing one between the 'in' keyword and the expression. Add them to be sure.
-        return ForEachStatement(
-            node.Type.WithTrailingTrivia( ElasticSpace ),
-            node.Identifier.WithTrailingTrivia( ElasticSpace ),
-            expression.WithLeadingTrivia( ElasticSpace ),
-            statement );
+        return SyntaxFactoryEx.ForEachStatement( node.Type, node.Identifier, expression, statement );
     }
 
     /// <summary>

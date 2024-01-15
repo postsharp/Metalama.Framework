@@ -43,8 +43,8 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
             FieldDeclaration(
                 fieldBuilder.GetAttributeLists( context ),
                 fieldBuilder.GetSyntaxModifierList(),
-                VariableDeclaration(
-                    syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                SyntaxFactoryEx.VariableDeclaration(
+                    syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() ),
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( fieldBuilder.Name ),

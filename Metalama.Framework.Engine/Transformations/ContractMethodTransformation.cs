@@ -127,22 +127,26 @@ namespace Metalama.Framework.Engine.Transformations
                     // var returnValue = <proceed>;
                     statements.Add(
                         LocalDeclarationStatement(
-                            VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                                .WithVariables(
-                                    SingletonSeparatedList(
-                                        VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
-                                            .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
+                            SyntaxFactoryEx.VariableDeclaration(
+                                SyntaxFactoryEx.VarIdentifier(),
+                                SingletonSeparatedList(
+                                    VariableDeclarator(
+                                        Identifier( returnValueName ),
+                                        default,
+                                        EqualsValueClause( proceedExpression ) ) ) ) ) );
 
                     if ( returnValueName != contractInputName )
                     {
                         // var contractInput = returnValue;
                         statements.Add(
                             LocalDeclarationStatement(
-                                VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                                    .WithVariables(
-                                        SingletonSeparatedList(
-                                            VariableDeclarator( Identifier( contractInputName.AssertNotNull() ).WithTrailingTrivia( ElasticSpace ) )
-                                                .WithInitializer( EqualsValueClause( IdentifierName( returnValueName ) ) ) ) ) ) );
+                                SyntaxFactoryEx.VariableDeclaration(
+                                    SyntaxFactoryEx.VarIdentifier(),
+                                    SingletonSeparatedList(
+                                        VariableDeclarator(
+                                            Identifier( contractInputName.AssertNotNull() ),
+                                            default,
+                                            EqualsValueClause( IdentifierName( returnValueName ) ) ) ) ) ) );
                     }
                 }
                 else
@@ -241,25 +245,13 @@ namespace Metalama.Framework.Engine.Transformations
                 var returnItemName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnItem" );
 
                 statements.Add(
-                    ForEachStatement(
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.IsAsync
-                            ? Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) )
-                            : default,
-                        Token( SyntaxKind.ForEachKeyword ),
-                        Token( SyntaxKind.OpenParenToken ),
+                    SyntaxFactoryEx.ForEachStatement(
+                        this.OverriddenDeclaration.IsAsync,
                         SyntaxFactoryEx.VarIdentifier(),
                         Identifier( returnItemName ),
-                        Token( TriviaList( ElasticSpace ), SyntaxKind.InKeyword, TriviaList( ElasticSpace ) ),
                         enumerableExpression,
-                        Token( SyntaxKind.CloseParenToken ),
                         Block(
-                            YieldStatement(
-                                SyntaxKind.YieldReturnStatement,
-                                Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
-                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                IdentifierName( returnItemName ),
-                                Token( SyntaxKind.SemicolonToken ) ) ) ) );
+                            SyntaxFactoryEx.YieldReturnStatement( IdentifierName( returnItemName ) ) ) ) );
             }
 
             void CreateEnumeratorEpilogue( ExpressionSyntax enumeratorExpression )
@@ -287,15 +279,11 @@ namespace Metalama.Framework.Engine.Transformations
                         moveNextExpression,
                         Token( TriviaList(), SyntaxKind.CloseParenToken, TriviaList() ),
                         Block(
-                            YieldStatement(
-                                SyntaxKind.YieldReturnStatement,
-                                Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
-                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                            SyntaxFactoryEx.YieldReturnStatement(
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     enumeratorExpression,
-                                    IdentifierName( "Current" ) ),
-                                Token( SyntaxKind.SemicolonToken ) ) ) ) );
+                                    IdentifierName( "Current" ) ) ) ) ) );
             }
         }
 

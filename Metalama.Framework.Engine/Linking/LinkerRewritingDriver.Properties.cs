@@ -282,8 +282,8 @@ namespace Metalama.Framework.Engine.Linking
             return FieldDeclaration(
                     attributes,
                     TokenList( modifiers ),
-                    VariableDeclaration(
-                        type.WithTrailingTrivia( Space ),
+                    SyntaxFactoryEx.VariableDeclaration(
+                        type,
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),

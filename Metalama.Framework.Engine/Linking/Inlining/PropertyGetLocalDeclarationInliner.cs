@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
             return SyntaxFactoryEx.FormattedBlock(
                     LocalDeclarationStatement(
-                            VariableDeclaration(
+                            SyntaxFactoryEx.VariableDeclaration(
                                 syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
                                 SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
                         .WithTrailingTrivia( ElasticLineFeed ),

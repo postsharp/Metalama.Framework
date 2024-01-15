@@ -17,7 +17,6 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28973
 
     class ServiceLocator : IServiceProvider
     {
-
         private static readonly ServiceLocator _instance = new();
         private readonly Dictionary<Type, object> _services = new();
 

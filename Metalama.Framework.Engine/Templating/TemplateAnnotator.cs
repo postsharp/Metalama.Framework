@@ -1377,18 +1377,12 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         var identifierClassification = forEachScope == CompileTimeOnly ? TextSpanClassification.CompileTimeVariable : default;
 
         var transformedNode =
-            ForEachStatement(
-                    node.AwaitKeyword,
-                    node.ForEachKeyword,
-                    node.OpenParenToken,
-                    node.Type.AddTargetScopeAnnotation( forEachScope ),
-                    node.Identifier.AddColoringAnnotation( identifierClassification ),
-                    node.InKeyword,
-                    annotatedExpression,
-                    node.CloseParenToken,
-                    annotatedStatement.AddTargetScopeAnnotation( forEachScope ) )
-                .AddScopeAnnotation( forEachScope )
-                .WithSymbolAnnotationsFrom( node );
+            node.PartialUpdate(
+                type: node.Type.AddTargetScopeAnnotation( forEachScope ),
+                identifier: node.Identifier.AddColoringAnnotation( identifierClassification ),
+                expression: annotatedExpression,
+                statement: annotatedStatement.AddTargetScopeAnnotation( forEachScope ) )
+                .AddScopeAnnotation( forEachScope );
 
         return transformedNode;
     }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             var keyType = dictionaryType.GetGenericArguments()[0];
             var valueType = dictionaryType.GetGenericArguments()[1];
 
-            var creationExpression = ObjectCreationExpression( serializationContext.GetTypeSyntax( dictionaryType ) );
+            var creationExpression = SyntaxFactoryEx.ObjectCreationExpression( serializationContext.GetTypeSyntax( dictionaryType ), arguments: null, initializer: null );
 
             var defaultComparer = typeof(EqualityComparer<>)
                 .MakeGenericType( keyType )
@@ -89,8 +90,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     var comparerExpression = MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(StringComparer) ),
-                            IdentifierName( comparerName ) )
-;
+                            IdentifierName( comparerName ) );
 
                     creationExpression = creationExpression.AddArgumentListArguments( Argument( comparerExpression ) );
                 }
@@ -123,8 +123,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             creationExpression = creationExpression.WithInitializer(
                     InitializerExpression(
                         SyntaxKind.CollectionInitializerExpression,
-                        SeparatedList<ExpressionSyntax>( lt ) ) )
-;
+                        SeparatedList<ExpressionSyntax>( lt ) ) );
 
             return creationExpression;
         }

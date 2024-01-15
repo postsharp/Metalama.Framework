@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 statements.Add(
                     LocalDeclarationStatement(
-                            VariableDeclaration(
+                            SyntaxFactoryEx.VariableDeclaration(
                                 context.SyntaxGenerationContext.SyntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
                                 SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
                         .WithTrailingTrivia( ElasticLineFeed )

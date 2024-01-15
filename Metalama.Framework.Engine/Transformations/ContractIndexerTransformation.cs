@@ -153,12 +153,13 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
             {
                 getterStatements.Add(
                     SyntaxFactory.LocalDeclarationStatement(
-                        SyntaxFactory.VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                            .WithVariables(
-                                SyntaxFactory.SingletonSeparatedList(
-                                    SyntaxFactory.VariableDeclarator(
-                                            SyntaxFactory.Identifier( getterReturnValueLocalName! ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) )
-                                        .WithInitializer( SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
+                        SyntaxFactoryEx.VariableDeclaration(
+                            SyntaxFactoryEx.VarIdentifier(),
+                            SyntaxFactory.SingletonSeparatedList(
+                                SyntaxFactory.VariableDeclarator(
+                                    SyntaxFactory.Identifier( getterReturnValueLocalName! ),
+                                    default,
+                                    SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
 
                 getterStatements.AddRange( getterOutputStatements );
 

@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -248,23 +247,20 @@ internal static partial class SyntaxFactoryEx
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
 
-    public static ObjectCreationExpressionSyntax ObjectCreationExpression(
-        TypeSyntax type,
-        ArgumentListSyntax? arguments,
-        InitializerExpressionSyntax? initializer = null )
-        => SyntaxFactory.ObjectCreationExpression(
-            SyntaxFactory.Token( default, SyntaxKind.NewKeyword, new( SyntaxFactory.Space ) ),
-            type,
-            arguments,
-            initializer );
+    public static ObjectCreationExpressionSyntax ObjectCreationExpression( TypeSyntax type, ArgumentListSyntax? arguments, InitializerExpressionSyntax? initializer = null )
+        => SyntaxFactory.ObjectCreationExpression( SyntaxFactory.Token( default, SyntaxKind.NewKeyword, new( SyntaxFactory.ElasticSpace ) ), type, arguments, initializer );
+
+    public static ObjectCreationExpressionSyntax ObjectCreationExpression( TypeSyntax type, ArgumentSyntax argument, InitializerExpressionSyntax? initializer = null )
+        => ObjectCreationExpression( type, SyntaxFactory.ArgumentList( SyntaxFactory.SingletonSeparatedList( argument ) ), initializer );
+
+    public static ObjectCreationExpressionSyntax ObjectCreationExpression( TypeSyntax type, params ArgumentSyntax[] arguments )
+        => ObjectCreationExpression( type, SyntaxFactory.ArgumentList( SyntaxFactory.SeparatedList( arguments ) ) );
 
     public static ArrayTypeSyntax ArrayType( TypeSyntax elementType )
         => SyntaxFactory.ArrayType(
             elementType,
             SyntaxFactory.SingletonList(
                 SyntaxFactory.ArrayRankSpecifier( SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression() ) ) ) );
-
-#pragma warning disable RS0030 // Do not use banned APIs
 
     [return: NotNullIfNotNull( nameof(node) )]
     public static T? AddTrailingSpaceIfNecessary<T>( T? node )
@@ -278,15 +274,35 @@ internal static partial class SyntaxFactoryEx
         return node;
     }
 
+    public static SyntaxToken AddTrailingSpaceIfNecessary( SyntaxToken token )
+    {
+        if ( token.TrailingTrivia.FullSpan.Length == 0 )
+        {
+            token = token.WithTrailingTrivia( SyntaxFactory.ElasticSpace );
+        }
+
+        return token;
+    }
+
+#pragma warning disable RS0030 // Do not use banned APIs
+
     public static ParameterSyntax Parameter( SyntaxTokenList modifiers, TypeSyntax? type, SyntaxToken identifier, EqualsValueClauseSyntax? @default )
+        => Parameter( default, modifiers, type, identifier, @default );
+
+    public static ParameterSyntax Parameter(
+        SyntaxList<AttributeListSyntax> attributeLists,
+        SyntaxTokenList modifiers,
+        TypeSyntax? type,
+        SyntaxToken identifier,
+        EqualsValueClauseSyntax? @default )
     {
         type = AddTrailingSpaceIfNecessary( type );
 
-        return SyntaxFactory.Parameter( default, modifiers, type, identifier, @default );
+        return SyntaxFactory.Parameter( attributeLists, modifiers, type, identifier, @default );
     }
 
     private static SyntaxToken KeywordTokenWithSpace( SyntaxKind kind )
-        => SyntaxFactory.Token( default, kind, new( SyntaxFactory.Space ) );
+        => SyntaxFactory.Token( default, kind, new( SyntaxFactory.ElasticSpace ) );
 
     public static ThrowExpressionSyntax ThrowExpression( ExpressionSyntax expression )
         => SyntaxFactory.ThrowExpression( KeywordTokenWithSpace( SyntaxKind.ThrowKeyword ), expression );
@@ -334,13 +350,13 @@ internal static partial class SyntaxFactoryEx
 
     public static ReturnStatementSyntax ReturnStatement( ExpressionSyntax expression, SyntaxTrivia[]? leadingTrivia = null )
         => SyntaxFactory.ReturnStatement(
-            SyntaxFactory.Token( leadingTrivia == null ? default : new( leadingTrivia ), SyntaxKind.ReturnKeyword, new( SyntaxFactory.Space ) ),
+            SyntaxFactory.Token( leadingTrivia == null ? default : new( leadingTrivia ), SyntaxKind.ReturnKeyword, new( SyntaxFactory.ElasticSpace ) ),
             expression,
             SyntaxFactory.Token( SyntaxKind.SemicolonToken ) );
 
     public static ArrayCreationExpressionSyntax ArrayCreationExpression( ArrayTypeSyntax type, InitializerExpressionSyntax? initializer )
         => SyntaxFactory.ArrayCreationExpression(
-            SyntaxFactory.Token( default, SyntaxKind.NewKeyword, new( SyntaxFactory.Space ) ),
+            SyntaxFactory.Token( default, SyntaxKind.NewKeyword, new( SyntaxFactory.ElasticSpace ) ),
             type,
             initializer );
 
@@ -350,6 +366,54 @@ internal static partial class SyntaxFactoryEx
 
         return SyntaxFactory.VariableDeclaration( type, variables );
     }
+
+    public static ForEachStatementSyntax ForEachStatement(
+        TypeSyntax type,
+        SyntaxToken identifier,
+        ExpressionSyntax expression,
+        StatementSyntax statement )
+        => ForEachStatement( default, type, identifier, expression, statement );
+
+    public static ForEachStatementSyntax ForEachStatement(
+        bool isAsync,
+        TypeSyntax type,
+        SyntaxToken identifier,
+        ExpressionSyntax expression,
+        StatementSyntax statement )
+    {
+        var awaitKeyword = isAsync ? SyntaxFactory.Token( default, SyntaxKind.AwaitKeyword, new( SyntaxFactory.ElasticSpace ) ) : default;
+        type = AddTrailingSpaceIfNecessary( type );
+        identifier = AddTrailingSpaceIfNecessary( identifier );
+
+        return SyntaxFactory.ForEachStatement(
+            default,
+            awaitKeyword,
+            SyntaxFactory.Token( SyntaxKind.ForEachKeyword ),
+            SyntaxFactory.Token( SyntaxKind.OpenParenToken ),
+            type,
+            identifier,
+            SyntaxFactory.Token( default, SyntaxKind.InKeyword, new(SyntaxFactory.ElasticSpace) ),
+            expression,
+            SyntaxFactory.Token( SyntaxKind.CloseParenToken ),
+            statement );
+    }
+
+    public static YieldStatementSyntax YieldReturnStatement( ExpressionSyntax expression )
+        => SyntaxFactory.YieldStatement(
+            SyntaxKind.YieldReturnStatement,
+            SyntaxFactory.Token( default, SyntaxKind.YieldKeyword, new( SyntaxFactory.ElasticSpace ) ),
+            SyntaxFactory.Token( default, SyntaxKind.ReturnKeyword, new( SyntaxFactory.ElasticSpace ) ),
+            expression,
+            SyntaxFactory.Token( SyntaxKind.SemicolonToken ) );
+
+    public static YieldStatementSyntax YieldBreakStatement()
+        => SyntaxFactory.YieldStatement(
+            SyntaxKind.YieldBreakStatement,
+            default,
+            SyntaxFactory.Token( default, SyntaxKind.YieldKeyword, new( SyntaxFactory.ElasticSpace ) ),
+            SyntaxFactory.Token( SyntaxKind.BreakKeyword ),
+            default,
+            SyntaxFactory.Token( SyntaxKind.SemicolonToken ) );
 
 #pragma warning restore RS0030
 }

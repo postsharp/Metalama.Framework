@@ -1,6 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -26,19 +26,19 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             var j = b[14];
             var k = b[15];
 
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( typeof(Guid) ) )
-                .AddArgumentListArguments(
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( c ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( d ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( e ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( f ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( g ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
-                    Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
+            return SyntaxFactoryEx.ObjectCreationExpression(
+                serializationContext.GetTypeSyntax( typeof(Guid) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( a ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( b2 ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( c ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( d ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( e ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( f ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( g ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( h ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( i ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( j ) ) ),
+                Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( k ) ) ) )
 ;
         }
 

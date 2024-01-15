@@ -107,12 +107,13 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             getterStatements.Insert(
                 0,
                 SyntaxFactory.LocalDeclarationStatement(
-                    SyntaxFactory.VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                        .WithVariables(
-                            SyntaxFactory.SingletonSeparatedList(
-                                SyntaxFactory.VariableDeclarator(
-                                        SyntaxFactory.Identifier( getterReturnValueLocalName! ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) )
-                                    .WithInitializer( SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
+                    SyntaxFactoryEx.VariableDeclaration(
+                        SyntaxFactoryEx.VarIdentifier(),
+                        SyntaxFactory.SingletonSeparatedList(
+                            SyntaxFactory.VariableDeclarator(
+                                SyntaxFactory.Identifier( getterReturnValueLocalName! ),
+                                default,
+                                SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
 
             getterStatements.Add(
                 SyntaxFactory.ReturnStatement(

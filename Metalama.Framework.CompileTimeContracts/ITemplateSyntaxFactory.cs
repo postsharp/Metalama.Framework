@@ -87,4 +87,8 @@ public interface ITemplateSyntaxFactory
     ITemplateSyntaxFactory ForTemplate( string templateName, object? templateInstanceOrType );
 
     TemplateTypeArgument TemplateTypeArgument( string name, Type type );
+
+    T? AddTrailingSpaceIfNecessary<T>( T? node ) where T : CSharpSyntaxNode;
+
+    SyntaxToken AddTrailingSpaceIfNecessary( SyntaxToken token );
 }
