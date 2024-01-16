@@ -322,7 +322,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
-                result = namedTypeX.TypeParameters.Length.CompareTo( namedTypeY.TypeParameters.Length );
+                result = namedTypeX.Arity.CompareTo( namedTypeY.Arity );
 
                 if ( result != 0 )
                 {
@@ -372,7 +372,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
-                result = methodX.TypeParameters.Length.CompareTo( methodY.TypeParameters.Length );
+                result = methodX.Arity.CompareTo( methodY.Arity );
 
                 if ( result != 0 )
                 {
@@ -684,7 +684,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
         {
             var h = 701_142_619; // Random prime.
 
-            h = HashCode.Combine( h, symbol.Kind );
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            h = HashCode.Combine( h, (int)symbol.Kind );
 
             switch ( symbol )
             {
@@ -701,7 +702,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
                     {
-                        h = HashCode.Combine( h, type.TypeParameters.Length );
+                        h = HashCode.Combine( h, type.Arity );
                     }
 
                     break;
@@ -831,7 +832,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     switch ( current )
                     {
                         case INamedTypeSymbol namedType:
-                            h = HashCode.Combine( h, namedType.Name, namedType.TypeParameters.Length );
+                            h = HashCode.Combine( h, namedType.Name, namedType.Arity );
 
                             break;
 
@@ -841,7 +842,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                             break;
 
                         case IMethodSymbol method:
-                            h = HashCode.Combine( h, method.Name, method.TypeParameters.Length, method.Parameters.Length );
+                            h = HashCode.Combine( h, method.Name, method.Arity, method.Parameters.Length );
 
                             // This runs only if the original symbol was a local function.
                             foreach ( var parameter in method.Parameters )

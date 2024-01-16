@@ -60,10 +60,11 @@ namespace Metalama.Framework.Engine.Linking
 
         public override int GetHashCode()
         {
+            // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
             return HashCode.Combine(
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
-                this.SemanticKind,
-                this.TargetKind );
+                (byte) this.SemanticKind,
+                (byte) this.TargetKind );
         }
 
         public override string ToString()
