@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationContext intermediateCompilationContext,
                 LinkerSyntaxHandler syntaxHandler,
                 LinkerInjectionRegistry injectionRegistry,
-                ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics,
+                HashSet<IntermediateSymbolSemantic> inlinedSemantics,
                 HashSet<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,

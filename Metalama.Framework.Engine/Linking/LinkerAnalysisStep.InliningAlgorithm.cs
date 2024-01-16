@@ -23,16 +23,16 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
                 _aspectReferencesByContainingSemantic;
 
-            private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSemantics;
-            private readonly ConcurrentSet<IntermediateSymbolSemantic> _inlinedSemantics;
+            private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
+            private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyDictionary<ResolvedAspectReference, Inliner> _inlinedReferences;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
             public InliningAlgorithm(
                 ProjectServiceProvider serviceProvider,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
-                ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics,
-                ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics,
+                HashSet<IntermediateSymbolSemantic> reachableSemantics,
+                HashSet<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults )
             {

@@ -39,12 +39,12 @@ namespace Metalama.Framework.Engine.Linking
                 this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             }
 
-            public async Task<ConcurrentSet<IntermediateSymbolSemantic>> RunAsync(CancellationToken cancellationToken)
+            public async Task<HashSet<IntermediateSymbolSemantic>> RunAsync(CancellationToken cancellationToken)
             {
                 // TODO: Optimize (should not allocate closures).
                 // TODO: Is using call stack reliable enough?
                 var visited =
-                    new ConcurrentSet<IntermediateSymbolSemantic>(
+                    new HashSet<IntermediateSymbolSemantic>(
                         IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
                 // Assume G(V, E) is a graph where vertices V are semantics of overridden declarations and overrides.
@@ -140,9 +140,12 @@ namespace Metalama.Framework.Engine.Linking
                 void DepthFirstSearch( IntermediateSymbolSemantic current )
                 {
                     // TODO: Some edges we are walking are not necessary and may hinder performance.
-                    if ( !visited.Add( current ) )
+                    lock ( visited )
                     {
-                        return;
+                        if ( !visited.Add( current ) )
+                        {
+                            return;
+                        }
                     }
 
                     // Implicit edges between accessors and method group.

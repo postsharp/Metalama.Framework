@@ -26,12 +26,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly ProjectServiceProvider _serviceProvider;
             private readonly SemanticModelProvider _semanticModelProvider;
-            private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSemantics;
+            private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
 
             public BodyAnalyzer(
                 ProjectServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
-                ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics )
+                HashSet<IntermediateSymbolSemantic> reachableSemantics )
             {
                 this._serviceProvider = serviceProvider;
                 this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();

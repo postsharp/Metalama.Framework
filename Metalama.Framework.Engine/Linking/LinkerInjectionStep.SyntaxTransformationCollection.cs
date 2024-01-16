@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -22,13 +23,13 @@ internal sealed partial class LinkerInjectionStep
     private sealed class SyntaxTransformationCollection
     {
         private readonly TransformationLinkerOrderComparer _comparer;
-        private readonly ConcurrentBag<InjectedMember> _injectedMembers;
+        private readonly List<InjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, List<InjectedMember>> _injectedMembersByInsertPosition;
 
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeDeclaration;
 
-        private readonly ConcurrentSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
-        private readonly ConcurrentSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
+        private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
+        private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
 
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
@@ -36,14 +37,14 @@ internal sealed partial class LinkerInjectionStep
         public SyntaxTransformationCollection( TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._injectedMembers = new ConcurrentBag<InjectedMember>();
+            this._injectedMembers = new List<InjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
 
             this._injectedInterfacesByTargetTypeDeclaration =
                 new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
 
-            this._removedVariableDeclaratorSyntax = new ConcurrentSet<VariableDeclaratorSyntax>();
-            this._autoPropertyWithSynthesizedSetterSyntax = new ConcurrentSet<PropertyDeclarationSyntax>();
+            this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
+            this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
         }
 
@@ -51,7 +52,10 @@ internal sealed partial class LinkerInjectionStep
         {
             foreach ( var injectedMember in injectedMembers )
             {
-                this._injectedMembers.Add( injectedMember );
+                lock ( this._injectedMembers )
+                {
+                    this._injectedMembers.Add( injectedMember );
+                }
 
                 var nodes = this._injectedMembersByInsertPosition.GetOrAdd(
                     injectMemberTransformation.InsertPosition,
@@ -86,7 +90,10 @@ internal sealed partial class LinkerInjectionStep
         {
             Invariant.Assert( declaration.IsAutoPropertyDeclaration() && !declaration.HasSetterAccessorDeclaration() );
 
-            this._autoPropertyWithSynthesizedSetterSyntax.Add( declaration );
+            lock ( this._autoPropertyWithSynthesizedSetterSyntax )
+            {
+                this._autoPropertyWithSynthesizedSetterSyntax.Add( declaration );
+            }
         }
 
         // ReSharper disable once UnusedMember.Local
@@ -105,7 +112,10 @@ internal sealed partial class LinkerInjectionStep
             switch ( removedSyntax )
             {
                 case VariableDeclaratorSyntax variableDeclarator:
-                    this._removedVariableDeclaratorSyntax.Add( variableDeclarator );
+                    lock ( this._removedVariableDeclaratorSyntax )
+                    {
+                        this._removedVariableDeclaratorSyntax.Add( variableDeclarator );
+                    }
 
                     break;
 

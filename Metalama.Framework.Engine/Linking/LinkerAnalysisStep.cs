@@ -219,7 +219,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private static IReadOnlyList<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)> GetRedirectedGetOnlyAutoProperties(
             LinkerInjectionRegistry injectionRegistry,
-            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics )
+            HashSet<IntermediateSymbolSemantic> reachableSemantics )
         {
             var list = new List<(IPropertySymbol PropertySymbol, IntermediateSymbolSemantic TargetSemantic)>();
 
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private async Task GetReachableReferencesAsync(
             IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> resolvedReferencesBySource,
-            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics,
+            HashSet<IntermediateSymbolSemantic> reachableSemantics,
             ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesBySource,
             ConcurrentDictionary<AspectReferenceTarget, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesByTarget,
             CancellationToken cancellationToken )
@@ -372,7 +372,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
             LinkerInjectionRegistry injectionRegistry,
-            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics )
+            HashSet<IntermediateSymbolSemantic> reachableSemantics )
         {
             var forcefullyInitializedSymbols = new List<ISymbol>();
 

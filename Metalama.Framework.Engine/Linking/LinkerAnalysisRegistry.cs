@@ -14,14 +14,14 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed class LinkerAnalysisRegistry
     {
-        private readonly ConcurrentSet<IntermediateSymbolSemantic> _reachableSemantics;
-        private readonly ConcurrentSet<IntermediateSymbolSemantic> _inlinedSemantics;
+        private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
+        private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
         private readonly IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>> _substitutions;
 
         public LinkerAnalysisRegistry(
             CompilationContext intermediateCompilation,
-            ConcurrentSet<IntermediateSymbolSemantic> reachableSemantics,
-            ConcurrentSet<IntermediateSymbolSemantic> inlinedSemantics,
+            HashSet<IntermediateSymbolSemantic> reachableSemantics,
+            HashSet<IntermediateSymbolSemantic> inlinedSemantics,
             IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>> substitutions )
         {
             this._reachableSemantics = reachableSemantics;
