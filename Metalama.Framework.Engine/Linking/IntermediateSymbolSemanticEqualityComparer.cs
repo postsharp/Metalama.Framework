@@ -31,9 +31,10 @@ namespace Metalama.Framework.Engine.Linking
 
         public int GetHashCode( IntermediateSymbolSemantic x )
         {
+            // PERF: Cast enum to byte otherwise it will be boxed within the method.
             return HashCode.Combine(
                 this._symbolComparer.GetHashCode( x.Symbol ),
-                x.Kind );
+                (byte) x.Kind );
         }
     }
     internal sealed class IntermediateSymbolSemanticEqualityComparer<TSymbol> : IEqualityComparer<IntermediateSymbolSemantic<TSymbol>>

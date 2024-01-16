@@ -21,23 +21,23 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override bool DefaultVisit( SyntaxNode node )
             {
-                switch (node)
+                switch ( node )
                 {
                     case ExpressionSyntax:
                     case LocalFunctionStatementSyntax:
                         return false;
 
                     default:
-                        foreach(var childNode in node.ChildNodes())
+                        foreach ( var childNode in node.ChildNodes() )
                         {
-                            if (this.Visit(childNode))
+                            if ( this.Visit( childNode ) )
                             {
                                 return true;
                             }
                         }
 
                         return false;
-                };
+                }
             }
         }
     }
