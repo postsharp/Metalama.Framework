@@ -19,6 +19,7 @@ namespace Metalama.Framework.Engine.Linking
             => InvocationExpression(
                 LinkerInjectionHelperProvider.GetFinalizeMemberExpression()
                     .WithAspectReferenceAnnotation(
+                        null,
                         aspectLayer,
                         AspectReferenceOrder.Previous,
                         flags: AspectReferenceFlags.Inlineable ) );
@@ -41,6 +42,7 @@ namespace Metalama.Framework.Engine.Linking
                         InvocationExpression(
                             LinkerInjectionHelperProvider.GetPropertyMemberExpression()
                                 .WithAspectReferenceAnnotation(
+                                    targetProperty.ToSerializableId(),
                                     aspectLayer,
                                     AspectReferenceOrder.Previous,
                                     targetKind,
@@ -52,6 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                     return
                         CreateMemberAccessExpression( targetProperty, syntaxGenerator )
                             .WithAspectReferenceAnnotation(
+                                targetProperty.ToSerializableId(),
                                 aspectLayer,
                                 AspectReferenceOrder.Previous,
                                 targetKind,
@@ -73,6 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                                 targetIndexer.Parameters.SelectAsReadOnlyList(
                                     p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) )
                     .WithAspectReferenceAnnotation(
+                        targetIndexer.ToSerializableId(),
                         aspectLayer,
                         AspectReferenceOrder.Previous,
                         targetKind,
@@ -89,6 +93,7 @@ namespace Metalama.Framework.Engine.Linking
                             targetOperator.ReturnType,
                             targetOperator.Parameters.SelectAsReadOnlyList( p => p.Type ) )
                         .WithAspectReferenceAnnotation(
+                            targetOperator.ToSerializableId(),
                             aspectLayer,
                             AspectReferenceOrder.Previous,
                             flags: AspectReferenceFlags.Inlineable ),

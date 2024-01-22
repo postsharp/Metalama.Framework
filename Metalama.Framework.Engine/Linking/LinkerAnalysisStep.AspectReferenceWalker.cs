@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -16,6 +18,7 @@ namespace Metalama.Framework.Engine.Linking
         private sealed class AspectReferenceWalker : SafeSyntaxWalker
         {
             private readonly AspectReferenceResolver _referenceResolver;
+            private readonly Compilation _intermediateCompilation;
             private readonly SemanticModel _semanticModel;
             private readonly IMethodSymbol _containingSymbol;
             private readonly Stack<IMethodSymbol> _localFunctionStack;
@@ -25,10 +28,12 @@ namespace Metalama.Framework.Engine.Linking
 
             public AspectReferenceWalker( 
                 AspectReferenceResolver referenceResolver,
+                Compilation intermediateCompilation,
                 SemanticModel semanticModel, 
                 IMethodSymbol containingSymbol,
                 HashSet<SyntaxNode> nodesContainingAspectReferences )
             {
+                this._intermediateCompilation= intermediateCompilation;
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
                 this.AspectReferences = new List<ResolvedAspectReference>();
@@ -63,28 +68,46 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( node.TryGetAspectReference( out var aspectReference ) )
                 {
-                    var nodeWithSymbol = node switch
+                    ISymbol? referencedSymbol;
+
+                    if ( aspectReference.TargetDeclarationId != null )
                     {
-                        ConditionalAccessExpressionSyntax conditionalAccess => GetConditionalMemberName( conditionalAccess ),
-                        _ => node
-                    };
+                        var candidateSymbols = DocumentationCommentId.GetSymbolsForDeclarationId( aspectReference.TargetDeclarationId.Value.Id, this._intermediateCompilation );
 
-                    var symbolInfo = this._semanticModel.GetSymbolInfo( nodeWithSymbol );
-                    var referencedSymbol = symbolInfo.Symbol;
-
-                    if ( referencedSymbol == null )
-                    {
-                        // This is a workaround for a problem I don't fully understand.
-                        // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
-                        // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
-
-                        if ( symbolInfo.CandidateSymbols.Length == 1 )
+                        if ( candidateSymbols.Length == 1 )
                         {
-                            referencedSymbol = symbolInfo.CandidateSymbols[0];
+                            referencedSymbol = candidateSymbols[0];
                         }
                         else
                         {
                             return;
+                        }
+                    }
+                    else
+                    {
+                        var nodeWithSymbol = node switch
+                        {
+                            ConditionalAccessExpressionSyntax conditionalAccess => GetConditionalMemberName( conditionalAccess ),
+                            _ => node
+                        };
+
+                        var symbolInfo = this._semanticModel.GetSymbolInfo( nodeWithSymbol );
+                        referencedSymbol = symbolInfo.Symbol;
+
+                        if ( referencedSymbol == null )
+                        {
+                            // This is a workaround for a problem I don't fully understand.
+                            // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
+                            // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
+
+                            if ( symbolInfo.CandidateSymbols.Length == 1 )
+                            {
+                                referencedSymbol = symbolInfo.CandidateSymbols[0];
+                            }
+                            else
+                            {
+                                return;
+                            }
                         }
                     }
 

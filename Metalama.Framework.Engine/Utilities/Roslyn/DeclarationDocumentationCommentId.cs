@@ -510,7 +510,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
         }
 
-        private static class Parser
+        public static class Parser
         {
             public static void ParseDeclaredSymbolId( string? id, CompilationModel compilation, List<IDeclaration> results )
             {

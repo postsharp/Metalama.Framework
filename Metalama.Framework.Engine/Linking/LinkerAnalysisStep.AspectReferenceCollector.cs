@@ -271,6 +271,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     var aspectReferenceCollector = new AspectReferenceWalker(
                         this._referenceResolver,
+                        this._intermediateCompilation.Compilation,
                         this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
                         symbol,
                         nodesContainingAspectReferences );

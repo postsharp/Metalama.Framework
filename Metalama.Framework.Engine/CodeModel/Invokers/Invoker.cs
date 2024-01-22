@@ -101,6 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             // CurrentAspectLayerId may be null when we are not executing in a template execution context.
             => new(
+                null,
                 TemplateExpansionContext.CurrentAspectLayerId ?? default,
                 this._order,
                 flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );

@@ -209,19 +209,91 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Factory = new DeclarationFactory( this );
 
             // Discover custom attributes.
-            AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
+            //AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
 
-            foreach ( var tree in partialCompilation.SyntaxTrees )
-            {
-                attributeDiscoveryVisitor.Visit( tree.Value );
-            }
+            //foreach ( var tree in partialCompilation.SyntaxTrees )
+            //{
+            //    attributeDiscoveryVisitor.Visit( tree.Value );
+            //}
 
-            this._allMemberAttributesByType = attributeDiscoveryVisitor.GetDiscoveredAttributes();
+            this._allMemberAttributesByType = DiscoverAttributes( this.CompilationContext );
 
             this._derivedTypes = new Lazy<DerivedTypeIndex>(
                 () => partialCompilation.LazyDerivedTypes.Value
                     .WithAdditionalAnalyzedTypes(
                         this._allMemberAttributesByType.Keys.Select( k => (INamedTypeSymbol?) k.GetSymbol( this.RoslynCompilation ) ).WhereNotNull() ) );
+        }
+
+        private static ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> DiscoverAttributes( CompilationContext compilationContext )
+        {
+            var builder = ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef>.CreateBuilder();
+
+            VisitSymbol( compilationContext.Compilation.Assembly );
+
+            return builder.ToImmutable();
+
+            void VisitSymbol( ISymbol symbol )
+            {
+                foreach ( var attribute in symbol.GetAttributes() )
+                {
+                    var attributeType = attribute.AttributeConstructor.AssertNotNull().ContainingType;
+
+                    builder.Add( 
+                        attributeType.ToTypedRef( compilationContext ).As<INamedType>(), 
+                        new AttributeRef( attribute, Ref.FromSymbol( symbol, compilationContext ), compilationContext ) );
+                }
+
+                switch ( symbol )
+                {
+                    case IAssemblySymbol assembly:
+                        foreach ( var namedType in assembly.GetAllTypes() )
+                        {
+                            VisitSymbol( namedType );
+                        }
+                        break;
+
+                    case INamedTypeSymbol namedType:
+                        foreach ( var member in namedType.GetMembers() )
+                        {
+                            VisitSymbol( member );
+                        }
+
+                        foreach ( var typeParam in namedType.TypeParameters )
+                        {
+                            VisitSymbol( typeParam );
+                        }
+                        break;
+
+                    case IMethodSymbol method:
+                        foreach ( var returnTypeAttribute in method.GetReturnTypeAttributes() )
+                        {
+                            var attributeType = returnTypeAttribute.AttributeConstructor.AssertNotNull().ContainingType;
+                            builder.Add(
+                                attributeType.ToTypedRef( compilationContext ).As<INamedType>(),
+                                new AttributeRef( returnTypeAttribute, Ref.FromSymbol<IDeclaration>( method, compilationContext, DeclarationRefTargetKind.Return ), compilationContext ) );
+                        }
+
+                        foreach ( var param in method.Parameters )
+                        {
+                            VisitSymbol( param );
+                        }
+
+                        foreach ( var typeParam in method.TypeParameters )
+                        {
+                            VisitSymbol( typeParam );
+                        }
+                        break;
+
+                    case IPropertySymbol property:
+
+                        foreach ( var param in property.Parameters )
+                        {
+                            VisitSymbol( param );
+                        }
+
+                        break;
+                }
+            }
         }
 
         // The following dictionaries contain the members of types, if they have been modified. If they have not been modified,
