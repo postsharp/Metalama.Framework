@@ -65,14 +65,13 @@ namespace Metalama.Framework.Engine.Linking
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
-            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
-            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
-            ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags = new();
+            HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
+            HashSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
             ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations = new();
             ConcurrentDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations = new();
             ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap = new();
-            ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
+            HashSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
@@ -113,7 +112,6 @@ namespace Metalama.Framework.Engine.Linking
                         nameProvider,
                         aspectReferenceSyntaxProvider,
                         buildersWithSynthesizedSetters,
-                        buildersWithAdditionalDeclarationFlags,
                         syntaxTransformationCollection,
                         replacedIntroduceDeclarationTransformations );
 
@@ -225,7 +223,9 @@ namespace Metalama.Framework.Engine.Linking
                 intermediateCompilation,
                 transformations,
                 syntaxTransformationCollection.InjectedMembers,
-                builderToTransformationMap );
+                builderToTransformationMap,
+                this._concurrentTaskRunner,
+                cancellationToken );
 
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 
@@ -241,7 +241,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static void IndexNodesWithModifiedAttributes(
             ITransformation transformation,
-            ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes )
+            HashSet<SyntaxNode> nodesWithModifiedAttributes )
         {
             // We only need to index transformations on syntax (i.e. on source code) because introductions on generated code
             // are taken from the compilation model.
@@ -249,18 +249,21 @@ namespace Metalama.Framework.Engine.Linking
             // Note: Compilation-level attributes will not be indexed because the containing declaration has no
             // syntax reference.
 
-            if ( transformation is IntroduceAttributeTransformation introduceAttributeTransformation )
+            lock ( nodesWithModifiedAttributes )
             {
-                foreach ( var declaringSyntax in introduceAttributeTransformation.TargetDeclaration.GetDeclaringSyntaxReferences() )
+                if ( transformation is IntroduceAttributeTransformation introduceAttributeTransformation )
                 {
-                    nodesWithModifiedAttributes.Add( declaringSyntax.GetSyntax() );
+                    foreach ( var declaringSyntax in introduceAttributeTransformation.TargetDeclaration.GetDeclaringSyntaxReferences() )
+                    {
+                        nodesWithModifiedAttributes.Add( declaringSyntax.GetSyntax() );
+                    }
                 }
-            }
-            else if ( transformation is RemoveAttributesTransformation removeAttributesTransformation )
-            {
-                foreach ( var declaringSyntax in removeAttributesTransformation.ContainingDeclaration.GetDeclaringSyntaxReferences() )
+                else if ( transformation is RemoveAttributesTransformation removeAttributesTransformation )
                 {
-                    nodesWithModifiedAttributes.Add( declaringSyntax.GetSyntax() );
+                    foreach ( var declaringSyntax in removeAttributesTransformation.ContainingDeclaration.GetDeclaringSyntaxReferences() )
+                    {
+                        nodesWithModifiedAttributes.Add( declaringSyntax.GetSyntax() );
+                    }
                 }
             }
         }
@@ -280,7 +283,7 @@ namespace Metalama.Framework.Engine.Linking
             ITransformation transformation,
             SyntaxTransformationCollection syntaxTransformationCollection,
             ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
-            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
+            HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
         {
             var compilation = input.CompilationModel;
 
@@ -331,7 +334,10 @@ namespace Metalama.Framework.Engine.Linking
                             throw new AssertionFailedException( $"Builder {replacedBuilder} is missing registered transformation." );
                         }
 
-                        replacedIntroduceDeclarationTransformations.Add( introduceDeclarationTransformation );
+                        lock ( replacedIntroduceDeclarationTransformations )
+                        {
+                            replacedIntroduceDeclarationTransformations.Add( introduceDeclarationTransformation );
+                        }
 
                         break;
 
@@ -349,9 +355,8 @@ namespace Metalama.Framework.Engine.Linking
             LinkerInjectionNameProvider nameProvider,
             LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
-            ConcurrentDictionary<IMemberBuilder, ConcurrentLinkedList<AspectLinkerDeclarationFlags>> buildersWithAdditionalDeclarationFlags,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            ConcurrentSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
+            HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
         {
             {
                 if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation
@@ -432,29 +437,6 @@ namespace Metalama.Framework.Engine.Linking
                                     } );
                     }
 
-                    if ( transformation is IIntroduceDeclarationTransformation introduceMemberTransformation
-                         && buildersWithAdditionalDeclarationFlags.TryGetValue(
-                             (IMemberBuilder) introduceMemberTransformation.DeclarationBuilder,
-                             out var additionalFlagsList ) )
-                    {
-                        // This is a member builder that should have linker declaration flags added.
-                        injectedMembers =
-                            injectedMembers
-                                .Select(
-                                    im =>
-                                    {
-                                        var flags = im.Syntax.GetLinkerDeclarationFlags();
-
-                                        foreach ( var additionalFlags in additionalFlagsList )
-                                        {
-                                            flags &= additionalFlags;
-                                        }
-
-                                        return
-                                            im.WithSyntax( im.Syntax.WithLinkerDeclarationFlags( flags ) );
-                                    } );
-                    }
-
                     return injectedMembers;
                 }
             }
@@ -471,7 +453,7 @@ namespace Metalama.Framework.Engine.Linking
         private static void IndexOverrideTransformation(
             ITransformation transformation,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            ConcurrentSet<PropertyBuilder> buildersWithSynthesizedSetters )
+            HashSet<PropertyBuilder> buildersWithSynthesizedSetters )
         {
             if ( transformation is not IOverrideDeclarationTransformation overriddenDeclaration )
             {
@@ -497,12 +479,18 @@ namespace Metalama.Framework.Engine.Linking
                         break;
 
                     case BuiltProperty { PropertyBuilder: var builder }:
-                        buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
+                        lock ( buildersWithSynthesizedSetters )
+                        {
+                            buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
+                        }
 
                         break;
 
                     case PropertyBuilder builder:
-                        buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
+                        lock ( buildersWithSynthesizedSetters )
+                        {
+                            buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
+                        }
 
                         break;
 

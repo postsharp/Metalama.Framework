@@ -5,7 +5,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Provides kinds aspect reference targets.
     /// </summary>
-    internal enum AspectReferenceTargetKind
+    internal enum AspectReferenceTargetKind : byte
     {
         /// <summary>
         /// Target the annotated declaration.

@@ -102,7 +102,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 1;
             }
 
-            var result = Comparer<SymbolKind>.Default.Compare( x.Kind, y.Kind );
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            var result = Comparer<int>.Default.Compare( (int) x.Kind, (int) y.Kind );
 
             if ( result != 0 )
             {
@@ -254,7 +255,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 }
             }
 
-            result = nsX.NamespaceKind.CompareTo( nsY.NamespaceKind );
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            result = Comparer<int>.Default.Compare( (int) nsX.NamespaceKind, (int) nsY.NamespaceKind );
 
             if ( result != 0 )
             {
@@ -309,7 +311,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.Nullability ) )
             {
-                result = Comparer<NullableAnnotation>.Default.Compare( namedTypeX.NullableAnnotation, namedTypeY.NullableAnnotation );
+                // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+                result = Comparer<byte>.Default.Compare( (byte)namedTypeX.NullableAnnotation, (byte) namedTypeY.NullableAnnotation );
 
                 if ( result != 0 )
                 {
@@ -319,7 +322,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
-                result = namedTypeX.TypeParameters.Length.CompareTo( namedTypeY.TypeParameters.Length );
+                result = namedTypeX.Arity.CompareTo( namedTypeY.Arity );
 
                 if ( result != 0 )
                 {
@@ -369,7 +372,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
             if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
             {
-                result = methodX.TypeParameters.Length.CompareTo( methodY.TypeParameters.Length );
+                result = methodX.Arity.CompareTo( methodY.Arity );
 
                 if ( result != 0 )
                 {
@@ -455,7 +458,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
-                        result = Comparer<RefKind>.Default.Compare( parameterX.RefKind, parameterY.RefKind );
+                        // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+                        result = Comparer<byte>.Default.Compare((byte) parameterX.RefKind, (byte) parameterY.RefKind);
 
                         if ( result != 0 )
                         {
@@ -513,7 +517,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 return 1;
             }
 
-            var result = Comparer<TypeKind>.Default.Compare( typeX.TypeKind, typeY.TypeKind );
+            // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+            var result = Comparer<byte>.Default.Compare((byte) typeX.TypeKind, (byte) typeY.TypeKind);
 
             if ( result != 0 )
             {
@@ -590,7 +595,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     return 1;
                 }
 
-                var result = Comparer<SymbolKind>.Default.Compare( currentX.Kind, currentY.Kind );
+                // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+                var result = Comparer<int>.Default.Compare( (int)currentX.Kind, (int)currentY.Kind );
 
                 if ( result != 0 )
                 {
@@ -678,7 +684,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
         {
             var h = 701_142_619; // Random prime.
 
-            h = HashCode.Combine( h, symbol.Kind );
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            h = HashCode.Combine( h, (int)symbol.Kind );
 
             switch ( symbol )
             {
@@ -695,7 +702,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                     if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
                     {
-                        h = HashCode.Combine( h, type.TypeParameters.Length );
+                        h = HashCode.Combine( h, type.Arity );
                     }
 
                     break;
@@ -720,7 +727,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
-                                h = HashCode.Combine( h, parameter.RefKind );
+                                // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
+                                h = HashCode.Combine( h, (byte)parameter.RefKind );
                             }
                         }
                     }
@@ -747,7 +755,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
                             if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
-                                h = HashCode.Combine( h, parameter.RefKind );
+                                h = HashCode.Combine( h, (byte) parameter.RefKind );
                             }
                         }
                     }
@@ -824,7 +832,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     switch ( current )
                     {
                         case INamedTypeSymbol namedType:
-                            h = HashCode.Combine( h, namedType.Name, namedType.TypeParameters.Length );
+                            h = HashCode.Combine( h, namedType.Name, namedType.Arity );
 
                             break;
 
@@ -834,7 +842,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                             break;
 
                         case IMethodSymbol method:
-                            h = HashCode.Combine( h, method.Name, method.TypeParameters.Length, method.Parameters.Length );
+                            h = HashCode.Combine( h, method.Name, method.Arity, method.Parameters.Length );
 
                             // This runs only if the original symbol was a local function.
                             foreach ( var parameter in method.Parameters )

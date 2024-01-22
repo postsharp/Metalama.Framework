@@ -7,12 +7,15 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Linking
@@ -22,17 +25,15 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal sealed class LinkerInjectionRegistry
     {
-        public const string InjectedNodeIdAnnotationId = "AspectLinker_InjectedNodeId";
-
         private readonly TransformationLinkerOrderComparer _comparer;
         private readonly PartialCompilation _intermediateCompilation;
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
-        private readonly IReadOnlyList<LinkerInjectedMember> _injectedMembers;
-        private readonly IReadOnlyList<ISymbol> _overrideTargets;
+        private readonly IReadOnlyList<InjectedMember> _injectedMembers;
+        private readonly IReadOnlyCollection<ISymbol> _overrideTargets;
         private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
         private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
-        private readonly IReadOnlyDictionary<ISymbol, LinkerInjectedMember> _symbolToInjectedMemberMap;
-        private readonly IReadOnlyDictionary<LinkerInjectedMember, ISymbol> _injectedMemberToSymbolMap;
+        private readonly IReadOnlyDictionary<ISymbol, InjectedMember> _symbolToInjectedMemberMap;
+        private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
         private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
 
         public LinkerInjectionRegistry(
@@ -40,14 +41,16 @@ namespace Metalama.Framework.Engine.Linking
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             IEnumerable<SyntaxTreeTransformation> transformations,
-            IReadOnlyCollection<LinkerInjectedMember> injectedMembers,
-            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap )
+            IReadOnlyCollection<InjectedMember> injectedMembers,
+            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
+            IConcurrentTaskRunner concurrentTaskRunner,
+            CancellationToken cancellationToken )
         {
-            List<ISymbol> overrideTargets;
-            Dictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
-            Dictionary<ISymbol, ISymbol> overrideTargetMap;
-            Dictionary<ISymbol, LinkerInjectedMember> symbolToInjectedMemberMap;
-            Dictionary<LinkerInjectedMember, ISymbol> injectedMemberToSymbolMap;
+            ConcurrentBag<ISymbol> overrideTargets;
+            ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
+            ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
+            ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
+            ConcurrentDictionary<InjectedMember, ISymbol> injectedMemberToSymbolMap;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
@@ -58,21 +61,20 @@ namespace Metalama.Framework.Engine.Linking
             this._injectedMembers = injectedMembers.ToList();
             this._builderToTransformationMap = (IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>) builderToTransformationMap;
 
-            var injectedMemberByNodeId = injectedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
-            this._overrideTargets = overrideTargets = new List<ISymbol>();
-            this._overrideTargetToOverrideListMap = overrideMap = new Dictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._overrideToOverrideTargetMap = overrideTargetMap = new Dictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new Dictionary<ISymbol, LinkerInjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new Dictionary<LinkerInjectedMember, ISymbol>();
+            this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
+            this._overrideTargetToOverrideListMap = overrideMap = new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._overrideToOverrideTargetMap = overrideTargetMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new ConcurrentDictionary<ISymbol, InjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
             //       the same spirit as the Index* methods.
             //       However, even for very large projects it seems to would have very small impact.
 
-            var overriddenDeclarations = new Dictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
-            var builderToInjectedMemberMap = new Dictionary<IDeclarationBuilder, LinkerInjectedMember>();
+            var overriddenDeclarations = new ConcurrentDictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
+            var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, InjectedMember>();
 
-            foreach ( var injectedMember in this._injectedMembers )
+            void ProcessLinkerInjectionMember( InjectedMember injectedMember )
             {
                 var injectedMemberSymbol = GetSymbolForInjectedMember( injectedMember );
 
@@ -82,9 +84,12 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( injectedMember.Transformation is IOverrideDeclarationTransformation overrideTransformation )
                 {
-                    overriddenDeclarations
-                        .GetOrAdd( overrideTransformation.OverriddenDeclaration, _ => new List<ISymbol>() )
-                        .Add( injectedMemberSymbol );
+                    var list = overriddenDeclarations.GetOrAdd( overrideTransformation.OverriddenDeclaration, _ => new List<ISymbol>() );
+
+                    lock ( list )
+                    {
+                        list.Add( injectedMemberSymbol );
+                    }
                 }
 
                 if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
@@ -93,22 +98,33 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            foreach ( var overriddenDeclaration in overriddenDeclarations )
-            {
-                var overrideTargetSymbol = GetOverrideTargetSymbol( overriddenDeclaration.Key ).AssertNotNull();
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+            concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessLinkerInjectionMember, cancellationToken ).Wait(cancellationToken);
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-                overriddenDeclaration.Value.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
+            void ProcessOverride(KeyValuePair<IDeclaration, List<ISymbol>> value)
+            {
+                var declaration = value.Key;
+                var overrides = value.Value;
+
+                var overrideTargetSymbol = GetOverrideTargetSymbol( declaration ).AssertNotNull();
+
+                overrides.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
                 overrideTargets.Add( overrideTargetSymbol );
-                overrideMap.Add( overrideTargetSymbol, overriddenDeclaration.Value );
+                overrideMap.TryAdd( overrideTargetSymbol, overrides );
 
-                foreach (var overrideSymbol in overriddenDeclaration.Value)
+                foreach (var overrideSymbol in overrides )
                 {
-                    overrideTargetMap.Add( overrideSymbol, overrideTargetSymbol );
+                    overrideTargetMap.TryAdd( overrideSymbol, overrideTargetSymbol );
                 }
             }
 
-            ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+            concurrentTaskRunner.RunInParallelAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+
+            ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember )
             {
                 var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
                 var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
@@ -191,7 +207,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">Symbol.</param>
         /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
-        public LinkerInjectedMember? GetInjectedMemberForSymbol( ISymbol symbol )
+        public InjectedMember? GetInjectedMemberForSymbol( ISymbol symbol )
         {
             switch ( symbol )
             {
@@ -232,7 +248,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="injectedMember"></param>
         /// <returns></returns>
-        public ISymbol GetSymbolForInjectedMember( LinkerInjectedMember injectedMember )
+        public ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember )
         {
             return this._injectedMemberToSymbolMap[injectedMember];
         }
@@ -241,7 +257,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets introduced members for all transformations.
         /// </summary>
         /// <returns>Enumeration of introduced members.</returns>
-        public IEnumerable<LinkerInjectedMember> GetInjectedMembers()
+        public IEnumerable<InjectedMember> GetInjectedMembers()
         {
             return this._injectedMembers;
         }
@@ -250,7 +266,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets all symbols for overridden members.
         /// </summary>
         /// <returns>Enumeration of symbols.</returns>
-        public IReadOnlyList<ISymbol> GetOverriddenMembers()
+        public IReadOnlyCollection<ISymbol> GetOverriddenMembers()
         {
             return this._overrideTargets;
         }

@@ -2,16 +2,14 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,8 +41,8 @@ namespace Metalama.Framework.Engine.Linking
             public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
                 CancellationToken cancellationToken )
             {
-                var aspectReferences = 
-                    new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>( 
+                var aspectReferences =
+                    new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>(
                         IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( this._intermediateCompilation.CompilationContext ) );
 
                 // Add implicit references going from final semantic to the last override.
@@ -136,10 +134,6 @@ namespace Metalama.Framework.Engine.Linking
                                 _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
                             };
 
-                        var list = (ConcurrentLinkedList<ResolvedAspectReference>) aspectReferences.GetOrAdd(
-                            containingSemantic,
-                            _ => new ConcurrentLinkedList<ResolvedAspectReference>() );
-
                         var resolvedReference =
                             new ResolvedAspectReference(
                                 containingSemantic,
@@ -153,7 +147,9 @@ namespace Metalama.Framework.Engine.Linking
                                 isInlineable: true,
                                 hasCustomReceiver: true );
 
-                        list.Add( resolvedReference );
+                        var wasAdded = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
+
+                        Invariant.Assert( wasAdded );
                     }
                 }
 
@@ -161,7 +157,7 @@ namespace Metalama.Framework.Engine.Linking
                 var injectedMembers = this._injectionRegistry.GetInjectedMembers();
                 await this._concurrentTaskRunner.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
 
-                void ProcessInjectedMember( LinkerInjectedMember injectedMember )
+                void ProcessInjectedMember( InjectedMember injectedMember )
                 {
                     var symbol = this._injectionRegistry.GetSymbolForInjectedMember( injectedMember );
 
@@ -201,49 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMembers2, cancellationToken );
-
-                void ProcessOverriddenMembers2( ISymbol symbol )
-                {
-                    switch ( symbol )
-                    {
-                        case IMethodSymbol methodSymbol:
-                            AnalyzeOverriddenBody( methodSymbol );
-
-                            break;
-
-                        case IPropertySymbol propertySymbol:
-                            if ( propertySymbol.GetMethod != null )
-                            {
-                                AnalyzeOverriddenBody( propertySymbol.GetMethod );
-                            }
-
-                            if ( propertySymbol.SetMethod != null )
-                            {
-                                AnalyzeOverriddenBody( propertySymbol.SetMethod );
-                            }
-
-                            break;
-
-                        case IEventSymbol eventSymbol:
-                            AnalyzeOverriddenBody( eventSymbol.AddMethod.AssertNotNull() );
-                            AnalyzeOverriddenBody( eventSymbol.RemoveMethod.AssertNotNull() );
-
-                            break;
-
-                        default:
-                            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                            throw new AssertionFailedException( $"Don't know how to process '{symbol?.Kind.ToString() ?? "(null)"}'." );
-                    }
-                }
-
                 return aspectReferences;
-
-                void AnalyzeOverriddenBody( IMethodSymbol symbol )
-                {
-                    var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                    aspectReferences[semantic] = Array.Empty<ResolvedAspectReference>();
-                }
 
                 void AnalyzeIntroducedBody( IMethodSymbol symbol )
                 {
@@ -274,7 +228,9 @@ namespace Metalama.Framework.Engine.Linking
 
                     aspectReferenceCollector.Visit( syntax );
 
-                    aspectReferences[semantic] = aspectReferenceCollector.AspectReferences.ToImmutableArray();
+                    var wasAdded = aspectReferences.TryAdd( semantic, aspectReferenceCollector.AspectReferences );
+
+                    Invariant.Assert( wasAdded );
                 }
             }
         }

@@ -26,9 +26,10 @@ namespace Metalama.Framework.Engine.Linking
 
         public override int GetHashCode()
         {
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
             return HashCode.Combine(
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
-                this.Kind );
+                (int)this.Kind );
         }
 
         public IntermediateSymbolSemantic<TSymbol> ToTyped<TSymbol>()
@@ -76,9 +77,10 @@ namespace Metalama.Framework.Engine.Linking
 
         public override int GetHashCode()
         {
+            // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
             return HashCode.Combine(
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
-                this.Kind );
+                (byte) this.Kind );
         }
 
         public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )

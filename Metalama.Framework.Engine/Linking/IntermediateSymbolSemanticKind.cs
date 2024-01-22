@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
     /// 
     /// Symbols that represent overrides always use Default value.
     /// </summary>
-    internal enum IntermediateSymbolSemanticKind
+    internal enum IntermediateSymbolSemanticKind : byte
     {
         /// <summary>
         /// Default symbol semantic, i.e. version visible in the intermediate compilation.

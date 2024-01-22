@@ -62,7 +62,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     ? this.StructuralSymbolComparer.GetHashCode( xSymbol )
                     : RuntimeHelpers.GetHashCode( obj.Target );
 
-                return HashCode.Combine( targetHashCode, obj.TargetKind );
+                // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+                return HashCode.Combine( targetHashCode, (int)obj.TargetKind );
             }
         }
 

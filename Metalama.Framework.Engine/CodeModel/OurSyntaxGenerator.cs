@@ -99,7 +99,7 @@ internal partial class OurSyntaxGenerator
         return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
     }
 
-    public TypeSyntax Type( ITypeSymbol symbol )
+    public virtual TypeSyntax Type( ITypeSymbol symbol )
     {
         var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
 

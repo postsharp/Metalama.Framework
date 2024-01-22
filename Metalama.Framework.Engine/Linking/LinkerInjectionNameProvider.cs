@@ -4,12 +4,12 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly CompilationModel _finalCompilation;
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
-        private readonly ConcurrentDictionary<INamedType, ConcurrentSet<string>> _injectedMemberNames;
+        private readonly ConcurrentDictionary<INamedType, HashSet<string>> _injectedMemberNames;
         private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
         private readonly ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>> _nameCollisionCounters;
         private readonly OurSyntaxGenerator _syntaxGenerator;
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             this._finalCompilation = finalCompilation;
             this._injectionHelperProvider = injectionHelperProvider;
-            this._injectedMemberNames = new ConcurrentDictionary<INamedType, ConcurrentSet<string>>( finalCompilation.Comparers.Default );
+            this._injectedMemberNames = new ConcurrentDictionary<INamedType, HashSet<string>>( finalCompilation.Comparers.Default );
             this._overriddenByCounters = new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>();
             this._nameCollisionCounters = new ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>>();
             this._syntaxGenerator = syntaxGenerator;
@@ -132,12 +132,19 @@ namespace Metalama.Framework.Engine.Linking
             if ( !this._nameCollisionCounters.TryGetValue( (containingType, hint), out var counter ) )
             {
                 var finalContainingType = containingType.Translate( this._finalCompilation );
-                var injectedMemberNames = this._injectedMemberNames.GetOrAdd( finalContainingType, _ => new ConcurrentSet<string>() );
+                var injectedMemberNames = this._injectedMemberNames.GetOrAdd( finalContainingType, _ => new HashSet<string>() );
 
                 // Collision counter was not yet initialized, therefore final compilation members need to be checked.
                 if ( CheckFinalMemberNames( finalContainingType, hint ) )
                 {
-                    if ( injectedMemberNames.Add( hint ) )
+                    bool result;
+
+                    lock ( injectedMemberNames )
+                    {
+                        result = injectedMemberNames.Add( hint );
+                    }
+
+                    if ( result )
                     {
                         // There is no collision with compilation members and we have reserved the name.
                         this._nameCollisionCounters.AddOrUpdate(
@@ -172,12 +179,12 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                var injectedMemberNames = this._injectedMemberNames.GetOrAdd( containingType, _ => new ConcurrentSet<string>() );
+                var injectedMemberNames = this._injectedMemberNames.GetOrAdd( containingType, _ => new HashSet<string>() );
 
                 return FindAndUpdate( containingType, injectedMemberNames, hint, counter );
             }
 
-            static string FindAndUpdate( INamedType finalContainingType, ConcurrentSet<string> injectedMemberNames, string hint, StrongBox<int> counter )
+            static string FindAndUpdate( INamedType finalContainingType, HashSet<string> injectedMemberNames, string hint, StrongBox<int> counter )
             {
                 lock ( counter )
                 {
@@ -185,9 +192,15 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var candidate = $"{hint}{counter.Value++}";
 
-                        if ( CheckFinalMemberNames( finalContainingType, hint ) && injectedMemberNames.Add( candidate ) )
+                        if ( CheckFinalMemberNames( finalContainingType, hint ) )
                         {
-                            return candidate;
+                            lock ( injectedMemberNames )
+                            {
+                                if ( injectedMemberNames.Add( candidate ) )
+                                {
+                                    return candidate;
+                                }
+                            }
                         }
                     }
                 }

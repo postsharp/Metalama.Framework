@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
 {
-    private sealed class LinkerInjectedMemberComparer : IComparer<LinkerInjectedMember>
+    private sealed class InjectedMemberComparer : IComparer<InjectedMember>
     {
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
@@ -34,11 +34,11 @@ internal sealed partial class LinkerInjectionStep
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
 
-        public static LinkerInjectedMemberComparer Instance { get; } = new();
+        public static InjectedMemberComparer Instance { get; } = new();
 
-        private LinkerInjectedMemberComparer() { }
+        private InjectedMemberComparer() { }
 
-        public int Compare( LinkerInjectedMember? x, LinkerInjectedMember? y )
+        public int Compare( InjectedMember? x, InjectedMember? y )
         {
             if ( x == y )
             {

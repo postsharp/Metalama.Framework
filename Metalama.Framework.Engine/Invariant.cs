@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+#if DEBUG
+using System.Linq;
+#endif
 using System.Runtime.CompilerServices;
 using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute;
 
@@ -267,6 +270,75 @@ namespace Metalama.Framework.Engine
 
                 yield return item;
             }
+#else
+            return items;
+#endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        public static IReadOnlyList<TItem> AssertSorted<TItem>( this IReadOnlyList<TItem> items )
+            where TItem : IComparable<TItem>
+        {
+#if DEBUG
+            return AssertSorted( items, static x => x, Comparison);
+
+            static int Comparison( TItem left, TItem right ) => left.CompareTo( right );
+#else
+            return items;
+#endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>( this IReadOnlyList<TItem> items, Func<TItem, TComparable> selectComparable )
+            where TComparable : IComparable<TComparable>
+        {
+#if DEBUG
+            return AssertSorted( items, selectComparable, Comparison );
+
+            static int Comparison( TComparable left, TComparable right ) => left.CompareTo( right );
+#else
+            return items;
+#endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>( this IReadOnlyList<TItem> items, Comparison<TItem> comparison )
+        {
+#if DEBUG
+            return AssertSorted( items, static x => x, comparison );
+#else
+            return items;
+#endif
+        }
+
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        [DebuggerStepThrough]
+        public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>( this IReadOnlyList<TItem> items, Func<TItem, TComparable> selectComparable, Comparison<TComparable> comparison )
+        {
+#if DEBUG
+            var materialized = items.Materialize();
+
+            for ( var i = 1; i < materialized.Count; i++ )
+            {
+                if ( comparison( selectComparable(materialized[i - 1]), selectComparable(materialized[i]) ) > 0 )
+                {
+                    throw new AssertionFailedException( "The enumeration must be sorted according to the given comparison." );
+                }
+            }
+
+            // Materialized list is intentionally thrown away to allow further assertions on materialization.
+            return items;
 #else
             return items;
 #endif

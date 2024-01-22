@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,9 +17,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     internal sealed class ForcedInitializationSubstitution : SyntaxNodeSubstitution
     {
         private readonly SyntaxNode _rootNode;
-        private readonly ISymbol[] _symbolsToInitialize;
+        private readonly IReadOnlyList<ISymbol> _symbolsToInitialize;
 
-        public ForcedInitializationSubstitution( CompilationContext compilationContext, SyntaxNode rootNode, ISymbol[] symbolsToInitialize ) : base(
+        public ForcedInitializationSubstitution( CompilationContext compilationContext, SyntaxNode rootNode, IReadOnlyList<ISymbol> symbolsToInitialize ) : base(
             compilationContext )
         {
             this._rootNode = rootNode;
@@ -47,7 +48,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
             IEnumerable<StatementSyntax> GetInitializationStatements()
             {
-                foreach ( var symbol in this._symbolsToInitialize )
+                foreach ( var symbol in this._symbolsToInitialize.OrderBy(static x => x, StructuralSymbolComparer.Default) )
                 {
                     yield return
                         ExpressionStatement(

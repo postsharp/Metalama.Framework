@@ -42,10 +42,11 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
+                // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
                 return HashCode.Combine(
                     x.InliningId,
                     this._symbolComparer.GetHashCode( x.DestinationSemantic.Symbol ),
-                    x.DestinationSemantic.Kind );
+                    (int) x.DestinationSemantic.Kind );
             }
         }
     }

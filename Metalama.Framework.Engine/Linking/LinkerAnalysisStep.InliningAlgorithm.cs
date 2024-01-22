@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
-            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
                 _aspectReferencesByContainingSemantic;
 
             private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public InliningAlgorithm(
                 ProjectServiceProvider serviceProvider,
-                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
+                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
                 HashSet<IntermediateSymbolSemantic> reachableSemantics,
                 HashSet<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,

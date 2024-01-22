@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -21,12 +20,25 @@ namespace Metalama.Framework.Engine.CodeModel
             public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
 
             public override bool DefaultVisit( SyntaxNode node )
-                => node switch
+            {
+                switch ( node )
                 {
-                    ExpressionSyntax => false,
-                    LocalFunctionStatementSyntax => false,
-                    _ => node.ChildNodes().Any( this.Visit )
-                };
+                    case ExpressionSyntax:
+                    case LocalFunctionStatementSyntax:
+                        return false;
+
+                    default:
+                        foreach ( var childNode in node.ChildNodes() )
+                        {
+                            if ( this.Visit( childNode ) )
+                            {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                }
+            }
         }
     }
 }

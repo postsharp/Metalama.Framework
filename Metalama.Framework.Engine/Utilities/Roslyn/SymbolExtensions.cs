@@ -176,12 +176,26 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
                 else
                 {
-                    var references =
-                        filter != null
-                            ? s.DeclaringSyntaxReferences.Where( filter )
-                            : s.DeclaringSyntaxReferences;
+                    // Find the lowest value.
 
-                    return references.OrderBy( x => x.SyntaxTree.FilePath.Length ).First();
+                    SyntaxReference? min = null;
+                    int? minLength = null;
+                    foreach ( var reference in s.DeclaringSyntaxReferences )
+                    {
+                        if (filter != null && !filter(reference))
+                        {
+                            continue;
+                        }
+
+                        var length = reference.SyntaxTree.FilePath.Length;
+                        if ( min == null || length < minLength )
+                        {
+                            min = reference;
+                            minLength = length;
+                        }
+                    }
+
+                    return min;
                 }
             }
 

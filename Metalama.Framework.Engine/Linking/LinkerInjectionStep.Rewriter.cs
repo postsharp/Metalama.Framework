@@ -35,7 +35,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly SyntaxTransformationCollection _syntaxTransformationCollection;
         private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
-        private readonly IReadOnlyCollectionWithContains<SyntaxNode> _nodesWithModifiedAttributes;
+        private readonly IReadOnlyCollection<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
 
         // ReSharper disable once NotAccessedField.Local
@@ -55,7 +55,7 @@ internal sealed partial class LinkerInjectionStep
             CompilationModel compilation,
             IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
             ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> introductionMemberLevelTransformations,
-            IReadOnlyCollectionWithContains<SyntaxNode> nodesWithModifiedAttributes,
+            IReadOnlyCollection<SyntaxNode> nodesWithModifiedAttributes,
             SyntaxTree syntaxTreeForGlobalAttributes,
             IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations,
             IUserDiagnosticSink diagnostics )

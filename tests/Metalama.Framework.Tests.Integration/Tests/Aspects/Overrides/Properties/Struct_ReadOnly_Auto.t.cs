@@ -62,8 +62,8 @@ internal readonly struct TargetStruct
   }
   public TargetStruct()
   {
-    this._staticPropertyInitOnly = default;
-    this._propertyInitOnly = default;
     this._property = default;
+    this._propertyInitOnly = default;
+    this._staticPropertyInitOnly = default;
   }
 }
