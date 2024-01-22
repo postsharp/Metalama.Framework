@@ -106,14 +106,24 @@ namespace Metalama.Framework.Engine.Linking
         public AspectReferenceTargetKind TargetKind { get; }
 
         /// <summary>
+        /// Gets flags of the aspect reference.
+        /// </summary>
+        public AspectReferenceFlags Flags { get; }
+
+        /// <summary>
         /// Gets a value indicating whether the reference is inlineable.
         /// </summary>
-        public bool IsInlineable { get; }
+        public bool IsInlineable => this.Flags.HasFlagFast( AspectReferenceFlags.Inlineable );
+
+        /// <summary>
+        /// Gets a value indicating whether the reference is an implicitly inlineable invocation.
+        /// </summary>
+        public bool IsImplicitlyInlineableInvocation => this.Flags.HasFlagFast( AspectReferenceFlags.ImplicitlyInlineableInvocation );
 
         /// <summary>
         /// Gets a value indicating whether the reference has a custom receiver expression.
         /// </summary>
-        public bool HasCustomReceiver { get; }
+        public bool HasCustomReceiver => this.Flags.HasFlagFast( AspectReferenceFlags.CustomReceiver );
 
         public ResolvedAspectReference(
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
@@ -124,8 +134,7 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxNode rootNode,
             SyntaxNode symbolSourceNode,
             AspectReferenceTargetKind targetKind,
-            bool isInlineable,
-            bool hasCustomReceiver )
+            AspectReferenceFlags flags )
         {
             Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && symbolSourceNode is not ExpressionSyntax );
 
@@ -146,8 +155,7 @@ namespace Metalama.Framework.Engine.Linking
             this.RootNode = rootNode;
             this.SymbolSourceNode = symbolSourceNode;
             this.TargetKind = targetKind;
-            this.IsInlineable = isInlineable;
-            this.HasCustomReceiver = hasCustomReceiver;
+            this.Flags = flags;
         }
 
         public override string ToString()

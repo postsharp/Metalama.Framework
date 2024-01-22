@@ -98,7 +98,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
                 this.ParentAdvice.AspectLayerId,
                 AspectReferenceOrder.Previous,
                 referenceTargetKind,
-                AspectReferenceFlags.Inlineable );
+                AspectReferenceFlags.Inlineable | AspectReferenceFlags.ImplicitlyInlineableInvocation );
     }
 
     public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();

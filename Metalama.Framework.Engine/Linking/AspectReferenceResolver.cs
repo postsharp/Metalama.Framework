@@ -144,8 +144,6 @@ namespace Metalama.Framework.Engine.Linking
             // resolvedReferencedSymbolSourceNode is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
 
             var targetKind = referenceSpecification.TargetKind;
-            var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
-            var hasCustomReceiver = (referenceSpecification.Flags & AspectReferenceFlags.CustomReceiver) != 0;
 
             if ( targetKind == AspectReferenceTargetKind.Self && resolvedReferencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
             {
@@ -281,8 +279,7 @@ namespace Metalama.Framework.Engine.Linking
                     resolvedRootNode,
                     resolvedReferencedSymbolSourceNode,
                     targetKind,
-                    isInlineable,
-                    hasCustomReceiver );
+                    referenceSpecification.Flags );
         }
 
         private void ResolveLayerIndex(

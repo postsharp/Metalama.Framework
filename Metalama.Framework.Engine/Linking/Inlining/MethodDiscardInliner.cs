@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( !IsInlineableInvocation( semanticModel, aspectReference.ContainingSemantic.Symbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, aspectReference, invocationExpression ) )
             {
                 return false;
             }

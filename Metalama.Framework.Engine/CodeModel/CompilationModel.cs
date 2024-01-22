@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -208,14 +209,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.Factory = new DeclarationFactory( this );
 
-            // Discover custom attributes.
-            //AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
-
-            //foreach ( var tree in partialCompilation.SyntaxTrees )
-            //{
-            //    attributeDiscoveryVisitor.Visit( tree.Value );
-            //}
-
             this._allMemberAttributesByType = DiscoverAttributes( this.CompilationContext );
 
             this._derivedTypes = new Lazy<DerivedTypeIndex>(
@@ -285,10 +278,27 @@ namespace Metalama.Framework.Engine.CodeModel
                         break;
 
                     case IPropertySymbol property:
-
-                        foreach ( var param in property.Parameters )
+                        if ( property.GetMethod != null )
                         {
-                            VisitSymbol( param );
+                            VisitSymbol( property.GetMethod );
+                        }
+
+                        if ( property.SetMethod != null )
+                        {
+                            VisitSymbol( property.SetMethod );
+                        }
+
+                        break;
+
+                    case IEventSymbol @event:
+                        if ( @event.AddMethod != null )
+                        {
+                            VisitSymbol( @event.AddMethod );
+                        }
+
+                        if ( @event.RemoveMethod != null )
+                        {
+                            VisitSymbol( @event.RemoveMethod );
                         }
 
                         break;

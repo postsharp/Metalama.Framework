@@ -144,8 +144,7 @@ namespace Metalama.Framework.Engine.Linking
                                 sourceNode,
                                 sourceNode,
                                 targetKind,
-                                isInlineable: true,
-                                hasCustomReceiver: true );
+                                AspectReferenceFlags.Inlineable | AspectReferenceFlags.CustomReceiver | AspectReferenceFlags.ImplicitlyInlineableInvocation );
 
                         var wasAdded = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
 
