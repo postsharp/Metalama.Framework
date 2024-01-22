@@ -437,7 +437,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return constructors.SelectAsImmutableArray( x => new ForcefullyInitializedType( x.Value.ToArray(), byDeclaringType[x.Key].ToArray() ) );
+            return constructors.SelectAsImmutableArray( x => new ForcefullyInitializedType( x.Value, byDeclaringType[x.Key] ) );
         }
 
         /// <summary>
