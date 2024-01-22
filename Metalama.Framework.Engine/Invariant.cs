@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute;
 
@@ -138,7 +137,7 @@ namespace Metalama.Framework.Engine
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        public static T AssertNotNull<T>( this T? obj, string? justification = null )
+        public static T AssertNotNull<T>( [NotNull] this T? obj, string? justification = null )
             where T : class
         {
 #if DEBUG
