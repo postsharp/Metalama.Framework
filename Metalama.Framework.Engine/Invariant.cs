@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+#if DEBUG
 using System.Linq;
+#endif
 using System.Runtime.CompilerServices;
 using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute;
 

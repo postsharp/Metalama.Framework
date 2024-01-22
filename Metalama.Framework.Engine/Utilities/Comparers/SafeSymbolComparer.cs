@@ -103,8 +103,15 @@ public sealed class SafeSymbolComparer : IEqualityComparer<ISymbol>
         }
     }
 
+#if !DEBUG
+#pragma warning disable CA1822
+#endif
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private void ValidateCompilation( ISymbol symbol )
+
+#if !DEBUG
+#pragma warning restore CA1822
+#endif
     {
 #if DEBUG
         if ( symbol.BelongsToCompilation( this._compilationContext ) == false )
