@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
 /// <summary>
-/// An abstraction that exposes the <see cref="RunSynchronously(System.Func{System.Threading.Tasks.Task},System.Threading.CancellationToken)"/>
-/// method. It could, in theory, have different implementations, for instance using <c>Microsoft.VisualStudio.Threading</c>, but
-/// in practice the only implementation uses the system methods.
+/// An abstraction that exposes the <see cref="RunSynchronously(Func{Task},CancellationToken)"/> method.
+/// It could, in theory, have different implementations, for instance using <c>Microsoft.VisualStudio.Threading</c>,
+/// but in practice the only implementation uses the system methods.
 /// </summary>
 [PublicAPI]
 public interface ITaskRunner : IGlobalService

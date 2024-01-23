@@ -48,8 +48,6 @@ public sealed class TaskBag
             },
             cancellationToken );
 
-        Thread.MemoryBarrier();
-
         lock ( sync )
         {
             if ( !taskCompleted )
