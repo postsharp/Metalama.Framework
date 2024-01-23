@@ -37,7 +37,7 @@ namespace Metalama.Testing.AspectTesting
             this.RelativePath = relativePath;
             this.FullPath = fullPath;
             this.ProjectDirectory = projectDirectory ?? projectProperties.ProjectDirectory;
-            this.SourceDirectory = projectProperties.SourceDirectory;
+            this.SourceDirectory = projectDirectory ?? projectProperties.SourceDirectory;
 
             if ( directoryOptionsReader != null )
             {
