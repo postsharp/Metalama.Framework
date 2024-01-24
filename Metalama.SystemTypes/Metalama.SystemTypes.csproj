@@ -11,40 +11,41 @@
 
     <ItemGroup>
         <!-- Pretty much all projects in the solution should be listed here -->
-        <InternalsVisibleTo Include="Metalama.Framework"/>
-        <InternalsVisibleTo Include="Metalama.Framework.CompileTime"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Sdk"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Introspection"/>
+        <InternalsVisibleTo Include="Metalama.Framework" />
+        <InternalsVisibleTo Include="Metalama.Framework.CompileTime" />
+        <InternalsVisibleTo Include="Metalama.Framework.Sdk" />
+        <InternalsVisibleTo Include="Metalama.Framework.Introspection" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.Analyzers" />
 
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
     
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.4.0" />
 
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.8.0"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.8.0"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.8.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.8.0" />
 
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.4.8.0" />
 
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
 
-        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting"/>
+        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Testing.UnitTesting" />
 
-        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.4.0"/>
-        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting"/>
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.0.1" />
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting.4.4.0" />
+        <InternalsVisibleTo Include="Metalama.Testing.AspectTesting" />
     </ItemGroup>
     
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 
 </Project>

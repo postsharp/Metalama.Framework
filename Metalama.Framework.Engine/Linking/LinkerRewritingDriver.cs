@@ -69,15 +69,9 @@ namespace Metalama.Framework.Engine.Linking
             if ( triviaSource == null )
             {
                 // Strip the trivia from the block and add a flattenable annotation.
-                return rewrittenBlock
-                    .WithOpenBraceToken(
-                        Token( SyntaxKind.OpenBraceToken )
-                            .WithLeadingTrivia( ElasticMarker )
-                            .WithTrailingTrivia( ElasticMarker ) )
-                    .WithCloseBraceToken(
-                        Token( SyntaxKind.CloseBraceToken )
-                            .WithLeadingTrivia( ElasticMarker )
-                            .WithTrailingTrivia( ElasticMarker ) )
+                return rewrittenBlock.PartialUpdate(
+                        openBraceToken: Token( new( ElasticMarker ), SyntaxKind.OpenBraceToken, new( ElasticMarker ) ),
+                        closeBraceToken: Token( new( ElasticMarker ), SyntaxKind.CloseBraceToken, new( ElasticMarker ) ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
             else
@@ -104,8 +98,9 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     rewrittenBlock =
                         rewrittenBlock
-                            .WithOpenBraceToken( rewrittenBlock.OpenBraceToken.WithoutTrivia() )
-                            .WithCloseBraceToken( rewrittenBlock.CloseBraceToken.WithoutTrivia() )
+                            .PartialUpdate( 
+                                openBraceToken: rewrittenBlock.OpenBraceToken.WithoutTrivia(),
+                                closeBraceToken: rewrittenBlock.CloseBraceToken.WithoutTrivia() )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
@@ -117,14 +112,15 @@ namespace Metalama.Framework.Engine.Linking
 
                 // Keep all trivia from the source block and add trivias from the root block.
                 return Block( rewrittenBlock )
-                    .WithOpenBraceToken(
-                        Token( SyntaxKind.OpenBraceToken )
-                            .WithLeadingTrivia( openBraceLeadingTrivia.Add( ElasticMarker ) )
-                            .WithTrailingTrivia( openBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
-                    .WithCloseBraceToken(
-                        Token( SyntaxKind.CloseBraceToken )
-                            .WithLeadingTrivia( closeBraceLeadingTrivia.Add( ElasticMarker ) )
-                            .WithTrailingTrivia( closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
+                    .PartialUpdate(
+                        openBraceToken: Token(
+                            openBraceLeadingTrivia.Add( ElasticMarker ),
+                            SyntaxKind.OpenBraceToken,
+                            openBraceTrailingTrivia.Insert( 0, ElasticMarker ) ),
+                        closeBraceToken: Token(
+                            closeBraceLeadingTrivia.Add( ElasticMarker ),
+                            SyntaxKind.CloseBraceToken,
+                            closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
@@ -333,9 +329,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-#pragma warning disable CA1822 // Mark members as static
         private static SyntaxNode RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
-#pragma warning restore CA1822 // Mark members as static
         {
             var rewriter = new SubstitutingRewriter( context );
 

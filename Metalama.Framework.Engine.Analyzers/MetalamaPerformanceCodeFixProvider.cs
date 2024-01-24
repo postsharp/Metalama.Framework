@@ -7,6 +7,9 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CodeActions;
+using System.Collections.Generic;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Analyzers;
 
@@ -17,7 +20,7 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
     public override ImmutableArray<string> FixableDiagnosticIds
         => ImmutableArray.Create( MetalamaPerformanceAnalyzer._normalizeWhitespace.Id, MetalamaPerformanceAnalyzer._syntaxNodeWith.Id );
 
-    public override FixAllProvider? GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
+    public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
     public override async Task RegisterCodeFixesAsync( CodeFixContext context )
     {
@@ -26,6 +29,10 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
             if ( diagnostic.Id == MetalamaPerformanceAnalyzer._normalizeWhitespace.Id )
             {
                 await RegisterNormalizeWhitespaceCodeFixAsync( context, diagnostic );
+            }
+            else if ( diagnostic.Id == MetalamaPerformanceAnalyzer._syntaxNodeWith.Id )
+            {
+                await RegisterSyntaxNodeWithCodeFixAsync( context, diagnostic );
             }
         }
     }
@@ -38,14 +45,77 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
 
         if ( node is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: var expression } } )
         {
-            const string Title = "Remove call to NormalizeWhitespace";
+            const string title = "Remove call to NormalizeWhitespace";
 
-            context.RegisterCodeFix( CodeAction.Create( Title, ct =>
-            {
-                var newRoot = root.ReplaceNode( node, expression.WithTrailingTrivia( node.GetTrailingTrivia() ) );
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title,
+                    _ =>
+                    {
+                        var newRoot = root.ReplaceNode( node, expression.WithTrailingTrivia( node.GetTrailingTrivia() ) );
 
-                return Task.FromResult( document.WithSyntaxRoot( newRoot ) );
-            }, equivalenceKey: Title ), diagnostic );
+                        return Task.FromResult( document.WithSyntaxRoot( newRoot ) );
+                    },
+                    equivalenceKey: title ),
+                diagnostic );
+        }
+    }
+
+    private static async Task RegisterSyntaxNodeWithCodeFixAsync( CodeFixContext context, Diagnostic diagnostic )
+    {
+        var document = context.Document;
+        var root = await document.GetSyntaxRootAsync( context.CancellationToken );
+        var diagnosticSpan = diagnostic.Location.SourceSpan;
+        var node = root.FindNode( diagnosticSpan ) as ExpressionSyntax;
+        //var semanticModel = await document.GetSemanticModelAsync(context.CancellationToken);
+
+        //var syntaxNodePartialUpdateExtensionsSymbol = semanticModel.Compilation.GetTypeByMetadataName(
+        //    "Metalama.Framework.Engine.Utilities.Roslyn.SyntaxNodePartialUpdateExtensions" )!;
+
+        List<ArgumentSyntax> arguments = [];
+
+        var currentNode = node;
+        MemberAccessExpressionSyntax? firstMemberAccess = null;
+
+        while ( currentNode.Span.OverlapsWith( diagnosticSpan ) && currentNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: var expression, Name: IdentifierNameSyntax name } memberAccess, ArgumentList.Arguments: [var argument] } )
+        {
+            firstMemberAccess ??= memberAccess;
+
+            var withMethodName = name.Identifier.ValueText;
+            var trimmedMethodName = withMethodName["With".Length..];
+            var parameterName = char.ToLowerInvariant( trimmedMethodName[0] ) + trimmedMethodName[1..];
+
+            arguments.Add( SyntaxFactory.Argument( SyntaxFactory.NameColon( parameterName ), default, argument.Expression ) );
+
+            currentNode = expression;
+        }
+
+        if ( arguments.Count >= 2 )
+        {
+            const string title = "Replace With calls with PartialUpdate";
+
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title,
+                    _ =>
+                    {
+                        var memberAccess = SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            currentNode,
+                            SyntaxFactory.Token( firstMemberAccess!.OperatorToken.LeadingTrivia, SyntaxKind.DotToken, default ),
+                            SyntaxFactory.IdentifierName( "PartialUpdate" ) );
+
+                        var newNode = SyntaxFactory.InvocationExpression(
+                                memberAccess,
+                                SyntaxFactory.ArgumentList( SyntaxFactory.SeparatedList( arguments.AsEnumerable().Reverse() ) ) )
+                            .WithTrailingTrivia( node.GetTrailingTrivia() );
+
+                        var newRoot = root.ReplaceNode( node, newNode );
+
+                        return Task.FromResult( document.WithSyntaxRoot( newRoot ) );
+                    },
+                    equivalenceKey: title ),
+                diagnostic );
         }
     }
 }

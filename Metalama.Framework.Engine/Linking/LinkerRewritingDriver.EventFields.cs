@@ -92,10 +92,11 @@ namespace Metalama.Framework.Engine.Linking
                         eventFieldDeclaration.Declaration.Type.WithTrailingTrivia( Space ),
                         null,
                         Identifier( symbol.Name ),
-                        AccessorList( List( new[] { transformedAdd, transformedRemove } ) )
-                            .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
-                            .WithCloseBraceToken( Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
-                        MissingToken( SyntaxKind.SemicolonToken ) );
+                        AccessorList(
+                            Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ),
+                            List( new[] { transformedAdd, transformedRemove } ),
+                            Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
+                        default );
             }
 
             AccessorDeclarationSyntax GetLinkedAccessor(
@@ -121,9 +122,7 @@ namespace Metalama.Framework.Engine.Linking
                             .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true ) ),
                         TokenList(),
                         Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        Block( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ), SingletonList<StatementSyntax>( linkedBody ), Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                         null,
                         default );

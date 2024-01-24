@@ -49,10 +49,9 @@ namespace Metalama.Framework.Engine.Linking
                                 .AddRange( ((ReturnStatementSyntax) node.Statements[i]).SemicolonToken.TrailingTrivia.StripFirstTrailingNewLine() );
                     }
 
-                    return node
-                        .WithStatements( List( newStatements ) )
-                        .WithCloseBraceToken(
-                            node.CloseBraceToken.WithLeadingTrivia(
+                    return node.PartialUpdate(
+                        statements: List( newStatements ),
+                        closeBraceToken: node.CloseBraceToken.WithLeadingTrivia(
                                 additionalTrailingTrivia
                                     .AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
                 }

@@ -47,9 +47,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                     if ( this._aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                     {
-                        return memberAccessExpression
-                            .WithExpression( ThisExpression() )
-                            .WithName( IdentifierName( backingFieldName ) );
+                        return memberAccessExpression.PartialUpdate( expression: ThisExpression(), name: IdentifierName( backingFieldName ) );
                     }
                     else
                     {
