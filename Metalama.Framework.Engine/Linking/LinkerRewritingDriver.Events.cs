@@ -154,15 +154,15 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
-                return accessorDeclaration
-                    .WithExpressionBody( null )
-                    .WithBody(
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                    .WithSemicolonToken( default );
+                return accessorDeclaration.PartialUpdate(
+                    expressionBody: null,
+                    body: Block(
+                            Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                            SingletonList<StatementSyntax>( linkedBody ),
+                            Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                    semicolonToken: default(SyntaxToken) );
             }
         }
 
@@ -314,10 +314,7 @@ namespace Metalama.Framework.Engine.Linking
                             new SubstitutionContext( this, generationContext, context ) )
                         : null;
 
-                return
-                    accessorDeclaration
-                        .WithBody( substitutedBody )
-                        .WithExpressionBody( substitutedExpressionBody );
+                return accessorDeclaration.PartialUpdate( body: substitutedBody, expressionBody: substitutedExpressionBody );
             }
         }
 

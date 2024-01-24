@@ -87,16 +87,16 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
                     };
 
-                var ret = destructorDeclaration
-                    .WithExpressionBody( null )
-                    .WithModifiers( destructorDeclaration.Modifiers )
-                    .WithBody(
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                    .WithSemicolonToken( default );
+                var ret = destructorDeclaration.PartialUpdate(
+                    expressionBody: null,
+                    modifiers: destructorDeclaration.Modifiers,
+                    body: Block(
+                            Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                            SingletonList<StatementSyntax>( linkedBody ),
+                            Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                    semicolonToken: default(SyntaxToken) );
 
                 return ret;
             }
@@ -165,8 +165,7 @@ namespace Metalama.Framework.Engine.Linking
                         null )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( body )
-                    .WithExpressionBody( expressionBody )
+                    .PartialUpdate( body: body, expressionBody: expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

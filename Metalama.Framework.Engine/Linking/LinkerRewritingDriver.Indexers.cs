@@ -110,14 +110,16 @@ namespace Metalama.Framework.Engine.Linking
 
                         transformedAccessors.Add(
                             AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    Block( linkedBody )
-                                        .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
-                                        .WithCloseBraceToken(
-                                            Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ) )
-                                .WithKeyword( Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ) ) );
+                                SyntaxKind.GetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                TokenList(),
+                                Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ),
+                                Block(
+                                    Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ),
+                                    SingletonList<StatementSyntax>( linkedBody ),
+                                    Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ),
+                                null,
+                                default ) );
                     }
                 }
 
@@ -158,15 +160,14 @@ namespace Metalama.Framework.Engine.Linking
                     };
 
                 return
-                    indexerDeclaration
-                        .WithAccessorList(
-                            AccessorList(
-                                    Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
-                                    List( transformedAccessors ),
-                                    Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
-                                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                        .WithExpressionBody( null )
-                        .WithSemicolonToken( default );
+                    indexerDeclaration.PartialUpdate(
+                        accessorList: AccessorList(
+                                Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
+                                List( transformedAccessors ),
+                                Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
+                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                        expressionBody: null,
+                        semicolonToken: default(SyntaxToken) );
             }
 
             AccessorDeclarationSyntax GetLinkedAccessor(
@@ -201,15 +202,15 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
-                return accessorDeclaration
-                    .WithExpressionBody( null )
-                    .WithBody(
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                    .WithSemicolonToken( default );
+                return accessorDeclaration.PartialUpdate(
+                    expressionBody: null,
+                    body: linkedBody
+                        .PartialUpdate(
+                            openBraceToken: Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                            closeBraceToken: Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                    semicolonToken: default(SyntaxToken) );
             }
         }
 
@@ -295,10 +296,7 @@ namespace Metalama.Framework.Engine.Linking
                             new SubstitutionContext( this, generationContext, context ) )
                         : null;
 
-                return
-                    accessorDeclaration
-                        .WithBody( substitutedBody )
-                        .WithExpressionBody( substitutedExpressionBody );
+                return accessorDeclaration.PartialUpdate( body: substitutedBody, expressionBody: substitutedExpressionBody );
             }
         }
 
@@ -333,14 +331,11 @@ namespace Metalama.Framework.Engine.Linking
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
                             indexerParameters.WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName ) ) ),
-                        null,
-                        null,
-                        default )
+                        accessorList,
+                        expressionBody,
+                        expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList )
-                    .WithExpressionBody( expressionBody )
-                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -350,34 +345,34 @@ namespace Metalama.Framework.Engine.Linking
             var setAccessor = indexer.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );
 
             return indexer
-                .WithAccessorList(
-                    AccessorList(
+                .PartialUpdate(
+                    accessorList: AccessorList(
                         List(
                             new[]
                                 {
                                     getAccessor != null
                                         ? AccessorDeclaration(
-                                                SyntaxKind.GetAccessorDeclaration,
-                                                SyntaxFactoryEx.FormattedBlock(
-                                                    ReturnStatement(
-                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                                                        GetInvocationTarget(),
-                                                        Token( SyntaxKind.SemicolonToken ) ) ) )
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            SyntaxFactoryEx.FormattedBlock(
+                                                ReturnStatement(
+                                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                                    GetInvocationTarget(),
+                                                    Token( SyntaxKind.SemicolonToken ) ) ) )
                                         : null,
                                     setAccessor != null
                                         ? AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
-                                                SyntaxFactoryEx.FormattedBlock(
-                                                    ExpressionStatement(
-                                                        AssignmentExpression(
-                                                            SyntaxKind.SimpleAssignmentExpression,
-                                                            GetInvocationTarget(),
-                                                            IdentifierName( "value" ) ) ) ) )
+                                            SyntaxKind.SetAccessorDeclaration,
+                                            SyntaxFactoryEx.FormattedBlock(
+                                                ExpressionStatement(
+                                                    AssignmentExpression(
+                                                        SyntaxKind.SimpleAssignmentExpression,
+                                                        GetInvocationTarget(),
+                                                        IdentifierName( "value" ) ) ) ) )
                                         : null
                                 }.Where( a => a != null )
-                                .AssertNoneNull() ) ) )
-                .WithExpressionBody( null )
-                .WithSemicolonToken( default )
+                                .AssertNoneNull() ) ),
+                    expressionBody: null,
+                    semicolonToken: default(SyntaxToken) )
                 .WithLeadingTrivia( indexer.GetLeadingTrivia() )
                 .WithTrailingTrivia( indexer.GetTrailingTrivia() );
 

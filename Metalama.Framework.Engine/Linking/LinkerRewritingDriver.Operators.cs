@@ -87,16 +87,16 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}'." )
                     };
 
-                var ret = operatorDeclaration
-                    .WithExpressionBody( null )
-                    .WithModifiers( operatorDeclaration.Modifiers )
-                    .WithBody(
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                    .WithSemicolonToken( default );
+                var ret = operatorDeclaration.PartialUpdate(
+                    expressionBody: null,
+                    modifiers: operatorDeclaration.Modifiers,
+                    body: Block(
+                            Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                            SingletonList<StatementSyntax>( linkedBody ),
+                            Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                    semicolonToken: default(SyntaxToken) );
 
                 return ret;
             }
@@ -166,13 +166,11 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
                         List<TypeParameterConstraintClauseSyntax>(),
-                        null,
-                        null )
+                        body,
+                        expressionBody,
+                        expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( body )
-                    .WithExpressionBody( expressionBody )
-                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

@@ -125,8 +125,7 @@ internal static partial class SyntaxFactoryEx
     private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
 
     public static StatementSyntax EmptyStatement
-        => SyntaxFactory.ExpressionStatement( EmptyExpression )
-            .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+        => SyntaxFactory.ExpressionStatement( EmptyExpression, SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
 
     public static CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {

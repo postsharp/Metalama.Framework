@@ -608,8 +608,9 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 propertyDeclaration = propertyDeclaration
-                    .WithInitializer( EqualsValueClause( memberLevelTransformations.Expressions[0].InitializerExpression ) )
-                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) );
+                    .PartialUpdate(
+                        initializer: EqualsValueClause( memberLevelTransformations.Expressions[0].InitializerExpression ),
+                        semicolonToken: Token( SyntaxKind.SemicolonToken ) );
             }
             else if ( memberLevelTransformations.Expressions.Length > 1 )
             {
@@ -751,10 +752,10 @@ internal sealed partial class LinkerInjectionStep
                 case { ExpressionBody: { } expressionBody }:
                     return
                         constructorDeclaration
-                            .WithExpressionBody( null )
-                            .WithSemicolonToken( default )
-                            .WithBody(
-                                SyntaxFactoryEx.FormattedBlock(
+                            .PartialUpdate(
+                                expressionBody: null,
+                                semicolonToken: default(SyntaxToken),
+                                body: SyntaxFactoryEx.FormattedBlock(
                                     beginningStatements
                                         .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) ) );
 

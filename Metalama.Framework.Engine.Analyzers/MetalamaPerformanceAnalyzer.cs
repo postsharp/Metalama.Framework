@@ -9,6 +9,7 @@ using System;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Analyzers;
 
@@ -30,7 +31,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         "Avoid chained With calls on SyntaxNodes.",
         "Avoid chained With calls on SyntaxNodes, use the PartialUpdate method instead to avoid allocating garbage nodes.",
         "Metalama",
-        DiagnosticSeverity.Info,
+        DiagnosticSeverity.Warning,
         true );
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create( _normalizeWhitespace, _syntaxNodeWith );
@@ -48,9 +49,10 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         context.RegisterOperationAction( AnalyzeNormalizeWhitespace, OperationKind.Invocation, OperationKind.MethodReference );
 
         var syntaxNodeTypeSymbol = context.Compilation.GetTypeByMetadataName( typeof(SyntaxNode).FullName! )!;
+        var syntaxNodePartialUpdateExtensionsSymbol = context.Compilation.GetTypeByMetadataName( "Metalama.Framework.Engine.Utilities.Roslyn.SyntaxNodePartialUpdateExtensions" )!;
 
         context.RegisterOperationAction(
-            operationContext => AnalyzeSyntaxNodeWithChains( operationContext, syntaxNodeTypeSymbol ),
+            operationContext => AnalyzeSyntaxNodeWithChains( operationContext, syntaxNodeTypeSymbol, syntaxNodePartialUpdateExtensionsSymbol ),
             OperationKind.Invocation );
     }
 
@@ -76,10 +78,11 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic( Diagnostic.Create( _normalizeWhitespace, location ) );
         }
     }
-
-
     
-    private static void AnalyzeSyntaxNodeWithChains( OperationAnalysisContext context, INamedTypeSymbol syntaxNodeSymbol )
+    private static void AnalyzeSyntaxNodeWithChains(
+        OperationAnalysisContext context,
+        INamedTypeSymbol syntaxNodeSymbol,
+        INamedTypeSymbol syntaxNodePartialUpdateExtensionsSymbol )
     {
         bool IsSyntaxNodeWithInvocation( IOperation operation, out IInvocationOperation? invocation )
         {
@@ -87,7 +90,11 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
                  method.Name.StartsWith( "With", StringComparison.Ordinal ) &&
                  method.ContainingType != null &&
                  context.Compilation.ClassifyConversion( method.ContainingType, syntaxNodeSymbol ) is
-                    { IsIdentity: true } or { IsImplicit: true, IsReference: true } )
+                    { IsIdentity: true } or { IsImplicit: true, IsReference: true } &&
+                 syntaxNodePartialUpdateExtensionsSymbol.GetMembers( "PartialUpdate" )
+                    .OfType<IMethodSymbol>()
+                    .SingleOrDefault( m => SymbolEqualityComparer.Default.Equals( m.Parameters[0].Type, method.ContainingType ) ) is { } partialUdateMethod &&
+                 partialUdateMethod.Parameters.Any( p => method.Name.AsSpan( "With".Length ).Equals( p.Name.AsSpan(), StringComparison.InvariantCultureIgnoreCase ) ) )
             {
                 invocation = invocationOperation;
 
