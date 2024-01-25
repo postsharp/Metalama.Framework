@@ -459,7 +459,8 @@ internal sealed partial class LinkerInjectionStep
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             {
-                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                if ( injectedMember.DeclarationBuilder != null && 
+                                    this._introductionMemberLevelTransformations.TryGetValue(
                                         injectedMember.DeclarationBuilder.AssertNotNull(),
                                         out var memberLevelTransformations ) )
                                 {

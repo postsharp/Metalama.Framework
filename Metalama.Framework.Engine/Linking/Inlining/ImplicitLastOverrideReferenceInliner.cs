@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     MethodDeclarationSyntax { Body: null, ExpressionBody: null } partialMethodDeclaration => partialMethodDeclaration,
                     DestructorDeclarationSyntax { Body: { } destructorBody } => destructorBody,
                     DestructorDeclarationSyntax { ExpressionBody: { } destructorBody } => destructorBody,
+                    ConstructorDeclarationSyntax { Body: { } constructorBody } => constructorBody,
+                    ConstructorDeclarationSyntax { ExpressionBody: { } constructorBody } => constructorBody,
                     OperatorDeclarationSyntax { Body: { } operatorBody } => operatorBody,
                     OperatorDeclarationSyntax { ExpressionBody: { } operatorBody } => operatorBody,
                     ConversionOperatorDeclarationSyntax { Body: { } conversionOperatorBody } => conversionOperatorBody,

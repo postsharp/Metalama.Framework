@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Linking
                 resolvedSemantic.Symbol is IMethodSymbol
                 {
                     MethodKind: not MethodKind.Ordinary and not MethodKind.ExplicitInterfaceImplementation and not MethodKind.Destructor
-                    and not MethodKind.UserDefinedOperator and not MethodKind.Conversion
+                    and not MethodKind.UserDefinedOperator and not MethodKind.Conversion and not MethodKind.Constructor and not MethodKind.StaticConstructor
                 } );
 
             this.ContainingSemantic = containingSemantic;

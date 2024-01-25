@@ -125,6 +125,18 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
+        /// Overrides the implementation of a constructor.
+        /// </summary>
+        /// <param name="targetMethod">The method to override.</param>
+        /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
+        ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
+        /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
+        ///     of the <see cref="meta"/> API.</param>
+        /// <seealso href="@overriding-members"/>
+        IOverrideAdviceResult<IConstructor> Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null );
+
+        /// <summary>
         /// Overrides a field or property by specifying a property template.
         /// </summary>
         /// <param name="targetFieldOrProperty">The field or property to override.</param>

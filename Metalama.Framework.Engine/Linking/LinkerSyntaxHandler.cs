@@ -27,6 +27,10 @@ namespace Metalama.Framework.Engine.Linking
                         // Partial methods without declared body have empty implicit body.
                         return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
+                    case ConstructorDeclarationSyntax constructorDecl:
+                        return (SyntaxNode?) constructorDecl.Body
+                               ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
+
                     case DestructorDeclarationSyntax destructorDecl:
                         return (SyntaxNode?) destructorDecl.Body
                                ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
@@ -69,6 +73,10 @@ namespace Metalama.Framework.Engine.Linking
                     case MethodDeclarationSyntax methodDecl:
                         return (SyntaxNode?) methodDecl.Body
                                ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
+
+                    case ConstructorDeclarationSyntax constructorDecl:
+                        return (SyntaxNode?) constructorDecl.Body
+                               ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     case AccessorDeclarationSyntax accessorDecl:
                         return (SyntaxNode?) accessorDecl.Body

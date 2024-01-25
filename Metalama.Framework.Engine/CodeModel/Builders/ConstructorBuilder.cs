@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl
+internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl
 {
     public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 

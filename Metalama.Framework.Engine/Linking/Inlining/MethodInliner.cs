@@ -22,7 +22,7 @@ internal abstract class MethodInliner : Inliner
                .All( a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextMethod.Parameters[a.Index] ) );
 
     public override bool IsValidForTargetSymbol( ISymbol symbol )
-        => symbol is IMethodSymbol { AssociatedSymbol: null, IsAsync: false } methodSymbol && !IteratorHelper.IsIteratorMethod( methodSymbol );
+        => symbol is IMethodSymbol { MethodKind: not MethodKind.Constructor, AssociatedSymbol: null, IsAsync: false } methodSymbol && !IteratorHelper.IsIteratorMethod( methodSymbol );
 
     public override bool IsValidForContainingSymbol( ISymbol symbol ) => true;
 }

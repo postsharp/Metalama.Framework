@@ -28,5 +28,8 @@ public enum AdviceKind
     AddInitializer,
     AddContract,
     ImplementInterface,
-    AddAnnotation
+    AddAnnotation,
+    IntroduceConstructor,
+    OverrideConstructor,
+    OverrideConstructorChainCall,
 }

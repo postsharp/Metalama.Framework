@@ -546,6 +546,40 @@ namespace Metalama.Framework.Engine.Linking
 
                         return;
 
+                    case { Name: LinkerInjectionHelperProvider.StaticConstructorMemberName }:
+                        // Referencing type's constructor.
+                        switch ( expression.Parent )
+                        {
+                            case InvocationExpressionSyntax { ArgumentList.Arguments: [] } invocationExpression:
+                                rootNode = expression;
+                                targetSymbol = containingSymbol.ContainingType.StaticConstructors.FirstOrDefault().AssertNotNull();
+                                targetSymbolSource = expression;
+
+                                return;
+
+                            default:
+                                throw new AssertionFailedException( $"Unexpected static constructor expression: '{expression.Parent}'." );
+                        }
+
+                    case { Name: LinkerInjectionHelperProvider.ConstructorMemberName }:
+                        // Referencing type's constructor.
+                        switch ( expression.Parent )
+                        {
+                            case InvocationExpressionSyntax
+                            {
+                                ArgumentList.Arguments: [{ Expression: ObjectCreationExpressionSyntax objectCreation }]
+                            } invocationExpression:
+
+                                rootNode = invocationExpression;
+                                targetSymbol = semanticModel.GetSymbolInfo( objectCreation ).Symbol.AssertNotNull();
+                                targetSymbolSource = objectCreation;
+
+                                return;
+
+                            default:
+                                throw new AssertionFailedException( $"Unexpected constructor expression: '{expression.Parent}'." );
+                        }
+
                     case { Name: LinkerInjectionHelperProvider.PropertyMemberName }:
                         // Referencing a property.
                         switch ( expression.Parent )
@@ -562,7 +596,7 @@ namespace Metalama.Framework.Engine.Linking
                                 return;
 
                             default:
-                                throw new AssertionFailedException( $"Unexpected invocation expression: '{expression.Parent}'." );
+                                throw new AssertionFailedException( $"Unexpected property expression: '{expression.Parent}'." );
                         }
 
                     case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
@@ -672,6 +706,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch (referencedSymbol, resolvedSymbol)
             {
+                case (IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic:false }, IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: false } ):
+                case (IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: true }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
                 case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },

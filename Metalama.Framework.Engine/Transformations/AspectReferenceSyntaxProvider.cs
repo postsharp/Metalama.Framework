@@ -11,6 +11,8 @@ namespace Metalama.Framework.Engine.Transformations
     {
         // TODO: Expressions for other kinds of aspect references should be created through this class (SoC).
 
+        public const string LinkerOverrideParamName = "__linker_param";
+
         public abstract ExpressionSyntax GetPropertyReference(
             AspectLayerId aspectLayer,
             IProperty overriddenProperty,
@@ -24,6 +26,10 @@ namespace Metalama.Framework.Engine.Transformations
             OurSyntaxGenerator syntaxGenerator );
 
         public abstract ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer );
+
+        public abstract ExpressionSyntax GetStaticConstructorReference( AspectLayerId aspectLayer );
+
+        public abstract ExpressionSyntax GetConstructorReference( AspectLayerId aspectLayer, IConstructor overriddenConstructor, OurSyntaxGenerator syntaxGenerator );
 
         public abstract ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, OurSyntaxGenerator syntaxGenerator );
 

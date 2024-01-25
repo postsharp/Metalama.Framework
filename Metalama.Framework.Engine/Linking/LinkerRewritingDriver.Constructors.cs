@@ -3,9 +3,12 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -13,30 +16,68 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LinkerRewritingDriver
     {
-        // Destructors/finalizers are only override targets, overrides are always represented as methods.
-
         private IReadOnlyList<MemberDeclarationSyntax> RewriteConstructor(
             ConstructorDeclarationSyntax constructorDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
-                return new[] { GetLinkedDeclaration() };
+                var members = new List<MemberDeclarationSyntax>();
+                var lastOverride = (IMethodSymbol) this.InjectionRegistry.GetLastOverride( symbol );
+
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                {
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
+                }
+                else
+                {
+                    throw new AssertionFailedException("Uninlined constructors are not supported.");
+                }
+
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && this.ShouldGenerateSourceMember( symbol ) )
+                {
+                    throw new AssertionFailedException( "Uninlined constructors are not supported." );
+                }
+
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && this.ShouldGenerateEmptyMember( symbol ) )
+                {
+                    throw new AssertionFailedException( "Uninlined constructors are not supported." );
+                }
+
+                return members;
+            }
+            else if ( this.InjectionRegistry.IsOverride( symbol ) )
+            {
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                {
+                    return Array.Empty<MemberDeclarationSyntax>();
+                }
+
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+            }
+            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+            {
+                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
             else
             {
                 return new[] { constructorDeclaration };
             }
 
-            ConstructorDeclarationSyntax GetLinkedDeclaration()
+            ConstructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
                 var linkedBody = this.GetSubstitutedBody(
-                    symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                    symbol.ToSemantic( semanticKind ),
                     new SubstitutionContext(
                         this,
                         generationContext,
-                        new InliningContextIdentifier( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) ) );
+                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                     constructorDeclaration switch

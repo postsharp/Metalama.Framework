@@ -55,6 +55,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
                     return this.SubstituteOperatorMemberAccess( substitutionContext );
 
+                case ObjectCreationExpressionSyntax objectCreationExpression:
+                    return this.SubstituteConstructorMemberAccess( objectCreationExpression );
+
                 case MemberAccessExpressionSyntax memberAccessExpression:
                     return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
 
@@ -72,6 +75,15 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         protected abstract string GetTargetMemberName();
 
         protected virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
+        {
+            return
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    ThisExpression(),
+                    IdentifierName( this.GetTargetMemberName() ) );
+        }
+
+        protected virtual SyntaxNode SubstituteConstructorMemberAccess( ObjectCreationExpressionSyntax currentNode )
         {
             return
                 MemberAccessExpression(
