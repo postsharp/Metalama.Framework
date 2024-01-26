@@ -800,15 +800,14 @@ internal sealed class AdviceFactory : IAdviceFactory
             var boundTemplate =
                 this.ValidateTemplateName( template, TemplateKind.Default, true )
                     ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
-                    .ForOverride( targetConstructor, this.GetObjectReader( args ) )
-                    .AssertNotNull();
+                    .ForOverride( targetConstructor, this.GetObjectReader( args ) );
 
             var advice = new OverrideConstructorAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetConstructor,
                 this._compilation,
-                boundTemplate,
+                boundTemplate.AssertNotNull(),
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
