@@ -4,6 +4,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             return
                                 SyntaxFactoryEx.FormattedBlock(
                                         CreateAssignmentStatement( returnStatement.Expression )
-                                            .WithTriviaFrom( returnStatement )
+                                            .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.PreserveTrivia )
                                             .WithOriginalLocationAnnotationFrom( returnStatement ),
                                         CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         {
                             var assignmentStatement =
                                 CreateAssignmentStatement( returnStatement.Expression )
-                                    .WithTriviaFrom( returnStatement )
+                                    .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.PreserveTrivia )
                                     .WithOriginalLocationAnnotationFrom( returnStatement );
 
                             if ( this._replaceByBreakIfOmitted )
@@ -176,7 +177,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 identifier,
                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                 expression ),
-                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
+                            Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
 
@@ -185,10 +186,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 return
                     GotoStatement(
                             SyntaxKind.GotoStatement,
-                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.GotoKeyword ),
                             default,
                             IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
+                            Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
         }

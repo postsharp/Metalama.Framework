@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
 
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]
@@ -97,8 +97,8 @@ namespace Metalama.Framework.Engine.Transformations
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
-                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.EventKeyword ),
+                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null!,
                         Identifier( eventName ),
                         AccessorList(

@@ -6,10 +6,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -48,9 +47,9 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         TokenList(
                             Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
                             Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
-                        methodBuilder.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
-                        Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
-                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OperatorKeyword ),
+                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
@@ -66,11 +65,11 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                     OperatorDeclaration(
                         methodBuilder.GetAttributeLists( context ),
                         TokenList(
-                            Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
-                            Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
-                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTrivia( Space ),
-                        Token( SyntaxKind.OperatorKeyword ).WithTrailingTrivia( Space ),
-                        methodBuilder.OperatorKind.ToOperatorKeyword().WithTrailingTrivia( Space ),
+                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ),
+                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) ),
+                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OperatorKeyword ),
+                        SyntaxFactoryEx.TokenWithSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
@@ -87,31 +86,31 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
             var block = SyntaxFactoryEx.FormattedBlock(
                 !methodBuilder.ReturnParameter.Type.Is( typeof(void) ) 
                     ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
-                        ? new StatementSyntax[]
-                        {
+                        ?
+                        [
                             SyntaxFactoryEx.FormattedBlock(
                                 YieldStatement(
                                     SyntaxKind.YieldBreakStatement,
                                     List<AttributeListSyntax>(),
-                                    Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
-                                    Token( TriviaList(), SyntaxKind.BreakKeyword, TriviaList( ElasticSpace ) ),
+                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.YieldKeyword ),
+                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.BreakKeyword ),
                                     null,
                                     Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
-                        }
-                        : new StatementSyntax[]
-                        {
+                        ]
+                        : 
+                        [
                             ReturnStatement(
-                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                                 DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
                                 Token( SyntaxKind.SemicolonToken ) )
-                        }
-                    : Array.Empty<StatementSyntax>() );
+                        ]
+                    : [] );
 
             var method =
                 MethodDeclaration(
                     methodBuilder.GetAttributeLists( context ),
                     methodBuilder.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.ReturnType( methodBuilder ).WithTrailingTrivia( Space ),
+                    context.SyntaxGenerator.ReturnType( methodBuilder ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     methodBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )

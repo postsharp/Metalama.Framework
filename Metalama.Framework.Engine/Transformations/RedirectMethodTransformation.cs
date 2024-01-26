@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this.OverriddenDeclaration.ReturnType
                     != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
                         ? ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                             GetInvocationExpression(),
                             Token( SyntaxKind.SemicolonToken ) )
                         : ExpressionStatement( GetInvocationExpression() ) );
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null,
                         Identifier(
                             context.InjectionNameProvider.GetOverrideName(

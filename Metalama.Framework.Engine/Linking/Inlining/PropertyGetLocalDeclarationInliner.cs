@@ -93,12 +93,11 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                                 syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
                                 SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
                         .NormalizeWhitespaceIfNecessary( syntaxGenerationContext.NormalizeWhitespace )
-                        .WithTrailingTrivia( ElasticLineFeed ),
+                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, syntaxGenerationContext.NormalizeWhitespace ),
                     linkedTargetBody )
                 .WithFormattingAnnotationsFrom( currentStatement )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
-                .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
+                .AddTriviaFromIfNecessay( currentNode, syntaxGenerationContext.PreserveTrivia );
         }
     }
 }

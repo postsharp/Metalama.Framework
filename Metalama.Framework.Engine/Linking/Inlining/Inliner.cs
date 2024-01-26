@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -60,10 +61,11 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// <param name="currentNode">Current node (after substitutions).</param>
         /// <param name="linkedTargetBody">Linked target body that is to be inlined.</param>
         /// <returns>Statement resulting from inlining.</returns>
-        public abstract StatementSyntax Inline(
+        public virtual StatementSyntax Inline(
             SyntaxGenerationContext syntaxGenerationContext,
             InliningSpecification specification,
             SyntaxNode currentNode,
-            StatementSyntax linkedTargetBody );
+            StatementSyntax linkedTargetBody )
+            => linkedTargetBody.AddTriviaFromIfNecessay( currentNode, syntaxGenerationContext.PreserveTrivia );
     }
 }

@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     // Backing field for auto property.
                     members.Add(
-                        GetPropertyBackingField(
+                        this.GetPropertyBackingField(
                             recordParameter.Type.AssertNotNull(),
                             EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
@@ -51,7 +52,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
+                    members.Add( this.GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -116,8 +117,8 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     PropertyDeclaration(
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                            TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ),
-                            recordParameter.Type.AssertNotNull().WithTrailingTrivia( Space ),
+                            TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) ),
+                            recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                             null,
                             recordParameter.Identifier,
                             AccessorList( List( generatedAccessors ) ),
@@ -163,14 +164,14 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static PropertyDeclarationSyntax GetTrampolineForPositionalProperty( SyntaxToken identifier, TypeSyntax type, IPropertySymbol targetSymbol )
+        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty( SyntaxToken identifier, TypeSyntax type, IPropertySymbol targetSymbol )
         {
             var getAccessor =
                 AccessorDeclaration(
                     SyntaxKind.GetAccessorDeclaration,
                     SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                             GetInvocationTarget(),
                             Token( SyntaxKind.SemicolonToken ) ) ) );
 
@@ -187,8 +188,8 @@ namespace Metalama.Framework.Engine.Linking
             return
                 PropertyDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) ),
-                        type.WithTrailingTrivia( Space ),
+                        TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) ),
+                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         identifier,
                         AccessorList( List( new[] { getAccessor, setAccessor } ) ),

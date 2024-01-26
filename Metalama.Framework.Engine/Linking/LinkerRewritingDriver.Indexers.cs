@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForIndexer( indexerDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineForIndexer( indexerDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Linking
         private static BlockSyntax GetImplicitIndexerGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
@@ -322,9 +322,9 @@ namespace Metalama.Framework.Engine.Linking
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         symbol.IsStatic
                             ? TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
                         indexerType,
                         null,
                         Token( SyntaxKind.ThisKeyword ),
@@ -334,12 +334,11 @@ namespace Metalama.Framework.Engine.Linking
                         accessorList,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static IndexerDeclarationSyntax GetTrampolineForIndexer( IndexerDeclarationSyntax indexer, IPropertySymbol targetSymbol )
+        private IndexerDeclarationSyntax GetTrampolineForIndexer( IndexerDeclarationSyntax indexer, IPropertySymbol targetSymbol )
         {
             var getAccessor = indexer.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.GetAccessorDeclaration );
             var setAccessor = indexer.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );
@@ -355,7 +354,7 @@ namespace Metalama.Framework.Engine.Linking
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactoryEx.FormattedBlock(
                                                 ReturnStatement(
-                                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                                                     GetInvocationTarget(),
                                                     Token( SyntaxKind.SemicolonToken ) ) ) )
                                         : null,
@@ -372,9 +371,8 @@ namespace Metalama.Framework.Engine.Linking
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ),
                     expressionBody: null,
-                    semicolonToken: default(SyntaxToken) )
-                .WithLeadingTrivia( indexer.GetLeadingTrivia() )
-                .WithTrailingTrivia( indexer.GetTrailingTrivia() );
+                    semicolonToken: default( SyntaxToken ) )
+                .WithTriviaFromIfNecessary( indexer, this.IntermediateCompilationContext.PreserveTrivia );
 
             ExpressionSyntax GetInvocationTarget()
             {

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -129,7 +130,7 @@ internal sealed class ChangeVisibilityCodeAction : ICodeAction
 
                 void AddModifier( SyntaxKind kind )
                 {
-                    var token = SyntaxFactory.Token( kind ).WithTrailingTrivia( SyntaxFactory.ElasticSpace );
+                    var token = SyntaxFactoryEx.TokenWithSpace( kind );
 
                     if ( newModifiers.Count == 0 && modifiers.Count > 0 )
                     {

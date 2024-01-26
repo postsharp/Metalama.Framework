@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -7,29 +8,35 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SyntaxExtensions = Metalama.Framework.Engine.Utilities.Roslyn.SyntaxExtensions;
 
 namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LinkerLinkingStep
     {
-        private sealed class CleanupBodyRewriter : SafeSyntaxRewriter
+        private sealed class CleanupBodyRewriter( SyntaxGenerationContext generationContext ) : SafeSyntaxRewriter
         {
+
             // TODO: Optimize (this reallocates multiple times).
 
             public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
-                if ( finalStatements.Count > 0 )
+                if ( overflowingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) )
                 {
-                    finalStatements[finalStatements.Count - 1] =
-                        finalStatements[finalStatements.Count - 1]
-                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
-                }
-                else
-                {
-                    node = node.WithCloseBraceToken(
-                        node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                    if ( finalStatements.Count > 0 )
+                    {
+                        finalStatements[^1] = finalStatements[^1]
+                            .WithTrailingTrivia( finalStatements[^1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                    }
+                    else
+                    {
+                        node = node.WithCloseBraceToken(
+                            node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+                    }
+#pragma warning restore LAMA0832
                 }
 
                 if ( anyRewrittenStatement )
@@ -46,15 +53,19 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
-                if ( finalStatements.Count > 0 )
+                if ( overflowingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) )
                 {
-                    finalStatements[finalStatements.Count - 1] =
-                        finalStatements[finalStatements.Count - 1]
-                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
-                }
-                else
-                {
-                    throw new AssertionFailedException( $"No final statement for switch section at '{node.GetLocation()}'." );
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                    if ( finalStatements.Count > 0 )
+                    {
+                        finalStatements[^1] = finalStatements[^1]
+                            .WithTrailingTrivia( finalStatements[^1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException( $"No final statement for switch section at '{node.GetLocation()}'." );
+                    }
+#pragma warning restore LAMA0832
                 }
 
                 if ( anyRewrittenStatement )
@@ -147,27 +158,33 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else if ( statement.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.EmptyTriviaStatement ) )
                     {
-                        // This is statement that carries only trivias and should be removed, trivias added to the previous and next statement.
-                        if ( finalStatements.Count == 0 )
-                        {
-                            // There is not yet any statement to attach the trivia so everything goes into overflow.
-                            overflowingTrivia = statement.GetLeadingTrivia().AddRange( statement.GetTrailingTrivia() );
-                        }
-                        else
-                        {
-                            // We need to replace trailing trivia of the last statement.
-                            var newTrailingTrivia =
-                                overflowingTrivia.Count > 0
-                                    ? statement.GetLeadingTrivia()
-                                        .AddRange( finalStatements[finalStatements.Count - 1].GetTrailingTrivia() )
-                                        .AddRange( statement.GetLeadingTrivia() )
-                                    : finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( statement.GetLeadingTrivia() );
+                        var leadingTrivia = statement.GetLeadingTrivia();
+                        var trailingTrivia = statement.GetTrailingTrivia();
 
-                            finalStatements[finalStatements.Count - 1] =
-                                finalStatements[finalStatements.Count - 1]
-                                    .WithTrailingTrivia( newTrailingTrivia );
+                        if ( leadingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) || trailingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) )
+                        {
+                            // This is statement that carries only trivias and should be removed, trivias added to the previous and next statement.
+                            if ( finalStatements.Count == 0 )
+                            {
+                                // There is not yet any statement to attach the trivia so everything goes into overflow.
+                                overflowingTrivia = leadingTrivia.AddRange( trailingTrivia );
+                            }
+                            else
+                            {
+                                // We need to replace trailing trivia of the last statement.
+                                var newTrailingTrivia =
+                                    overflowingTrivia.Count > 0
+                                        ? leadingTrivia
+                                            .AddRange( finalStatements[^1].GetTrailingTrivia() )
+                                            .AddRange( leadingTrivia )
+                                        : finalStatements[^1].GetTrailingTrivia().AddRange( leadingTrivia );
 
-                            overflowingTrivia = statement.GetTrailingTrivia().StripFirstTrailingNewLine();
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                                finalStatements[^1] = finalStatements[^1].WithTrailingTrivia( newTrailingTrivia );
+#pragma warning restore LAMA0832
+
+                                overflowingTrivia = trailingTrivia.StripFirstTrailingNewLine();
+                            }
                         }
 
                         anyRewrittenStatement = true;
@@ -202,26 +219,31 @@ namespace Metalama.Framework.Engine.Linking
 
                     // Index of the last statement.
                     var lastStatementIndex = statements.Count - 1;
-                    var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
-                    var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
 
-                    if ( firstStatementIndex >= statements.Count )
+                    if ( SyntaxExtensions.ShouldTriviaBePreserved( block.OpenBraceToken, generationContext.PreserveTrivia )
+                        || SyntaxExtensions.ShouldTriviaBePreserved( block.CloseBraceToken, generationContext.PreserveTrivia ) )
                     {
-                        // There was no statement added.
-                        // We will add an empty statement to carry trivia, which we will prune above.
-                        statements.Add(
-                            EmptyStatement()
-                                .WithLeadingTrivia( leadingTrivia )
-                                .WithTrailingTrivia( trailingTrivia )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement ) );
-                    }
-                    else
-                    {
-                        statements[firstStatementIndex] =
-                            statements[firstStatementIndex].WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
+                        var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
+                        var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
 
-                        statements[lastStatementIndex] =
-                            statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
+                        if ( firstStatementIndex >= statements.Count )
+                        {
+                            // There was no statement added.
+                            // We will add an empty statement to carry trivia, which we will prune above.
+                            statements.Add(
+                                EmptyStatement( Token( leadingTrivia, SyntaxKind.SemicolonToken, trailingTrivia ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement ) );
+                        }
+                        else
+                        {
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                            statements[firstStatementIndex] =
+                                statements[firstStatementIndex].WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
+
+                            statements[lastStatementIndex] =
+                                statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
+#pragma warning restore LAMA0832
+                        }
                     }
                 }
             }
@@ -253,6 +275,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 token = base.VisitToken( token );
 
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 if ( TryFilterTriviaList( token.LeadingTrivia, out var filteredLeadingTrivia ) )
                 {
                     token = token.WithLeadingTrivia( filteredLeadingTrivia );
@@ -262,6 +285,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     token = token.WithTrailingTrivia( filteredTrailingTrivia );
                 }
+#pragma warning restore LAMA0832
 
                 return token;
 
@@ -274,20 +298,24 @@ namespace Metalama.Framework.Engine.Linking
                         if ( trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression ) )
                         {
                             anyChange = true;
+
+                            break;
                         }
                     }
 
                     if ( anyChange )
                     {
-                        filteredTriviaList = TriviaList();
+                        var triviaBuilder = new List<SyntaxTrivia>( triviaList.Count );
 
                         foreach ( var trivia in triviaList )
                         {
                             if ( !trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression ) )
                             {
-                                filteredTriviaList = filteredTriviaList.Add( trivia );
+                                triviaBuilder.Add( trivia );
                             }
                         }
+
+                        filteredTriviaList = new SyntaxTriviaList( triviaBuilder );
 
                         return true;
                     }

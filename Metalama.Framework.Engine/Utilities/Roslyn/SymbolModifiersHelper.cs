@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -67,59 +68,59 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
             {
-                tokens.Add( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Inheritance) != 0 )
             {
                 if ( member.HasModifier( SyntaxKind.NewKeyword ) )
                 {
-                    tokens.Add( Token( SyntaxKind.NewKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.NewKeyword ) );
                 }
 
                 // The following modifiers are exclusive in C# but not in the symbol model.
                 if ( member.IsOverride )
                 {
-                    tokens.Add( Token( SyntaxKind.OverrideKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OverrideKeyword ) );
                 }
                 else if ( member.IsAbstract )
                 {
-                    tokens.Add( Token( SyntaxKind.AbstractKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AbstractKeyword ) );
                 }
                 else if ( member.IsVirtual )
                 {
-                    tokens.Add( Token( SyntaxKind.VirtualKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.VirtualKeyword ) );
                 }
 
                 if ( member.IsSealed )
                 {
-                    tokens.Add( Token( SyntaxKind.SealedKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.SealedKeyword ) );
                 }
             }
 
             if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethodSymbol { IsReadOnly: true } or IFieldSymbol { IsReadOnly: true } )
             {
-                tokens.Add( Token( SyntaxKind.ReadOnlyKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReadOnlyKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Const) != 0 && member is IFieldSymbol { IsConst: true } )
             {
-                tokens.Add( Token( SyntaxKind.ConstKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ConstKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Unsafe) != 0 && member.HasModifier( SyntaxKind.UnsafeKeyword ) )
             {
-                tokens.Add( Token( SyntaxKind.UnsafeKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.UnsafeKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Volatile) != 0 && member is IFieldSymbol { IsVolatile: true } )
             {
-                tokens.Add( Token( SyntaxKind.VolatileKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.VolatileKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Async) != 0 && member is IMethodSymbol { IsAsync: true } )
             {
-                tokens.Add( Token( SyntaxKind.AsyncKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AsyncKeyword ) );
             }
 
             return TokenList( tokens );
@@ -158,34 +159,34 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             switch ( member.DeclaredAccessibility )
             {
                 case Accessibility.Private:
-                    tokens.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
 
                     break;
 
                 case Accessibility.ProtectedAndInternal:
-                    tokens.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
 
                     break;
 
                 case Accessibility.Protected:
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
 
                     break;
 
                 case Accessibility.Internal:
-                    tokens.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InternalKeyword ) );
 
                     break;
 
                 case Accessibility.ProtectedOrInternal:
-                    tokens.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
-                    tokens.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InternalKeyword ) );
 
                     break;
 
                 case Accessibility.Public:
-                    tokens.Add( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) );
 
                     break;
             }
@@ -197,17 +198,17 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( parameter.RefKind == RefKind.In )
             {
-                tokens.Add( Token( SyntaxKind.InKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InKeyword ) );
             }
 
             if ( parameter.RefKind == RefKind.Ref )
             {
-                tokens.Add( Token( SyntaxKind.RefKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.RefKeyword ) );
             }
 
             if ( parameter.RefKind == RefKind.Out )
             {
-                tokens.Add( Token( SyntaxKind.OutKeyword ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OutKeyword ) );
             }
 
             return TokenList( tokens );

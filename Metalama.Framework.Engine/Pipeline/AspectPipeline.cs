@@ -220,9 +220,10 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Set NormalizeWhitespace setting for the compilation.
             var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
-            var whitespaceMatters = !string.IsNullOrWhiteSpace( projectOptions.TransformedFilesOutputPath ) || projectOptions.DebugTransformedCode == true || projectOptions.IsTest;
-            var normalizeWhitespace = whitespaceMatters && !projectOptions.FormatOutput;
-            CompilationContext.SetNormalizeWhitespace( compilation, normalizeWhitespace );
+            var triviaMatters = !string.IsNullOrWhiteSpace( projectOptions.TransformedFilesOutputPath ) || projectOptions.DebugTransformedCode == true || projectOptions.IsTest;
+            var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
+            var preserveTrivia = triviaMatters;
+            CompilationContext.SetTriviaHandling( compilation, normalizeWhitespace, preserveTrivia );
 
             // Add MetricsManager.
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

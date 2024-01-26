@@ -297,7 +297,7 @@ internal partial class OurSyntaxGenerator
 
                 clauses.Add(
                     TypeParameterConstraintClause(
-                        Token( SyntaxKind.WhereKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.WhereKeyword ),
                         SyntaxFactory.IdentifierName( genericParameter.Name ),
                         Token( SyntaxKind.ColonToken ),
                         SeparatedList( constraints ) ) );

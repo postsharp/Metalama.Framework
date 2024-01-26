@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -68,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             void AddToken( SyntaxKind syntaxKind )
             {
-                tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( syntaxKind ) );
             }
 
             if ( (categories & ModifierCategories.Accessibility) != 0 )
@@ -147,7 +148,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             void AddToken( SyntaxKind syntaxKind )
             {
-                tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( syntaxKind ) );
             }
 
             // If the target is explicit interface implementation, skip accessibility modifiers.
@@ -220,7 +221,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             void AddToken( SyntaxKind syntaxKind )
             {
-                tokens.Add( Token( syntaxKind ).WithTrailingTrivia( Space ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithSpace( syntaxKind ) );
             }
 
             switch ( parameter.RefKind )

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Analyzers;
 public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
 {
     public override ImmutableArray<string> FixableDiagnosticIds
-        => ImmutableArray.Create( MetalamaPerformanceAnalyzer._normalizeWhitespace.Id, MetalamaPerformanceAnalyzer._syntaxNodeWith.Id );
+        => ImmutableArray.Create( MetalamaPerformanceAnalyzer.NormalizeWhitespace.Id, MetalamaPerformanceAnalyzer.SyntaxNodeWith.Id );
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
@@ -27,11 +27,11 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
     {
         foreach ( var diagnostic in context.Diagnostics )
         {
-            if ( diagnostic.Id == MetalamaPerformanceAnalyzer._normalizeWhitespace.Id )
+            if ( diagnostic.Id == MetalamaPerformanceAnalyzer.NormalizeWhitespace.Id )
             {
                 await RegisterNormalizeWhitespaceCodeFixAsync( context, diagnostic );
             }
-            else if ( diagnostic.Id == MetalamaPerformanceAnalyzer._syntaxNodeWith.Id )
+            else if ( diagnostic.Id == MetalamaPerformanceAnalyzer.SyntaxNodeWith.Id )
             {
                 await RegisterSyntaxNodeWithCodeFixAsync( context, diagnostic );
             }

@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -55,7 +55,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                     VariableDeclaration(
-                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
+                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         SeparatedList(
                             new[]
                             {
@@ -71,11 +71,11 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
+                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     eventBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            .WithTrailingTrivia( ElasticSpace )
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace )
                         : null,
                     this.IntroducedDeclaration.GetCleanName(),
                     GenerateAccessorList(),

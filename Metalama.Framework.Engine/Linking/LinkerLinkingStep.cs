@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
                     var cleanRoot =
-                        new CleanupRewriter( input.ProjectOptions )
+                        new CleanupRewriter( input.ProjectOptions, input.IntermediateCompilation.CompilationContext.DefaultSyntaxGenerationContext )
                             .Visit( linkedRoot )!;
 
                     var fixedRoot = PreprocessorFixer.Fix( cleanRoot );

@@ -608,8 +608,18 @@ dotnet_diagnostic.CA2011.severity = warning
 # RS1024 Compare (Roslyn) symbols correctly. There is a bug in the analyzer and it has dozens of false positive.
 dotnet_diagnostic.RS1024.severity = none
 
-[Metalama.Framework.Engine/{CompileTime,Templating,Pipeline/DesignTime}/**.cs]
+[Metalama.Framework.Engine/{CompileTime,DesignTime,Templating,Pipeline/DesignTime}/**.cs]
 # LAMA0830: NormalizeWhitespace is expensive.
 dotnet_diagnostic.LAMA0830.severity = suggestion
 # LAMA0831: Avoid chained With calls on SyntaxNodes.
 dotnet_diagnostic.LAMA0831.severity = suggestion
+# LAMA0831: "Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+dotnet_diagnostic.LAMA0832.severity = suggestion
+
+[Metalama.Testing.*/**.cs]
+# LAMA0830: NormalizeWhitespace is expensive.
+dotnet_diagnostic.LAMA0830.severity = none
+# LAMA0831: Avoid chained With calls on SyntaxNodes.
+dotnet_diagnostic.LAMA0831.severity = none
+# LAMA0831: "Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+dotnet_diagnostic.LAMA0832.severity = none

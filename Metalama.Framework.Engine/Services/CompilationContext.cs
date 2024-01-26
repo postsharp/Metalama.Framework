@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Services;
 
 public sealed class CompilationContext : ICompilationServices, ITemplateReflectionContext
 {
-    private static readonly ConcurrentDictionary<string, bool> _normalizeWhitespaceDictionary = new();
+    private static readonly ConcurrentDictionary<string, (bool NormalizeWhitespace, bool PreserveTrivia)> _triviaHandlingDictionary = new();
 
     internal CompilationContext( Compilation compilation )
     {
@@ -129,27 +129,34 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal SymbolTranslator SymbolTranslator => new( this );
 
     /// <summary>
-    /// Sets whether <see cref="SyntaxNodeExtensions.NormalizeWhitespace{TNode}(TNode, string, bool)"/> should be called on nodes generated for this compilation
+    /// Sets whether whitespace should be normalized on nodes generated for this compilation
     /// and other compilations with the same <see cref="Compilation.AssemblyName"/>.
     /// This is not necessary when the syntax tree is not saved to disk, or when the code is formatted before saving.
+    /// Also sets whether trivia should be preserved by copying it from original code to generated code.
     /// </summary>
-    public static void SetNormalizeWhitespace( Compilation compilation, bool normalizeWhitespace )
-        => _normalizeWhitespaceDictionary.AddOrUpdate( compilation.AssemblyName.AssertNotNull(), normalizeWhitespace, ( _, _ ) => normalizeWhitespace );
-
-    private bool GetNormalizeWhitespace()
+    public static void SetTriviaHandling( Compilation compilation, bool normalizeWhitespace, bool preserveTrivia )
     {
-        if ( _normalizeWhitespaceDictionary.TryGetValue( this.Compilation.AssemblyName.AssertNotNull(), out var normalizeWhitespace ) )
+        var tuple = (normalizeWhitespace, preserveTrivia);
+        _triviaHandlingDictionary.AddOrUpdate( compilation.AssemblyName.AssertNotNull(), tuple, ( _, _ ) => tuple );
+    }
+
+    private (bool NormalizeWhitespace, bool PreserveTrivia) GetTriviaHandling()
+    {
+        if ( _triviaHandlingDictionary.TryGetValue( this.Compilation.AssemblyName.AssertNotNull(), out var triviaHandling ) )
         {
-            return normalizeWhitespace;
+            return triviaHandling;
         }
         else
         {
-            // This shouldn't happen. If it does, default to the safer, but less efficient option.
+            // This shouldn't happen. If it does, default to the safer, but less efficient options.
             Invariant.Assert( false );
-            return true;
+            return (true, true);
         }
     }
 
     [Memo]
-    internal bool NormalizeWhitespace => this.GetNormalizeWhitespace();
+    internal bool NormalizeWhitespace => this.GetTriviaHandling().NormalizeWhitespace;
+
+    [Memo]
+    internal bool PreserveTrivia => this.GetTriviaHandling().PreserveTrivia;
 }

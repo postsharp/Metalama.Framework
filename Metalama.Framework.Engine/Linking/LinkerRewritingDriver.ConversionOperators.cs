@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineConversionOperator( operatorDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineConversionOperator( operatorDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Linking
             var emptyBody =
                 SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         DefaultExpression( @operator.Type ),
                         Token( SyntaxKind.SemicolonToken ) ) );
 
@@ -149,37 +149,32 @@ namespace Metalama.Framework.Engine.Linking
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
 
-            return
-                MethodDeclaration(
-                        this.FilterAttributesOnSpecialImpl( symbol ),
-                        modifiers,
-                        @operator.Type.WithTrailingTrivia( Space ),
-                        null,
-                        Identifier( name ),
-                        null,
-                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
-                        List<TypeParameterConstraintClauseSyntax>(),
-                        null,
-                        null )
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .PartialUpdate( body: body, expressionBody: expressionBody )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+            return MethodDeclaration(
+                    this.FilterAttributesOnSpecialImpl( symbol ),
+                    modifiers,
+                    @operator.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    null,
+                    Identifier( name ),
+                    null,
+                    this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
+                    List<TypeParameterConstraintClauseSyntax>(),
+                    body,
+                    expressionBody )
+                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator(
+        private ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol targetSymbol )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
-            return
-                @operator
-                    .WithBody( GetBody() )
-                    .WithLeadingTrivia( @operator.GetLeadingTrivia() )
-                    .WithTrailingTrivia( @operator.GetTrailingTrivia() );
+            return @operator
+                .WithBody( GetBody() )
+                .WithTriviaFromIfNecessary( @operator, this.IntermediateCompilationContext.NormalizeWhitespace );
 
             BlockSyntax GetBody()
             {
@@ -190,7 +185,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         invocation,
                         Token( SyntaxKind.SemicolonToken ) ) );
             }

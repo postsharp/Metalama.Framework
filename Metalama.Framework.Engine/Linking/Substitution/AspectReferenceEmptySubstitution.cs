@@ -53,8 +53,7 @@ internal sealed class AspectReferenceEmptySubstitution : AspectReferenceRenaming
 
         return currentNode.PartialUpdate(
             expression: expression
-                .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ),
+                .WithTriviaFromIfNecessary( currentNode.Expression, substitutionContext.SyntaxGenerationContext.PreserveTrivia ),
             name: RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
     }
 }

@@ -110,7 +110,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
             var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
 
-            CompilationContext.SetNormalizeWhitespace( templateSemanticModel.Compilation, true );
+            CompilationContext.SetTriviaHandling( templateSemanticModel.Compilation, normalizeWhitespace: true, preserveTrivia: true );
 
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
@@ -128,7 +128,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
 
-            CompilationContext.SetNormalizeWhitespace( compileTimeCompilation, true );
+            CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
 
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel!, testResult.PipelineDiagnostics, serviceProvider );
 

@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -70,8 +70,8 @@ namespace Metalama.Framework.Engine.Transformations
             var syntax =
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ), Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                    TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ), SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) ),
+                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(

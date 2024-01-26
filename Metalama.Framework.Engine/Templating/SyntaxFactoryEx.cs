@@ -176,13 +176,13 @@ internal static partial class SyntaxFactoryEx
 
     public static BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
         => SyntaxFactory.Block(
-            SyntaxFactory.Token( SyntaxKind.OpenBraceToken ).WithTrailingTrivia( SyntaxFactory.ElasticLineFeed ),
+            SyntaxFactory.Token( default, SyntaxKind.OpenBraceToken, new( SyntaxFactory.ElasticLineFeed ) ),
             SyntaxFactory.List(
                 statements.Select(
                     s => NeedsLineFeed( s )
                         ? s.WithTrailingTrivia( s.GetTrailingTrivia().Add( SyntaxFactory.ElasticLineFeed ) )
                         : s ) ),
-            SyntaxFactory.Token( SyntaxKind.CloseBraceToken ).WithLeadingTrivia( SyntaxFactory.ElasticLineFeed ) );
+            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.CloseBraceToken, default ) );
 
     public static ExpressionStatementSyntax DiscardStatement( ExpressionSyntax discardedExpression )
         => SyntaxFactory.ExpressionStatement(
@@ -245,17 +245,19 @@ internal static partial class SyntaxFactoryEx
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
 
-    private static SyntaxToken KeywordTokenWithSpace( SyntaxKind kind )
-        => SyntaxFactory.Token( default, kind, new( SyntaxFactory.Space ) );
+    internal static SyntaxToken TokenWithSpace( SyntaxKind kind )
+    {
+        return SyntaxFactory.Token( default, kind, new( SyntaxFactory.ElasticSpace ) );
+    }
 
     public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
         SyntaxKind disableOrRestoreKind,
         SeparatedSyntaxList<ExpressionSyntax> errorCodes )
         => SyntaxFactory.PragmaWarningDirectiveTrivia(
             SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
-            KeywordTokenWithSpace( SyntaxKind.PragmaKeyword ),
-            KeywordTokenWithSpace( SyntaxKind.WarningKeyword ),
-            KeywordTokenWithSpace( disableOrRestoreKind ),
+            TokenWithSpace( SyntaxKind.PragmaKeyword ),
+            TokenWithSpace( SyntaxKind.WarningKeyword ),
+            TokenWithSpace( disableOrRestoreKind ),
             errorCodes,
             SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new( SyntaxFactory.ElasticLineFeed ) ),
             isActive: true );

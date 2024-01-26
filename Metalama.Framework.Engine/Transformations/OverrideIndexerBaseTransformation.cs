@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -43,8 +44,8 @@ namespace Metalama.Framework.Engine.Transformations
                     this,
                     IndexerDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
-                        context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                        TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                        context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null,
                         Token( SyntaxKind.ThisKeyword ),
                         this.GetParameterList( context ),

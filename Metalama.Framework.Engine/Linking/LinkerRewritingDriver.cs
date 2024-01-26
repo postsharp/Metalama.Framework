@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Linking
                             return
                                 SyntaxFactoryEx.FormattedBlock(
                                         ReturnStatement(
-                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                                             rewrittenArrowClause.Expression,
                                             Token( SyntaxKind.SemicolonToken ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );

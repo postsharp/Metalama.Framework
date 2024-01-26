@@ -232,8 +232,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
-        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace.
-        CompilationContext.SetNormalizeWhitespace( compileTimeCompilation, true );
+        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
+        CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
 
         var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 

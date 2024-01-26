@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Analyzers;
 public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
 {
     // Range: 830-839
-    internal static readonly DiagnosticDescriptor _normalizeWhitespace = new(
+    internal static readonly DiagnosticDescriptor NormalizeWhitespace = new(
         "LAMA0830",
         "NormalizeWhitespace is expensive.",
         "The NormalizeWhitespace method is expensive and should only be called when necessary or when performance doesn't matter. Consider using the conditional NormalizeWhitespaceIfNecessary instead.",
@@ -26,7 +26,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         DiagnosticSeverity.Warning,
         true );
 
-    internal static readonly DiagnosticDescriptor _syntaxNodeWith = new(
+    internal static readonly DiagnosticDescriptor SyntaxNodeWith = new(
         "LAMA0831",
         "Avoid chained With calls on SyntaxNodes.",
         "Avoid chained With calls on SyntaxNodes, use the PartialUpdate method instead to avoid allocating garbage nodes.",
@@ -34,7 +34,15 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         DiagnosticSeverity.Warning,
         true );
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create( _normalizeWhitespace, _syntaxNodeWith );
+    internal static readonly DiagnosticDescriptor WithTrivia = new(
+        "LAMA0832",
+        "Avoid WithLeadingTrivia and WithTrailingTrivia calls.",
+        "Avoid WithLeadingTrivia and WithTrailingTrivia calls, use the WithTriviaIfNecessary method instead.",
+        "Metalama",
+        DiagnosticSeverity.Warning,
+        true );
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create( NormalizeWhitespace, SyntaxNodeWith, WithTrivia );
 
     public override void Initialize( AnalysisContext context )
     {
@@ -54,6 +62,8 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         context.RegisterOperationAction(
             operationContext => AnalyzeSyntaxNodeWithChains( operationContext, syntaxNodeTypeSymbol, syntaxNodePartialUpdateExtensionsSymbol ),
             OperationKind.Invocation );
+
+        context.RegisterOperationAction( AnalyzeWithTrivia, OperationKind.Invocation, OperationKind.MethodReference );
     }
 
     private static void AnalyzeNormalizeWhitespace( OperationAnalysisContext context )
@@ -75,7 +85,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
                 location = Location.Create( syntax.SyntaxTree, TextSpan.FromBounds( memberAccess.OperatorToken.SpanStart, syntax.Span.End ) );
             }
 
-            context.ReportDiagnostic( Diagnostic.Create( _normalizeWhitespace, location ) );
+            context.ReportDiagnostic( Diagnostic.Create( NormalizeWhitespace, location ) );
         }
     }
     
@@ -127,8 +137,31 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
                         TextSpan.FromBounds( memberAccess.OperatorToken.SpanStart, location.SourceSpan.End ) );
                 }
 
-                context.ReportDiagnostic( Diagnostic.Create( _syntaxNodeWith, location ) );
+                context.ReportDiagnostic( Diagnostic.Create( SyntaxNodeWith, location ) );
             }
+        }
+    }
+
+    private static void AnalyzeWithTrivia( OperationAnalysisContext context )
+    {
+        var method = context.Operation switch
+        {
+            IInvocationOperation invocation => invocation.TargetMethod,
+            IMethodReferenceOperation methodReference => methodReference.Method,
+            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation?.GetType()}'." ),
+        };
+
+        if ( method.Name is nameof(SyntaxNodeExtensions.WithLeadingTrivia) or nameof(SyntaxNodeExtensions.WithTrailingTrivia) or nameof(SyntaxNodeExtensions.WithTriviaFrom) )
+        {
+            var syntax = context.Operation.Syntax;
+            var location = syntax.GetLocation();
+
+            if ( syntax is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax memberAccess } )
+            {
+                location = Location.Create( syntax.SyntaxTree, TextSpan.FromBounds( memberAccess.OperatorToken.SpanStart, syntax.Span.End ) );
+            }
+
+            context.ReportDiagnostic( Diagnostic.Create( WithTrivia, location ) );
         }
     }
 }

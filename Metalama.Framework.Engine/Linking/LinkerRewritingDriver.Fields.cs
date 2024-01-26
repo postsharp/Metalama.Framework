@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
                 members.Add(
-                    GetEmptyImplField(
+                    this.GetEmptyImplField(
                         symbol,
                         List<AttributeListSyntax>(),
                         fieldDeclaration.Declaration.Type ) );
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking
             return members;
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplField(
+        private MemberDeclarationSyntax GetEmptyImplField(
             IFieldSymbol symbol,
             SyntaxList<AttributeListSyntax> attributes,
             TypeSyntax type )
@@ -71,17 +72,16 @@ namespace Metalama.Framework.Engine.Linking
                         attributes,
                         symbol.IsStatic
                             ? TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
                         type,
                         null,
                         Identifier( GetEmptyImplMemberName( symbol ) ),
-                        null,
+                        accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         null )
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithAccessorList( accessorList.WithTrailingTrivia( ElasticLineFeed ) )
+                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

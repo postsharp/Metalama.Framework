@@ -64,8 +64,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
                                 RewriteName( currentNode.Name, this.GetTargetMemberName() ) )
-                            .WithLeadingTrivia( currentNode.GetLeadingTrivia() )
-                            .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
+                            .WithTriviaFromIfNecessary( currentNode, substitutionContext.SyntaxGenerationContext.PreserveTrivia );
                 }
                 else
                 {

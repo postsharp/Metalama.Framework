@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForOperator( operatorDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineForOperator( operatorDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.Linking
             var emptyBody =
                 SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         DefaultExpression( @operator.ReturnType ),
                         Token( SyntaxKind.SemicolonToken ) ) );
 
@@ -154,13 +154,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
 
             return
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        @operator.ReturnType.WithTrailingTrivia( Space ),
+                        @operator.ReturnType.WithTrailingTriviaIfNecessary( Space, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         Identifier( name ),
                         null,
@@ -169,20 +169,17 @@ namespace Metalama.Framework.Engine.Linking
                         body,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static OperatorDeclarationSyntax GetTrampolineForOperator( OperatorDeclarationSyntax @operator, IMethodSymbol targetSymbol )
+        private OperatorDeclarationSyntax GetTrampolineForOperator( OperatorDeclarationSyntax @operator, IMethodSymbol targetSymbol )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
-            return
-                @operator
-                    .WithBody( GetBody() )
-                    .WithLeadingTrivia( @operator.GetLeadingTrivia() )
-                    .WithTrailingTrivia( @operator.GetTrailingTrivia() );
+            return @operator
+                .WithBody( GetBody() )
+                .WithTriviaFromIfNecessary( @operator, this.IntermediateCompilationContext.PreserveTrivia );
 
             BlockSyntax GetBody()
             {
@@ -193,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         invocation,
                         Token( SyntaxKind.SemicolonToken ) ) );
             }

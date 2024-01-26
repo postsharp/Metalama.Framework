@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineDestructor( destructorDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineDestructor( destructorDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -149,13 +149,13 @@ namespace Metalama.Framework.Engine.Linking
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
 
             return
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ).WithTrailingTrivia( Space ),
+                        PredefinedType( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.VoidKeyword ) ),
                         null,
                         Identifier( name ),
                         null,
@@ -163,21 +163,19 @@ namespace Metalama.Framework.Engine.Linking
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
                     .PartialUpdate( body: body, expressionBody: expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax destructor, IMethodSymbol targetSymbol )
+        private DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax destructor, IMethodSymbol targetSymbol )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return
                 destructor
                     .WithBody( GetBody() )
-                    .WithLeadingTrivia( destructor.GetLeadingTrivia() )
-                    .WithTrailingTrivia( destructor.GetTrailingTrivia() );
+                    .WithTriviaFromIfNecessary( destructor, this.IntermediateCompilationContext.PreserveTrivia );
 
             BlockSyntax GetBody()
             {
@@ -188,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         invocation,
                         Token( SyntaxKind.SemicolonToken ) ) );
             }

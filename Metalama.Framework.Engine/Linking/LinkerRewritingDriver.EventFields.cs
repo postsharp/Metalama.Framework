@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForEventField( eventFieldDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineForEventField( eventFieldDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -88,8 +88,8 @@ namespace Metalama.Framework.Engine.Linking
                     EventDeclaration(
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
-                        Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
-                        eventFieldDeclaration.Declaration.Type.WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.EventKeyword ),
+                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         Identifier( symbol.Name ),
                         AccessorList(
@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Linking
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
+        private EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
         {
             // TODO: Do not copy leading/trailing trivia to all declarations.
 
@@ -162,8 +162,8 @@ namespace Metalama.Framework.Engine.Linking
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
-                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( Space ),
-                        eventField.Declaration.Type.WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.EventKeyword ),
+                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         eventField.Declaration.Variables.Single().Identifier,
                         AccessorList(
@@ -188,8 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                                                         IdentifierName( "value" ) ) ) ) )
                                 }.WhereNotNull() ) ),
                         default )
-                    .WithLeadingTrivia( eventField.GetLeadingTrivia() )
-                    .WithTrailingTrivia( eventField.GetTrailingTrivia() );
+                    .WithTriviaFromIfNecessary( eventField, this.IntermediateCompilationContext.NormalizeWhitespace );
 
             ExpressionSyntax GetInvocationTarget()
             {

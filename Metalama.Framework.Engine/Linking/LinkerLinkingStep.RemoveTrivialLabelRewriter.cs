@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,15 +12,8 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed partial class LinkerLinkingStep
     {
         // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
-        private sealed class RemoveTrivialLabelRewriter : SafeSyntaxRewriter
+        private sealed class RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter, SyntaxGenerationContext generationContext ) : SafeSyntaxRewriter
         {
-            private readonly IReadOnlyDictionary<string, int> _observedLabelCounter;
-
-            public RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter )
-            {
-                this._observedLabelCounter = observedLabelCounter;
-            }
-
             public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 var newStatements = new List<StatementSyntax>();
@@ -50,18 +44,29 @@ namespace Metalama.Framework.Engine.Linking
                     if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: var gotoLabel } } gotoStatement
                          && nextStatement is LabeledStatementSyntax { Identifier.ValueText: var declaredLabel } labeledStatement
                          && gotoLabel == declaredLabel
-                         && this._observedLabelCounter.TryGetValue( declaredLabel, out var counter )
+                         && observedLabelCounter.TryGetValue( declaredLabel, out var counter )
                          && counter == 1 )
                     {
-                        newStatements.Add(
-                            labeledStatement.Statement
-                                .WithLeadingTrivia(
-                                    TriviaList( ElasticMarker )
-                                        .AddRange( gotoStatement.GetLeadingTrivia() )
-                                        .AddRange( gotoStatement.GetTrailingTrivia().StripFirstTrailingNewLine() )
-                                        .AddRange( TriviaList( ElasticMarker ) )
-                                        .AddRange( labeledStatement.GetLeadingTrivia() )
-                                        .AddRange( labeledStatement.Statement.GetLeadingTrivia() ) ) );
+                        if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.PreserveTrivia ) || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.PreserveTrivia ) )
+                        {
+                            List<SyntaxTrivia> trivia =
+                            [
+                                ElasticMarker,
+                                .. gotoStatement.GetLeadingTrivia(),
+                                .. gotoStatement.GetTrailingTrivia(),
+                                ElasticMarker,
+                                .. labeledStatement.GetLeadingTrivia(),
+                                .. labeledStatement.Statement.GetLeadingTrivia()
+                            ];
+
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                            newStatements.Add( labeledStatement.Statement.WithLeadingTrivia( trivia ) );
+#pragma warning restore LAMA0832
+                        }
+                        else
+                        {
+                            newStatements.Add( labeledStatement.Statement );
+                        }
 
                         anyChange = true;
                         nextStatement = null;

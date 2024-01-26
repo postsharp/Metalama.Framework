@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     // Backing field for auto property.
                     members.Add(
-                        GetPropertyBackingField(
+                        this.GetPropertyBackingField(
                             propertyDeclaration.Type,
                             propertyDeclaration.Initializer,
                             FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForProperty( propertyDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+                    members.Add( this.GetTrampolineForProperty( propertyDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
                 }
 
                 if ( !propertyDeclaration.IsAutoPropertyDeclaration()
@@ -103,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[]
                 {
-                    GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
                     this.GetOriginalImplProperty(
                         symbol,
                         FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
@@ -250,22 +250,22 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static FieldDeclarationSyntax GetPropertyBackingField(
+        private FieldDeclarationSyntax GetPropertyBackingField(
             TypeSyntax type,
             EqualsValueClauseSyntax? initializer,
             SyntaxList<AttributeListSyntax> attributes,
             IPropertySymbol symbol )
         {
-            var modifiers = new List<SyntaxToken> { Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) };
+            var modifiers = new List<SyntaxToken> { SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) };
 
             if ( symbol.SetMethod == null || symbol.SetMethod.IsInitOnly )
             {
-                modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ).WithTrailingTrivia( Space ) );
+                modifiers.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReadOnlyKeyword ) );
             }
 
             if ( symbol.IsStatic )
             {
-                modifiers.Add( Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) );
+                modifiers.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) );
             }
 
             if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
@@ -283,21 +283,20 @@ namespace Metalama.Framework.Engine.Linking
                     attributes,
                     TokenList( modifiers ),
                     VariableDeclaration(
-                        type.WithTrailingTrivia( Space ),
+                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 initializer ) ) ) )
-                .WithLeadingTrivia( LineFeed, LineFeed )
-                .WithTrailingTrivia( LineFeed )
+                .WithTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), new( ElasticLineFeed ), this.IntermediateCompilationContext.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
@@ -473,23 +472,23 @@ namespace Metalama.Framework.Engine.Linking
                         attributes,
                         symbol.IsStatic
                             ? TokenList(
-                                Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                                Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) )
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
                         propertyType,
                         null,
                         Identifier( name ),
-                        cleanAccessorList?.WithTrailingTrivia( ElasticLineFeed ),
+                        cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         expressionBody,
                         initializer.WithSourceCodeAnnotation(),
                         semicolonToken: expressionBody != null || initializer != null
-                            ? Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed )
+                            ? Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) )
                             : default )
-                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static PropertyDeclarationSyntax GetTrampolineForProperty(
+        private PropertyDeclarationSyntax GetTrampolineForProperty(
             PropertyDeclarationSyntax property,
             IntermediateSymbolSemantic<IPropertySymbol> targetSymbol )
         {
@@ -507,7 +506,7 @@ namespace Metalama.Framework.Engine.Linking
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactoryEx.FormattedBlock(
                                                 ReturnStatement(
-                                                    Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
                                                     GetInvocationTarget(),
                                                     Token( SyntaxKind.SemicolonToken ) ) ) )
                                         : null,
@@ -525,9 +524,8 @@ namespace Metalama.Framework.Engine.Linking
                                 .AssertNoneNull() ) ),
                     expressionBody: null,
                     initializer: null,
-                    semicolonToken: default(SyntaxToken) )
-                .WithLeadingTrivia( property.GetLeadingTrivia() )
-                .WithTrailingTrivia( property.GetTrailingTrivia() );
+                    semicolonToken: default( SyntaxToken ) )
+                .WithTriviaFromIfNecessary( property, this.IntermediateCompilationContext.PreserveTrivia );
 
             ExpressionSyntax GetInvocationTarget()
             {

@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             VariableDeclaration(
                                 context.SyntaxGenerationContext.SyntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
                                 SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
-                        .WithTrailingTrivia( ElasticLineFeed )
+                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
             }
 
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     LabeledStatement(
                             Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
                             EmptyStatement() )
-                        .WithTrailingTrivia( ElasticLineFeed )
+                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
             }

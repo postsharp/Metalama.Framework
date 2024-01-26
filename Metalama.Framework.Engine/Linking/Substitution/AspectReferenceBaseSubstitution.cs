@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -55,8 +56,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         return
             IdentifierName( "__LINKER_TO_BE_REMOVED__" )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
-                .WithLeadingTrivia( currentNode.GetLeadingTrivia() )
-                .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
+                .WithTriviaFromIfNecessary( currentNode, this.CompilationContext.PreserveTrivia );
     }
 
     protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
@@ -73,16 +73,14 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
             return currentNode
                 .WithExpression(
                     substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( hiddenSymbol.ContainingType )
-                        .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                        .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+                        .WithTriviaFromIfNecessary( currentNode.Expression, this.CompilationContext.PreserveTrivia ) );
         }
         else
         {
             return currentNode
                 .WithExpression(
                     BaseExpression()
-                        .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                        .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+                        .WithTriviaFromIfNecessary( currentNode.Expression, this.CompilationContext.PreserveTrivia ) );
         }
     }
 
@@ -91,7 +89,6 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         return currentNode
             .WithExpression(
                 BaseExpression()
-                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) );
+                    .WithTriviaFromIfNecessary( currentNode.Expression, this.CompilationContext.PreserveTrivia ) );
     }
 }
