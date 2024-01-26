@@ -72,6 +72,7 @@ namespace Metalama.Framework.Engine.Transformations
             {
                 new InsertedStatement(
                     expandedBody
+                        .AssertNotNull()
                         .WithGeneratedCodeAnnotation(
                             metaApi.AspectInstance?.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
