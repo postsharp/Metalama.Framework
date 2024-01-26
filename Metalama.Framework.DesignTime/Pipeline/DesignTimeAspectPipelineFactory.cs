@@ -5,6 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
@@ -170,6 +171,39 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
                 return pipeline;
             }
         }
+    }
+
+    public virtual async ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
+        IProjectVersion projectVersion,
+        TestableCancellationToken cancellationToken )
+    {
+        var projectKey = projectVersion.ProjectKey;
+
+        var workspaceProvider = this.ServiceProvider.GetRequiredService<WorkspaceProvider>();
+        var referencedProject = await workspaceProvider.GetProjectAsync( projectKey, cancellationToken );
+
+        if ( referencedProject == null )
+        {
+            this._logger.Warning?.Log(
+                $"Failed to process the reference to '{projectKey}': cannot get the project from the workspace." );
+
+            return FallibleResultWithDiagnostics<DesignTimeAspectPipeline>.Failed(
+                ImmutableArray<Diagnostic>.Empty,
+                $"Cannot get the project '{projectKey}' from the workspace" );
+        }
+
+        var pipeline = this.GetOrCreatePipeline( referencedProject, cancellationToken );
+
+        if ( pipeline == null )
+        {
+            this._logger.Warning?.Log( $"Failed to process the reference to '{projectKey}': cannot get a pipeline." );
+
+            return FallibleResultWithDiagnostics<DesignTimeAspectPipeline>.Failed(
+                ImmutableArray<Diagnostic>.Empty,
+                $"Cannot get the pipeline for project '{projectKey}'." );
+        }
+
+        return pipeline;
     }
 
     public async ValueTask ResumePipelinesAsync( AsyncExecutionContext executionContext, bool executePipelineNow, CancellationToken cancellationToken )
@@ -361,9 +395,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
             if ( !transitiveAspectManifestProvider.IsSuccessful )
             {
-                return FallibleResultWithDiagnostics<AspectPipelineConfiguration>.Failed(
-                    transitiveAspectManifestProvider.Diagnostics,
-                    transitiveAspectManifestProvider.DebugReason );
+                return transitiveAspectManifestProvider.CastFailure<AspectPipelineConfiguration>();
             }
 
             configuration = configuration.Value.WithServiceProvider(

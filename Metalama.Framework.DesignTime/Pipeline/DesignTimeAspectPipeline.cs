@@ -9,7 +9,6 @@ using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
-using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
@@ -482,7 +481,25 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 if ( metalamaVersion == EngineAssemblyMetadataReader.Instance.AssemblyVersion )
                 {
                     // This is a Metalama reference of the current version. We need to compile the dependency.
-                    var referenceResult = await this._pipelineFactory.ExecuteAsync(
+
+                    if ( !this._pipelineFactory.TryGetPipeline( reference.ProjectKey, out var pipeline ) )
+                    {
+                        // There is currently no pipeline for this project.
+                        // Calling _pipelineFactory.ExecuteAsync would wait for it to be created,
+                        // which only happens when some other code calls GetOrCreatePipelineAsync.
+                        // This is not guanteed to happen, so we have to create the pipeline ourselves here.
+
+                        var pipelineResult = await this._pipelineFactory.GetOrCreatePipelineAsync( reference, cancellationToken );
+
+                        if ( !pipelineResult.IsSuccessful )
+                        {
+                            return pipelineResult.CastFailure<DesignTimeProjectVersion>();
+                        }
+
+                        pipeline = pipelineResult.Value;
+                    }
+
+                    var referenceResult = await pipeline.ExecuteAsync(
                         reference.Compilation,
                         autoResumePipeline,
                         executionContext,
@@ -536,29 +553,14 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                         // To deserialize the manifest, we need a service provider with the CompileTimeProject of the referenced project, compiled
                         // for the current Metalama version.
 
-                        var workspaceProvider = this.ServiceProvider.Global.GetRequiredService<WorkspaceProvider>();
-                        var referencedProject = await workspaceProvider.GetProjectAsync( reference.ProjectKey, cancellationToken );
+                        var pipelineResult = await this._pipelineFactory.GetOrCreatePipelineAsync( reference, cancellationToken );
 
-                        if ( referencedProject == null )
+                        if ( !pipelineResult.IsSuccessful )
                         {
-                            this.Logger.Warning?.Log(
-                                $"Failed to process the reference to '{reference.ProjectKey}': cannot get the project from the workspace." );
-
-                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
-                                ImmutableArray<Diagnostic>.Empty,
-                                $"Cannot get the project '{reference.ProjectKey}' from the workspace" );
+                            return pipelineResult.CastFailure<DesignTimeProjectVersion>();
                         }
 
-                        var pipeline = this._pipelineFactory.GetOrCreatePipeline( referencedProject, cancellationToken );
-
-                        if ( pipeline == null )
-                        {
-                            this.Logger.Warning?.Log( $"Failed to process the reference to '{reference.ProjectKey}': cannot get a pipeline." );
-
-                            return FallibleResultWithDiagnostics<DesignTimeProjectVersion>.Failed(
-                                ImmutableArray<Diagnostic>.Empty,
-                                $"Cannot get the pipeline for project '{reference.ProjectKey}'." );
-                        }
+                        var pipeline = pipelineResult.Value;
 
                         var configuration = await pipeline.GetConfigurationAsync(
                             PartialCompilation.CreateComplete( reference.Compilation ),

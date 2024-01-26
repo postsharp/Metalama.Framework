@@ -54,6 +54,16 @@ public readonly struct FallibleResultWithDiagnostics<T>
 
     public static implicit operator FallibleResultWithDiagnostics<T>( T value ) => new( value, true, default );
 
+    public FallibleResultWithDiagnostics<TOther> CastFailure<TOther>()
+    {
+        if ( this.IsSuccessful )
+        {
+            throw new InvalidOperationException( "Can't cast successful result." );
+        }
+
+        return FallibleResultWithDiagnostics<TOther>.Failed( this.Diagnostics, this.DebugReason );
+    }
+
     private FallibleResultWithDiagnostics( T result, bool isSuccessful, ImmutableArray<Diagnostic> diagnostics, string? debugReason = null )
     {
         this._result = result;
