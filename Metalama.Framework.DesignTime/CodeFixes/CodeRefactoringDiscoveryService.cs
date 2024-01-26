@@ -85,8 +85,6 @@ public sealed class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryS
             return ComputeRefactoringResult.Empty;
         }
 
-        // Execute the pipeline.
-
         var eligibleAspects = pipeline.GetEligibleAspects( compilation, symbol, cancellationToken.ToTestable() );
 
         var licenseVerifier = pipeline.ServiceProvider.GetService<LicenseVerifier>();
