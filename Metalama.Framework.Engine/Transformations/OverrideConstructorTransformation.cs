@@ -21,12 +21,12 @@ namespace Metalama.Framework.Engine.Transformations
     {
         private new IConstructor OverriddenDeclaration => (IConstructor) base.OverriddenDeclaration;
 
-        private BoundTemplateMethod? Template { get; }
+        private BoundTemplateMethod Template { get; }
 
         public OverrideConstructorTransformation(
             Advice advice,
             IConstructor overriddenDeclaration,
-            BoundTemplateMethod? template,
+            BoundTemplateMethod template,
             IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {

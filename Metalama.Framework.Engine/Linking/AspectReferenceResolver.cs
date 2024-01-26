@@ -706,7 +706,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch (referencedSymbol, resolvedSymbol)
             {
-                case (IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic:false }, IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: false } ):
+                case (IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: false }, IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: false } ):
                 case (IMethodSymbol { MethodKind: MethodKind.Constructor, IsStatic: true }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
                 case (IMethodSymbol { MethodKind: MethodKind.Ordinary }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
