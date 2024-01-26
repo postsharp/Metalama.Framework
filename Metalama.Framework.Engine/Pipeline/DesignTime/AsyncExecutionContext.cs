@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 /// <summary>
-/// A context objects used for debugging of locking issues in async methods. It has no use in the release build.
+/// A context object used for debugging of locking issues in async methods. It has no use in the release build.
 /// </summary>
 public sealed class AsyncExecutionContext
 {
