@@ -46,7 +46,7 @@ internal sealed class ConstructorInliner : Inliner
         // The syntax has to be in form: <annotated_constructor_expression>( new <type>(<arguments>) );
         if ( aspectReference.ResolvedSemantic.Symbol is not IMethodSymbol { MethodKind: MethodKind.Constructor } )
         {
-            // Coverage: ignore (hit only when the check in base class is incorrect).
+            // Coverage: ignore (hit only when the check IsValidForTargetSymbol check is incorrect).
             return false;
         }
 

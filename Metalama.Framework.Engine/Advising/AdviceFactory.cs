@@ -785,7 +785,7 @@ internal sealed class AdviceFactory : IAdviceFactory
     public IOverrideAdviceResult<IConstructor> Override(
         IConstructor targetConstructor,
         string template,
-        object? args = null, 
+        object? args = null,
         object? tags = null )
     {
         using ( this.WithNonUserCode() )
