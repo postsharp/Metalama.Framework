@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data;
 using System.Linq;
 using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -781,9 +782,42 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
+    public IOverrideAdviceResult<IConstructor> Override(
+        IConstructor targetConstructor,
+        string template,
+        object? args = null,
+        object? tags = null )
+    {
+        using ( this.WithNonUserCode() )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.CheckEligibility( targetConstructor, AdviceKind.OverrideConstructor );
+
+            var boundTemplate =
+                this.ValidateTemplateName( template, TemplateKind.Default, true )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    .ForOverride( targetConstructor, this.GetObjectReader( args ) );
+
+            var advice = new OverrideConstructorAdvice(
+                this._state.AspectInstance,
+                this._templateInstance,
+                targetConstructor,
+                this._compilation,
+                boundTemplate.AssertNotNull(),
+                this._layerName,
+                this.GetObjectReader( tags ) );
+
+            return this.ExecuteAdvice<IConstructor>( advice );
+        }
+    }
+
     public IOverrideAdviceResult<IProperty> Override(
         IFieldOrProperty targetFieldOrProperty,
-        string defaultTemplate,
+        string template,
         object? tags = null )
     {
         using ( this.WithNonUserCode() )
@@ -796,7 +830,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
             // Set template represents both set and init accessors.
-            var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+            var propertyTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();

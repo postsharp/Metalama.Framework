@@ -143,6 +143,8 @@ namespace Metalama.Framework.Engine.Linking
                     switch ( semantic.Symbol.MethodKind )
                     {
                         case MethodKind.Ordinary:
+                        case MethodKind.Constructor:
+                        case MethodKind.StaticConstructor:
                         case MethodKind.ExplicitInterfaceImplementation:
                         case MethodKind.Destructor:
                         case MethodKind.UserDefinedOperator:
@@ -348,7 +350,7 @@ namespace Metalama.Framework.Engine.Linking
                         case IMethodSymbol
                         {
                             MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation or MethodKind.UserDefinedOperator
-                            or MethodKind.Conversion or MethodKind.Destructor
+                            or MethodKind.Conversion or MethodKind.Destructor or MethodKind.Constructor or MethodKind.StaticConstructor
                         }:
                             return IsInlinedSemanticBody( semantic.ToTyped<IMethodSymbol>() );
 

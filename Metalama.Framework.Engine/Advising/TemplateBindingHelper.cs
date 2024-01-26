@@ -190,6 +190,63 @@ internal static class TemplateBindingHelper
         return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
     }
 
+    public static BoundTemplateMethod ForOverride( this TemplateMember<IMethod> template, IConstructor targetConstructor, IObjectReader? arguments = null )
+    {
+        template.Declaration.GetSymbol().ThrowIfBelongsToDifferentCompilationThan( targetConstructor.GetSymbol() );
+        arguments ??= ObjectReader.Empty;
+        var parameterMapping = ImmutableDictionary.CreateBuilder<string, ExpressionSyntax>();
+
+        void AddParameter( IParameter methodParameter, IParameter templateParameter )
+        {
+            ExpressionSyntax parameterSyntax = IdentifierName( methodParameter.Name );
+
+            parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type.GetSymbol() );
+
+            parameterMapping.Add( templateParameter.Name, parameterSyntax );
+        }
+
+        foreach ( var templateParameter in template.Declaration.Parameters )
+        {
+            if ( template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
+            {
+                continue;
+            }
+
+            var constructorParameter = targetConstructor.Parameters.OfName( templateParameter.Name );
+
+            if ( constructorParameter == null )
+            {
+                var parameterNames = string.Join( ", ", targetConstructor.Parameters.SelectAsImmutableArray( p => "'" + p.Name + "'" ) );
+
+                throw new InvalidTemplateSignatureException(
+                    MetalamaStringFormatter.Format(
+                        $"Cannot use the template '{template.Declaration}' to override the constructor '{targetConstructor}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
+            }
+
+            if ( !VerifyTemplateType( templateParameter.Type, constructorParameter.Type, template, arguments ) )
+            {
+                throw new InvalidTemplateSignatureException(
+                    MetalamaStringFormatter.Format(
+                        $"Cannot use the template '{template.Declaration}' to override the constructor '{targetConstructor}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{constructorParameter.Name}'." ) );
+            }
+
+            AddParameter( constructorParameter, templateParameter );
+        }
+
+        // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
+        var templateArguments = GetTemplateArguments( template, arguments, parameterMapping.ToImmutable() );
+
+        // Verify that the template return type matches the target.
+        if ( !VerifyTemplateType( template.Declaration.ReturnType, TypeFactory.Implementation.GetSpecialType( SpecialType.Void ), template, arguments ) )
+        {
+            throw new InvalidTemplateSignatureException(
+                MetalamaStringFormatter.Format(
+                    $"Cannot use the template '{template.Declaration}' to override the constructor '{targetConstructor}': the template return type '{template.Declaration.ReturnType}' is not compatible with 'void'." ) );
+        }
+
+        return new BoundTemplateMethod( template, templateArguments );
+    }
+
     /// <summary>
     /// Binds a template to a given overridden method with given template arguments.
     /// </summary>

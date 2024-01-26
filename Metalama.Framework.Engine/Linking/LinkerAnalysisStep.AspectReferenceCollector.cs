@@ -111,6 +111,7 @@ namespace Metalama.Framework.Engine.Linking
                         var sourceNode =
                             containingSymbol.GetPrimaryDeclaration() switch
                             {
+                                ConstructorDeclarationSyntax constructor => constructor.Body ?? (SyntaxNode?) constructor.ExpressionBody ?? constructor,
                                 MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
                                 DestructorDeclarationSyntax destructor => destructor.Body
                                                                           ?? (SyntaxNode?) destructor.ExpressionBody

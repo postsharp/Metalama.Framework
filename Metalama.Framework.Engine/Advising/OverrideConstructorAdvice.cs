@@ -11,19 +11,14 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    // TODO: Check why this class is unused.
-    // ReSharper disable once UnusedType.Global
-
-    // Because we are using OverrideMethodAdvice, but that does not return a correct AdviceKind (#34372).
-
-    internal class OverrideFinalizerAdvice : OverrideMemberAdvice<IMethod>
+    internal class OverrideConstructorAdvice : OverrideMemberAdvice<IConstructor>
     {
         private readonly BoundTemplateMethod _boundTemplate;
 
-        public OverrideFinalizerAdvice(
+        public OverrideConstructorAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
-            IMethod targetDeclaration,
+            IConstructor targetDeclaration,
             ICompilation sourceCompilation,
             BoundTemplateMethod boundTemplate,
             string? layerName,
@@ -32,15 +27,14 @@ namespace Metalama.Framework.Engine.Advising
             this._boundTemplate = boundTemplate;
         }
 
-        public override AdviceKind AdviceKind => AdviceKind.OverrideFinalizer;
+        public override AdviceKind AdviceKind => AdviceKind.OverrideConstructor;
 
         public override AdviceImplementationResult Implement(
             ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {
-            // TODO: order should be self if the target is introduced on the same layer.
-            addTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+            addTransformation( new OverrideConstructorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
 
             return AdviceImplementationResult.Success();
         }

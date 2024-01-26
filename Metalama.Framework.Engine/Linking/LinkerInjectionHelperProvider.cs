@@ -19,7 +19,9 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed class LinkerInjectionHelperProvider
     {
         public const string HelperTypeName = "__LinkerInjectionHelpers__";
+        public const string ConstructorMemberName = "__Constructor";
         public const string FinalizeMemberName = "__Finalize";
+        public const string StaticConstructorMemberName = "__StaticConstructor";
         public const string PropertyMemberName = "__Property";
         public const string AsyncVoidMethodMemberName = "__AsyncVoidMethod";
         private const string _eventFieldInitializationExpressionMemberName = "__EventFieldInitializationExpression__";
@@ -49,6 +51,24 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxKind.SimpleMemberAccessExpression,
                     IdentifierName( HelperTypeName ),
                     IdentifierName( FinalizeMemberName ) );
+        }
+
+        public static ExpressionSyntax GetConstructorMemberExpression()
+        {
+            return
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName( HelperTypeName ),
+                    IdentifierName( ConstructorMemberName ) );
+        }
+
+        public static ExpressionSyntax GetStaticConstructorMemberExpression()
+        {
+            return
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    IdentifierName( HelperTypeName ),
+                    IdentifierName( StaticConstructorMemberName ) );
         }
 
         public static ExpressionSyntax GetPropertyMemberExpression()
@@ -193,7 +213,9 @@ namespace Metalama.Framework.Engine.Linking
 {(useNullability ? "#nullable enable" : "")}
 internal class {HelperTypeName}
 {{
+    public static T {ConstructorMemberName}<T>(T value) => value;
     public static void {FinalizeMemberName}() {{}}
+    public static void {StaticConstructorMemberName}() {{}}
     public static ref T{suffix} {PropertyMemberName}<T>(T{suffix} value) => ref Dummy<T{suffix}>.Field;    
     public static void {_eventFieldInitializationExpressionMemberName}<T>(T? value) where T : System.Delegate {{}}
     {string.Join( "\n    ", binaryOperators )}

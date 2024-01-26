@@ -25,7 +25,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             new PropertyGetLocalDeclarationInliner(),
             new PropertySetValueAssignmentInliner(),
             new EventAddAssignmentInliner(),
-            new EventRemoveAssignmentInliner()
+            new EventRemoveAssignmentInliner(),
+            new ConstructorInliner(),
         };
 
         public bool TryGetInliner( ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner )

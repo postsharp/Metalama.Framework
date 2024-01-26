@@ -28,6 +28,9 @@ public static partial class EligibilityRuleFactory
                     t => $"'{t}' is neither a class, record class, struct, record struct, nor interface" );
         } );
 
+    internal static IEligibilityRule<IDeclaration> OverrideConstructorAdviceRule { get; } = CreateRule<IDeclaration, IConstructor>(
+        builder => builder.DeclaringType().AddRule( _overrideDeclaringTypeRule ) );
+
     internal static IEligibilityRule<IDeclaration> OverrideMethodAdviceRule { get; } = CreateRule<IDeclaration, IMethod>(
         builder =>
         {
@@ -128,6 +131,7 @@ public static partial class EligibilityRuleFactory
         => adviceKind switch
         {
             AdviceKind.None => EligibilityRule<IDeclaration>.Empty,
+            AdviceKind.OverrideConstructor => OverrideConstructorAdviceRule,
             AdviceKind.OverrideMethod => OverrideMethodAdviceRule,
             AdviceKind.OverrideFieldOrPropertyOrIndexer => OverrideFieldOrPropertyOrIndexerAdviceRule,
             AdviceKind.OverrideEvent => OverrideEventAdviceRule,

@@ -207,6 +207,10 @@ namespace Metalama.Framework.Engine.Linking
                         return (SyntaxNode?) destructorDecl.Body
                                ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
+                    case ConstructorDeclarationSyntax constructorDecl:
+                        return (SyntaxNode?) constructorDecl.Body
+                               ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
+
                     case OperatorDeclarationSyntax operatorDecl:
                         return (SyntaxNode?) operatorDecl.Body
                                ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
@@ -253,6 +257,10 @@ namespace Metalama.Framework.Engine.Linking
                     case DestructorDeclarationSyntax destructorDecl:
                         return (SyntaxNode?) destructorDecl.Body
                                ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
+
+                    case ConstructorDeclarationSyntax constructorDecl:
+                        return (SyntaxNode?) constructorDecl.Body
+                               ?? constructorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected override symbol: '{symbol}'." );
@@ -465,6 +473,18 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol, SyntaxGenerationContext generationContext )
         {
+            if (this.AnalysisRegistry.HasAnyUnsupportedOverride(symbol))
+            {
+                // If there is unsupported code in overrides, we will not rewrite the member.
+                return new[] { syntax };
+            }
+
+            if (this.InjectionRegistry.IsOverride(symbol) && this.AnalysisRegistry.HasAnyUnsupportedOverride( this.InjectionRegistry.GetOverrideTarget(symbol ).AssertNotNull() ) )
+            {
+                // If there are any overrides with unsupported code, we will skip this member.
+                return Array.Empty<MemberDeclarationSyntax>();
+            }
+
             switch ( symbol )
             {
                 case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation } methodSymbol:

@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
-        public IMethodBase MethodBase => (IMethodBase?) this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+        public IMethodBase MethodBase => (IMethodBase?) this._method ?? (IMethodBase?)this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
         public IField Field => this._fieldOrPropertyOrIndexer as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethod) );
+        public IParameterList Parameters => this.MethodBase?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethodBase) );
 
         public IParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 

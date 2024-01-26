@@ -16,15 +16,18 @@ namespace Metalama.Framework.Engine.Linking
         private readonly HashSet<IntermediateSymbolSemantic> _reachableSemantics;
         private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
         private readonly IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>> _substitutions;
+        private readonly HashSet<ISymbol> _overrideTargetsWithUnsupportedNonInlinedOverrides;
 
         public LinkerAnalysisRegistry(
             CompilationContext intermediateCompilation,
             HashSet<IntermediateSymbolSemantic> reachableSemantics,
             HashSet<IntermediateSymbolSemantic> inlinedSemantics,
-            IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>> substitutions )
+            IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>> substitutions,
+            HashSet<ISymbol> overrideTargetsWithUnsupportedNonInlinedOverrides )
         {
             this._reachableSemantics = reachableSemantics;
             this._inlinedSemantics = inlinedSemantics;
+            this._overrideTargetsWithUnsupportedNonInlinedOverrides = overrideTargetsWithUnsupportedNonInlinedOverrides;
 
             this._substitutions =
                 substitutions.ToDictionary(
@@ -82,6 +85,11 @@ namespace Metalama.Framework.Engine.Linking
         public bool HasBaseSemanticReferences( ISymbol symbol )
         {
             return this.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) );
+        }
+
+        public bool HasAnyUnsupportedOverride(ISymbol symbol)
+        {
+            return this._overrideTargetsWithUnsupportedNonInlinedOverrides.Contains( symbol );
         }
     }
 }

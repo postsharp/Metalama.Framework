@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -331,7 +332,7 @@ namespace Metalama.Framework.Engine.Linking
                         Token( SyntaxKind.ThisKeyword ),
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
-                            indexerParameters.WithAdditionalParameters( (specialImplType, "__linker_param") ) ),
+                            indexerParameters.WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName ) ) ),
                         null,
                         null,
                         default )

@@ -146,7 +146,8 @@ namespace Metalama.Framework.Engine.Linking
                 input.InjectionRegistry,
                 input.IntermediateCompilation,
                 input.DiagnosticSink,
-                nonInlinedSemantics );
+                nonInlinedSemantics,
+                out var overrideTargetsWithUnsupportedNonInlinedOverrides );
 
             var forcefullyInitializedSymbols = GetForcefullyInitializedSymbols( input.InjectionRegistry, reachableSemantics );
             var forcefullyInitializedTypes = GetForcefullyInitializedTypes( input.IntermediateCompilation, forcefullyInitializedSymbols );
@@ -202,7 +203,8 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.CompilationContext,
                 reachableSemantics,
                 inlinedSemantics,
-                substitutions );
+                substitutions,
+                overrideTargetsWithUnsupportedNonInlinedOverrides );
 
             return
                 new LinkerAnalysisStepOutput(
@@ -323,11 +325,14 @@ namespace Metalama.Framework.Engine.Linking
             LinkerInjectionRegistry injectionRegistry,
             PartialCompilation intermediateCompilation,
             UserDiagnosticSink diagnosticSink,
-            IEnumerable<IntermediateSymbolSemantic> nonInlinedSemantics )
+            IEnumerable<IntermediateSymbolSemantic> nonInlinedSemantics,
+            out HashSet<ISymbol> overrideTargetsWithUnsupportedNonInlinedOverrides )
         {
+            var overrideTargets = new HashSet<ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+
             foreach ( var nonInlinedSemantic in nonInlinedSemantics )
             {
-                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters.Length: > 0 } )
+                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters.Length: > 0 } or IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
                 {
                     // We only handle indexer symbol. Accessors are also not inlineable, but we don't want three messages.
                     ISymbol overrideTarget;
@@ -360,13 +365,18 @@ namespace Metalama.Framework.Engine.Linking
                         injectionRegistry.GetSourceAspect( nonInlinedSemantic.Symbol )?.ShortName
                         ?? "source code";
 
-                    // TODO: If this message stays, it needs to be improved because non-inlining is not caused by the code, but by references.
-                    diagnosticSink.Report(
-                        AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic(
-                            overrideTarget.GetDiagnosticLocation(),
-                            (sourceName, overrideTarget) ) );
+                    if ( overrideTargets.Add( overrideTarget ) )
+                    {
+                        // TODO: If this message stays, it needs to be improved because non-inlining is not caused by the code, but by references.
+                        diagnosticSink.Report(
+                            AspectLinkerDiagnosticDescriptors.DeclarationMustBeInlined.CreateRoslynDiagnostic(
+                                overrideTarget.GetDiagnosticLocation(),
+                                (sourceName, overrideTarget) ) );
+                    }
                 }
             }
+
+            overrideTargetsWithUnsupportedNonInlinedOverrides = overrideTargets;
         }
 
         private static IReadOnlyList<ISymbol> GetForcefullyInitializedSymbols(
