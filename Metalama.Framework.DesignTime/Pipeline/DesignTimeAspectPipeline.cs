@@ -485,8 +485,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                     if ( !this._pipelineFactory.TryGetPipeline( reference.ProjectKey, out var pipeline ) )
                     {
                         // There is currently no pipeline for this project.
-                        // Calling _pipelineFactory.ExecuteAsync would wait for it to be created, which is not guanteed to happen.
-                        // So we have to create the pipeline here.
+                        // Calling _pipelineFactory.ExecuteAsync would wait for it to be created,
+                        // which only happens when some other code calls GetOrCreatePipelineAsync.
+                        // This is not guanteed to happen, so we have to create the pipeline ourselves here.
 
                         var pipelineResult = await this._pipelineFactory.GetOrCreatePipelineAsync( reference, cancellationToken );
 
