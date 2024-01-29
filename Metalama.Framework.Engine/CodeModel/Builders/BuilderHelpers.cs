@@ -15,34 +15,34 @@ internal static class BuilderHelpers
         switch ( accessibility )
         {
             case Accessibility.Private:
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
                 break;
 
             case Accessibility.Protected:
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
 
                 break;
 
             case Accessibility.Internal:
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InternalKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InternalKeyword ) );
 
                 break;
 
             case Accessibility.PrivateProtected:
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
 
                 break;
 
             case Accessibility.ProtectedInternal:
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InternalKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InternalKeyword ) );
 
                 break;
 
             case Accessibility.Public:
-                tokenList.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) );
 
                 break;
 

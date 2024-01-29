@@ -251,9 +251,9 @@ namespace Metalama.Framework.Engine.Linking
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
                             ? TokenList(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
-                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         VariableDeclaration(
                             eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                             SingletonSeparatedList(
@@ -341,9 +341,9 @@ namespace Metalama.Framework.Engine.Linking
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         symbol.IsStatic
                             ? TokenList(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
-                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         eventType,
                         null,
                         Identifier( name ),

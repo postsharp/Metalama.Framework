@@ -80,7 +80,7 @@ internal static class ProceedHelper
                             return
                                 new SyntaxUserExpression(
                                     AwaitExpression(
-                                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AwaitKeyword ),
+                                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                             invocationExpression )
                                         .WithAdditionalAnnotations( Simplifier.Annotation ),
                                     resultType );
@@ -90,7 +90,7 @@ internal static class ProceedHelper
                                 new SyntaxUserExpression(
                                     ParenthesizedExpression(
                                             AwaitExpression(
-                                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AwaitKeyword ),
+                                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                                 invocationExpression ) )
                                         .WithAdditionalAnnotations( Simplifier.Annotation ),
                                     asyncInfo.ResultType );
@@ -139,7 +139,7 @@ internal static class ProceedHelper
 
             var expression = ParenthesizedExpression(
                     AwaitExpression(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AwaitKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                         bufferExpression ) )
                 .WithAdditionalAnnotations( Simplifier.Annotation );
 

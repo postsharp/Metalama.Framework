@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Linking
         private static BlockSyntax GetImplicitIndexerGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
@@ -322,9 +322,9 @@ namespace Metalama.Framework.Engine.Linking
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         symbol.IsStatic
                             ? TokenList(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
-                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         indexerType,
                         null,
                         Token( SyntaxKind.ThisKeyword ),
@@ -356,7 +356,7 @@ namespace Metalama.Framework.Engine.Linking
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactoryEx.FormattedBlock(
                                                 ReturnStatement(
-                                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                                                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                                     GetInvocationTarget(),
                                                     Token( SyntaxKind.SemicolonToken ) ) ) )
                                         : null,

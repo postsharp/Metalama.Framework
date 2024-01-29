@@ -47,8 +47,8 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         TokenList(
                             Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( ElasticSpace ) ),
                             Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
-                        SyntaxFactoryEx.TokenWithSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OperatorKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                         context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
@@ -65,11 +65,11 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                     OperatorDeclaration(
                         methodBuilder.GetAttributeLists( context ),
                         TokenList(
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ),
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
                         context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OperatorKeyword ),
-                        SyntaxFactoryEx.TokenWithSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
@@ -92,15 +92,15 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                                 YieldStatement(
                                     SyntaxKind.YieldBreakStatement,
                                     List<AttributeListSyntax>(),
-                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.YieldKeyword ),
-                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.BreakKeyword ),
+                                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.YieldKeyword ),
+                                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.BreakKeyword ),
                                     null,
                                     Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
                         ]
                         : 
                         [
                             ReturnStatement(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                 DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
                                 Token( SyntaxKind.SemicolonToken ) )
                         ]

@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 return
                     GotoStatement(
                             SyntaxKind.GotoStatement,
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.GotoKeyword ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.GotoKeyword ),
                             default,
                             IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
                             Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) )

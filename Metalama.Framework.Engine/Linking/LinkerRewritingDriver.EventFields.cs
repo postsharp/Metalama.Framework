@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Linking
                     EventDeclaration(
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.EventKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
                         eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         Identifier( symbol.Name ),
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.Linking
                 EventDeclaration(
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.EventKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
                         eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         eventField.Declaration.Variables.Single().Identifier,

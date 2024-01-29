@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Linking
                         ? SyntaxFactoryEx.FormattedBlock()
                         : SyntaxFactoryEx.FormattedBlock(
                             ReturnStatement(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                 DefaultExpression( generationContext.SyntaxGenerator.Type( resultType ) ),
                                 Token( SyntaxKind.SemicolonToken ) ) );
 
@@ -236,7 +236,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             var constraints = method.ConstraintClauses;
 
@@ -292,7 +292,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             invocation,
                             Token( SyntaxKind.SemicolonToken ) ) );
                 }

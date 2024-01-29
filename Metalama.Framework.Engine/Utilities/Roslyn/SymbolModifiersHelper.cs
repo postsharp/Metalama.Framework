@@ -68,59 +68,59 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( member.IsStatic && (categories & ModifierCategories.Static) != 0 )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Inheritance) != 0 )
             {
                 if ( member.HasModifier( SyntaxKind.NewKeyword ) )
                 {
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.NewKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.NewKeyword ) );
                 }
 
                 // The following modifiers are exclusive in C# but not in the symbol model.
                 if ( member.IsOverride )
                 {
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OverrideKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OverrideKeyword ) );
                 }
                 else if ( member.IsAbstract )
                 {
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AbstractKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AbstractKeyword ) );
                 }
                 else if ( member.IsVirtual )
                 {
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.VirtualKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.VirtualKeyword ) );
                 }
 
                 if ( member.IsSealed )
                 {
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.SealedKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.SealedKeyword ) );
                 }
             }
 
             if ( (categories & ModifierCategories.ReadOnly) != 0 && member is IMethodSymbol { IsReadOnly: true } or IFieldSymbol { IsReadOnly: true } )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReadOnlyKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReadOnlyKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Const) != 0 && member is IFieldSymbol { IsConst: true } )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ConstKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ConstKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Unsafe) != 0 && member.HasModifier( SyntaxKind.UnsafeKeyword ) )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.UnsafeKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.UnsafeKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Volatile) != 0 && member is IFieldSymbol { IsVolatile: true } )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.VolatileKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.VolatileKeyword ) );
             }
 
             if ( (categories & ModifierCategories.Async) != 0 && member is IMethodSymbol { IsAsync: true } )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AsyncKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AsyncKeyword ) );
             }
 
             return TokenList( tokens );
@@ -159,34 +159,34 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             switch ( member.DeclaredAccessibility )
             {
                 case Accessibility.Private:
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
                     break;
 
                 case Accessibility.ProtectedAndInternal:
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
 
                     break;
 
                 case Accessibility.Protected:
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
 
                     break;
 
                 case Accessibility.Internal:
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InternalKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InternalKeyword ) );
 
                     break;
 
                 case Accessibility.ProtectedOrInternal:
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ProtectedKeyword ) );
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InternalKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InternalKeyword ) );
 
                     break;
 
                 case Accessibility.Public:
-                    tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) );
+                    tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) );
 
                     break;
             }
@@ -198,17 +198,17 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             if ( parameter.RefKind == RefKind.In )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.InKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InKeyword ) );
             }
 
             if ( parameter.RefKind == RefKind.Ref )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.RefKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.RefKeyword ) );
             }
 
             if ( parameter.RefKind == RefKind.Out )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.OutKeyword ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OutKeyword ) );
             }
 
             return TokenList( tokens );

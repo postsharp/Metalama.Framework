@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                                 propertyDeclaration.Modifiers.Any( t => t.IsKind( SyntaxKind.PrivateKeyword ) )
                                 || propertyDeclaration.Modifiers.All( t => !t.IsAccessModifierKeyword() )
                                     ? TokenList()
-                                    : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                                    : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                                 Token( isInit ? SyntaxKind.InitKeyword : SyntaxKind.SetKeyword ),
                                 null,
                                 null,

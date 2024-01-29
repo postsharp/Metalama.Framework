@@ -29,7 +29,7 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
             case SyntaxKind.GetAccessorDeclaration:
                 return SyntaxFactoryEx.FormattedBlock(
                     SyntaxFactory.ReturnStatement(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         this.CreateProceedGetExpression( context ),
                         SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
 

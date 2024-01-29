@@ -256,16 +256,16 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxList<AttributeListSyntax> attributes,
             IPropertySymbol symbol )
         {
-            var modifiers = new List<SyntaxToken> { SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) };
+            var modifiers = new List<SyntaxToken> { SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) };
 
             if ( symbol.SetMethod == null || symbol.SetMethod.IsInitOnly )
             {
-                modifiers.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReadOnlyKeyword ) );
+                modifiers.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReadOnlyKeyword ) );
             }
 
             if ( symbol.IsStatic )
             {
-                modifiers.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) );
+                modifiers.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) );
             }
 
             if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
@@ -296,7 +296,7 @@ namespace Metalama.Framework.Engine.Linking
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             symbol.IsStatic
@@ -472,9 +472,9 @@ namespace Metalama.Framework.Engine.Linking
                         attributes,
                         symbol.IsStatic
                             ? TokenList(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
-                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         propertyType,
                         null,
                         Identifier( name ),
@@ -506,7 +506,7 @@ namespace Metalama.Framework.Engine.Linking
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactoryEx.FormattedBlock(
                                                 ReturnStatement(
-                                                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                                                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                                     GetInvocationTarget(),
                                                     Token( SyntaxKind.SemicolonToken ) ) ) )
                                         : null,

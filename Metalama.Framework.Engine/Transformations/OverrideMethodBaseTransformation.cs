@@ -41,14 +41,14 @@ namespace Metalama.Framework.Engine.Transformations
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
-                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
                 if ( isAsyncTemplate )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
-                    modifiers = modifiers.Add( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.AsyncKeyword ) );
+                    modifiers = modifiers.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AsyncKeyword ) );
                 }
             }
             else

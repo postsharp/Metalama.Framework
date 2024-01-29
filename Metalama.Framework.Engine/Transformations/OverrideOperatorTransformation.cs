@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Transformations
             var syntax =
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ), SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) ),
+                    TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ), SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
                     context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     null,
                     Identifier(

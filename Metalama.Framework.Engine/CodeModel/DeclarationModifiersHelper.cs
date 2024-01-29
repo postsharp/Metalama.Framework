@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             void AddToken( SyntaxKind syntaxKind )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( syntaxKind ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( syntaxKind ) );
             }
 
             if ( (categories & ModifierCategories.Accessibility) != 0 )
@@ -148,7 +148,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             void AddToken( SyntaxKind syntaxKind )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( syntaxKind ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( syntaxKind ) );
             }
 
             // If the target is explicit interface implementation, skip accessibility modifiers.
@@ -221,7 +221,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             void AddToken( SyntaxKind syntaxKind )
             {
-                tokens.Add( SyntaxFactoryEx.TokenWithSpace( syntaxKind ) );
+                tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( syntaxKind ) );
             }
 
             switch ( parameter.RefKind )

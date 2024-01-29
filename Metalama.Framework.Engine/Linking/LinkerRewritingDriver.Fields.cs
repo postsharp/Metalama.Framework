@@ -72,9 +72,9 @@ namespace Metalama.Framework.Engine.Linking
                         attributes,
                         symbol.IsStatic
                             ? TokenList(
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ),
-                                SyntaxFactoryEx.TokenWithSpace( SyntaxKind.StaticKeyword ) )
-                            : TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
+                            : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         type,
                         null,
                         Identifier( GetEmptyImplMemberName( symbol ) ),

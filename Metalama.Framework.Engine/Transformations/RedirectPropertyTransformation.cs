@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return
                     SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             CreateAccessTargetExpression(),
                             Token( SyntaxKind.SemicolonToken ) ) );
             }

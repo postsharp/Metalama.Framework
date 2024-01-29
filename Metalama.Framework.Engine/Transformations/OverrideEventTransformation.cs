@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static )
-                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.Transformations
                     EventDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.EventKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
                         context.SyntaxGenerator.EventType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null!,
                         Identifier( eventName ),

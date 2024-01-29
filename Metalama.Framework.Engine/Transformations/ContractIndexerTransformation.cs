@@ -164,7 +164,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
 
                 getterStatements.Add(
                     SyntaxFactory.ReturnStatement(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
                         SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
             }

@@ -48,7 +48,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static )
-            .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+            .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
         var overrides = new[]
         {

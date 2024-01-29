@@ -116,7 +116,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
 
             getterStatements.Add(
                 SyntaxFactory.ReturnStatement(
-                    SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                     SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
                     SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
 

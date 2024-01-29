@@ -130,7 +130,7 @@ internal sealed class ChangeVisibilityCodeAction : ICodeAction
 
                 void AddModifier( SyntaxKind kind )
                 {
-                    var token = SyntaxFactoryEx.TokenWithSpace( kind );
+                    var token = SyntaxFactoryEx.TokenWithTrailingSpace( kind );
 
                     if ( newModifiers.Count == 0 && modifiers.Count > 0 )
                     {

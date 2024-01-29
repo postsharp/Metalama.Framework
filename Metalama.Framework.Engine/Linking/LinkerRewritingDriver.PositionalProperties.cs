@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     PropertyDeclaration(
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                            TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) ),
+                            TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
                             recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                             null,
                             recordParameter.Identifier,
@@ -171,7 +171,7 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxKind.GetAccessorDeclaration,
                     SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             GetInvocationTarget(),
                             Token( SyntaxKind.SemicolonToken ) ) ) );
 
@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
             return
                 PropertyDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PublicKeyword ) ),
+                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
                         type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         identifier,

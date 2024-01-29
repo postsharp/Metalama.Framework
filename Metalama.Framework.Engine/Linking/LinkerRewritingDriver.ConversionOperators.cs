@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Linking
             var emptyBody =
                 SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         DefaultExpression( @operator.Type ),
                         Token( SyntaxKind.SemicolonToken ) ) );
 
@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             return MethodDeclaration(
                     this.FilterAttributesOnSpecialImpl( symbol ),
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return SyntaxFactoryEx.FormattedBlock(
                     ReturnStatement(
-                        SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         invocation,
                         Token( SyntaxKind.SemicolonToken ) ) );
             }

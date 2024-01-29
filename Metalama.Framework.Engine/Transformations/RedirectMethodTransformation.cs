@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this.OverriddenDeclaration.ReturnType
                     != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
                         ? ReturnStatement(
-                            SyntaxFactoryEx.TokenWithSpace( SyntaxKind.ReturnKeyword ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             GetInvocationExpression(),
                             Token( SyntaxKind.SemicolonToken ) )
                         : ExpressionStatement( GetInvocationExpression() ) );

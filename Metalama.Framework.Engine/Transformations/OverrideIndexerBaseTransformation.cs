@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this,
                     IndexerDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.PrivateKeyword ) ),
+                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null,
                         Token( SyntaxKind.ThisKeyword ),

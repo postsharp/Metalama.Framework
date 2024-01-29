@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -245,19 +246,19 @@ internal static partial class SyntaxFactoryEx
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
 
-    internal static SyntaxToken TokenWithSpace( SyntaxKind kind )
-    {
-        return SyntaxFactory.Token( default, kind, new( SyntaxFactory.ElasticSpace ) );
-    }
+    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokens = new();
+
+    internal static SyntaxToken TokenWithTrailingSpace( SyntaxKind kind )
+        => _tokens.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticSpace ) ) );
 
     public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
         SyntaxKind disableOrRestoreKind,
         SeparatedSyntaxList<ExpressionSyntax> errorCodes )
         => SyntaxFactory.PragmaWarningDirectiveTrivia(
             SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
-            TokenWithSpace( SyntaxKind.PragmaKeyword ),
-            TokenWithSpace( SyntaxKind.WarningKeyword ),
-            TokenWithSpace( disableOrRestoreKind ),
+            TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
+            TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
+            TokenWithTrailingSpace( disableOrRestoreKind ),
             errorCodes,
             SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new( SyntaxFactory.ElasticLineFeed ) ),
             isActive: true );

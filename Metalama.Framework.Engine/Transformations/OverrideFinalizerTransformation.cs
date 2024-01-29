@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Transformations
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList(),
-                    PredefinedType( SyntaxFactoryEx.TokenWithSpace( SyntaxKind.VoidKeyword ) ),
+                    PredefinedType( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.VoidKeyword ) ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(
