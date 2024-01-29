@@ -174,7 +174,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return @operator
                 .WithBody( GetBody() )
-                .WithTriviaFromIfNecessary( @operator, this.IntermediateCompilationContext.NormalizeWhitespace );
+                .WithTriviaFromIfNecessary( @operator, this.IntermediateCompilationContext.PreserveTrivia );
 
             BlockSyntax GetBody()
             {

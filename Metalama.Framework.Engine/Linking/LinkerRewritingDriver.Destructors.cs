@@ -161,10 +161,9 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         destructor.ParameterList,
                         List<TypeParameterConstraintClauseSyntax>(),
-                        null,
-                        null )
+                        body,
+                        expressionBody )
                     .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
-                    .PartialUpdate( body: body, expressionBody: expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                                                         IdentifierName( "value" ) ) ) ) )
                                 }.WhereNotNull() ) ),
                         default )
-                    .WithTriviaFromIfNecessary( eventField, this.IntermediateCompilationContext.NormalizeWhitespace );
+                    .WithTriviaFromIfNecessary( eventField, this.IntermediateCompilationContext.PreserveTrivia );
 
             ExpressionSyntax GetInvocationTarget()
             {

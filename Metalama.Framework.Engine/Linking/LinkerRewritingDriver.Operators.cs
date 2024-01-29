@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        @operator.ReturnType.WithTrailingTriviaIfNecessary( Space, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
                         null,
                         Identifier( name ),
                         null,
