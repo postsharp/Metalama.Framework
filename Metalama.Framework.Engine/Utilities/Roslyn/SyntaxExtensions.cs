@@ -152,20 +152,9 @@ public static class SyntaxExtensions
         return node.WithLeadingTrivia( leadingTrivia );
     }
 
-    // TODO: remove if note commonly used
     internal static TNode WithLeadingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia leadingTrivia, bool preserveTrivia )
         where TNode : SyntaxNode
         => node.WithLeadingTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), preserveTrivia );
-
-    internal static SyntaxToken WithLeadingTriviaIfNecessary( this SyntaxToken token, SyntaxTriviaList leadingTrivia, bool preserveTrivia )
-    {
-        if ( !preserveTrivia && !leadingTrivia.ContainsDirectives() )
-        {
-            return token;
-        }
-
-        return token.WithLeadingTrivia( leadingTrivia );
-    }
 
     internal static TNode WithTrailingTriviaIfNecessary<TNode>( this TNode node, SyntaxTriviaList trailingTrivia, bool preserveTrivia )
         where TNode : SyntaxNode
@@ -178,7 +167,6 @@ public static class SyntaxExtensions
         return node.WithTrailingTrivia( trailingTrivia );
     }
 
-    // TODO: remove if note commonly used
     internal static TNode WithTrailingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia trailingTrivia, bool preserveTrivia )
         where TNode : SyntaxNode
         => node.WithTrailingTriviaIfNecessary( new SyntaxTriviaList( trailingTrivia ), preserveTrivia );
@@ -204,7 +192,6 @@ public static class SyntaxExtensions
         return node.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia );
     }
 
-    // TODO: remove if note commonly used
     internal static TNode WithTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia leadingTrivia, SyntaxTrivia trailingTrivia, bool preserveTrivia )
         where TNode : SyntaxNode
         => node.WithTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), new( trailingTrivia ), preserveTrivia );

@@ -330,7 +330,9 @@ namespace Metalama.Framework.Engine.Linking
                         Token( SyntaxKind.ThisKeyword ),
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
-                            indexerParameters.WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName ) ) ),
+                            indexerParameters
+                                .WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.IntermediateCompilationContext.PreserveTrivia )
+                                .WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName ) ) ),
                         accessorList,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )

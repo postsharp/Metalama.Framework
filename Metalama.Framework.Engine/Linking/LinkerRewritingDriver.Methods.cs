@@ -255,7 +255,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
-                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, method.ParameterList ),
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.PreserveTrivia ) ),
                         constraints,
                         body,
                         expressionBody,

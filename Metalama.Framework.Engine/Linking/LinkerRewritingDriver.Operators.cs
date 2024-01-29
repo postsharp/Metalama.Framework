@@ -164,7 +164,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null,
-                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList ),
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, @operator.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.IntermediateCompilationContext.PreserveTrivia ) ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody,

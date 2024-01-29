@@ -159,7 +159,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null,
-                        destructor.ParameterList,
+                        destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.IntermediateCompilationContext.PreserveTrivia ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody )

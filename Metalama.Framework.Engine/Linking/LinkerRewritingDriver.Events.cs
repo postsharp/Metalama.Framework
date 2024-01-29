@@ -347,10 +347,9 @@ namespace Metalama.Framework.Engine.Linking
                         eventType,
                         null,
                         Identifier( name ),
-                        null )
+                        cleanAccessorList )
                     .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.NormalizeWhitespace )
                     .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
-                    .WithAccessorList( cleanAccessorList )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
