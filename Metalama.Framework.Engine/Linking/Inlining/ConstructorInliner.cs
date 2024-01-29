@@ -82,6 +82,6 @@ internal sealed class ConstructorInliner : Inliner
 
     public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody )
     {
-        return linkedTargetBody.WithTriviaFromIfNecessary( currentNode, syntaxGenerationContext.PreserveTrivia );
+        return linkedTargetBody.AddTriviaFromIfNecessay( currentNode, syntaxGenerationContext.PreserveTrivia );
     }
 }
