@@ -25,6 +25,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
 
+        internal bool NormalizeWhitespace => this.CompilationContext.NormalizeWhitespace;
+
+        internal bool PreserveTrivia => this.CompilationContext.PreserveTrivia;
+
         [Memo]
         internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof(IsExternalInit).FullName! ) != null;
 

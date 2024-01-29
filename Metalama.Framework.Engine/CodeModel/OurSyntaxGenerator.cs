@@ -45,6 +45,8 @@ internal partial class OurSyntaxGenerator
 
     public bool IsNullAware { get; }
 
+    protected virtual bool NormalizeWhitespace => true;
+
     private OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
     {
         this._syntaxGenerator = syntaxGenerator;
@@ -99,6 +101,13 @@ internal partial class OurSyntaxGenerator
         return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
     }
 
+    private sealed class NormalizeSpaceRewriter : SafeSyntaxRewriter
+    {
+#pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
+        public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace();
+#pragma warning restore LAMA0830
+    }
+
     public virtual TypeSyntax Type( ITypeSymbol symbol )
     {
         var typeSyntax = (TypeSyntax) this._syntaxGenerator.TypeExpression( symbol ).WithAdditionalAnnotations( Simplifier.Annotation );
@@ -108,7 +117,13 @@ internal partial class OurSyntaxGenerator
             typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
         }
 
-        return (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();
+        if ( this.NormalizeWhitespace )
+        {
+            // Just calling NormalizeWhitespaceIfNecessary here produces ugly whitespace, e.g. "typeof(global::System.Int32[, ])".
+            typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter().Visit( typeSyntax ).AssertNotNull();
+        }
+
+        return typeSyntax;
     }
 
     public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
@@ -120,7 +135,7 @@ internal partial class OurSyntaxGenerator
         var array = (ArrayCreationExpressionSyntax) this._syntaxGenerator.ArrayCreationExpression( elementType, elements );
 
         return array.WithType( array.Type.WithAdditionalAnnotations( Simplifier.Annotation ) )
-            .NormalizeWhitespace( indentation: "", eol: "", elasticTrivia: true );
+            .NormalizeWhitespaceIfNecessary( this.NormalizeWhitespace );
     }
 
     public TypeSyntax Type( SpecialType specialType )
@@ -282,7 +297,7 @@ internal partial class OurSyntaxGenerator
 
                 clauses.Add(
                     TypeParameterConstraintClause(
-                        Token( SyntaxKind.WhereKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.WhereKeyword ),
                         SyntaxFactory.IdentifierName( genericParameter.Name ),
                         Token( SyntaxKind.ColonToken ),
                         SeparatedList( constraints ) ) );

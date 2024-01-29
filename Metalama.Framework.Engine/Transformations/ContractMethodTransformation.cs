@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.Transformations
                             VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                                 .WithVariables(
                                     SingletonSeparatedList(
-                                        VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
+                                        VariableDeclarator( Identifier( default, returnValueName, new( ElasticSpace ) ) )
                                             .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
 
                     if ( returnValueName != contractInputName )
@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Transformations
                                 VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                                     .WithVariables(
                                         SingletonSeparatedList(
-                                            VariableDeclarator( Identifier( contractInputName.AssertNotNull() ).WithTrailingTrivia( ElasticSpace ) )
+                                            VariableDeclarator( Identifier( default, contractInputName.AssertNotNull(), new( ElasticSpace ) ) )
                                                 .WithInitializer( EqualsValueClause( IdentifierName( returnValueName ) ) ) ) ) ) );
                     }
                 }

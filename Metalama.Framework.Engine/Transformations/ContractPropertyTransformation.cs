@@ -111,12 +111,12 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                         .WithVariables(
                             SyntaxFactory.SingletonSeparatedList(
                                 SyntaxFactory.VariableDeclarator(
-                                        SyntaxFactory.Identifier( getterReturnValueLocalName! ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) )
+                                        SyntaxFactory.Identifier( default, getterReturnValueLocalName!, new( SyntaxFactory.ElasticSpace ) ) )
                                     .WithInitializer( SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
 
             getterStatements.Add(
                 SyntaxFactory.ReturnStatement(
-                    SyntaxFactory.Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( SyntaxFactory.Space ),
+                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                     SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
                     SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
 

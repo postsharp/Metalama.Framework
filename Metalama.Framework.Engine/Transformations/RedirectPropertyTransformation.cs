@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Transformations
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null,
                         Identifier(
                             context.InjectionNameProvider.GetOverrideName(
@@ -85,7 +86,7 @@ namespace Metalama.Framework.Engine.Transformations
                 return
                     SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             CreateAccessTargetExpression(),
                             Token( SyntaxKind.SemicolonToken ) ) );
             }

@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,6 +14,7 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodBase = System.Reflection.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
+using ReflectionHelper = Metalama.Framework.RunTime.ReflectionHelper;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -51,11 +52,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 var methodBaseParametersExpressions = method.Parameters.SelectAsReadOnlyList(
                     p => p.RefKind != RefKind.None
                         ? (ExpressionSyntax) InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
-                                    IdentifierName( "MakeByRefType" ) ) )
-                            .AddArgumentListArguments()
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
+                                IdentifierName( "MakeByRefType" ) ) )
                         : serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) );
 
                 parameterTypeArray = ImplicitArrayCreationExpression(
@@ -78,30 +78,38 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 if ( ReflectionSignatureBuilder.HasTypeArgument( constructor ) )
                 {
                     invokeGetMethod = InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                reflectionHelperTypeSyntax,
-                                IdentifierName( nameof(ReflectionHelper.GetConstructor) ) ) )
-                        .AddArgumentListArguments(
-                            Argument( typeCreation ),
-                            Argument( allBindingFlags ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.StringLiteralExpression,
-                                    Literal( ReflectionSignatureBuilder.GetConstructorSignature( constructor ) ) ) ) );
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            reflectionHelperTypeSyntax,
+                            IdentifierName( nameof(ReflectionHelper.GetConstructor) ) ),
+                        ArgumentList(
+                            SeparatedList(
+                                new[]
+                                {
+                                    Argument( typeCreation ),
+                                    Argument( allBindingFlags ),
+                                    Argument(
+                                        LiteralExpression(
+                                            SyntaxKind.StringLiteralExpression,
+                                            Literal( ReflectionSignatureBuilder.GetConstructorSignature( constructor ) ) ) )
+                                } ) ) );
                 }
                 else
                 {
                     invokeGetMethod = InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                typeCreation,
-                                IdentifierName( "GetConstructor" ) ) )
-                        .AddArgumentListArguments(
-                            Argument( allBindingFlags ),
-                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
-                            Argument( parameterTypeArray ),
-                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) );
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            typeCreation,
+                            IdentifierName( "GetConstructor" ) ),
+                        ArgumentList(
+                            SeparatedList(
+                                new[]
+                                {
+                                    Argument( allBindingFlags ),
+                                    Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
+                                    Argument( parameterTypeArray ),
+                                    Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
+                                } ) ) );
                 }
             }
             else
@@ -109,45 +117,50 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 if ( ReflectionSignatureBuilder.HasTypeArgument( (IMethod) method ) )
                 {
                     invokeGetMethod = InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                reflectionHelperTypeSyntax,
-                                IdentifierName( nameof(ReflectionHelper.GetMethod) ) ) )
-                        .AddArgumentListArguments(
-                            Argument( typeCreation ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.StringLiteralExpression,
-                                    Literal( method.Name ) ) ),
-                            Argument( allBindingFlags ),
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.StringLiteralExpression,
-                                    Literal( ReflectionSignatureBuilder.GetMethodSignature( (IMethod) method ) ) ) ) );
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            reflectionHelperTypeSyntax,
+                            IdentifierName( nameof(ReflectionHelper.GetMethod) ) ),
+                        ArgumentList(
+                            SeparatedList(
+                                new[]
+                                {
+                                    Argument( typeCreation ),
+                                    Argument(
+                                        LiteralExpression(
+                                            SyntaxKind.StringLiteralExpression,
+                                            Literal( method.Name ) ) ),
+                                    Argument( allBindingFlags ),
+                                    Argument(
+                                        LiteralExpression(
+                                            SyntaxKind.StringLiteralExpression,
+                                            Literal( ReflectionSignatureBuilder.GetMethodSignature( (IMethod) method ) ) ) )
+                                } ) ) );
                 }
                 else
                 {
                     invokeGetMethod = InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                typeCreation,
-                                IdentifierName( "GetMethod" ) ) )
-                        .AddArgumentListArguments(
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.StringLiteralExpression,
-                                    Literal( method.Name ) ) ),
-                            Argument( allBindingFlags ),
-                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
-                            Argument( parameterTypeArray ),
-                            Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ) );
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            typeCreation,
+                            IdentifierName( "GetMethod" ) ),
+                        ArgumentList(
+                            SeparatedList(
+                                new[]
+                                {
+                                    Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( method.Name ) ) ),
+                                    Argument( allBindingFlags ),
+                                    Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) ),
+                                    Argument( parameterTypeArray ),
+                                    Argument( LiteralExpression( SyntaxKind.NullLiteralExpression ) )
+                                } ) ) );
                 }
             }
 
             // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
             invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
 
-            return invokeGetMethod.NormalizeWhitespace();
+            return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
         }
 
         // The following is the old code that was used alongside Intrinsics.

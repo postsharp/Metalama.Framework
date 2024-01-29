@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -17,14 +16,14 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             return InvocationExpression(
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        serializationContext.GetTypeSyntax( typeof(DateTimeOffset) ),
-                        IdentifierName( "Parse" ) ) )
-                .AddArgumentListArguments(
-                    Argument(
-                        LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            Literal( isoTime ) ) ) )
-                .NormalizeWhitespace();
+                        serializationContext.GetTypeSyntax( typeof( DateTimeOffset ) ),
+                        IdentifierName( "Parse" ) ),
+                    ArgumentList(
+                        SingletonSeparatedList(
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( isoTime ) ) ) ) ) );
         }
 
         public DateTimeOffsetSerializer( SyntaxSerializationService service ) : base( service ) { }

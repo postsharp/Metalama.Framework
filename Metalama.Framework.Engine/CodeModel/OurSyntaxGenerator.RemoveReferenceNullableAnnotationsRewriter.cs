@@ -10,11 +10,6 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {
-        private sealed class NormalizeSpaceRewriter : SafeSyntaxRewriter
-        {
-            public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace();
-        }
-
         private sealed class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
         {
             private ITypeSymbol _type;

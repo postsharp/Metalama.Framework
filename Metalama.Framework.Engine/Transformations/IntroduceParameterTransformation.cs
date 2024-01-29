@@ -3,8 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -27,7 +27,7 @@ internal sealed class IntroduceParameterTransformation : BaseTransformation, IMe
         var syntax = SyntaxFactory.Parameter(
             default,
             default,
-            syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type.GetSymbol() ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ),
+            syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
             SyntaxFactory.Identifier( this.Parameter.Name ),
             null );
 
@@ -35,9 +35,7 @@ internal sealed class IntroduceParameterTransformation : BaseTransformation, IMe
         {
             syntax = syntax.WithDefault(
                 SyntaxFactory.EqualsValueClause(
-                    SyntaxFactory.Token( SyntaxKind.EqualsToken )
-                        .WithLeadingTrivia( SyntaxFactory.ElasticSpace )
-                        .WithTrailingTrivia( SyntaxFactory.ElasticSpace ),
+                    SyntaxFactory.Token( new( SyntaxFactory.ElasticSpace ), SyntaxKind.EqualsToken, new( SyntaxFactory.ElasticSpace ) ),
                     syntaxGenerationContext.SyntaxGenerator.TypedConstant( this.Parameter.DefaultValue.Value ) ) );
         }
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -50,11 +51,9 @@ internal sealed class AspectReferenceEmptySubstitution : AspectReferenceRenaming
                 ? substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType )
                 : ThisExpression();
 
-        return currentNode
-            .WithExpression(
-                expression
-                    .WithLeadingTrivia( currentNode.Expression.GetLeadingTrivia() )
-                    .WithTrailingTrivia( currentNode.Expression.GetTrailingTrivia() ) )
-            .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+        return currentNode.PartialUpdate(
+            expression: expression
+                .WithTriviaFromIfNecessary( currentNode.Expression, substitutionContext.SyntaxGenerationContext.PreserveTrivia ),
+            name: RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
     }
 }

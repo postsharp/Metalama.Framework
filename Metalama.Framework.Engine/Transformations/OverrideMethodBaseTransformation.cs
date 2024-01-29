@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -40,14 +41,14 @@ namespace Metalama.Framework.Engine.Transformations
 
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
                 if ( isAsyncTemplate )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
-                    modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ).WithTrailingTrivia( Space ) );
+                    modifiers = modifiers.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AsyncKeyword ) );
                 }
             }
             else
@@ -73,7 +74,7 @@ namespace Metalama.Framework.Engine.Transformations
             var introducedMethod = MethodDeclaration(
                 List<AttributeListSyntax>(),
                 modifiers,
-                returnType.WithTrailingTrivia( Space ),
+                returnType.WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                 null,
                 Identifier(
                     context.InjectionNameProvider.GetOverrideName(

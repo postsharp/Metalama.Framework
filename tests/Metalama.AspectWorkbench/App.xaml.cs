@@ -13,7 +13,7 @@ namespace Metalama.AspectWorkbench
     {
         public App()
         {
-            BackstageServiceFactory.Initialize( new BackstageInitializationOptions( new MyApplicationInfo() ), "AspectWorkbench" );
+            BackstageServiceFactory.Initialize( new BackstageInitializationOptions( new MyApplicationInfo() ) { AddLicensing = true, AddSupportServices = true  }, "AspectWorkbench" );
         }
 
         private sealed class MyApplicationInfo : ApplicationInfoBase

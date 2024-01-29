@@ -10,7 +10,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -196,9 +196,9 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList(
-                        Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ),
-                        Token( SyntaxKind.StaticKeyword ).WithTrailingTrivia( Space ) ),
-                    context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace(SyntaxKind.StaticKeyword) ),
+                    context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     null,
                     Identifier( initializerName ),
                     null,

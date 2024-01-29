@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +26,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
             IndexerDeclaration(
                 indexerBuilder.GetAttributeLists( context ),
                 indexerBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ).WithTrailingTrivia( ElasticSpace ),
+                syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                 indexerBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
                         (NameSyntax) syntaxGenerator.Type( indexerBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
