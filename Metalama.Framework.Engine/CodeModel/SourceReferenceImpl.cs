@@ -59,6 +59,7 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
     public string GetText( in SourceSpan sourceSpan )
         => ((SyntaxTree) sourceSpan.SyntaxTree).GetText().GetSubText( TextSpan.FromBounds( sourceSpan.Start, sourceSpan.End ) ).ToString();
 
+#pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
     public string GetText( in SourceReference sourceReference, bool normalized )
         => sourceReference.NodeOrToken switch
         {
@@ -68,6 +69,7 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
             SyntaxNode token when !normalized => token.ToFullString(),
             _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
         };
+#pragma warning restore LAMA0830
 
     public bool IsImplementationPart( in SourceReference sourceReference )
         => !(sourceReference.NodeOrToken is MethodDeclarationSyntax { Body: null, ExpressionBody: null } method &&

@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -15,34 +15,34 @@ internal static class BuilderHelpers
         switch ( accessibility )
         {
             case Accessibility.Private:
-                tokenList.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
                 break;
 
             case Accessibility.Protected:
-                tokenList.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
 
                 break;
 
             case Accessibility.Internal:
-                tokenList.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InternalKeyword ) );
 
                 break;
 
             case Accessibility.PrivateProtected:
-                tokenList.Add( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
-                tokenList.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
 
                 break;
 
             case Accessibility.ProtectedInternal:
-                tokenList.Add( Token( SyntaxKind.ProtectedKeyword ).WithTrailingTrivia( Space ) );
-                tokenList.Add( Token( SyntaxKind.InternalKeyword ).WithTrailingTrivia( Space ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ProtectedKeyword ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.InternalKeyword ) );
 
                 break;
 
             case Accessibility.Public:
-                tokenList.Add( Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) );
+                tokenList.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) );
 
                 break;
 

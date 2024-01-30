@@ -94,4 +94,8 @@ public class DefaultProjectOptions : IProjectOptions
     public virtual bool IsTest => false;
 
     public virtual string? TemplateLanguageVersion => null;
+
+    public virtual bool? DebugTransformedCode => null;
+
+    public virtual string? TransformedFilesOutputPath => null;
 }

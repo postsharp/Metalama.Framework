@@ -396,8 +396,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                         YieldStatement(
                             SyntaxKind.YieldReturnStatement,
                             IdentifierName( resultItem ) ) ) ) )
-            .WithAwaitKeyword( Token( SyntaxKind.AwaitKeyword ) )
-            .NormalizeWhitespace();
+            .WithAwaitKeyword( Token( SyntaxKind.AwaitKeyword ) );
 
         return Block( forEach, CreateYieldBreakStatement() ).WithFlattenBlockAnnotation();
     }
@@ -479,7 +478,6 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
             Block( whileStatement ) );
 
         return Block( usingStatement, CreateYieldBreakStatement() )
-            .NormalizeWhitespace()
             .WithFlattenBlockAnnotation();
     }
 

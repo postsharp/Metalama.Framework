@@ -48,6 +48,8 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
         return base.Type( symbol );
     }
 
+    protected override bool NormalizeWhitespace => this._context.NormalizeWhitespace;
+
     public AttributeSyntax Attribute( IAttributeData attribute )
     {
         var constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
@@ -110,14 +112,14 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
     public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute )
     {
         var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute ) ) )
-            .WithLeadingTrivia( oldNode.GetLeadingTrivia() )
-            .WithTrailingTrivia( ElasticCarriageReturnLineFeed );
+            .WithLeadingTriviaIfNecessary( oldNode.GetLeadingTrivia(), this._context.PreserveTrivia )
+            .WithTrailingTriviaIfNecessary( ElasticCarriageReturnLineFeed, this._context.NormalizeWhitespace );
 
-        oldNode = oldNode.WithoutLeadingTrivia();
+        oldNode = oldNode.WithLeadingTriviaIfNecessary( default(SyntaxTriviaList), this._context.PreserveTrivia );
 
         if ( attributeList.GetLeadingTrivia().LastOrDefault() is { RawKind: (int) SyntaxKind.WhitespaceTrivia } indentationTrivia )
         {
-            oldNode = oldNode.WithLeadingTrivia( indentationTrivia );
+            oldNode = oldNode.WithLeadingTriviaIfNecessary( indentationTrivia, this._context.PreserveTrivia );
         }
 
         return oldNode.Kind() switch
@@ -255,7 +257,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
                 p => Parameter(
                     this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                     p.GetSyntaxModifierList(),
-                    this.Type( p.Type.GetSymbol() ).WithTrailingTrivia( Space ),
+                    this.Type( p.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, this.NormalizeWhitespace ),
                     Identifier( p.Name ),
                     removeDefaultValues || p.DefaultValue == null
                         ? null
@@ -324,7 +326,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
             if ( constraints.Count > 0 )
             {
-                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespace();
+                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespaceIfNecessary( this.NormalizeWhitespace );
                 list = list.Add( clause );
             }
         }

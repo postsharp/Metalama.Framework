@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -47,18 +46,6 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             var returnStatement = (ReturnStatementSyntax) aspectReference.RootExpression.AssertNotNull().Parent.AssertNotNull();
 
             return new InliningAnalysisInfo( returnStatement, null );
-        }
-
-        public override StatementSyntax Inline(
-            SyntaxGenerationContext syntaxGenerationContext,
-            InliningSpecification specification,
-            SyntaxNode currentNode,
-            StatementSyntax linkedTargetBody )
-        {
-            return
-                linkedTargetBody
-                    .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
-                    .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
         }
     }
 }

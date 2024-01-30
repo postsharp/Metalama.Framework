@@ -48,14 +48,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 if ( this.AspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
                 {
-                    return currentNode
-                        .WithExpression( ThisExpression() )
-                        .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+                    return currentNode.PartialUpdate( expression: ThisExpression(), name: RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
                 }
                 else
                 {
-                    return currentNode
-                        .WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
+                    return currentNode.WithName( RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
                 }
             }
             else
@@ -67,8 +64,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
                                 RewriteName( currentNode.Name, this.GetTargetMemberName() ) )
-                            .WithLeadingTrivia( currentNode.GetLeadingTrivia() )
-                            .WithTrailingTrivia( currentNode.GetTrailingTrivia() );
+                            .WithTriviaFromIfNecessary( currentNode, substitutionContext.SyntaxGenerationContext.PreserveTrivia );
                 }
                 else
                 {

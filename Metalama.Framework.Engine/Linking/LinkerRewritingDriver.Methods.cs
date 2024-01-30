@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineForMethod( methodDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+                    members.Add( this.GetTrampolineForMethod( methodDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[]
                 {
-                    GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
                     this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext )
                 };
             }
@@ -138,15 +138,16 @@ namespace Metalama.Framework.Engine.Linking
                     };
 
                 var ret = methodDeclaration
-                    .WithExpressionBody( null )
-                    .WithModifiers( modifiers )
-                    .WithBody(
-                        Block( linkedBody )
-                            .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
-                            .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                    .PartialUpdate(
+                        expressionBody: null,
+                        modifiers: modifiers,
+                        body: Block(
+                                Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                                SingletonList<StatementSyntax>( linkedBody ),
+                                Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                    .WithSemicolonToken( default );
+                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                        semicolonToken: default(SyntaxToken) );
 
                 return ret;
             }
@@ -216,7 +217,7 @@ namespace Metalama.Framework.Engine.Linking
                         ? SyntaxFactoryEx.FormattedBlock()
                         : SyntaxFactoryEx.FormattedBlock(
                             ReturnStatement(
-                                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                 DefaultExpression( generationContext.SyntaxGenerator.Type( resultType ) ),
                                 Token( SyntaxKind.SemicolonToken ) ) );
 
@@ -235,7 +236,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( Space ) );
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             var constraints = method.ConstraintClauses;
 
@@ -250,24 +251,20 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        returnType.WithTrailingTrivia( Space ),
+                        returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.NormalizeWhitespace ),
                         null,
                         Identifier( name ),
                         method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
-                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, method.ParameterList ),
+                        this.FilterAttributesOnSpecialImpl( symbol.Parameters, method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.PreserveTrivia ) ),
                         constraints,
-                        null,
-                        null )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( ElasticLineFeed )
-                    .WithTrailingTrivia( ElasticLineFeed )
-                    .WithBody( body )
-                    .WithExpressionBody( expressionBody )
-                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
+                        body,
+                        expressionBody,
+                        expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, generationContext.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private static MethodDeclarationSyntax GetTrampolineForMethod(
+        private MethodDeclarationSyntax GetTrampolineForMethod(
             MethodDeclarationSyntax method,
             IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
         {
@@ -280,11 +277,8 @@ namespace Metalama.Framework.Engine.Linking
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return method
-                .WithBody( GetBody() )
-                .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                .NormalizeWhitespace()
-                .WithLeadingTrivia( method.GetLeadingTrivia() )
-                .WithTrailingTrivia( method.GetTrailingTrivia() );
+                .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
+                .WithTriviaFromIfNecessary( method, this.IntermediateCompilationContext.PreserveTrivia );
 
             BlockSyntax GetBody()
             {
@@ -298,7 +292,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             invocation,
                             Token( SyntaxKind.SemicolonToken ) ) );
                 }

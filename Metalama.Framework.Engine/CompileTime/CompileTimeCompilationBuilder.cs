@@ -232,6 +232,9 @@ internal sealed partial class CompileTimeCompilationBuilder
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
 
+        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
+        CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
+
         var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 
         var templateSymbolManifestBuilder = new TemplateProjectManifestBuilder( compilationContext.SourceCompilation );
@@ -271,6 +274,7 @@ internal sealed partial class CompileTimeCompilationBuilder
                     compileTimeToSourceMap?.Add( path, t.SyntaxTree.FilePath );
 
                     // Remove all preprocessor trivias.
+                    // PERF: only do this if the node actually contains preprocessor directives.
                     compileTimeSyntaxRoot = new RemovePreprocessorDirectivesRewriter().Visit( compileTimeSyntaxRoot ).AssertNotNull();
 
                     return CSharpSyntaxTree.Create(

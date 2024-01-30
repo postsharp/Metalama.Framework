@@ -179,8 +179,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     /// <see cref="MetaSyntaxRewriter.TransformationKind.None"/> for compile-time code
     /// or <see cref="MetaSyntaxRewriter.TransformationKind.Transform"/> for run-time code.
     /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
     protected override TransformationKind GetTransformationKind( SyntaxNode node )
         => IsCompileTimeCode( node ) ? TransformationKind.None : TransformationKind.Transform;
 
@@ -2008,8 +2006,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var callRender = InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RenderInterpolatedString) ),
-                ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) )
-            .NormalizeWhitespace();
+                ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) );
 
         this.Unindent();
 
@@ -2022,8 +2019,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var fixedNode = InvocationExpression(
                 this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.FixInterpolationSyntax) ),
-                ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) )
-            .NormalizeWhitespace();
+                ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) );
 
         return fixedNode;
     }

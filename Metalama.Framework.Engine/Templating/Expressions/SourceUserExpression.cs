@@ -26,7 +26,7 @@ internal sealed class SourceUserExpression : SyntaxUserExpression, ISourceExpres
     public string AsString => this.Expression.NormalizeWhitespace().ToString();
 
     [Memo]
-    public string AsFullString => this.Expression.ToFullString();
+    public string AsFullString => this.Expression.NormalizeWhitespace().ToFullString();
 
     [Memo]
     public TypedConstant? AsTypedConstant => this.GetTypeConstant( this.Expression );

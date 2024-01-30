@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -125,8 +126,7 @@ internal static partial class SyntaxFactoryEx
     private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
 
     public static StatementSyntax EmptyStatement
-        => SyntaxFactory.ExpressionStatement( EmptyExpression )
-            .WithSemicolonToken( SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
+        => SyntaxFactory.ExpressionStatement( EmptyExpression, SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
 
     public static CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {
@@ -177,13 +177,13 @@ internal static partial class SyntaxFactoryEx
 
     public static BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
         => SyntaxFactory.Block(
-            SyntaxFactory.Token( SyntaxKind.OpenBraceToken ).WithTrailingTrivia( SyntaxFactory.ElasticLineFeed ),
+            SyntaxFactory.Token( default, SyntaxKind.OpenBraceToken, new( SyntaxFactory.ElasticLineFeed ) ),
             SyntaxFactory.List(
                 statements.Select(
                     s => NeedsLineFeed( s )
                         ? s.WithTrailingTrivia( s.GetTrailingTrivia().Add( SyntaxFactory.ElasticLineFeed ) )
                         : s ) ),
-            SyntaxFactory.Token( SyntaxKind.CloseBraceToken ).WithLeadingTrivia( SyntaxFactory.ElasticLineFeed ) );
+            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.CloseBraceToken, default ) );
 
     public static ExpressionStatementSyntax DiscardStatement( ExpressionSyntax discardedExpression )
         => SyntaxFactory.ExpressionStatement(
@@ -245,4 +245,21 @@ internal static partial class SyntaxFactoryEx
             Code.RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
+
+    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokens = new();
+
+    internal static SyntaxToken TokenWithTrailingSpace( SyntaxKind kind )
+        => _tokens.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticSpace ) ) );
+
+    public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
+        SyntaxKind disableOrRestoreKind,
+        SeparatedSyntaxList<ExpressionSyntax> errorCodes )
+        => SyntaxFactory.PragmaWarningDirectiveTrivia(
+            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
+            TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
+            TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
+            TokenWithTrailingSpace( disableOrRestoreKind ),
+            errorCodes,
+            SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new( SyntaxFactory.ElasticLineFeed ) ),
+            isActive: true );
 }

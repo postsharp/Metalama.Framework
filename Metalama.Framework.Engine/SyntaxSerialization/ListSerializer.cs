@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -22,12 +21,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 serializedItems.Add( this.Service.Serialize( item, serializationContext ) );
             }
 
-            return ObjectCreationExpression( serializationContext.GetTypeSyntax( obj.GetType() ) )
-                .WithInitializer(
-                    InitializerExpression(
-                        SyntaxKind.CollectionInitializerExpression,
-                        SeparatedList( serializedItems ) ) )
-                .NormalizeWhitespace();
+            return ObjectCreationExpression(
+                serializationContext.GetTypeSyntax( obj.GetType() ),
+                default,
+                InitializerExpression( SyntaxKind.CollectionInitializerExpression, SeparatedList( serializedItems ) ) );
         }
 
         public override Type InputType => typeof(IEnumerable<>);

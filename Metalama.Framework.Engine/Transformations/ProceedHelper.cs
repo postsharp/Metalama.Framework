@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
@@ -79,7 +80,7 @@ internal static class ProceedHelper
                             return
                                 new SyntaxUserExpression(
                                     AwaitExpression(
-                                            Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                             invocationExpression )
                                         .WithAdditionalAnnotations( Simplifier.Annotation ),
                                     resultType );
@@ -89,7 +90,7 @@ internal static class ProceedHelper
                                 new SyntaxUserExpression(
                                     ParenthesizedExpression(
                                             AwaitExpression(
-                                                Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                                 invocationExpression ) )
                                         .WithAdditionalAnnotations( Simplifier.Annotation ),
                                     asyncInfo.ResultType );
@@ -138,7 +139,7 @@ internal static class ProceedHelper
 
             var expression = ParenthesizedExpression(
                     AwaitExpression(
-                        Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( Space ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                         bufferExpression ) )
                 .WithAdditionalAnnotations( Simplifier.Annotation );
 
