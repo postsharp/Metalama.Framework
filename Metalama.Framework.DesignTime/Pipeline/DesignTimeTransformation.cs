@@ -4,15 +4,11 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal readonly struct DesignTimeTransformation
+internal readonly struct DesignTimeTransformation( SerializableDeclarationId targetDeclarationId, string aspectClassFullName, string description )
 {
-    public SerializableDeclarationId TargetDeclarationId { get; }
+    public SerializableDeclarationId TargetDeclarationId { get; } = targetDeclarationId;
 
-    public string AspectClassFullName { get; }
+    public string AspectClassFullName { get; } = aspectClassFullName;
 
-    public DesignTimeTransformation( SerializableDeclarationId targetDeclarationId, string aspectClassFullName )
-    {
-        this.TargetDeclarationId = targetDeclarationId;
-        this.AspectClassFullName = aspectClassFullName;
-    }
+    public string Description { get; } = description;
 }

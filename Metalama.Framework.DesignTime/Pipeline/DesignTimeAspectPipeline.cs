@@ -62,6 +62,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     // This field should not be changed directly, but only through the SetState method.
     private PipelineState _currentState;
 
+    private ulong _aspectClassesHashCode;
+    private ulong _aspectInstancesHashCode;
+
     private int _pipelineExecutionCount;
 
     public ProjectKey ProjectKey { get; }
@@ -213,17 +216,37 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 #endif
 
         var oldStatus = this._currentState.Status;
+
         this._currentState = state;
 
         if ( oldStatus != state.Status )
         {
             await this._eventHub.OnPipelineStatusChangedEventAsync( new DesignTimePipelineStatusChangedEventArgs( this, oldStatus, state.Status ) );
         }
+
+        // Recomputing configuration when compile-time code changes goes old -> invalid -> new.
+        // We want to ignore the intermediate invalid state here.
+        var newAspectClassesHashCode = state.Configuration is { IsSuccessful: true } configuration
+            ? configuration.Value.AspectClassesHashCode ^ HashUtilities.HashStrings( configuration.Value.FabricTypeNames )
+            : 0;
+
+        if ( newAspectClassesHashCode != 0 && this._aspectClassesHashCode != newAspectClassesHashCode )
+        {
+            this._aspectClassesHashCode = newAspectClassesHashCode;
+            this._eventHub.OnAspectClassesChanged( this.ProjectKey );
+        }
+
+        var newAspectInstancesHashCode = state.PipelineResult.AspectInstancesHashCode;
+
+        if ( newAspectInstancesHashCode != 0 && this._aspectInstancesHashCode != newAspectInstancesHashCode )
+        {
+            this._aspectInstancesHashCode = newAspectInstancesHashCode;
+            this._eventHub.OnAspectInstancesChanged( this.ProjectKey );
+        }
     }
 
     // It's ok if we return an obsolete project in the use cases of this property.
-    // ReSharper disable once InconsistentlySynchronizedField
-    private IReadOnlyCollection<IAspectClass>? AspectClasses
+    public IReadOnlyCollection<IAspectClass>? AspectClasses
     {
         get
         {
@@ -233,6 +256,19 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
             }
 
             return this._currentState.Configuration.Value.Value.AspectClasses;
+        }
+    }
+
+    public ImmutableArray<string>? Fabrics
+    {
+        get
+        {
+            if ( this._currentState.Configuration is not { IsSuccessful: true } )
+            {
+                return null;
+            }
+
+            return this._currentState.Configuration.Value.Value.FabricTypeNames;
         }
     }
 

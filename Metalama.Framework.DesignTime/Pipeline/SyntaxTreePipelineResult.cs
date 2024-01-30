@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -48,6 +50,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; }
 
+        public ulong AspectInstancesHashCode { get; }
+
         private SyntaxTreePipelineResult(
             string? syntaxTreePath,
             ImmutableArray<Diagnostic>? diagnostics,
@@ -72,6 +76,39 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.Dependencies = dependencies ?? ImmutableArray<string>.Empty;
             this.AspectInstances = aspectInstances ?? ImmutableArray<DesignTimeAspectInstance>.Empty;
             this.Transformations = transformations ?? ImmutableArray<DesignTimeTransformation>.Empty;
+
+            this.AspectInstancesHashCode = ComputeAspectInstancesHashCode( this.AspectInstances, this.Transformations );
+        }
+
+        private static ulong ComputeAspectInstancesHashCode( ImmutableArray<DesignTimeAspectInstance> aspectInstances, ImmutableArray<DesignTimeTransformation> transformations )
+        {
+            // Hash code shouldn't depend on the order of aspect instances (or transformations), which is why each instance is hashed separately and their hashes are XORed.
+
+            ulong hashCode = 0;
+
+            foreach ( var aspectInstance in aspectInstances )
+            {
+                var xxh = new XXH64();
+
+                xxh.Update( aspectInstance.AspectClassFullName );
+                xxh.Update( aspectInstance.TargetDeclarationId.Id );
+                xxh.Update( aspectInstance.PredecessorDeclarationId?.Id );
+
+                hashCode ^= xxh.Digest();
+            }
+
+            foreach ( var transformation in transformations )
+            {
+                var xxh = new XXH64();
+
+                xxh.Update( transformation.AspectClassFullName );
+                xxh.Update( transformation.TargetDeclarationId.Id );
+                xxh.Update( transformation.Description );
+
+                hashCode ^= xxh.Digest();
+            }
+
+            return hashCode;
         }
 
         public override string ToString()

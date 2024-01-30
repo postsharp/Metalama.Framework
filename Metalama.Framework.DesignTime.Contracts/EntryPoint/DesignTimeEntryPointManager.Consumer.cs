@@ -116,9 +116,6 @@ public sealed partial class DesignTimeEntryPointManager
             }
         }
 
-        /// <summary>
-        /// Subscribes an observer, which will be invoked when a new <see cref="ICompilerServiceProvider"/> is registered.
-        /// </summary>
         public IDisposable ObserveOnServiceProviderRegistered( ServiceProviderEventHandler observer )
         {
             lock ( this._parent._sync )

@@ -53,7 +53,7 @@ internal sealed class CodeLensService : ICodeLensService
             return;
         }
 
-        var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetCodeLensSummaryAsync), cancellationToken );
+        var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetCodeLensDetailsAsync), cancellationToken );
 
         result[0] = await analysisProcessApi.GetCodeLensDetailsAsync( projectKey, symbol.GetSerializableId(), cancellationToken );
     }

@@ -58,6 +58,8 @@ internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalS
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.IsEditingCompileTimeCodeChanged += this.OnIsEditingCompileTimeCodeChanged;
         this._eventHub.CompileTimeErrorsChanged += this.OnCompileTimeErrorsChanged;
+        this._eventHub.AspectClassesChanged += this.OnAspectClassesChanged;
+        this._eventHub.AspectInstancesChanged += this.OnAspectInstancesChanged;
     }
 
     protected override void ConfigureRpc( JsonRpc rpc )
@@ -121,12 +123,30 @@ internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalS
         }
     }
 
+    private void OnAspectClassesChanged( ProjectKey projectKey )
+    {
+        foreach ( var client in this._clients.Values )
+        {
+            client.OnAspectClassesChanged( projectKey );
+        }
+    }
+
+    private void OnAspectInstancesChanged( ProjectKey projectKey )
+    {
+        foreach ( var client in this._clients.Values )
+        {
+            client.OnAspectInstancesChanged( projectKey );
+        }
+    }
+
     public override void Dispose()
     {
         base.Dispose();
 
         this._eventHub.IsEditingCompileTimeCodeChanged -= this.OnIsEditingCompileTimeCodeChanged;
         this._eventHub.CompileTimeErrorsChanged -= this.OnCompileTimeErrorsChanged;
+        this._eventHub.AspectClassesChanged -= this.OnAspectClassesChanged;
+        this._eventHub.AspectInstancesChanged -= this.OnAspectInstancesChanged;
     }
 
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;

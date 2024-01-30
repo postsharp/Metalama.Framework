@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public CompileTimeProject CompileTimeProject { get; }
 
-        public PipelineContributorSources ExecuteFabrics(
+        public (PipelineContributorSources PipelineContributorSources, ImmutableArray<string> FabricTypeNames) ExecuteFabrics(
             CompileTimeProject compileTimeProject,
             CompilationModel compilationModel,
             ProjectModel project,
@@ -59,17 +59,23 @@ namespace Metalama.Framework.Engine.Fabrics
                 .SelectMany( x => x.Project.TransitiveFabricTypes.SelectAsReadOnlyList( t => (x.Project, x.Depth, Type: t) ) )
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
+                .ToArray();
+            var transitiveFabricTypeNames = transitiveFabricTypes.SelectAsReadOnlyList( x => x.Type );
+            var transitiveFabricDrivers = transitiveFabricTypes
                 .SelectMany( x => this.CreateDrivers( x.Project, x.Type, compilationModel, diagnosticAdder ) )
                 .ToReadOnlyList();
 
             // Discover the fabrics inside the current project.
-            var fabrics =
-                compileTimeProject.FabricTypes
+            var fabricTypeNames = compileTimeProject.FabricTypes
                     .OrderBy( t => t )
+                    .ToImmutableArray();
+            var fabricDrivers = fabricTypeNames
                     .SelectMany( x => this.CreateDrivers( compileTimeProject, x, compilationModel, diagnosticAdder ) )
                     .ToOrderedList( x => x );
 
-            var typeFabricDrivers = fabrics.OfType<TypeFabricDriver>().Concat( transitiveFabricTypes.OfType<TypeFabricDriver>() ).ToImmutableArray();
+            var allFabricTypeNames = fabricTypeNames.Concat( transitiveFabricTypeNames ).ToImmutableArray();
+
+            var typeFabricDrivers = fabricDrivers.OfType<TypeFabricDriver>().Concat( transitiveFabricDrivers.OfType<TypeFabricDriver>() ).ToImmutableArray();
 
             var aspectSources = ImmutableArray.CreateBuilder<IAspectSource>();
             var validatorSources = ImmutableArray.CreateBuilder<IValidatorSource>();
@@ -100,12 +106,14 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
             }
 
-            Execute( fabrics.OfType<ProjectFabricDriver>() );
-            Execute( transitiveFabricTypes.OfType<ProjectFabricDriver>() );
+            Execute( fabricDrivers.OfType<ProjectFabricDriver>() );
+            Execute( transitiveFabricDrivers.OfType<ProjectFabricDriver>() );
             project.Freeze();
-            Execute( fabrics.OfType<NamespaceFabricDriver>() );
+            Execute( fabricDrivers.OfType<NamespaceFabricDriver>() );
 
-            return new PipelineContributorSources( aspectSources.ToImmutable(), validatorSources.ToImmutable(), optionsSources.ToImmutableArray() );
+            var pipelineContributorSources = new PipelineContributorSources( aspectSources.ToImmutable(), validatorSources.ToImmutable(), optionsSources.ToImmutableArray() );
+
+            return (pipelineContributorSources, allFabricTypeNames);
         }
 
         private IEnumerable<FabricDriver> CreateDrivers(

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.DesignTime.AspectExplorer;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
@@ -26,15 +27,18 @@ internal sealed partial class AnalysisProcessEndpoint
         private readonly ICodeLensServiceImpl? _codeLensServiceImpl;
         private readonly CodeRefactoringDiscoveryService? _codeRefactoringDiscoveryService;
         private readonly CodeActionExecutionService? _codeActionExecutionService;
+        private readonly AspectDatabase? _aspectDatabase;
 
         public ApiImplementation( AnalysisProcessEndpoint parent, IUserProcessApi client )
         {
             this._parent = parent;
             this._client = client;
 
-            this._codeLensServiceImpl = this._parent._serviceProvider.GetService<ICodeLensServiceImpl>();
-            this._codeRefactoringDiscoveryService = this._parent._serviceProvider.GetService<CodeRefactoringDiscoveryService>();
-            this._codeActionExecutionService = this._parent._serviceProvider.GetService<CodeActionExecutionService>();
+            var serviceProvider = this._parent._serviceProvider;
+            this._codeLensServiceImpl = serviceProvider.GetService<ICodeLensServiceImpl>();
+            this._codeRefactoringDiscoveryService = serviceProvider.GetService<CodeRefactoringDiscoveryService>();
+            this._codeActionExecutionService = serviceProvider.GetService<CodeActionExecutionService>();
+            this._aspectDatabase = serviceProvider.GetService<AspectDatabase>();
         }
 
         public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken )
@@ -146,6 +150,30 @@ internal sealed partial class AnalysisProcessEndpoint
                 codeActionModel,
                 isComputingPreview,
                 cancellationToken );
+        }
+
+        public Task<IEnumerable<string>> GetAspectClassesAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+        {
+            if ( this._aspectDatabase is null )
+            {
+                this._parent.Logger.Warning?.Log( "The AspectDatabase is not registered." );
+
+                return Task.FromResult( Enumerable.Empty<string>() );
+            }
+
+            return this._aspectDatabase.GetAspectClassesAsync( projectKey, cancellationToken );
+        }
+
+        public Task<IEnumerable<AspectDatabaseAspectInstance>> GetAspectInstancesAsync( ProjectKey projectKey, string aspectClass, CancellationToken cancellationToken )
+        {
+            if ( this._aspectDatabase is null )
+            {
+                this._parent.Logger.Warning?.Log( "The AspectDatabase is not registered." );
+
+                return Task.FromResult( Enumerable.Empty<AspectDatabaseAspectInstance>() );
+            }
+
+            return this._aspectDatabase.GetAspectInstancesAsync( projectKey, new( aspectClass ), cancellationToken );
         }
     }
 }

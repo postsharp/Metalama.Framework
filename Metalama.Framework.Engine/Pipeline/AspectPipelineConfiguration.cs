@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public IReadOnlyCollection<IAspectClass> AspectClasses => this.BoundAspectClasses;
 
+        public ulong AspectClassesHashCode => this.BoundAspectClasses.HashCode;
+
         internal ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         internal CompileTimeProject? CompileTimeProject { get; }
@@ -37,6 +39,8 @@ namespace Metalama.Framework.Engine.Pipeline
         private CompileTimeProjectRepository CompileTimeProjectRepository { get; }
 
         internal PipelineContributorSources? FabricsConfiguration { get; }
+
+        public ImmutableArray<string> FabricTypeNames { get; }
 
         public ProjectModel ProjectModel { get; }
 
@@ -52,6 +56,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompileTimeProject? compileTimeProject,
             CompileTimeProjectRepository compileTimeProjectRepository,
             PipelineContributorSources? fabricsConfiguration,
+            ImmutableArray<string> fabricTypeNames,
             ProjectModel projectModel,
             ProjectServiceProvider serviceProvider,
             CodeFixFilter codeFixFilter )
@@ -63,6 +68,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.CompileTimeProject = compileTimeProject;
             this.CompileTimeProjectRepository = compileTimeProjectRepository;
             this.FabricsConfiguration = fabricsConfiguration;
+            this.FabricTypeNames = fabricTypeNames;
             this.ProjectModel = projectModel;
             this.ServiceProvider = serviceProvider;
             this.CodeFixFilter = codeFixFilter;
@@ -77,6 +83,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.CompileTimeProject,
                 this.CompileTimeProjectRepository,
                 this.FabricsConfiguration,
+                this.FabricTypeNames,
                 this.ProjectModel,
                 serviceProvider,
                 this.CodeFixFilter );
@@ -92,6 +99,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.CompileTimeProject,
                     this.CompileTimeProjectRepository,
                     this.FabricsConfiguration,
+                    this.FabricTypeNames,
                     this.ProjectModel,
                     this.ServiceProvider,
                     codeFixFilter );
