@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -16,12 +15,9 @@ internal sealed partial class LinkerInjectionStep
     {
         // TODO: this class is no longer used concurrently, and is being added in transformation order.
 
-        private ConcurrentLinkedList<LinkerInsertedStatement>? _unorderedStatements;
         private ConcurrentLinkedList<IntroduceParameterTransformation>? _unorderedParameters;
         private ConcurrentLinkedList<IntroduceConstructorInitializerArgumentTransformation>? _unorderedArguments;
         private ConcurrentLinkedList<SetInitializerExpressionTransformation>? _unorderedExpressions;
-
-        public ImmutableArray<LinkerInsertedStatement> Statements { get; private set; }
 
         public ImmutableArray<IntroduceParameterTransformation> Parameters { get; private set; }
 
@@ -29,35 +25,8 @@ internal sealed partial class LinkerInjectionStep
 
         public ImmutableArray<SetInitializerExpressionTransformation> Expressions { get; private set; }
 
-        private static ImmutableArray<T> Sort<T>(
-            ConcurrentLinkedList<T>? input,
-            Func<T, ITransformation> getTransformation,
-            TransformationLinkerOrderComparer comparer )
-        {
-            if ( input == null || input.Count == 0 )
-            {
-                return ImmutableArray<T>.Empty;
-            }
-            else if ( input.Count == 1 )
-            {
-                return input.ToImmutableArray();
-            }
-            else
-            {
-                // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
-                // except within an aspect, where the order needs to be preserved.
-                return input.OrderBy( getTransformation, comparer )
-                    .GroupBy( x => getTransformation( x ).ParentAdvice.Aspect )
-                    .Reverse()
-                    .SelectMany( x => x )
-                    .ToImmutableArray();
-            }
-        }
-
         public void Sort( TransformationLinkerOrderComparer comparer )
         {
-            this.Statements = Sort( this._unorderedStatements, s => s.ParentTransformation, comparer );
-
             this.Arguments = this._unorderedArguments?.OrderBy( a => a.ParameterIndex ).ToImmutableArray()
                              ?? ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
 
@@ -66,9 +35,6 @@ internal sealed partial class LinkerInjectionStep
 
             this.Expressions = this._unorderedExpressions?.ToImmutableArray() ?? ImmutableArray<SetInitializerExpressionTransformation>.Empty;
         }
-
-        public void Add( LinkerInsertedStatement statement )
-            => LazyInitializer.EnsureInitialized( ref this._unorderedStatements ).Add( statement );
 
         public void Add( IntroduceParameterTransformation transformation )
             => LazyInitializer.EnsureInitialized( ref this._unorderedParameters ).Add( transformation );

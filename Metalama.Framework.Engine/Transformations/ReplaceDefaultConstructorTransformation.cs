@@ -83,12 +83,13 @@ internal sealed class ReplaceDefaultConstructorTransformation
                                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) )
                         .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     this.IntroducedDeclaration,
-                    InsertedStatementKind.WholeTypeInitialization )
+                    this.ParentAdvice.AspectLayerId,
+                    InsertedStatementKind.FinalEntry )
             };
         }
 
         return Array.Empty<InsertedStatement>();
     }
 
-    IMember IMemberLevelTransformation.TargetMember => this.IntroducedDeclaration;
+    IMember IInsertStatementTransformation.TargetMember => this.IntroducedDeclaration;
 }

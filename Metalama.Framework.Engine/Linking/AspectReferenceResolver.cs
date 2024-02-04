@@ -571,7 +571,14 @@ namespace Metalama.Framework.Engine.Linking
                             } invocationExpression:
 
                                 rootNode = invocationExpression;
-                                targetSymbol = semanticModel.GetSymbolInfo( objectCreation ).Symbol.AssertNotNull();
+
+                                // TODO: This is hacky - since don't see any introduced parameter shile expanding a template, target symbol of th
+                                // This is not a problem until we support invokers or 
+                                var overrideTarget =
+                                    this._injectionRegistry.GetOverrideTarget( containingSymbol )
+                                    ?? throw new AssertionFailedException( $"Could not resolve override target for '{containingSymbol}'" );
+
+                                targetSymbol = overrideTarget;
                                 targetSymbolSource = objectCreation;
 
                                 return;

@@ -1,16 +1,12 @@
 [Override]
-public class TargetClass : BaseClass
+public class TargetClass
 {
-  public TargetClass(int x, string s) : base(x)
+  public TargetClass()
   {
-    global::System.Console.WriteLine("This is the override.");
-    global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Param s = {s}");
-    Console.WriteLine($"This is the original constructor.");
-  }
-  public TargetClass() : this(42, "42")
-  {
-    global::System.Console.WriteLine("This is the override.");
+    global::System.Console.WriteLine("This is the initializer 1.");
+    global::System.Console.WriteLine("This is the initializer 2.");
+    global::System.Console.WriteLine("This is the override 2.");
+    global::System.Console.WriteLine("This is the override 1.");
     Console.WriteLine($"This is the original constructor.");
   }
 }

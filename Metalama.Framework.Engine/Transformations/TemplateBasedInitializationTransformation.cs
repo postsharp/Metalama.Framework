@@ -76,7 +76,9 @@ namespace Metalama.Framework.Engine.Transformations
                         .WithGeneratedCodeAnnotation(
                             metaApi.AspectInstance?.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                    this.ContextDeclaration )
+                    this.ContextDeclaration,
+                    this.ParentAdvice.AspectLayerId,
+                    InsertedStatementKind.FinalEntry )
             };
         }
 

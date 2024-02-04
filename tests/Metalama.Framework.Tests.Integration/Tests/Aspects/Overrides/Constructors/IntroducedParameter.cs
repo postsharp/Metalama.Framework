@@ -12,15 +12,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Int
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template), args: new { i = 1 });
-            builder.Advice.IntroduceParameter(builder.Target.Constructors.Single(), "introduced", TypeFactory.GetType(SpecialType.Int32), TypedConstant.Create(42));
-            builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template), args: new { i = 2 });
+            foreach (var constructor in builder.Target.Constructors)
+            {
+                builder.Advice.Override(constructor, nameof(Template), args: new { i = 1 });
+                builder.Advice.IntroduceParameter(constructor, "introduced", TypeFactory.GetType(SpecialType.Int32), TypedConstant.Create(42));
+                builder.Advice.Override(constructor, nameof(Template), args: new { i = 2 });
+            }
         }
 
         [Template]
         public void Template([CompileTime] int i)
         {
-            Console.WriteLine( "This is the override {i}." );
+            Console.WriteLine( $"This is the override {i}." );
 
             foreach (var param in meta.Target.Parameters)
             {
@@ -36,6 +39,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Int
     public class TargetClass
     {
         public TargetClass()
+        {
+            Console.WriteLine($"This is the original constructor.");
+        }
+        public TargetClass(int x)
         {
             Console.WriteLine($"This is the original constructor.");
         }
