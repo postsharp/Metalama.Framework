@@ -6,7 +6,7 @@ using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.IntroducedParameter
 {
-    // Tests single OverrideConstructor aspect with trivial template on methods with trivial bodies.
+    // Tests single OverrideConstructor advice with with IntroduceParameter in a single aspect.
 
     public class OverrideAttribute : TypeAspect
     {

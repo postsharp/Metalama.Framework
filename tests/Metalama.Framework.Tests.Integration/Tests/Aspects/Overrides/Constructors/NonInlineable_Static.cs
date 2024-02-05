@@ -6,7 +6,7 @@ using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.NonInlineable_Static
 {
-    // Tests that single static OverrideConstructor aspect with non-inlineable template produces a diagnostic error.
+    // Tests that single static OverrideConstructor advice with non-inlineable template produces a diagnostic error.
 
     public class OverrideAttribute : TypeAspect
     {

@@ -9,7 +9,7 @@ using Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Multipl
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Multiple
 {
-    // Tests single OverrideConstructor aspect with trivial template on methods with trivial bodies.
+    // Tests single OverrideConstructor advice used multiple times in multiple aspects.
 
     public class InnerOverrideAttribute : TypeAspect
     {

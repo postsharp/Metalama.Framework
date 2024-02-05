@@ -3,10 +3,13 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
+using Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.IntroducedParameter_Multiple;
+
+[assembly:AspectOrder(typeof(Override2Attribute), typeof(Override1Attribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.IntroducedParameter_Multiple
 {
-    // Tests single OverrideConstructor aspect with trivial template on methods with trivial bodies.
+    // Tests single OverrideConstructor advice with with IntroduceParameter in multiple aspects.
 
     public class Override1Attribute : TypeAspect
     {

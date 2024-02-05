@@ -438,16 +438,9 @@ internal sealed partial class LinkerInjectionStep
                     // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
                     var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
 
-                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
+                    var entryStatements = this._transformationCollection.GetInjectedInitializerStatements( injectedMember );
 
-
-/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
-Before:
-                    injectedNode = this.InjectStatementsIntoIntroducedMember( entryStatements, injectedNode );
-After:
-                    injectedNode = InjectStatementsIntoIntroducedMember( entryStatements, injectedNode );
-*/
-                    injectedNode = Rewriter.InjectStatementsIntoIntroducedMember( entryStatements, injectedNode );
+                    injectedNode = InjectStatementsIntoMemberDeclaration( entryStatements, injectedNode );
 
                     injectedNode = injectedNode
                         .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
@@ -511,7 +504,7 @@ After:
             }
         }
 
-        private static MemberDeclarationSyntax InjectStatementsIntoIntroducedMember( IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
+        private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration( IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
         {
             if (entryStatements.Count == 0)
             {
@@ -522,21 +515,23 @@ After:
             {
                 case ConstructorDeclarationSyntax { Body: { } body } constructor:
                     return constructor.WithBody( ReplaceBlock( entryStatements, body ) );
+
                 case ConstructorDeclarationSyntax { ExpressionBody: { } expressionBody } constructor:
                     return
                         constructor.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: new SyntaxNodePartialUpdateExtensions.Option<SyntaxToken>( default ),
+                            semicolonToken: default( SyntaxToken ),
                             body: ReplaceExpression( entryStatements, expressionBody.Expression ) );
 
                 // Static constructor overrides.
                 case MethodDeclarationSyntax { Body: { } body } method:
                     return method.WithBody( ReplaceBlock( entryStatements, body ) );
+
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     return
                         method.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: new SyntaxNodePartialUpdateExtensions.Option<SyntaxToken>( default ),
+                            semicolonToken: default( SyntaxToken ),
                             body: ReplaceExpression( entryStatements, expressionBody.Expression ) );
 
                 default:
@@ -547,16 +542,20 @@ After:
             {
                 return
                     Block(
-                        Block( List( entryStatements ) ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                        targetBlock.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                        Block( List( entryStatements ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                        targetBlock
+                            .WithSourceCodeAnnotationIfNotGenerated()
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
             }
 
             BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, ExpressionSyntax targetExpression )
             {
                 return
                     Block(
-                        Block( List( entryStatements ) ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                        ExpressionStatement( targetExpression ) );
+                        Block( List( entryStatements ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                        ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() ) );
             }
         }
 
@@ -784,60 +783,6 @@ After:
             }
         }
 
-        private static ConstructorDeclarationSyntax InsertStatements(
-            ConstructorDeclarationSyntax constructorDeclaration,
-            ImmutableArray<LinkerInsertedStatement> insertedStatements )
-        {
-            if ( insertedStatements.IsEmpty )
-            {
-                return constructorDeclaration;
-            }
-
-            // TODO: The order here is correct for initialization, i.e. first aspects (transformation order) are initialized first.
-            //       This would not be, however, correct for other uses, but we don't have those.
-
-            var beginningStatements = Order( insertedStatements )
-                .Select( s => s.Statement );
-
-            switch ( constructorDeclaration )
-            {
-                case { ExpressionBody: { } expressionBody }:
-                    return
-                        constructorDeclaration
-                            .PartialUpdate(
-                                expressionBody: null,
-                                semicolonToken: default(SyntaxToken),
-                                body: SyntaxFactoryEx.FormattedBlock(
-                                    beginningStatements
-                                        .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) ) );
-
-                case { Body: { } body }:
-                    return
-                        constructorDeclaration
-                            .WithBody(
-                                SyntaxFactoryEx.FormattedBlock(
-                                    beginningStatements
-                                        .Append(
-                                            body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                                                .WithSourceCodeAnnotationIfNotGenerated() ) ) );
-            }
-
-            return constructorDeclaration;
-
-            // TODO: This sort is intended only for beginning statements.
-            static IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
-                => statements
-                    .OrderBy( s => s.Kind )
-                    .ThenBy(
-                        s => s.ContextDeclaration switch
-                        {
-                            IMember => 0,
-                            INamedType => 1,
-                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
-                        } )
-                    .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
-        }
-
         private IReadOnlyList<FieldDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
         {
             var originalNode = node;
@@ -941,13 +886,7 @@ After:
             {
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( (IMember) this._compilation.GetDeclaration( symbol ) );
 
-/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
-Before:
-                node = (ConstructorDeclarationSyntax) this.InjectStatementsIntoIntroducedMember( entryStatements, node );
-After:
-                node = (ConstructorDeclarationSyntax) InjectStatementsIntoIntroducedMember( entryStatements, node );
-*/
-                node = (ConstructorDeclarationSyntax) Rewriter.InjectStatementsIntoIntroducedMember( entryStatements, node );
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( entryStatements, node );
             }
 
             // Rewrite attributes.

@@ -284,7 +284,7 @@ internal sealed partial class LinkerInjectionStep
             return this._introductionMemberLevelTransformations.GetOrAdd( declarationBuilder, static _ => new MemberLevelTransformations() );
         }
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( InjectedMember injectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedInitializerStatements( InjectedMember injectedMember )
         {
             if ( injectedMember.Declaration is not IMember member
                  || !this._insertedStatementsByTargetDeclaration.TryGetValue( member, out var insertedStatements ) )
@@ -295,13 +295,31 @@ internal sealed partial class LinkerInjectionStep
             var statements = new List<StatementSyntax>();
 
             if ( this._injectedMembersByTargetDeclaration.TryGetValue(member, out var injectedMembers ) 
-                && injectedMembers[^1] == injectedMember )
+                 && injectedMembers[^1] == injectedMember )
             {
-                // This is the last override, insert all Final statements.
-                statements.AddRange( insertedStatements.Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer ).Select( s => s.InsertedStatement.Statement ) );
+                var initializerStatements = 
+                    insertedStatements
+                    .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer )
+                    .Select( s => s.InsertedStatement );
+
+                var orderedInitializerStatements = Order( initializerStatements );
+
+                // This is the last override, insert all Initializer statements.
+                statements.AddRange( orderedInitializerStatements.Select( s => s.Statement ) );
             }
 
             return statements;
+
+            static IEnumerable<InsertedStatement> Order( IEnumerable<InsertedStatement> statements )
+                => statements
+                    .OrderBy(
+                        s => s.ContextDeclaration switch
+                        {
+                            IMember => 0,
+                            INamedType => 1,
+                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
+                        } )
+                    .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
         }
 
         internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMember sourceMember )
@@ -316,7 +334,7 @@ internal sealed partial class LinkerInjectionStep
             if ( !this._injectedMembersByTargetDeclaration.TryGetValue( sourceMember, out var injectedMembers )
                 || injectedMembers.Count == 0)
             {
-                // This is the last override, insert all Final statements.
+                // This is the last override, insert all Initializer statements.
                 statements.AddRange( insertedStatements.Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer ).Select( s => s.InsertedStatement.Statement ) );
             }
 
