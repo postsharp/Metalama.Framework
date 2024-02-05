@@ -124,6 +124,63 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
         }
 
         [Fact]
+        public void TestPropertyUserErrorFromDependency()
+        {
+            var log = new StringBuilder();
+
+            this.GetUserDiagnosticsFileContent(
+                dependentCode: """
+                               using System;
+                               using Metalama.Framework.Aspects;
+                               using Metalama.Framework.Code;
+                               using Metalama.Framework.Diagnostics;
+
+                               namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode;
+
+                               public class ReportErrorAttribute : MethodAspect
+                               {
+                                   private static DiagnosticDefinition<IMethod> UserError { get; } = new(
+                                           "MY001",
+                                           Severity.Error,
+                                           "User error description.");
+                               
+                                   public override void BuildAspect(IAspectBuilder<IMethod> builder)
+                                   {
+                                       builder.Diagnostics.Report( UserError.WithArguments( builder.Target ) );
+                                   }
+                               }
+                               """,
+                targetCode: """
+                            namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode;
+
+                            class TargetCode
+                            {
+                                [ReportError]
+                                public void Foo() { }
+                            }
+                            """,
+                aspectCode: "",
+                configurationFileChanged: ( configurationManager, file ) =>
+                {
+                    if ( file is UserDiagnosticsConfiguration { Diagnostics.IsEmpty: false } userDiagnostics )
+                    {
+                        log.AppendLine( string.Join( ", ", userDiagnostics.Diagnostics.SelectAsReadOnlyCollection( d => d.Value.Id ) ) );
+
+                        configurationManager.Set( new UserDiagnosticsConfiguration() );
+                    }
+                } );
+
+            // Verify that the diagnostic is reported for both compilations.
+            Assert.Equal(
+                """
+                MY001
+                MY001
+
+                """,
+                log.ToString() );
+        }
+
+        [Fact]
         public void TestDiagnosticSuppression()
         {
             var output =

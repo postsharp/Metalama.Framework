@@ -57,8 +57,8 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                         return f with
                         {
                             Diagnostics = f.Diagnostics.AddRange(
-                                missing.Diagnostics.SelectAsImmutableArray(
-                                    d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
+                                missing.Diagnostics.SelectAsReadOnlyCollection(
+                                    d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new( d ) ) ) ),
                             Suppressions = f.Suppressions.AddRange( missing.Suppressions )
                         };
                     } );
@@ -92,7 +92,13 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                 if ( !DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.ContainsKey( diagnostic.Id )
                      && !file.Diagnostics.ContainsKey( diagnostic.Id ) )
                 {
-                    missingDiagnostics.Add( diagnostic );
+                    // Duplicates here would cause an exception in RegisterDescriptors.
+                    // They can happen if the diagnostic is defined as a property, since it is reported from its backing field as well.
+                    // Also, the case where the same diagnostic ID is defined in multiple places shouldn't throw either.
+                    if ( !missingDiagnostics.Any( d => d.Id == diagnostic.Id ) )
+                    {
+                        missingDiagnostics.Add( diagnostic );
+                    }
                 }
             }
 
