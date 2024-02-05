@@ -572,8 +572,10 @@ namespace Metalama.Framework.Engine.Linking
 
                                 rootNode = invocationExpression;
 
-                                // TODO: This is hacky - since don't see any introduced parameter shile expanding a template, target symbol of th
-                                // This is not a problem until we support invokers or 
+                                // TODO: This is hacky - since we don't see any introduced parameter while expanding a template, the target symbol of the aspect
+                                //       reference is not valid (either unresolved or pointing to a wrong constructor).
+                                //       Using the override target (which is correctly resolved) is a temporary solution until we need to have constructor invokers.
+
                                 var overrideTarget =
                                     this._injectionRegistry.GetOverrideTarget( containingSymbol )
                                     ?? throw new AssertionFailedException( $"Could not resolve override target for '{containingSymbol}'" );
