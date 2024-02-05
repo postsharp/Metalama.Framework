@@ -42,7 +42,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                 this.ContextDeclaration,
                 this.ParentAdvice.AspectLayerId,
-                InsertedStatementKind.FinalEntry )
+                InsertedStatementKind.Initializer )
         };
     }
 

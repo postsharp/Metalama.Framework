@@ -440,7 +440,14 @@ internal sealed partial class LinkerInjectionStep
 
                     var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
 
+
+/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
+Before:
                     injectedNode = this.InjectStatementsIntoIntroducedMember( entryStatements, injectedNode );
+After:
+                    injectedNode = InjectStatementsIntoIntroducedMember( entryStatements, injectedNode );
+*/
+                    injectedNode = Rewriter.InjectStatementsIntoIntroducedMember( entryStatements, injectedNode );
 
                     injectedNode = injectedNode
                         .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
@@ -504,7 +511,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private MemberDeclarationSyntax InjectStatementsIntoIntroducedMember( IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
+        private static MemberDeclarationSyntax InjectStatementsIntoIntroducedMember( IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
         {
             if (entryStatements.Count == 0)
             {
@@ -933,7 +940,14 @@ internal sealed partial class LinkerInjectionStep
             if ( symbol != null )
             {
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( (IMember) this._compilation.GetDeclaration( symbol ) );
+
+/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
+Before:
                 node = (ConstructorDeclarationSyntax) this.InjectStatementsIntoIntroducedMember( entryStatements, node );
+After:
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoIntroducedMember( entryStatements, node );
+*/
+                node = (ConstructorDeclarationSyntax) Rewriter.InjectStatementsIntoIntroducedMember( entryStatements, node );
             }
 
             // Rewrite attributes.
