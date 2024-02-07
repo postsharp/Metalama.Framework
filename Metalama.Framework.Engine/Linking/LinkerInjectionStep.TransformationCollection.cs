@@ -129,6 +129,8 @@ internal sealed partial class LinkerInjectionStep
 
         public void AddInsertedStatements( IMember targetMember, IEnumerable<InsertedStatement> statements )
         {
+            // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
+            //       Assertions should be added first.
             var statementList = this._insertedStatementsByTargetDeclaration.GetOrAdd( targetMember, _ => new() );
 
             InjectedMember? lastInjectedMember = null;
@@ -137,6 +139,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 lock ( injectedMemberList )
                 {
+                    // Use the last injected member as the target body.
                     lastInjectedMember = injectedMemberList[^1];
                 }
             }
@@ -284,61 +287,62 @@ internal sealed partial class LinkerInjectionStep
             return this._introductionMemberLevelTransformations.GetOrAdd( declarationBuilder, static _ => new MemberLevelTransformations() );
         }
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedInitializerStatements( InjectedMember injectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( InjectedMember injectedMember )
         {
-            if ( injectedMember.Declaration is not IMember member
-                 || !this._insertedStatementsByTargetDeclaration.TryGetValue( member, out var insertedStatements ) )
+            return this.GetInjectedInitialStatements( (IMember) injectedMember.Declaration, injectedMember );
+        }
+
+        internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IMember sourceMember )
+        {
+            return this.GetInjectedInitialStatements( sourceMember, null );
+        }
+
+        private IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IMember targetMember, InjectedMember? targetInjectedMember )
+        {
+            // PERF: Iterating and reversing should be avoided.
+            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( targetMember, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
 
             var statements = new List<StatementSyntax>();
 
-            if ( this._injectedMembersByTargetDeclaration.TryGetValue(member, out var injectedMembers ) 
-                 && injectedMembers[^1] == injectedMember )
+            var hasInjectedMembers = this._injectedMembersByTargetDeclaration.TryGetValue( targetMember, out var injectedMembers );
+
+            if ( (!hasInjectedMembers && targetInjectedMember == null) || (hasInjectedMembers && targetInjectedMember == injectedMembers![^1]) )
             {
-                var initializerStatements = 
+                // Return initializer statements source members with no overrides or to the last override.
+                var initializerStatements =
                     insertedStatements
                     .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer )
                     .Select( s => s.InsertedStatement );
 
-                var orderedInitializerStatements = Order( initializerStatements );
+                var orderedInitializerStatements = OrderInitializerStatements( initializerStatements );
 
-                // This is the last override, insert all Initializer statements.
                 statements.AddRange( orderedInitializerStatements.Select( s => s.Statement ) );
             }
 
-            return statements;
+            // For non-initializer statements we have to select a range of statements that fits this injected member.
+            var currentEntryStatements =
+                insertedStatements
+                .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.CurrentEntry && s.LatestInjectedMember == targetInjectedMember )
+                .Select( s => s.InsertedStatement.Statement )
+                .Reverse();
 
-            static IEnumerable<InsertedStatement> Order( IEnumerable<InsertedStatement> statements )
-                => statements
-                    .OrderBy(
-                        s => s.ContextDeclaration switch
-                        {
-                            IMember => 0,
-                            INamedType => 1,
-                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
-                        } )
-                    .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
-        }
-
-        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMember sourceMember )
-        {
-            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( sourceMember, out var insertedStatements ) )
-            {
-                return ImmutableArray<StatementSyntax>.Empty;
-            }
-
-            var statements = new List<StatementSyntax>();
-
-            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( sourceMember, out var injectedMembers )
-                || injectedMembers.Count == 0)
-            {
-                // This is the last override, insert all Initializer statements.
-                statements.AddRange( insertedStatements.Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer ).Select( s => s.InsertedStatement.Statement ) );
-            }
+            statements.AddRange( currentEntryStatements );
 
             return statements;
         }
+
+        private static IEnumerable<InsertedStatement> OrderInitializerStatements( IEnumerable<InsertedStatement> statements )
+            => statements
+                .OrderBy(
+                    s => s.ContextDeclaration switch
+                    {
+                        IMember => 0,
+                        INamedType => 1,
+                        _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
+                    } )
+                .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
     }
 }

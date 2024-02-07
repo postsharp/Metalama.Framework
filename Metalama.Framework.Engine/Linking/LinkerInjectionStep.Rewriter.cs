@@ -438,7 +438,7 @@ internal sealed partial class LinkerInjectionStep
                     // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
                     var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
 
-                    var entryStatements = this._transformationCollection.GetInjectedInitializerStatements( injectedMember );
+                    var entryStatements = this._transformationCollection.GetInjectedInitialStatements( injectedMember );
 
                     injectedNode = InjectStatementsIntoMemberDeclaration( entryStatements, injectedNode );
 
@@ -884,7 +884,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( (IMember) this._compilation.GetDeclaration( symbol ) );
+                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( (IMember) this._compilation.GetDeclaration( symbol ) );
 
                 node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( entryStatements, node );
             }

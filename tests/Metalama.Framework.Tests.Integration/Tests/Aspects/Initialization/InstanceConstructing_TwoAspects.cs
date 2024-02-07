@@ -21,6 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
             Console.WriteLine( $"{meta.Target.Type.Name}: {meta.AspectInstance.AspectClass.ShortName} First" );
         }
     }
+
     public class SecondAspect : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)

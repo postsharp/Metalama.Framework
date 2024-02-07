@@ -434,7 +434,15 @@ public static partial class EligibilityExtensions
             member => $"{member} must not be abstract" );
 
     /// <summary>
-    /// Forbids the target constructor from being primary constructor of a class or a struct (C# 12.0).
+    /// Forbids the target constructor from being a primary constructor.
+    /// </summary>
+    public static void MustNotBePrimaryConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
+        => eligibilityBuilder.MustSatisfy(
+            member => member is not { IsPrimary: true },
+            member => $"{member} must not be a primary constructor" );
+
+    /// <summary>
+    /// Forbids the target constructor from being a primary constructor of a class or a struct (C# 12.0).
     /// </summary>
     public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
