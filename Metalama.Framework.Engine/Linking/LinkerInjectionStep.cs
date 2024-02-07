@@ -348,16 +348,12 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
                 {
-                    bool wasReplaced;
-
                     lock ( replacedIntroduceDeclarationTransformations )
                     {
-                        wasReplaced = replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation );
-                    }
-
-                    if ( wasReplaced )
-                    {
-                        return;
+                        if ( replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation ) )
+                        {
+                            return;
+                        }
                     }
                 }
 

@@ -188,7 +188,8 @@ namespace Metalama.Framework.Engine.Linking
 
                             for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
                             {
-                                if ( !StructuralSymbolComparer.Default.Equals( originalConstructor.Parameters[i].Type, translatedConstructor.Parameters[i].Type ) )
+                                if ( !StructuralSymbolComparer.Default.Equals( originalConstructor.Parameters[i].Type, translatedConstructor.Parameters[i].Type )
+                                     && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind)
                                 {
                                     matches = false;
                                     break;
