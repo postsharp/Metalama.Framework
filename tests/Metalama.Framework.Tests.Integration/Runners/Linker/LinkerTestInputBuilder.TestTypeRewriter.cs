@@ -488,7 +488,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                 introductionSyntax,
                                 new AspectLayerId( aspectName.AssertNotNull(), layerName ),
                                 InjectedMemberSemantic.Introduction,
-                                null )
+                                (IMemberBuilder) transformation )
                         } );
 
                 if ( memberNameOverride != null )
@@ -677,7 +677,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
-                    .Returns(
+                    .ReturnsLazily( () =>
                         new[]
                         {
                             new InjectedMember(
@@ -693,7 +693,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                     EventFieldDeclarationSyntax _ => InjectedMemberSemantic.Override,
                                     _ => throw new NotSupportedException()
                                 },
-                                null )
+                                (IMemberOrNamedType)((IOverrideDeclarationTransformation)transformation).OverriddenDeclaration )
                         } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentTypeStack.Peek().Type ) );

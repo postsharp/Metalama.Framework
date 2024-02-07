@@ -4,9 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Primary
 {
-    // Tests single OverrideConstructor advice with trivial template on constructors.
+    // Tests single OverrideConstructor advice with trivial template on primary constructors.
 
     public class OverrideAttribute : TypeAspect
     {
@@ -39,16 +39,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Sim
 
     // <target>
     [Override]
-    public class TargetClass : BaseClass
+    public class TargetClass(int x, int y) : BaseClass(x)
     {
-        public TargetClass(int x, string s) : base(x)
-        {
-            Console.WriteLine( $"This is the original constructor." );
-        }
-
-        public TargetClass() : this(42, "42")
-        {
-            Console.WriteLine($"This is the original constructor.");
-        }
+        private int z = y;
     }
 }

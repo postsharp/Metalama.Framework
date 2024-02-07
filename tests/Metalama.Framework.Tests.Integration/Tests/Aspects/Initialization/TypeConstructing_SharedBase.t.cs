@@ -7,7 +7,7 @@ public class TargetCode
   }
   static TargetCode()
   {
-    global::System.Console.WriteLine("TargetCode: Aspect1");
     global::System.Console.WriteLine("TargetCode: Aspect2");
+    global::System.Console.WriteLine("TargetCode: Aspect1");
   }
 }
