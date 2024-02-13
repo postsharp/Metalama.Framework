@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -26,7 +27,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
         public static async Task<IReadOnlyCollection<IntroducedSyntaxTree>> GenerateDesignTimeSyntaxTreesAsync(
             ProjectServiceProvider serviceProvider,
             PartialCompilation partialCompilation,
-            CompilationModel compilationModel,
+            CompilationModel initialCompilationModel,
+            CompilationModel finalCompilationModel,
             IReadOnlyCollection<ITransformation> transformations,
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
@@ -35,9 +37,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             var useNullability = partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
-            var lexicalScopeFactory = new LexicalScopeFactory( compilationModel );
-            var injectionHelperProvider = new LinkerInjectionHelperProvider( compilationModel, useNullability );
-            var injectionNameProvider = new LinkerInjectionNameProvider( compilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+            var lexicalScopeFactory = new LexicalScopeFactory( finalCompilationModel );
+            var injectionHelperProvider = new LinkerInjectionHelperProvider( finalCompilationModel, useNullability );
+            var injectionNameProvider = new LinkerInjectionNameProvider( finalCompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
@@ -45,8 +47,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 transformations
                     .Where(
                         t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
-                                                                                   && t.TargetDeclaration is INamedType )
-                    .GroupBy( t => (INamedType) t.TargetDeclaration );
+                                                                                   && t.TargetDeclaration is INamedType or IConstructor )
+                    .GroupBy( t =>
+                        t.TargetDeclaration switch
+                        {
+                            INamedType namedType => namedType,
+                            IConstructor constructor => constructor.DeclaringType,
+                            _ => throw new AssertionFailedException($"Unsupported: {t.TargetDeclaration.DeclarationKind}")
+                        } );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
@@ -72,7 +80,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = compilationModel.CompilationContext.GetSyntaxGenerationContext( true );
+                var introducedParameters = new Dictionary<IConstructor, List<IParameter>>( finalCompilationModel.Comparers.Default);
+                var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( true );
 
                 foreach ( var transformation in orderedTransformations )
                 {
@@ -89,12 +98,17 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            compilationModel );
+                            finalCompilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
                             .Select( m => m.Syntax );
 
                         members = members.AddRange( injectedMembers );
+                    }
+
+                    if (transformation is IntroduceParameterTransformation introduceParameterTransformation)
+                    {
+                        introducedParameters.GetOrAdd( (IConstructor) introduceParameterTransformation.TargetMember, _ => new() ).Add( introduceParameterTransformation.Parameter );
                     }
 
                     if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
@@ -103,6 +117,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax() );
                     }
                 }
+
+                members = members.AddRange( CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, introducedParameters ) );
 
                 // Create a class.
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
@@ -151,6 +167,88 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             }
 
             return additionalSyntaxTreeDictionary.Values.AsReadOnly();
+        }
+
+        private static IReadOnlyList<ConstructorDeclarationSyntax> CreateInjectedConstructors(
+            CompilationModel initialCompilationModel,
+            CompilationModel finalCompilationModel,
+            SyntaxGenerationContext syntaxGenerationContext,
+            Dictionary<IConstructor, List<IParameter>> introducedParameterMap )
+        {
+            var constructors = new List<ConstructorDeclarationSyntax>();
+
+            foreach ( var parameterKeyValuePair in introducedParameterMap )
+            {
+                var initialConstructor = parameterKeyValuePair.Key.Translate( initialCompilationModel );
+                var finalConstructor = parameterKeyValuePair.Key.Translate( finalCompilationModel );
+                var introducedParameters = parameterKeyValuePair.Value;
+
+                // TODO: Currently we don't see introduced parameters in builder code model.
+                var finalParameters =
+                    finalConstructor is BuiltConstructor
+                    ? finalConstructor.Parameters.ToImmutableArray().AddRange( introducedParameters )
+                    : finalConstructor.Parameters.ToImmutableArray();
+
+                var initialParameters = initialConstructor.Parameters.ToImmutableArray();
+
+                constructors.Add(
+                    ConstructorDeclaration(
+                        List<AttributeListSyntax>(),
+                        finalConstructor.GetSyntaxModifierList(),
+                        Identifier( finalConstructor.DeclaringType.Name ),
+                        syntaxGenerationContext.SyntaxGenerator.ParameterList( finalParameters, initialCompilationModel ),
+                        ConstructorInitializer(
+                            SyntaxKind.ThisConstructorInitializer,
+                            ArgumentList(
+                                SeparatedList( initialParameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ) ),
+                        Block() ) );
+
+                if ( initialConstructor.Parameters.Any(p => p.DefaultValue != null))
+                {
+                    // Target constructor has optional parameters.
+                    // If there is no matching constructor without optional parameters, we need to generate it to avoid ambiguous match.
+
+                    var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
+                    var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
+
+                    var similarConstructor =
+                        initialConstructor.DeclaringType.Constructors.OfExactSignature(
+                            nonOptionalParameters.SelectAsArray( p => p.Type ),
+                            nonOptionalParameters.SelectAsArray( p => p.RefKind ) );
+
+                    if ( similarConstructor == null )
+                    {
+                        constructors.Add(
+                            ConstructorDeclaration(
+                                List<AttributeListSyntax>(),
+                                initialConstructor.GetSyntaxModifierList(),
+                                Identifier( initialConstructor.DeclaringType.Name ),
+                                syntaxGenerationContext.SyntaxGenerator.ParameterList( nonOptionalParameters, initialCompilationModel ),
+                                ConstructorInitializer(
+                                    SyntaxKind.ThisConstructorInitializer,
+                                    ArgumentList(
+                                        SeparatedList( nonOptionalParameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) )
+                                        .AddRange( 
+                                            optionalParameters.SelectAsArray(
+                                                p => 
+                                                    Argument(
+                                                        NameColon(p.Name),
+                                                        p.RefKind switch
+                                                        { 
+                                                            Code.RefKind.None or Code.RefKind.In => default,
+                                                            Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token(SyntaxKind.RefKeyword),
+                                                            Code.RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                                                            _ => throw new AssertionFailedException($"Unsupported: {p.RefKind}"),
+                                                        },
+                                                        LiteralExpression(
+                                                            SyntaxKind.DefaultLiteralExpression,
+                                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) ),
+                                Block() ) );
+                    }
+                }
+            }
+
+            return constructors;
         }
 
         private static TypeDeclarationSyntax CreatePartialType( INamedType type, BaseListSyntax? baseList, SyntaxList<MemberDeclarationSyntax> members )

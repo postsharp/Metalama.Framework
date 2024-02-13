@@ -24,6 +24,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 case IMethodImpl method:
                     return GetMemberSyntaxModifierList( method, categories );
 
+                case IConstructorImpl constructor:
+                    return GetMemberSyntaxModifierList( constructor, categories );
+
                 case IPropertyImpl property:
                     return GetMemberSyntaxModifierList( property, categories );
 

@@ -248,12 +248,18 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
     public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation, bool removeDefaultValues = false )
         => SyntaxFactory.ParameterList( this.ParameterListParameters( method, compilation, removeDefaultValues ) );
 
+    public ParameterListSyntax ParameterList( IReadOnlyList<IParameter> parameters, CompilationModel compilation, bool removeDefaultValues = false )
+        => SyntaxFactory.ParameterList( this.ParameterListParameters( parameters, compilation, removeDefaultValues ) );
+
     public BracketedParameterListSyntax ParameterList( IIndexer indexer, CompilationModel compilation, bool removeDefaultValues = false )
         => BracketedParameterList( this.ParameterListParameters( indexer, compilation, removeDefaultValues ) );
 
     private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation, bool removeDefaultValues )
+        => this.ParameterListParameters(method.Parameters, compilation, removeDefaultValues );
+
+    private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IReadOnlyList<IParameter> parameters, CompilationModel compilation, bool removeDefaultValues )
         => SeparatedList(
-            method.Parameters.SelectAsReadOnlyList(
+            parameters.SelectAsReadOnlyList(
                 p => Parameter(
                     this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                     p.GetSyntaxModifierList(),
