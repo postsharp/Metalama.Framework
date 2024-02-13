@@ -46,13 +46,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\AppendParameter\ImplicitConstructor - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\DesignTime\IntroduceParameter - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\DesignTime\IntroduceParameter_ExistingOptional - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\DesignTime\IntroduceParameter_ImplicitParameterless - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
@@ -61,29 +54,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Aspects\AppendParameter\Multiple.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Multiple.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_ExistingOptionalNonOptional.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>IntroduceParameter_ExistingOptionalNonOptional.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_ExistingOptional.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>IntroduceParameter_ExistingOptional.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_ExplicitParameterless.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>IntroduceParameter_ExplicitParameterless.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_ImplicitParameterless.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>IntroduceParameter_ImplicitParameterless.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />
