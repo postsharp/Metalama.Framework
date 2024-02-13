@@ -14,7 +14,7 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
 {
     // We compare equality of two projects that have the same assembly name by hashing their preprocessor 
     // symbols. There are typically very few compilations of the same assembly name in a solution (one for each different platform)
-    // so the change of collision is negligible.
+    // so the chance of collision is negligible.
 
     // ReSharper disable once MemberCanBePrivate.Global (Json)
     public ulong PreprocessorSymbolHashCode { get; }
