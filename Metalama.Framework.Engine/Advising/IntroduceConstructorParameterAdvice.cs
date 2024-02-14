@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +18,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class AppendConstructorParameterAdvice : Advice
+internal sealed class IntroduceConstructorParameterAdvice : Advice
 {
     private readonly string _parameterName;
     private readonly IType _parameterType;
@@ -25,7 +26,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
     private readonly Func<IParameter, IConstructor, PullAction>? _pullActionFunc;
     private readonly TypedConstant _defaultValue;
 
-    public AppendConstructorParameterAdvice(
+    public IntroduceConstructorParameterAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
         IConstructor targetDeclaration,
@@ -55,6 +56,17 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;
+
+        var existingParameter = constructor.Parameters.FirstOrDefault( p => p.Name == this._parameterName );
+
+        if ( existingParameter != null )
+        {
+            return AdviceImplementationResult.Failed(
+                AdviceDiagnosticDescriptors.CannotIntroduceParameterAlreadyExists.CreateRoslynDiagnostic(
+                    constructor.GetDiagnosticLocation(),
+                    (this.Aspect.AspectClass.ShortName, this._parameterName, constructor, existingParameter, existingParameter),
+                    this ) );
+        }
 
         // Introducing parameters into static constructors is not allowed.
         if ( constructor.IsStatic )

@@ -372,7 +372,8 @@ namespace Metalama.Framework.Engine.Linking
 
                         // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
                         //       For introduction, this should be a compilation that INCLUDES the builder.
-                        //       But, if we pass the mutable compilation, it will get changed before we pass the 
+                        //       But, if we pass the mutable compilation, it will get changed before the template is expanded.
+                        //       The expanded template should not see declarations added after it runs.
 
                         // Call GetInjectedMembers
                         var injectionContext = new MemberInjectionContext(

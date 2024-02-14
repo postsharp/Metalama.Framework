@@ -754,9 +754,19 @@ internal sealed partial class LinkerInjectionStep
             }
             else
             {
-                return existingParameters.WithParameters(
-                    existingParameters.Parameters.AddRange(
-                        newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                if ( existingParameters.Parameters.Any( p => p.Modifiers.Any( m => m.IsKind( SyntaxKind.ParamsKeyword ) ) ) )
+                {
+                    return existingParameters.WithParameters(
+                        existingParameters.Parameters.InsertRange(
+                            existingParameters.Parameters.Count - 1,
+                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                }
+                else
+                {
+                    return existingParameters.WithParameters(
+                        existingParameters.Parameters.AddRange(
+                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                }
             }
         }
 

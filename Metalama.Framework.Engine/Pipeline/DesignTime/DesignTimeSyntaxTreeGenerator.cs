@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     }
                 }
 
-                members = members.AddRange( CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, introducedParameters ) );
+                members = members.AddRange( CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key, introducedParameters ) );
 
                 // Create a class.
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
@@ -176,26 +176,19 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext,
+            INamedType type,
             Dictionary<IConstructor, List<IParameter>> introducedParameterMap )
         {
             // TODO: This will not work properly with universal constructor builders.
+            var initialType = type.Translate( initialCompilationModel );
 
             var constructors = new List<ConstructorDeclarationSyntax>();
-            var signatures = new Dictionary<INamedType, HashSet<(ISymbol Type, Code.RefKind RefKind)[]>>( finalCompilationModel.Comparers.Default );
+            var existingSignatures = new HashSet<(ISymbol Type, Code.RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
 
             // Go through all types that will get generated constructors and index existing constructors.
-            var comparer = new ConstructorSignatureEqualityComparer();
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            foreach ( var type in introducedParameterMap.Keys.Select( c => c.DeclaringType ).Distinct( finalCompilationModel.Comparers.Default ) )
-#pragma warning restore CS0618 // Type or member is obsolete
+            foreach ( var constructor in initialType.Constructors )
             {
-                var initialType = type.Translate( initialCompilationModel );
-
-                foreach ( var constructor in initialType.Constructors )
-                {
-                    signatures.GetOrAdd( initialType, _ => new( comparer ) ).Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
-                }
+                existingSignatures.Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
             }
 
             foreach ( var parameterKeyValuePair in introducedParameterMap )
@@ -211,8 +204,6 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     : finalConstructor.Parameters.ToImmutableArray();
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
-
-                var existingSignatures = signatures[finalConstructor.DeclaringType];
 
                 if ( !existingSignatures.Add( finalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
                 {
@@ -244,8 +235,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     // Target constructor has optional parameters.
                     // If there is no constructor without optional parameters, we need to generate it to avoid ambiguous match.
 
-                    var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
-                    var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
+                    var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null).ToArray();
+                    var optionalParameters = initialParameters.Where( p => p.DefaultValue != null).ToArray();
 
                     if ( existingSignatures.Add( nonOptionalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
                     {
