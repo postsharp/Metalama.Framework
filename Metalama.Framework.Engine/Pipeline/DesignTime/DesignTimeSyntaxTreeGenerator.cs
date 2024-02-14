@@ -229,7 +229,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         ConstructorInitializer(
                             SyntaxKind.ThisConstructorInitializer,
                             ArgumentList(
-                                SeparatedList( initialParameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ) ),
+                                SeparatedList( 
+                                    initialParameters.SelectAsArray( 
+                                        p => 
+                                            Argument( 
+                                                p.DefaultValue != null
+                                                    ? NameColon( p.Name )
+                                                    : null, 
+                                                GetArgumentRefToken( p ), 
+                                                IdentifierName( p.Name ) ) ) ) ) ),
                         Block() ) );
 
                 if ( initialConstructor.Parameters.Any( p => p.DefaultValue != null ) )
@@ -251,19 +259,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                 ConstructorInitializer(
                                     SyntaxKind.ThisConstructorInitializer,
                                     ArgumentList(
-                                        SeparatedList( nonOptionalParameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) )
+                                        SeparatedList( 
+                                            nonOptionalParameters.SelectAsArray( p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
                                         .AddRange(
                                             optionalParameters.SelectAsArray(
                                                 p =>
                                                     Argument(
                                                         NameColon( p.Name ),
-                                                        p.RefKind switch
-                                                        {
-                                                            Code.RefKind.None or Code.RefKind.In => default,
-                                                            Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
-                                                            Code.RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                                            _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" ),
-                                                        },
+                                                        GetArgumentRefToken(p),
                                                         LiteralExpression(
                                                             SyntaxKind.DefaultLiteralExpression,
                                                             Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) ),
@@ -273,6 +276,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             }
 
             return constructors;
+
+            SyntaxToken GetArgumentRefToken( IParameter p ) =>
+                p.RefKind switch
+                {
+                    Code.RefKind.None or Code.RefKind.In => default,
+                    Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
+                    Code.RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                    _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" ),
+                };
         }
 
         private static TypeDeclarationSyntax CreatePartialType( INamedType type, BaseListSyntax? baseList, SyntaxList<MemberDeclarationSyntax> members )
