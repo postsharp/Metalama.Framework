@@ -61,6 +61,19 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
     public void Add( IParameterBuilder parameterBuilder )
     {
         this.EnsureComplete();
-        this.AddItem( parameterBuilder.ToTypedRef<IParameter>() );
+
+        var lastParam =
+            this.Count > 0
+            ? (Ref<IParameter>?)this[this.Count - 1]
+            : null;
+
+        if ( lastParam is { Target: IParameterSymbol { IsParams: true } } )
+        {
+            this.InsertItem( this.Count - 1, parameterBuilder.ToTypedRef<IParameter>() );
+        }
+        else
+        {
+            this.AddItem( parameterBuilder.ToTypedRef<IParameter>() );
+        }
     }
 }

@@ -88,7 +88,7 @@ internal sealed class AddAttributeAdvice : Advice
 
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicitlyDeclared: true } constructor )
             {
-                addTransformation( new ConstructorBuilder( constructor.DeclaringType, this ).ToTransformation() );
+                addTransformation( new ExplicitConstructorBuilder( constructor.DeclaringType, this ).ToTransformation() );
             }
 
             var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );

@@ -7,10 +7,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 /*
- * Tests that when a parameter is appended to a constructor, the design-time pipeline generates a new constructor the allows settings the parameters in code.
+ * Tests that when a parameter is appended to a constructor with ref/out parameters, the design-time pipeline generates 
+ * a constructor that uses existing constructor with correct "refness".
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_RefOut
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -27,13 +28,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParame
     [Introduction]
     internal partial class TestClass
     {
-        public TestClass(int param)
+        public TestClass(ref int param, int optParam = 42)
         {
+        }
+
+        public TestClass(out string param, int optParam = 42)
+        {
+            param = "42";
         }
 
         public void Foo()
         {
-            _ = new TestClass(42);
+            int f = 42;
+            _ = new TestClass(ref f);
+            _ = new TestClass(out var g);
         }
     }
 }

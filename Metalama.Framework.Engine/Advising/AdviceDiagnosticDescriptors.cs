@@ -252,5 +252,13 @@ namespace Metalama.Framework.Engine.Advising
                 "The aspect '{0}' cannot override the member '{1}' because it is not virtual.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, string Parameter, IDeclaration TargetDeclaration, IParameter ExistingParameter)>
+            CannotIntroduceParameterAlreadyExists = new(
+                "LAMA0530",
+                "Cannot parameter when a parameter with the same name already exists.",
+                "The aspect '{0}' cannot introduce parameter '{1}' to '{2}' because the target declaration already has a parameter '{3}'.",
+                _category,
+                Error );
     }
 }

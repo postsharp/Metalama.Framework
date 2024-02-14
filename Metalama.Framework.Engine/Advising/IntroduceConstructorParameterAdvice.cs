@@ -17,7 +17,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class AppendConstructorParameterAdvice : Advice
+internal sealed class IntroduceConstructorParameterAdvice : Advice
 {
     private readonly string _parameterName;
     private readonly IType _parameterType;
@@ -25,7 +25,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
     private readonly Func<IParameter, IConstructor, PullAction>? _pullActionFunc;
     private readonly TypedConstant _defaultValue;
 
-    public AppendConstructorParameterAdvice(
+    public IntroduceConstructorParameterAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
         IConstructor targetDeclaration,
@@ -56,6 +56,17 @@ internal sealed class AppendConstructorParameterAdvice : Advice
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;
 
+        var existingParameter = constructor.Parameters.FirstOrDefault( p => p.Name == this._parameterName );
+
+        if ( existingParameter != null )
+        {
+            return AdviceImplementationResult.Failed(
+                AdviceDiagnosticDescriptors.CannotIntroduceParameterAlreadyExists.CreateRoslynDiagnostic(
+                    constructor.GetDiagnosticLocation(),
+                    (this.Aspect.AspectClass.ShortName, this._parameterName, constructor, existingParameter, existingParameter),
+                    this ) );
+        }
+
         // Introducing parameters into static constructors is not allowed.
         if ( constructor.IsStatic )
         {
@@ -69,7 +80,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ConstructorBuilder( constructor.DeclaringType, this );
+            var constructorBuilder = new ExplicitConstructorBuilder( constructor.DeclaringType, this );
             initializedConstructor = constructorBuilder;
             addTransformation( constructorBuilder.ToTransformation() );
         }
@@ -139,7 +150,7 @@ internal sealed class AppendConstructorParameterAdvice : Advice
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ConstructorBuilder( chainedConstructor.DeclaringType, this );
+                    var derivedConstructorBuilder = new ExplicitConstructorBuilder( chainedConstructor.DeclaringType, this );
                     addTransformation( derivedConstructorBuilder.ToTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }

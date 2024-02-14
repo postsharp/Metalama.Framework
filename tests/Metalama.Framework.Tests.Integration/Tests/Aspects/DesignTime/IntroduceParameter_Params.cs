@@ -7,10 +7,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 /*
- * Tests that when a parameter is appended to a constructor, the design-time pipeline generates a new constructor the allows settings the parameters in code.
+ * Tests that when a parameter is appended to a constructor with params parameter, 
+ * the design-time pipeline generates a new constructor the allows settings the new parameters in code.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_Params
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -27,7 +28,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParame
     [Introduction]
     internal partial class TestClass
     {
-        public TestClass(int param)
+        public TestClass(int param1, params int[] param2)
         {
         }
 

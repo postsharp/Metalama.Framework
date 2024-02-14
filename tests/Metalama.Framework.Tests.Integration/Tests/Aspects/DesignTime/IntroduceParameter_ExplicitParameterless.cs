@@ -7,16 +7,16 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 /*
- * Tests that when a parameter is appended to a constructor, the design-time pipeline generates a new constructor the allows settings the parameters in code.
+ * Tests that when a parameter is appended to a explicit parameterless constructor, the design-time pipeline generates a correct constructor with optional parameters.
  */
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExplicitParameterless
 {
     public class IntroductionAttribute : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach(var constructor in builder.Target.Constructors)
+            foreach (var constructor in builder.Target.Constructors)
             {
                 builder.Advice.IntroduceParameter(constructor, "introduced1", typeof(int), TypedConstant.Create(42));
                 builder.Advice.IntroduceParameter(constructor, "introduced2", typeof(string), TypedConstant.Create("42"));
@@ -27,13 +27,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParame
     [Introduction]
     internal partial class TestClass
     {
-        public TestClass(int param)
+        public TestClass()
         {
         }
 
         public void Foo()
         {
-            _ = new TestClass(42);
+            _ = new TestClass();
         }
     }
 }
