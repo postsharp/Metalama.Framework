@@ -6,6 +6,10 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+/*
+ * Tests that when a parameter is appended to a implicit parameterless constructor, the design-time pipeline generates a correct constructor with optional parameters.
+ */
+
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ImplicitParameterless
 {
     public class IntroductionAttribute : TypeAspect

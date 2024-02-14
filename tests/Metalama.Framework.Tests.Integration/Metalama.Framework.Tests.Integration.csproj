@@ -46,6 +46,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\DesignTime\IntroduceParameter - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\DesignTime\IntroduceParameter_Conflicting - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
@@ -54,6 +59,21 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_RefOut.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>IntroduceParameter_RefOut.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_Ambiguous.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>IntroduceParameter_Ambiguous.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_Conflicting.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>IntroduceParameter_Conflicting.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

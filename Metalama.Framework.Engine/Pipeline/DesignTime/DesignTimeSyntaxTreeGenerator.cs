@@ -1,18 +1,22 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -175,7 +179,25 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             SyntaxGenerationContext syntaxGenerationContext,
             Dictionary<IConstructor, List<IParameter>> introducedParameterMap )
         {
+            // TODO: This will not work properly with universal constructor builders.
+
             var constructors = new List<ConstructorDeclarationSyntax>();
+            var signatures = new Dictionary<INamedType, HashSet<(ISymbol Type, Code.RefKind RefKind)[]>>( finalCompilationModel.Comparers.Default );
+
+            // Go through all types that will get generated constructors and index existing constructors.
+            var comparer = new ConstructorSignatureEqualityComparer();
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            foreach ( var type in introducedParameterMap.Keys.Select( c => c.DeclaringType ).Distinct( finalCompilationModel.Comparers.Default ) )
+#pragma warning restore CS0618 // Type or member is obsolete
+            {
+                var initialType = type.Translate( initialCompilationModel );
+
+                foreach ( var constructor in initialType.Constructors )
+                {
+                    signatures.GetOrAdd( initialType, _ => new( comparer ) ).Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
+                }
+            }
 
             foreach ( var parameterKeyValuePair in introducedParameterMap )
             {
@@ -191,6 +213,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 
+                var existingSignatures = signatures[finalConstructor.DeclaringType];
+
+                if ( !existingSignatures.Add( finalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                {
+                    continue;
+                }
+
                 constructors.Add(
                     ConstructorDeclaration(
                         List<AttributeListSyntax>(),
@@ -203,20 +232,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                 SeparatedList( initialParameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ) ),
                         Block() ) );
 
-                if ( initialConstructor.Parameters.Any(p => p.DefaultValue != null))
+                if ( initialConstructor.Parameters.Any( p => p.DefaultValue != null ) )
                 {
                     // Target constructor has optional parameters.
-                    // If there is no matching constructor without optional parameters, we need to generate it to avoid ambiguous match.
+                    // If there is no constructor without optional parameters, we need to generate it to avoid ambiguous match.
 
                     var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
                     var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
 
-                    var similarConstructor =
-                        initialConstructor.DeclaringType.Constructors.OfExactSignature(
-                            nonOptionalParameters.SelectAsArray( p => p.Type ),
-                            nonOptionalParameters.SelectAsArray( p => p.RefKind ) );
-
-                    if ( similarConstructor == null )
+                    if ( existingSignatures.Add( nonOptionalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(
@@ -228,17 +252,17 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                     SyntaxKind.ThisConstructorInitializer,
                                     ArgumentList(
                                         SeparatedList( nonOptionalParameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) )
-                                        .AddRange( 
+                                        .AddRange(
                                             optionalParameters.SelectAsArray(
-                                                p => 
+                                                p =>
                                                     Argument(
-                                                        NameColon(p.Name),
+                                                        NameColon( p.Name ),
                                                         p.RefKind switch
-                                                        { 
+                                                        {
                                                             Code.RefKind.None or Code.RefKind.In => default,
-                                                            Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token(SyntaxKind.RefKeyword),
+                                                            Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
                                                             Code.RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                                            _ => throw new AssertionFailedException($"Unsupported: {p.RefKind}"),
+                                                            _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" ),
                                                         },
                                                         LiteralExpression(
                                                             SyntaxKind.DefaultLiteralExpression,
@@ -395,6 +419,55 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             } ) ) ),
                 LineFeed,
                 LineFeed );
+        }
+
+        private class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, Code.RefKind RefKind)[]>
+        {
+            private readonly StructuralSymbolComparer _symbolComparer;
+
+            public ConstructorSignatureEqualityComparer()
+            {
+                this._symbolComparer = StructuralSymbolComparer.Default;
+            }
+
+            public bool Equals( (ISymbol Type, Code.RefKind RefKind)[]? x, (ISymbol Type, Code.RefKind RefKind)[]? y )
+            {
+                if ( x == null || y == null )
+                {
+                    return x == null && y == null;
+                }
+
+                if ( x.Length != y.Length )
+                {
+                    return false;
+                }
+
+                for ( var i = 0; i < x.Length; i++ )
+                {
+                    if ( x[i].RefKind != y[i].RefKind )
+                    {
+                        return false;
+                    }
+                    if ( !this._symbolComparer.Equals( x[i].Type, y[i].Type ) )
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public int GetHashCode( [DisallowNull] (ISymbol Type, Code.RefKind RefKind)[] obj )
+            {
+                var hashCode = obj.Length;
+
+                for ( var i = 0; i < obj.Length; i++ )
+                {
+                    hashCode = HashCode.Combine( hashCode, this._symbolComparer.GetHashCode( obj[i].Type ), (int) obj[i].RefKind );
+                }
+
+                return hashCode;
+            }
         }
     }
 }

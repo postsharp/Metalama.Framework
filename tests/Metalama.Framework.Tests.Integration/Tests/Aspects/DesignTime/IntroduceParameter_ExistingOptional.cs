@@ -6,6 +6,11 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+/*
+ * Tests that when a parameter is appended to a constructor with optional parameter, the design-time pipeline also generates 
+ * a "deambiguing" constructor without any optional parameter that prevents C# "ambiguous call" error cause by the constructor with new parameters.
+ */
+
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ExistingOptional
 {
     public class IntroductionAttribute : TypeAspect
