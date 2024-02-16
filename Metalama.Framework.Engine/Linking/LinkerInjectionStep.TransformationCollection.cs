@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -326,15 +327,17 @@ internal sealed partial class LinkerInjectionStep
             var currentEntryStatements =
                 insertedStatements
                 .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.CurrentEntry && s.LatestInjectedMember == targetInjectedMember )
-                .Select( s => s.InsertedStatement.Statement )
-                .Reverse();
+                .Select( s => s.InsertedStatement );
 
-            statements.AddRange( currentEntryStatements );
+            var orderedCurrentEntryStatements = OrderEntryStatements( currentEntryStatements );
+
+            statements.AddRange( orderedCurrentEntryStatements.Select( s => s.Statement ) );
 
             return statements;
         }
 
         private static IEnumerable<InsertedStatement> OrderInitializerStatements( IEnumerable<InsertedStatement> statements )
+            // Initializers of separate declarations should precede initializers of the type.
             => statements
                 .OrderBy(
                     s => s.ContextDeclaration switch
@@ -344,5 +347,14 @@ internal sealed partial class LinkerInjectionStep
                         _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
                     } )
                 .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
+
+        private static IEnumerable<InsertedStatement> OrderEntryStatements( IEnumerable<InsertedStatement> statements )
+        {
+            // Makes sure that the order is not changed when override is added in the middle of aspects that insert statements.
+            return statements
+                .OrderByDescending( s => s.Transformation.OrderWithinPipeline )
+                .ThenByDescending( s => s.Transformation.OrderWithinPipelineStepAndType )
+                .ThenBy( s => s.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
+        }
     }
 }

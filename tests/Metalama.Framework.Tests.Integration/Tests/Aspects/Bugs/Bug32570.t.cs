@@ -16,7 +16,6 @@ public class TargetType
   }
   public global::System.Int32 Bar(global::System.Int32 x)
   {
-    global::System.Console.WriteLine("Validate x");
     global::System.Int32 returnValue;
     global::System.Console.WriteLine("Overridden");
     global::System.Console.WriteLine("Introduced");

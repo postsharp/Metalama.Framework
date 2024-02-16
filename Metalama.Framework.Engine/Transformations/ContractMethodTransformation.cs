@@ -15,18 +15,30 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal sealed class ContractMethodTransformation : OverrideMethodBaseTransformation
+    internal sealed class ContractMethodTransformation : OverrideMethodBaseTransformation, IInsertStatementTransformation
     {
         public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
             base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+
+        public IMember TargetMember => this.OverriddenDeclaration;
+
+        public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+        {
+            var advice = (ContractAdvice) this.ParentAdvice;
+
+            if (!advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies ))
+            {
+                return Array.Empty<InsertedStatement>();
+            }
+
+            return inputFilterBodies.SelectAsArray( b => new InsertedStatement( b, this.OverriddenDeclaration, this, InsertedStatementKind.CurrentEntry ) );
+        }
 
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var advice = (ContractAdvice) this.ParentAdvice;
 
             // Execute the templates.
-
-            _ = advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies );
 
             var hasOutputFilters = advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) );
 
@@ -58,54 +70,52 @@ namespace Metalama.Framework.Engine.Transformations
                 _ => (false, TemplateKind.Default),
             };
 
-            List<StatementSyntax>? outputFilterBodies;
             string? returnValueName;
             string? contractInputName;
 
-            if ( hasOutputFilters )
+            if ( !hasOutputFilters )
             {
-                // Get output filter statements.
-                if ( !this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
-                {
-                    // We need to store the return value before running filters.
-                    returnValueName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
+                return Array.Empty<InjectedMember>();
+            }
 
-                    if ( iteratorInfo is { EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator or EnumerableKind.IAsyncEnumerator } )
-                    {
-                        // For enumerator and async enumerator, filters need to get the input in a different variable.
-                        contractInputName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "contractEnumerator" );
-                    }
-                    else
-                    {
-                        // Otherwise, the stored return value is used.
-                        contractInputName = returnValueName;
-                    }
+            // Get output filter statements.
+            if ( !this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
+            {
+                // We need to store the return value before running filters.
+                returnValueName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
+
+                if ( iteratorInfo is { EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator or EnumerableKind.IAsyncEnumerator } )
+                {
+                    // For enumerator and async enumerator, filters need to get the input in a different variable.
+                    contractInputName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "contractEnumerator" );
                 }
                 else
                 {
-                    // There are filters on ref/out parameters.
-                    if ( this.OverriddenDeclaration.IsAsync )
-                    {
-                        throw new AssertionFailedException( $"{this.OverriddenDeclaration} is async, does not return anything, but has output filters." );
-                    }
-
-                    returnValueName = null;
-                    contractInputName = null;
+                    // Otherwise, the stored return value is used.
+                    contractInputName = returnValueName;
+                }
+            }
+            else
+            {
+                // There are filters on ref/out parameters.
+                if ( this.OverriddenDeclaration.IsAsync )
+                {
+                    throw new AssertionFailedException( $"{this.OverriddenDeclaration} is async, does not return anything, but has output filters." );
                 }
 
-                _ = !advice.TryExecuteTemplates(
+                returnValueName = null;
+                contractInputName = null;
+            }
+
+            if (!advice.TryExecuteTemplates(
                     this.OverriddenDeclaration,
                     context,
                     ContractDirection.Output,
                     contractInputName,
                     null,
-                    out outputFilterBodies );
-            }
-            else
+                    out var outputFilterBodies ) )
             {
-                outputFilterBodies = null;
-                returnValueName = null;
-                contractInputName = null;
+                return Array.Empty<InjectedMember>();
             }
 
             // Get the proceed expression.
@@ -113,124 +123,84 @@ namespace Metalama.Framework.Engine.Transformations
 
             var statements = new List<StatementSyntax>();
 
-            if ( inputFilterBodies != null )
+            // There are output filters.
+            if ( returnValueName != null )
             {
-                // Add input filters.
-                statements.AddRange( inputFilterBodies );
-            }
+                // var returnValue = <proceed>;
+                statements.Add(
+                    LocalDeclarationStatement(
+                        VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
+                            .WithVariables(
+                                SingletonSeparatedList(
+                                    VariableDeclarator( Identifier( default, returnValueName, new( ElasticSpace ) ) )
+                                        .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
 
-            if ( outputFilterBodies is { Count: > 0 } )
-            {
-                // There are output filters.
-                if ( returnValueName != null )
+                if ( returnValueName != contractInputName )
                 {
-                    // var returnValue = <proceed>;
+                    // var contractInput = returnValue;
                     statements.Add(
                         LocalDeclarationStatement(
                             VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
                                 .WithVariables(
                                     SingletonSeparatedList(
-                                        VariableDeclarator( Identifier( default, returnValueName, new( ElasticSpace ) ) )
-                                            .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
-
-                    if ( returnValueName != contractInputName )
-                    {
-                        // var contractInput = returnValue;
-                        statements.Add(
-                            LocalDeclarationStatement(
-                                VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                                    .WithVariables(
-                                        SingletonSeparatedList(
-                                            VariableDeclarator( Identifier( default, contractInputName.AssertNotNull(), new( ElasticSpace ) ) )
-                                                .WithInitializer( EqualsValueClause( IdentifierName( returnValueName ) ) ) ) ) ) );
-                    }
-                }
-                else
-                {
-                    // <proceed>;
-                    statements.Add( ExpressionStatement( proceedExpression ) );
-                }
-
-                if ( returnValueName != contractInputName )
-                {
-                    // Enumerator variable need to be reset after every return value contract.
-                    var first = true;
-
-                    foreach ( var outputFilterBody in outputFilterBodies )
-                    {
-                        if ( !first )
-                        {
-                            statements.Add(
-                                ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        IdentifierName( contractInputName.AssertNotNull() ),
-                                        Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
-                                        IdentifierName( returnValueName.AssertNotNull() ) ) ) );
-                        }
-                        else
-                        {
-                            first = false;
-                        }
-
-                        statements.Add( outputFilterBody );
-                    }
-                }
-                else
-                {
-                    statements.AddRange( outputFilterBodies );
-                }
-
-                if ( returnValueName != null )
-                {
-                    if ( templateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
-                    {
-                        CreateEnumerableEpilogue( IdentifierName( returnValueName ) );
-                    }
-                    else if ( iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator
-                             or EnumerableKind.IAsyncEnumerator )
-                    {
-                        CreateEnumeratorEpilogue( IdentifierName( returnValueName ) );
-                    }
-                    else
-                    {
-                        statements.Add(
-                            ReturnStatement(
-                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                IdentifierName( returnValueName ),
-                                Token( SyntaxKind.SemicolonToken ) ) );
-                    }
+                                        VariableDeclarator( Identifier( default, contractInputName.AssertNotNull(), new( ElasticSpace ) ) )
+                                            .WithInitializer( EqualsValueClause( IdentifierName( returnValueName ) ) ) ) ) ) );
                 }
             }
             else
             {
-                if ( iteratorInfo.EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable or EnumerableKind.IAsyncEnumerable )
+                // <proceed>;
+                statements.Add( ExpressionStatement( proceedExpression ) );
+            }
+
+            if ( returnValueName != contractInputName )
+            {
+                // Enumerator variable need to be reset after every return value contract.
+                var first = true;
+
+                foreach ( var outputFilterBody in outputFilterBodies )
                 {
-                    statements.Add(
-                        ReturnStatement(
-                            Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                            proceedExpression,
-                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) );
+                    if ( !first )
+                    {
+                        statements.Add(
+                            ExpressionStatement(
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    IdentifierName( contractInputName.AssertNotNull() ),
+                                    Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
+                                    IdentifierName( returnValueName.AssertNotNull() ) ) ) );
+                    }
+                    else
+                    {
+                        first = false;
+                    }
+
+                    statements.Add( outputFilterBody );
                 }
-                else if ( iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator or EnumerableKind.IAsyncEnumerator )
+            }
+            else
+            {
+                statements.AddRange( outputFilterBodies );
+            }
+
+            if ( returnValueName != null )
+            {
+                if ( templateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
                 {
-                    statements.Add(
-                        ReturnStatement(
-                            Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                            proceedExpression,
-                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) );
+                    CreateEnumerableEpilogue( IdentifierName( returnValueName ) );
                 }
-                else if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
+                else if ( iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator
+                         or EnumerableKind.IAsyncEnumerator )
                 {
-                    statements.Add( ExpressionStatement( proceedExpression ) );
+                    CreateEnumeratorEpilogue( IdentifierName( returnValueName ) );
                 }
                 else
                 {
                     statements.Add(
                         ReturnStatement(
                             Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                            proceedExpression,
-                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) );
+                            IdentifierName( returnValueName ),
+                            Token( SyntaxKind.SemicolonToken ) ) );
                 }
             }
 

@@ -25,6 +25,10 @@ using System.Threading.Tasks;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using Newtonsoft.Json.Linq;
+using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
+
+
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
@@ -517,102 +521,104 @@ namespace Metalama.Framework.Engine.Linking
 
             switch ( insertStatementTransformation.TargetMember )
             {
-                case Constructor constructor:
+                case Constructor { IsPrimary: true } primaryConstructor:
                     {
-                        var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
+                        var primaryDeclaration = primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                         var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
                         var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
-                        if ( constructor.IsPrimary )
+                        // Convert each statement into a separate SetInitializerExpressionTransformation and index those.
+                        ProcessStatements( insertedStatements.Select( s => s.Statement ) );
+
+                        void ProcessStatements( IEnumerable<StatementSyntax> statements )
                         {
-                            // Convert each statement into a separate SetInitializerExpressionTransformation and index those.
-                            ProcessStatements( insertedStatements.Select( s => s.Statement ) );
-
-                            void ProcessStatements( IEnumerable<StatementSyntax> statements )
+                            foreach ( var statement in statements )
                             {
-                                foreach ( var statement in statements )
+                                if ( statement is BlockSyntax block )
                                 {
-                                    if ( statement is BlockSyntax block )
-                                    {
-                                        ProcessStatements( block.Statements );
+                                    ProcessStatements( block.Statements );
 
-                                        return;
-                                    }
-
-                                    if ( statement is not ExpressionStatementSyntax
-                                        {
-                                            Expression: AssignmentExpressionSyntax
-                                            {
-                                                RawKind: (int) SyntaxKind.SimpleAssignmentExpression,
-                                                Left: var leftExpression,
-                                                Right: var rightExpression
-                                            }
-                                        } )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (statement, constructor.DeclaringType) ) );
-
-                                        break;
-                                    }
-
-                                    var identifier = leftExpression switch
-                                    {
-                                        IdentifierNameSyntax identifierName => identifierName,
-                                        MemberAccessExpressionSyntax
-                                        {
-                                            RawKind: (int) SyntaxKind.SimpleMemberAccessExpression,
-                                            Expression: ThisExpressionSyntax,
-                                            Name: IdentifierNameSyntax thisIdentifierName
-                                        } => thisIdentifierName,
-                                        _ => null
-                                    };
-
-                                    if ( identifier == null )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
-
-                                        break;
-                                    }
-
-                                    var memberName = identifier.Identifier.ValueText;
-                                    var fieldOrProperty = constructor.DeclaringType.FieldsAndProperties.OfName( memberName ).Single();
-
-                                    if ( fieldOrProperty.RefKind != RefKind.None )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is a ref member.") ) );
-
-                                        break;
-                                    }
-
-                                    if ( fieldOrProperty.IsAutoPropertyOrField == false )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is not an auto-property.") ) );
-
-                                        break;
-                                    }
-
-                                    IndexMemberLevelTransformation(
-                                        input,
-                                        diagnostics,
-                                        lexicalScopeFactory,
-                                        new SetInitializerExpressionTransformation( insertStatementTransformation.ParentAdvice, fieldOrProperty, rightExpression ),
-                                        transformationCollection );
+                                    return;
                                 }
+
+                                if ( statement is not ExpressionStatementSyntax
+                                    {
+                                        Expression: AssignmentExpressionSyntax
+                                        {
+                                            RawKind: (int) SyntaxKind.SimpleAssignmentExpression,
+                                            Left: var leftExpression,
+                                            Right: var rightExpression
+                                        }
+                                    } )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
+                                    primaryConstructor.DiagnosticLocation, (statement, primaryConstructor.DeclaringType) ) );
+                                    break;
+                                }
+
+                                var identifier = leftExpression switch
+                                {
+                                    IdentifierNameSyntax identifierName => identifierName,
+                                    MemberAccessExpressionSyntax
+                                    {
+                                        RawKind: (int) SyntaxKind.SimpleMemberAccessExpression,
+                                        Expression: ThisExpressionSyntax,
+                                        Name: IdentifierNameSyntax thisIdentifierName
+                                    } => thisIdentifierName,
+                                    _ => null
+                                };
+
+                                if ( identifier == null )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                    primaryConstructor.DiagnosticLocation, (leftExpression, primaryConstructor.DeclaringType, "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
+                                    break;
+                                }
+
+                                var memberName = identifier.Identifier.ValueText;
+                                var fieldOrProperty = primaryConstructor.DeclaringType.FieldsAndProperties.OfName( memberName ).Single();
+
+                                if ( fieldOrProperty.RefKind != RefKind.None )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                    primaryConstructor.DiagnosticLocation, (leftExpression, primaryConstructor.DeclaringType, "It is a ref member.") ) );
+                                    break;
+                                }
+
+                                if ( fieldOrProperty.IsAutoPropertyOrField == false )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                    primaryConstructor.DiagnosticLocation, (leftExpression, primaryConstructor.DeclaringType, "It is not an auto-property.") ) );
+                                    break;
+                                }
+
+                                IndexMemberLevelTransformation(
+                                    input,
+                                    diagnostics,
+                                    lexicalScopeFactory,
+                                    new SetInitializerExpressionTransformation( insertStatementTransformation.ParentAdvice, fieldOrProperty, rightExpression ),
+                                    transformationCollection );
                             }
                         }
-                        else
-                        {
-                            transformationCollection.AddInsertedStatements( constructor, insertedStatements );
-                        }
+
+                        break;
+                    }
+
+                case MethodBase methodBase:
+                    {
+                        var primaryDeclaration = methodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( methodBase, insertedStatements );
 
                         break;
                     }
@@ -632,15 +638,25 @@ namespace Metalama.Framework.Engine.Linking
 
                         var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
-                        var builder =
-                            builtOrBuilderConstructor switch
-                            {
-                                IConstructorBuilder cb => cb,
-                                BuiltConstructor builtConstructor => builtConstructor.ConstructorBuilder,
-                                _ => throw new AssertionFailedException( $"Unsupported: {builtOrBuilderConstructor}" ),
-                            };
+                        transformationCollection.AddInsertedStatements( constructorBuilder, insertedStatements );
 
-                        transformationCollection.AddInsertedStatements( builder, insertedStatements );
+                        break;
+                    }
+
+                case IMethod { } builtOrBuilderMethod:
+                    {
+                        var methodBuilder = insertStatementTransformation.TargetMember as MethodBuilder
+                                                 ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetMember).Builder;
+
+                        var positionInSyntaxTree = GetSyntaxTreePosition( methodBuilder.ToInsertPosition() );
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                            methodBuilder.PrimarySyntaxTree.AssertNotNull(),
+                            positionInSyntaxTree );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( methodBuilder, insertedStatements );
 
                         break;
                     }

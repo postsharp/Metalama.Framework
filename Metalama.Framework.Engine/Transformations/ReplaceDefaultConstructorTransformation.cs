@@ -83,7 +83,7 @@ internal sealed class ReplaceDefaultConstructorTransformation
                                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) )
                         .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     this.IntroducedDeclaration,
-                    this.ParentAdvice.AspectLayerId,
+                    this,
                     InsertedStatementKind.Initializer )
             };
         }

@@ -1,7 +1,7 @@
 using Metalama.Framework.Aspects;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.BugX;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 
 // <target>
 public class TargetType

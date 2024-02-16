@@ -440,7 +440,7 @@ internal sealed partial class LinkerInjectionStep
 
                     var entryStatements = this._transformationCollection.GetInjectedInitialStatements( injectedMember );
 
-                    injectedNode = InjectStatementsIntoMemberDeclaration( entryStatements, injectedNode );
+                    injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, injectedNode );
 
                     injectedNode = injectedNode
                         .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
@@ -504,7 +504,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration( IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
+        private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration( IMemberOrNamedType contextDeclaration, IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
         {
             if (entryStatements.Count == 0)
             {
@@ -521,18 +521,37 @@ internal sealed partial class LinkerInjectionStep
                         constructor.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default( SyntaxToken ),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression ) );
+                            body: ReplaceExpression( entryStatements, expressionBody.Expression, true ) );
 
-                // Static constructor overrides.
+                // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
                     return method.WithBody( ReplaceBlock( entryStatements, body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
+                    var returnsVoid =
+                        contextDeclaration switch
+                        {
+                            IConstructor => true,
+                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( Code.SpecialType.Void ),
+                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( Code.SpecialType.Void ),
+                            _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
+                        };
+
                     return
                         method.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default( SyntaxToken ),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression ) );
+                            body: ReplaceExpression( entryStatements, expressionBody.Expression, returnsVoid ) );
+
+                case OperatorDeclarationSyntax { Body: { } body } @operator:
+                    return @operator.WithBody( ReplaceBlock( entryStatements, body ) );
+
+                case OperatorDeclarationSyntax { ExpressionBody: { } expressionBody } @operator:
+                    return
+                        @operator.PartialUpdate(
+                            expressionBody: null,
+                            semicolonToken: default( SyntaxToken ),
+                            body: ReplaceExpression( entryStatements, expressionBody.Expression, false ) );
 
                 default:
                     throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
@@ -549,13 +568,18 @@ internal sealed partial class LinkerInjectionStep
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
             }
 
-            BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, ExpressionSyntax targetExpression )
+            BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, ExpressionSyntax targetExpression, bool returnsVoid )
             {
                 return
                     Block(
                         Block( List( entryStatements ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                        ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() ) );
+                        returnsVoid
+                        ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
+                        : ReturnStatement(
+                            Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                            targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
+                            Token( SyntaxKind.SemicolonToken ) ) );
             }
         }
 
@@ -883,6 +907,8 @@ internal sealed partial class LinkerInjectionStep
         {
             var originalNode = node;
 
+            node = (ConstructorDeclarationSyntax) this.VisitConstructorDeclaration( node )!;
+
             if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
             {
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
@@ -894,22 +920,35 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( (IMember) this._compilation.GetDeclaration( symbol ) );
+                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
 
-                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( entryStatements, node );
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
             }
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
             node = this.ReplaceAttributes( node, rewrittenAttributes );
 
-            return (ConstructorDeclarationSyntax) this.VisitConstructorDeclaration( node )!;
+            return node;
         }
 
         private MethodDeclarationSyntax VisitMethodDeclarationCore( MethodDeclarationSyntax node )
         {
             var originalNode = node;
+
             node = (MethodDeclarationSyntax) this.VisitMethodDeclaration( node )!;
+
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+
+            if ( symbol != null )
+            {
+                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+
+                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+            }
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -921,7 +960,19 @@ internal sealed partial class LinkerInjectionStep
         private OperatorDeclarationSyntax VisitOperatorDeclarationCore( OperatorDeclarationSyntax node )
         {
             var originalNode = node;
+
             node = (OperatorDeclarationSyntax) this.VisitOperatorDeclaration( node )!;
+
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+
+            if ( symbol != null )
+            {
+                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+
+                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+            }
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );

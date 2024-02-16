@@ -12,25 +12,22 @@ public class Class1
       throw new global::System.ArgumentNullException();
     return new(Task.CompletedTask);
   }
-  public Task ExecuteAsync_Task([NotNull] Action action)
+  public async Task ExecuteAsync_Task([NotNull] Action action)
   {
     if (action == null)
       throw new global::System.ArgumentNullException();
-    return this.ExecuteAsync_Task_Source(action);
+    await Task.Yield();
   }
-  private async Task ExecuteAsync_Task_Source(Action action) => await Task.Yield();
-  public ValueTask ExecuteAsync_ValueTask([NotNull] Action action)
+  public async ValueTask ExecuteAsync_ValueTask([NotNull] Action action)
   {
     if (action == null)
       throw new global::System.ArgumentNullException();
-    return this.ExecuteAsync_ValueTask_Source(action);
+    await Task.Yield();
   }
-  private async ValueTask ExecuteAsync_ValueTask_Source(Action action) => await Task.Yield();
   public async void ExecuteAsync_Void([NotNull] Action action)
   {
     if (action == null)
       throw new global::System.ArgumentNullException();
-    await this.ExecuteAsync_Void_Source(action);
+    await Task.Yield();
   }
-  private async global::System.Threading.Tasks.ValueTask ExecuteAsync_Void_Source(Action action) => await Task.Yield();
 }

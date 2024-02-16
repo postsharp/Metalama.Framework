@@ -22,20 +22,20 @@ namespace Metalama.Framework.Engine.Transformations
         public IDeclaration ContextDeclaration { get; }
 
         /// <summary>
-        /// Gets the aspect layer of the inserted statement. Used for sorting and targeting the correct injected member/source body.
+        /// Gets the transformation that created this statement.
         /// </summary>
-        public AspectLayerId AspectLayerId { get; }
+        public ITransformation Transformation { get; }
 
         /// <summary>
         /// Gets the kind of the inserted statement, which decides where the statement is placed during injection step.
         /// </summary>
         public InsertedStatementKind Kind { get; }
 
-        public InsertedStatement( StatementSyntax newNode, IDeclaration contextDeclaration, AspectLayerId aspectLayerId, InsertedStatementKind kind )
+        public InsertedStatement( StatementSyntax newNode, IDeclaration contextDeclaration, ITransformation transformation, InsertedStatementKind kind )
         {
             this.Statement = newNode;
             this.ContextDeclaration = contextDeclaration;
-            this.AspectLayerId = aspectLayerId;
+            this.Transformation = transformation;
             this.Kind = kind;
         }
     }
