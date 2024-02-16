@@ -44,7 +44,7 @@ internal sealed class IntroduceParameterTransformation : BaseTransformation, IMe
 
     public override IDeclaration TargetDeclaration => this.TargetMember;
 
-    public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
+    public override TransformationObservability Observability => TransformationObservability.Always;
 
     public override TransformationKind TransformationKind => TransformationKind.IntroduceParameter;
 

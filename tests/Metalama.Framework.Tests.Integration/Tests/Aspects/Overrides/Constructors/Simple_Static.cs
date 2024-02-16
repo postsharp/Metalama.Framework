@@ -6,7 +6,7 @@ using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Simple_Static
 {
-    // Tests OverrideConstructor aspect with a trivial template on a static constructor.
+    // Tests OverrideConstructor advice with a trivial template on a static constructor.
 
     public class OverrideAttribute : TypeAspect
     {

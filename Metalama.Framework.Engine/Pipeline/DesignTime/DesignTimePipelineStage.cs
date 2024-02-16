@@ -62,6 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 this._serviceProvider,
                 input.LastCompilation,
+                pipelineStepsResult.FirstCompilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,
                 diagnosticSink,

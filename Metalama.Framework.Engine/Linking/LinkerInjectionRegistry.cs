@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -36,13 +37,17 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
         private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
 
+        // TODO: This is used only for mapping of constructors with introduced parameters (limitation of code model).
+        private readonly IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
+
         public LinkerInjectionRegistry(
             TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             IEnumerable<SyntaxTreeTransformation> transformations,
             IReadOnlyCollection<InjectedMember> injectedMembers,
-            IDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
+            IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
+            IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> introducedParametersByTargetDeclaration,
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
@@ -59,7 +64,8 @@ namespace Metalama.Framework.Engine.Linking
                 .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
                 .ToDictionary( m => m.OldTree.AssertNotNull(), m => m.NewTree.AssertNotNull() );
             this._injectedMembers = injectedMembers.ToList();
-            this._builderToTransformationMap = (IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>) builderToTransformationMap;
+            this._builderToTransformationMap = builderToTransformationMap;
+            this._introducedParametersByTargetDeclaration = introducedParametersByTargetDeclaration;
 
             this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
             this._overrideTargetToOverrideListMap = overrideMap = new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
@@ -147,7 +153,61 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( overrideTarget is Declaration originalDeclaration )
                 {
-                    return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(), true );
+                    if ( this._introducedParametersByTargetDeclaration.TryGetValue( overrideTarget, out var introducedParameters ) )
+                    {
+                        // Constructors with introduced parameters cannot be found through normal translation.
+                        // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
+                        Invariant.Assert( overrideTarget is IConstructor );
+
+                        var originalConstructor = (IMethodSymbol) overrideTarget.GetSymbol().AssertNotNull();
+
+                        Invariant.Assert( originalConstructor is { MethodKind: MethodKind.Constructor } );
+
+                        var originalDeclaringType = originalConstructor.ContainingType;
+
+                        var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType ).AssertNotNull();
+
+                        foreach ( var translatedMember in translatedDeclaringType.GetMembers() )
+                        {
+                            if ( translatedMember is not IMethodSymbol { MethodKind: MethodKind.Constructor } translatedConstructor )
+                            {
+                                continue;
+                            }
+
+                            if ( translatedConstructor.Parameters.Length != originalConstructor.Parameters.Length + introducedParameters.Count )
+                            {
+                                continue;
+                            }
+
+                            if ( symbolToInjectedMemberMap.ContainsKey(translatedMember) )
+                            {
+                                continue;
+                            }
+
+                            var matches = true;
+
+                            for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
+                            {
+                                if ( !StructuralSymbolComparer.Default.Equals( originalConstructor.Parameters[i].Type, translatedConstructor.Parameters[i].Type )
+                                     && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind)
+                                {
+                                    matches = false;
+                                    break;
+                                }
+                            }
+
+                            if (matches)
+                            {
+                                return translatedConstructor;
+                            }
+                        }
+
+                        throw new AssertionFailedException($"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters.");
+                    }
+                    else
+                    {
+                        return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(), true );
+                    }
                 }
                 else if ( overrideTarget is IDeclarationBuilder builder )
                 {

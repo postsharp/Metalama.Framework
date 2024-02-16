@@ -29,7 +29,11 @@ public static partial class EligibilityRuleFactory
         } );
 
     internal static IEligibilityRule<IDeclaration> OverrideConstructorAdviceRule { get; } = CreateRule<IDeclaration, IConstructor>(
-        builder => builder.DeclaringType().AddRule( _overrideDeclaringTypeRule ) );
+        builder =>
+        {
+            builder.MustNotBePrimaryConstructor();
+            builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
+        } );
 
     internal static IEligibilityRule<IDeclaration> OverrideMethodAdviceRule { get; } = CreateRule<IDeclaration, IMethod>(
         builder =>

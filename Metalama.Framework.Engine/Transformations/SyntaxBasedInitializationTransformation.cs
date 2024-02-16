@@ -40,7 +40,9 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
                 this._initializationStatement( context.SyntaxGenerationContext )
                     .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                this.ContextDeclaration )
+                this.ContextDeclaration,
+                this.ParentAdvice.AspectLayerId,
+                InsertedStatementKind.Initializer )
         };
     }
 

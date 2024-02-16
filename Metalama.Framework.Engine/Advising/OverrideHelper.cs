@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Advising
                 // If there is no 'this()' constructor, add one.
                 if ( type.Constructors.All( c => c.IsImplicitlyDeclared ) )
                 {
-                    var constructorBuilder = new ConstructorBuilder( type, advice );
+                    var constructorBuilder = new ExplicitConstructorBuilder( type, advice );
 
                     addTransformation( constructorBuilder.ToTransformation() );
                 }

@@ -1741,7 +1741,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( constructor, AdviceKind.IntroduceParameter );
 
-            var advice = new AppendConstructorParameterAdvice(
+            var advice = new IntroduceConstructorParameterAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 constructor,

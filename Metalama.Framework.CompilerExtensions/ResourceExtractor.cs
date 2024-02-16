@@ -123,19 +123,13 @@ namespace Metalama.Framework.CompilerExtensions
                 var assemblyQualifiedName = _embeddedAssemblies[assemblyName].Name.ToString();
                 log.AppendLine( $"Creating an instance of '{typeName}' from '{assemblyQualifiedName}'." );
 
-                var assembly = GetAssembly( assemblyQualifiedName, log );
+                var assembly = 
+                    GetAssembly( assemblyQualifiedName, log ) 
+                    ?? throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
 
-                if ( assembly == null )
-                {
-                    throw new ArgumentOutOfRangeException( nameof(assemblyName), $"Cannot load the assembly '{assemblyQualifiedName}'" );
-                }
-
-                var type = assembly.GetType( typeName, true );
-
-                if ( type == null )
-                {
-                    throw new ArgumentOutOfRangeException( nameof(typeName), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
-                }
+                var type = 
+                    assembly.GetType( typeName, true ) 
+                    ?? throw new ArgumentOutOfRangeException( nameof(typeName), $"Cannot load the type '{typeName}' in assembly '{assemblyQualifiedName}'" );
 
                 return Activator.CreateInstance( type );
             }

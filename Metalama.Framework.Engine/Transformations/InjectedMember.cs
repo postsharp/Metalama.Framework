@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -41,17 +40,16 @@ namespace Metalama.Framework.Engine.Transformations
 
         /// <summary>
         /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMember"/>.
-        /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
-        /// are not suppressed from the introduced member.
+        /// This is used to associate diagnostic suppressions to the introduced member and for inserted statements.
         /// </summary>
-        public IMemberOrNamedType? Declaration { get; }
+        public IMemberOrNamedType Declaration { get; }
 
         public InjectedMember(
             IInjectMemberTransformation injectMemberTransformation,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             InjectedMemberSemantic semantic,
-            MemberBuilder declaration ) : this(
+            IMemberBuilder declaration ) : this(
             injectMemberTransformation,
             declaration.DeclarationKind,
             syntax,
@@ -64,7 +62,7 @@ namespace Metalama.Framework.Engine.Transformations
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             InjectedMemberSemantic semantic,
-            IMemberOrNamedType? declaration ) : this(
+            IMemberOrNamedType declaration ) : this(
             overrideMemberTransformation,
             overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
             syntax,
@@ -88,7 +86,7 @@ namespace Metalama.Framework.Engine.Transformations
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             InjectedMemberSemantic semantic,
-            IMemberOrNamedType? declaration )
+            IMemberOrNamedType declaration )
         {
             this.Transformation = transformation;
             this.Syntax = syntax;

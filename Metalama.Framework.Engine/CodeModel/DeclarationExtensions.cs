@@ -561,8 +561,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
 
-        internal static T Translate<T>( this T declaration, ICompilation newCompilation )
+        internal static T Translate<T>( this T declaration, ICompilation newCompilation, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
             where T : IDeclaration
-            => declaration.Compilation == newCompilation ? declaration : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration ).AssertNotNull();
+            => declaration.Compilation == newCompilation ? declaration : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
     }
 }
