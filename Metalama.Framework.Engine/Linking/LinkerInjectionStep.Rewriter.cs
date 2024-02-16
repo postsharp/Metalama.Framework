@@ -438,9 +438,10 @@ internal sealed partial class LinkerInjectionStep
                     // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
                     var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
 
+                    // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
                     var entryStatements = this._transformationCollection.GetInjectedInitialStatements( injectedMember );
 
-                    injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, injectedNode );
+                    injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration.AssertNotNull(), entryStatements, injectedNode );
 
                     injectedNode = injectedNode
                         .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
