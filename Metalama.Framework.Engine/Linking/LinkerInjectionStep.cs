@@ -22,13 +22,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
-using Newtonsoft.Json.Linq;
-using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
-
-
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
