@@ -26,7 +26,8 @@ namespace Metalama.Framework.Engine.Transformations
         {
             var advice = (ContractAdvice) this.ParentAdvice;
 
-            if (!advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies ))
+            if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies ) 
+                || inputFilterBodies.Count == 0)
             {
                 return Array.Empty<InsertedStatement>();
             }
@@ -73,7 +74,9 @@ namespace Metalama.Framework.Engine.Transformations
             string? returnValueName;
             string? contractInputName;
 
-            if ( !hasOutputFilters )
+            var isPartialWithContracts = this.OverriddenDeclaration.IsPartial;
+
+            if ( !hasOutputFilters && !isPartialWithContracts )
             {
                 return Array.Empty<InjectedMember>();
             }
@@ -107,7 +110,7 @@ namespace Metalama.Framework.Engine.Transformations
                 contractInputName = null;
             }
 
-            if (!advice.TryExecuteTemplates(
+            if ( !advice.TryExecuteTemplates(
                     this.OverriddenDeclaration,
                     context,
                     ContractDirection.Output,
@@ -153,34 +156,37 @@ namespace Metalama.Framework.Engine.Transformations
                 statements.Add( ExpressionStatement( proceedExpression ) );
             }
 
-            if ( returnValueName != contractInputName )
+            if ( outputFilterBodies != null )
             {
-                // Enumerator variable need to be reset after every return value contract.
-                var first = true;
-
-                foreach ( var outputFilterBody in outputFilterBodies )
+                if ( returnValueName != contractInputName )
                 {
-                    if ( !first )
-                    {
-                        statements.Add(
-                            ExpressionStatement(
-                                AssignmentExpression(
-                                    SyntaxKind.SimpleAssignmentExpression,
-                                    IdentifierName( contractInputName.AssertNotNull() ),
-                                    Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
-                                    IdentifierName( returnValueName.AssertNotNull() ) ) ) );
-                    }
-                    else
-                    {
-                        first = false;
-                    }
+                    // Enumerator variable need to be reset after every return value contract.
+                    var first = true;
 
-                    statements.Add( outputFilterBody );
+                    foreach ( var outputFilterBody in outputFilterBodies )
+                    {
+                        if ( !first )
+                        {
+                            statements.Add(
+                                ExpressionStatement(
+                                    AssignmentExpression(
+                                        SyntaxKind.SimpleAssignmentExpression,
+                                        IdentifierName( contractInputName.AssertNotNull() ),
+                                        Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
+                                        IdentifierName( returnValueName.AssertNotNull() ) ) ) );
+                        }
+                        else
+                        {
+                            first = false;
+                        }
+
+                        statements.Add( outputFilterBody );
+                    }
                 }
-            }
-            else
-            {
-                statements.AddRange( outputFilterBodies );
+                else
+                {
+                    statements.AddRange( outputFilterBodies );
+                }
             }
 
             if ( returnValueName != null )

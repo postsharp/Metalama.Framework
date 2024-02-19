@@ -544,6 +544,9 @@ internal sealed partial class LinkerInjectionStep
                             semicolonToken: default( SyntaxToken ),
                             body: ReplaceExpression( entryStatements, expressionBody.Expression, returnsVoid ) );
 
+                case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
+                    throw new AssertionFailedException( $"Method without body not supported: {contextDeclaration}" );
+
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
                     return @operator.WithBody( ReplaceBlock( entryStatements, body ) );
 

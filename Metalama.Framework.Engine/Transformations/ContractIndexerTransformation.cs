@@ -47,7 +47,8 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                         ContractDirection.Input, 
                         null, 
                         accessor.MethodKind == MethodKind.PropertyGet ? RemoveInputContract : null,
-                        out inputStatements ) )
+                        out inputStatements )
+                    || inputStatements.Count == 0)
                 {
                     inputStatements = null;
                     proceedExpression = null;
@@ -76,7 +77,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                         ? context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" ) 
                         : null;
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Output, returnValueLocalName, null, out outputStatements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Output, returnValueLocalName, null, out outputStatements ) || outputStatements.Count == 0 )
                 {
                     inputStatements = null;
                     proceedExpression = null;

@@ -149,8 +149,23 @@ namespace Metalama.Framework.Engine.Linking
                             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
                         semicolonToken: default(SyntaxToken) );
 
+                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
+                {
+                    ret = RemoveAttributesForPartialImplementation( ret );
+                }
+
                 return ret;
             }
+        }
+
+        private static MethodDeclarationSyntax RemoveAttributesForPartialImplementation( MethodDeclarationSyntax declaration )
+        {
+            return
+                declaration.PartialUpdate(
+                    attributeLists: List<AttributeListSyntax>(),
+                    parameterList: declaration.ParameterList.PartialUpdate(
+                        parameters: SeparatedList(
+                            declaration.ParameterList.Parameters.SelectAsArray( p => p.PartialUpdate( attributeLists: List<AttributeListSyntax>() ) ) ) ) );
         }
 
         private MemberDeclarationSyntax GetOriginalImplMethod(
