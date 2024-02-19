@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.Utilities;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,6 +18,8 @@ namespace Metalama.Framework.Engine.Pipeline
         public BoundAspectClassCollection( IEnumerable<IBoundAspectClass> aspectClasses )
         {
             this.Dictionary = aspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
+            
+            this.HashCode = HashUtilities.HashStrings( this.Dictionary.Keys );
         }
 
         IEnumerator<IAspectClass> IEnumerable<IAspectClass>.GetEnumerator() => this.GetEnumerator();
@@ -26,5 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public int Count => this.Dictionary.Count;
+
+        public ulong HashCode { get; }
     }
 }

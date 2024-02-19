@@ -67,6 +67,10 @@ internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProc
 
     public event Action<ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>>? CompileTimeErrorsChanged;
 
+    public event Action<ProjectKey>? AspectClassesChanged;
+
+    public event Action<ProjectKey>? AspectInstancesChanged;
+
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(
         ProjectKey projectKey,
         string syntaxTreePath,

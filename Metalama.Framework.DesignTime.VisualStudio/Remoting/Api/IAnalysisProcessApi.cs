@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
+using Metalama.Framework.DesignTime.AspectExplorer;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.CodeLens;
 using Metalama.Framework.DesignTime.Contracts.CodeLens;
@@ -55,5 +56,19 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     Task<ICodeLensDetailsTable> GetCodeLensDetailsAsync(
         ProjectKey projectKey,
         SerializableDeclarationId symbolId,
+        [UsedImplicitly] CancellationToken cancellationToken = default );
+
+    /// <summary>
+    /// Gets the aspect classes in a project, represented using the string form of <see cref="SerializableTypeId"/>.
+    /// </summary>
+    Task<IEnumerable<string>> GetAspectClassesAsync( ProjectKey projectKey, [UsedImplicitly] CancellationToken cancellationToken = default );
+
+    /// <summary>
+    /// Gets the aspect instances for an aspect class in a project.
+    /// <paramref name="aspectClassId"/> is the string form of <see cref="SerializableTypeId"/>.
+    /// </summary>
+    Task<IEnumerable<AspectDatabaseAspectInstance>> GetAspectInstancesAsync(
+        ProjectKey projectKey,
+        string aspectClassId,
         [UsedImplicitly] CancellationToken cancellationToken = default );
 }

@@ -2,9 +2,14 @@
 
 using JetBrains.Annotations;
 using K4os.Hash.xxHash;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
+
+#if NETCOREAPP2_1_OR_GREATER
+using System;
+#endif
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -12,6 +17,19 @@ namespace Metalama.Framework.Engine.Utilities
     public static class HashUtilities
     {
         public static string HashString( string s ) => XXH64.DigestOf( Encoding.UTF8.GetBytes( s ) ).ToString( "x16", CultureInfo.InvariantCulture );
+
+        public static ulong HashStrings<T>( T strings )
+            where T : IEnumerable<string>
+        {
+            var hash = new XXH64();
+
+            foreach ( var s in strings )
+            {
+                hash.Update( s );
+            }
+
+            return hash.Digest();
+        }
 
         public static void Update( this XXH64 hash, string? value )
         {
@@ -21,7 +39,24 @@ namespace Metalama.Framework.Engine.Utilities
             }
             else
             {
+#if NETCOREAPP2_1_OR_GREATER
+                const int maxStackLimit = 1024;
+
+                if ( Encoding.UTF8.GetMaxByteCount( value.Length ) <= maxStackLimit )
+                {
+                    Span<byte> bytes = stackalloc byte[maxStackLimit];
+
+                    var encodedLength = Encoding.UTF8.GetBytes( value, bytes );
+
+                    hash.Update( bytes[..encodedLength] );
+                }
+                else
+                {
+                    hash.Update( Encoding.UTF8.GetBytes( value ) );
+                }
+#else
                 hash.Update( Encoding.UTF8.GetBytes( value ) );
+#endif
             }
         }
 

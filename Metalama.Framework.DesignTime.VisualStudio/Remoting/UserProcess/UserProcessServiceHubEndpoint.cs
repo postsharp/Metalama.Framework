@@ -66,6 +66,10 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
 
     public event Action<UserProcessEndpoint>? EndpointAdded;
 
+    public event Action<ProjectKey>? AspectClassesChanged;
+
+    public event Action<ProjectKey>? AspectInstancesChanged;
+
     protected override void ConfigureRpc( JsonRpc rpc )
     {
         var client = new ApiImplementation( this, rpc );
@@ -170,15 +174,14 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
         return await api.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
     }
 
-    private void OnIsEditingCompileTimeCodeChanged( bool value )
-    {
-        this.IsEditingCompileTimeCodeChanged?.Invoke( value );
-    }
+    private void OnIsEditingCompileTimeCodeChanged( bool value ) => this.IsEditingCompileTimeCodeChanged?.Invoke( value );
 
     private void OnCompileTimeErrorsChanged( ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> errors )
-    {
-        this.SetCompileTimeErrorsForProjects( errors );
-    }
+        => this.SetCompileTimeErrorsForProjects( errors );
+
+    private void OnAspectClassesChanged( ProjectKey projectKey ) => this.AspectClassesChanged?.Invoke( projectKey );
+
+    private void OnAspectInstancesChanged( ProjectKey projectKey ) => this.AspectInstancesChanged?.Invoke( projectKey );
 
     private Task NotifyCompilationResultChangeAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
     {

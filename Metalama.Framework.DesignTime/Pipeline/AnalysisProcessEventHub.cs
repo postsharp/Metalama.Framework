@@ -114,4 +114,12 @@ public sealed class AnalysisProcessEventHub : IGlobalService
     {
         this.CompileTimeErrorsChanged?.Invoke( projectKey, errors );
     }
+
+    public event Action<ProjectKey>? AspectClassesChanged;
+
+    internal void OnAspectClassesChanged( ProjectKey projectKey ) => this.AspectClassesChanged?.Invoke( projectKey );
+
+    public event Action<ProjectKey>? AspectInstancesChanged;
+
+    internal void OnAspectInstancesChanged( ProjectKey projectKey ) => this.AspectInstancesChanged?.Invoke( projectKey );
 }

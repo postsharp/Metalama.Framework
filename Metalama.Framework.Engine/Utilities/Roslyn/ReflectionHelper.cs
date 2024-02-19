@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
-    internal static class ReflectionHelper
+    public static class ReflectionHelper
     {
         // From internal System.TypeNameKind in System.Private.CoreLib
         private enum TypeNameKind
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         private static readonly WeakCache<INamespaceOrTypeSymbol, string> _reflectionFullNameCache = new();
         private static readonly WeakCache<INamespaceOrTypeSymbol, string> _reflectionToStringNameCache = new();
 
-        public static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName )
+        internal static AssemblyIdentity ToAssemblyIdentity( this AssemblyName assemblyName )
         {
             ImmutableArray<byte> publicKeyOrToken = default;
             var hasPublicKey = false;
@@ -55,12 +55,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 hasPublicKey );
         }
 
-        public static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
+        internal static INamedTypeSymbol GetTypeByMetadataNameSafe( this Compilation compilation, string name )
             => compilation.GetTypeByMetadataName( name ) ?? throw new ArgumentOutOfRangeException(
                 nameof(name),
                 $"Cannot find a type '{name}' in compilation '{compilation.AssemblyName}" );
 
-        public static IAssemblySymbol? GetAssembly( this Compilation compilation, AssemblyIdentity assemblyName )
+        internal static IAssemblySymbol? GetAssembly( this Compilation compilation, AssemblyIdentity assemblyName )
         {
             if ( compilation.Assembly.Identity.Equals( assemblyName ) )
             {
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
         }
 
-        public static IAssemblySymbol? GetAssembly( this Compilation compilation, string assemblyName )
+        internal static IAssemblySymbol? GetAssembly( this Compilation compilation, string assemblyName )
         {
             if ( compilation.Assembly.Name == assemblyName )
             {
@@ -87,18 +87,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <summary>
         /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
         /// </summary>
-        public static string GetReflectionName( this INamedTypeSymbol symbol ) => ((INamespaceOrTypeSymbol) symbol).GetReflectionName();
-
-        /// <summary>
-        /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
-        /// </summary>
-        public static string GetReflectionName( this INamespaceOrTypeSymbol s )
+        internal static string GetReflectionName( this INamespaceOrTypeSymbol s )
             => _reflectionNameCache.GetOrAdd( s, x => x.GetReflectionName( TypeNameKind.Name ) );
-
-        /// <summary>
-        /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
-        /// </summary>
-        public static string GetReflectionFullName( this INamedTypeSymbol s ) => ((INamespaceOrTypeSymbol) s).GetReflectionFullName();
 
         /// <summary>
         /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
@@ -109,7 +99,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <summary>
         /// Gets a string that would be equal to the returned value of <see cref="Type.ToString"/> method.
         /// </summary>
-        public static string GetReflectionToStringName( this INamespaceOrTypeSymbol s )
+        internal static string GetReflectionToStringName( this INamespaceOrTypeSymbol s )
             => _reflectionToStringNameCache.GetOrAdd( s, x => x.GetReflectionName( TypeNameKind.ToString ) );
 
         private static string GetReflectionName( this INamespaceOrTypeSymbol s, TypeNameKind kind )
@@ -240,7 +230,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <param name="typeName">The type name.</param>
         /// <param name="assemblyName">The assembly name.</param>
         /// <returns>A string of the form <c>TypeName, AssemblyName</c>, where commas in <paramref name="typeName"/> have been properly escaped.</returns>
-        public static string GetAssemblyQualifiedTypeName( string typeName, string assemblyName )
+        internal static string GetAssemblyQualifiedTypeName( string typeName, string assemblyName )
         {
             if ( typeName == null )
             {
@@ -258,7 +248,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// <summary>
         /// Returns any method (static, instance, any accessibility) from the given type or its base types.
         /// </summary>
-        public static MethodInfo? GetAnyMethod( this Type type, string name )
+        internal static MethodInfo? GetAnyMethod( this Type type, string name )
             => type.GetMethod( name, BindingFlags.Static | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic )
                ?? type.BaseType?.GetAnyMethod( name );
     }

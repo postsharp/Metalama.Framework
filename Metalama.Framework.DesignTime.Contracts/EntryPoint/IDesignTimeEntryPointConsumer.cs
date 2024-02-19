@@ -14,6 +14,10 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint;
 [Guid( "B6EAF9AE-2A70-4BBB-93A1-C877E2758462" )]
 public interface IDesignTimeEntryPointConsumer
 {
+    /// <summary>
+    /// Subscribes an observer, which will be invoked when a new <see cref="ICompilerServiceProvider"/> is registered.
+    /// The observer will also be immediately invoked for all currently registered providers.
+    /// </summary>
     IDisposable ObserveOnServiceProviderRegistered( ServiceProviderEventHandler observer );
 
     /// <summary>

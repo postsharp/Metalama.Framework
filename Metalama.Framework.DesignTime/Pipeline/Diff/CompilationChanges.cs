@@ -149,6 +149,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             var hasCompileTimeChange = !referenceChanges.PortableExecutableReferenceChanges.IsEmpty
                                        || referenceChanges.ProjectReferenceChanges.Any( c => c.Value.HasCompileTimeCodeChange );
 
+            // Change in the assembly identity (and assembly version in particular) should be considered a compile-time change.
+            // This is important especially because on start, VS first creates compilations without assembly versions (0.0.0.0)
+            // and only afterwards creates compilations with correct versions.
+            hasCompileTimeChange = hasCompileTimeChange || oldProjectVersion.Compilation.Assembly.Identity != newCompilation.Assembly.Identity;
+
             // Process new trees.
             var lastTrees = oldProjectVersion.SyntaxTrees;
 

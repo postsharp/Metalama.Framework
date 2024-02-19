@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
@@ -9,9 +10,11 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Fabrics;
 using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -66,6 +69,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> Annotations { get; } = _emptyAnnotations;
 
+        public ulong AspectInstancesHashCode { get; }
+
         private byte[]? _serializedTransitiveAspectManifest;
 
         private AspectPipelineResult(
@@ -76,7 +81,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
             DesignTimeReferenceValidatorCollection referenceValidators,
             ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions> inheritableOptions,
-            ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> annotations )
+            ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> annotations,
+            ulong aspectInstancesHashCode )
         {
             this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
@@ -86,6 +92,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.ReferenceValidators = referenceValidators;
             this.Configuration = configuration;
             this.Annotations = annotations;
+            this.AspectInstancesHashCode = aspectInstancesHashCode;
 
             Logger.DesignTime.Trace?.Log(
                 $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
@@ -123,6 +130,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             DesignTimeReferenceValidatorCollection.Builder? validatorsBuilder = null;
             ImmutableDictionary<HierarchicalOptionsKey, IHierarchicalOptions>.Builder? inheritableOptionsBuilder = null;
             ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder? annotationsBuilder = null;
+            var aspectInstancesHashCode = this.AspectInstancesHashCode;
 
             foreach ( var result in resultsByTree )
             {
@@ -193,6 +201,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                             annotationsBuilder.Remove( annotation.Key, annotation );
                         }
                     }
+
+                    aspectInstancesHashCode ^= oldSyntaxTreeResult.AspectInstancesHashCode;
                 }
 
                 // Index the new tree.
@@ -256,6 +266,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
                 }
 
+                aspectInstancesHashCode ^= result.AspectInstancesHashCode;
+
                 syntaxTreeResultBuilder[filePath] = result;
             }
 
@@ -277,17 +289,17 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 inheritableAspects,
                 validators,
                 inheritableOptions,
-                annotations );
+                annotations,
+                aspectInstancesHashCode );
         }
 
         /// <summary>
         /// Splits a <see cref="DesignTimePipelineExecutionResult"/>, which includes data for several syntax trees, into
         /// a list of <see cref="SyntaxTreePipelineResult"/> which each have information related to a single syntax tree.
         /// </summary>
-        private static IEnumerable<SyntaxTreePipelineResult>
-            SplitResultsByTree(
-                PartialCompilation compilation,
-                DesignTimePipelineExecutionResult pipelineResults )
+        private static IEnumerable<SyntaxTreePipelineResult> SplitResultsByTree(
+            PartialCompilation compilation,
+            DesignTimePipelineExecutionResult pipelineResults )
         {
             SyntaxTreePipelineResult.Builder? emptySyntaxTreeResult = null;
 
@@ -360,10 +372,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.Introductions.Add( introduction );
             }
 
+            var compilationContext = compilation.CompilationContext;
+
             // Split inheritable aspects by syntax tree.
             foreach ( var inheritableAspectInstance in pipelineResults.InheritableAspects )
             {
-                var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.CompilationContext );
+                var syntaxTree = inheritableAspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilationContext );
 
                 if ( syntaxTree == null )
                 {
@@ -421,23 +435,39 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // Split aspect instances by syntax tree.
             foreach ( var aspectInstance in pipelineResults.AspectInstances )
             {
-                var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
+                var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilationContext );
 
-                var syntaxTree = aspectInstance.TargetDeclaration.GetPrimarySyntaxTree( compilation.CompilationContext );
-
-                if ( syntaxTree == null )
+                // No continue here to handle even aspect instances without a syntax tree.
+                if ( syntaxTree == null && !resultBuilders.ContainsKey( string.Empty ) )
                 {
-                    // Skipping because we don't have a syntax tree.
-                    continue;
+                    resultBuilders.Add( string.Empty, new( null ) );
                 }
 
-                var filePath = syntaxTree.FilePath;
+                var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
+                SerializableDeclarationId? predecessorDeclarationId = null;
+
+                if ( aspectInstance.Predecessors is [var predecessor, ..] )
+                {
+                    var reflectionMapper = ((ICompilationServices) compilationContext).ReflectionMapper;
+
+                    var predecessorDeclarationSymbol = predecessor.Instance switch
+                    {
+                        IAspectInstance predecessorAspect => reflectionMapper.GetTypeSymbol( predecessorAspect.Aspect.GetType() ),
+                        IFabricInstance fabricInstance => reflectionMapper.GetTypeSymbol( fabricInstance.Fabric.GetType() ),
+                        _ => null
+                    };
+
+                    predecessorDeclarationId = predecessorDeclarationSymbol?.GetSerializableId();
+                }
+
+                var filePath = syntaxTree?.FilePath ?? string.Empty;
                 var builder = resultBuilders[filePath];
                 builder.AspectInstances ??= ImmutableArray.CreateBuilder<DesignTimeAspectInstance>();
 
                 builder.AspectInstances.Add(
-                    new DesignTimeAspectInstance(
+                    new(
                         targetDeclarationId,
+                        predecessorDeclarationId,
                         aspectInstance.AspectClass.FullName ) );
             }
 
@@ -458,7 +488,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
                 builder.Transformations.Add(
-                    new DesignTimeTransformation( transformation.TargetDeclaration.ToSerializableId(), transformation.AspectClass.FullName ) );
+                    new( transformation.TargetDeclaration.ToSerializableId(), transformation.AspectClass.FullName, MetalamaStringFormatter.Format( transformation.ToDisplayString() ) ) );
             }
 
             // Split options by syntax tree.

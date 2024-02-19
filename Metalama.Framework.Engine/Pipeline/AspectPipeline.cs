@@ -288,7 +288,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Execute fabrics.
             var fabricManager = new FabricManager( allAspectClasses, projectServiceProviderWithProject, compileTimeProject );
-            var fabricsConfiguration = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
+            var (fabricsConfiguration, fabricTypes) = fabricManager.ExecuteFabrics( compileTimeProject, compilationModel, projectModel, diagnosticAdder );
 
             // Freeze the project model to prevent any further modification of configuration.
             projectModel.Freeze();
@@ -313,6 +313,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 compileTimeProject,
                 compileTimeProjectRepository,
                 fabricsConfiguration,
+                fabricTypes,
                 projectModel,
                 projectServiceProviderWithProject.WithService( eligibilityService ),
                 this.CodeFixFilter );

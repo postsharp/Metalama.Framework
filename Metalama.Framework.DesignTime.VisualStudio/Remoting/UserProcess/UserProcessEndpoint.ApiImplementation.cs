@@ -41,14 +41,13 @@ internal sealed partial class UserProcessEndpoint
             }
         }
 
-        public void OnIsEditingCompileTimeCodeChanged( bool isEditing )
-        {
-            this._parent.IsEditingCompileTimeCodeChanged?.Invoke( isEditing );
-        }
+        public void OnIsEditingCompileTimeCodeChanged( bool isEditing ) => this._parent.IsEditingCompileTimeCodeChanged?.Invoke( isEditing );
 
         public void OnCompileTimeErrorsChanged( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> diagnostics )
-        {
-            this._parent.SetCompileTimeErrors( projectKey, diagnostics );
-        }
+            => this._parent.SetCompileTimeErrors( projectKey, diagnostics );
+
+        public void OnAspectClassesChanged( ProjectKey projectKey ) => this._parent.AspectClassesChanged?.Invoke( projectKey );
+
+        public void OnAspectInstancesChanged( ProjectKey projectKey ) => this._parent.AspectInstancesChanged?.Invoke( projectKey );
     }
 }

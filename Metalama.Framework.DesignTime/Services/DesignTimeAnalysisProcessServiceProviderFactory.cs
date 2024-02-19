@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
+using Metalama.Framework.DesignTime.AspectExplorer;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
 using Metalama.Framework.DesignTime.Pipeline;
@@ -57,7 +58,8 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
         // Add services that depend on the pipeline factory.
         serviceProvider = serviceProvider.WithServices(
             new CodeActionExecutionService( serviceProvider ),
-            new CodeRefactoringDiscoveryService( serviceProvider ) );
+            new CodeRefactoringDiscoveryService( serviceProvider ),
+            new AspectDatabase( serviceProvider ) );
 
         return serviceProvider;
     }

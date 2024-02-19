@@ -6,9 +6,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-internal static class SerializableTypeIdGenerator
+public static class SerializableTypeIdGenerator
 {
-    internal static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol )
+    public static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol )
     {
         var id = OurSyntaxGenerator.CompileTime.TypeOfExpression( symbol, keepNullableAnnotations: true ).ToString();
 

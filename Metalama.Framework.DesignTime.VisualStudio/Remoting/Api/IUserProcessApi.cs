@@ -17,4 +17,8 @@ internal interface IUserProcessApi : IProjectHandlerCallbackApi
     void OnIsEditingCompileTimeCodeChanged( bool isEditing );
 
     void OnCompileTimeErrorsChanged( ProjectKey projectKey, IReadOnlyCollection<DiagnosticData> errors );
+
+    void OnAspectClassesChanged( ProjectKey projectKey );
+
+    void OnAspectInstancesChanged( ProjectKey projectKey );
 }

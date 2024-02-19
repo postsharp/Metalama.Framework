@@ -30,6 +30,9 @@ internal sealed partial class UserProcessServiceHubEndpoint
             endpoint.IsEditingCompileTimeCodeChanged += this._parent.OnIsEditingCompileTimeCodeChanged;
             endpoint.CompileTimeErrorsChanged += this._parent.OnCompileTimeErrorsChanged;
 
+            endpoint.AspectClassesChanged += this._parent.OnAspectClassesChanged;
+            endpoint.AspectInstancesChanged += this._parent.OnAspectInstancesChanged;
+
             // Connect to the analysis process.
             await endpoint.ConnectAsync( cancellationToken );
 
