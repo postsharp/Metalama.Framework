@@ -118,7 +118,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         var backstageServices = ServiceProvider<IBackstageService>.Empty
             .WithService( this )
             .WithService( platformInfo )
-            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() );
+            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IFileSystem>() )
+            .WithService( BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<BackstageBackgroundTasksService>() );
 
         var licenseConsumptionService = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
