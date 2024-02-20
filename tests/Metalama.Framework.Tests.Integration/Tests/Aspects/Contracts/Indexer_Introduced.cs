@@ -17,18 +17,37 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var property in builder.Target.Properties)
+            foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.AddContract( property, nameof(Filter), ContractDirection.Both );
+                builder.Advice.AddContract( indexer, nameof(Filter), ContractDirection.Both );
+
+                foreach (var param in indexer.Parameters)
+                {
+                    builder.Advice.AddContract(param, nameof(Filter));
+                }
             }
 
-            var introducedField = builder.Advice.IntroduceProperty( builder.Target, nameof(IntroducedProperty) ).Declaration;
+            var introducedIndexer = builder.Advice.IntroduceIndexer(builder.Target, TypeFactory.GetType(typeof(string)).ToNullableType(), nameof(GetTemplate), nameof(SetTemplate)).Declaration;
 
-            builder.Advice.AddContract( introducedField, nameof(Filter), ContractDirection.Both );
+            builder.Advice.AddContract( introducedIndexer, nameof(Filter), ContractDirection.Both );
+
+            foreach (var param in introducedIndexer.Parameters)
+            {
+                builder.Advice.AddContract(param, nameof(Filter));
+            }
         }
 
         [Template]
-        public string? IntroducedProperty { get; set; }
+        public void SetTemplate()
+        {
+            meta.Proceed();
+        }
+
+        [Template]
+        public string? GetTemplate()
+        {
+            return meta.Proceed();
+        }
 
         [Template]
         public void Filter( dynamic? value )
@@ -44,6 +63,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
     [IntroduceAndFilter]
     internal class Target
     {
-        public string? ExistingProperty { get; set; }
+        public string? this[string? x, string? y]
+        {
+            get
+            {
+                return x + y;
+            }
+
+            set
+            {
+            }
+        }
     }
 }

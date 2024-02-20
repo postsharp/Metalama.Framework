@@ -68,7 +68,7 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                 inputStatements = null;
             }
 
-            if ( accessor != null
+            if ( accessor != null && accessor.MethodKind == MethodKind.PropertyGet
                  && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
                  && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) ) )
             {

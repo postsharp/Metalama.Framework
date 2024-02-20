@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ContractPropertyTransformation : OverridePropertyBaseTransformation
+internal sealed class ContractPropertyTransformation : OverridePropertyBaseTransformation, IInsertStatementTransformation
 {
     private readonly MethodKind? _targetMethodKind;
 
@@ -24,10 +24,30 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
         this._targetMethodKind = targetMethodKind;
     }
 
+    public IMember TargetMember => this.OverriddenDeclaration;
+
+    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    {
+        if (this.OverriddenDeclaration.SetMethod == null)
+        {
+            return Array.Empty<InsertedStatement>();
+        }
+
+        var advice = (ContractAdvice) this.ParentAdvice;
+
+        if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies )
+            || inputFilterBodies.Count == 0 )
+        {
+            return Array.Empty<InsertedStatement>();
+        }
+
+        return inputFilterBodies.SelectAsArray( b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.CurrentEntry ) );
+    }
+
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
-        BlockSyntax? getterBody, setterBody;
+        BlockSyntax? getterBody;
 
         // Local function that executes the filter for one of the accessors.
         bool TryExecuteFilters(
@@ -80,22 +100,6 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             }
         }
 
-        // Process the setter (input filters).
-        if ( TryExecuteFilters(
-                this.OverriddenDeclaration.SetMethod,
-                ContractDirection.Input,
-                out var setterStatements,
-                out var setterProceedExpression,
-                out _ ) )
-        {
-            setterStatements.Add( SyntaxFactory.ExpressionStatement( setterProceedExpression ) );
-            setterBody = SyntaxFactoryEx.FormattedBlock( setterStatements );
-        }
-        else
-        {
-            setterBody = null;
-        }
-
         // Process the getter (output filters).
         if ( TryExecuteFilters(
                 this.OverriddenDeclaration.GetMethod,
@@ -127,8 +131,20 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             getterBody = null;
         }
 
+        // We need to force an empty override for auto properties with input contracts.
+        // This is caused by a current design of the linker - auto-property deconstruction happens during the final rewriting and
+        // insert statement transformation requires a body to insert statements into.
+        var isAutoProperty = ((IProperty) this.OverriddenDeclaration).IsAutoPropertyOrField.AssertNotNull();
+
+        // The same goes for record properties
+        var isRecordProperty = this.OverriddenDeclaration.ContainingDeclaration is INamedType { TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct };
+
+        var requiresEmptyOverride =
+            advice.Contracts.Any( c => c.AppliesTo( ContractDirection.Input ) )
+            && (isAutoProperty || isRecordProperty);
+
         // Return if we have no filter at this point. This may be an error condition.
-        if ( getterBody == null && setterBody == null )
+        if ( getterBody == null && !requiresEmptyOverride )
         {
             return Array.Empty<InjectedMember>();
         }
@@ -138,12 +154,13 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             getterBody = this.CreateIdentityAccessorBody( context, SyntaxKind.GetAccessorDeclaration );
         }
 
-        if ( this.OverriddenDeclaration.SetMethod != null && setterBody == null )
-        {
-            setterBody = this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration );
-        }
-
-        return this.GetInjectedMembersImpl( context, getterBody, setterBody );
+        return
+            this.GetInjectedMembersImpl(
+                context,
+                getterBody,
+                this.OverriddenDeclaration.SetMethod != null
+                ? this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration )
+                : null );
     }
 
     public override string ToString() => $"Add default contract to property '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";

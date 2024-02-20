@@ -116,7 +116,6 @@ namespace Metalama.Framework.Engine
 #endif
         [DebuggerStepThrough]
         public static IEnumerable<T> AssertEach<T>( this IEnumerable<T> obj, Predicate<T> predicate )
-            where T : class
         {
 #if DEBUG
             foreach ( var item in obj )
@@ -129,7 +128,7 @@ namespace Metalama.Framework.Engine
                 yield return item;
             }
 #else
-       return obj;
+            return obj;
 #endif
         }
 

@@ -27,6 +27,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
+
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
@@ -99,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
                         transformationCollection,
                         buildersWithSynthesizedSetters );
 
-                    this.IndexIntroduceTransformation(
+                    this.IndexInjectTransformation(
                         input,
                         transformation,
                         diagnostics,
@@ -335,7 +336,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void IndexIntroduceTransformation(
+        private void IndexInjectTransformation(
             AspectLinkerInput input,
             ITransformation transformation,
             UserDiagnosticSink diagnostics,
@@ -654,6 +655,37 @@ namespace Metalama.Framework.Engine.Linking
                         var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
                         transformationCollection.AddInsertedStatements( methodBuilder, insertedStatements );
+
+                        break;
+                    }
+
+                case Property property:
+                    {
+                        var primaryDeclaration = property.GetPrimaryDeclarationSyntax().AssertNotNull();
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( property, insertedStatements );
+
+                        break;
+                    }
+
+                case IProperty { } builtOrBuilderProperty:
+                    {
+                        var propertyBuilder = insertStatementTransformation.TargetMember as PropertyBuilder
+                                                 ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetMember).Builder;
+
+                        var positionInSyntaxTree = GetSyntaxTreePosition( propertyBuilder.ToInsertPosition() );
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                            propertyBuilder.PrimarySyntaxTree.AssertNotNull(),
+                            positionInSyntaxTree );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( propertyBuilder, insertedStatements );
 
                         break;
                     }

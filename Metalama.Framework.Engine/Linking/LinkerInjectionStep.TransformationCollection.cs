@@ -38,7 +38,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
-        private readonly ConcurrentDictionary<IMember, List<(InsertedStatement InsertedStatement, InjectedMember? LatestInjectedMember)>> _insertedStatementsByTargetDeclaration;
+        private readonly ConcurrentDictionary<IDeclaration, List<(InsertedStatement InsertedStatement, InjectedMember? LatestInjectedMember)>> _insertedStatementsByTargetDeclaration;
         private readonly ConcurrentDictionary<IDeclaration, List<InjectedMember>> _injectedMembersByTargetDeclaration;
         private readonly ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
 
@@ -289,7 +289,7 @@ internal sealed partial class LinkerInjectionStep
 
         internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( InjectedMember injectedMember )
         {
-            return this.GetInjectedInitialStatements( (IMember) injectedMember.Declaration, injectedMember );
+            return this.GetInjectedInitialStatements( injectedMember.Declaration, injectedMember );
         }
 
         internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IMember sourceMember )
@@ -297,35 +297,51 @@ internal sealed partial class LinkerInjectionStep
             return this.GetInjectedInitialStatements( sourceMember, null );
         }
 
-        private IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IMember targetMember, InjectedMember? targetInjectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IDeclaration targetDeclaration, InjectedMember? targetInjectedMember )
         {
             // PERF: Iterating and reversing should be avoided.
-            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( targetMember, out var insertedStatements ) )
+            (var canonicalTarget, var statementFilter) =
+                targetDeclaration switch
+                {
+                    IMethod { MethodKind: Code.MethodKind.PropertyGet } =>
+                        (targetDeclaration.ContainingDeclaration.AssertNotNull(), static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet }),
+                    IMethod { MethodKind: Code.MethodKind.PropertySet } =>
+                        (targetDeclaration.ContainingDeclaration.AssertNotNull(), static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertySet }),
+                    _ => (targetDeclaration, (Func<InsertedStatement, bool>?) null),
+                };
+
+            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( canonicalTarget, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
 
             var statements = new List<StatementSyntax>();
 
-            var hasInjectedMembers = this._injectedMembersByTargetDeclaration.TryGetValue( targetMember, out var injectedMembers );
+            var hasInjectedMembers = this._injectedMembersByTargetDeclaration.TryGetValue( canonicalTarget, out var injectedMembers );
 
-            if ( (!hasInjectedMembers && targetInjectedMember == null) || (hasInjectedMembers && targetInjectedMember == injectedMembers![^1]) )
+            if ( canonicalTarget is IConstructor )
             {
-                // Return initializer statements source members with no overrides or to the last override.
-                var initializerStatements =
-                    insertedStatements
-                    .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer )
-                    .Select( s => s.InsertedStatement );
+                if ( (!hasInjectedMembers && targetInjectedMember == null) || (hasInjectedMembers && targetInjectedMember == injectedMembers![^1]) )
+                {
+                    // Return initializer statements source members with no overrides or to the last override.
+                    var initializerStatements =
+                        insertedStatements
+                        .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer )
+                        .Select( s => s.InsertedStatement );
 
-                var orderedInitializerStatements = OrderInitializerStatements( initializerStatements );
+                    var orderedInitializerStatements = OrderInitializerStatements( initializerStatements );
 
-                statements.AddRange( orderedInitializerStatements.Select( s => s.Statement ) );
+                    statements.AddRange( orderedInitializerStatements.Select( s => s.Statement ) );
+                }
             }
 
             // For non-initializer statements we have to select a range of statements that fits this injected member.
             var currentEntryStatements =
                 insertedStatements
-                .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.CurrentEntry && s.LatestInjectedMember == targetInjectedMember )
+                .Where( s =>
+                    s.InsertedStatement.Kind == InsertedStatementKind.CurrentEntry
+                    && s.LatestInjectedMember == targetInjectedMember
+                    && (statementFilter == null || statementFilter( s.InsertedStatement )) )
                 .Select( s => s.InsertedStatement );
 
             var orderedCurrentEntryStatements = OrderEntryStatements( currentEntryStatements );
