@@ -44,7 +44,11 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.DevEnvEntryPoint
             CancellationTokenSource cancellationTokenSource = new();
             var task = consumer.GetServiceProviderAsync( version, cancellationTokenSource.Token );
             Assert.False( task.IsCompleted );
+#if NET5_0_OR_GREATER
+            await cancellationTokenSource.CancelAsync();
+#else
             cancellationTokenSource.Cancel();
+#endif
             await Assert.ThrowsAsync<TaskCanceledException>( async () => await task );
         }
 

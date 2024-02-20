@@ -121,12 +121,10 @@ internal sealed partial class LinkerInjectionStep
                 // Add `#pragma warning` trivia around the node.
                 var errorCodes = SeparatedList<ExpressionSyntax>( suppressionsOnThisElement.Distinct().OrderBy( e => e ).Select( IdentifierName ) );
 
-                var disable = Trivia(
-                        SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, errorCodes ) )
+                var disable = Trivia( SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, errorCodes ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
-                var restore = Trivia(
-                        SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes ) )
+                var restore = Trivia( SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
@@ -298,7 +296,9 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( outputTrivia.Any() && !outputAttributeLists.Any() )
                     {
-                        newList = newList.WithLeadingTriviaIfNecessary( newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ), syntaxGenerationContext.PreserveTrivia );
+                        newList = newList.WithLeadingTriviaIfNecessary(
+                            newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ),
+                            syntaxGenerationContext.PreserveTrivia );
 
                         outputTrivia.Clear();
                     }
@@ -352,7 +352,12 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
             {
-                this.ApplyMemberLevelTransformationsToPrimaryConstructor( node, memberLevelTransformations, syntaxGenerationContext, out baseList, out parameterList );
+                this.ApplyMemberLevelTransformationsToPrimaryConstructor(
+                    node,
+                    memberLevelTransformations,
+                    syntaxGenerationContext,
+                    out baseList,
+                    out parameterList );
             }
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
@@ -395,7 +400,10 @@ internal sealed partial class LinkerInjectionStep
                     if ( baseList == null )
                     {
                         node = (T) node
-                            .WithIdentifier( node.Identifier.WithTrailingTriviaIfNecessary( default, syntaxGenerationContext.PreserveTrivia || node.Identifier.ContainsDirectives ) )
+                            .WithIdentifier(
+                                node.Identifier.WithTrailingTriviaIfNecessary(
+                                    default,
+                                    syntaxGenerationContext.PreserveTrivia || node.Identifier.ContainsDirectives ) )
                             .WithBaseList(
                                 BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
@@ -475,10 +483,10 @@ internal sealed partial class LinkerInjectionStep
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
                             {
-                                if ( injectedMember.DeclarationBuilder != null && 
-                                    this._transformationCollection.TryGetMemberLevelTransformations(
-                                        injectedMember.DeclarationBuilder.AssertNotNull(),
-                                        out var memberLevelTransformations ) )
+                                if ( injectedMember.DeclarationBuilder != null &&
+                                     this._transformationCollection.TryGetMemberLevelTransformations(
+                                         injectedMember.DeclarationBuilder.AssertNotNull(),
+                                         out var memberLevelTransformations ) )
                                 {
                                     injectedNode = this.ApplyMemberLevelTransformations(
                                         constructorDeclaration,
@@ -504,9 +512,9 @@ internal sealed partial class LinkerInjectionStep
                         case PropertyDeclarationSyntax propertyDeclaration:
                             {
                                 if ( injectedMember.DeclarationBuilder != null &&
-                                    this._transformationCollection.TryGetMemberLevelTransformations(
-                                        injectedMember.DeclarationBuilder,
-                                        out var memberLevelTransformations ) )
+                                     this._transformationCollection.TryGetMemberLevelTransformations(
+                                         injectedMember.DeclarationBuilder,
+                                         out var memberLevelTransformations ) )
                                 {
                                     injectedNode = this.ApplyMemberLevelTransformations( propertyDeclaration, memberLevelTransformations );
                                 }
@@ -528,9 +536,12 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration( IMemberOrNamedType contextDeclaration, IReadOnlyList<StatementSyntax> entryStatements, MemberDeclarationSyntax currentNode )
+        private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration(
+            IMemberOrNamedType contextDeclaration,
+            IReadOnlyList<StatementSyntax> entryStatements,
+            MemberDeclarationSyntax currentNode )
         {
-            if (entryStatements.Count == 0)
+            if ( entryStatements.Count == 0 )
             {
                 return currentNode;
             }
@@ -544,7 +555,7 @@ internal sealed partial class LinkerInjectionStep
                     return
                         constructor.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: default( SyntaxToken ),
+                            semicolonToken: default(SyntaxToken),
                             body: ReplaceExpression( entryStatements, expressionBody.Expression, true ) );
 
                 // Static constructor overrides also go here.
@@ -564,7 +575,7 @@ internal sealed partial class LinkerInjectionStep
                     return
                         method.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: default( SyntaxToken ),
+                            semicolonToken: default(SyntaxToken),
                             body: ReplaceExpression( entryStatements, expressionBody.Expression, returnsVoid ) );
 
                 case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
@@ -577,7 +588,7 @@ internal sealed partial class LinkerInjectionStep
                     return
                         @operator.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: default( SyntaxToken ),
+                            semicolonToken: default(SyntaxToken),
                             body: ReplaceExpression( entryStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
@@ -586,7 +597,7 @@ internal sealed partial class LinkerInjectionStep
                     return
                         property.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: default( SyntaxToken ),
+                            semicolonToken: default(SyntaxToken),
                             accessorList: AccessorList(
                                 SingletonList(
                                     AccessorDeclaration(
@@ -600,26 +611,31 @@ internal sealed partial class LinkerInjectionStep
                         property.PartialUpdate(
                             accessorList: accessorList.PartialUpdate(
                                 accessors:
-                                    List( accessorList.Accessors.SelectAsArray( a =>
-                                        IsMatchingAccessor( a, contextDeclaration )
-                                        ? a switch
-                                        {
-                                            { Body: { } body } => a.PartialUpdate( body: ReplaceBlock( entryStatements, body ) ),
-                                            { ExpressionBody: { } expressionBody } =>
-                                                a.PartialUpdate(
-                                                    expressionBody: null,
-                                                    semicolonToken: default( SyntaxToken ),
-                                                    body: ReplaceExpression( entryStatements, expressionBody.Expression, a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                            _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" ),
-                                        }
-                                        : a ) ) ) );
+                                List(
+                                    accessorList.Accessors.SelectAsArray(
+                                        a =>
+                                            IsMatchingAccessor( a, contextDeclaration )
+                                                ? a switch
+                                                {
+                                                    { Body: { } body } => a.PartialUpdate( body: ReplaceBlock( entryStatements, body ) ),
+                                                    { ExpressionBody: { } expressionBody } =>
+                                                        a.PartialUpdate(
+                                                            expressionBody: null,
+                                                            semicolonToken: default(SyntaxToken),
+                                                            body: ReplaceExpression(
+                                                                entryStatements,
+                                                                expressionBody.Expression,
+                                                                a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
+                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" ),
+                                                }
+                                                : a ) ) ) );
 
                     static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, IDeclaration contextDeclaration )
                         => (accessorDeclaration.Kind(), contextDeclaration) switch
                         {
-                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertyGet } ) => true,
-                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet } ) => true,
-                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet } ) => true,
+                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertyGet }) => true,
+                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
+                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
                             _ => false,
                         };
 
@@ -645,11 +661,11 @@ internal sealed partial class LinkerInjectionStep
                         Block( List( entryStatements ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                         returnsVoid
-                        ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
-                        : ReturnStatement(
-                            Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                            targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
-                            Token( SyntaxKind.SemicolonToken ) ) );
+                            ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
+                            : ReturnStatement(
+                                Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
+                                Token( SyntaxKind.SemicolonToken ) ) );
             }
         }
 
@@ -708,7 +724,8 @@ internal sealed partial class LinkerInjectionStep
                     this._diagnostics.Report(
                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                             fieldVariableDeclarator.GetDiagnosticLocation(),
-                            (fieldVariableDeclarator.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The field already has an initializer.") ) );
+                            (fieldVariableDeclarator.Identifier.ValueText, transformation.TargetMember.DeclaringType,
+                             "The field already has an initializer.") ) );
                 }
                 else
                 {
@@ -744,10 +761,12 @@ internal sealed partial class LinkerInjectionStep
                     this._diagnostics.Report(
                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
                             propertyDeclaration.GetDiagnosticLocation(),
-                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "The property already has an initializer.") ) );
+                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType,
+                             "The property already has an initializer.") ) );
                 }
 
-                if ( propertyDeclaration.ExpressionBody != null || propertyDeclaration.AccessorList?.Accessors.Any( a => a.Body != null || a.ExpressionBody != null ) == true )
+                if ( propertyDeclaration.ExpressionBody != null
+                     || propertyDeclaration.AccessorList?.Accessors.Any( a => a.Body != null || a.ExpressionBody != null ) == true )
                 {
                     this._diagnostics.Report(
                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
@@ -816,8 +835,7 @@ internal sealed partial class LinkerInjectionStep
                         newBaseTypeSyntax =
                             PrimaryConstructorBaseType(
                                 simpleBaseType.Type,
-                                ArgumentList( SeparatedList(
-                                    memberLevelTransformations.Arguments.Select( x => x.ToSyntax() ) ) ) );
+                                ArgumentList( SeparatedList( memberLevelTransformations.Arguments.Select( x => x.ToSyntax() ) ) ) );
 
                         break;
 
@@ -826,6 +844,7 @@ internal sealed partial class LinkerInjectionStep
                             primaryCtorBaseType
                                 .WithArgumentList(
                                     primaryCtorBaseType.ArgumentList.AddArguments( memberLevelTransformations.Arguments.SelectAsArray( x => x.ToSyntax() ) ) );
+
                         break;
 
                     default:
@@ -853,13 +872,17 @@ internal sealed partial class LinkerInjectionStep
                     return existingParameters.WithParameters(
                         existingParameters.Parameters.InsertRange(
                             existingParameters.Parameters.Count - 1,
-                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                            newParameters.Select(
+                                x => x.ToSyntax( syntaxGenerationContext )
+                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
                 }
                 else
                 {
                     return existingParameters.WithParameters(
                         existingParameters.Parameters.AddRange(
-                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                            newParameters.Select(
+                                x => x.ToSyntax( syntaxGenerationContext )
+                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
                 }
             }
         }
@@ -873,7 +896,8 @@ internal sealed partial class LinkerInjectionStep
                 return initializerSyntax;
             }
 
-            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this._syntaxGenerationContextFactory.Default.NormalizeWhitespace ) );
+            var newArgumentsSyntax = newArguments.Select(
+                a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this._syntaxGenerationContextFactory.Default.NormalizeWhitespace ) );
 
             if ( initializerSyntax == null )
             {
@@ -893,15 +917,17 @@ internal sealed partial class LinkerInjectionStep
 
             if ( node.Declaration.Variables.Any( this._transformationCollection.HasMemberLevelTransformations ) )
             {
-                node = node.ReplaceNodes( node.Declaration.Variables, ( variableDeclarator, _ ) =>
-                {
-                    if ( this._transformationCollection.TryGetMemberLevelTransformations( variableDeclarator, out var memberLevelTransformations ) )
+                node = node.ReplaceNodes(
+                    node.Declaration.Variables,
+                    ( variableDeclarator, _ ) =>
                     {
-                        variableDeclarator = this.ApplyMemberLevelTransformations( variableDeclarator, memberLevelTransformations );
-                    }
+                        if ( this._transformationCollection.TryGetMemberLevelTransformations( variableDeclarator, out var memberLevelTransformations ) )
+                        {
+                            variableDeclarator = this.ApplyMemberLevelTransformations( variableDeclarator, memberLevelTransformations );
+                        }
 
-                    return variableDeclarator;
-                } );
+                        return variableDeclarator;
+                    } );
             }
 
             // Rewrite attributes.
@@ -922,7 +948,11 @@ internal sealed partial class LinkerInjectionStep
                     var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists, originalNode );
 
-                    var fieldDeclaration = FieldDeclaration( default, node.Modifiers, declaration, Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
+                    var fieldDeclaration = FieldDeclaration(
+                        default,
+                        node.Modifiers,
+                        declaration,
+                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
 
                     fieldDeclaration = this.ReplaceAttributes( fieldDeclaration, attributes );
 
@@ -1196,11 +1226,11 @@ internal sealed partial class LinkerInjectionStep
                     var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists, node );
 
                     var eventDeclaration = EventFieldDeclaration(
-                            default,
-                            node.Modifiers,
-                            Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
-                            declaration,
-                            Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
+                        default,
+                        node.Modifiers,
+                        Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
+                        declaration,
+                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
 
                     eventDeclaration = this.ReplaceAttributes( eventDeclaration, attributes );
 

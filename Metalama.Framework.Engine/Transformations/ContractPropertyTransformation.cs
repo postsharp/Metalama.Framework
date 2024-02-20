@@ -19,7 +19,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
     private readonly MethodKind? _targetMethodKind;
 
     public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration, MethodKind? targetMethodKind ) :
-        base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+        base( advice, overriddenDeclaration, ObjectReader.Empty )
     {
         this._targetMethodKind = targetMethodKind;
     }
@@ -28,7 +28,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
 
     public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        if (this.OverriddenDeclaration.SetMethod == null)
+        if ( this.OverriddenDeclaration.SetMethod == null )
         {
             return Array.Empty<InsertedStatement>();
         }
@@ -36,12 +36,13 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
         var advice = (ContractAdvice) this.ParentAdvice;
 
         if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies )
-            || inputFilterBodies.Count == 0 )
+             || inputFilterBodies.Count == 0 )
         {
             return Array.Empty<InsertedStatement>();
         }
 
-        return inputFilterBodies.SelectAsArray( b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.CurrentEntry ) );
+        return inputFilterBodies.SelectAsArray(
+            b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.CurrentEntry ) );
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
@@ -57,8 +58,8 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             [NotNullWhen( true )] out ExpressionSyntax? proceedExpression,
             out string? returnValueLocalName )
         {
-            if ( accessor != null 
-                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) 
+            if ( accessor != null
+                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
                  && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
             {
                 if ( direction == ContractDirection.Output )
@@ -70,7 +71,8 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                     returnValueLocalName = null;
                 }
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, direction, returnValueLocalName, null, out statements ) || statements.Count == 0 )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, direction, returnValueLocalName, null, out statements )
+                     || statements.Count == 0 )
                 {
                     proceedExpression = null;
 
@@ -159,8 +161,8 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                 context,
                 getterBody,
                 this.OverriddenDeclaration.SetMethod != null
-                ? this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration )
-                : null );
+                    ? this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration )
+                    : null );
     }
 
     public override string ToString() => $"Add default contract to property '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";

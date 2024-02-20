@@ -6,32 +6,31 @@ using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable SA1414
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities;
+
+internal class ValueTupleComparer
 {
-    internal class ValueTupleComparer
+    public static IEqualityComparer<(T1, T2)> Create<T1, T2>( IEqualityComparer<T1> c1, IEqualityComparer<T2> c2 ) => new Comparer<T1, T2>( c1, c2 );
+
+    private sealed class Comparer<T1, T2> : IEqualityComparer<(T1, T2)>
     {
-        public static IEqualityComparer<(T1, T2)> Create<T1, T2>( IEqualityComparer<T1> c1, IEqualityComparer<T2> c2 ) => new Comparer<T1, T2>( c1, c2 );
+        private readonly IEqualityComparer<T1> _c1;
+        private readonly IEqualityComparer<T2> _c2;
 
-        private class Comparer<T1, T2> : IEqualityComparer<(T1, T2)>
+        public Comparer( IEqualityComparer<T1> c1, IEqualityComparer<T2> c2 )
         {
-            private readonly IEqualityComparer<T1> _c1;
-            private readonly IEqualityComparer<T2> _c2;
+            this._c1 = c1;
+            this._c2 = c2;
+        }
 
-            public Comparer( IEqualityComparer<T1> c1, IEqualityComparer<T2> c2 )
-            {
-                this._c1 = c1;
-                this._c2 = c2;
-            }
+        public bool Equals( (T1, T2) x, (T1, T2) y )
+        {
+            return this._c1.Equals( x.Item1, y.Item1 ) && this._c2.Equals( x.Item2, y.Item2 );
+        }
 
-            public bool Equals( (T1, T2) x, (T1, T2) y )
-            {
-                return this._c1.Equals( x.Item1, y.Item1 ) && this._c2.Equals( x.Item2, y.Item2 );
-            }
-
-            public int GetHashCode( [DisallowNull] (T1, T2) x )
-            {
-                return HashCode.Combine( this._c1.GetHashCode( x.Item1! ), this._c2.GetHashCode( x.Item2! ) );
-            }
+        public int GetHashCode( [DisallowNull] (T1, T2) x )
+        {
+            return HashCode.Combine( this._c1.GetHashCode( x.Item1! ), this._c2.GetHashCode( x.Item2! ) );
         }
     }
 }

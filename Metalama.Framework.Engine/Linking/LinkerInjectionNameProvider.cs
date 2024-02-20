@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
             this._injectionHelperProvider = injectionHelperProvider;
             this._injectedMemberNames = new ConcurrentDictionary<INamedType, HashSet<string>>( finalCompilation.Comparers.Default );
 
-            this._overriddenByCounters = 
+            this._overriddenByCounters =
                 new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>(
                     ValueTupleComparer.Create<Type, IMember>( EqualityComparer<Type>.Default, finalCompilation.Comparers.Default ) );
 
@@ -161,6 +161,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 // If the strong box is already present, it means that other thread ran through before us, we have to only assert.
                                 Invariant.Assert( v.Value > 1 );
+
                                 return v;
                             } );
 
@@ -195,7 +196,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 lock ( counter )
                 {
-                    while (true)
+                    while ( true )
                     {
                         var candidate = $"{hint}{counter.Value++}";
 

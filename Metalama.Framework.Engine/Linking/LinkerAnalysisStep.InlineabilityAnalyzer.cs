@@ -62,14 +62,15 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<ISymbol, IntermediateSymbolSemantic> redirectedSymbols,
                 CancellationToken cancellationToken )
             {
-                var redirectionTargets = 
-                    new HashSet<IntermediateSymbolSemantic>( 
-                        redirectedSymbols.Values, 
-                        IntermediateSymbolSemanticEqualityComparer.ForCompilation(this._intermediateCompilationContext) );
+                var redirectionTargets =
+                    new HashSet<IntermediateSymbolSemantic>(
+                        redirectedSymbols.Values,
+                        IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
-                var inlineableSemantics = new HashSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
+                var inlineableSemantics = new HashSet<IntermediateSymbolSemantic>(
+                    IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
-                void ProcessSemantic(IntermediateSymbolSemantic semantic)
+                void ProcessSemantic( IntermediateSymbolSemantic semantic )
                 {
                     if ( IsInlineable( semantic ) )
                     {
@@ -304,7 +305,8 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences,
                 CancellationToken cancellationToken )
             {
-                var inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
+                var inlinedSemantics = new HashSet<IntermediateSymbolSemantic>(
+                    IntermediateSymbolSemanticEqualityComparer.ForCompilation( this._intermediateCompilationContext ) );
 
                 void ProcessSemantic( IntermediateSymbolSemantic inlineableSemantic )
                 {

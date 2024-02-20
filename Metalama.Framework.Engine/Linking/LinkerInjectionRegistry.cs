@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
@@ -63,14 +62,22 @@ namespace Metalama.Framework.Engine.Linking
             this._transformedSyntaxTreeMap = transformations
                 .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
                 .ToDictionary( m => m.OldTree.AssertNotNull(), m => m.NewTree.AssertNotNull() );
+
             this._injectedMembers = injectedMembers.ToList();
             this._builderToTransformationMap = builderToTransformationMap;
             this._introducedParametersByTargetDeclaration = introducedParametersByTargetDeclaration;
 
             this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
-            this._overrideTargetToOverrideListMap = overrideMap = new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._overrideToOverrideTargetMap = overrideTargetMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
-            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap = new ConcurrentDictionary<ISymbol, InjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+
+            this._overrideTargetToOverrideListMap = overrideMap =
+                new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
+
+            this._overrideToOverrideTargetMap =
+                overrideTargetMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+
+            this._symbolToInjectedMemberMap = symbolToInjectedMemberMap =
+                new ConcurrentDictionary<ISymbol, InjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+
             this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
 
             // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
@@ -100,27 +107,28 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
                 {
-                    builderToInjectedMemberMap.TryAdd(introduceTransformation.DeclarationBuilder, injectedMember);
+                    builderToInjectedMemberMap.TryAdd( introduceTransformation.DeclarationBuilder, injectedMember );
                 }
             }
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-            concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessLinkerInjectionMember, cancellationToken ).Wait(cancellationToken);
+            concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessLinkerInjectionMember, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-            void ProcessOverride(KeyValuePair<IDeclaration, List<ISymbol>> value)
+            void ProcessOverride( KeyValuePair<IDeclaration, List<ISymbol>> value )
             {
                 var declaration = value.Key;
                 var overrides = value.Value;
 
                 var overrideTargetSymbol = GetOverrideTargetSymbol( declaration ).AssertNotNull();
 
-                overrides.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
+                overrides.Sort(
+                    ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
                 overrideTargets.Add( overrideTargetSymbol );
                 overrideMap.TryAdd( overrideTargetSymbol, overrides );
 
-                foreach (var overrideSymbol in overrides )
+                foreach ( var overrideSymbol in overrides )
                 {
                     overrideTargetMap.TryAdd( overrideSymbol, overrideTargetSymbol );
                 }
@@ -142,11 +150,11 @@ namespace Metalama.Framework.Engine.Linking
                     _ => intermediateSyntax
                 };
 
-                return 
+                return
                     this._intermediateCompilation.CompilationContext.SemanticModelProvider.GetSemanticModel( intermediateSyntaxTree )
-                    .GetDeclaredSymbol( symbolSyntax )
-                    .AssertNotNull()
-                    .GetCanonicalDefinition();
+                        .GetDeclaredSymbol( symbolSyntax )
+                        .AssertNotNull()
+                        .GetCanonicalDefinition();
             }
 
             ISymbol? GetOverrideTargetSymbol( IDeclaration overrideTarget )
@@ -165,7 +173,8 @@ namespace Metalama.Framework.Engine.Linking
 
                         var originalDeclaringType = originalConstructor.ContainingType;
 
-                        var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType ).AssertNotNull();
+                        var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType )
+                            .AssertNotNull();
 
                         foreach ( var translatedMember in translatedDeclaringType.GetMembers() )
                         {
@@ -179,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking
                                 continue;
                             }
 
-                            if ( symbolToInjectedMemberMap.ContainsKey(translatedMember) )
+                            if ( symbolToInjectedMemberMap.ContainsKey( translatedMember ) )
                             {
                                 continue;
                             }
@@ -188,25 +197,31 @@ namespace Metalama.Framework.Engine.Linking
 
                             for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
                             {
-                                if ( !StructuralSymbolComparer.Default.Equals( originalConstructor.Parameters[i].Type, translatedConstructor.Parameters[i].Type )
-                                     && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind)
+                                if ( !StructuralSymbolComparer.Default.Equals(
+                                         originalConstructor.Parameters[i].Type,
+                                         translatedConstructor.Parameters[i].Type )
+                                     && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind )
                                 {
                                     matches = false;
+
                                     break;
                                 }
                             }
 
-                            if (matches)
+                            if ( matches )
                             {
                                 return translatedConstructor;
                             }
                         }
 
-                        throw new AssertionFailedException($"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters.");
+                        throw new AssertionFailedException(
+                            $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
                     }
                     else
                     {
-                        return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(), true );
+                        return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
+                            originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
+                            true );
                     }
                 }
                 else if ( overrideTarget is IDeclarationBuilder builder )
@@ -252,7 +267,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             referencedSymbol = referencedSymbol.GetCanonicalDefinition();
 
-            if (this._overrideTargetToOverrideListMap.TryGetValue(referencedSymbol, out var overrideSymbolList))
+            if ( this._overrideTargetToOverrideListMap.TryGetValue( referencedSymbol, out var overrideSymbolList ) )
             {
                 return overrideSymbolList;
             }
@@ -280,7 +295,7 @@ namespace Metalama.Framework.Engine.Linking
                     return this.GetInjectedMemberForSymbol( eventAccessorSymbol.AssociatedSymbol.AssertNotNull() );
             }
 
-            if (this._symbolToInjectedMemberMap.TryGetValue( symbol, out var injectedMember))
+            if ( this._symbolToInjectedMemberMap.TryGetValue( symbol, out var injectedMember ) )
             {
                 return injectedMember;
             }
@@ -335,7 +350,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             overrideSymbol = overrideSymbol.GetCanonicalDefinition();
 
-            if (this._overrideToOverrideTargetMap.TryGetValue(overrideSymbol, out var overrideTargetSymbol))
+            if ( this._overrideToOverrideTargetMap.TryGetValue( overrideSymbol, out var overrideTargetSymbol ) )
             {
                 return overrideTargetSymbol;
             }
@@ -464,8 +479,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             symbol = symbol.GetCanonicalDefinition();
 
-            return 
-                this.IsOverride( symbol ) && 
+            return
+                this.IsOverride( symbol ) &&
                 this._intermediateCompilation.CompilationContext.SymbolComparer.Equals(
                     symbol,
                     this.GetLastOverride( this.GetOverrideTarget( symbol ).AssertNotNull() ) );

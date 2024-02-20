@@ -27,7 +27,6 @@ using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
@@ -236,7 +235,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static void IndexNodesWithModifiedAttributes(
             ITransformation transformation,
-            TransformationCollection transformationCollection)
+            TransformationCollection transformationCollection )
         {
             // We only need to index transformations on syntax (i.e. on source code) because introductions on generated code
             // are taken from the compilation model.
@@ -264,7 +263,9 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                transformationCollection.AddIntroduceTransformation( introduceDeclarationTransformation.DeclarationBuilder, introduceDeclarationTransformation );
+                transformationCollection.AddIntroduceTransformation(
+                    introduceDeclarationTransformation.DeclarationBuilder,
+                    introduceDeclarationTransformation );
             }
         }
 
@@ -512,7 +513,7 @@ namespace Metalama.Framework.Engine.Linking
             ITransformation transformation,
             TransformationCollection transformationCollection )
         {
-            if (transformation is not IInsertStatementTransformation insertStatementTransformation )
+            if ( transformation is not IInsertStatementTransformation insertStatementTransformation )
             {
                 return;
             }
@@ -553,7 +554,9 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     diagnostics.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
-                                    primaryConstructor.DiagnosticLocation, (statement, primaryConstructor.DeclaringType) ) );
+                                            primaryConstructor.DiagnosticLocation,
+                                            (statement, primaryConstructor.DeclaringType) ) );
+
                                     break;
                                 }
 
@@ -573,7 +576,10 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     diagnostics.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                    primaryConstructor.DiagnosticLocation, (leftExpression, primaryConstructor.DeclaringType, "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
+                                            primaryConstructor.DiagnosticLocation,
+                                            (leftExpression, primaryConstructor.DeclaringType,
+                                             "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
+
                                     break;
                                 }
 
@@ -584,7 +590,9 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     diagnostics.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                    primaryConstructor.DiagnosticLocation, (leftExpression, primaryConstructor.DeclaringType, "It is a ref member.") ) );
+                                            primaryConstructor.DiagnosticLocation,
+                                            (leftExpression, primaryConstructor.DeclaringType, "It is a ref member.") ) );
+
                                     break;
                                 }
 
@@ -592,7 +600,9 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     diagnostics.Report(
                                         AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                    primaryConstructor.DiagnosticLocation, (leftExpression, primaryConstructor.DeclaringType, "It is not an auto-property.") ) );
+                                            primaryConstructor.DiagnosticLocation,
+                                            (leftExpression, primaryConstructor.DeclaringType, "It is not an auto-property.") ) );
+
                                     break;
                                 }
 
@@ -644,7 +654,7 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethod { } builtOrBuilderMethod:
                     {
                         var methodBuilder = insertStatementTransformation.TargetMember as MethodBuilder
-                                                 ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetMember).Builder;
+                                            ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetMember).Builder;
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( methodBuilder.ToInsertPosition() );
 
@@ -675,7 +685,7 @@ namespace Metalama.Framework.Engine.Linking
                 case IProperty { } builtOrBuilderProperty:
                     {
                         var propertyBuilder = insertStatementTransformation.TargetMember as PropertyBuilder
-                                                 ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetMember).Builder;
+                                              ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetMember).Builder;
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( propertyBuilder.ToInsertPosition() );
 
@@ -776,7 +786,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     break;
 
-                case (SetInitializerExpressionTransformation setInitializerExpressionTransformation, _ ):
+                case (SetInitializerExpressionTransformation setInitializerExpressionTransformation, _):
                     memberLevelTransformations.Add( setInitializerExpressionTransformation );
 
                     break;
