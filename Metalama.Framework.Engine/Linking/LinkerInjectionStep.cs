@@ -129,9 +129,31 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             // It's imperative that order of transformations is preserved while grouping by syntax tree.
-            var transformationsBySyntaxTree = input.Transformations.GroupBy( t => t.TransformedSyntaxTree );
+            // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
+            // of a partial type in parallel.
+            var transformationsByCanonicalSyntaxTree = input.Transformations.GroupBy( GetCanonicalSyntaxTree );
 
-            await this._concurrentTaskRunner.RunInParallelAsync( transformationsBySyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
+            static SyntaxTree GetCanonicalSyntaxTree( ITransformation transformation )
+            {
+                return GetCanonicalTargetDeclaration( transformation.TargetDeclaration ) switch
+                {
+                    INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
+                    ICompilation compilation => transformation.TransformedSyntaxTree,
+                    var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
+                };
+
+                static IDeclaration GetCanonicalTargetDeclaration(IDeclaration declaration)
+                    => declaration switch
+                       {
+                           IMember member => member.DeclaringType,
+                           INamedType type => type,
+                           IParameter parameter => GetCanonicalTargetDeclaration(parameter.ContainingDeclaration.AssertNotNull()),
+                           ICompilation compilation => compilation,
+                           var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
+                       };
+            }
+
+            await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
 
             await transformationCollection.FinalizeAsync(
                 transformationComparer,
@@ -704,7 +726,7 @@ namespace Metalama.Framework.Engine.Linking
                     throw new AssertionFailedException( $"Unexpected target: {insertStatementTransformation.TargetMember}." );
             }
 
-            IEnumerable<InsertedStatement> GetInsertedStatements(
+            IReadOnlyList<InsertedStatement> GetInsertedStatements(
                 IInsertStatementTransformation insertStatementTransformation,
                 SyntaxGenerationContext syntaxGenerationContext )
             {
@@ -716,9 +738,8 @@ namespace Metalama.Framework.Engine.Linking
                     input.CompilationModel );
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );
-#if DEBUG
-                statements = statements.ToMutableList();
 
+#if DEBUG
                 foreach ( var statement in statements )
                 {
                     if ( statement.Statement is BlockSyntax block )

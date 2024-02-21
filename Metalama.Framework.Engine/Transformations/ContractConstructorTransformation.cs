@@ -21,7 +21,7 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
 
     public IMember TargetMember { get; }
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
 
@@ -35,7 +35,7 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
         }
         else
         {
-            return inputFilterBodies.SelectAsReadOnlyList( x => new InsertedStatement( x, this.TargetMember, this, InsertedStatementKind.CurrentEntry ) );
+            return inputFilterBodies.SelectAsArray( x => new InsertedStatement( x, this.TargetMember, this, InsertedStatementKind.InputContract ) );
         }
     }
 

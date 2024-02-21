@@ -132,7 +132,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMember targetMember, IEnumerable<InsertedStatement> statements )
+        public void AddInsertedStatements( IMember targetMember, IReadOnlyList<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
@@ -151,7 +151,7 @@ internal sealed partial class LinkerInjectionStep
 
             lock ( statementList )
             {
-                statementList.AddRange( statements.Select( x => (x, lastInjectedMember) ) );
+                statementList.AddRange( statements.SelectAsArray( x => (x, lastInjectedMember) ) );
             }
         }
 
@@ -356,7 +356,7 @@ internal sealed partial class LinkerInjectionStep
                 insertedStatements
                     .Where(
                         s =>
-                            s.InsertedStatement.Kind == InsertedStatementKind.CurrentEntry
+                            s.InsertedStatement.Kind == InsertedStatementKind.InputContract
                             && s.LatestInjectedMember == targetInjectedMember
                             && (statementFilter == null || statementFilter( s.InsertedStatement )) )
                     .Select( s => s.InsertedStatement );

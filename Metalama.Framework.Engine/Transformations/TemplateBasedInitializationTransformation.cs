@@ -36,7 +36,7 @@ internal sealed class TemplateBasedInitializationTransformation : BaseTransforma
         this.Tags = tags;
     }
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         var metaApi = MetaApi.ForConstructor(
             this._targetConstructor,
@@ -65,7 +65,7 @@ internal sealed class TemplateBasedInitializationTransformation : BaseTransforma
         if ( !templateDriver.TryExpandDeclaration( expansionContext, this._boundTemplate.TemplateArguments, out var expandedBody ) )
         {
             // Template expansion error.
-            return Enumerable.Empty<InsertedStatement>();
+            return Array.Empty<InsertedStatement>();
         }
 
         return new[]

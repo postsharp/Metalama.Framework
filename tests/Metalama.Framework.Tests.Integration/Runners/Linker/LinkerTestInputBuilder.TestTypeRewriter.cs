@@ -474,6 +474,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
                 A.CallTo( () => ((IIntroduceDeclarationTransformation) transformation).DeclarationBuilder ).Returns( (IDeclarationBuilder) transformation );
 
+                A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => ((IMemberBuilder) transformation).DeclaringType );
+
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
                 A.CallTo( () => ((IDeclarationBuilderImpl) transformation).ParentAdvice ).Returns( advice );
@@ -672,6 +674,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
                 A.CallTo( () => transformation.OrderWithinPipelineStepAndTypeAndAspectInstance ).Returns( this._nextTransformationOrdinal++ );
+
+                A.CallTo( () => transformation.TargetDeclaration ).ReturnsLazily( () => (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );

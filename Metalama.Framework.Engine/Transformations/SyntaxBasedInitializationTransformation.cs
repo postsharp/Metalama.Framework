@@ -32,7 +32,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
         this._initializationStatement = initializationStatement;
     }
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         return new[]
         {

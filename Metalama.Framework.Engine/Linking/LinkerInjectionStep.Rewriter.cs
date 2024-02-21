@@ -452,7 +452,7 @@ internal sealed partial class LinkerInjectionStep
                             // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
                             var entryStatements = this._transformationCollection.GetInjectedInitialStatements( injectedMember );
 
-                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration.AssertNotNull(), entryStatements, injectedNode );
+                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, injectedNode );
 
                             break;
 

@@ -26,7 +26,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
 
     public IMember TargetMember => this.OverriddenDeclaration;
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         if ( this.OverriddenDeclaration.SetMethod == null )
         {
@@ -42,7 +42,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
         }
 
         return inputFilterBodies.SelectAsArray(
-            b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.CurrentEntry ) );
+            b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.InputContract ) );
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )

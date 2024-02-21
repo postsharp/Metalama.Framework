@@ -22,7 +22,7 @@ internal sealed class ContractMethodTransformation : OverrideMethodBaseTransform
 
     public IMember TargetMember => this.OverriddenDeclaration;
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
 
@@ -32,7 +32,7 @@ internal sealed class ContractMethodTransformation : OverrideMethodBaseTransform
             return Array.Empty<InsertedStatement>();
         }
 
-        return inputFilterBodies.SelectAsArray( b => new InsertedStatement( b, this.OverriddenDeclaration, this, InsertedStatementKind.CurrentEntry ) );
+        return inputFilterBodies.SelectAsArray( b => new InsertedStatement( b, this.OverriddenDeclaration, this, InsertedStatementKind.InputContract ) );
     }
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
