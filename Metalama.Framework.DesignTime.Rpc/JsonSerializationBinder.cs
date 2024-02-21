@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
 using System.Collections.Immutable;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc.Protocol;
@@ -11,17 +10,17 @@ using System.Text;
 namespace Metalama.Framework.DesignTime.Rpc;
 
 /// <summary>
-/// An implementation of <see cref="ISerializationBinder"/> that strips version numbers from non-Metalama assemblies. 
+/// An implementation of <see cref="ISerializationBinder"/> that strips version numbers from non-Metalama assemblies.
 /// </summary>
-internal sealed class JsonSerializationBinder : DefaultSerializationBinder
+public sealed class JsonSerializationBinder : DefaultSerializationBinder
 {
     private readonly ConcurrentDictionary<string, Assembly> _assemblies = new();
     private readonly Dictionary<string, string> _assemblyNames = new();
     private static readonly char[] _tokens = new[] { ',', ']' };
 
-    public static JsonSerializationBinder Instance { get; } = new();
+    public static JsonSerializationBinder Default { get; } = new();
 
-    private JsonSerializationBinder()
+    public JsonSerializationBinder( IEnumerable<Assembly>? additionalAssemblies = null )
     {
         void AddAssemblyOfType( Type t )
         {
@@ -29,9 +28,16 @@ internal sealed class JsonSerializationBinder : DefaultSerializationBinder
         }
 
         AddAssemblyOfType( typeof(ProjectKey) );
-        AddAssemblyOfType( typeof(SerializableDeclarationId) );
         AddAssemblyOfType( typeof(ImmutableArray<>) );
         AddAssemblyOfType( typeof(CommonErrorData) );
+
+        if ( additionalAssemblies != null )
+        {
+            foreach ( var additionalAssembly in additionalAssemblies )
+            {
+                this.TryAddAssembly( additionalAssembly.GetName().Name, additionalAssembly );
+            }
+        }
 
         void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
         {

@@ -13,7 +13,8 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
     private T? _server;
     private volatile int _connecting;
 
-    protected ClientEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName ) { }
+    protected ClientEndpoint( IServiceProvider serviceProvider, string pipeName, JsonSerializationBinder? binder = null ) :
+        base( serviceProvider, pipeName, binder ) { }
 
     protected virtual void ConfigureRpc( JsonRpc rpc ) { }
 
@@ -37,7 +38,7 @@ public abstract class ClientEndpoint<T> : ServiceEndpoint, IDisposable
             this._pipeStream = new NamedPipeClientStream( ".", this.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous );
             await this._pipeStream.ConnectAsync( cancellationToken );
 
-            this._rpc = CreateRpc( this._pipeStream );
+            this._rpc = this.CreateRpc( this._pipeStream );
             this._server = this._rpc.Attach<T>();
             this.ConfigureRpc( this._rpc );
             this._rpc.StartListening();

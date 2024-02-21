@@ -31,7 +31,11 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
     private volatile ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> _compileTimeErrorsByProject =
         ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>.Empty;
 
-    public UserProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName, int.MaxValue )
+    public UserProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base(
+        serviceProvider.Underlying,
+        pipeName,
+        int.MaxValue,
+        JsonSerializationBinderFactory.Instance )
     {
         this._serviceProvider = serviceProvider;
     }

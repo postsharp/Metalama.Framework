@@ -52,7 +52,11 @@ internal sealed partial class AnalysisProcessEndpoint : ServerEndpoint, IGlobalS
         return _instance;
     }
 
-    public AnalysisProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName, 1 )
+    public AnalysisProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base(
+        serviceProvider.Underlying,
+        pipeName,
+        1,
+        JsonSerializationBinderFactory.Instance )
     {
         this._serviceProvider = serviceProvider;
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
