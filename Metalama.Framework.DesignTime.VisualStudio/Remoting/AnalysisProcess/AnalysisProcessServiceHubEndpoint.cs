@@ -14,7 +14,10 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
 {
     private readonly AnalysisProcessEventHub _eventHub;
 
-    public AnalysisProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName )
+    public AnalysisProcessServiceHubEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base(
+        serviceProvider.Underlying,
+        pipeName,
+        JsonSerializationBinderFactory.Instance )
     {
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
         this._eventHub.CompilationResultChanged += this.OnCompilationResultChanged;

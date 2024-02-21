@@ -13,6 +13,8 @@ namespace Metalama.Framework.DesignTime.Rpc;
 /// </summary>
 public abstract class ServiceEndpoint
 {
+    private readonly JsonSerializationBinder _binder;
+
     protected TaskCompletionSource<bool> InitializedTask { get; } = new();
 
     protected IRpcExceptionHandler? ExceptionHandler { get; }
@@ -21,11 +23,12 @@ public abstract class ServiceEndpoint
 
     public string PipeName { get; }
 
-    protected ServiceEndpoint( IServiceProvider serviceProvider, string pipeName )
+    protected ServiceEndpoint( IServiceProvider serviceProvider, string pipeName, JsonSerializationBinder? binder = null )
     {
         this.Logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
         this.PipeName = pipeName;
         this.ExceptionHandler = (IRpcExceptionHandler?) serviceProvider.GetService( typeof(IRpcExceptionHandler) );
+        this._binder = binder ?? JsonSerializationBinder.Default;
     }
 
     public async ValueTask WaitUntilInitializedAsync( string callerName, CancellationToken cancellationToken = default )
@@ -70,7 +73,7 @@ public abstract class ServiceEndpoint
         }
     }
 
-    protected static JsonRpc CreateRpc( Stream stream )
+    protected JsonRpc CreateRpc( Stream stream )
     {
         // MessagePackFormatter does not work in the devenv process, probably because devenv sets it up with some global effect.
 
@@ -88,7 +91,7 @@ public abstract class ServiceEndpoint
         // However, we need to remove the version number for non-Metalama assemblies because different versions of these libraries may run on both ends
         // of the pipe. The solution is to specify TypeNameAssemblyFormatHandling.Full but implement our JsonSerializationBinder.
         formatter.JsonSerializer.TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple;
-        formatter.JsonSerializer.SerializationBinder = JsonSerializationBinder.Instance;
+        formatter.JsonSerializer.SerializationBinder = this._binder;
 
         var handler = new LengthHeaderMessageHandler( stream, stream, formatter );
 

@@ -12,7 +12,10 @@ public abstract class ServerEndpoint : ServiceEndpoint, IDisposable
     private readonly CancellationTokenSource _startCancellationSource = new();
     private readonly ConcurrentDictionary<JsonRpc, NamedPipeServerStream> _pipes = new();
 
-    protected ServerEndpoint( IServiceProvider serviceProvider, string pipeName, int maxClientCount ) : base( serviceProvider, pipeName )
+    protected ServerEndpoint( IServiceProvider serviceProvider, string pipeName, int maxClientCount, JsonSerializationBinder? binder = null ) : base(
+        serviceProvider,
+        pipeName,
+        binder )
     {
         this._maxClientCount = maxClientCount;
     }
@@ -78,7 +81,7 @@ public abstract class ServerEndpoint : ServiceEndpoint, IDisposable
 
         this.Logger.Trace?.Log( $"Endpoint '{this.PipeName}': got a client." );
 
-        var rpc = CreateRpc( pipe );
+        var rpc = this.CreateRpc( pipe );
         this.ConfigureRpc( rpc );
 
         rpc.Disconnected += this.OnRpcDisconnected;

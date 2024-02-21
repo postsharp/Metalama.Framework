@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,7 +18,7 @@ public sealed class SerializationBinderTests
     [InlineData( typeof(ImmutableArray<ProjectKey>) )]
     public void Binder( Type type )
     {
-        var binder = JsonSerializationBinder.Instance;
+        var binder = JsonSerializationBinderFactory.Instance;
         binder.BindToName( type, out var assemblyName, out var typeName );
         assemblyName = JsonSerializationBinder.RemoveAssemblyDetailsFromAssemblyName( assemblyName! );
         typeName = JsonSerializationBinder.RemoveAssemblyDetailsFromTypeName( typeName! );
@@ -34,7 +35,7 @@ public sealed class SerializationBinderTests
         "System.Collections.Immutable.ImmutableDictionary`2[[System.String, System.Private.CoreLib, VERSION],[System.String, System.Private.CoreLib, VERSION]]" )]
     public void QualifyTypeName( Type type, string expectedQualifiedName )
     {
-        var binder = JsonSerializationBinder.Instance;
+        var binder = JsonSerializationBinderFactory.Instance;
         binder.BindToName( type, out _, out var typeName );
         typeName = JsonSerializationBinder.RemoveAssemblyDetailsFromTypeName( typeName! );
 
