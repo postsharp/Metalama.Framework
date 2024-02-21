@@ -22,15 +22,28 @@ public sealed class JsonSerializationBinder : DefaultSerializationBinder
 
     public JsonSerializationBinder( IEnumerable<Assembly>? additionalAssemblies = null )
     {
-        void AddAssemblyOfType( Type t )
+        void AddAssemblyOfType( Type t, params string[] alternateNames )
         {
-            this.TryAddAssembly( t.Assembly.GetName().Name, t.Assembly );
+            var assemblyName = t.Assembly.GetName().Name;
+            this.TryAddAssembly( assemblyName, t.Assembly );
+
+            foreach ( var name in alternateNames )
+            {
+                if ( name != assemblyName )
+                {
+                    this.TryAddAssembly( name, t.Assembly );
+                }
+            }
         }
 
-        AddAssemblyOfType( typeof(ProjectKey) );
-        AddAssemblyOfType( typeof(ImmutableArray<>) );
-        AddAssemblyOfType( typeof(CommonErrorData) );
+        // Add system dependencies.
+        AddAssemblyOfType( typeof(ImmutableArray<>) ); // System.Collections.Immutable
+        AddAssemblyOfType( typeof(CommonErrorData) ); // StreamJsonRpc
+        
+        // Add the current assembly. Note that in VSX it is merged inside a different assembly named Metalama.Repacked.
+        AddAssemblyOfType( typeof(ProjectKey), "Metalama.Framework.DesignTime.Rpc", "Metalama.Repacked" ); // The current assembly
 
+        // Add additional assemblies.
         if ( additionalAssemblies != null )
         {
             foreach ( var additionalAssembly in additionalAssemblies )
