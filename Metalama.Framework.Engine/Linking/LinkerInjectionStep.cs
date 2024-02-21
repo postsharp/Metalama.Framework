@@ -142,15 +142,15 @@ namespace Metalama.Framework.Engine.Linking
                     var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
                 };
 
-                static IDeclaration GetCanonicalTargetDeclaration(IDeclaration declaration)
+                static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
                     => declaration switch
-                       {
-                           IMember member => member.DeclaringType,
-                           INamedType type => type,
-                           IParameter parameter => GetCanonicalTargetDeclaration(parameter.ContainingDeclaration.AssertNotNull()),
-                           ICompilation compilation => compilation,
-                           var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
-                       };
+                    {
+                        IMember member => member.DeclaringType,
+                        INamedType type => type,
+                        IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
+                        ICompilation compilation => compilation,
+                        var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
+                    };
             }
 
             await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
@@ -551,7 +551,9 @@ namespace Metalama.Framework.Engine.Linking
                         var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
                         // Convert each statement into a separate SetInitializerExpressionTransformation and index those.
+#pragma warning disable CS0618 // Type or member is obsolete
                         ProcessStatements( insertedStatements.Select( s => s.Statement ) );
+#pragma warning restore CS0618 // Type or member is obsolete
 
                         void ProcessStatements( IEnumerable<StatementSyntax> statements )
                         {

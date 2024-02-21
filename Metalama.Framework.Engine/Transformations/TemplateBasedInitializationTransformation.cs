@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Introspection;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations;
 

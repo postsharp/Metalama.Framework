@@ -19,5 +19,4 @@ public enum InsertedStatementKind
 
     [Obsolete]
     OutputContract = 100,
-
 }
