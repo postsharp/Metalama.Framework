@@ -420,10 +420,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                         _ = declarationKind switch
                         {
-                            DeclarationKind.Method => o.Implements<IMethod>().Implements<IRefImpl<IMethod>>(),
-                            DeclarationKind.Property => o.Implements<IProperty>().Implements<IRefImpl<IProperty>>(),
-                            DeclarationKind.Event => o.Implements<IEvent>().Implements<IRefImpl<IEvent>>(),
-                            DeclarationKind.Field => o.Implements<IField>().Implements<IRefImpl<IField>>(),
+                            DeclarationKind.Method => o.Implements<IMethodImpl>().Implements<IRefImpl<IMethod>>(),
+                            DeclarationKind.Property => o.Implements<IPropertyImpl>().Implements<IRefImpl<IProperty>>(),
+                            DeclarationKind.Event => o.Implements<IEventImpl>().Implements<IRefImpl<IEvent>>(),
+                            DeclarationKind.Field => o.Implements<IFieldImpl>().Implements<IRefImpl<IField>>(),
                             _ => throw new AssertionFailedException( $"Unexpected declaration kind {declarationKind}." )
                         };
 
@@ -449,6 +449,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
                             .Returns( (IProperty) transformation );
 
+                        A.CallTo( () => ((IProperty) transformation).GetMethod ).Returns( A.Fake<IMethodImpl>() );
+                        A.CallTo( () => ((IProperty) transformation).SetMethod ).Returns( A.Fake<IMethodImpl>() );
+
                         break;
 
                     case DeclarationKind.Event:
@@ -456,6 +459,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                         A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
                             .Returns( (IEvent) transformation );
+
+                        A.CallTo( () => ((IEvent) transformation).AddMethod ).Returns( A.Fake<IMethodImpl>() );
+                        A.CallTo( () => ((IEvent) transformation).RemoveMethod ).Returns( A.Fake<IMethodImpl>() );
 
                         break;
 

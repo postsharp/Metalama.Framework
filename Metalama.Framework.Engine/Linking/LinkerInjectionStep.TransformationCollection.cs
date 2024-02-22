@@ -354,7 +354,7 @@ internal sealed partial class LinkerInjectionStep
                 if ( targetInjectedMember == null )
                 {
                     bottomBound = null;
-                    topBound = GetTransformationMemberLayerIndex(injectedMembers.First().Transformation);
+                    topBound = GetTransformationMemberLayerIndex( injectedMembers.First().Transformation );
                 }
                 else
                 {
@@ -365,11 +365,11 @@ internal sealed partial class LinkerInjectionStep
                         throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
                     }
 
-                    bottomBound = GetTransformationMemberLayerIndex(targetInjectedMember.Transformation);
+                    bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
                     topBound =
                         targetInjectedMemberIndex >= injectedMembers.Count - 1
                         ? null
-                        : GetTransformationMemberLayerIndex(injectedMembers[targetInjectedMemberIndex].Transformation);
+                        : GetTransformationMemberLayerIndex( injectedMembers[targetInjectedMemberIndex + 1].Transformation );
                 }
             }
 
