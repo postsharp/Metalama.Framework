@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Resolves aspect references.
     /// </summary>
-    internal sealed class AspectReferenceResolver
+    internal sealed partial class AspectReferenceResolver
     {
         private readonly LinkerInjectionRegistry _injectionRegistry;
         private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
@@ -758,87 +758,5 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private record struct OverrideIndex(MemberLayerIndex Index, InjectedMember Override);
-
-        private readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
-        {
-            /// <summary>
-            /// Gets the index of the aspect layer. Zero is the state before any transformation.
-            /// </summary>
-            public int LayerIndex { get; }
-
-            // ReSharper disable once MemberCanBePrivate.Local
-            /// <summary>
-            /// Gets the index of the aspect instance within the target type.
-            /// </summary>
-            public int InstanceIndex { get; }
-
-            // ReSharper disable once MemberCanBePrivate.Local
-            /// <summary>
-            /// Gets the index of the transformation within the aspect instance.
-            /// </summary>
-            public int TransformationIndex { get; }
-
-            public MemberLayerIndex( int layerIndex, int instanceIndex, int transformationIndex )
-            {
-                this.LayerIndex = layerIndex;
-                this.InstanceIndex = instanceIndex;
-                this.TransformationIndex = transformationIndex;
-            }
-
-            public int CompareTo( MemberLayerIndex other )
-            {
-                var layerDiff = this.LayerIndex - other.LayerIndex;
-
-                if ( layerDiff == 0 )
-                {
-                    var instanceDiff = this.InstanceIndex - other.InstanceIndex;
-
-                    if ( instanceDiff == 0 )
-                    {
-                        return this.TransformationIndex - other.TransformationIndex;
-                    }
-                    else
-                    {
-                        return instanceDiff;
-                    }
-                }
-                else
-                {
-                    return layerDiff;
-                }
-            }
-
-            public bool Equals( MemberLayerIndex other )
-            {
-                return this.CompareTo( other ) == 0;
-            }
-
-            public override bool Equals( object? obj )
-            {
-                return obj is MemberLayerIndex mli && this.Equals( mli );
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine( this.LayerIndex, this.InstanceIndex, this.TransformationIndex );
-            }
-
-            public override string ToString()
-            {
-                return $"({this.LayerIndex}, {this.InstanceIndex}, {this.TransformationIndex})";
-            }
-
-            public static bool operator ==( MemberLayerIndex a, MemberLayerIndex b ) => a.Equals( b );
-
-            public static bool operator !=( MemberLayerIndex a, MemberLayerIndex b ) => !a.Equals( b );
-
-            public static bool operator <( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) < 0;
-
-            public static bool operator <=( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) <= 0;
-
-            public static bool operator >( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) > 0;
-
-            public static bool operator >=( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) >= 0;
-        }
     }
 }

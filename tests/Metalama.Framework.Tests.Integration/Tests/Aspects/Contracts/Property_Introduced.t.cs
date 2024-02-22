@@ -36,6 +36,10 @@ internal class Target
     }
     set
     {
+      if (value == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
       this._introducedProperty = value;
     }
   }

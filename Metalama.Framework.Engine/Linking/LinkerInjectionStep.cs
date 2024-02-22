@@ -26,6 +26,8 @@ using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using System;
+
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
@@ -62,7 +64,7 @@ namespace Metalama.Framework.Engine.Linking
             var transformationComparer = TransformationLinkerOrderComparer.Instance;
             var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
             var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
-            var transformationCollection = new TransformationCollection( transformationComparer );
+            var transformationCollection = new TransformationCollection( input.CompilationModel, transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
@@ -132,6 +134,27 @@ namespace Metalama.Framework.Engine.Linking
             // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
             // of a partial type in parallel.
             var transformationsByCanonicalSyntaxTree = input.Transformations.GroupBy( GetCanonicalSyntaxTree );
+
+            var path = $"C:\\Dev\\Temp\\Metalama.TransformationOrder\\{input.CompilationModel.Name}\\{Guid.NewGuid()}.txt";
+
+            System.IO.Directory.CreateDirectory( System.IO.Path.GetDirectoryName( path )! );
+
+            System.IO.File.WriteAllLines(
+                $"C:\\Dev\\Temp\\Metalama.TransformationOrder\\{input.CompilationModel.Name}\\{Guid.NewGuid()}.txt",
+                transformationsByCanonicalSyntaxTree.OrderBy(g => g.Key.FilePath).SelectMany( g =>
+                {
+                    var lines = new List<string>();
+                    lines.Add( $"{g.Key.FilePath}:" );
+
+                    foreach (var transformation in g)
+                    {
+                        lines.Add( transformation.ToString()! );
+                    }
+
+                    lines.Add( "" );
+
+                    return lines;
+                } ) );
 
             static SyntaxTree GetCanonicalSyntaxTree( ITransformation transformation )
             {

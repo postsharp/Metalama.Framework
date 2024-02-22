@@ -39,8 +39,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
-        private readonly ConcurrentDictionary<IDeclaration, List<(InsertedStatement InsertedStatement, InjectedMember? LatestInjectedMember)>>
-            _insertedStatementsByTargetDeclaration;
+        private readonly ConcurrentDictionary<IDeclaration, List<InsertedStatement>> _insertedStatementsByTargetDeclaration;
 
         private readonly ConcurrentDictionary<IDeclaration, List<InjectedMember>> _injectedMembersByTargetDeclaration;
         private readonly ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
@@ -52,7 +51,7 @@ internal sealed partial class LinkerInjectionStep
         public IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> IntroducedParametersByTargetDeclaration
             => this._introducedParametersByTargetDeclaration;
 
-        public TransformationCollection( TransformationLinkerOrderComparer comparer )
+        public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
             this._injectedMembers = new();
@@ -65,9 +64,9 @@ internal sealed partial class LinkerInjectionStep
             this._symbolMemberLevelTransformations = new();
             this._introductionMemberLevelTransformations = new();
             this._builderToTransformationMap = new();
-            this._insertedStatementsByTargetDeclaration = new();
-            this._injectedMembersByTargetDeclaration = new();
-            this._introducedParametersByTargetDeclaration = new();
+            this._insertedStatementsByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
+            this._injectedMembersByTargetDeclaration = new( finalCompilationModel.Comparers.Default);
+            this._introducedParametersByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
         }
 
         public void AddInjectedMembers( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
@@ -151,7 +150,7 @@ internal sealed partial class LinkerInjectionStep
 
             lock ( statementList )
             {
-                statementList.AddRange( statements.SelectAsArray( x => (x, lastInjectedMember) ) );
+                statementList.AddRange( statements );
             }
         }
 
@@ -331,9 +330,50 @@ internal sealed partial class LinkerInjectionStep
                 return ImmutableArray<StatementSyntax>.Empty;
             }
 
-            var statements = new List<StatementSyntax>();
+            bool hasInjectedMembers;
+            MemberLayerIndex? bottomBound;
+            MemberLayerIndex? topBound;
 
-            var hasInjectedMembers = this._injectedMembersByTargetDeclaration.TryGetValue( canonicalTarget, out var injectedMembers );
+            // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( canonicalTarget, out var injectedMembers ) )
+            {
+                hasInjectedMembers = false;
+                if ( targetInjectedMember == null )
+                {
+                    bottomBound = null;
+                    topBound = null;
+                }
+                else
+                {
+                    throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                }
+            }
+            else
+            {
+                hasInjectedMembers = true;
+                if ( targetInjectedMember == null )
+                {
+                    bottomBound = null;
+                    topBound = GetTransformationMemberLayerIndex(injectedMembers.First().Transformation);
+                }
+                else
+                {
+                    var targetInjectedMemberIndex = injectedMembers.IndexOf( targetInjectedMember );
+
+                    if ( targetInjectedMemberIndex < 0 )
+                    {
+                        throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                    }
+
+                    bottomBound = GetTransformationMemberLayerIndex(targetInjectedMember.Transformation);
+                    topBound =
+                        targetInjectedMemberIndex >= injectedMembers.Count - 1
+                        ? null
+                        : GetTransformationMemberLayerIndex(injectedMembers[targetInjectedMemberIndex].Transformation);
+                }
+            }
+
+            var statements = new List<StatementSyntax>();
 
             if ( canonicalTarget is IConstructor )
             {
@@ -342,8 +382,8 @@ internal sealed partial class LinkerInjectionStep
                     // Return initializer statements source members with no overrides or to the last override.
                     var initializerStatements =
                         insertedStatements
-                            .Where( s => s.InsertedStatement.Kind == InsertedStatementKind.Initializer )
-                            .Select( s => s.InsertedStatement );
+                            .Where( s => s.Kind == InsertedStatementKind.Initializer )
+                            .Select( s => s );
 
                     var orderedInitializerStatements = OrderInitializerStatements( initializerStatements );
 
@@ -356,10 +396,10 @@ internal sealed partial class LinkerInjectionStep
                 insertedStatements
                     .Where(
                         s =>
-                            s.InsertedStatement.Kind == InsertedStatementKind.InputContract
-                            && s.LatestInjectedMember == targetInjectedMember
-                            && (statementFilter == null || statementFilter( s.InsertedStatement )) )
-                    .Select( s => s.InsertedStatement );
+                            s.Kind == InsertedStatementKind.InputContract
+                            && (bottomBound == null || GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound)
+                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound)
+                            && (statementFilter == null || statementFilter( s )) );
 
             var orderedCurrentEntryStatements = OrderEntryStatements( currentEntryStatements );
 
@@ -389,5 +429,11 @@ internal sealed partial class LinkerInjectionStep
                 .ThenByDescending( s => s.Transformation.OrderWithinPipelineStepAndType )
                 .ThenBy( s => s.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
         }
+
+        private static MemberLayerIndex GetTransformationMemberLayerIndex( ITransformation transformation )
+            => new MemberLayerIndex(
+                transformation.OrderWithinPipeline,
+                transformation.OrderWithinPipelineStepAndType,
+                transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
     }
 }

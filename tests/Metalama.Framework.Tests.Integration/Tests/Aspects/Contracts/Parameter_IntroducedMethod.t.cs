@@ -17,6 +17,10 @@ internal class Target
   }
   private global::System.String? IntroducedMethod(global::System.String? param)
   {
+    if (param == null)
+    {
+      throw new global::System.ArgumentNullException("param");
+    }
     global::System.String? returnValue;
     returnValue = param;
     if (returnValue == null)
