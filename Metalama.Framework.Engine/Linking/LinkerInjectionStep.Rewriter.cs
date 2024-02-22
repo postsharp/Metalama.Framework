@@ -549,7 +549,7 @@ internal sealed partial class LinkerInjectionStep
             switch ( currentNode )
             {
                 case ConstructorDeclarationSyntax { Body: { } body } constructor:
-                    return constructor.PartialUpdate( body: ReplaceBlock( entryStatements, body ) );
+                    return constructor.WithBody( ReplaceBlock( entryStatements, body ) );
 
                 case ConstructorDeclarationSyntax { ExpressionBody: { } expressionBody } constructor:
                     return
@@ -560,7 +560,7 @@ internal sealed partial class LinkerInjectionStep
 
                 // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
-                    return method.PartialUpdate( body: ReplaceBlock( entryStatements, body ) );
+                    return method.WithBody( ReplaceBlock( entryStatements, body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     var returnsVoid =
@@ -582,7 +582,7 @@ internal sealed partial class LinkerInjectionStep
                     throw new AssertionFailedException( $"Method without body not supported: {contextDeclaration}" );
 
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
-                    return @operator.PartialUpdate( body: ReplaceBlock( entryStatements, body ) );
+                    return @operator.WithBody( ReplaceBlock( entryStatements, body ) );
 
                 case OperatorDeclarationSyntax { ExpressionBody: { } expressionBody } @operator:
                     return
@@ -608,16 +608,15 @@ internal sealed partial class LinkerInjectionStep
                     Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } );
 
                     return
-                        property.PartialUpdate(
-                            accessorList: accessorList.PartialUpdate(
-                                accessors:
+                        property.WithAccessorList(
+                            accessorList.WithAccessors(
                                 List(
                                     accessorList.Accessors.SelectAsArray(
                                         a =>
                                             IsMatchingAccessor( a, contextDeclaration )
                                                 ? a switch
                                                 {
-                                                    { Body: { } body } => a.PartialUpdate( body: ReplaceBlock( entryStatements, body ) ),
+                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, body ) ),
                                                     { ExpressionBody: { } expressionBody } =>
                                                         a.PartialUpdate(
                                                             expressionBody: null,

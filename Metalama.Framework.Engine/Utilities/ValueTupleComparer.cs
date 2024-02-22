@@ -30,7 +30,9 @@ internal class ValueTupleComparer
 
         public int GetHashCode( [DisallowNull] (T1, T2) x )
         {
-            return HashCode.Combine( this._c1.GetHashCode( x.Item1! ), this._c2.GetHashCode( x.Item2! ) );
+            return HashCode.Combine(
+                x.Item1 is not null ? this._c1.GetHashCode( x.Item1! ) : 0,
+                x.Item2 is not null ? this._c2.GetHashCode( x.Item2! ) : 0 );
         }
     }
 }
