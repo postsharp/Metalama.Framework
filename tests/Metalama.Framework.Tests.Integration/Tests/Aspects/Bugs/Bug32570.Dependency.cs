@@ -2,12 +2,12 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System;
 using System.Linq;
-using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.BugX;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 using Metalama.Framework.Code;
 
 [assembly: AspectOrder( typeof(ParameterContractAspect), typeof(OverrideAspect), typeof(IntroductionAspect) )]
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.BugX;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 
 public class MethodFabric : TransitiveProjectFabric
 {

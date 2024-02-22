@@ -32,7 +32,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
         this._initializationStatement = initializationStatement;
     }
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         return new[]
         {
@@ -41,7 +41,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
                     .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                 this.ContextDeclaration,
-                this.ParentAdvice.AspectLayerId,
+                this,
                 InsertedStatementKind.Initializer )
         };
     }

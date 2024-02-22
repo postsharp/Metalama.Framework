@@ -1,0 +1,32 @@
+using System;
+using Metalama.Framework.Aspects;
+
+#pragma warning disable CS8618
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Method_Partial
+{
+    internal class NotNullAttribute : ContractAspect
+    {
+        public override void Validate( dynamic? value )
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException( meta.Target.Parameter.Name );
+            }
+        }
+    }
+
+    // <target>
+    internal partial class Target
+    {
+        public partial void M([NotNull] string m);
+    }
+
+    // <target>
+    internal partial class Target
+    {
+        public partial void M(string m)
+        {
+        }
+    }
+}

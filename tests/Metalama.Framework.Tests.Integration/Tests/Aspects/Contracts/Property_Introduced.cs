@@ -1,11 +1,8 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Introduced;
 
 #pragma warning disable CS8618, CS0169
-
-[assembly: AspectOrder( typeof(IntroduceAndFilterAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Introduced
 {

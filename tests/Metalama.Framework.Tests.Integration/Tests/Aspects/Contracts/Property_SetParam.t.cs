@@ -20,10 +20,7 @@ internal class Target
   }
   public string Q
   {
-    get
-    {
-      return q!;
-    }
+    get => q!;
     [param: NotNull]
     set
     {

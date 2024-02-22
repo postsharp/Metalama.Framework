@@ -14,14 +14,14 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
 {
     public ContractConstructorTransformation( Advice advice, IConstructor constructor ) : base( advice )
     {
-        Invariant.AssertNot( constructor.IsPrimary && constructor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct );
+        Invariant.AssertNot( constructor is { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct } );
 
         this.TargetMember = constructor;
     }
 
     public IMember TargetMember { get; }
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
 
@@ -35,7 +35,7 @@ internal sealed class ContractConstructorTransformation : BaseTransformation, II
         }
         else
         {
-            return inputFilterBodies.SelectAsReadOnlyList( x => new InsertedStatement( x, this.TargetMember, this.ParentAdvice.AspectLayerId, InsertedStatementKind.CurrentEntry ) );
+            return inputFilterBodies.SelectAsArray( x => new InsertedStatement( x, this.TargetMember, this, InsertedStatementKind.InputContract ) );
         }
     }
 

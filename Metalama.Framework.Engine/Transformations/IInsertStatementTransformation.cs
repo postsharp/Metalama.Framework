@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
-    /// Represents a single code transformation.
+    /// Represents a code transformation that insert statements into the target member.
     /// </summary>
     internal interface IInsertStatementTransformation : ITransformation
     {
@@ -16,10 +16,10 @@ namespace Metalama.Framework.Engine.Transformations
         IMember TargetMember { get; }
 
         /// <summary>
-        /// Evaluates the target syntax node and transforms the state.
+        /// Provides an list of inserted statements.
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns>Inserted statement or <c>null</c> if an error has occured.</returns>
-        IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
+        /// <param name="context">Context for providing inserted statements.</param>
+        /// <returns>A list of Inserted statements or empty list if an error occured.</returns>
+        IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
     }
 }

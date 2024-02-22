@@ -66,7 +66,7 @@ internal sealed class ReplaceDefaultConstructorTransformation
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 
-    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
         // See https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11#auto-default-struct.
         if ( this.IntroducedDeclaration.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct &&
@@ -83,7 +83,7 @@ internal sealed class ReplaceDefaultConstructorTransformation
                                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) )
                         .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     this.IntroducedDeclaration,
-                    this.ParentAdvice.AspectLayerId,
+                    this,
                     InsertedStatementKind.Initializer )
             };
         }

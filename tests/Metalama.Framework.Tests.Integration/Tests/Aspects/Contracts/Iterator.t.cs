@@ -8,10 +8,6 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return this.Enumerable_Source(text);
-  }
-  private IEnumerable Enumerable_Source(string text)
-  {
     yield return "Hello";
     yield return text;
   }
@@ -22,10 +18,6 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return this.Enumerator_Source(text);
-  }
-  private IEnumerator Enumerator_Source(string text)
-  {
     yield return "Hello";
     yield return text;
   }
@@ -36,10 +28,6 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return this.EnumerableT_Source(text);
-  }
-  private IEnumerable<string> EnumerableT_Source(string text)
-  {
     yield return "Hello";
     yield return text;
   }
@@ -50,10 +38,6 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return this.EnumeratorT_Source(text);
-  }
-  private IEnumerator<string> EnumeratorT_Source(string text)
-  {
     yield return "Hello";
     yield return text;
   }
