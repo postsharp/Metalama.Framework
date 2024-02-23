@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
@@ -14,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -29,6 +31,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     private readonly Dictionary<AssemblyIdentity, CompileTimeProject> _referencedProjects;
 
     public SerializerGenerator(
+        ProjectServiceProvider serviceProvider,
         IDiagnosticAdder diagnosticAdder,
         CompilationContext runTimeCompilationContext,
         CompilationContext compileTimeCompilationContext,
@@ -40,10 +43,27 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         this._runTimeCompilationContext = runTimeCompilationContext;
         this._compileTimeCompilationContext = compileTimeCompilationContext;
 
+        var logger = serviceProvider.GetLoggerFactory().GetLogger( "SerializerGenerator" );
+
         // If multiple projects have the same identity, only use one of them.
-        this._referencedProjects = compileTimeProjects
-            .GroupBy( x => x.RunTimeIdentity )
-            .ToDictionary( g => g.Key, g => g.First() );
+        this._referencedProjects = [];
+
+        foreach ( var group in compileTimeProjects.GroupBy( x => x.RunTimeIdentity ) )
+        {
+            if ( group.Count() > 1 )
+            {
+                var sortedGroup = group.OrderBy( r => r.CompiledAssemblyPath ).ToImmutableArray();
+
+                logger.Warning?.Log(
+                    $"Multiple projects with the identity {group.Key} were found: {string.Join( ", ", sortedGroup.Select( x => x.CompiledAssemblyPath ) )}. Only the first one will be used." );
+
+                this._referencedProjects.Add( group.Key, sortedGroup[0] );
+            }
+            else
+            {
+                this._referencedProjects.Add( group.Key, group.Single() );
+            }
+        }
     }
 
     public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
