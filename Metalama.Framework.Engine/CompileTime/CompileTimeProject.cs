@@ -37,7 +37,8 @@ namespace Metalama.Framework.Engine.CompileTime
     {
         internal CompileTimeProjectManifest? Manifest { get; }
 
-        private readonly string? _compiledAssemblyPath;
+        internal string? CompiledAssemblyPath { get; }
+
         private readonly AssemblyIdentity _compileTimeIdentity;
         private readonly ITextMapFileProvider? _mapFileProvider;
         private readonly CacheableTemplateDiscoveryContextProvider? _cacheableTemplateDiscoveryContextProvider;
@@ -109,8 +110,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
         /// </summary>
-        /// <returns></returns>
-        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetMetadataReference( this.AssertNotEmpty()._compiledAssemblyPath! );
+        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetMetadataReference( this.AssertNotEmpty().CompiledAssemblyPath! );
 
         /// <summary>
         /// Gets a <see cref="CompileTime.ProjectLicenseInfo"/> corresponding to the current project.
@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets a value indicating whether the current project is empty, i.e. does not contain any source code. Note that
         /// an empty project can STILL contain <see cref="References"/>.
         /// </summary>
-        public bool IsEmpty => this._compiledAssemblyPath == null && !this.IsFramework;
+        public bool IsEmpty => this.CompiledAssemblyPath == null && !this.IsFramework;
 
         public bool IsFramework => this.RunTimeIdentity.Name == "Metalama.Framework";
 
@@ -178,7 +178,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             this.Domain = domain;
-            this._compiledAssemblyPath = compiledAssemblyPath;
+            this.CompiledAssemblyPath = compiledAssemblyPath;
             this._mapFileProvider = mapFileProvider;
             this.Directory = directory;
             this._cacheableTemplateDiscoveryContextProvider = cacheableTemplateDiscoveryContextProvider;
@@ -494,7 +494,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity, this._compiledAssemblyPath! );
+                this._assembly = this.Domain.GetOrLoadAssembly( this._compileTimeIdentity, this.CompiledAssemblyPath! );
             }
         }
 
