@@ -37,9 +37,13 @@ internal sealed class SerializerGenerator : ISerializerGenerator
     {
         this._diagnosticAdder = diagnosticAdder;
         this._context = context;
-        this._referencedProjects = compileTimeProjects.ToDictionary( x => x.RunTimeIdentity, x => x );
         this._runTimeCompilationContext = runTimeCompilationContext;
         this._compileTimeCompilationContext = compileTimeCompilationContext;
+
+        // If multiple projects have the same identity, only use one of them.
+        this._referencedProjects = compileTimeProjects
+            .GroupBy( x => x.RunTimeIdentity )
+            .ToDictionary( g => g.Key, g => g.First() );
     }
 
     public bool ShouldSuppressReadOnly( SerializableTypeInfo serializableType, ISymbol memberSymbol )
