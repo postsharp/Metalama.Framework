@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Advising
             Func<Contract, bool>? contractFilter,
             [NotNullWhen( true )] out List<StatementSyntax>? statements )
         {
-            statements = null;
+            statements = new List<StatementSyntax>();
 
             foreach ( var contract in this.Contracts )
             {
@@ -137,8 +137,6 @@ namespace Metalama.Framework.Engine.Advising
                 var parameterType = ((IHasType) contractTarget).Type;
                 ExpressionSyntax parameterExpression = IdentifierName( parameterName );
                 parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
-
-                statements ??= new List<StatementSyntax>();
 
                 var metaApiProperties = new MetaApiProperties(
                     this.SourceCompilation,
@@ -184,7 +182,7 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
-            return statements is { Count: > 0 };
+            return true;
         }
     }
 }

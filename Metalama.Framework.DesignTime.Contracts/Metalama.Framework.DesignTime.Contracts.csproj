@@ -5,13 +5,18 @@
            types to be in a .NET 6 build, otherwise it would conflict with the types in System.Runtime. -->
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <RootNamespace>Metalama.Framework.DesignTime.Contracts</RootNamespace>
+        
+        <!--  warning NU1903: Package 'Newtonsoft.Json' 12.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
+        <NoWarn>$(NoWarn);NU1903</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <!-- It is essential that the package version remains constant.-->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.0.1" PrivateAssets="all" />
-        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
+
+        <!-- We must match the version used by the lowest version of Visual Studion supported by the VSX. -->
+        <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     </ItemGroup>
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />

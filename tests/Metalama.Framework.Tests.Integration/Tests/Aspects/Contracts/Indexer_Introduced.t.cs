@@ -1,12 +1,20 @@
 [IntroduceAndFilter]
 internal class Target
 {
-  private string? _existingProperty;
-  public string? ExistingProperty
+  public string? this[string? x, string? y]
   {
     get
     {
-      var returnValue = this._existingProperty;
+      if (x == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      if (y == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      global::System.String? returnValue;
+      returnValue = x + y;
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
@@ -19,15 +27,26 @@ internal class Target
       {
         throw new global::System.ArgumentNullException();
       }
-      this._existingProperty = value;
+      if (x == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      if (y == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
     }
   }
-  private global::System.String? _introducedProperty;
-  public global::System.String? IntroducedProperty
+  public global::System.String? this[global::System.String? index]
   {
     get
     {
-      var returnValue = this._introducedProperty;
+      if (index == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      global::System.String? returnValue;
+      returnValue = default(global::System.String? );
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
@@ -40,7 +59,10 @@ internal class Target
       {
         throw new global::System.ArgumentNullException();
       }
-      this._introducedProperty = value;
+      if (index == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
     }
   }
 }

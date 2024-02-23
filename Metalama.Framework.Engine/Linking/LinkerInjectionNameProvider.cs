@@ -32,8 +32,15 @@ namespace Metalama.Framework.Engine.Linking
             this._finalCompilation = finalCompilation;
             this._injectionHelperProvider = injectionHelperProvider;
             this._injectedMemberNames = new ConcurrentDictionary<INamedType, HashSet<string>>( finalCompilation.Comparers.Default );
-            this._overriddenByCounters = new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>();
-            this._nameCollisionCounters = new ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>>();
+
+            this._overriddenByCounters =
+                new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>(
+                    ValueTupleComparer.Create<Type, IMember>( EqualityComparer<Type>.Default, finalCompilation.Comparers.Default ) );
+
+            this._nameCollisionCounters =
+                new ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>>(
+                    ValueTupleComparer.Create<INamedType, string>( finalCompilation.Comparers.Default, StringComparer.Ordinal ) );
+
             this._syntaxGenerator = syntaxGenerator;
         }
 
@@ -111,7 +118,7 @@ namespace Metalama.Framework.Engine.Linking
 
         internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember )
         {
-            // TODO: COunter update can be optimized but having multiple indexer overrides is not likely.
+            // TODO: Counter update can be optimized but having multiple indexer overrides is not likely.
 
             var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
 
@@ -154,6 +161,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 // If the strong box is already present, it means that other thread ran through before us, we have to only assert.
                                 Invariant.Assert( v.Value > 1 );
+
                                 return v;
                             } );
 
@@ -188,7 +196,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 lock ( counter )
                 {
-                    while (true)
+                    while ( true )
                     {
                         var candidate = $"{hint}{counter.Value++}";
 

@@ -41,13 +41,14 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                  && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
                  && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Input ) ) )
             {
-                if ( !advice.TryExecuteTemplates( 
-                        this.OverriddenDeclaration,
-                        context, 
-                        ContractDirection.Input, 
-                        null, 
-                        accessor.MethodKind == MethodKind.PropertyGet ? RemoveInputContract : null,
-                        out inputStatements ) )
+                if ( !advice.TryExecuteTemplates(
+                         this.OverriddenDeclaration,
+                         context,
+                         ContractDirection.Input,
+                         null,
+                         accessor.MethodKind == MethodKind.PropertyGet ? RemoveInputContract : null,
+                         out inputStatements )
+                     || inputStatements.Count == 0 )
                 {
                     inputStatements = null;
                     proceedExpression = null;
@@ -67,16 +68,22 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
                 inputStatements = null;
             }
 
-            if ( accessor != null
-                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
-                 && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) ) )
+            if ( accessor != null && accessor.MethodKind == MethodKind.PropertyGet
+                                  && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
+                                  && advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) ) )
             {
-                returnValueLocalName = 
-                    accessor.MethodKind == MethodKind.PropertyGet 
-                        ? context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" ) 
+                returnValueLocalName =
+                    accessor.MethodKind == MethodKind.PropertyGet
+                        ? context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" )
                         : null;
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Output, returnValueLocalName, null, out outputStatements ) )
+                if ( !advice.TryExecuteTemplates(
+                        this.OverriddenDeclaration,
+                        context,
+                        ContractDirection.Output,
+                        returnValueLocalName,
+                        null,
+                        out outputStatements ) || outputStatements.Count == 0 )
                 {
                     inputStatements = null;
                     proceedExpression = null;

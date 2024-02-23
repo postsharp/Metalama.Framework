@@ -17,8 +17,4 @@
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.4.8.0" />
     </ItemGroup>
     
-    <ItemGroup>
-      <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
-    </ItemGroup>
-
 </Project>

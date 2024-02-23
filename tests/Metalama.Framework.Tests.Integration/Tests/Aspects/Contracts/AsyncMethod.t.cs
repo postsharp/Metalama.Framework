@@ -16,16 +16,12 @@ public class TestClass
     }
     return returnValue;
   }
-  public Task DoSomethingAsync(string text)
+  public async Task DoSomethingAsync(string text)
   {
     if (text is null)
     {
       throw new global::System.ArgumentNullException("text");
     }
-    return this.DoSomethingAsync_Source(text);
-  }
-  private async Task DoSomethingAsync_Source(string text)
-  {
     await Task.Yield();
     Console.WriteLine("Hello");
   }
@@ -54,10 +50,6 @@ public class TestClass
     {
       throw new global::System.ArgumentNullException("text");
     }
-    await this.DoSomethingAsyncVoid_Source(text);
-  }
-  private async global::System.Threading.Tasks.ValueTask DoSomethingAsyncVoid_Source(string text)
-  {
     await Task.Yield();
     Console.WriteLine("Hello");
   }

@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -61,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
             var transformationComparer = TransformationLinkerOrderComparer.Instance;
             var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
             var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
-            var transformationCollection = new TransformationCollection( transformationComparer );
+            var transformationCollection = new TransformationCollection( input.CompilationModel, transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
@@ -98,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
                         transformationCollection,
                         buildersWithSynthesizedSetters );
 
-                    this.IndexIntroduceTransformation(
+                    this.IndexInjectTransformation(
                         input,
                         transformation,
                         diagnostics,
@@ -128,9 +130,52 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             // It's imperative that order of transformations is preserved while grouping by syntax tree.
-            var transformationsBySyntaxTree = input.Transformations.GroupBy( t => t.TransformedSyntaxTree );
+            // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
+            // of a partial type in parallel.
+            var transformationsByCanonicalSyntaxTree = input.Transformations.GroupBy( GetCanonicalSyntaxTree );
 
-            await this._concurrentTaskRunner.RunInParallelAsync( transformationsBySyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
+            var path = $"C:\\Dev\\Temp\\Metalama.TransformationOrder\\{input.CompilationModel.Name}\\{Guid.NewGuid()}.txt";
+
+            System.IO.Directory.CreateDirectory( System.IO.Path.GetDirectoryName( path )! );
+
+            System.IO.File.WriteAllLines(
+                $"C:\\Dev\\Temp\\Metalama.TransformationOrder\\{input.CompilationModel.Name}\\{Guid.NewGuid()}.txt",
+                transformationsByCanonicalSyntaxTree.OrderBy(g => g.Key.FilePath).SelectMany( g =>
+                {
+                    var lines = new List<string>();
+                    lines.Add( $"{g.Key.FilePath}:" );
+
+                    foreach (var transformation in g)
+                    {
+                        lines.Add( transformation.ToString()! );
+                    }
+
+                    lines.Add( "" );
+
+                    return lines;
+                } ) );
+
+            static SyntaxTree GetCanonicalSyntaxTree( ITransformation transformation )
+            {
+                return GetCanonicalTargetDeclaration( transformation.TargetDeclaration ) switch
+                {
+                    INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
+                    ICompilation compilation => transformation.TransformedSyntaxTree,
+                    var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
+                };
+
+                static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
+                    => declaration switch
+                    {
+                        IMember member => member.DeclaringType,
+                        INamedType type => type,
+                        IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
+                        ICompilation compilation => compilation,
+                        var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" ),
+                    };
+            }
+
+            await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
 
             await transformationCollection.FinalizeAsync(
                 transformationComparer,
@@ -234,7 +279,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static void IndexNodesWithModifiedAttributes(
             ITransformation transformation,
-            TransformationCollection transformationCollection)
+            TransformationCollection transformationCollection )
         {
             // We only need to index transformations on syntax (i.e. on source code) because introductions on generated code
             // are taken from the compilation model.
@@ -262,7 +307,9 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
-                transformationCollection.AddIntroduceTransformation( introduceDeclarationTransformation.DeclarationBuilder, introduceDeclarationTransformation );
+                transformationCollection.AddIntroduceTransformation(
+                    introduceDeclarationTransformation.DeclarationBuilder,
+                    introduceDeclarationTransformation );
             }
         }
 
@@ -334,7 +381,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void IndexIntroduceTransformation(
+        private void IndexInjectTransformation(
             AspectLinkerInput input,
             ITransformation transformation,
             UserDiagnosticSink diagnostics,
@@ -510,109 +557,122 @@ namespace Metalama.Framework.Engine.Linking
             ITransformation transformation,
             TransformationCollection transformationCollection )
         {
-            if (transformation is not IInsertStatementTransformation insertStatementTransformation )
+            if ( transformation is not IInsertStatementTransformation insertStatementTransformation )
             {
                 return;
             }
 
             switch ( insertStatementTransformation.TargetMember )
             {
-                case Constructor constructor:
+                case Constructor { IsPrimary: true } primaryConstructor:
                     {
-                        var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
+                        var primaryDeclaration = primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                         var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
                         var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
-                        if ( constructor.IsPrimary )
+                        // Convert each statement into a separate SetInitializerExpressionTransformation and index those.
+#pragma warning disable CS0618 // Type or member is obsolete
+                        ProcessStatements( insertedStatements.Select( s => s.Statement ) );
+#pragma warning restore CS0618 // Type or member is obsolete
+
+                        void ProcessStatements( IEnumerable<StatementSyntax> statements )
                         {
-                            // Convert each statement into a separate SetInitializerExpressionTransformation and index those.
-                            ProcessStatements( insertedStatements.Select( s => s.Statement ) );
-
-                            void ProcessStatements( IEnumerable<StatementSyntax> statements )
+                            foreach ( var statement in statements )
                             {
-                                foreach ( var statement in statements )
+                                if ( statement is BlockSyntax block )
                                 {
-                                    if ( statement is BlockSyntax block )
-                                    {
-                                        ProcessStatements( block.Statements );
+                                    ProcessStatements( block.Statements );
 
-                                        return;
-                                    }
-
-                                    if ( statement is not ExpressionStatementSyntax
-                                        {
-                                            Expression: AssignmentExpressionSyntax
-                                            {
-                                                RawKind: (int) SyntaxKind.SimpleAssignmentExpression,
-                                                Left: var leftExpression,
-                                                Right: var rightExpression
-                                            }
-                                        } )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (statement, constructor.DeclaringType) ) );
-
-                                        break;
-                                    }
-
-                                    var identifier = leftExpression switch
-                                    {
-                                        IdentifierNameSyntax identifierName => identifierName,
-                                        MemberAccessExpressionSyntax
-                                        {
-                                            RawKind: (int) SyntaxKind.SimpleMemberAccessExpression,
-                                            Expression: ThisExpressionSyntax,
-                                            Name: IdentifierNameSyntax thisIdentifierName
-                                        } => thisIdentifierName,
-                                        _ => null
-                                    };
-
-                                    if ( identifier == null )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
-
-                                        break;
-                                    }
-
-                                    var memberName = identifier.Identifier.ValueText;
-                                    var fieldOrProperty = constructor.DeclaringType.FieldsAndProperties.OfName( memberName ).Single();
-
-                                    if ( fieldOrProperty.RefKind != RefKind.None )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is a ref member.") ) );
-
-                                        break;
-                                    }
-
-                                    if ( fieldOrProperty.IsAutoPropertyOrField == false )
-                                    {
-                                        diagnostics.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                                                constructor.DiagnosticLocation, (leftExpression, constructor.DeclaringType, "It is not an auto-property.") ) );
-
-                                        break;
-                                    }
-
-                                    IndexMemberLevelTransformation(
-                                        input,
-                                        diagnostics,
-                                        lexicalScopeFactory,
-                                        new SetInitializerExpressionTransformation( insertStatementTransformation.ParentAdvice, fieldOrProperty, rightExpression ),
-                                        transformationCollection );
+                                    return;
                                 }
+
+                                if ( statement is not ExpressionStatementSyntax
+                                    {
+                                        Expression: AssignmentExpressionSyntax
+                                        {
+                                            RawKind: (int) SyntaxKind.SimpleAssignmentExpression,
+                                            Left: var leftExpression,
+                                            Right: var rightExpression
+                                        }
+                                    } )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAddStatementToPrimaryConstructor.CreateRoslynDiagnostic(
+                                            primaryConstructor.DiagnosticLocation,
+                                            (statement, primaryConstructor.DeclaringType) ) );
+
+                                    break;
+                                }
+
+                                var identifier = leftExpression switch
+                                {
+                                    IdentifierNameSyntax identifierName => identifierName,
+                                    MemberAccessExpressionSyntax
+                                    {
+                                        RawKind: (int) SyntaxKind.SimpleMemberAccessExpression,
+                                        Expression: ThisExpressionSyntax,
+                                        Name: IdentifierNameSyntax thisIdentifierName
+                                    } => thisIdentifierName,
+                                    _ => null
+                                };
+
+                                if ( identifier == null )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                            primaryConstructor.DiagnosticLocation,
+                                            (leftExpression, primaryConstructor.DeclaringType,
+                                             "Only the 'memberName' and 'this.memberName' forms are supported.") ) );
+
+                                    break;
+                                }
+
+                                var memberName = identifier.Identifier.ValueText;
+                                var fieldOrProperty = primaryConstructor.DeclaringType.FieldsAndProperties.OfName( memberName ).Single();
+
+                                if ( fieldOrProperty.RefKind != RefKind.None )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                            primaryConstructor.DiagnosticLocation,
+                                            (leftExpression, primaryConstructor.DeclaringType, "It is a ref member.") ) );
+
+                                    break;
+                                }
+
+                                if ( fieldOrProperty.IsAutoPropertyOrField == false )
+                                {
+                                    diagnostics.Report(
+                                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
+                                            primaryConstructor.DiagnosticLocation,
+                                            (leftExpression, primaryConstructor.DeclaringType, "It is not an auto-property.") ) );
+
+                                    break;
+                                }
+
+                                IndexMemberLevelTransformation(
+                                    input,
+                                    diagnostics,
+                                    lexicalScopeFactory,
+                                    new SetInitializerExpressionTransformation( insertStatementTransformation.ParentAdvice, fieldOrProperty, rightExpression ),
+                                    transformationCollection );
                             }
                         }
-                        else
-                        {
-                            transformationCollection.AddInsertedStatements( constructor, insertedStatements );
-                        }
+
+                        break;
+                    }
+
+                case MethodBase methodBase:
+                    {
+                        var primaryDeclaration = methodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( methodBase, insertedStatements );
 
                         break;
                     }
@@ -632,15 +692,56 @@ namespace Metalama.Framework.Engine.Linking
 
                         var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
-                        var builder =
-                            builtOrBuilderConstructor switch
-                            {
-                                IConstructorBuilder cb => cb,
-                                BuiltConstructor builtConstructor => builtConstructor.ConstructorBuilder,
-                                _ => throw new AssertionFailedException( $"Unsupported: {builtOrBuilderConstructor}" ),
-                            };
+                        transformationCollection.AddInsertedStatements( constructorBuilder, insertedStatements );
 
-                        transformationCollection.AddInsertedStatements( builder, insertedStatements );
+                        break;
+                    }
+
+                case IMethod { } builtOrBuilderMethod:
+                    {
+                        var methodBuilder = insertStatementTransformation.TargetMember as MethodBuilder
+                                            ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetMember).Builder;
+
+                        var positionInSyntaxTree = GetSyntaxTreePosition( methodBuilder.ToInsertPosition() );
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                            methodBuilder.PrimarySyntaxTree.AssertNotNull(),
+                            positionInSyntaxTree );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( methodBuilder, insertedStatements );
+
+                        break;
+                    }
+
+                case Property property:
+                    {
+                        var primaryDeclaration = property.GetPrimaryDeclarationSyntax().AssertNotNull();
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( property, insertedStatements );
+
+                        break;
+                    }
+
+                case IProperty { } builtOrBuilderProperty:
+                    {
+                        var propertyBuilder = insertStatementTransformation.TargetMember as PropertyBuilder
+                                              ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetMember).Builder;
+
+                        var positionInSyntaxTree = GetSyntaxTreePosition( propertyBuilder.ToInsertPosition() );
+
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                            propertyBuilder.PrimarySyntaxTree.AssertNotNull(),
+                            positionInSyntaxTree );
+
+                        var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                        transformationCollection.AddInsertedStatements( propertyBuilder, insertedStatements );
 
                         break;
                     }
@@ -649,7 +750,7 @@ namespace Metalama.Framework.Engine.Linking
                     throw new AssertionFailedException( $"Unexpected target: {insertStatementTransformation.TargetMember}." );
             }
 
-            IEnumerable<InsertedStatement> GetInsertedStatements(
+            IReadOnlyList<InsertedStatement> GetInsertedStatements(
                 IInsertStatementTransformation insertStatementTransformation,
                 SyntaxGenerationContext syntaxGenerationContext )
             {
@@ -661,9 +762,8 @@ namespace Metalama.Framework.Engine.Linking
                     input.CompilationModel );
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );
-#if DEBUG
-                statements = statements.ToMutableList();
 
+#if DEBUG
                 foreach ( var statement in statements )
                 {
                     if ( statement.Statement is BlockSyntax block )
@@ -731,7 +831,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     break;
 
-                case (SetInitializerExpressionTransformation setInitializerExpressionTransformation, _ ):
+                case (SetInitializerExpressionTransformation setInitializerExpressionTransformation, _):
                     memberLevelTransformations.Add( setInitializerExpressionTransformation );
 
                     break;

@@ -26,7 +26,10 @@ internal sealed partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProc
     private ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>> _compileTimeErrorsPerProject =
         ImmutableDictionary<ProjectKey, ImmutableArray<IDiagnosticData>>.Empty;
 
-    public UserProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base( serviceProvider.Underlying, pipeName )
+    public UserProcessEndpoint( GlobalServiceProvider serviceProvider, string pipeName ) : base(
+        serviceProvider.Underlying,
+        pipeName,
+        JsonSerializationBinderFactory.Instance )
     {
         this._apiImplementation = new ApiImplementation( this );
     }
