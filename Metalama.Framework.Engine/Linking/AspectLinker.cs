@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Services;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,9 +31,6 @@ namespace Metalama.Framework.Engine.Linking
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
             var injectionStepOutput =
                 await new LinkerInjectionStep( this._serviceProvider, this._compilationContext ).ExecuteAsync( this._input, cancellationToken );
-
-            this._serviceProvider.GetService<ILinkerObserver>()
-                ?.OnIntermediateCompilationCreated( injectionStepOutput.IntermediateCompilation );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
             var analysisStepOutput =

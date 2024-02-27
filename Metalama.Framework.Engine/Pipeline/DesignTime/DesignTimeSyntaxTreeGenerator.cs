@@ -216,7 +216,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         finalConstructor.GetSyntaxModifierList(),
                         Identifier( finalConstructor.DeclaringType.Name ),
                         syntaxGenerationContext.SyntaxGenerator.ParameterList( finalParameters, initialCompilationModel ),
-                        ConstructorInitializer(
+                        initialConstructor.IsImplicitlyDeclared
+                        ? default
+                        : ConstructorInitializer(
                             SyntaxKind.ThisConstructorInitializer,
                             ArgumentList(
                                 SeparatedList( 

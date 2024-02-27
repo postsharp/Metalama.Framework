@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -232,6 +233,9 @@ namespace Metalama.Framework.Engine.Linking
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
+
+            this._serviceProvider.GetService<ILinkerObserver>()
+                ?.OnIntermediateCompilationCreated( intermediateCompilation );
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
