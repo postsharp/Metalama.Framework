@@ -137,6 +137,38 @@ class ReferencingClass
         }
 
         [Fact]
+        public void CompilationDuplicateMetadataReference()
+        {
+            const string referencedCode = @"
+using Metalama.Framework.Aspects;
+[assembly: CompileTime]
+public class ReferencedClass
+{
+}
+";
+
+            const string referencingCode = @"
+
+using Metalama.Framework.Aspects;
+[assembly: CompileTime]
+class ReferencingClass
+{
+  ReferencedClass c;
+}
+";
+
+            var referencedCompilation = TestCompilationFactory.CreateCSharpCompilation( referencedCode );
+            var referencedCompilationModified = referencedCompilation.WithOptions( referencedCompilation.Options.WithAllowUnsafe( !referencedCompilation.Options.AllowUnsafe ) );
+
+            var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation(
+                referencingCode, additionalReferences: [referencedCompilation.ToMetadataReference(), referencedCompilationModified.ToMetadataReference()] );
+
+            using var testContext = this.CreateTestContext();
+            var domain = testContext.Domain;
+            CompileTimeProjectRepository.Create( domain, testContext.ServiceProvider, roslynCompilation ).AssertNotNull();
+        }
+
+        [Fact]
         public void BinaryMetadataReferences()
         {
             // This tests that we can create compile-time assemblies that have reference compiled assemblies (out of the solution) with compile-time code.

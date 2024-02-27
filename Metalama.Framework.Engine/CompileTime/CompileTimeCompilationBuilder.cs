@@ -241,6 +241,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         var templateCompiler = new TemplateCompiler( this._serviceProvider, compilationContext, templateSymbolManifestBuilder );
 
         var produceCompileTimeCodeRewriter = new ProduceCompileTimeCodeRewriter(
+            this._serviceProvider,
             this,
             compilationContext,
             compileTimeCompilationContext,
