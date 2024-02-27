@@ -134,27 +134,6 @@ namespace Metalama.Framework.Engine.Linking
             // of a partial type in parallel.
             var transformationsByCanonicalSyntaxTree = input.Transformations.GroupBy( GetCanonicalSyntaxTree );
 
-            var path = $"C:\\Dev\\Temp\\Metalama.TransformationOrder\\{input.CompilationModel.Name}\\{Guid.NewGuid()}.txt";
-
-            System.IO.Directory.CreateDirectory( System.IO.Path.GetDirectoryName( path )! );
-
-            System.IO.File.WriteAllLines(
-                $"C:\\Dev\\Temp\\Metalama.TransformationOrder\\{input.CompilationModel.Name}\\{Guid.NewGuid()}.txt",
-                transformationsByCanonicalSyntaxTree.OrderBy(g => g.Key.FilePath).SelectMany( g =>
-                {
-                    var lines = new List<string>();
-                    lines.Add( $"{g.Key.FilePath}:" );
-
-                    foreach (var transformation in g)
-                    {
-                        lines.Add( transformation.ToString()! );
-                    }
-
-                    lines.Add( "" );
-
-                    return lines;
-                } ) );
-
             static SyntaxTree GetCanonicalSyntaxTree( ITransformation transformation )
             {
                 return GetCanonicalTargetDeclaration( transformation.TargetDeclaration ) switch
