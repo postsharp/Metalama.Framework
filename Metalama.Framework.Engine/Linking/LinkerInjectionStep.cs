@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -27,8 +28,6 @@ using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
-using Metalama.Framework.Engine.Observers;
-
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
