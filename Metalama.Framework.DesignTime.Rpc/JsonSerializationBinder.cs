@@ -14,93 +14,32 @@ namespace Metalama.Framework.DesignTime.Rpc;
 /// </summary>
 public sealed class JsonSerializationBinder : DefaultSerializationBinder
 {
+    private static readonly char[] _tokens = new[] { ',', ']' };
     private readonly ConcurrentDictionary<string, Assembly> _assemblies = new();
     private readonly Dictionary<string, string> _assemblyNames = new();
-    private static readonly char[] _tokens = new[] { ',', ']' };
 
     public static JsonSerializationBinder Default { get; } = new();
 
-    public JsonSerializationBinder( IEnumerable<Assembly>? additionalAssemblies = null )
+    public JsonSerializationBinder( Action<JsonSerializationBinderConfiguration>? configure = null )
     {
-        void AddAssemblyOfType( Type t, params string[] alternateNames )
-        {
-            var assemblyName = t.Assembly.GetName().Name;
-            this.TryAddAssembly( assemblyName, t.Assembly );
-
-            foreach ( var name in alternateNames )
-            {
-                if ( name != assemblyName )
-                {
-                    this.TryAddAssembly( name, t.Assembly );
-                }
-            }
-        }
+        var configuration = new JsonSerializationBinderConfiguration( this );
 
         // Add system dependencies.
-        AddAssemblyOfType( typeof(ImmutableArray<>) ); // System.Collections.Immutable
-        AddAssemblyOfType( typeof(CommonErrorData) ); // StreamJsonRpc
-        
+        configuration.AddAssemblyOfType( typeof(ImmutableArray<>) ); // System.Collections.Immutable
+        configuration.AddAssemblyOfType( typeof(CommonErrorData) );  // StreamJsonRpc
+
         // Add the current assembly. Note that in VSX it is merged inside a different assembly named Metalama.Repacked.
-        AddAssemblyOfType( typeof(ProjectKey), "Metalama.Framework.DesignTime.Rpc", "Metalama.Repacked" ); // The current assembly
+        configuration.AddAssemblyOfType( typeof(ProjectKey), "Metalama.Framework.DesignTime.Rpc", "Metalama.Repacked" ); // The current assembly
 
+        // Add system assemblies.
+        configuration.AddSystemLibrary( "System.Private.CoreLib" );
+        configuration.AddSystemLibrary( "mscorlib" );
+        
         // Add additional assemblies.
-        if ( additionalAssemblies != null )
-        {
-            foreach ( var additionalAssembly in additionalAssemblies )
-            {
-                this.TryAddAssembly( additionalAssembly.GetName().Name, additionalAssembly );
-            }
-        }
-
-        void AddAssemblyWithSameVersionThanType( Type t, string assemblyName )
-        {
-            var newAssemblyName = new AssemblyName( t.Assembly.FullName.Replace( t.Assembly.GetName().Name, assemblyName ) );
-
-            var assembly = AppDomain.CurrentDomain
-                .GetAssemblies()
-                .FirstOrDefault(
-                    a =>
-                    {
-                        var name = a.GetName();
-
-                        return AssemblyName.ReferenceMatchesDefinition( newAssemblyName, name ) && name.Version == newAssemblyName.Version;
-                    } );
-
-            try
-            {
-                if ( assembly == null )
-                {
-                    assembly = Assembly.Load( newAssemblyName );
-                }
-
-                this.TryAddAssembly( assemblyName, assembly );
-            }
-            catch ( FileNotFoundException )
-            {
-                // This happens in tests for assemblies of the other version of Roslyn than the one the test project is compiled for.
-            }
-        }
-
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.0.1" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.4.0" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.4.8.0" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.0.1" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.4.0" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.DesignTime.VisualStudio.4.8.0" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.0.1" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.4.0" );
-        AddAssemblyWithSameVersionThanType( typeof(ProjectKey), "Metalama.Framework.Engine.4.8.0" );
-
-        void AddSystemLibrary( string name )
-        {
-            this.TryAddAssembly( name, typeof(int).Assembly );
-        }
-
-        AddSystemLibrary( "System.Private.CoreLib" );
-        AddSystemLibrary( "mscorlib" );
+        configure?.Invoke( configuration );
     }
 
-    private void TryAddAssembly( string assemblyName, Assembly assembly )
+    internal void TryAddAssembly( string assemblyName, Assembly assembly )
     {
         if ( this._assemblies.TryAdd( assemblyName, assembly ) )
         {

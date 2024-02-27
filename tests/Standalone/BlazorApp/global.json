@@ -1,10 +1,5 @@
 {
   "comment": "Don't specify .NET SDK version here, so that the latest installed version is used.",
-  "sdk": {
-    "comment":  "8.0.200 is broken until Roslyn 4.9.0 is merged into Metalama Compiler",
-    "version": "8.0.100",
-    "rollForward": "patch"
-  },
   "msbuild-sdks": {
     "PostSharp.Engineering.Sdk": "2023.2.76"
   }

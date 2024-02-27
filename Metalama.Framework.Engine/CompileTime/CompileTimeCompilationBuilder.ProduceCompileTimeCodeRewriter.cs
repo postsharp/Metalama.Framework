@@ -77,6 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
+                ProjectServiceProvider serviceProvider,
                 CompileTimeCompilationBuilder parent,
                 ClassifyingCompilationContext compilationContext,
                 CompilationContext compileTimeCompilationContext,
@@ -116,6 +117,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator(
+                    serviceProvider,
                     diagnosticAdder,
                     compilationContext.CompilationContext,
                     compileTimeCompilationContext,
