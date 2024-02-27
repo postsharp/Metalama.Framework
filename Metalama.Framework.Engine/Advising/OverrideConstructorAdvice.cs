@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -34,7 +35,17 @@ namespace Metalama.Framework.Engine.Advising
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {
-            addTransformation( new OverrideConstructorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+            var targetCtor = this.TargetDeclaration.GetTarget( compilation );
+
+            if ( targetCtor.IsImplicitInstanceConstructor() )
+            {
+                // Missing implicit ctor.
+                var builder = new ConstructorBuilder( targetCtor.DeclaringType, this );
+                addTransformation( builder.ToTransformation() );
+                targetCtor = builder;
+            }
+
+            addTransformation( new OverrideConstructorTransformation( this, targetCtor, this._boundTemplate, this.Tags ) );
 
             return AdviceImplementationResult.Success();
         }

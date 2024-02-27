@@ -27,6 +27,8 @@ using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using Metalama.Framework.Engine.Observers;
+
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
@@ -253,6 +255,9 @@ namespace Metalama.Framework.Engine.Linking
             transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
+
+            this._serviceProvider.GetService<ILinkerObserver>()
+                ?.OnIntermediateCompilationCreated( intermediateCompilation );
 
             var injectionRegistry = new LinkerInjectionRegistry(
                 transformationComparer,
