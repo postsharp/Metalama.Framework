@@ -237,10 +237,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                 return null;
         }
 
-        if ( symbol.BelongsToCompilation( this._compilationModel.CompilationContext ) == false )
-        {
-            throw new ArgumentOutOfRangeException( nameof(symbol), $"'{symbol}' does not belong to the current compilation." );
-        }
+        symbol.ThrowIfBelongsToDifferentCompilationThan( this.CompilationContext );
 
         switch ( symbol.Kind )
         {
