@@ -5,22 +5,31 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Type;
 
+public class MyAttribute : Attribute;
+
 [Inheritable]
 public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(SerializableAttribute) ) );
+        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
     }
 }
 
 // <target>
-internal class Output
+internal class TargetClass
 {
     [MyAspect]
     internal class C { }
 
     internal class D : C { }
+}
+
+// <target>
+internal struct TargetStruct
+{
+    [MyAspect]
+    internal struct C { }
 }
 
 // <target>
@@ -39,4 +48,27 @@ internal record class TargetRecordClass
     internal record class C { }
 
     internal record class D : C { }
+}
+
+// <target>
+internal interface TargetInterface
+{
+    [MyAspect]
+    internal interface C { }
+}
+
+// <target>
+internal class TargetEnum
+{
+    [MyAspect]
+    internal enum E
+    {
+    }
+}
+
+// <target>
+internal class TargetDelegate
+{
+    [MyAspect]
+    internal delegate void D();
 }
