@@ -338,6 +338,53 @@ internal sealed partial class LinkerInjectionStep
 
         public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
+        public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+        {
+            var originalNode = node;
+            var members = new List<EnumMemberDeclarationSyntax>( node.Members.Count );
+
+            using ( var suppressionContext = this.WithSuppressions( node ) )
+            {
+                // Process the type members.
+                foreach ( var member in node.Members )
+                {
+                    var visitedMember = this.VisitEnumMemberDeclarationCore( member );
+
+                    using ( var memberSuppressions = this.WithSuppressions( member ) )
+                    {
+                        var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions );
+                        members.Add( memberWithSuppressions );
+                    }
+                }
+
+                node = this.AddSuppression( node, suppressionContext.NewSuppressions );
+            }
+
+            node = node.WithMembers( SeparatedList( members ) );
+
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = ReplaceAttributes( node, rewrittenAttributes );
+
+            return node;
+        }
+
+        public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+        {
+            var originalNode = node;
+
+            using ( var suppressionContext = this.WithSuppressions( node ) )
+            {
+                node = this.AddSuppression( node, suppressionContext.NewSuppressions );
+            }
+
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = ReplaceAttributes( node, rewrittenAttributes );
+
+            return node;
+        }
+
         private SyntaxNode VisitTypeDeclaration<T>( T node )
             where T : TypeDeclarationSyntax
         {
@@ -1000,6 +1047,17 @@ internal sealed partial class LinkerInjectionStep
                     return new[] { node };
                 }
             }
+        }
+
+        private EnumMemberDeclarationSyntax VisitEnumMemberDeclarationCore( EnumMemberDeclarationSyntax node )
+        {
+            var originalNode = node;
+
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = ReplaceAttributes( node, rewrittenAttributes );
+
+            return node;
         }
 
         private ConstructorDeclarationSyntax VisitConstructorDeclarationCore( ConstructorDeclarationSyntax node )

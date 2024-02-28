@@ -26,3 +26,10 @@ internal class C
     [MyAspect]
     private int Field3;
 }
+
+// <target>
+internal enum E
+{
+    [MyAspect]
+    A
+}
