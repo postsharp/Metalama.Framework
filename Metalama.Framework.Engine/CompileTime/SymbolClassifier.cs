@@ -276,10 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
-            if ( symbol.BelongsToCompilation( this._compilationContext ) == false )
-            {
-                throw new ArgumentOutOfRangeException( $"The symbol '{symbol}' does not belong to the expected compilation." );
-            }
+            symbol.ThrowIfBelongsToDifferentCompilationThan( this._compilationContext );
 
             return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, null )
                 .GetValueOrDefault( TemplatingScope.RunTimeOnly );
