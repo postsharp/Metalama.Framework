@@ -364,7 +364,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = ReplaceAttributes( node, rewrittenAttributes );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
@@ -380,7 +380,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = ReplaceAttributes( node, rewrittenAttributes );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
@@ -1055,7 +1055,7 @@ internal sealed partial class LinkerInjectionStep
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-            node = ReplaceAttributes( node, rewrittenAttributes );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
         }
