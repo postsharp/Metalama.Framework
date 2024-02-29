@@ -64,10 +64,14 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<InjectedMember>();
             }
 
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Unsafe )
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+
             var syntax =
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList(),
+                    TokenList( modifiers ),
                     PredefinedType( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.VoidKeyword ) ),
                     null,
                     Identifier(

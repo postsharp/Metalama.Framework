@@ -502,6 +502,26 @@ namespace Metalama.Testing.AspectTesting
                 var actualOutput = (string) state["actualProgramOutput"]!;
                 Assert.Equal( expectedOutput, actualOutput );
             }
+
+#if DEBUG
+            if ( testInput.Options.AcceptInvalidInput != true && testResult.IntermediateLinkerCompilation != null )
+            {
+                // The following is useful when debugging weird linker problems.
+                // Linker should never produce invalid compilation by itself, but usually recovers quite well.
+
+                // TODO: Commented out because we have some tests that generate invalid syntax either into the intermediate compilation or even to the final one.
+
+                //var intermediateDiagnostics = testResult.IntermediateLinkerCompilation.Compilation.GetDiagnostics();
+
+                //var intermediateLinkerError =
+                //    intermediateDiagnostics.FirstOrDefault( d => d is { Severity: DiagnosticSeverity.Error } or { Severity: DiagnosticSeverity.Warning, IsWarningAsError: true } );
+
+                //if ( intermediateLinkerError != null )
+                //{
+                //    throw new InvalidOperationException( $"Invalid intermediate compilation: {intermediateLinkerError}" );
+                //}
+            }
+#endif
         }
     }
 }

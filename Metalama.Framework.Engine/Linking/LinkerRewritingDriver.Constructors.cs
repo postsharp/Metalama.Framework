@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -20,9 +21,31 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
+            var members = new List<MemberDeclarationSyntax>();
+
+            // If deconstructing primary constructor, add all fields defined by primary constructor parameters.
+            if ( this.InjectionRegistry.IsAuxiliarySourceSymbol( symbol )
+                 && this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol.ContainingType ) )
+            {
+                foreach ( var primaryConstructorField in this.LateTransformationRegistry.GetPrimaryConstructorFields( symbol.ContainingType ) )
+                {
+                    members.Add(
+                        FieldDeclaration(
+                             List<AttributeListSyntax>(),
+                             TokenList( TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ), TokenWithTrailingSpace( SyntaxKind.ReadOnlyKeyword ) ),
+                             VariableDeclaration(
+                                 generationContext.SyntaxGenerator
+                                    .Type( primaryConstructorField.Type )
+                                    .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.PreserveTrivia ),
+                                 SingletonSeparatedList(
+                                     VariableDeclarator(
+                                         Identifier( TriviaList( ElasticSpace ), primaryConstructorField.Name[1..^2], default ) ) ) ),
+                             TokenWithTrailingLineFeed( SyntaxKind.SemicolonToken ) ) );
+                }
+            }
+
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
-                var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = this.InjectionRegistry.GetLastOverride( symbol );
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -31,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    throw new AssertionFailedException("Uninlined constructors are not supported.");
+                    throw new AssertionFailedException( "Uninlined constructors are not supported." );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -47,27 +70,25 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     throw new AssertionFailedException( "Uninlined constructors are not supported." );
                 }
-
-                return members;
             }
             else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
-                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    return Array.Empty<MemberDeclarationSyntax>();
+                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) );
                 }
-
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
             }
             else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
             {
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) );
             }
             else
             {
-                return new[] { constructorDeclaration };
+                members.Add( constructorDeclaration );
             }
+
+            return members;
 
             ConstructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
@@ -89,6 +110,37 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unsupported form of constructor declaration for {symbol}." )
                     };
 
+                var isAuxiliaryConstructor = this.InjectionRegistry.IsAuxiliarySourceSymbol( symbol );
+
+                if ( isAuxiliaryConstructor )
+                {
+                    List<StatementSyntax> primaryConstructorFieldAssignments = new();
+
+                    foreach ( var primaryConstructorField in this.LateTransformationRegistry.GetPrimaryConstructorFields( symbol.ContainingType ) )
+                    {
+                        var cleanName = primaryConstructorField.Name[1..^2];
+
+                        primaryConstructorFieldAssignments.Add(
+                            ExpressionStatement(
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        ThisExpression(),
+                                        IdentifierName( cleanName ) ),
+                                    IdentifierName( cleanName ) ) ) );
+                    }
+
+                    if ( primaryConstructorFieldAssignments.Count > 0 )
+                    {
+                        linkedBody = 
+                            Block(
+                                Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                linkedBody )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                    }
+                }
+
                 var ret = constructorDeclaration.PartialUpdate(
                     expressionBody: null,
                     body: Block(
@@ -97,7 +149,20 @@ namespace Metalama.Framework.Engine.Linking
                             Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
-                    semicolonToken: default(SyntaxToken) );
+                    parameterList:
+                        isAuxiliaryConstructor
+                        ? constructorDeclaration.ParameterList.WithParameters(
+                            constructorDeclaration.ParameterList.Parameters.RemoveAt( constructorDeclaration.ParameterList.Parameters.Count - 1 ) )
+                        : default,
+                    initializer:
+                        isAuxiliaryConstructor
+                        ? this.LateTransformationRegistry.GetPrimaryConstructorBaseArgumentList( symbol ) switch
+                        {
+                            { } arguments => ConstructorInitializer(SyntaxKind.BaseConstructorInitializer, arguments),
+                            null => null,
+                        }
+                        : default,
+                    semicolonToken: default( SyntaxToken ) );
 
                 return ret;
             }

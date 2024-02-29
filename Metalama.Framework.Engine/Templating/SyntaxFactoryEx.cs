@@ -246,10 +246,14 @@ internal static partial class SyntaxFactoryEx
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
 
-    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokens = new();
+    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithTrailingSpace = new();
+    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithLineFeed = new();
 
     internal static SyntaxToken TokenWithTrailingSpace( SyntaxKind kind )
-        => _tokens.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticSpace ) ) );
+        => _tokensWithTrailingSpace.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticSpace ) ) );
+
+    internal static SyntaxToken TokenWithTrailingLineFeed( SyntaxKind kind )
+        => _tokensWithLineFeed.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticLineFeed ) ) );
 
     public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
         SyntaxKind disableOrRestoreKind,

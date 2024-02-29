@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             var modifiers = this.OverriddenDeclaration
-                .GetSyntaxModifierList( ModifierCategories.Static )
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
                 .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             // TODO: Do not throw exception when template expansion fails.

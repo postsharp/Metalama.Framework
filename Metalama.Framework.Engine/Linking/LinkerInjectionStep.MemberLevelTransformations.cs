@@ -45,8 +45,4 @@ internal sealed partial class LinkerInjectionStep
         public void Add( SetInitializerExpressionTransformation transformation )
             => LazyInitializer.EnsureInitialized( ref this._unorderedExpressions ).Add( transformation );
     }
-
-    // Currently unused, but might be useful in the future.
-    // ReSharper disable once ClassNeverInstantiated.Local
-    private sealed class TypeLevelTransformations { }
 }

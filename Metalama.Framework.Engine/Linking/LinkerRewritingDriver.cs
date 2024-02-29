@@ -29,9 +29,11 @@ namespace Metalama.Framework.Engine.Linking
     {
         private ProjectServiceProvider ServiceProvider { get; }
 
+        private CompilationContext IntermediateCompilationContext { get; }
+
         private LinkerInjectionRegistry InjectionRegistry { get; }
 
-        private CompilationContext IntermediateCompilationContext { get; }
+        private LinkerLateTransformationRegistry LateTransformationRegistry { get; }
 
         private LinkerAnalysisRegistry AnalysisRegistry { get; }
 
@@ -39,12 +41,14 @@ namespace Metalama.Framework.Engine.Linking
             ProjectServiceProvider serviceProvider,
             CompilationContext intermediateCompilationContext,
             LinkerInjectionRegistry injectionRegistry,
+            LinkerLateTransformationRegistry lateTransformationRegistry,
             LinkerAnalysisRegistry analysisRegistry )
         {
             this.ServiceProvider = serviceProvider;
-            this.InjectionRegistry = injectionRegistry;
-            this.AnalysisRegistry = analysisRegistry;
             this.IntermediateCompilationContext = intermediateCompilationContext;
+            this.InjectionRegistry = injectionRegistry;
+            this.LateTransformationRegistry = lateTransformationRegistry;
+            this.AnalysisRegistry = analysisRegistry;
         }
 
         /// <summary>

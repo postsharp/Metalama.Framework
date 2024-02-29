@@ -67,11 +67,15 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<InjectedMember>();
             }
 
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+
             var syntax =
                 this.OverriddenDeclaration.IsStatic
                 ? (MemberDeclarationSyntax) MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.PrivateKeyword ), Token(SyntaxKind.StaticKeyword ) ),
+                    TokenList( modifiers ),
                     PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
                     null,
                     Identifier(
@@ -83,10 +87,10 @@ namespace Metalama.Framework.Engine.Transformations
                     ParameterList(),
                     List<TypeParameterConstraintClauseSyntax>(),
                     newMethodBody,
-                    null)
+                    null )
                 : ConstructorDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    TokenList( Token( TriviaList(), SyntaxKind.PrivateKeyword, TriviaList( ElasticSpace ) ) ),
                     Identifier( this.OverriddenDeclaration.DeclaringType.Name ),
                     this.GetParameterList( context ),
                     ConstructorInitializer(

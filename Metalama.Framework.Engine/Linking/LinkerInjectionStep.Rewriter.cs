@@ -440,7 +440,7 @@ internal sealed partial class LinkerInjectionStep
                 foreach ( var injectedMember in injectedMembersAtPosition )
                 {
                     // We should inject into a correct syntax tree.
-                    Invariant.Assert( injectedMember.Transformation.TransformedSyntaxTree == originalNode.SyntaxTree );
+                    Invariant.Assert( injectedMember.TargetSyntaxTree == originalNode.SyntaxTree );
 
                     // Allow for tracking of the node inserted.
                     // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
@@ -476,7 +476,9 @@ internal sealed partial class LinkerInjectionStep
 
                     injectedNode = injectedNode
                         .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
-                        .WithGeneratedCodeAnnotation( injectedMember.Transformation.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )!;
+                        .WithGeneratedCodeAnnotation(
+                            injectedMember.Transformation?.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation
+                            ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     // Insert inserted statements into 
                     switch ( injectedNode )

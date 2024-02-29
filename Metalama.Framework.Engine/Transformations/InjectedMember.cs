@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -17,9 +19,9 @@ namespace Metalama.Framework.Engine.Transformations
         public DeclarationKind Kind { get; }
 
         /// <summary>
-        /// Gets the <see cref="IInjectMemberTransformation" /> that created this object.
+        /// Gets the <see cref="ITransformation" /> that created or resulted in creation of this object or <c>null</c> if being result of the source code.
         /// </summary>
-        public IInjectMemberTransformation Transformation { get; }
+        public ITransformation? Transformation { get; }
 
         public IDeclarationBuilder? DeclarationBuilder => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilder;
 
@@ -31,7 +33,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMember"/>.
         /// </summary>
-        public AspectLayerId AspectLayerId { get; }
+        public AspectLayerId? AspectLayerId { get; }
 
         /// <summary>
         /// Gets the semantic of the introduced member as supported by the linker.
@@ -43,6 +45,11 @@ namespace Metalama.Framework.Engine.Transformations
         /// This is used to associate diagnostic suppressions to the introduced member and for inserted statements.
         /// </summary>
         public IMemberOrNamedType Declaration { get; }
+
+        public SyntaxTree TargetSyntaxTree =>
+            this.Transformation != null
+            ? this.Transformation.TransformedSyntaxTree
+            : this.Declaration.GetPrimarySyntaxTree().AssertNotNull();
 
         public InjectedMember(
             IInjectMemberTransformation injectMemberTransformation,
@@ -81,10 +88,10 @@ namespace Metalama.Framework.Engine.Transformations
             prototype.Declaration ) { }
 
         internal InjectedMember(
-            IInjectMemberTransformation transformation,
+            ITransformation? transformation,
             DeclarationKind kind,
             MemberDeclarationSyntax syntax,
-            AspectLayerId aspectLayerId,
+            AspectLayerId? aspectLayerId,
             InjectedMemberSemantic semantic,
             IMemberOrNamedType declaration )
         {
@@ -96,7 +103,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.Kind = kind;
         }
 
-        public override string? ToString() => this.Transformation.ToString();
+        public override string? ToString() => this.Transformation?.ToString() ?? "(linker auxiliary)";
 
         internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax )
         {

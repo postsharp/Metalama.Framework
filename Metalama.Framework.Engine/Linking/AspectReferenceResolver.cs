@@ -393,12 +393,11 @@ namespace Metalama.Framework.Engine.Linking
                             x =>
                             {
                                 var injectedMember = @this._injectionRegistry.GetInjectedMemberForSymbol( x ).AssertNotNull();
-                                return new OverrideIndex(
-                                    new MemberLayerIndex(
-                                        @this._layerIndex[injectedMember.AspectLayerId],
-                                        injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
-                                        injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 ),
-                                    injectedMember );
+
+                                return
+                                    new OverrideIndex(
+                                        @this.GetMemberLayerIndex(injectedMember),
+                                        injectedMember );
                             } )
                         .Materialize()
                         .AssertSorted( x => x.Index);
@@ -446,11 +445,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return
-                new MemberLayerIndex(
-                    this._layerIndex[injectedMember.AspectLayerId],
-                    injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
-                    injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
+            return this.GetMemberLayerIndex( injectedMember );
         }
 
         private MemberLayerIndex GetAnnotationLayerIndex( ISymbol containingSymbol )
@@ -459,12 +454,16 @@ namespace Metalama.Framework.Engine.Linking
                 this._injectionRegistry.GetInjectedMemberForSymbol( containingSymbol )
                 ?? throw new AssertionFailedException( $"Could not find injected member for {containingSymbol}." );
 
-            return
-                new MemberLayerIndex(
-                    this._layerIndex[containingInjectedMember.AspectLayerId],
-                    containingInjectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
-                    containingInjectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 );
+            return this.GetMemberLayerIndex( containingInjectedMember );
         }
+
+        private MemberLayerIndex GetMemberLayerIndex( InjectedMember injectedMember )
+            => injectedMember.Transformation != null
+            ? new MemberLayerIndex(
+                    this._layerIndex[injectedMember.AspectLayerId.AssertNotNull()],
+                    injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
+                    injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 )
+            : new MemberLayerIndex( 0, 0, 0 );
 
         /// <summary>
         /// Resolves target symbol of the reference.

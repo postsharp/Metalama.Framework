@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -24,10 +25,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using JetBrains.Annotations;
+
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
@@ -70,6 +74,7 @@ namespace Metalama.Framework.Engine.Linking
 
             HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             HashSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
+            ConcurrentDictionary<IDeclaration, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( input.CompilationModel.Comparers.Default );
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
@@ -99,6 +104,7 @@ namespace Metalama.Framework.Engine.Linking
                     IndexOverrideTransformation(
                         transformation,
                         transformationCollection,
+                        auxiliaryMemberTransformations,
                         buildersWithSynthesizedSetters );
 
                     this.IndexInjectTransformation(
@@ -156,6 +162,17 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
+
+            // Process any auxiliary member transformations in parallel.
+            void ProcessAuxiliaryMemberTransformations( KeyValuePair<IDeclaration, AuxiliaryMemberTransformations> transformationPair)
+            {
+                var declaration = transformationPair.Key;
+                var transformations = transformationPair.Value;
+
+                IndexAuxiliaryMemberTransformations( transformationCollection, injectionHelperProvider, declaration, transformations );
+            }
+
+            await this._concurrentTaskRunner.RunInParallelAsync( auxiliaryMemberTransformations, ProcessAuxiliaryMemberTransformations, cancellationToken );
 
             await transformationCollection.FinalizeAsync(
                 transformationComparer,
@@ -234,6 +251,7 @@ namespace Metalama.Framework.Engine.Linking
 
             intermediateCompilation = intermediateCompilation.Update( transformations );
 
+            // Report the linker intermediate compilation to tooling/tests.
             this._serviceProvider.GetService<ILinkerObserver>()
                 ?.OnIntermediateCompilationCreated( intermediateCompilation );
 
@@ -248,6 +266,11 @@ namespace Metalama.Framework.Engine.Linking
                 this._concurrentTaskRunner,
                 cancellationToken );
 
+            var lateTransformationRegistry = 
+                new LinkerLateTransformationRegistry(
+                    intermediateCompilation,
+                    transformationCollection.LateTypeLevelTransformations );
+
             var projectOptions = this._serviceProvider.GetService<IProjectOptions>();
 
             return
@@ -256,6 +279,7 @@ namespace Metalama.Framework.Engine.Linking
                     input.CompilationModel,
                     intermediateCompilation,
                     injectionRegistry,
+                    lateTransformationRegistry,
                     input.OrderedAspectLayers,
                     projectOptions );
         }
@@ -405,7 +429,7 @@ namespace Metalama.Framework.Engine.Linking
                         //       But, if we pass the mutable compilation, it will get changed before the template is expanded.
                         //       The expanded template should not see declarations added after it runs.
 
-                        // Call GetInjectedMembers
+                        // Call GetInjectedMembers.
                         var injectionContext = new MemberInjectionContext(
                             this._serviceProvider,
                             diagnostics,
@@ -486,9 +510,10 @@ namespace Metalama.Framework.Engine.Linking
         private static void IndexOverrideTransformation(
             ITransformation transformation,
             TransformationCollection transformationCollection,
+            ConcurrentDictionary<IDeclaration, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
             HashSet<PropertyBuilder> buildersWithSynthesizedSetters )
         {
-            if ( transformation is not IOverrideDeclarationTransformation overriddenDeclaration )
+            if ( transformation is not IOverrideDeclarationTransformation overrideDeclarationTransformation )
             {
                 return;
             }
@@ -497,7 +522,7 @@ namespace Metalama.Framework.Engine.Linking
             // If this is overridden property we need to:
             //  1) Block inlining of the first override (force the trampoline).
             //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
-            if ( overriddenDeclaration.OverriddenDeclaration is IProperty
+            if ( overrideDeclarationTransformation.OverriddenDeclaration is IProperty
                 {
                     IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod.IsImplicitlyDeclared: true,
                     OverriddenProperty: null or { SetMethod: not null }
@@ -531,6 +556,12 @@ namespace Metalama.Framework.Engine.Linking
                         throw new AssertionFailedException( $"Unexpected declaration: '{overriddenAutoProperty}'." );
                 }
             }
+
+            if (overrideDeclarationTransformation.OverriddenDeclaration is IConstructor { IsPrimary: true } overriddenConstructor)
+            {
+                auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectSourceVersion();
+                transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
+            }
         }
 
         private void IndexInsertStatementTransformation(
@@ -549,6 +580,9 @@ namespace Metalama.Framework.Engine.Linking
             {
                 case Constructor { IsPrimary: true } primaryConstructor:
                     {
+                        // Inserting statements can have two different effects on primary constructors:
+                        // 1) If only trivial initializer statements are injected
+
                         var primaryDeclaration = primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                         var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
@@ -821,6 +855,58 @@ namespace Metalama.Framework.Engine.Linking
 
                 default:
                     throw new AssertionFailedException( $"Unexpected combination: ('{transformation}', '{memberLevelTransformation.TargetMember}')." );
+            }
+        }
+
+        private static void IndexAuxiliaryMemberTransformations( 
+            TransformationCollection transformationCollection, 
+            LinkerInjectionHelperProvider injectionHelperProvider,
+            IDeclaration declaration, 
+            AuxiliaryMemberTransformations transformations )
+        {
+            if ( transformations.ShouldInjectSourceVersion )
+            {
+                switch ( declaration )
+                {
+                    case IConstructor { IsPrimary: true } primaryConstructor:
+                        var syntax = (TypeDeclarationSyntax) primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
+
+                        transformationCollection.AddInjectedMember(
+                            new InjectedMember(
+                                null,
+                                DeclarationKind.Constructor,
+                                ConstructorDeclaration(
+                                    List<AttributeListSyntax>(),
+                                    primaryConstructor.GetSyntaxModifierList( ModifierCategories.Unsafe )
+                                    .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
+                                    Identifier( primaryConstructor.DeclaringType.Name ),
+                                    syntax.ParameterList.AssertNotNull().AddParameters(
+                                        Parameter(
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            injectionHelperProvider.GetSourceType(),
+                                            Identifier( AspectReferenceSyntaxProvider.LinkerOverrideParamName ),
+                                            EqualsValueClause(
+                                                LiteralExpression(
+                                                    SyntaxKind.DefaultLiteralExpression,
+                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                    ConstructorInitializer(
+                                        SyntaxKind.ThisConstructorInitializer,
+                                        ArgumentList(
+                                            SeparatedList(
+                                                syntax.ParameterList.Parameters.SelectAsArray(
+                                                    p => Argument( null, p.Modifiers.FirstOrDefault(), IdentifierName( p.Identifier.ValueText ) ) ) ) ) ),
+                                    Block(),
+                                    null,
+                                    default ),
+                                null,
+                                InjectedMemberSemantic.AuxiliaryBody,
+                                primaryConstructor ) );
+
+                        break;
+                    default:
+                        throw new AssertionFailedException( $"Unsupported: {declaration}" );
+                }
             }
         }
     }

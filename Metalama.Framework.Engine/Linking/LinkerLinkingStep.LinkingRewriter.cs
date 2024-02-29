@@ -37,7 +37,19 @@ namespace Metalama.Framework.Engine.Linking
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
-                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
+            {
+                var transformedMembers = this.GetMembersForTypeDeclaration( node );
+
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
+
+                var symbol = semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+
+                node = this._rewritingDriver.RewriteClass( node, symbol );
+
+                node = node.WithMembers( List( transformedMembers ) );
+
+                return node;
+            }
 
             public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
@@ -125,7 +137,6 @@ namespace Metalama.Framework.Engine.Linking
 
             private IReadOnlyList<MemberDeclarationSyntax> GetMembersForTypeDeclaration( TypeDeclarationSyntax node )
             {
-                // TODO: Other transformations than method overrides.
                 var newMembers = new List<MemberDeclarationSyntax>();
 
                 foreach ( var member in node.Members )
