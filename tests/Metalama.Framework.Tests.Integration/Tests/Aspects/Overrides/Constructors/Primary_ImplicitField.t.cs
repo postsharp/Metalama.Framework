@@ -1,2 +1,16 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0041 on `TargetClass`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [OverrideAttribute] applied to 'TargetClass': Cannot add an OverrideConstructor advice to 'TargetClass.TargetClass(int, int)' because 'TargetClass.TargetClass(int, int)' must not be a primary constructor. Check the IsAdviceEligible(AdviceKind.OverrideConstructor) method. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+[Override]
+public class TargetClass
+{
+  public int Foo() => x;
+  public int Bar() => y;
+  private readonly global::System.Int32 x;
+  private readonly global::System.Int32 y;
+  private TargetClass(int x, int y)
+  {
+    this.x = x;
+    this.y = y;
+    global::System.Console.WriteLine("This is the override.");
+    global::System.Console.WriteLine($"Param x = {x}");
+    global::System.Console.WriteLine($"Param y = {y}");
+  }
+}

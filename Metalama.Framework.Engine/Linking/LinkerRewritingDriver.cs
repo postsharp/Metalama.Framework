@@ -465,6 +465,11 @@ namespace Metalama.Framework.Engine.Linking
                 return true;
             }
 
+            if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
+            {
+                return true;
+            }
+
             return false;
         }
 

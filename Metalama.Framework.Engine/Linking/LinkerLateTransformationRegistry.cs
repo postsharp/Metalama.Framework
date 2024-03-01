@@ -16,14 +16,18 @@ namespace Metalama.Framework.Engine.Linking
     internal class LinkerLateTransformationRegistry
     {
         private readonly ISet<INamedTypeSymbol> _typesWithRemovedPrimaryConstructor;
+        private readonly ISet<ISymbol> _primaryConstructorInitializedMembers;
 
         public LinkerLateTransformationRegistry( 
             PartialCompilation intermediateCompilation,
             IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> lateTypeLevelTransformations )
         {
+            // TODO: Parallelize.
             HashSet<INamedTypeSymbol> typesWithRemovedPrimaryConstructor;
+            HashSet<ISymbol> primaryConstructorInitializedMembers;
 
             this._typesWithRemovedPrimaryConstructor = typesWithRemovedPrimaryConstructor = new HashSet<INamedTypeSymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._primaryConstructorInitializedMembers = primaryConstructorInitializedMembers = new HashSet<ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
             foreach (var lateTypeLevelTransformationPair in lateTypeLevelTransformations )
             {
@@ -35,6 +39,57 @@ namespace Metalama.Framework.Engine.Linking
                 if (transformations.ShouldRemovePrimaryConstructor)
                 {
                     typesWithRemovedPrimaryConstructor.Add( typeSymbol );
+
+                    foreach ( var symbol in typeSymbol.GetMembers() )
+                    {
+                        if ( symbol.IsImplicitlyDeclared )
+                        {
+                            continue;
+                        }
+
+                        switch ( symbol )
+                        {
+                            case IFieldSymbol fieldSymbol:
+                                var declarator = (VariableDeclaratorSyntax) fieldSymbol.GetPrimaryDeclaration().AssertNotNull();
+
+                                if ( declarator.Initializer == null )
+                                {
+                                    continue;
+                                }
+
+                                primaryConstructorInitializedMembers.Add( fieldSymbol );
+
+                                break;
+
+                            case IPropertySymbol propertySymbol:
+                                var propertyDeclaration = (PropertyDeclarationSyntax) propertySymbol.GetPrimaryDeclaration().AssertNotNull();
+
+                                if ( propertyDeclaration.Initializer == null )
+                                {
+                                    continue;
+                                }
+
+                                primaryConstructorInitializedMembers.Add( propertySymbol );
+
+                                break;
+
+                            case IEventSymbol eventSymbol:
+                                var eventDeclaration = eventSymbol.GetPrimaryDeclaration().AssertNotNull();
+
+                                if ( eventDeclaration is VariableDeclaratorSyntax eventFieldDeclarator )
+                                {
+
+                                    if ( eventFieldDeclarator.Initializer == null )
+                                    {
+                                        continue;
+                                    }
+
+                                    primaryConstructorInitializedMembers.Add( eventSymbol );
+                                }
+
+                                break;
+                        }
+                    }
                 }
             }
         }
@@ -44,9 +99,16 @@ namespace Metalama.Framework.Engine.Linking
             return this._typesWithRemovedPrimaryConstructor.Contains(type);
         }
 
+#pragma warning disable CA1822 // Mark members as static
         public IReadOnlyList<IFieldSymbol> GetPrimaryConstructorFields( INamedTypeSymbol type )
+#pragma warning restore CA1822 // Mark members as static
         {
             return type.GetMembers().OfType<IFieldSymbol>().Where(f => f.Name is [ '<', .., '>', 'P' ] ).ToArray();
+        }
+
+        public bool IsPrimaryConstructorInitializedMember( ISymbol symbol )
+        {
+            return this._primaryConstructorInitializedMembers.Contains( symbol );
         }
 
         public ArgumentListSyntax? GetPrimaryConstructorBaseArgumentList( IMethodSymbol constructor )

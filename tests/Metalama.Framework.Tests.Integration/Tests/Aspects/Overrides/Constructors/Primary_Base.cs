@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Primary
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Primary_Base
 {
     // Tests single OverrideConstructor advice with trivial template on primary constructors.
 
@@ -32,9 +32,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
         }
     }
 
+    public class BaseClass
+    {
+        public BaseClass(int x) { }
+    }
+
     // <target>
     [Override]
-    public class TargetClass(int x, int y)
+    public class TargetClass(int x, int y) : BaseClass(x)
     {
     }
 }

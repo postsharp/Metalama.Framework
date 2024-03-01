@@ -32,15 +32,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
         }
     }
 
-    public class BaseClass
-    {
-        public BaseClass(int x) { }
-    }
-
     // <target>
     [Override]
-    public class TargetClass(int x, int y) : BaseClass(x)
+    public class TargetClass(int x, int y)
     {
-        public int Foo() => y;
+        public int Foo() => x;
+
+        public int Bar() => y;
     }
 }

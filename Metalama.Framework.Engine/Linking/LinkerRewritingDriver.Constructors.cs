@@ -110,9 +110,9 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unsupported form of constructor declaration for {symbol}." )
                     };
 
-                var isAuxiliaryConstructor = this.InjectionRegistry.IsAuxiliarySourceSymbol( symbol );
+                var isAuxiliaryForPrimaryConstructor = this.InjectionRegistry.IsAuxiliarySourceSymbol( symbol );
 
-                if ( isAuxiliaryConstructor )
+                if ( isAuxiliaryForPrimaryConstructor )
                 {
                     List<StatementSyntax> primaryConstructorFieldAssignments = new();
 
@@ -129,6 +129,57 @@ namespace Metalama.Framework.Engine.Linking
                                         ThisExpression(),
                                         IdentifierName( cleanName ) ),
                                     IdentifierName( cleanName ) ) ) );
+                    }
+
+                    foreach ( var member in symbol.ContainingType.GetMembers() )
+                    {
+                        if ( !this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( member ) )
+                        {
+                            continue;
+                        }
+
+                        string name;
+                        ExpressionSyntax expression;
+
+                        switch ( member )
+                        {
+                            case IFieldSymbol field:
+                                var fieldDeclaration = (VariableDeclaratorSyntax) field.GetPrimaryDeclaration().AssertNotNull();
+
+                                name = field.Name;
+                                expression = fieldDeclaration.Initializer.AssertNotNull().Value;
+
+                                break;
+
+                            case IEventSymbol eventField:
+                                var eventFieldDeclaration = (VariableDeclaratorSyntax) eventField.GetPrimaryDeclaration().AssertNotNull();
+
+                                name = eventField.Name;
+                                expression = eventFieldDeclaration.Initializer.AssertNotNull().Value;
+
+                                break;
+
+                            case IPropertySymbol property:
+                                var propertyDeclaration = (PropertyDeclarationSyntax) property.GetPrimaryDeclaration().AssertNotNull();
+
+                                name = propertyDeclaration.Identifier.ValueText;
+                                expression = propertyDeclaration.Initializer.AssertNotNull().Value;
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException( $"Unsupported: {member}" );
+                        }
+
+                        primaryConstructorFieldAssignments.Add(
+                            ExpressionStatement(
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    MemberAccessExpression(
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        ThisExpression(),
+                                        IdentifierName( name ) ),
+                                    expression ) ) );
                     }
 
                     if ( primaryConstructorFieldAssignments.Count > 0 )
@@ -150,12 +201,12 @@ namespace Metalama.Framework.Engine.Linking
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
                     parameterList:
-                        isAuxiliaryConstructor
+                        isAuxiliaryForPrimaryConstructor
                         ? constructorDeclaration.ParameterList.WithParameters(
                             constructorDeclaration.ParameterList.Parameters.RemoveAt( constructorDeclaration.ParameterList.Parameters.Count - 1 ) )
                         : default,
                     initializer:
-                        isAuxiliaryConstructor
+                        isAuxiliaryForPrimaryConstructor
                         ? this.LateTransformationRegistry.GetPrimaryConstructorBaseArgumentList( symbol ) switch
                         {
                             { } arguments => ConstructorInitializer(SyntaxKind.BaseConstructorInitializer, arguments),

@@ -1,7 +1,7 @@
 [Override]
-public class TargetClass
+public class TargetClass : BaseClass
 {
-  private TargetClass(int x, int y)
+  private TargetClass(int x, int y) : base(x)
   {
     global::System.Console.WriteLine("This is the override.");
     global::System.Console.WriteLine($"Param x = {x}");
