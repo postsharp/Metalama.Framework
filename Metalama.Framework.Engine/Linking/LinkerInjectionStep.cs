@@ -765,7 +765,11 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case IConstructor { IsPrimary: true } primaryConstructor:
+#if ROSLYN_4_8_0_OR_GREATER
                         var syntax = (TypeDeclarationSyntax) primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
+#else
+                        var syntax = (RecordDeclarationSyntax) primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
+#endif
 
                         transformationCollection.AddInjectedMember(
                             new InjectedMember(

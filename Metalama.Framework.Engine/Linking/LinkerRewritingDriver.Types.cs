@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             if (this.LateTransformationRegistry.HasRemovedPrimaryConstructor(symbol))
             {
+#if ROSLYN_4_8_0_OR_GREATER
                 classDeclaration =
                     classDeclaration.PartialUpdate(
                         parameterList: default( ParameterListSyntax ),
@@ -35,6 +36,9 @@ namespace Metalama.Framework.Engine.Linking
                                         _ => b
                                     } ) ) )
                             : default );
+#else
+                throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+#endif
             }
 
             classDeclaration = classDeclaration.WithMembers( List( transformedMembers ) );
@@ -49,7 +53,11 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
             {
+#if ROSLYN_4_8_0_OR_GREATER
                 structDeclaration = structDeclaration.WithParameterList( default );
+#else
+                throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+#endif
             }
 
             structDeclaration = structDeclaration.WithMembers( List( transformedMembers ) );

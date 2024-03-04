@@ -39,7 +39,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                     VariableDeclaratorSyntax { Parent.Parent: EventFieldDeclarationSyntax } eventFieldVariable => eventFieldVariable,
                     ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
+#if ROSLYN_4_8_0_OR_GREATER
                     TypeDeclarationSyntax { ParameterList: { } parameterList } => parameterList,
+#endif
                     _ => throw new AssertionFailedException( $"Declaration '{aspectReference.ContainingSemantic.Symbol}' has an unexpected declaration node." )
                 };
 

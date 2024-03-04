@@ -25,11 +25,6 @@ public class Aspect : TypeAspect
     }
 }
 
-class MyAttribute : Attribute
-{
-    public MyAttribute(int[] array) { }
-}
-
 // <target>
 [Aspect]
 class TargetCode { }
