@@ -9,6 +9,7 @@ namespace Metalama.Framework.DesignTime.Contracts.AspectExplorer;
 public struct AspectExplorerAspectInstance
 {
     public ISymbol TargetDeclaration;
+    public AspectExplorerDeclarationKind TargetDeclarationKind;
     public AspectExplorerAspectTransformation[] Transformations;
 }
 
@@ -16,5 +17,13 @@ public struct AspectExplorerAspectInstance
 public struct AspectExplorerAspectTransformation
 {
     public ISymbol TargetDeclaration;
+    public AspectExplorerDeclarationKind TargetDeclarationKind;
     public string Description;
+}
+
+[Guid( "1E91F9F1-FD0E-4668-B4D1-6D445C7BE1FD" )]
+public enum AspectExplorerDeclarationKind
+{
+    Default,
+    ReturnParameter
 }

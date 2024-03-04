@@ -66,7 +66,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             this._name = name;
         }
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
         public ParameterInfo ToParameterInfo() => throw new NotSupportedException();
 

@@ -189,6 +189,16 @@ public static class SerializableDeclarationIdProvider
 
     public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, Compilation compilation )
     {
+        var symbol = id.ResolveToSymbolOrNull( compilation, out var isReturnParameter );
+
+        return isReturnParameter ? null : symbol;
+    }
+
+    /// <remarks>This overload is only used for aspect targets, so it doesn't need to handle the other target kinds.</remarks>
+    public static ISymbol? ResolveToSymbolOrNull( this SerializableDeclarationId id, Compilation compilation, out bool isReturnParameter )
+    {
+        isReturnParameter = false;
+
         var indexOfAt = id.Id.IndexOfOrdinal( ';' );
 
         if ( indexOfAt > 0 )
@@ -202,6 +212,12 @@ public static class SerializableDeclarationIdProvider
             var ordinal = parts.Length == 3 ? int.Parse( parts[2], CultureInfo.InvariantCulture ) : -1;
 
             var parent = DocumentationCommentId.GetFirstSymbolForDeclarationId( parentId, compilation );
+
+            if ( kind == nameof(DeclarationRefTargetKind.Return) )
+            {
+                isReturnParameter = true;
+                return parent;
+            }
 
             return (parent, kind) switch
             {
