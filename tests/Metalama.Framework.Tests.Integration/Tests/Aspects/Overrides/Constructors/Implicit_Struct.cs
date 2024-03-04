@@ -4,10 +4,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit;
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit_Struct;
 
 /*
- * Tests single OverrideConstructor advice on an implicit constructor of a class.
+ * Tests single OverrideConstructor advice on an implicit constructor of a struct.
  */
 
 public class OverrideAttribute : TypeAspect
@@ -27,6 +27,6 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public class TargetClass
+public struct TargetStruct
 {
 }

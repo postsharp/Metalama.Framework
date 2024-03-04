@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Linking
                              default ) );
                 }
 
-                if ( constructorDeclaration.Parent is RecordDeclarationSyntax recordDeclaration )
+                if ( constructorDeclaration.Parent is RecordDeclarationSyntax { ParameterList.Parameters.Count: >0 } recordDeclaration )
                 {
                     members.Add(
                         MethodDeclaration(

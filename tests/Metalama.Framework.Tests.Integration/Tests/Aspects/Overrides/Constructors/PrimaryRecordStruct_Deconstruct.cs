@@ -4,46 +4,47 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordStruct_Deconstruct
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordStruct_Deconstruct;
+
+/*
+ * Tests single OverrideConstructor advice on a primary constructor of a record class while using the Deconstruct method.
+ */
+
+public class OverrideAttribute : TypeAspect
 {
-    // Tests single OverrideConstructor advice on a primary constructor of a record class while using the Deconstruct method.
-
-    public class OverrideAttribute : TypeAspect
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        foreach (var constructor in builder.Target.Constructors)
         {
-            foreach (var constructor in builder.Target.Constructors)
+            if (constructor.IsImplicitlyDeclared)
             {
-                if (constructor.IsImplicitlyDeclared)
-                {
-                    continue;
-                }
-
-                builder.Advice.Override(constructor, nameof(Template));
-            }
-        }
-
-        [Template]
-        public void Template()
-        {
-            Console.WriteLine( "This is the override." );
-
-            foreach (var param in meta.Target.Parameters)
-            {
-                Console.WriteLine($"Param {param.Name} = {param.Value}");
+                continue;
             }
 
-            meta.Proceed();
+            builder.Advice.Override(constructor, nameof(Template));
         }
     }
 
-    // <target>
-    [Override]
-    public record struct TargetStruct(int X, int Y)
+    [Template]
+    public void Template()
     {
-        public void Foo()
+        Console.WriteLine( "This is the override." );
+
+        foreach (var param in meta.Target.Parameters)
         {
-            var (x, y) = this;
+            Console.WriteLine($"Param {param.Name} = {param.Value}");
         }
+
+        meta.Proceed();
+    }
+}
+
+// <target>
+[Override]
+public record struct TargetStruct(int X, int Y)
+{
+    public void Foo()
+    {
+        var (x, y) = this;
     }
 }

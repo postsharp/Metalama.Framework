@@ -4,31 +4,32 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.NoProceed
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.NoProceed;
+
+/*
+ * Tests single OverrideConstructor advice with no meta.Proceed call.
+ */
+
+public class OverrideAttribute : TypeAspect
 {
-    // Tests single OverrideConstructor advice with no meta.Proceed call.
-
-    public class OverrideAttribute : TypeAspect
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
-        {
-            builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template) );
-        }
-
-        [Template]
-        public void Template()
-        {
-            Console.WriteLine( "This is the override." );
-        }
+        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template) );
     }
 
-    // <target>
-    [Override]
-    internal class TargetClass
+    [Template]
+    public void Template()
     {
-        public TargetClass()
-        {
-            Console.WriteLine( $"This is the original constructor." );
-        }
+        Console.WriteLine( "This is the override." );
+    }
+}
+
+// <target>
+[Override]
+internal class TargetClass
+{
+    public TargetClass()
+    {
+        Console.WriteLine( $"This is the original constructor." );
     }
 }

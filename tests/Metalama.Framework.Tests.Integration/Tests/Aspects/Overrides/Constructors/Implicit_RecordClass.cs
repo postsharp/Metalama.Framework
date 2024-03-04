@@ -4,17 +4,17 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit;
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit_RecordClass;
 
 /*
- * Tests single OverrideConstructor advice on an implicit constructor of a class.
+ * Tests single OverrideConstructor advice on an implicit constructor of a record class.
  */
 
 public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template));
+        builder.Advice.Override(builder.Target.Constructors.Single(c => c is { Parameters.Count: 0 }), nameof(Template));
     }
 
     [Template]
@@ -27,6 +27,6 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public class TargetClass
+public record class TargetClass
 {
 }

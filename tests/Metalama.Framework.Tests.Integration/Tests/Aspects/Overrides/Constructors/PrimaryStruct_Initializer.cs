@@ -9,43 +9,44 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryStruct_Initializer
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryStruct_Initializer;
+
+/*
+ * Tests single OverrideConstructor advice on a primary constructor of a non-record struct with initializers using primary constructor parameters.
+ */
+
+public class OverrideAttribute : TypeAspect
 {
-    // Tests single OverrideConstructor advice on a primary constructor of a non-record struct with initializers using primary constructor parameters.
-
-    public class OverrideAttribute : TypeAspect
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        foreach (var constructor in builder.Target.Constructors)
         {
-            foreach (var constructor in builder.Target.Constructors)
-            {
-                builder.Advice.Override(constructor, nameof(Template));
-            }
-        }
-
-        [Template]
-        public void Template()
-        {
-            Console.WriteLine( "This is the override." );
-
-            foreach (var param in meta.Target.Parameters)
-            {
-                Console.WriteLine($"Param {param.Name} = {param.Value}");
-            }
-
-            meta.Proceed();
+            builder.Advice.Override(constructor, nameof(Template));
         }
     }
 
-    // <target>
-    [Override]
-    public struct TargetStruct(int x, int y, EventHandler z)
+    [Template]
+    public void Template()
     {
-        private int a = x;
+        Console.WriteLine( "This is the override." );
 
-        private int B { get; } = y;
+        foreach (var param in meta.Target.Parameters)
+        {
+            Console.WriteLine($"Param {param.Name} = {param.Value}");
+        }
 
-        private event EventHandler C = z;
+        meta.Proceed();
     }
+}
+
+// <target>
+[Override]
+public struct TargetStruct(int x, int y, EventHandler z)
+{
+    private int a = x;
+
+    private int B { get; } = y;
+
+    private event EventHandler C = z;
 }
 #endif

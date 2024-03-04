@@ -4,10 +4,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordClass;
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordClass_CopyCtor;
 
 /*
- * Tests single OverrideConstructor advice on a primary constructor of a record class.
+ * Tests single OverrideConstructor advice on a copy-ctor constructor of a record struct (should get an eligibility error).
  */
 
 public class OverrideAttribute : TypeAspect
@@ -16,7 +16,7 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            if (constructor.IsImplicitlyDeclared)
+            if (!constructor.IsImplicitlyDeclared)
             {
                 continue;
             }
@@ -28,13 +28,6 @@ public class OverrideAttribute : TypeAspect
     [Template]
     public void Template()
     {
-        Console.WriteLine( "This is the override." );
-
-        foreach (var param in meta.Target.Parameters)
-        {
-            Console.WriteLine($"Param {param.Name} = {param.Value}");
-        }
-
         meta.Proceed();
     }
 }

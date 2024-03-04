@@ -115,8 +115,27 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( injectedMember is { Transformation: null, Semantic: InjectedMemberSemantic.AuxiliaryBody })
                 {
-                    var originalSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( injectedMember.Declaration.GetSymbol().AssertNotNull() ).AssertNotNull();
-                    auxiliarySourceMemberMap[originalSymbol] = injectedMemberSymbol;
+                    var originalDeclaration = injectedMember.Declaration;
+                    ISymbol translatedSymbol;
+
+                    if ( this._introducedParametersByTargetDeclaration.TryGetValue( originalDeclaration, out var introducedParameters ) )
+                    {
+                        // Constructors with introduced parameters cannot be found through normal translation.
+                        // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
+                        Invariant.Assert( originalDeclaration is IConstructor );
+
+                        var originalConstructor = (IMethodSymbol) originalDeclaration.GetSymbol().AssertNotNull();
+
+                        translatedSymbol =
+                            TranslateConstructor( originalConstructor, introducedParameters )
+                            ?? throw new AssertionFailedException( $"Could not translate '{originalDeclaration}' with {introducedParameters.Count} introduced parameters." );
+                    }
+                    else
+                    {
+                        translatedSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull() ).AssertNotNull();
+                    }
+
+                    auxiliarySourceMemberMap[translatedSymbol] = injectedMemberSymbol;
 
                     lock ( auxiliarySourceMembers )
                     {
@@ -182,67 +201,20 @@ namespace Metalama.Framework.Engine.Linking
                         Invariant.Assert( overrideTarget is IConstructor );
 
                         var originalConstructor = (IMethodSymbol) overrideTarget.GetSymbol().AssertNotNull();
+                        
+                        var translatedConstructor = 
+                            TranslateConstructor( originalConstructor, introducedParameters )
+                            ?? throw new AssertionFailedException( $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
 
-                        Invariant.Assert( originalConstructor is { MethodKind: MethodKind.Constructor } );
-
-                        var originalDeclaringType = originalConstructor.ContainingType;
-
-                        var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType )
-                            .AssertNotNull();
-
-                        foreach ( var translatedMember in translatedDeclaringType.GetMembers() )
-                        {
-                            if ( translatedMember is not IMethodSymbol { MethodKind: MethodKind.Constructor } translatedConstructor )
-                            {
-                                continue;
-                            }
-
-                            if ( translatedConstructor.Parameters.Length != originalConstructor.Parameters.Length + introducedParameters.Count )
-                            {
-                                continue;
-                            }
-
-                            if ( symbolToInjectedMemberMap.ContainsKey( translatedMember ) )
-                            {
-                                continue;
-                            }
-
-                            var matches = true;
-
-                            for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
-                            {
-                                if ( !StructuralSymbolComparer.Default.Equals(
-                                         originalConstructor.Parameters[i].Type,
-                                         translatedConstructor.Parameters[i].Type )
-                                     && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind )
-                                {
-                                    matches = false;
-
-                                    break;
-                                }
-                            }
-
-                            if ( matches )
-                            {
-                                if ( auxiliarySourceMemberMap.TryGetValue( translatedConstructor, out var auxiliarySourceMemberSymbol ) )
-                                {
-                                    return auxiliarySourceMemberSymbol;
-                                }
-                                else
-                                {
-                                    return translatedConstructor;
-                                }
-                            }
-                        }
-
-                        throw new AssertionFailedException(
-                            $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
+                        return translatedConstructor;
                     }
                     else
                     {
-                        var symbol = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
-                            originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
-                            true );
+                        var symbol = 
+                            this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
+                                originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
+                                true )
+                            .AssertNotNull();
 
                         if ( auxiliarySourceMemberMap.TryGetValue(symbol, out var auxiliarySourceMemberSymbol) )
                         {
@@ -286,7 +258,65 @@ namespace Metalama.Framework.Engine.Linking
                     return intermediateSemanticModel.GetDeclaredSymbol( symbolNode ).GetCanonicalDefinition();
                 }
             }
+
+            IMethodSymbol? TranslateConstructor(IMethodSymbol originalConstructor, IReadOnlyList<IntroduceParameterTransformation> introducedParameters)
+            {
+                Invariant.Assert( originalConstructor is { MethodKind: MethodKind.Constructor } );
+
+                var originalDeclaringType = originalConstructor.ContainingType;
+
+                var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType )
+                    .AssertNotNull();
+
+                foreach ( var translatedMember in translatedDeclaringType.GetMembers() )
+                {
+                    if ( translatedMember is not IMethodSymbol { MethodKind: MethodKind.Constructor } translatedConstructor )
+                    {
+                        continue;
+                    }
+
+                    if ( translatedConstructor.Parameters.Length != originalConstructor.Parameters.Length + introducedParameters.Count )
+                    {
+                        continue;
+                    }
+
+                    if ( symbolToInjectedMemberMap.ContainsKey( translatedMember ) )
+                    {
+                        continue;
+                    }
+
+                    var matches = true;
+
+                    for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
+                    {
+                        if ( !StructuralSymbolComparer.Default.Equals(
+                                 originalConstructor.Parameters[i].Type,
+                                 translatedConstructor.Parameters[i].Type )
+                             && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind )
+                        {
+                            matches = false;
+
+                            break;
+                        }
+                    }
+
+                    if ( matches )
+                    {
+                        if ( auxiliarySourceMemberMap.TryGetValue( translatedConstructor, out var auxiliarySourceMemberSymbol ) )
+                        {
+                            return (IMethodSymbol)auxiliarySourceMemberSymbol;
+                        }
+                        else
+                        {
+                            return translatedConstructor;
+                        }
+                    }
+                }
+
+                return null;
+            }
         }
+
 
         /// <summary>
         /// Gets introduced members representing overrides of a symbol.

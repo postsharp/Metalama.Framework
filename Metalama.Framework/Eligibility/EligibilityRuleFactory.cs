@@ -29,7 +29,11 @@ public static partial class EligibilityRuleFactory
         } );
 
     internal static IEligibilityRule<IDeclaration> OverrideConstructorAdviceRule { get; } = CreateRule<IDeclaration, IConstructor>(
-        builder => builder.DeclaringType().AddRule( _overrideDeclaringTypeRule ) );
+        builder =>
+        {
+            builder.MustNotBeRecordCopyConstructor();
+            builder.DeclaringType().AddRule( _overrideDeclaringTypeRule );
+        } );
 
     internal static IEligibilityRule<IDeclaration> OverrideMethodAdviceRule { get; } = CreateRule<IDeclaration, IMethod>(
         builder =>
@@ -113,6 +117,7 @@ public static partial class EligibilityRuleFactory
                 .AddRules(
                     constructorEligibilityBuilder =>
                     {
+                        constructorEligibilityBuilder.MustNotBeRecordCopyConstructor();
                         constructorEligibilityBuilder.MustNotBeStatic();
 
                         constructorEligibilityBuilder.DeclaringType().MustBeExplicitlyDeclared();

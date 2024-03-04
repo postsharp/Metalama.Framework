@@ -6,10 +6,10 @@ using System.Linq;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Constructors.Attributes;
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Constructors.Attributes_Primary;
 
 /*
- * Tests that overriding a constructor keeps all the existing attributes.
+ * Tests that overriding a primary constructor keeps all the existing attributes.
  */
 
 public class OverrideAttribute : TypeAspect
@@ -29,19 +29,13 @@ public class OverrideAttribute : TypeAspect
 [AttributeUsage( AttributeTargets.Constructor )]
 public class ConstructorOnlyAttribute : Attribute { }
 
-[AttributeUsage( AttributeTargets.Constructor)]
-public class ExplicitConstructorOnlyAttribute : Attribute { }
-
 [AttributeUsage( AttributeTargets.Parameter )]
 public class ParamOnlyAttribute : Attribute { }
 
 // <target>
 [Override]
-internal class TargetClass
+[method:ConstructorOnly]
+internal class TargetClass([ParamOnly] int x)
 {
-    [ConstructorOnly]
-    [method: ExplicitConstructorOnly]
-    public TargetClass([ParamOnly] int x)
-    {
-    }
+    int Z = x;
 }

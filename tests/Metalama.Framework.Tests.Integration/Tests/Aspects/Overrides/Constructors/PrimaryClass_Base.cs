@@ -9,43 +9,44 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryClass_Base
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryClass_Base;
+
+/*
+ * Tests single OverrideConstructor advice on a primary constructor of a non-record class with base constructor arguments.
+ */
+
+public class OverrideAttribute : TypeAspect
 {
-    // Tests single OverrideConstructor advice on a primary constructor of a non-record class with base constructor arguments.
-
-    public class OverrideAttribute : TypeAspect
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        foreach (var constructor in builder.Target.Constructors)
         {
-            foreach (var constructor in builder.Target.Constructors)
-            {
-                builder.Advice.Override(constructor, nameof(Template));
-            }
-        }
-
-        [Template]
-        public void Template()
-        {
-            Console.WriteLine( "This is the override." );
-
-            foreach (var param in meta.Target.Parameters)
-            {
-                Console.WriteLine($"Param {param.Name} = {param.Value}");
-            }
-
-            meta.Proceed();
+            builder.Advice.Override(constructor, nameof(Template));
         }
     }
 
-    public class BaseClass
+    [Template]
+    public void Template()
     {
-        public BaseClass(int x) { }
-    }
+        Console.WriteLine( "This is the override." );
 
-    // <target>
-    [Override]
-    public class TargetClass(int x, int y) : BaseClass(x)
-    {
+        foreach (var param in meta.Target.Parameters)
+        {
+            Console.WriteLine($"Param {param.Name} = {param.Value}");
+        }
+
+        meta.Proceed();
     }
+}
+
+public class BaseClass
+{
+    public BaseClass(int x) { }
+}
+
+// <target>
+[Override]
+public class TargetClass(int x, int y) : BaseClass(x)
+{
 }
 #endif

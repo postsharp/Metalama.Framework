@@ -447,7 +447,7 @@ public static partial class EligibilityExtensions
     public static void MustNotBePrimaryConstructorOfNonRecordType( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             member => member is not { IsPrimary: true, DeclaringType.TypeKind: TypeKind.Class or TypeKind.Struct },
-            member => $"{member} must not be a primary constructor of non-record type" );
+            member => $"{member} must not be a primary constructor of a non-record type" );
 
     /// <summary>
     /// Forbids the target constructor from being the copy constructor of a record.
@@ -455,7 +455,7 @@ public static partial class EligibilityExtensions
     public static void MustNotBeRecordCopyConstructor( this IEligibilityBuilder<IConstructor> eligibilityBuilder )
         => eligibilityBuilder.MustSatisfy(
             member => !member.IsRecordCopyConstructor(),
-            member => $"{member} must not be the copy constructor of record type" );
+            member => $"{member} must not be the copy constructor of a record type" );
 
     /// <summary>
     /// Forbids the target type from being an interface.

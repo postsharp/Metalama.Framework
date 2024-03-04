@@ -161,20 +161,21 @@ namespace Metalama.Framework.Engine.Linking
 
             await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
 
+            // Finalize non-auxiliary transformations (sorting).
+            await transformationCollection.FinalizeAsync(
+                this._concurrentTaskRunner,
+                cancellationToken );
+
             // Process any auxiliary member transformations in parallel.
             void ProcessAuxiliaryMemberTransformations( KeyValuePair<IDeclaration, AuxiliaryMemberTransformations> transformationPair)
             {
                 var declaration = transformationPair.Key;
                 var transformations = transformationPair.Value;
 
-                IndexAuxiliaryMemberTransformations( transformationCollection, injectionHelperProvider, declaration, transformations );
+                this.IndexAuxiliaryMemberTransformations( transformationCollection, injectionHelperProvider, declaration, transformations );
             }
 
             await this._concurrentTaskRunner.RunInParallelAsync( auxiliaryMemberTransformations, ProcessAuxiliaryMemberTransformations, cancellationToken );
-
-            await transformationCollection.FinalizeAsync(
-                this._concurrentTaskRunner,
-                cancellationToken );
 
             var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
@@ -754,7 +755,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static void IndexAuxiliaryMemberTransformations( 
+        private void IndexAuxiliaryMemberTransformations( 
             TransformationCollection transformationCollection, 
             LinkerInjectionHelperProvider injectionHelperProvider,
             IDeclaration declaration, 
@@ -771,6 +772,30 @@ namespace Metalama.Framework.Engine.Linking
                         var syntax = (RecordDeclarationSyntax) primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 #endif
 
+                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( syntax );
+
+                        var parameters = syntax.ParameterList.AssertNotNull();
+
+                        if ( transformationCollection.TryGetMemberLevelTransformations( syntax, out var memberTransformations )
+                             && memberTransformations.Parameters.Length > 0)
+                        {
+                            parameters =
+                                parameters.AddParameters(
+                                    memberTransformations.Parameters.SelectAsArray( p => p.ToSyntax( syntaxGenerationContext ) ) );
+                        }
+
+                        parameters =
+                            parameters.AddParameters(
+                                Parameter(
+                                    List<AttributeListSyntax>(),
+                                    TokenList(),
+                                    injectionHelperProvider.GetSourceType(),
+                                    Identifier( AspectReferenceSyntaxProvider.LinkerOverrideParamName ),
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+
                         transformationCollection.AddInjectedMember(
                             new InjectedMember(
                                 null,
@@ -780,16 +805,7 @@ namespace Metalama.Framework.Engine.Linking
                                     primaryConstructor.GetSyntaxModifierList( ModifierCategories.Unsafe )
                                     .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                                     Identifier( primaryConstructor.DeclaringType.Name ),
-                                    syntax.ParameterList.AssertNotNull().AddParameters(
-                                        Parameter(
-                                            List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            injectionHelperProvider.GetSourceType(),
-                                            Identifier( AspectReferenceSyntaxProvider.LinkerOverrideParamName ),
-                                            EqualsValueClause(
-                                                LiteralExpression(
-                                                    SyntaxKind.DefaultLiteralExpression,
-                                                    Token( SyntaxKind.DefaultKeyword ) ) ) ) ),
+                                    parameters,
                                     ConstructorInitializer(
                                         SyntaxKind.ThisConstructorInitializer,
                                         ArgumentList(
