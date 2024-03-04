@@ -470,6 +470,11 @@ namespace Metalama.Framework.Engine.Linking
                 return true;
             }
 
+            if ( this.InjectionRegistry.IsAuxiliarySourceSymbol( symbol ) )
+            {
+                return true;
+            }
+
             return false;
         }
 

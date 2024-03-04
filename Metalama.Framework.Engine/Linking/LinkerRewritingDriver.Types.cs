@@ -1,9 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Linq;
+using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -11,19 +15,20 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed partial class LinkerRewritingDriver
     {
         public ClassDeclarationSyntax RewriteClass(
-            ClassDeclarationSyntax typeDeclaration,
-            INamedTypeSymbol symbol )
+            ClassDeclarationSyntax classDeclaration,
+            INamedTypeSymbol symbol,
+            IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
         {
             if (this.LateTransformationRegistry.HasRemovedPrimaryConstructor(symbol))
             {
-                typeDeclaration =
-                    typeDeclaration.PartialUpdate(
+                classDeclaration =
+                    classDeclaration.PartialUpdate(
                         parameterList: default( ParameterListSyntax ),
                         baseList:
-                            typeDeclaration.BaseList != null
-                            ? typeDeclaration.BaseList.WithTypes(
+                            classDeclaration.BaseList != null
+                            ? classDeclaration.BaseList.WithTypes(
                                 SeparatedList(
-                                typeDeclaration.BaseList.Types.SelectAsArray( b =>
+                                classDeclaration.BaseList.Types.SelectAsArray( b =>
                                     b switch
                                     {
                                         PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
@@ -32,7 +37,125 @@ namespace Metalama.Framework.Engine.Linking
                             : default );
             }
 
-            return typeDeclaration;
+            classDeclaration = classDeclaration.WithMembers( List( transformedMembers ) );
+
+            return classDeclaration;
+        }
+
+        public StructDeclarationSyntax RewriteStruct(
+            StructDeclarationSyntax structDeclaration,
+            INamedTypeSymbol symbol,
+            IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+        {
+            if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
+            {
+                structDeclaration = structDeclaration.WithParameterList( default );
+            }
+
+            structDeclaration = structDeclaration.WithMembers( List( transformedMembers ) );
+
+            return structDeclaration;
+        }
+
+        public RecordDeclarationSyntax RewriteRecord(
+            RecordDeclarationSyntax recordDeclaration,
+            INamedTypeSymbol symbol,
+            IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+        {
+            if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
+            {
+                recordDeclaration =
+                    recordDeclaration.PartialUpdate(
+                        parameterList: default( ParameterListSyntax ),
+                        baseList:
+                            recordDeclaration.BaseList != null
+                            ? recordDeclaration.BaseList.WithTypes(
+                                SeparatedList(
+                                recordDeclaration.BaseList.Types.SelectAsArray( b =>
+                                    b switch
+                                    {
+                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                        _ => b
+                                    } ) ) )
+                            : default );
+            }
+            else if ( recordDeclaration.ParameterList != null )
+            {
+                var semanticModel = this.IntermediateCompilationContext.SemanticModelProvider.GetSemanticModel( recordDeclaration.SyntaxTree );
+                SyntaxGenerationContext? generationContext = null;
+
+                List<MemberDeclarationSyntax>? newMembers = null;
+
+                var transformedParametersAndCommas = new List<SyntaxNodeOrToken>( recordDeclaration.ParameterList.Parameters.Count * 2 );
+
+                for ( var i = 0; i < recordDeclaration.ParameterList.Parameters.Count; i++ )
+                {
+                    var parameter = recordDeclaration.ParameterList.Parameters[i];
+                    newMembers ??= new List<MemberDeclarationSyntax>();
+
+                    var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
+
+                    if ( parameterSymbol == null )
+                    {
+                        continue;
+                    }
+
+                    var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
+
+                    if ( propertySymbol != null && this.IsRewriteTarget( propertySymbol ) )
+                    {
+                        SyntaxGenerationContext GetSyntaxGenerationContext()
+                            => generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                                recordDeclaration.SyntaxTree,
+                                recordDeclaration.SpanStart );
+
+                        if ( this.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
+                        {
+                            // Add new members that take place of synthesized positional property.
+                            newMembers.AddRange(
+                                this.RewritePositionalProperty(
+                                    parameter,
+                                    propertySymbol.AssertNotNull(),
+                                    GetSyntaxGenerationContext() ) );
+                        }
+
+                        // Remove all attributes related to properties (property/field/get/set target specifiers).
+                        var transformedParameter =
+                            parameter.WithAttributeLists(
+                                List(
+                                    parameter.AttributeLists
+                                        .Where(
+                                            l =>
+                                                l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
+                                                && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
+                                                && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
+                                                && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
+
+                        transformedParametersAndCommas.Add( transformedParameter );
+                    }
+                    else
+                    {
+                        transformedParametersAndCommas.Add( parameter );
+                    }
+
+                    if ( i < recordDeclaration.ParameterList.Parameters.SeparatorCount )
+                    {
+                        transformedParametersAndCommas.Add( recordDeclaration.ParameterList.Parameters.GetSeparator( i ) );
+                    }
+                }
+
+                recordDeclaration = recordDeclaration.WithParameterList( recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+
+                if ( newMembers is { Count: > 0 } )
+                {
+                    transformedMembers =
+                        transformedMembers.Concat( newMembers );
+                }
+            }
+
+            recordDeclaration = recordDeclaration.WithMembers( List( transformedMembers ) );
+
+            return recordDeclaration;
         }
     }
 }

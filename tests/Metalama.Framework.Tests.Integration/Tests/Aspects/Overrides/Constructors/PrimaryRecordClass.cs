@@ -4,9 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Primary_ImplicitField
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordClass
 {
-    // Tests single OverrideConstructor advice with trivial template on primary constructor with field defined by parameter.
+    // Tests single OverrideConstructor advice on a primary constructor of a record class.
 
     public class OverrideAttribute : TypeAspect
     {
@@ -14,6 +14,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
         {
             foreach (var constructor in builder.Target.Constructors)
             {
+                if (constructor.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
                 builder.Advice.Override(constructor, nameof(Template));
             }
         }
@@ -34,10 +39,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
 
     // <target>
     [Override]
-    public class TargetClass(int x, int y)
+    public record class TargetClass(int X, int Y)
     {
-        public int Foo() => x;
-
-        public int Bar() => y;
     }
 }

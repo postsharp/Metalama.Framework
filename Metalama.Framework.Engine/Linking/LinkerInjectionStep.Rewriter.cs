@@ -480,7 +480,6 @@ internal sealed partial class LinkerInjectionStep
                             injectedMember.Transformation?.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
-                    // Insert inserted statements into 
                     switch ( injectedNode )
                     {
                         case ConstructorDeclarationSyntax constructorDeclaration:
@@ -494,31 +493,6 @@ internal sealed partial class LinkerInjectionStep
                                         constructorDeclaration,
                                         memberLevelTransformations,
                                         syntaxGenerationContext );
-                                }
-
-                                break;
-                            }
-
-                        case FieldDeclarationSyntax fieldDeclaration:
-                            {
-                                if ( this._transformationCollection.TryGetMemberLevelTransformations(
-                                        injectedMember.DeclarationBuilder.AssertNotNull(),
-                                        out var memberLevelTransformations ) )
-                                {
-                                    injectedNode = this.ApplyMemberLevelTransformations( fieldDeclaration, memberLevelTransformations );
-                                }
-
-                                break;
-                            }
-
-                        case PropertyDeclarationSyntax propertyDeclaration:
-                            {
-                                if ( injectedMember.DeclarationBuilder != null &&
-                                     this._transformationCollection.TryGetMemberLevelTransformations(
-                                         injectedMember.DeclarationBuilder,
-                                         out var memberLevelTransformations ) )
-                                {
-                                    injectedNode = this.ApplyMemberLevelTransformations( propertyDeclaration, memberLevelTransformations );
                                 }
 
                                 break;
@@ -690,116 +664,11 @@ internal sealed partial class LinkerInjectionStep
             };
         }
 
-        private FieldDeclarationSyntax ApplyMemberLevelTransformations(
-            FieldDeclarationSyntax fieldDeclaration,
-            MemberLevelTransformations memberLevelTransformations )
-        {
-            Invariant.Assert( fieldDeclaration.Declaration.Variables.Count == 1 );
-
-            var originalFieldVariableDeclarator = fieldDeclaration.Declaration.Variables[0];
-            var newFieldVariableDeclarator = this.ApplyMemberLevelTransformations( originalFieldVariableDeclarator, memberLevelTransformations );
-
-            return fieldDeclaration.ReplaceNode( originalFieldVariableDeclarator, newFieldVariableDeclarator );
-        }
-
-        private VariableDeclaratorSyntax ApplyMemberLevelTransformations(
-            VariableDeclaratorSyntax fieldVariableDeclarator,
-            MemberLevelTransformations memberLevelTransformations )
-        {
-            Invariant.Assert( memberLevelTransformations.Parameters.Length == 0 );
-            Invariant.Assert( memberLevelTransformations.Arguments.Length == 0 );
-
-            var transformation = memberLevelTransformations.Expressions[0];
-
-            if ( memberLevelTransformations.Expressions.Length == 1 )
-            {
-                // The expressions 'default' and 'default!' in the initializer are considered the same as if there was no initializer.
-                if ( fieldVariableDeclarator.Initializer?.Value is not (null or
-                    { RawKind: (int) SyntaxKind.DefaultLiteralExpression } or
-                    PostfixUnaryExpressionSyntax
-                    {
-                        RawKind: (int) SyntaxKind.SuppressNullableWarningExpression,
-                        Operand.RawKind: (int) SyntaxKind.DefaultLiteralExpression
-                    }) )
-                {
-                    this._diagnostics.Report(
-                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                            fieldVariableDeclarator.GetDiagnosticLocation(),
-                            (fieldVariableDeclarator.Identifier.ValueText, transformation.TargetMember.DeclaringType,
-                             "The field already has an initializer.") ) );
-                }
-                else
-                {
-                    fieldVariableDeclarator = fieldVariableDeclarator.WithInitializer( EqualsValueClause( transformation.InitializerExpression ) );
-                }
-            }
-            else if ( memberLevelTransformations.Expressions.Length > 1 )
-            {
-                var aspects = memberLevelTransformations.Expressions.SelectAsArray( e => e.ParentAdvice.Aspect.ToString() );
-
-                this._diagnostics.Report(
-                    AspectLinkerDiagnosticDescriptors.CannotAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
-                        fieldVariableDeclarator.GetDiagnosticLocation(),
-                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType, aspects) ) );
-            }
-
-            return fieldVariableDeclarator;
-        }
-
-        private PropertyDeclarationSyntax ApplyMemberLevelTransformations(
-            PropertyDeclarationSyntax propertyDeclaration,
-            MemberLevelTransformations memberLevelTransformations )
-        {
-            Invariant.Assert( memberLevelTransformations.Parameters.Length == 0 );
-            Invariant.Assert( memberLevelTransformations.Arguments.Length == 0 );
-
-            var transformation = memberLevelTransformations.Expressions[0];
-
-            if ( memberLevelTransformations.Expressions.Length == 1 )
-            {
-                if ( propertyDeclaration.Initializer != null )
-                {
-                    this._diagnostics.Report(
-                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                            propertyDeclaration.GetDiagnosticLocation(),
-                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType,
-                             "The property already has an initializer.") ) );
-                }
-
-                if ( propertyDeclaration.ExpressionBody != null
-                     || propertyDeclaration.AccessorList?.Accessors.Any( a => a.Body != null || a.ExpressionBody != null ) == true )
-                {
-                    this._diagnostics.Report(
-                        AspectLinkerDiagnosticDescriptors.CannotAssignToExpressionFromPrimaryConstructor.CreateRoslynDiagnostic(
-                            propertyDeclaration.GetDiagnosticLocation(),
-                            (propertyDeclaration.Identifier.ValueText, transformation.TargetMember.DeclaringType, "Is is not an auto-property.") ) );
-                }
-
-                propertyDeclaration = propertyDeclaration
-                    .PartialUpdate(
-                        initializer: EqualsValueClause( memberLevelTransformations.Expressions[0].InitializerExpression ),
-                        semicolonToken: Token( SyntaxKind.SemicolonToken ) );
-            }
-            else if ( memberLevelTransformations.Expressions.Length > 1 )
-            {
-                var aspects = memberLevelTransformations.Expressions.SelectAsArray( e => e.ParentAdvice.Aspect.ToString() );
-
-                this._diagnostics.Report(
-                    AspectLinkerDiagnosticDescriptors.CannotAssignToMemberMoreThanOnceFromPrimaryConstructor.CreateRoslynDiagnostic(
-                        propertyDeclaration.GetDiagnosticLocation(),
-                        (transformation.TargetMember.DeclarationKind, transformation.TargetMember, transformation.TargetMember.DeclaringType, aspects) ) );
-            }
-
-            return propertyDeclaration;
-        }
-
         private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
             ConstructorDeclarationSyntax constructorDeclaration,
             MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext )
         {
-            Invariant.Assert( memberLevelTransformations.Expressions.Length == 0 );
-
             constructorDeclaration = constructorDeclaration.WithParameterList(
                 AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
 
@@ -915,21 +784,6 @@ internal sealed partial class LinkerInjectionStep
         private IReadOnlyList<FieldDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
         {
             var originalNode = node;
-
-            if ( node.Declaration.Variables.Any( this._transformationCollection.HasMemberLevelTransformations ) )
-            {
-                node = node.ReplaceNodes(
-                    node.Declaration.Variables,
-                    ( variableDeclarator, _ ) =>
-                    {
-                        if ( this._transformationCollection.TryGetMemberLevelTransformations( variableDeclarator, out var memberLevelTransformations ) )
-                        {
-                            variableDeclarator = this.ApplyMemberLevelTransformations( variableDeclarator, memberLevelTransformations );
-                        }
-
-                        return variableDeclarator;
-                    } );
-            }
 
             // Rewrite attributes.
             if ( originalNode.Declaration.Variables.Count > 1
@@ -1135,11 +989,6 @@ internal sealed partial class LinkerInjectionStep
         private PropertyDeclarationSyntax VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
         {
             var originalNode = node;
-
-            if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
-            {
-                node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations );
-            }
 
             node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 

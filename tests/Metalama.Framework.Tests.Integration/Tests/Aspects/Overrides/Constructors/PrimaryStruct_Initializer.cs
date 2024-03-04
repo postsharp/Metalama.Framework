@@ -4,9 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Primary_Base
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryStruct_Initializer
 {
-    // Tests single OverrideConstructor advice with trivial template on primary constructors.
+    // Tests single OverrideConstructor advice on a primary constructor of a non-record struct with initializers using primary constructor parameters.
 
     public class OverrideAttribute : TypeAspect
     {
@@ -32,14 +32,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
         }
     }
 
-    public class BaseClass
-    {
-        public BaseClass(int x) { }
-    }
-
     // <target>
     [Override]
-    public class TargetClass(int x, int y) : BaseClass(x)
+    public struct TargetStruct(int x, int y, EventHandler z)
     {
+        private int a = x;
+
+        private int B { get; } = y;
+
+        private event EventHandler C = z;
     }
 }

@@ -230,6 +230,9 @@ namespace Metalama.AspectWorkbench.ViewModels
             if ( testResult.IntermediateLinkerCompilation != null )
             {
                 var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
+
+                intermediateSyntaxTree = intermediateSyntaxTree.WithRootAndOptions( (await intermediateSyntaxTree.GetRootAsync()).NormalizeWhitespace(), intermediateSyntaxTree.Options );
+
                 var linkerProject = testRunner.CreateProject( testInput.Options );
 
                 var linkerDocument = linkerProject.AddDocument(

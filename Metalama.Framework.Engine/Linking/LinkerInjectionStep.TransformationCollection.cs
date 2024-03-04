@@ -275,18 +275,17 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public async Task FinalizeAsync(
-            TransformationLinkerOrderComparer transformationComparer,
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
             await concurrentTaskRunner.RunInParallelAsync(
                 this._introductionMemberLevelTransformations.Values,
-                t => t.Sort( transformationComparer ),
+                t => t.Sort(),
                 cancellationToken );
 
             await concurrentTaskRunner.RunInParallelAsync(
                 this._symbolMemberLevelTransformations.Values,
-                t => t.Sort( transformationComparer ),
+                t => t.Sort(),
                 cancellationToken );
         }
 

@@ -4,9 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Primary_Initializer
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryRecordClass_Deconstruct
 {
-    // Tests single OverrideConstructor advice on primary constructors of a type with initializers using primary constructor parameters.
+    // Tests single OverrideConstructor advice on a primary constructor of a record class while using the Deconstruct method.
 
     public class OverrideAttribute : TypeAspect
     {
@@ -14,6 +14,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
         {
             foreach (var constructor in builder.Target.Constructors)
             {
+                if (constructor.IsImplicitlyDeclared)
+                {
+                    continue;
+                }
+
                 builder.Advice.Override(constructor, nameof(Template));
             }
         }
@@ -34,12 +39,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Pri
 
     // <target>
     [Override]
-    public class TargetClass(int x, int y, EventHandler z)
+    public record class TargetClass(int X, int Y)
     {
-        private int a = x;
-
-        private int B { get; } = y;
-
-        private event EventHandler C = z;
+        public void Foo()
+        {
+            var (x, y) = this;
+        }
     }
 }

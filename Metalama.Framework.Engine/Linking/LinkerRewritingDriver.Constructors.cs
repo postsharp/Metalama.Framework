@@ -7,10 +7,10 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using System.Linq;
 using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -41,6 +41,77 @@ namespace Metalama.Framework.Engine.Linking
                                      VariableDeclarator(
                                          Identifier( TriviaList( ElasticSpace ), primaryConstructorField.Name[1..^2], default ) ) ) ),
                              TokenWithTrailingLineFeed( SyntaxKind.SemicolonToken ) ) );
+                }
+
+                foreach ( var primaryConstructorProperty in this.LateTransformationRegistry.GetPrimaryConstructorProperties( symbol.ContainingType ) )
+                {
+                    members.Add(
+                        PropertyDeclaration(
+                             List<AttributeListSyntax>(),
+                             TokenList( TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
+                             generationContext.SyntaxGenerator.Type( primaryConstructorProperty.Type ),
+                             null,
+                             Identifier( TriviaList( ElasticSpace ), primaryConstructorProperty.Name, default ),
+                             AccessorList(
+                                 List(
+                                     new[]
+                                     {
+                                         AccessorDeclaration(
+                                             SyntaxKind.GetAccessorDeclaration, 
+                                             List<AttributeListSyntax>(), 
+                                             TokenList(), 
+                                             Token(SyntaxKind.GetKeyword),
+                                             null, 
+                                             null, 
+                                             Token( SyntaxKind.SemicolonToken) ),
+                                         AccessorDeclaration(
+                                             SyntaxKind.InitAccessorDeclaration,
+                                             List<AttributeListSyntax>(),
+                                             TokenList(),
+                                             Token(SyntaxKind.InitKeyword),
+                                             null,
+                                             null,
+                                             Token( SyntaxKind.SemicolonToken) )
+                                     } ) ),
+                             null,
+                             null,
+                             default ) );
+                }
+
+                if ( constructorDeclaration.Parent is RecordDeclarationSyntax recordDeclaration )
+                {
+                    members.Add(
+                        MethodDeclaration(
+                            List<AttributeListSyntax>(),
+                            TokenList( TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                            PredefinedType( TokenWithTrailingSpace( SyntaxKind.VoidKeyword ) ),
+                            null,
+                            Identifier( "Deconstruct" ),
+                            null,
+                            ParameterList(
+                                SeparatedList(
+                                    recordDeclaration.ParameterList.Parameters.SelectAsArray(
+                                        p =>
+                                            Parameter(
+                                                List<AttributeListSyntax>(),
+                                                TokenList( TokenWithTrailingSpace( SyntaxKind.OutKeyword ) ),
+                                                p.Type,
+                                                p.Identifier,
+                                                null ) ) ) ),
+                            List<TypeParameterConstraintClauseSyntax>(),
+                            Block(
+                                recordDeclaration.ParameterList.Parameters.SelectAsArray(
+                                    p =>
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( p.Identifier ),
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    ThisExpression(),
+                                                    IdentifierName( p.Identifier ) ) ) ) ) ),
+                            null,
+                            default ) );
                 }
             }
 
@@ -79,25 +150,24 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) );
                 }
             }
-            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
-            {
-                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) );
-            }
             else
             {
-                members.Add( constructorDeclaration );
+                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) );
             }
 
             return members;
 
             ConstructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
             {
-                var linkedBody = this.GetSubstitutedBody(
-                    symbol.ToSemantic( semanticKind ),
-                    new SubstitutionContext(
-                        this,
-                        generationContext,
-                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
+                var linkedBody =
+                    this.InjectionRegistry.IsOverrideTarget( symbol ) || this.InjectionRegistry.IsOverride( symbol ) || this.AnalysisRegistry.HasAnySubstitutions( symbol )
+                    ? this.GetSubstitutedBody(
+                        symbol.ToSemantic( semanticKind ),
+                        new SubstitutionContext(
+                            this,
+                            generationContext,
+                            new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) )
+                    : null;
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                     constructorDeclaration switch
@@ -160,10 +230,23 @@ namespace Metalama.Framework.Engine.Linking
                                 break;
 
                             case IPropertySymbol property:
-                                var propertyDeclaration = (PropertyDeclarationSyntax) property.GetPrimaryDeclaration().AssertNotNull();
+                                var primaryDeclaration = property.GetPrimaryDeclaration().AssertNotNull();
 
-                                name = propertyDeclaration.Identifier.ValueText;
-                                expression = propertyDeclaration.Initializer.AssertNotNull().Value;
+                                switch (primaryDeclaration)
+                                {
+                                    case PropertyDeclarationSyntax propertyDeclaration:
+                                        name = propertyDeclaration.Identifier.ValueText;
+                                        expression = propertyDeclaration.Initializer.AssertNotNull().Value;
+                                        break;
+
+                                    case ParameterSyntax parameterDeclaration:
+                                        name = parameterDeclaration.Identifier.ValueText;
+                                        expression = IdentifierName( parameterDeclaration.Identifier.ValueText );
+                                        break;
+
+                                    default:
+                                        throw new AssertionFailedException( $"Unsupported: {primaryDeclaration.Kind()}" );
+                                }
 
                                 break;
 
@@ -184,36 +267,64 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( primaryConstructorFieldAssignments.Count > 0 )
                     {
-                        linkedBody = 
-                            Block(
-                                Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                                linkedBody )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        if ( linkedBody != null )
+                        {
+                            linkedBody =
+                                Block(
+                                    Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    linkedBody )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else if (constructorDeclaration.ExpressionBody != null)
+                        {
+                            linkedBody =
+                                Block(
+                                    Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    ExpressionStatement( constructorDeclaration.ExpressionBody.Expression ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
+                        else
+                        {
+                            linkedBody =
+                                Block(
+                                    Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    constructorDeclaration.Body.AssertNotNull().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        }
                     }
                 }
 
                 var ret = constructorDeclaration.PartialUpdate(
-                    expressionBody: null,
-                    body: Block(
+                    expressionBody: 
+                        linkedBody != null
+                        ? null
+                        : constructorDeclaration.ExpressionBody,
+                    body: 
+                        linkedBody != null
+                        ? Block(
                             Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
                             SingletonList<StatementSyntax>( linkedBody ),
                             Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
+                        : constructorDeclaration.Body,
                     parameterList:
                         isAuxiliaryForPrimaryConstructor
                         ? constructorDeclaration.ParameterList.WithParameters(
                             constructorDeclaration.ParameterList.Parameters.RemoveAt( constructorDeclaration.ParameterList.Parameters.Count - 1 ) )
-                        : default,
+                        : constructorDeclaration.ParameterList,
                     initializer:
                         isAuxiliaryForPrimaryConstructor
                         ? this.LateTransformationRegistry.GetPrimaryConstructorBaseArgumentList( symbol ) switch
                         {
-                            { } arguments => ConstructorInitializer(SyntaxKind.BaseConstructorInitializer, arguments),
-                            null => null,
+                            { } arguments => ConstructorInitializer( SyntaxKind.BaseConstructorInitializer, arguments ),
+                            null => default,
                         }
-                        : default,
-                    semicolonToken: default( SyntaxToken ) );
+                        : constructorDeclaration.Initializer,
+                    semicolonToken:
+                        linkedBody != null
+                        ? default
+                        : constructorDeclaration.SemicolonToken);
 
                 return ret;
             }

@@ -62,14 +62,25 @@ namespace Metalama.Framework.Engine.Linking
                                 break;
 
                             case IPropertySymbol propertySymbol:
-                                var propertyDeclaration = (PropertyDeclarationSyntax) propertySymbol.GetPrimaryDeclaration().AssertNotNull();
+                                var primaryDeclaration = propertySymbol.GetPrimaryDeclaration().AssertNotNull();
 
-                                if ( propertyDeclaration.Initializer == null )
+                                switch ( primaryDeclaration )
                                 {
-                                    continue;
-                                }
+                                    case PropertyDeclarationSyntax propertyDeclaration:
+                                        if ( propertyDeclaration.Initializer == null )
+                                        {
+                                            continue;
+                                        }
 
-                                primaryConstructorInitializedMembers.Add( propertySymbol );
+                                        primaryConstructorInitializedMembers.Add( propertySymbol );
+
+                                        break;
+
+                                    case ParameterSyntax:
+                                        primaryConstructorInitializedMembers.Add( propertySymbol );
+
+                                        break;
+                                }
 
                                 break;
 
@@ -104,6 +115,13 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning restore CA1822 // Mark members as static
         {
             return type.GetMembers().OfType<IFieldSymbol>().Where(f => f.Name is [ '<', .., '>', 'P' ] ).ToArray();
+        }
+
+#pragma warning disable CA1822 // Mark members as static
+        public IReadOnlyList<IPropertySymbol> GetPrimaryConstructorProperties( INamedTypeSymbol type )
+#pragma warning restore CA1822 // Mark members as static
+        {
+            return type.GetMembers().OfType<IPropertySymbol>().Where( p => p.GetPrimaryDeclaration() is ParameterSyntax ).ToArray();
         }
 
         public bool IsPrimaryConstructorInitializedMember( ISymbol symbol )
