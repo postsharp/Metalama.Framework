@@ -2,7 +2,7 @@
 abstract class TargetCode
 {
   public int Property { get; }
-  private TargetCode()
+  public TargetCode()
   {
     Property = 13;
     Property = 42;

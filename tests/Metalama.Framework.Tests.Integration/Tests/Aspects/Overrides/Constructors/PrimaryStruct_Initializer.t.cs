@@ -5,7 +5,7 @@ public struct TargetStruct
   private int a;
   private int B { get; }
   private event EventHandler C;
-  private TargetStruct(int x, int y, EventHandler z)
+  public TargetStruct(int x, int y, EventHandler z)
   {
     this.a = x;
     this.B = y;

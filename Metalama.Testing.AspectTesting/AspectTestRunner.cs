@@ -511,15 +511,17 @@ namespace Metalama.Testing.AspectTesting
 
                 // TODO: Commented out because we have some tests that generate invalid syntax either into the intermediate compilation or even to the final one.
 
-                //var intermediateDiagnostics = testResult.IntermediateLinkerCompilation.Compilation.GetDiagnostics();
+                /*
+                var intermediateDiagnostics = testResult.IntermediateLinkerCompilation.Compilation.GetDiagnostics();
 
-                //var intermediateLinkerError =
-                //    intermediateDiagnostics.FirstOrDefault( d => d is { Severity: DiagnosticSeverity.Error } or { Severity: DiagnosticSeverity.Warning, IsWarningAsError: true } );
+                var intermediateLinkerError =
+                    intermediateDiagnostics.FirstOrDefault( d => d is { Severity: DiagnosticSeverity.Error } or { Severity: DiagnosticSeverity.Warning, IsWarningAsError: true } );
 
-                //if ( intermediateLinkerError != null )
-                //{
-                //    throw new InvalidOperationException( $"Invalid intermediate compilation: {intermediateLinkerError}" );
-                //}
+                if ( intermediateLinkerError != null )
+                {
+                    throw new InvalidOperationException( $"Invalid intermediate compilation: {intermediateLinkerError}" );
+                }
+                */
             }
 #endif
         }

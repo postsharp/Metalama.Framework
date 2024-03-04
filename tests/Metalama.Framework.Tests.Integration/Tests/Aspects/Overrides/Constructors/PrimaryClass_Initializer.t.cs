@@ -4,7 +4,7 @@ public class TargetClass
   private int a;
   private int B { get; }
   private event EventHandler C;
-  private TargetClass(int x, int y, EventHandler z)
+  public TargetClass(int x, int y, EventHandler z)
   {
     this.a = x;
     this.B = y;

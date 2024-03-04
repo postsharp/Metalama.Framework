@@ -5,7 +5,7 @@ public class TargetClass
   public int Bar() => y;
   private readonly global::System.Int32 x;
   private readonly global::System.Int32 y;
-  private TargetClass(int x, int y)
+  public TargetClass(int x, int y)
   {
     this.x = x;
     this.y = y;

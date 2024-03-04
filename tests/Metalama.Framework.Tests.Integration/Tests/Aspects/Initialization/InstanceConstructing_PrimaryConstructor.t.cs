@@ -2,7 +2,7 @@
 public class TargetCode
 {
   public int X { get; }
-  private TargetCode(int x)
+  public TargetCode(int x)
   {
     this.X = x;
     global::System.Console.WriteLine("TargetCode: Aspect");

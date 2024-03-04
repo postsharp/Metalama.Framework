@@ -10,7 +10,7 @@ public record class TargetClass
   {
     X = this.X;
   }
-  private TargetClass(int X)
+  public TargetClass(int X)
   {
     this.X = X;
     global::System.Console.WriteLine("This is the override.");

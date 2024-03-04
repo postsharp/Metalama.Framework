@@ -8,7 +8,7 @@ class TargetCode
   string? f1, f2;
   public string? Property1 { get; }
   public string? Property2 { get; set; }
-  private TargetCode()
+  public TargetCode()
   {
     this.f = "f";
     this.f1 = "f1";

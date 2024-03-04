@@ -10,160 +10,170 @@ using System.Linq;
 using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerRewritingDriver
 {
-    internal sealed partial class LinkerRewritingDriver
+    public ClassDeclarationSyntax RewriteClass(
+        ClassDeclarationSyntax classDeclaration,
+        INamedTypeSymbol symbol,
+        IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
     {
-        public ClassDeclarationSyntax RewriteClass(
-            ClassDeclarationSyntax classDeclaration,
-            INamedTypeSymbol symbol,
-            IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+        if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
         {
-            if (this.LateTransformationRegistry.HasRemovedPrimaryConstructor(symbol))
-            {
 #if ROSLYN_4_8_0_OR_GREATER
-                classDeclaration =
-                    classDeclaration.PartialUpdate(
-                        parameterList: default( ParameterListSyntax ),
-                        baseList:
-                            classDeclaration.BaseList != null
-                            ? classDeclaration.BaseList.WithTypes(
-                                SeparatedList(
-                                classDeclaration.BaseList.Types.SelectAsArray( b =>
-                                    b switch
-                                    {
-                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                        _ => b
-                                    } ) ) )
-                            : default );
+            classDeclaration =
+                classDeclaration.PartialUpdate(
+                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
+                    parameterList: default( ParameterListSyntax ),
+                    baseList:
+                        classDeclaration.BaseList != null
+                        ? classDeclaration.BaseList.WithTypes(
+                            SeparatedList(
+                            classDeclaration.BaseList.Types.SelectAsArray( b =>
+                                b switch
+                                {
+                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                    _ => b
+                                } ) ) )
+                        : default );
 #else
-                throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+        throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
-            }
-
-            classDeclaration = classDeclaration.WithMembers( List( transformedMembers ) );
-
-            return classDeclaration;
         }
 
-        public StructDeclarationSyntax RewriteStruct(
-            StructDeclarationSyntax structDeclaration,
-            INamedTypeSymbol symbol,
-            IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+        classDeclaration = classDeclaration.WithMembers( List( transformedMembers ) );
+
+        return classDeclaration;
+    }
+
+    public StructDeclarationSyntax RewriteStruct(
+        StructDeclarationSyntax structDeclaration,
+        INamedTypeSymbol symbol,
+        IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+    {
+        if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
         {
-            if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
-            {
 #if ROSLYN_4_8_0_OR_GREATER
-                structDeclaration = structDeclaration.WithParameterList( default );
+            structDeclaration =
+                structDeclaration.PartialUpdate(
+                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
+                    parameterList: default( ParameterListSyntax ) );
 #else
-                throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+        throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
-            }
-
-            structDeclaration = structDeclaration.WithMembers( List( transformedMembers ) );
-
-            return structDeclaration;
         }
 
-        public RecordDeclarationSyntax RewriteRecord(
-            RecordDeclarationSyntax recordDeclaration,
-            INamedTypeSymbol symbol,
-            IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+        structDeclaration = structDeclaration.WithMembers( List( transformedMembers ) );
+
+        return structDeclaration;
+    }
+
+    public RecordDeclarationSyntax RewriteRecord(
+        RecordDeclarationSyntax recordDeclaration,
+        INamedTypeSymbol symbol,
+        IReadOnlyList<MemberDeclarationSyntax> transformedMembers )
+    {
+        if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
         {
-            if ( this.LateTransformationRegistry.HasRemovedPrimaryConstructor( symbol ) )
+            recordDeclaration =
+                recordDeclaration.PartialUpdate(
+                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
+                    parameterList: default( ParameterListSyntax ),
+                    baseList:
+                        recordDeclaration.BaseList != null
+                        ? recordDeclaration.BaseList.WithTypes(
+                            SeparatedList(
+                            recordDeclaration.BaseList.Types.SelectAsArray( b =>
+                                b switch
+                                {
+                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                    _ => b
+                                } ) ) )
+                        : default );
+        }
+        else if ( recordDeclaration.ParameterList != null )
+        {
+            var semanticModel = this.IntermediateCompilationContext.SemanticModelProvider.GetSemanticModel( recordDeclaration.SyntaxTree );
+            SyntaxGenerationContext? generationContext = null;
+
+            List<MemberDeclarationSyntax>? newMembers = null;
+
+            var transformedParametersAndCommas = new List<SyntaxNodeOrToken>( recordDeclaration.ParameterList.Parameters.Count * 2 );
+
+            for ( var i = 0; i < recordDeclaration.ParameterList.Parameters.Count; i++ )
             {
-                recordDeclaration =
-                    recordDeclaration.PartialUpdate(
-                        parameterList: default( ParameterListSyntax ),
-                        baseList:
-                            recordDeclaration.BaseList != null
-                            ? recordDeclaration.BaseList.WithTypes(
-                                SeparatedList(
-                                recordDeclaration.BaseList.Types.SelectAsArray( b =>
-                                    b switch
-                                    {
-                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                        _ => b
-                                    } ) ) )
-                            : default );
-            }
-            else if ( recordDeclaration.ParameterList != null )
-            {
-                var semanticModel = this.IntermediateCompilationContext.SemanticModelProvider.GetSemanticModel( recordDeclaration.SyntaxTree );
-                SyntaxGenerationContext? generationContext = null;
+                var parameter = recordDeclaration.ParameterList.Parameters[i];
+                newMembers ??= new List<MemberDeclarationSyntax>();
 
-                List<MemberDeclarationSyntax>? newMembers = null;
+                var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
 
-                var transformedParametersAndCommas = new List<SyntaxNodeOrToken>( recordDeclaration.ParameterList.Parameters.Count * 2 );
-
-                for ( var i = 0; i < recordDeclaration.ParameterList.Parameters.Count; i++ )
+                if ( parameterSymbol == null )
                 {
-                    var parameter = recordDeclaration.ParameterList.Parameters[i];
-                    newMembers ??= new List<MemberDeclarationSyntax>();
-
-                    var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
-
-                    if ( parameterSymbol == null )
-                    {
-                        continue;
-                    }
-
-                    var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
-
-                    if ( propertySymbol != null && this.IsRewriteTarget( propertySymbol ) )
-                    {
-                        SyntaxGenerationContext GetSyntaxGenerationContext()
-                            => generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
-                                recordDeclaration.SyntaxTree,
-                                recordDeclaration.SpanStart );
-
-                        if ( this.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
-                        {
-                            // Add new members that take place of synthesized positional property.
-                            newMembers.AddRange(
-                                this.RewritePositionalProperty(
-                                    parameter,
-                                    propertySymbol.AssertNotNull(),
-                                    GetSyntaxGenerationContext() ) );
-                        }
-
-                        // Remove all attributes related to properties (property/field/get/set target specifiers).
-                        var transformedParameter =
-                            parameter.WithAttributeLists(
-                                List(
-                                    parameter.AttributeLists
-                                        .Where(
-                                            l =>
-                                                l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
-                                                && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
-                                                && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
-                                                && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
-
-                        transformedParametersAndCommas.Add( transformedParameter );
-                    }
-                    else
-                    {
-                        transformedParametersAndCommas.Add( parameter );
-                    }
-
-                    if ( i < recordDeclaration.ParameterList.Parameters.SeparatorCount )
-                    {
-                        transformedParametersAndCommas.Add( recordDeclaration.ParameterList.Parameters.GetSeparator( i ) );
-                    }
+                    continue;
                 }
 
-                recordDeclaration = recordDeclaration.WithParameterList( recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+                var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
 
-                if ( newMembers is { Count: > 0 } )
+                if ( propertySymbol != null && this.IsRewriteTarget( propertySymbol ) )
                 {
-                    transformedMembers =
-                        transformedMembers.Concat( newMembers );
+                    SyntaxGenerationContext GetSyntaxGenerationContext()
+                        => generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                            recordDeclaration.SyntaxTree,
+                            recordDeclaration.SpanStart );
+
+                    if ( this.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
+                    {
+                        // Add new members that take place of synthesized positional property.
+                        newMembers.AddRange(
+                            this.RewritePositionalProperty(
+                                parameter,
+                                propertySymbol.AssertNotNull(),
+                                GetSyntaxGenerationContext() ) );
+                    }
+
+                    // Remove all attributes related to properties (property/field/get/set target specifiers).
+                    var transformedParameter =
+                        parameter.WithAttributeLists(
+                            List(
+                                parameter.AttributeLists
+                                    .Where(
+                                        l =>
+                                            l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
+                                            && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
+                                            && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
+                                            && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
+
+                    transformedParametersAndCommas.Add( transformedParameter );
+                }
+                else
+                {
+                    transformedParametersAndCommas.Add( parameter );
+                }
+
+                if ( i < recordDeclaration.ParameterList.Parameters.SeparatorCount )
+                {
+                    transformedParametersAndCommas.Add( recordDeclaration.ParameterList.Parameters.GetSeparator( i ) );
                 }
             }
 
-            recordDeclaration = recordDeclaration.WithMembers( List( transformedMembers ) );
+            recordDeclaration = recordDeclaration.WithParameterList( recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
-            return recordDeclaration;
+            if ( newMembers is { Count: > 0 } )
+            {
+                transformedMembers =
+                    transformedMembers.Concat( newMembers );
+            }
         }
+
+        recordDeclaration = recordDeclaration.WithMembers( List( transformedMembers ) );
+
+        return recordDeclaration;
+    }
+
+    public static SyntaxList<AttributeListSyntax> RewritePrimaryConstructorTypeAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
+    {
+        return
+            List( attributeLists.Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) != true ) );
     }
 }

@@ -5,10 +5,7 @@ public record TargetRecord
   {
     return a;
   }
-  public void Deconstruct()
-  {
-  }
-  private TargetRecord()
+  public TargetRecord()
   {
     global::System.Console.WriteLine("TargetRecord: Aspect");
   }

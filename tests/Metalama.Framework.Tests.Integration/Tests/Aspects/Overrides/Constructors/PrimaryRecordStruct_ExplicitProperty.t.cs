@@ -10,7 +10,7 @@ public record struct TargetStruct
   {
     X = this.X;
   }
-  private TargetStruct(int X)
+  public TargetStruct(int X)
   {
     this.X = X;
     global::System.Console.WriteLine("This is the override.");

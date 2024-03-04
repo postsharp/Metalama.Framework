@@ -22,7 +22,7 @@ abstract class TargetCode : Base
   [field: MyAttribute]
   int x17 { get; }
   int x18, x19;
-  private TargetCode()
+  public TargetCode()
   {
     x1 = 1;
     x2 = 2;

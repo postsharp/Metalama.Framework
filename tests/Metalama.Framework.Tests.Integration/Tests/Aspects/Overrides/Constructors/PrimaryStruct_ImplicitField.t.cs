@@ -5,7 +5,7 @@ public struct TargetStruct
   public int Bar() => y;
   private readonly global::System.Int32 x;
   private readonly global::System.Int32 y;
-  private TargetStruct(int x, int y)
+  public TargetStruct(int x, int y)
   {
     this.x = x;
     this.y = y;
