@@ -33,8 +33,6 @@ internal sealed partial class LinkerInjectionStep
         private readonly TransformationCollection _transformationCollection;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
 
-        private readonly IUserDiagnosticSink _diagnostics;
-
         // Maps a diagnostic id to the number of times it has been suppressed.
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
@@ -43,8 +41,7 @@ internal sealed partial class LinkerInjectionStep
             TransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
-            SyntaxTree syntaxTreeForGlobalAttributes,
-            IUserDiagnosticSink diagnostics )
+            SyntaxTree syntaxTreeForGlobalAttributes )
         {
             this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
             this._diagnosticSuppressions = diagnosticSuppressions;
@@ -52,7 +49,6 @@ internal sealed partial class LinkerInjectionStep
             this._transformationCollection = syntaxTransformationCollection;
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
-            this._diagnostics = diagnostics;
         }
 
         private bool PreserveTrivia => this._syntaxGenerationContextFactory.Default.PreserveTrivia;

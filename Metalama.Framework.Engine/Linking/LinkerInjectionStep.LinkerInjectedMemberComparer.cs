@@ -131,6 +131,9 @@ internal sealed partial class LinkerInjectionStep
 
             switch ( (x.Transformation, y.Transformation) )
             {
+                case (null, null ):
+                    return 0;
+
                 case (null, _ ):
                     return -1;
 

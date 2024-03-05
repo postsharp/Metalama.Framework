@@ -228,8 +228,7 @@ namespace Metalama.Framework.Engine.Linking
                     transformationCollection,
                     suppressionsByTarget,
                     input.CompilationModel,
-                    syntaxTreeForGlobalAttributes,
-                    diagnostics );
+                    syntaxTreeForGlobalAttributes );
 
                 var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
                 var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
@@ -811,7 +810,11 @@ namespace Metalama.Framework.Engine.Linking
                                         ArgumentList(
                                             SeparatedList(
                                                 syntax.ParameterList.Parameters.SelectAsArray(
-                                                    p => Argument( null, p.Modifiers.FirstOrDefault(), IdentifierName( p.Identifier.ValueText ) ) ) ) ) ),
+                                                    p => 
+                                                        Argument( 
+                                                            null, 
+                                                            p.Modifiers.FirstOrDefault( m => !m.IsKind( SyntaxKind.ParamsKeyword )), 
+                                                            IdentifierName( p.Identifier.ValueText ) ) ) ) ) ),
                                     Block(),
                                     null,
                                     default ),

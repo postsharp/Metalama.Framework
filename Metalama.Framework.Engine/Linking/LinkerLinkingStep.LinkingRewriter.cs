@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
                 LinkerRewritingDriver rewritingDriver )
             {
                 this._compilationContext = intermediateCompilationContext;
-                this._semanticModelProvider = intermediateCompilationContext.SemanticModelProvider;;
+                this._semanticModelProvider = intermediateCompilationContext.SemanticModelProvider;
                 this._rewritingDriver = rewritingDriver;
             }
 

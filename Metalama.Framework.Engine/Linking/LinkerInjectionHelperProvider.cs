@@ -165,8 +165,8 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( ordinal )
             {
-                case 0:
-                    throw new AssertionFailedException( $"Cannot create a 0 ordinal for {kind} by aspect {aspectName} (internal linker error)." );
+                case <= 0:
+                    throw new AssertionFailedException( $"Cannot create a {ordinal} ordinal for {kind} by aspect {aspectName} (internal linker error)." );
 
                 case < 10:
                     return

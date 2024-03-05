@@ -39,7 +39,7 @@ internal sealed partial class LinkerRewritingDriver
                                 .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.PreserveTrivia ),
                              SingletonSeparatedList(
                                  VariableDeclarator(
-                                     Identifier( TriviaList( ElasticSpace ), primaryConstructorField.Name[1..^2], default ) ) ) ),
+                                     Identifier( TriviaList( ElasticSpace ), GetCleanPrimaryConstructorFieldName( primaryConstructorField ), default ) ) ) ),
                          TokenWithTrailingLineFeed( SyntaxKind.SemicolonToken ) ) );
             }
 
@@ -188,7 +188,7 @@ internal sealed partial class LinkerRewritingDriver
 
                 foreach ( var primaryConstructorField in this.LateTransformationRegistry.GetPrimaryConstructorFields( symbol.ContainingType ) )
                 {
-                    var cleanName = primaryConstructorField.Name[1..^2];
+                    var cleanName = GetCleanPrimaryConstructorFieldName( primaryConstructorField );
 
                     primaryConstructorFieldAssignments.Add(
                         ExpressionStatement(
@@ -340,7 +340,7 @@ internal sealed partial class LinkerRewritingDriver
         }
     }
 
-    public static SyntaxList<AttributeListSyntax> GetPrimaryConstructorAttributes(ConstructorDeclarationSyntax constructorDeclaration)
+    private static SyntaxList<AttributeListSyntax> GetPrimaryConstructorAttributes(ConstructorDeclarationSyntax constructorDeclaration)
     {
         var typeDeclaration = (TypeDeclarationSyntax) constructorDeclaration.Parent.AssertNotNull();
 
@@ -349,5 +349,10 @@ internal sealed partial class LinkerRewritingDriver
                 typeDeclaration.AttributeLists
                 .Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) == true )
                 .Select( al => al.WithTarget( null ) ) );
+    }
+
+    private static string GetCleanPrimaryConstructorFieldName(IFieldSymbol field)
+    {
+        return field.Name[1..^2];
     }
 }

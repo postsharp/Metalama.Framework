@@ -7,7 +7,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.ConstructorPrimary_Parameter;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.ConstructorPrimary_Struct_Parameter;
 
 internal class NotNullAttribute : ContractAspect
 {
@@ -15,15 +15,15 @@ internal class NotNullAttribute : ContractAspect
     {
         if (value == null)
         {
-            throw new ArgumentNullException( meta.Target.Parameter.Name );
+            throw new ArgumentNullException( meta.Target.Property.Name );
         }
     }
 }
 
 // <target>
-internal class Target( [NotNull]string x )
+internal record struct Target([NotNull] string X)
 {
-    public string X { get; set; } = x;
+    public string Y { get; set; } = X;
 }
 
 #endif

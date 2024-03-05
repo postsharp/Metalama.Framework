@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -114,7 +115,22 @@ namespace Metalama.Framework.Engine.Linking
         public IReadOnlyList<IFieldSymbol> GetPrimaryConstructorFields( INamedTypeSymbol type )
 #pragma warning restore CA1822 // Mark members as static
         {
-            return type.GetMembers().OfType<IFieldSymbol>().Where(f => f.Name is [ '<', .., '>', 'P' ] ).ToArray();
+#if ROSLYN_4_8_0_OR_GREATER
+            var typeSyntax =
+                (TypeDeclarationSyntax) type.DeclaringSyntaxReferences.Select( r => r.GetSyntax() )
+                .Single( d => d is TypeDeclarationSyntax { ParameterList: not null } );
+
+            if (typeSyntax is RecordDeclarationSyntax)
+            {
+                return Array.Empty<IFieldSymbol>();
+            }
+
+            var parameterList = typeSyntax.ParameterList.AssertNotNull();
+
+            return type.GetMembers().OfType<IFieldSymbol>().Where( f => f.Locations.Any( l => parameterList.Span.Contains( l.SourceSpan.Start ) ) ).ToArray();
+#else
+            return Array.Empty<IFieldSymbol>();
+#endif
         }
 
 #pragma warning disable CA1822 // Mark members as static
@@ -135,7 +151,15 @@ namespace Metalama.Framework.Engine.Linking
 
             Invariant.Assert( this.HasRemovedPrimaryConstructor( type ) );
 
-            var typeSyntax = (TypeDeclarationSyntax) type.GetPrimaryDeclaration().AssertNotNull();
+#if ROSLYN_4_8_0_OR_GREATER
+            var typeSyntax =
+                (TypeDeclarationSyntax) type.DeclaringSyntaxReferences.Select( r => r.GetSyntax() )
+                .Single( d => d is TypeDeclarationSyntax { ParameterList: not null } );
+#else
+            var typeSyntax =
+                (RecordDeclarationSyntax) type.DeclaringSyntaxReferences.Select( r => r.GetSyntax() )
+                .Single( d => d is RecordDeclarationSyntax { ParameterList: not null } );
+#endif
 
             var primaryConstructorBase = typeSyntax.BaseList?.Types.OfType<PrimaryConstructorBaseTypeSyntax>().SingleOrDefault();
 

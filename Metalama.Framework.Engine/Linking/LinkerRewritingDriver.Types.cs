@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
-using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking;
@@ -106,13 +105,7 @@ internal sealed partial class LinkerRewritingDriver
                 var parameter = recordDeclaration.ParameterList.Parameters[i];
                 newMembers ??= new List<MemberDeclarationSyntax>();
 
-                var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
-
-                if ( parameterSymbol == null )
-                {
-                    continue;
-                }
-
+                var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter ).AssertNotNull();
                 var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
 
                 if ( propertySymbol != null && this.IsRewriteTarget( propertySymbol ) )
@@ -122,15 +115,12 @@ internal sealed partial class LinkerRewritingDriver
                             recordDeclaration.SyntaxTree,
                             recordDeclaration.SpanStart );
 
-                    if ( this.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
-                    {
-                        // Add new members that take place of synthesized positional property.
-                        newMembers.AddRange(
-                            this.RewritePositionalProperty(
-                                parameter,
-                                propertySymbol.AssertNotNull(),
-                                GetSyntaxGenerationContext() ) );
-                    }
+                    // Add new members that take place of synthesized positional property.
+                    newMembers.AddRange(
+                        this.RewritePositionalProperty(
+                            parameter,
+                            propertySymbol.AssertNotNull(),
+                            GetSyntaxGenerationContext() ) );
 
                     // Remove all attributes related to properties (property/field/get/set target specifiers).
                     var transformedParameter =

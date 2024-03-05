@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Aspects;
+﻿#if TEST_OPTIONS
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -39,3 +41,5 @@ internal class TargetClass([ParamOnly] int x)
 {
     int Z = x;
 }
+
+#endif

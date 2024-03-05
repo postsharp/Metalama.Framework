@@ -5,7 +5,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Type;
 
-public class MyAttribute : Attribute;
+public class MyAttribute : Attribute { }
 
 [Inheritable]
 public class MyAspect : TypeAspect

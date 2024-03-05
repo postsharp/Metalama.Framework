@@ -292,7 +292,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( !StructuralSymbolComparer.Default.Equals(
                                  originalConstructor.Parameters[i].Type,
                                  translatedConstructor.Parameters[i].Type )
-                             && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind )
+                             || originalConstructor.Parameters[i].RefKind != translatedConstructor.Parameters[i].RefKind )
                         {
                             matches = false;
 
@@ -316,7 +316,6 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
         }
-
 
         /// <summary>
         /// Gets introduced members representing overrides of a symbol.
