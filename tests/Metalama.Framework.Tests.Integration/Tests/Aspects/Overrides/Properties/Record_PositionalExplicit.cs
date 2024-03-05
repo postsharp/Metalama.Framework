@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @Skipped(#34517)
+#endif
+
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System;
