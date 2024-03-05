@@ -1,4 +1,8 @@
 ﻿#if TEST_OPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
