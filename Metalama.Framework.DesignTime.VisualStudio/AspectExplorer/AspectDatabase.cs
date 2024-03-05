@@ -80,7 +80,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var targetDeclaration = ResolveToSymbol( aspectInstance.TargetDeclarationId );
+                var targetDeclaration = ResolveToSymbol( aspectInstance.TargetDeclarationId, out var targetDeclarationKind );
 
                 if ( targetDeclaration is null )
                 {
@@ -90,6 +90,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
                 yield return new AspectExplorerAspectInstance
                 {
                     TargetDeclaration = targetDeclaration,
+                    TargetDeclarationKind = targetDeclarationKind,
                     Transformations = GetTransformations( aspectInstance ).ToArray()
                 };
             }
@@ -99,7 +100,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         {
             foreach ( var transformation in aspectInstance.Transformations )
             {
-                var targetDeclaration = ResolveToSymbol( transformation.TargetDeclarationId );
+                var targetDeclaration = ResolveToSymbol( transformation.TargetDeclarationId, out var targetDeclarationKind );
 
                 if ( targetDeclaration is null )
                 {
@@ -109,12 +110,27 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
                 yield return new AspectExplorerAspectTransformation
                 {
                     TargetDeclaration = targetDeclaration,
+                    TargetDeclarationKind = targetDeclarationKind,
                     Description = transformation.Description
                 };
             }
         }
 
-        ISymbol? ResolveToSymbol( string? id ) => id is null ? null : new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilation );
+        ISymbol? ResolveToSymbol( string? id, out AspectExplorerDeclarationKind kind )
+        {
+            if ( id is null )
+            {
+                kind = AspectExplorerDeclarationKind.Default;
+
+                return null;
+            }
+
+            var symbol = new SerializableDeclarationId( id ).ResolveToSymbolOrNull( compilation, out var isReturnParameter );
+
+            kind = isReturnParameter ? AspectExplorerDeclarationKind.ReturnParameter : AspectExplorerDeclarationKind.Default;
+
+            return symbol;
+        }
     }
 
     public event Action<string>? AspectClassesChanged;

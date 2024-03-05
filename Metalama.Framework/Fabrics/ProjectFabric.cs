@@ -10,8 +10,9 @@ namespace Metalama.Framework.Fabrics
     /// When the project contains several project fabrics, the ones whose source file is the closest to the root directory is executed
     /// first. The project fabrics are then ordered by type name.
     /// </remarks>
-    /// <seealso href="@exposing-configuration"/>
-    /// <seealso href="@applying-aspects"/>
+    /// <seealso href="@fabrics"/> 
+    /// <seealso href="@aspect-configuration"/>
+    /// <seealso href="@fabrics-adding-aspects"/>
     public abstract class ProjectFabric : Fabric
     {
         /// <summary>

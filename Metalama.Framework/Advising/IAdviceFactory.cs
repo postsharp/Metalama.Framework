@@ -39,7 +39,7 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
-        /// <seealso href="@overriding-members"/>
+        /// <seealso href="@overriding-methods"/>
         IOverrideAdviceResult<IMethod> Override( IMethod targetMethod, in MethodTemplateSelector template, object? args = null, object? tags = null );
 
         /// <summary>
@@ -133,7 +133,6 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
-        /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IConstructor> Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null );
 
         /// <summary>
@@ -144,7 +143,7 @@ namespace Metalama.Framework.Advising
         ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <seealso href="@overriding-members"/>
+        /// <seealso href="@overriding-fields-or-properties"/>
         IOverrideAdviceResult<IProperty> Override(
             IFieldOrProperty targetFieldOrProperty,
             string template,
@@ -166,7 +165,7 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <seealso href="@overriding-members"/>
+        /// <seealso href="@overriding-fields-or-properties"/>
         IOverrideAdviceResult<IProperty> OverrideAccessors(
             IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplate = default,
@@ -493,7 +492,7 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <seealso href="@overriding-members"/>
+        /// <seealso href="@overriding-events"/>
         IOverrideAdviceResult<IEvent> OverrideAccessors(
             IEvent targetEvent,
             string? addTemplate,
