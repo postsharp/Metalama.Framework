@@ -10,7 +10,7 @@ namespace Metalama.Framework.Fabrics
     /// You cannot inherit this class directly, inherit from <see cref="ProjectFabric"/>, <see cref="NamespaceFabric"/>,
     /// or <see cref="TypeFabric"/> instead.
     /// </summary>
-    /// <seealso href="@applying-aspects"/>
+    /// <seealso href="@fabrics-adding-aspects"/>
     [CompileTime]
     public abstract class Fabric : ICompileTimeSerializable, ITemplateProvider
     {
