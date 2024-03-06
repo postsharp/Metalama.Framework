@@ -17,23 +17,18 @@ internal sealed partial class LinkerInjectionStep
 
         private ConcurrentLinkedList<IntroduceParameterTransformation>? _unorderedParameters;
         private ConcurrentLinkedList<IntroduceConstructorInitializerArgumentTransformation>? _unorderedArguments;
-        private ConcurrentLinkedList<SetInitializerExpressionTransformation>? _unorderedExpressions;
 
         public ImmutableArray<IntroduceParameterTransformation> Parameters { get; private set; }
 
         public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; }
 
-        public ImmutableArray<SetInitializerExpressionTransformation> Expressions { get; private set; }
-
-        public void Sort( TransformationLinkerOrderComparer comparer )
+        public void Sort()
         {
             this.Arguments = this._unorderedArguments?.OrderBy( a => a.ParameterIndex ).ToImmutableArray()
                              ?? ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
 
             this.Parameters = this._unorderedParameters?.OrderBy( p => p.Parameter.Index ).ToImmutableArray()
                               ?? ImmutableArray<IntroduceParameterTransformation>.Empty;
-
-            this.Expressions = this._unorderedExpressions?.ToImmutableArray() ?? ImmutableArray<SetInitializerExpressionTransformation>.Empty;
         }
 
         public void Add( IntroduceParameterTransformation transformation )
@@ -41,12 +36,5 @@ internal sealed partial class LinkerInjectionStep
 
         public void Add( IntroduceConstructorInitializerArgumentTransformation argument )
             => LazyInitializer.EnsureInitialized( ref this._unorderedArguments ).Add( argument );
-
-        public void Add( SetInitializerExpressionTransformation transformation )
-            => LazyInitializer.EnsureInitialized( ref this._unorderedExpressions ).Add( transformation );
     }
-
-    // Currently unused, but might be useful in the future.
-    // ReSharper disable once ClassNeverInstantiated.Local
-    private sealed class TypeLevelTransformations { }
 }

@@ -21,6 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly ConcurrentDictionary<INamedType, HashSet<string>> _injectedMemberNames;
         private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
+        private readonly ConcurrentDictionary<(Type AspectType, IMember TargetMember), int> _auxiliaryCounters;
         private readonly ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>> _nameCollisionCounters;
         private readonly OurSyntaxGenerator _syntaxGenerator;
 
@@ -35,6 +36,10 @@ namespace Metalama.Framework.Engine.Linking
 
             this._overriddenByCounters =
                 new ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int>(
+                    ValueTupleComparer.Create<Type, IMember>( EqualityComparer<Type>.Default, finalCompilation.Comparers.Default ) );
+
+            this._auxiliaryCounters =
+                new ConcurrentDictionary<(Type AspectType, IMember TargetMember), int>(
                     ValueTupleComparer.Create<Type, IMember>( EqualityComparer<Type>.Default, finalCompilation.Comparers.Default ) );
 
             this._nameCollisionCounters =
@@ -118,11 +123,21 @@ namespace Metalama.Framework.Engine.Linking
 
         internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember )
         {
-            // TODO: Counter update can be optimized but having multiple indexer overrides is not likely.
-
             var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
 
             return this._injectionHelperProvider.GetOverriddenByType( this._syntaxGenerator, aspect.AspectClass, ordinal );
+        }
+
+        internal TypeSyntax GetSourceType()
+        {
+            return this._injectionHelperProvider.GetSourceType();
+        }
+
+        internal TypeSyntax GetAuxiliaryType( IAspectInstanceInternal aspect, IMember targetMember )
+        {
+            var ordinal = this._auxiliaryCounters.AddOrUpdate( (aspect.AspectClass.Type, targetMember), 0, ( _, v ) => v + 1 );
+
+            return this._injectionHelperProvider.GetAuxiliaryType( this._syntaxGenerator, aspect.AspectClass, ordinal );
         }
 
         private string FindUniqueName( INamedType containingType, string hint )

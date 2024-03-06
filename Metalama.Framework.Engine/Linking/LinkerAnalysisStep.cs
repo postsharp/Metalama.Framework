@@ -211,6 +211,7 @@ namespace Metalama.Framework.Engine.Linking
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
                     input.InjectionRegistry,
+                    input.LateTransformationRegistry,
                     analysisRegistry,
                     input.ProjectOptions );
         }

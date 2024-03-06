@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -30,6 +31,15 @@ namespace Metalama.Framework.Engine.Linking
                         symbol,
                         List<AttributeListSyntax>(),
                         fieldDeclaration.Declaration.Type ) );
+            }
+
+            if (this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
+            {
+                fieldDeclaration =
+                    fieldDeclaration.WithDeclaration(
+                        fieldDeclaration.Declaration.WithVariables(
+                            SeparatedList(
+                                fieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
             }
 
             members.Add( fieldDeclaration );

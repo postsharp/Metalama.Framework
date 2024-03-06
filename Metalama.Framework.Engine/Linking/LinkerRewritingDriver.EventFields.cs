@@ -65,6 +65,15 @@ namespace Metalama.Framework.Engine.Linking
                             symbol ) );
                 }
 
+                if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
+                {
+                    eventFieldDeclaration =
+                        eventFieldDeclaration.WithDeclaration(
+                            eventFieldDeclaration.Declaration.WithVariables(
+                                SeparatedList(
+                                    eventFieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
+                }
+
                 members.Add( eventFieldDeclaration );
 
                 return members;

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Engine.Templating
             // Prevent that by adding `yield break;` at the end of the method body.
             block = templateExpansionContext.AddYieldBreakIfNecessary( block );
 
-            block = block.NormalizeWhitespace();
+            block = block.NormalizeWhitespaceIfNecessary( templateExpansionContext.SyntaxGenerationContext.NormalizeWhitespace );
 
             // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
             var aspectClass = templateExpansionContext.MetaApi.AspectInstance?.AspectClass;

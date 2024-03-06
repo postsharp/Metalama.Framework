@@ -38,13 +38,17 @@ namespace Metalama.Framework.Engine.Transformations
                     ? SyntaxKind.InitAccessorDeclaration
                     : SyntaxKind.SetAccessorDeclaration;
 
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Unsafe )
+                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+
             var overrides = new[]
             {
                 new InjectedMember(
                     this,
                     IndexerDeclaration(
                         List<AttributeListSyntax>(),
-                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
+                        TokenList( modifiers ),
                         context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null,
                         Token( SyntaxKind.ThisKeyword ),

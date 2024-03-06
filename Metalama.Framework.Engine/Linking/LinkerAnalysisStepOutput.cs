@@ -15,6 +15,7 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnosticSink,
             PartialCompilation intermediateCompilation,
             LinkerInjectionRegistry injectionRegistry,
+            LinkerLateTransformationRegistry linkerLateTransformationRegistry,
             LinkerAnalysisRegistry analysisRegistry,
             IProjectOptions? projectOptions )
         {
@@ -22,6 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             this.IntermediateCompilation = intermediateCompilation;
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
+            this.LateTransformationRegistry = linkerLateTransformationRegistry;
             this.ProjectOptions = projectOptions;
         }
 
@@ -39,6 +41,11 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the injection registry.
         /// </summary>
         public LinkerInjectionRegistry InjectionRegistry { get; }
+
+        /// <summary>
+        /// Gets the registry of late transformations that are performed during linking.
+        /// </summary>
+        public LinkerLateTransformationRegistry LateTransformationRegistry { get; }
 
         /// <summary>
         /// Gets the analysis registry.

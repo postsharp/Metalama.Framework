@@ -1,6 +1,14 @@
-// Warning CS0414 on `x`: `The field 'TargetRecord.x' is assigned but its value is never used`
 [Aspect]
-public record TargetRecord()
+public record TargetRecord
 {
-    int x = 13;
+  private readonly int x;
+  public int Y { get; }
+  public int Foo() => x;
+  public TargetRecord()
+  {
+    this.x = 0;
+    this.Y = 0;
+    x = 13;
+    Y = 27;
+  }
 }

@@ -27,7 +27,8 @@ namespace Metalama.Framework.Engine.Linking
         private const string _eventFieldInitializationExpressionMemberName = "__EventFieldInitializationExpression__";
         private const string _emptyCodeTypeName = "__Empty";
         private const string _sourceCodeTypeName = "__Source";
-        private const string _overridenByTypeName = "__OverriddenBy";
+        private const string _overriddenByTypeName = "__OverriddenBy";
+        private const string _auxiliaryTypeName = "__Auxiliary";
         private const string _ordinalTypeName = "__Ordinal";
         private const string _compositeOrdinalTypeName = "__CompositeOrdinal";
         private const string _syntaxTreeName = "__LinkerInjectionHelpers__.cs";
@@ -119,67 +120,81 @@ namespace Metalama.Framework.Engine.Linking
                                     .Append( syntaxGenerator.Type( returnType.GetSymbol().AssertNotNull() ) ) ) ) ) );
         }
 
+#pragma warning disable CA1822 // Mark members as static
+        public TypeSyntax GetSourceType()
+#pragma warning restore CA1822 // Mark members as static
+            => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
+
         public TypeSyntax GetOverriddenByType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
+            => this.GetNumberedHelperType( syntaxGenerator, _overriddenByTypeName, "override", aspectType, ordinal );
+
+        public TypeSyntax GetAuxiliaryType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
+            => this.GetNumberedHelperType( syntaxGenerator, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
+
+        public TypeSyntax GetNumberedHelperType( OurSyntaxGenerator syntaxGenerator, string baseTypeName, string description, IAspectClass aspectType, int ordinal )
         {
             var aspectTypeSyntax = syntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
 
-            switch ( ordinal )
+            switch ( ordinal)
             {
                 case 0:
                     return
                         QualifiedName(
                             IdentifierName( HelperTypeName ),
                             GenericName(
-                                Identifier( _overridenByTypeName ),
+                                Identifier( baseTypeName ),
                                 TypeArgumentList( SingletonSeparatedList( aspectTypeSyntax ) ) ) );
 
-                case < 10:
+                default:
                     return
                         QualifiedName(
                             IdentifierName( HelperTypeName ),
                             GenericName(
-                                Identifier( _overridenByTypeName ),
+                                Identifier( baseTypeName ),
                                 TypeArgumentList(
                                     SeparatedList(
                                         new[]
                                         {
                                             aspectTypeSyntax,
-                                            QualifiedName(
-                                                IdentifierName( HelperTypeName ),
-                                                IdentifierName( _ordinalTypeName + ordinal ) )
+                                            GetOrdinalTypeArgument(aspectType.ShortName, description, ordinal)
                                         } ) ) ) );
+            }
+        }
+
+        private static TypeSyntax GetOrdinalTypeArgument(string aspectName, string kind, int ordinal)
+        {
+            switch ( ordinal )
+            {
+                case <= 0:
+                    throw new AssertionFailedException( $"Cannot create a {ordinal} ordinal for {kind} by aspect {aspectName} (internal linker error)." );
+
+                case < 10:
+                    return
+                        QualifiedName(
+                            IdentifierName( HelperTypeName ),
+                            IdentifierName( _ordinalTypeName + ordinal ) );
 
                 case < 100:
                     return
                         QualifiedName(
                             IdentifierName( HelperTypeName ),
                             GenericName(
-                                Identifier( _overridenByTypeName ),
+                                Identifier( _compositeOrdinalTypeName ),
                                 TypeArgumentList(
-                                    SeparatedList(
+                                    SeparatedList<TypeSyntax>(
                                         new[]
                                         {
-                                            aspectTypeSyntax,
                                             QualifiedName(
                                                 IdentifierName( HelperTypeName ),
-                                                GenericName(
-                                                    Identifier( _compositeOrdinalTypeName ),
-                                                    TypeArgumentList(
-                                                        SeparatedList<TypeSyntax>(
-                                                            new[]
-                                                            {
-                                                                QualifiedName(
-                                                                    IdentifierName( HelperTypeName ),
-                                                                    IdentifierName( _ordinalTypeName + (ordinal / 10) ) ),
-                                                                QualifiedName(
-                                                                    IdentifierName( HelperTypeName ),
-                                                                    IdentifierName( _ordinalTypeName + (ordinal % 10) ) )
-                                                            } ) ) ) )
+                                                IdentifierName( _ordinalTypeName + (ordinal / 10) ) ),
+                                            QualifiedName(
+                                                IdentifierName( HelperTypeName ),
+                                                IdentifierName( _ordinalTypeName + (ordinal % 10) ) )
                                         } ) ) ) );
 
                 default:
                     // NOTE: Lets have a beer when someone really hits this limit (without having a bug in the aspect).
-                    throw new AssertionFailedException( $"More than 100 overrides of a single member by aspect {aspectType.ShortName}." );
+                    throw new AssertionFailedException( $"More than 100 {kind} declarations created for a single member by aspect {aspectName} (aspect authoring error)." );
             }
         }
 
@@ -211,8 +226,10 @@ namespace Metalama.Framework.Engine.Linking
 
             var code = @$"
 {(useNullability ? "#nullable enable" : "")}
+// NOTE: Currently all references to this type should be removed by the linker and where not possible, an error should be produced (e.g. uninlineable declarations).
 internal class {HelperTypeName}
 {{
+    // Members used for special aspect references, which do not use normal expression such as invocation.
     public static T {ConstructorMemberName}<T>(T value) => value;
     public static void {FinalizeMemberName}() {{}}
     public static void {StaticConstructorMemberName}() {{}}
@@ -230,11 +247,20 @@ internal class {HelperTypeName}
         static System.Threading.Tasks.Task Wrapped(params object[] args) => System.Threading.Tasks.Task.CompletedTask;
     }}
 
+    // Types that are used as additional parameters for members where name cannot be changed.
     public readonly struct {_emptyCodeTypeName} {{}}
     public readonly struct {_sourceCodeTypeName} {{}}
-    public readonly struct {_overridenByTypeName}<TAspect> {{}}
-    public readonly struct {_overridenByTypeName}<TAspect, TOrdinal> {{}}
 
+    // Used for overrides, first override by single aspect does not use ordinal.
+    public readonly struct {_overriddenByTypeName}<TAspect> {{}}
+    public readonly struct {_overriddenByTypeName}<TAspect, TOrdinal> {{}}
+
+    // Used for special declarations which are not result of overrides, e.g. target bodies for inserted statements.
+    // These have well-known body structure and can usually bypass body analysis.
+    public readonly struct {_auxiliaryTypeName}<TAspect> {{}}
+    public readonly struct {_auxiliaryTypeName}<TAspect, TOrdinal> {{}}
+    
+    // Ordinal types used when there are multiple declarations of the same kind.
     public readonly struct {_ordinalTypeName}0 {{}}
     public readonly struct {_ordinalTypeName}1 {{}}
     public readonly struct {_ordinalTypeName}2 {{}}
@@ -245,8 +271,11 @@ internal class {HelperTypeName}
     public readonly struct {_ordinalTypeName}7 {{}}
     public readonly struct {_ordinalTypeName}8 {{}}
     public readonly struct {_ordinalTypeName}9 {{}}
+
+    // Composite ordinal that is used when there are more than 9, e.g. C<1,9>.
     public readonly struct {_compositeOrdinalTypeName}<T1, T2> {{}}
 
+    // Helper for returning reference for property expressions.
     public class Dummy<T>
     {{
         public static T? Field;

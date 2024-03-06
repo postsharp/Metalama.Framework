@@ -33,7 +33,13 @@ There are several ways to look at the target, coded by `AspectReferenceOrder` en
 * Current - targets the declaration as it is immediately after the current aspect. This is different from Base only if the aspect overrides the declaration.
 * Final - targets the declaration as it will be in the end. This mimicks the behavior of `this.Foo()` virtual call in C#.
 
-#### Expressions
+### Special
+
+#### Primary constructors
+
+Source-oriented approach to transforming primary constructor is to deconstruct it when necessary. This is needed when there is any transformation
+of the "body" of the primary constructor - initializer, contract or override. A helper "source" constructor is injected by the linker, which
+contains contract statements ordered before any constructor override and initializer statements. 
 
 ## Step 2 - Analysis (`LinkerAnalysisStep` class):
 

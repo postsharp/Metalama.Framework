@@ -37,17 +37,18 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
             this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
-        var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability switch
+        var setAccessorDeclarationKind = (this.OverriddenDeclaration.IsStatic, this.OverriddenDeclaration.Writeability) switch
         {
-            Writeability.ConstructorOnly =>
+            (true, not Writeability.None) => SyntaxKind.SetAccessorDeclaration,
+            (false, Writeability.ConstructorOnly) =>
                 context.SyntaxGenerationContext.SupportsInitAccessors ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-            Writeability.InitOnly => SyntaxKind.InitAccessorDeclaration,
-            Writeability.All => SyntaxKind.SetAccessorDeclaration,
+            (false, Writeability.InitOnly) => SyntaxKind.InitAccessorDeclaration,
+            (false, Writeability.All) => SyntaxKind.SetAccessorDeclaration,
             _ => SyntaxKind.None
         };
         
         var modifiers = this.OverriddenDeclaration
-            .GetSyntaxModifierList( ModifierCategories.Static )
+            .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
         var overrides = new[]

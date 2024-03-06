@@ -1,3 +1,7 @@
+#if TESTOPTIONS
+// @AcceptInvalidInput
+#endif
+
 using System;
 using Metalama.Framework.Aspects;
 

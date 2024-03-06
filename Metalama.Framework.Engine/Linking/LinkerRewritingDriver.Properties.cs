@@ -120,6 +120,11 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
+                if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
+                {
+                    propertyDeclaration = propertyDeclaration.PartialUpdate( initializer: default(EqualsValueClauseSyntax), semicolonToken: default( SyntaxToken ) );
+                }
+
                 return new[] { propertyDeclaration };
             }
 

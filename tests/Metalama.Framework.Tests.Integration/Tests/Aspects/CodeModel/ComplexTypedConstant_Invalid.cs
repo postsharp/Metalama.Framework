@@ -1,3 +1,7 @@
+#if TESTOPTIONS
+// @AcceptInvalidInput
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,11 +23,6 @@ public class Aspect : TypeAspect
         var typedConstant = TypedConstant.Create(new[] { 42 });
         builder.Advice.IntroduceParameter(builder.Target.Constructors.Single(), "p", typeof(int[]), typedConstant);
     }
-}
-
-class MyAttribute : Attribute
-{
-    public MyAttribute(int[] array) { }
 }
 
 // <target>

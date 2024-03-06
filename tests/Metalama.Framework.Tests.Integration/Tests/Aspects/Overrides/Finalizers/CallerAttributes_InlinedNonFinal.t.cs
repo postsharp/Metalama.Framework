@@ -8,7 +8,7 @@ internal class TargetClass
     this.Finalize_Override();
     return;
   }
-  void Finalize_Override()
+  private void Finalize_Override()
   {
     global::System.Console.WriteLine("This is the overridden method (1).");
     this.MethodWithCallerMemberName(42, name1: "Finalize", name2: "Finalize");

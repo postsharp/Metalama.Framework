@@ -224,7 +224,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public SyntaxSerializationContext SyntaxSerializationContext { get; }
 
-    private SyntaxGenerationContext SyntaxGenerationContext { get; }
+    public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
     public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 

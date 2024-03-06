@@ -35,6 +35,8 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<ISymbol, InjectedMember> _symbolToInjectedMemberMap;
         private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
         private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
+        private readonly IReadOnlyDictionary<ISymbol, ISymbol> _auxiliarySourceMemberMap;
+        private readonly ISet<ISymbol> _auxiliarySourceMembers;
 
         // TODO: This is used only for mapping of constructors with introduced parameters (limitation of code model).
         private readonly IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
@@ -55,6 +57,8 @@ namespace Metalama.Framework.Engine.Linking
             ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
             ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
             ConcurrentDictionary<InjectedMember, ISymbol> injectedMemberToSymbolMap;
+            ConcurrentDictionary<ISymbol, ISymbol> auxiliarySourceMemberMap;
+            HashSet<ISymbol> auxiliarySourceMembers;
 
             this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
@@ -69,6 +73,9 @@ namespace Metalama.Framework.Engine.Linking
 
             this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
 
+            this._auxiliarySourceMemberMap = auxiliarySourceMemberMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+            this._auxiliarySourceMembers = auxiliarySourceMembers = new HashSet<ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+
             this._overrideTargetToOverrideListMap = overrideMap =
                 new ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>>( intermediateCompilation.CompilationContext.SymbolComparer );
 
@@ -80,14 +87,10 @@ namespace Metalama.Framework.Engine.Linking
 
             this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
 
-            // TODO: This could be parallelized. The collections could be built in the LinkerInjectionStep, it is in
-            //       the same spirit as the Index* methods.
-            //       However, even for very large projects it seems to would have very small impact.
-
             var overriddenDeclarations = new ConcurrentDictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
             var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, InjectedMember>();
 
-            void ProcessLinkerInjectionMember( InjectedMember injectedMember )
+            void ProcessInjectedMember( InjectedMember injectedMember )
             {
                 var injectedMemberSymbol = GetSymbolForInjectedMember( injectedMember );
 
@@ -109,10 +112,40 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     builderToInjectedMemberMap.TryAdd( introduceTransformation.DeclarationBuilder, injectedMember );
                 }
+
+                if ( injectedMember is { Transformation: null, Semantic: InjectedMemberSemantic.AuxiliaryBody })
+                {
+                    var originalDeclaration = injectedMember.Declaration;
+                    ISymbol translatedSymbol;
+
+                    if ( this._introducedParametersByTargetDeclaration.TryGetValue( originalDeclaration, out var introducedParameters ) )
+                    {
+                        // Constructors with introduced parameters cannot be found through normal translation.
+                        // TODO: This is a hack, constructors with introduced parameters should be identifiable through code model.
+                        Invariant.Assert( originalDeclaration is IConstructor );
+
+                        var originalConstructor = (IMethodSymbol) originalDeclaration.GetSymbol().AssertNotNull();
+
+                        translatedSymbol =
+                            TranslateConstructor( originalConstructor, introducedParameters )
+                            ?? throw new AssertionFailedException( $"Could not translate '{originalDeclaration}' with {introducedParameters.Count} introduced parameters." );
+                    }
+                    else
+                    {
+                        translatedSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaration.GetSymbol().AssertNotNull() ).AssertNotNull();
+                    }
+
+                    auxiliarySourceMemberMap[translatedSymbol] = injectedMemberSymbol;
+
+                    lock ( auxiliarySourceMembers )
+                    {
+                        auxiliarySourceMembers.Add( injectedMemberSymbol );
+                    }
+                }
             }
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-            concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessLinkerInjectionMember, cancellationToken ).Wait( cancellationToken );
+            concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
             void ProcessOverride( KeyValuePair<IDeclaration, List<ISymbol>> value )
@@ -140,7 +173,7 @@ namespace Metalama.Framework.Engine.Linking
 
             ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember )
             {
-                var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.Transformation.TransformedSyntaxTree];
+                var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.TargetSyntaxTree];
                 var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
 
                 SyntaxNode symbolSyntax = intermediateSyntax switch
@@ -168,60 +201,29 @@ namespace Metalama.Framework.Engine.Linking
                         Invariant.Assert( overrideTarget is IConstructor );
 
                         var originalConstructor = (IMethodSymbol) overrideTarget.GetSymbol().AssertNotNull();
+                        
+                        var translatedConstructor = 
+                            TranslateConstructor( originalConstructor, introducedParameters )
+                            ?? throw new AssertionFailedException( $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
 
-                        Invariant.Assert( originalConstructor is { MethodKind: MethodKind.Constructor } );
-
-                        var originalDeclaringType = originalConstructor.ContainingType;
-
-                        var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType )
-                            .AssertNotNull();
-
-                        foreach ( var translatedMember in translatedDeclaringType.GetMembers() )
-                        {
-                            if ( translatedMember is not IMethodSymbol { MethodKind: MethodKind.Constructor } translatedConstructor )
-                            {
-                                continue;
-                            }
-
-                            if ( translatedConstructor.Parameters.Length != originalConstructor.Parameters.Length + introducedParameters.Count )
-                            {
-                                continue;
-                            }
-
-                            if ( symbolToInjectedMemberMap.ContainsKey( translatedMember ) )
-                            {
-                                continue;
-                            }
-
-                            var matches = true;
-
-                            for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
-                            {
-                                if ( !StructuralSymbolComparer.Default.Equals(
-                                         originalConstructor.Parameters[i].Type,
-                                         translatedConstructor.Parameters[i].Type )
-                                     && originalConstructor.Parameters[i].RefKind == translatedConstructor.Parameters[i].RefKind )
-                                {
-                                    matches = false;
-
-                                    break;
-                                }
-                            }
-
-                            if ( matches )
-                            {
-                                return translatedConstructor;
-                            }
-                        }
-
-                        throw new AssertionFailedException(
-                            $"Could not translate '{overrideTarget}' with {introducedParameters.Count} introduced parameters." );
+                        return translatedConstructor;
                     }
                     else
                     {
-                        return this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
-                            originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
-                            true );
+                        var symbol = 
+                            this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate(
+                                originalDeclaration.GetSymbol().AssertNotNull().GetCanonicalDefinition().AssertNotNull(),
+                                true )
+                            .AssertNotNull();
+
+                        if ( auxiliarySourceMemberMap.TryGetValue(symbol, out var auxiliarySourceMemberSymbol) )
+                        {
+                            return auxiliarySourceMemberSymbol;
+                        }
+                        else
+                        {
+                            return symbol;
+                        }
                     }
                 }
                 else if ( overrideTarget is IDeclarationBuilder builder )
@@ -255,6 +257,63 @@ namespace Metalama.Framework.Engine.Linking
 
                     return intermediateSemanticModel.GetDeclaredSymbol( symbolNode ).GetCanonicalDefinition();
                 }
+            }
+
+            IMethodSymbol? TranslateConstructor(IMethodSymbol originalConstructor, IReadOnlyList<IntroduceParameterTransformation> introducedParameters)
+            {
+                Invariant.Assert( originalConstructor is { MethodKind: MethodKind.Constructor } );
+
+                var originalDeclaringType = originalConstructor.ContainingType;
+
+                var translatedDeclaringType = this._intermediateCompilation.CompilationContext.SymbolTranslator.Translate( originalDeclaringType )
+                    .AssertNotNull();
+
+                foreach ( var translatedMember in translatedDeclaringType.GetMembers() )
+                {
+                    if ( translatedMember is not IMethodSymbol { MethodKind: MethodKind.Constructor } translatedConstructor )
+                    {
+                        continue;
+                    }
+
+                    if ( translatedConstructor.Parameters.Length != originalConstructor.Parameters.Length + introducedParameters.Count )
+                    {
+                        continue;
+                    }
+
+                    if ( symbolToInjectedMemberMap.ContainsKey( translatedMember ) )
+                    {
+                        continue;
+                    }
+
+                    var matches = true;
+
+                    for ( var i = 0; i < originalConstructor.Parameters.Length; i++ )
+                    {
+                        if ( !StructuralSymbolComparer.Default.Equals(
+                                 originalConstructor.Parameters[i].Type,
+                                 translatedConstructor.Parameters[i].Type )
+                             || originalConstructor.Parameters[i].RefKind != translatedConstructor.Parameters[i].RefKind )
+                        {
+                            matches = false;
+
+                            break;
+                        }
+                    }
+
+                    if ( matches )
+                    {
+                        if ( auxiliarySourceMemberMap.TryGetValue( translatedConstructor, out var auxiliarySourceMemberSymbol ) )
+                        {
+                            return (IMethodSymbol)auxiliarySourceMemberSymbol;
+                        }
+                        else
+                        {
+                            return translatedConstructor;
+                        }
+                    }
+                }
+
+                return null;
             }
         }
 
@@ -358,6 +417,23 @@ namespace Metalama.Framework.Engine.Linking
             {
                 return null;
             }
+        }
+
+        public ISymbol? GetAuxiliarySourceSymbol(ISymbol symbol)
+        {
+            if (this._auxiliarySourceMemberMap.TryGetValue(symbol, out var auxiliarySourceSymbol))
+            {
+                return auxiliarySourceSymbol;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public bool IsAuxiliarySourceSymbol( ISymbol symbol )
+        {
+            return this._auxiliarySourceMembers.Contains( symbol );
         }
 
         /// <summary>
@@ -492,7 +568,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
-            return injectedMember?.Transformation.ParentAdvice.Aspect.AspectClass;
+            return injectedMember?.Transformation?.ParentAdvice.Aspect.AspectClass;
         }
     }
 }

@@ -129,53 +129,68 @@ internal sealed partial class LinkerInjectionStep
                 return typeComparison;
             }
 
-            // Order by aspect layer.
-            var aspectLayerComparison = x.Transformation.OrderWithinPipeline.CompareTo( y.Transformation.OrderWithinPipeline );
-
-            if ( aspectLayerComparison != 0 )
+            switch ( (x.Transformation, y.Transformation) )
             {
-                return aspectLayerComparison;
-            }
+                case (null, null ):
+                    return 0;
 
-            // Order by aspect instance in the current type.
-            var aspectInstanceOrderComparison =
-                x.Transformation.OrderWithinPipelineStepAndType.CompareTo( y.Transformation.OrderWithinPipelineStepAndType );
-
-            if ( aspectInstanceOrderComparison != 0 )
-            {
-                return aspectInstanceOrderComparison;
-            }
-
-            // Order by adding order within the aspect instance.
-            var adviceOrderComparison =
-                x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance.CompareTo( y.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
-
-            if ( adviceOrderComparison != 0 )
-            {
-                return adviceOrderComparison;
-            }
-
-            // Order by semantic.
-            var semanticComparison = GetSemanticOrder( x.Semantic ).CompareTo( GetSemanticOrder( y.Semantic ) );
-
-            if ( semanticComparison != 0 )
-            {
-                return semanticComparison;
-            }
-
-            {
-                // Order replaced declarations within the same layer.
-                if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
-                     && replacedMemberRefX.Target == y.Transformation )
-                {
-                    return 1;
-                }
-
-                if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
-                     && replacedMemberRefY.Target == x.Transformation )
-                {
+                case (null, _ ):
                     return -1;
-                }
+
+                case (_, null ):
+                    return 1;
+
+                case (not null, not null ):
+                    // Order by aspect layer.
+                    var aspectLayerComparison = x.Transformation.OrderWithinPipeline.CompareTo( y.Transformation.OrderWithinPipeline );
+
+                    if ( aspectLayerComparison != 0 )
+                    {
+                        return aspectLayerComparison;
+                    }
+
+                    // Order by aspect instance in the current type.
+                    var aspectInstanceOrderComparison =
+                        x.Transformation.OrderWithinPipelineStepAndType.CompareTo( y.Transformation.OrderWithinPipelineStepAndType );
+
+                    if ( aspectInstanceOrderComparison != 0 )
+                    {
+                        return aspectInstanceOrderComparison;
+                    }
+
+                    // Order by adding order within the aspect instance.
+                    var adviceOrderComparison =
+                        x.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance.CompareTo( y.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
+
+                    if ( adviceOrderComparison != 0 )
+                    {
+                        return adviceOrderComparison;
+                    }
+
+                    // Order by semantic.
+                    var semanticComparison = GetSemanticOrder( x.Semantic ).CompareTo( GetSemanticOrder( y.Semantic ) );
+
+                    if ( semanticComparison != 0 )
+                    {
+                        return semanticComparison;
+                    }
+
+                    {
+                        // Order replaced declarations within the same layer.
+                        if ( x.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
+                             && replacedMemberRefX.Target == y.Transformation )
+                        {
+                            return 1;
+                        }
+
+                        if ( y.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
+                             && replacedMemberRefY.Target == x.Transformation )
+                        {
+                            return -1;
+                        }
+                    }
+
+                    break;
             }
 
             // TODO: At this point, all should be sorted, but mocks are not setting the order properties.
@@ -188,8 +203,8 @@ internal sealed partial class LinkerInjectionStep
         private static int GetAccessibilityOrder( Accessibility accessibility )
             => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-        private static int GetTransformationTypeOrder( IInjectMemberTransformation injectMemberTransformation )
-            => injectMemberTransformation is IOverrideDeclarationTransformation ? 0 : 1;
+        private static int GetTransformationTypeOrder( ITransformation? transformation )
+            => transformation is IOverrideDeclarationTransformation ? 0 : 1;
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 

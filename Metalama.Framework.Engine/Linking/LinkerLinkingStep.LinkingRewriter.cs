@@ -34,10 +34,30 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             public override SyntaxNode VisitStructDeclaration( StructDeclarationSyntax node )
-                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
+            {
+                var transformedMembers = this.GetMembersForTypeDeclaration( node );
+
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
+
+                var symbol = semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+
+                node = this._rewritingDriver.RewriteStruct( node, symbol, transformedMembers );
+
+                return node;
+            }
 
             public override SyntaxNode VisitClassDeclaration( ClassDeclarationSyntax node )
-                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
+            {
+                var transformedMembers = this.GetMembersForTypeDeclaration( node );
+
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
+
+                var symbol = semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+
+                node = this._rewritingDriver.RewriteClass( node, symbol, transformedMembers );
+
+                return node;
+            }
 
             public override SyntaxNode VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
@@ -46,86 +66,17 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var transformedMembers = this.GetMembersForTypeDeclaration( node ).AssertNotNull();
 
-                if ( node.ParameterList != null )
-                {
-                    var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
-                    SyntaxGenerationContext? generationContext = null;
+                var semanticModel = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree );
 
-                    List<MemberDeclarationSyntax>? newMembers = null;
+                var symbol = semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
 
-                    var transformedParametersAndCommas = new List<SyntaxNodeOrToken>( node.ParameterList.Parameters.Count * 2 );
+                node = this._rewritingDriver.RewriteRecord( node, symbol, transformedMembers );
 
-                    for ( var i = 0; i < node.ParameterList.Parameters.Count; i++ )
-                    {
-                        var parameter = node.ParameterList.Parameters[i];
-                        newMembers ??= new List<MemberDeclarationSyntax>();
-
-                        var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
-
-                        if ( parameterSymbol == null )
-                        {
-                            continue;
-                        }
-
-                        var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
-
-                        if ( propertySymbol != null && this._rewritingDriver.IsRewriteTarget( propertySymbol ) )
-                        {
-                            SyntaxGenerationContext GetSyntaxGenerationContext()
-                                => generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
-                                    node.SyntaxTree,
-                                    node.SpanStart );
-
-                            if ( this._rewritingDriver.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
-                            {
-                                // Add new members that take place of synthesized positional property.
-                                newMembers.AddRange(
-                                    this._rewritingDriver.RewritePositionalProperty(
-                                        parameter,
-                                        propertySymbol.AssertNotNull(),
-                                        GetSyntaxGenerationContext() ) );
-                            }
-
-                            // Remove all attributes related to properties (property/field/get/set target specifiers).
-                            var transformedParameter =
-                                parameter.WithAttributeLists(
-                                    List(
-                                        parameter.AttributeLists
-                                            .Where(
-                                                l =>
-                                                    l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
-                                                    && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
-                                                    && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
-                                                    && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
-
-                            transformedParametersAndCommas.Add( transformedParameter );
-                        }
-                        else
-                        {
-                            transformedParametersAndCommas.Add( parameter );
-                        }
-
-                        if ( i < node.ParameterList.Parameters.SeparatorCount )
-                        {
-                            transformedParametersAndCommas.Add( node.ParameterList.Parameters.GetSeparator( i ) );
-                        }
-                    }
-
-                    node = node.WithParameterList( node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
-
-                    if ( newMembers is { Count: > 0 } )
-                    {
-                        transformedMembers =
-                            transformedMembers.Concat( newMembers );
-                    }
-                }
-
-                return node.WithMembers( List( transformedMembers ) );
+                return node;
             }
 
             private IReadOnlyList<MemberDeclarationSyntax> GetMembersForTypeDeclaration( TypeDeclarationSyntax node )
             {
-                // TODO: Other transformations than method overrides.
                 var newMembers = new List<MemberDeclarationSyntax>();
 
                 foreach ( var member in node.Members )

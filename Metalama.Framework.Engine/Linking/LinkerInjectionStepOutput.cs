@@ -15,6 +15,7 @@ namespace Metalama.Framework.Engine.Linking
             CompilationModel finalCompilationModel,
             PartialCompilation intermediateCompilation,
             LinkerInjectionRegistry injectionRegistry,
+            LinkerLateTransformationRegistry lateTransformationRegistry,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IProjectOptions? projectOptions )
         {
@@ -22,6 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             this.FinalCompilationModel = finalCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
             this.InjectionRegistry = injectionRegistry;
+            this.LateTransformationRegistry = lateTransformationRegistry;
             this.OrderedAspectLayers = orderedAspectLayers;
             this.ProjectOptions = projectOptions;
         }
@@ -45,6 +47,11 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the introduction registry.
         /// </summary>
         public LinkerInjectionRegistry InjectionRegistry { get; }
+
+        /// <summary>
+        /// Gets the registry of late transformations that are performed during linking.
+        /// </summary>
+        public LinkerLateTransformationRegistry LateTransformationRegistry { get; }
 
         /// <summary>
         /// Gets a list of ordered aspect layers.

@@ -44,12 +44,16 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<IDeclaration, List<InjectedMember>> _injectedMembersByTargetDeclaration;
         private readonly ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
 
+        private readonly ConcurrentDictionary<INamedType, LateTypeLevelTransformations> _lateTypeLevelTransformations;
+
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
 
         public IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> BuilderToTransformationMap => this._builderToTransformationMap;
 
         public IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> IntroducedParametersByTargetDeclaration
             => this._introducedParametersByTargetDeclaration;
+
+        public IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> LateTypeLevelTransformations => this._lateTypeLevelTransformations;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
@@ -67,6 +71,27 @@ internal sealed partial class LinkerInjectionStep
             this._insertedStatementsByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
             this._injectedMembersByTargetDeclaration = new( finalCompilationModel.Comparers.Default);
             this._introducedParametersByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
+            this._lateTypeLevelTransformations = new( finalCompilationModel.Comparers.Default );
+        }
+
+        public void AddInjectedMember( InjectedMember injectedMember )
+        {
+            this._injectedMembers.Add( injectedMember );
+
+            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( injectedMember.Declaration.ToInsertPosition(), _ => new List<InjectedMember>() );
+
+            lock ( nodes )
+            {
+                nodes.Add( injectedMember );
+            }
+
+            var declarationInjectedMembers =
+                this._injectedMembersByTargetDeclaration.GetOrAdd( injectedMember.Declaration, _ => new List<InjectedMember>() );
+
+            lock ( declarationInjectedMembers )
+            {
+                declarationInjectedMembers.Add( injectedMember );
+            }
         }
 
         public void AddInjectedMembers( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
@@ -136,17 +161,6 @@ internal sealed partial class LinkerInjectionStep
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
             var statementList = this._insertedStatementsByTargetDeclaration.GetOrAdd( targetMember, _ => new() );
-
-            InjectedMember? lastInjectedMember = null;
-
-            if ( this._injectedMembersByTargetDeclaration.TryGetValue( targetMember, out var injectedMemberList ) )
-            {
-                lock ( injectedMemberList )
-                {
-                    // Use the last injected member as the target body.
-                    lastInjectedMember = injectedMemberList[^1];
-                }
-            }
 
             lock ( statementList )
             {
@@ -261,18 +275,17 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public async Task FinalizeAsync(
-            TransformationLinkerOrderComparer transformationComparer,
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
             await concurrentTaskRunner.RunInParallelAsync(
                 this._introductionMemberLevelTransformations.Values,
-                t => t.Sort( transformationComparer ),
+                t => t.Sort(),
                 cancellationToken );
 
             await concurrentTaskRunner.RunInParallelAsync(
                 this._symbolMemberLevelTransformations.Values,
-                t => t.Sort( transformationComparer ),
+                t => t.Sort(),
                 cancellationToken );
         }
 
@@ -298,6 +311,11 @@ internal sealed partial class LinkerInjectionStep
         public MemberLevelTransformations GetOrAddMemberLevelTransformations( IDeclarationBuilder declarationBuilder )
         {
             return this._introductionMemberLevelTransformations.GetOrAdd( declarationBuilder, static _ => new MemberLevelTransformations() );
+        }
+
+        public LateTypeLevelTransformations GetOrAddLateTypeLevelTransformations( INamedType type )
+        {
+            return this._lateTypeLevelTransformations.GetOrAdd( type, static _ => new LateTypeLevelTransformations() );
         }
 
         internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( InjectedMember injectedMember )
@@ -430,10 +448,12 @@ internal sealed partial class LinkerInjectionStep
                 .ThenBy( s => s.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
         }
 
-        private static MemberLayerIndex GetTransformationMemberLayerIndex( ITransformation transformation )
-            => new MemberLayerIndex(
+        private static MemberLayerIndex GetTransformationMemberLayerIndex( ITransformation? transformation )
+            => transformation != null
+            ? new MemberLayerIndex(
                 transformation.OrderWithinPipeline,
                 transformation.OrderWithinPipelineStepAndType,
-                transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
+                transformation.OrderWithinPipelineStepAndTypeAndAspectInstance )
+            : new MemberLayerIndex(0,0,0);
     }
 }
