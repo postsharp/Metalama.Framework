@@ -48,4 +48,9 @@ public record class BaseClass
 [Override]
 public record class TargetClass(int X, int Y) : BaseClass(X)
 {
+    public void Foo()
+    {
+        var (x, y) = this;
+        _ = this with { X = 13, Y = 42 };
+    }
 }

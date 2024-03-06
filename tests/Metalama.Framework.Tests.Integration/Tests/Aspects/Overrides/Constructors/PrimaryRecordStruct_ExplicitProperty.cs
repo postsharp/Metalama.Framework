@@ -41,12 +41,14 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public record struct TargetStruct(int X)
+public record struct TargetStruct(int X, int Y)
 {
-    public int X = X;
+    public int X { get; set; } = X;
 
     public void Foo()
     {
         this.X = 42;
+        var (x, y) = this;
+        _ = this with { X = 13, Y = 42 };
     }
 }

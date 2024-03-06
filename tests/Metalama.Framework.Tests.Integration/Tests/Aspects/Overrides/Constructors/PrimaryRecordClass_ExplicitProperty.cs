@@ -41,12 +41,14 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public record class TargetClass(int X)
+public record class TargetClass(int X, int Y)
 {
-    public int X = X;
+    public int X { get; set; } = X;
 
     public void Foo()
     {
+        var (x, y) = this;
+        _ = this with { X = 13, Y = 42 };
         this.X = 42;
     }
 }

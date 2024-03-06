@@ -1,6 +1,15 @@
 [Override]
 public record class TargetClass
 {
+  public void Foo()
+  {
+    var(x, y) = this;
+    _ = this with
+    {
+      X = 13,
+      Y = 42
+    };
+  }
   public global::System.Int32 X { get; init; }
   public global::System.Int32 Y { get; init; }
   public void Deconstruct(out int X, out int Y)

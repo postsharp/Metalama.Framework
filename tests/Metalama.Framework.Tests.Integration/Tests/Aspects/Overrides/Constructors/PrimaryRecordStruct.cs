@@ -43,4 +43,9 @@ public class OverrideAttribute : TypeAspect
 [Override]
 public record struct TargetStruct(int X, int Y)
 {
+    public void Foo()
+    {
+        var (x, y) = this;
+        _ = this with { X = 13, Y = 42 };
+    }
 }
