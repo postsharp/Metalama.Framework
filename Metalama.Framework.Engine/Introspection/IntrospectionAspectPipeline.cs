@@ -81,7 +81,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
         var pipelineResult = await this.ExecuteAsync(
-            compilation,
+            compilation.PartialCompilation,
             diagnostics,
             configuration.WithServiceProvider( serviceProvider ),
             cancellationToken );
