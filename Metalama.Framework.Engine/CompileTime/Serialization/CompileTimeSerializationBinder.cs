@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization
 {
@@ -16,13 +17,14 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
     internal class CompileTimeSerializationBinder
     {
         private static readonly ImmutableDictionary<string, string> _ourAssemblyVersions;
+        private static readonly AssemblyName _engineAssemblyName = typeof(CompileTimeSerializationBinder).Assembly.GetName();
 
         private readonly ILogger _logger;
 
         static CompileTimeSerializationBinder()
         {
             var assemblyNames = typeof(CompileTimeSerializationBinder).Assembly.GetReferencedAssemblies()
-                .Concat( typeof(CompileTimeSerializationBinder).Assembly.GetName().AssertNotNull() );
+                .Concat( _engineAssemblyName );
 
             // The AppDomain may contain several versions of Metalama, so we need to be careful when choosing the assembly version to which we bind.
             // Instead of looking at the AppDomain, we look at the assemblies that the current specific version references. This should work for Metalama
@@ -44,6 +46,12 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <returns>The required <see cref="Type"/>.</returns>
         public virtual Type? BindToType( string typeName, string assemblyName )
         {
+            // Redirect to the current assembly if the type is from an older version.
+            if ( assemblyName.StartsWith( "Metalama.Framework.Engine.", StringComparison.Ordinal ) )
+            {
+                assemblyName = _engineAssemblyName.Name.AssertNotNull();
+            }
+
             if ( !_ourAssemblyVersions.TryGetValue( assemblyName, out var ourAssemblyVersion ) )
             {
                 if ( !assemblyName.StartsWith( "mscorlib, ", StringComparison.Ordinal ) )

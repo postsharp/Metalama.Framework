@@ -108,7 +108,7 @@ namespace Metalama.Framework.CompilerExtensions
         }
 
         /// <summary>
-        /// Creates an instance of a type of the <c>Metalama.Framework.Engine</c> assembly.
+        /// Creates an instance of a type from a Roslyn-version-specific Metalama assembly.
         /// </summary>
         public static object CreateInstance( string assemblyName, string typeName )
         {
