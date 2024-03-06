@@ -389,32 +389,8 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="AspectPipelineResult"/>.
         /// </summary>
         /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        protected Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
+        protected async Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             PartialCompilation compilation,
-            IDiagnosticAdder diagnosticAdder,
-            AspectPipelineConfiguration? pipelineConfiguration,
-            TestableCancellationToken cancellationToken )
-            => this.ExecuteAsync( compilation, null, diagnosticAdder, pipelineConfiguration, cancellationToken );
-
-        /// <summary>
-        /// Executes the all stages of the current pipeline, report diagnostics, and returns the last <see cref="AspectPipelineResult"/>.
-        /// </summary>
-        /// <returns><c>true</c> if there was no error, <c>false</c> otherwise.</returns>
-        protected Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
-            CompilationModel compilation,
-            IDiagnosticAdder diagnosticAdder,
-            AspectPipelineConfiguration? pipelineConfiguration,
-            TestableCancellationToken cancellationToken )
-            => this.ExecuteAsync(
-                compilation.PartialCompilation,
-                compilation,
-                diagnosticAdder,
-                pipelineConfiguration,
-                cancellationToken );
-
-        private async Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
-            PartialCompilation compilation,
-            CompilationModel? compilationModel,
             IDiagnosticAdder diagnosticAdder,
             AspectPipelineConfiguration? pipelineConfiguration,
             TestableCancellationToken cancellationToken )
@@ -443,31 +419,25 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
-            if ( compilationModel == null )
-            {
-                var hierarchicalOptionsManager = new HierarchicalOptionsManager( pipelineConfiguration.ServiceProvider );
+            // Set up the options manager and the compilation model.
+            var hierarchicalOptionsManager = new HierarchicalOptionsManager( pipelineConfiguration.ServiceProvider );
 
-                compilationModel = CompilationModel.CreateInitialInstance(
-                    pipelineConfiguration.ProjectModel,
-                    compilation,
-                    hierarchicalOptionsManager: hierarchicalOptionsManager,
-                    externalAnnotationProvider: contributorSources.ExternalAnnotationProvider );
+            var compilationModel = CompilationModel.CreateInitialInstance(
+                pipelineConfiguration.ProjectModel,
+                compilation,
+                hierarchicalOptionsManager: hierarchicalOptionsManager,
+                externalAnnotationProvider: contributorSources.ExternalAnnotationProvider );
 
-                var diagnosticSink = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
+            var diagnosticSink = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
 
-                hierarchicalOptionsManager.Initialize(
-                    pipelineConfiguration.CompileTimeProject,
-                    contributorSources.OptionsSources,
-                    contributorSources.ExternalOptionsProvider,
-                    compilationModel,
-                    diagnosticSink );
+            hierarchicalOptionsManager.Initialize(
+                pipelineConfiguration.CompileTimeProject,
+                contributorSources.OptionsSources,
+                contributorSources.ExternalOptionsProvider,
+                compilationModel,
+                diagnosticSink );
 
-                diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
-            }
-            else
-            {
-                compilationModel.HierarchicalOptionsManager.AssertNotNull();
-            }
+            diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
 
             // Execute the pipeline stages.
             var pipelineStageResult = new AspectPipelineResult(
