@@ -3,48 +3,83 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ContractPropertyTransformation : OverridePropertyBaseTransformation, IInsertStatementTransformation
+internal sealed class ContractPropertyTransformation : ContractBaseTransformation
 {
-    private readonly MethodKind? _targetMethodKind;
+    public new IProperty TargetMember => (IProperty) base.TargetMember;
 
-    public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration, MethodKind? targetMethodKind ) :
-        base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public ContractPropertyTransformation(
+        Advice advice,
+        IProperty targetProperty,
+        ContractDirection contractDirection,
+        TemplateMember<IMethod> template,
+        IObjectReader templateArguments,
+        IObjectReader tags ) : base( advice, targetProperty, targetProperty, contractDirection, template, templateArguments, tags )
     {
-        this._targetMethodKind = targetMethodKind;
     }
 
-    public IMember TargetMember => this.OverriddenDeclaration;
-
-    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        if ( this.OverriddenDeclaration.SetMethod == null )
+        Invariant.Assert( this.ContractTarget == this.TargetMember );
+        Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
+
+        bool? inputResult, outputResult;
+        BlockSyntax? inputContractBlock, outputContractBlock;
+
+        if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
+        {
+            Invariant.Assert( this.TargetMember.SetMethod is not null );
+
+            inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), out inputContractBlock );
+        }
+        else
+        {
+            inputResult = null;
+            inputContractBlock = null;
+        }
+
+        if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
+        {
+            Invariant.Assert( this.TargetMember.GetMethod is not null );
+
+            var returnVariableName = context.GetReturnValueVariableName();
+            outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), out outputContractBlock );
+        }
+        else
+        {
+            outputResult = null;
+            outputContractBlock = null;
+        }
+
+        if ( inputResult == false || outputResult == false )
         {
             return Array.Empty<InsertedStatement>();
         }
 
-        var advice = (ContractAdvice) this.ParentAdvice;
+        var statements = new List<InsertedStatement>();
 
-        if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies )
-             || inputFilterBodies.Count == 0 )
+        if ( inputContractBlock != null )
         {
-            return Array.Empty<InsertedStatement>();
+            statements.Add( new InsertedStatement( inputContractBlock, this.TargetMember.SetMethod.AssertNotNull(), this, InsertedStatementKind.InputContract ) );
         }
 
-        return inputFilterBodies.SelectAsArray(
-            b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.InputContract ) );
+        if ( outputContractBlock != null )
+        {
+            statements.Add( new InsertedStatement( outputContractBlock, this.TargetMember.GetMethod.AssertNotNull(), this, InsertedStatementKind.OutputContract ) );
+        }
+
+        return statements;
     }
 
+    public override FormattableString ToDisplayString() => $"Add contract to property '{this.TargetMember.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+
+    /*
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
@@ -164,6 +199,5 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                     ? this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration )
                     : null );
     }
-
-    public override string ToString() => $"Add default contract to property '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+    */
 }

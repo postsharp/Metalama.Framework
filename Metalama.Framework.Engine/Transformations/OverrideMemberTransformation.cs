@@ -39,65 +39,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
     {
-        ExpressionSyntax expression;
-
-        var memberNameString =
-            this.OverriddenDeclaration switch
-            {
-                { IsExplicitInterfaceImplementation: true } => this.OverriddenDeclaration.Name.Split( '.' ).Last(),
-                _ => this.OverriddenDeclaration.Name
-            };
-
-        SimpleNameSyntax memberName;
-
-        if ( this.OverriddenDeclaration is IGeneric { TypeParameters.Count: > 0 } generic )
-        {
-            memberName = GenericName( memberNameString )
-                .WithTypeArgumentList(
-                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsReadOnlyList( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
-        }
-        else
-        {
-            memberName = IdentifierName( memberNameString );
-        }
-
-        if ( !this.OverriddenDeclaration.IsStatic )
-        {
-            if ( this.OverriddenDeclaration.IsExplicitInterfaceImplementation )
-            {
-                var implementedInterfaceMember = this.OverriddenDeclaration.GetExplicitInterfaceImplementation();
-
-                expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ParenthesizedExpression(
-                        SyntaxFactoryEx.SafeCastExpression(
-                            generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
-                            ThisExpression() ) ),
-                    memberName );
-            }
-            else
-            {
-                expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    memberName );
-            }
-        }
-        else
-        {
-            expression =
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    generationContext.SyntaxGenerator.Type( this.OverriddenDeclaration.DeclaringType.GetSymbol() ),
-                    memberName );
-        }
-
-        return expression
-            .WithAspectReferenceAnnotation(
-                this.ParentAdvice.AspectLayerId,
-                AspectReferenceOrder.Previous,
-                referenceTargetKind,
-                AspectReferenceFlags.Inlineable );
+        return ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration, this.ParentAdvice.AspectLayerId, referenceTargetKind, generationContext );
     }
 
     public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();

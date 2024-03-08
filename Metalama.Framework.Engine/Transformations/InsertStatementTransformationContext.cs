@@ -9,13 +9,15 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Context for code transformation's syntax node evaluation.
     /// </summary>
-    internal sealed class InsertStatementTransformationContext : TransformationContext
+    internal abstract class InsertStatementTransformationContext : TransformationContext
     {
-        public InsertStatementTransformationContext(
+        protected InsertStatementTransformationContext(
             ProjectServiceProvider serviceProvider,
             UserDiagnosticSink diagnosticSink,
-            ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
+            CompilationModel compilation,
+            ITemplateLexicalScopeProvider lexicalScopeProvider ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
+
+        public abstract string GetReturnValueVariableName();
     }
 }

@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
@@ -21,14 +22,14 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal static class ProceedHelper
 {
-    public static SyntaxUserExpression CreateProceedDynamicExpression(
+    public static (ExpressionSyntax Syntax, IType Result) CreateProceedExpression(
         SyntaxGenerationContext generationContext,
         ExpressionSyntax invocationExpression,
         TemplateKind selectedTemplateKind,
         IMethod overriddenMethod )
     {
         var runtimeAspectHelperType =
-            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
+            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof( RunTimeAspectHelper ) ) );
 
         switch ( selectedTemplateKind )
         {
@@ -48,7 +49,7 @@ internal static class ProceedHelper
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
                                         runtimeAspectHelperType,
-                                        IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
+                                        IdentifierName( nameof( RunTimeAspectHelper.Buffer ) ) ) )
                                 .WithArgumentList(
                                     ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation );
@@ -61,7 +62,7 @@ internal static class ProceedHelper
                         expression = GenerateAwaitBufferAsync();
                     }
 
-                    return new SyntaxUserExpression( expression, overriddenMethod.ReturnType );
+                    return (expression, overriddenMethod.ReturnType);
                 }
 
             case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
@@ -77,23 +78,21 @@ internal static class ProceedHelper
                             return WrapAsyncVoid( invocationExpression, overriddenMethod, true );
 
                         case { ResultType: var resultType } when resultType.Is( SpecialType.Void ):
-                            return
-                                new SyntaxUserExpression(
-                                    AwaitExpression(
-                                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
-                                            invocationExpression )
-                                        .WithAdditionalAnnotations( Simplifier.Annotation ),
-                                    resultType );
+                            return (
+                                AwaitExpression(
+                                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
+                                        invocationExpression )
+                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                resultType);
 
                         default:
-                            return
-                                new SyntaxUserExpression(
-                                    ParenthesizedExpression(
-                                            AwaitExpression(
-                                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
-                                                invocationExpression ) )
-                                        .WithAdditionalAnnotations( Simplifier.Annotation ),
-                                    asyncInfo.ResultType );
+                            return (
+                                ParenthesizedExpression(
+                                        AwaitExpression(
+                                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
+                                            invocationExpression ) )
+                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                asyncInfo.ResultType);
                     }
                 }
 
@@ -101,19 +100,17 @@ internal static class ProceedHelper
                 return WrapAsyncVoid( invocationExpression, overriddenMethod, false );
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
-                { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
+            { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
                 {
                     var expression = GenerateAwaitBufferAsync();
 
-                    return new SyntaxUserExpression( expression, overriddenMethod.ReturnType );
+                    return (expression, overriddenMethod.ReturnType);
                 }
         }
 
         // This is a default method, or a non-default template.
         // Generate: `BASE(ARGS)`
-        return new SyntaxUserExpression(
-            invocationExpression,
-            overriddenMethod.ReturnType );
+        return (invocationExpression, overriddenMethod.ReturnType);
 
         ExpressionSyntax GenerateAwaitBufferAsync()
         {
@@ -127,13 +124,13 @@ internal static class ProceedHelper
             {
                 arguments = arguments.AddArguments( Argument( IdentifierName( cancellationTokenParameter.Name ) ) );
             }
-            
+
             var bufferExpression =
                 InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             runtimeAspectHelperType,
-                            IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
+                            IdentifierName( nameof( RunTimeAspectHelper.Buffer ) + "Async" ) ) )
                     .WithArgumentList( arguments )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
@@ -146,7 +143,7 @@ internal static class ProceedHelper
             return expression;
         }
 
-        static SyntaxUserExpression WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
+        static (ExpressionSyntax Syntax, IType? Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
         {
             if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
             {
@@ -162,20 +159,90 @@ internal static class ProceedHelper
 
             if ( await )
             {
-                return
-                    new SyntaxUserExpression(
-                        AwaitExpression(
-                            Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                            expression ),
-                        overriddenMethod.ReturnType );
+                return (
+                    AwaitExpression(
+                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                        expression ),
+                    overriddenMethod.ReturnType);
             }
             else
             {
-                return
-                    new SyntaxUserExpression(
-                        expression,
-                        overriddenMethod.ReturnType );
+                return (expression, overriddenMethod.ReturnType);
             }
         }
+    }
+
+    public static SyntaxUserExpression CreateProceedDynamicExpression(
+        SyntaxGenerationContext generationContext,
+        ExpressionSyntax invocationExpression,
+        TemplateKind selectedTemplateKind,
+        IMethod overriddenMethod )
+    {
+        var (expression, type) = CreateProceedExpression( generationContext, invocationExpression, selectedTemplateKind, overriddenMethod );
+
+        return new SyntaxUserExpression( expression, type );
+    }
+
+    public static ExpressionSyntax CreateMemberAccessExpression( IMember targetMember, AspectLayerId aspectLayerId, AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
+    {
+        ExpressionSyntax expression;
+
+        var memberNameString =
+            targetMember switch
+            {
+                { IsExplicitInterfaceImplementation: true } => targetMember.Name.Split( '.' ).Last(),
+                _ => targetMember.Name
+            };
+
+        SimpleNameSyntax memberName;
+
+        if ( targetMember is IGeneric { TypeParameters.Count: > 0 } generic )
+        {
+            memberName = GenericName( memberNameString )
+                .WithTypeArgumentList(
+                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsReadOnlyList( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+        }
+        else
+        {
+            memberName = IdentifierName( memberNameString );
+        }
+
+        if ( !targetMember.IsStatic )
+        {
+            if ( targetMember.IsExplicitInterfaceImplementation )
+            {
+                var implementedInterfaceMember = targetMember.GetExplicitInterfaceImplementation();
+
+                expression = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    ParenthesizedExpression(
+                        SyntaxFactoryEx.SafeCastExpression(
+                            generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                            ThisExpression() ) ),
+                    memberName );
+            }
+            else
+            {
+                expression = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    ThisExpression(),
+                    memberName );
+            }
+        }
+        else
+        {
+            expression =
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    generationContext.SyntaxGenerator.Type( targetMember.DeclaringType.GetSymbol() ),
+                    memberName );
+        }
+
+        return expression
+            .WithAspectReferenceAnnotation(
+                aspectLayerId,
+                AspectReferenceOrder.Previous,
+                referenceTargetKind,
+                AspectReferenceFlags.Inlineable );
     }
 }

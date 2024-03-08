@@ -493,25 +493,28 @@ internal sealed partial class LinkerInjectionStep
                     {
                         case IMethod or IConstructor:
                             // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
-                            var entryStatements = this._transformationCollection.GetInjectedInitialStatements( injectedMember );
+                            var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
+                            var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
 
-                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, injectedNode );
+                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, exitStatements, injectedNode );
 
                             break;
 
                         case IProperty property:
                             if ( property.GetMethod != null )
                             {
-                                var getEntryStatements = this._transformationCollection.GetInjectedInitialStatements( property.GetMethod, injectedMember );
+                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements( property.GetMethod, injectedMember );
+                                var getExitStatements = this._transformationCollection.GetInjectedExitStatements( property.GetMethod, injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( property.GetMethod, getEntryStatements, injectedNode );
+                                injectedNode = InjectStatementsIntoMemberDeclaration( property.GetMethod, getEntryStatements, getExitStatements, injectedNode );
                             }
 
                             if ( property.SetMethod != null )
                             {
-                                var setEntryStatements = this._transformationCollection.GetInjectedInitialStatements( property.SetMethod, injectedMember );
+                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements( property.SetMethod, injectedMember );
+                                var setExitStatements = this._transformationCollection.GetInjectedExitStatements( property.SetMethod, injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( property.SetMethod, setEntryStatements, injectedNode );
+                                injectedNode = InjectStatementsIntoMemberDeclaration( property.SetMethod, setEntryStatements, setExitStatements, injectedNode );
                             }
 
                             break;
@@ -558,9 +561,10 @@ internal sealed partial class LinkerInjectionStep
         private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration(
             IMemberOrNamedType contextDeclaration,
             IReadOnlyList<StatementSyntax> entryStatements,
+            IReadOnlyList<StatementSyntax> exitStatements,
             MemberDeclarationSyntax currentNode )
         {
-            if ( entryStatements.Count == 0 )
+            if ( entryStatements.Count == 0 && exitStatements.Count == 0 )
             {
                 return currentNode;
             }
@@ -568,18 +572,18 @@ internal sealed partial class LinkerInjectionStep
             switch ( currentNode )
             {
                 case ConstructorDeclarationSyntax { Body: { } body } constructor:
-                    return constructor.WithBody( ReplaceBlock( entryStatements, body ) );
+                    return constructor.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
 
                 case ConstructorDeclarationSyntax { ExpressionBody: { } expressionBody } constructor:
                     return
                         constructor.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default(SyntaxToken),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression, true ) );
+                            body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, true ) );
 
                 // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
-                    return method.WithBody( ReplaceBlock( entryStatements, body ) );
+                    return method.WithBody( ReplaceBlock( entryStatements, exitStatements,body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     var returnsVoid =
@@ -595,20 +599,20 @@ internal sealed partial class LinkerInjectionStep
                         method.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default(SyntaxToken),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression, returnsVoid ) );
+                            body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, returnsVoid ) );
 
                 case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
                     throw new AssertionFailedException( $"Method without body not supported: {contextDeclaration}" );
 
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
-                    return @operator.WithBody( ReplaceBlock( entryStatements, body ) );
+                    return @operator.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
 
                 case OperatorDeclarationSyntax { ExpressionBody: { } expressionBody } @operator:
                     return
                         @operator.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default(SyntaxToken),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression, false ) );
+                            body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
                     Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
@@ -621,7 +625,7 @@ internal sealed partial class LinkerInjectionStep
                                 SingletonList(
                                     AccessorDeclaration(
                                         SyntaxKind.GetAccessorDeclaration,
-                                        ReplaceExpression( entryStatements, expressionBody.Expression, false ) ) ) ) );
+                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
                 case PropertyDeclarationSyntax { AccessorList: { } accessorList } property:
                     Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } );
@@ -635,13 +639,14 @@ internal sealed partial class LinkerInjectionStep
                                             IsMatchingAccessor( a, contextDeclaration )
                                                 ? a switch
                                                 {
-                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, body ) ),
+                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) ),
                                                     { ExpressionBody: { } expressionBody } =>
                                                         a.PartialUpdate(
                                                             expressionBody: null,
                                                             semicolonToken: default(SyntaxToken),
                                                             body: ReplaceExpression(
                                                                 entryStatements,
+                                                                exitStatements,
                                                                 expressionBody.Expression,
                                                                 a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
                                                     _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" ),
@@ -661,19 +666,52 @@ internal sealed partial class LinkerInjectionStep
                     throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
             }
 
-            BlockSyntax ReplaceBlock( IReadOnlyList<StatementSyntax> entryStatements, BlockSyntax targetBlock )
+            BlockSyntax ReplaceBlock( IReadOnlyList<StatementSyntax> entryStatements, IReadOnlyList<StatementSyntax> exitStatements, BlockSyntax targetBlock )
             {
-                return
-                    Block(
-                        Block( List( entryStatements ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                        targetBlock
-                            .WithSourceCodeAnnotationIfNotGenerated()
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                if ( exitStatements.Count > 0 )
+                {
+                    switch ( targetBlock )
+                    {
+                        case { Statements: [ExpressionStatementSyntax expressionStatement] }:
+                            return
+                                Block(
+                                    Block( List( entryStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    expressionStatement,
+                                    Block( List( exitStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+
+                        case { Statements: [LocalDeclarationStatementSyntax localDeclarationStatement, ReturnStatementSyntax returnStatement] }:
+                            return
+                                Block(
+                                    Block( List( entryStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    localDeclarationStatement,
+                                    Block( List( exitStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    returnStatement );
+
+                        default:
+                            throw new AssertionFailedException( $"Unsupported form of body with exit statements for: {contextDeclaration}" );
+                    }
+                }
+                else
+                {
+                    return
+                        Block(
+                            Block( List( entryStatements ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                            targetBlock
+                                .WithSourceCodeAnnotationIfNotGenerated()
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                }
             }
 
-            BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, ExpressionSyntax targetExpression, bool returnsVoid )
+            BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, IReadOnlyList<StatementSyntax> exitStatements, ExpressionSyntax targetExpression, bool returnsVoid )
             {
+                // Auxiliary bodies that may receive exit statements are never expression bodies.
+                Invariant.Assert( exitStatements.Count == 0 );
+
                 return
                     Block(
                         Block( List( entryStatements ) )
@@ -930,9 +968,9 @@ internal sealed partial class LinkerInjectionStep
             if ( symbol != null )
             {
                 var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration );
 
-                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -954,9 +992,9 @@ internal sealed partial class LinkerInjectionStep
             if ( symbol != null )
             {
                 var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration );
 
-                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -978,9 +1016,9 @@ internal sealed partial class LinkerInjectionStep
             if ( symbol != null )
             {
                 var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration );
 
-                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -1052,9 +1090,9 @@ internal sealed partial class LinkerInjectionStep
             if ( symbol != null && symbol.SetMethod != null )
             {
                 var declaration = (IProperty) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration.SetMethod.AssertNotNull() );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
 
-                node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.SetMethod, entryStatements, node );
+                node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.SetMethod, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             if ( this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )

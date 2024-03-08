@@ -108,6 +108,17 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
+                if ( injectedMember.Transformation is IInsertStatementTransformation insertStatementTransformation)
+                {
+                    // These are auxiliary overrides created as a result of insert statement. We treat them as normal overrides.
+                    var list = overriddenDeclarations.GetOrAdd( insertStatementTransformation.TargetMember, _ => new List<ISymbol>() );
+
+                    lock ( list )
+                    {
+                        list.Add( injectedMemberSymbol );
+                    }
+                }
+
                 if ( injectedMember.Transformation is IIntroduceDeclarationTransformation introduceTransformation )
                 {
                     builderToInjectedMemberMap.TryAdd( introduceTransformation.DeclarationBuilder, injectedMember );

@@ -29,6 +29,10 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using Metalama.Framework.CompileTimeContracts;
+using System.Xml.Linq;
+
+
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
@@ -64,14 +68,15 @@ namespace Metalama.Framework.Engine.Linking
 
             var transformationComparer = TransformationLinkerOrderComparer.Instance;
             var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
-            var nameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+            var injectionNameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
             var transformationCollection = new TransformationCollection( input.CompilationModel, transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
             HashSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
-            ConcurrentDictionary<IDeclaration, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( input.CompilationModel.Comparers.Default );
+            ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl> pendingInsertStatementContexts = new( input.CompilationModel.Comparers.Default );
+            ConcurrentDictionary<IMember, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( input.CompilationModel.Comparers.Default );
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
@@ -102,23 +107,21 @@ namespace Metalama.Framework.Engine.Linking
                         transformation,
                         transformationCollection,
                         auxiliaryMemberTransformations,
-                        buildersWithSynthesizedSetters );
+                        buildersWithSynthesizedSetters,
+                        pendingInsertStatementContexts );
 
                     this.IndexInjectTransformation(
                         input,
                         transformation,
                         diagnostics,
                         lexicalScopeFactory,
-                        nameProvider,
+                        injectionNameProvider,
                         aspectReferenceSyntaxProvider,
                         buildersWithSynthesizedSetters,
                         transformationCollection,
                         replacedIntroduceDeclarationTransformations );
 
                     IndexMemberLevelTransformation(
-                        input,
-                        diagnostics,
-                        lexicalScopeFactory,
                         transformation,
                         transformationCollection );
 
@@ -128,7 +131,8 @@ namespace Metalama.Framework.Engine.Linking
                         lexicalScopeFactory,
                         transformation,
                         transformationCollection,
-                        auxiliaryMemberTransformations );
+                        auxiliaryMemberTransformations,
+                        pendingInsertStatementContexts );
 
                     IndexNodesWithModifiedAttributes( transformation, transformationCollection );
                 }
@@ -166,13 +170,27 @@ namespace Metalama.Framework.Engine.Linking
                 this._concurrentTaskRunner,
                 cancellationToken );
 
-            // Process any auxiliary member transformations in parallel.
-            void ProcessAuxiliaryMemberTransformations( KeyValuePair<IDeclaration, AuxiliaryMemberTransformations> transformationPair)
+            void FlushPendingInsertStatementContext(KeyValuePair<IMember, InsertStatementTransformationContextImpl> pair)
             {
-                var declaration = transformationPair.Key;
+                if ( pair.Value.WasUsedForOutputContracts )
+                {
+                    auxiliaryMemberTransformations
+                        .GetOrAdd( pair.Key, _ => new() )
+                        .InjectAuxiliaryOutputContractMember(
+                            pair.Value.AssertNotNull().OriginTransformation,
+                            pair.Value.ReturnValueVariableName.AssertNotNull() );
+                }
+            }
+
+            await this._concurrentTaskRunner.RunInParallelAsync( pendingInsertStatementContexts, FlushPendingInsertStatementContext, cancellationToken );
+
+            // Process any auxiliary member transformations in parallel.
+            void ProcessAuxiliaryMemberTransformations( KeyValuePair<IMember, AuxiliaryMemberTransformations> transformationPair)
+            {
+                var member = transformationPair.Key;
                 var transformations = transformationPair.Value;
 
-                this.IndexAuxiliaryMemberTransformations( transformationCollection, injectionHelperProvider, declaration, transformations );
+                this.IndexAuxiliaryMemberTransformations( transformationCollection, injectionNameProvider, injectionHelperProvider, member, transformations );
             }
 
             await this._concurrentTaskRunner.RunInParallelAsync( auxiliaryMemberTransformations, ProcessAuxiliaryMemberTransformations, cancellationToken );
@@ -507,8 +525,9 @@ namespace Metalama.Framework.Engine.Linking
         private static void IndexOverrideTransformation(
             ITransformation transformation,
             TransformationCollection transformationCollection,
-            ConcurrentDictionary<IDeclaration, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-            HashSet<PropertyBuilder> buildersWithSynthesizedSetters )
+            ConcurrentDictionary<IMember, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
+            HashSet<PropertyBuilder> buildersWithSynthesizedSetters,
+            ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
         {
             if ( transformation is not IOverrideDeclarationTransformation overrideDeclarationTransformation )
             {
@@ -556,8 +575,25 @@ namespace Metalama.Framework.Engine.Linking
 
             if (overrideDeclarationTransformation.OverriddenDeclaration is IConstructor { IsPrimary: true } overriddenConstructor)
             {
-                auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectSourceVersion();
+                auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectAuxiliarySourceMember();
                 transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
+            }
+
+            if ( overrideDeclarationTransformation.OverriddenDeclaration is IMember overriddenMember
+                 && pendingInsertStatementContexts.TryGetValue( overriddenMember, out var insertStatementContext ) )
+            {
+                // Remove context for the insert statement (there should be no race since we parallelize based on containing type).
+                pendingInsertStatementContexts.TryRemove( overriddenMember, out _ );
+
+                // If the return value variable was requested, it means that an auxiliary member is needed, which will receive all statements.
+                if (insertStatementContext.ReturnValueVariableName != null)
+                {
+                    auxiliaryMemberTransformations
+                        .GetOrAdd( overriddenMember, _ => new() )
+                        .InjectAuxiliaryOutputContractMember(
+                            insertStatementContext.AssertNotNull().OriginTransformation,
+                            insertStatementContext.ReturnValueVariableName );
+                }
             }
         }
 
@@ -567,14 +603,15 @@ namespace Metalama.Framework.Engine.Linking
             LexicalScopeFactory lexicalScopeFactory,
             ITransformation transformation,
             TransformationCollection transformationCollection,
-            ConcurrentDictionary<IDeclaration, AuxiliaryMemberTransformations> auxiliaryMemberTransformations )
+            ConcurrentDictionary<IMember, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
+            ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
         {
             if ( transformation is not IInsertStatementTransformation insertStatementTransformation )
             {
                 return;
             }
 
-            switch ( insertStatementTransformation.TargetMember )
+            switch ( insertStatementTransformation.TargetDeclaration )
             {
                 case MethodBase methodBase:
                     {
@@ -591,8 +628,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IConstructor { } builtOrBuilderConstructor:
                     {
-                        var constructorBuilder = insertStatementTransformation.TargetMember as ConstructorBuilder
-                                                 ?? ((BuiltConstructor) insertStatementTransformation.TargetMember).ConstructorBuilder;
+                        var constructorBuilder = insertStatementTransformation.TargetDeclaration as ConstructorBuilder
+                                                 ?? ((BuiltConstructor) insertStatementTransformation.TargetDeclaration).ConstructorBuilder;
 
                         Invariant.Assert( !((IConstructor) constructorBuilder).IsPrimary );
 
@@ -611,8 +648,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IMethod { } builtOrBuilderMethod:
                     {
-                        var methodBuilder = insertStatementTransformation.TargetMember as MethodBuilder
-                                            ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetMember).Builder;
+                        var methodBuilder = insertStatementTransformation.TargetDeclaration as MethodBuilder
+                                            ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetDeclaration).Builder;
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( methodBuilder.ToInsertPosition() );
 
@@ -642,8 +679,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 case IProperty { } builtOrBuilderProperty:
                     {
-                        var propertyBuilder = insertStatementTransformation.TargetMember as PropertyBuilder
-                                              ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetMember).Builder;
+                        var propertyBuilder = insertStatementTransformation.TargetDeclaration as PropertyBuilder
+                                              ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetDeclaration).Builder;
 
                         var positionInSyntaxTree = GetSyntaxTreePosition( propertyBuilder.ToInsertPosition() );
 
@@ -659,12 +696,12 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected target: {insertStatementTransformation.TargetMember}." );
+                    throw new AssertionFailedException( $"Unexpected target: {insertStatementTransformation.TargetDeclaration}." );
             }
 
-            if ( insertStatementTransformation.TargetMember is IConstructor { IsPrimary: true } overriddenConstructor )
+            if ( insertStatementTransformation.TargetDeclaration is IConstructor { IsPrimary: true } overriddenConstructor )
             {
-                auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectSourceVersion();
+                auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectAuxiliarySourceMember();
                 transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
             }
 
@@ -672,19 +709,40 @@ namespace Metalama.Framework.Engine.Linking
                 IInsertStatementTransformation insertStatementTransformation,
                 SyntaxGenerationContext syntaxGenerationContext )
             {
-                var context = new InsertStatementTransformationContext(
-                    this._serviceProvider,
-                    diagnostics,
-                    lexicalScopeFactory,
-                    syntaxGenerationContext,
-                    input.CompilationModel );
+                // Contexts for inserting statements are reused until the next override of the target declaration.
+                var context =
+                    pendingInsertStatementContexts.GetOrAdd(
+                        insertStatementTransformation.TargetMember,
+                        m => new InsertStatementTransformationContextImpl(
+                            this._serviceProvider,
+                            diagnostics,
+                            syntaxGenerationContext,
+                            input.CompilationModel,
+                            lexicalScopeFactory,
+                            insertStatementTransformation,
+                            m ) );
 
                 var statements = insertStatementTransformation.GetInsertedStatements( context );
+
+                foreach ( var statement in statements )
+                {
+                    if ( statement.Kind == InsertedStatementKind.OutputContract )
+                    {
+                        context.MarkAsUsedForOutputContracts();
+
+                        if ( insertStatementTransformation.TargetMember is IProperty or IIndexer
+                            || (insertStatementTransformation.TargetMember is IMethod method && method.GetAsyncInfo().ResultType.SpecialType == SpecialType.Void) )
+                        {
+                            // Force the return variable name to be allocated if the return type is not void.
+                            _ = context.GetReturnValueVariableName();
+                        }
+                    }
+                }
 
 #if DEBUG
                 foreach ( var statement in statements )
                 {
-                    if ( statement.Statement is BlockSyntax block )
+                        if ( statement.Statement is BlockSyntax block )
                     {
                         if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
                         {
@@ -698,17 +756,14 @@ namespace Metalama.Framework.Engine.Linking
                             throw new AssertionFailedException( "GeneratedCodeAnnotationKind annotation missing." );
                         }
                     }
-                }
 #endif
+                }
 
                 return statements;
             }
         }
 
         private static void IndexMemberLevelTransformation(
-            AspectLinkerInput input,
-            UserDiagnosticSink diagnostics,
-            LexicalScopeFactory lexicalScopeFactory,
             ITransformation transformation,
             TransformationCollection transformationCollection )
         {
@@ -755,77 +810,56 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private void IndexAuxiliaryMemberTransformations( 
-            TransformationCollection transformationCollection, 
+            TransformationCollection transformationCollection,
+            LinkerInjectionNameProvider injectionNameProvider,
             LinkerInjectionHelperProvider injectionHelperProvider,
-            IDeclaration declaration, 
+            IMember member,
             AuxiliaryMemberTransformations transformations )
         {
-            if ( transformations.ShouldInjectSourceVersion )
+            var auxiliaryMemberFactory = new AuxiliaryMemberFactory( this._compilationContext, injectionNameProvider, injectionHelperProvider, transformationCollection );
+
+            if ( transformations.ShouldInjectAuxiliarySourceMember )
             {
-                switch ( declaration )
+                switch ( member )
                 {
                     case IConstructor { IsPrimary: true } primaryConstructor:
-#if ROSLYN_4_8_0_OR_GREATER
-                        var syntax = (TypeDeclarationSyntax) primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
-#else
-                        var syntax = (RecordDeclarationSyntax) primaryConstructor.GetPrimaryDeclarationSyntax().AssertNotNull();
-#endif
-
-                        var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( syntax );
-
-                        var parameters = syntax.ParameterList.AssertNotNull();
-
-                        if ( transformationCollection.TryGetMemberLevelTransformations( syntax, out var memberTransformations )
-                             && memberTransformations.Parameters.Length > 0)
-                        {
-                            parameters =
-                                parameters.AddParameters(
-                                    memberTransformations.Parameters.SelectAsArray( p => p.ToSyntax( syntaxGenerationContext ) ) );
-                        }
-
-                        parameters =
-                            parameters.AddParameters(
-                                Parameter(
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    injectionHelperProvider.GetSourceType(),
-                                    Identifier( AspectReferenceSyntaxProvider.LinkerOverrideParamName ),
-                                    EqualsValueClause(
-                                        LiteralExpression(
-                                            SyntaxKind.DefaultLiteralExpression,
-                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
-
                         transformationCollection.AddInjectedMember(
                             new InjectedMember(
                                 null,
                                 DeclarationKind.Constructor,
-                                ConstructorDeclaration(
-                                    List<AttributeListSyntax>(),
-                                    primaryConstructor.GetSyntaxModifierList( ModifierCategories.Unsafe )
-                                    .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
-                                    Identifier( primaryConstructor.DeclaringType.Name ),
-                                    parameters,
-                                    ConstructorInitializer(
-                                        SyntaxKind.ThisConstructorInitializer,
-                                        ArgumentList(
-                                            SeparatedList(
-                                                syntax.ParameterList.Parameters.SelectAsArray(
-                                                    p => 
-                                                        Argument( 
-                                                            null, 
-                                                            p.Modifiers.FirstOrDefault( m => !m.IsKind( SyntaxKind.ParamsKeyword )), 
-                                                            IdentifierName( p.Identifier.ValueText ) ) ) ) ) ),
-                                    Block(),
-                                    null,
-                                    default ),
+                                auxiliaryMemberFactory.GetAuxiliarySourceConstructor(primaryConstructor),
                                 null,
                                 InjectedMemberSemantic.AuxiliaryBody,
                                 primaryConstructor ) );
 
                         break;
                     default:
-                        throw new AssertionFailedException( $"Unsupported: {declaration}" );
+                        throw new AssertionFailedException( $"Unsupported: {member}" );
                 }
+            }
+
+            foreach ( var outputContractAuxiliaryMember in transformations.AuxiliaryOutputContractMembers )
+            {
+                // Having a record in this list means that there is an output contract, which requires a trivial body that will act as a receiver of contracts.
+                // If there is no output contract, we don't get here at all and all input contracts are injected into the preceding override or source.
+                // Note that if there are such contra
+                // Example:
+                // <input_contracts> 
+                // var returnValue = meta.Proceed();
+                // <output_contracts>
+                // return returnValue;
+
+                var aspectLayerId = outputContractAuxiliaryMember.OriginTransformation.ParentAdvice.AspectLayerId;
+                var compilationModel = (CompilationModel)outputContractAuxiliaryMember.OriginTransformation.ParentAdvice.SourceCompilation;
+
+                transformationCollection.AddInjectedMember(
+                    new InjectedMember(
+                        outputContractAuxiliaryMember.OriginTransformation,
+                        member.DeclarationKind,
+                        auxiliaryMemberFactory.GetAuxiliaryOutputContractMember( member, compilationModel, aspectLayerId, outputContractAuxiliaryMember.ReturnVariableName ),
+                        aspectLayerId,
+                        InjectedMemberSemantic.AuxiliaryBody,
+                        member ) );
             }
         }
     }

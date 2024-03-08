@@ -219,7 +219,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( declaration == null )
             {
-                throw new AssertionFailedException( "Dont know how to sort." );
+                throw new AssertionFailedException( "Don't know how to sort." );
             }
 
             return declaration;

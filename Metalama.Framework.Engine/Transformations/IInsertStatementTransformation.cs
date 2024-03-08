@@ -11,15 +11,15 @@ namespace Metalama.Framework.Engine.Transformations
     internal interface IInsertStatementTransformation : ITransformation
     {
         /// <summary>
-        /// Gets a target member into which the statement should be inserted.
-        /// </summary>
-        IMember TargetMember { get; }
-
-        /// <summary>
         /// Provides an list of inserted statements.
         /// </summary>
         /// <param name="context">Context for providing inserted statements.</param>
         /// <returns>A list of Inserted statements or empty list if an error occured.</returns>
         IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
+
+        /// <summary>
+        /// Context declaration 
+        /// </summary>
+        IMember TargetMember { get; }
     }
 }

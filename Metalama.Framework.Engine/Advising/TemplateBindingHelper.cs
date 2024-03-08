@@ -153,11 +153,11 @@ internal static class TemplateBindingHelper
     }
 
     /// <summary>
-    /// Binds a template to a contract for a given location name with given arguments.
+    /// Binds a template to a contract for a given value expression with given arguments.
     /// </summary>
     public static BoundTemplateMethod ForContract(
         this TemplateMember<IMethod> template,
-        ExpressionSyntax parameterExpression,
+        ExpressionSyntax valueExpression,
         IObjectReader? arguments = null )
     {
         // The template must be void.
@@ -185,7 +185,7 @@ internal static class TemplateBindingHelper
         }
 
         var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty
-            .Add( "value", parameterExpression );
+            .Add( "value", valueExpression );
 
         return new BoundTemplateMethod( template, GetTemplateArguments( template, arguments, parameterMapping ) );
     }

@@ -3,38 +3,106 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ContractMethodTransformation : OverrideMethodBaseTransformation, IInsertStatementTransformation
+internal sealed class ContractMethodTransformation : ContractBaseTransformation
 {
-    public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
-        base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+    public new IMethod TargetMember => (IMethod)base.TargetMember;
 
-    public IMember TargetMember => this.OverriddenDeclaration;
-
-    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    public ContractMethodTransformation( 
+        Advice advice,
+        IMethod targetMethod,
+        IParameter contractTarget,
+        ContractDirection contractDirection,
+        TemplateMember<IMethod> template,
+        IObjectReader templateArguments,
+        IObjectReader tags ) : base( advice, targetMethod, contractTarget, contractDirection, template, templateArguments, tags ) 
     {
-        var advice = (ContractAdvice) this.ParentAdvice;
-
-        if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies )
-             || inputFilterBodies.Count == 0 )
-        {
-            return Array.Empty<InsertedStatement>();
-        }
-
-        return inputFilterBodies.SelectAsArray( b => new InsertedStatement( b, this.OverriddenDeclaration, this, InsertedStatementKind.InputContract ) );
     }
 
+    public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    {
+        switch ( this.ContractTarget )
+        {
+            case IParameter { IsReturnParameter: true } returnValueParam:
+                {
+                    Invariant.Assert( this.ContractDirection == ContractDirection.Output );
+
+                    var variableName = context.GetReturnValueVariableName();
+
+                    if ( !this.TryExecuteTemplate( context, IdentifierName( variableName ), out var contractBlock ) )
+                    {
+                        return Array.Empty<InsertedStatement>();
+                    }
+                    else
+                    {
+                        return new[] { new InsertedStatement( contractBlock, returnValueParam, this, InsertedStatementKind.OutputContract ) };
+                    }
+                }
+
+            case IParameter param:
+                {
+                    Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
+
+                    bool? inputResult, outputResult;
+                    BlockSyntax? inputContractBlock, outputContractBlock;
+                    var valueSyntax = IdentifierName( param.Name );
+
+                    if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
+                    {   
+                        Invariant.Assert( param.RefKind is not RefKind.Out );
+                        inputResult = this.TryExecuteTemplate( context, valueSyntax, out inputContractBlock );
+                    }
+                    else
+                    {
+                        inputResult = null;
+                        inputContractBlock = null;
+                    }
+
+                    if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
+                    {
+                        Invariant.Assert( param.RefKind is not RefKind.None );
+                        outputResult = this.TryExecuteTemplate( context, valueSyntax, out outputContractBlock );
+                    }
+                    else
+                    {
+                        outputResult = null;
+                        outputContractBlock = null;
+                    }
+
+                    if (inputResult == false || outputResult == false)
+                    {
+                        return Array.Empty<InsertedStatement>();
+                    }
+
+                    var statements = new List<InsertedStatement>();
+
+                    if (inputContractBlock != null)
+                    {
+                        statements.Add( new InsertedStatement( inputContractBlock, param, this, InsertedStatementKind.InputContract ) );
+                    }
+
+                    if ( outputContractBlock != null )
+                    {
+                        statements.Add( new InsertedStatement( outputContractBlock, param, this, InsertedStatementKind.OutputContract ) );
+                    }
+
+                    return statements;
+                }
+
+            default:
+                throw new AssertionFailedException( $"Unsupported contract target: {this.ContractTarget}" );
+        }
+    }
+
+    public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetDeclaration}'";
+
+    /*
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
@@ -275,6 +343,5 @@ internal sealed class ContractMethodTransformation : OverrideMethodBaseTransform
                             Token( SyntaxKind.SemicolonToken ) ) ) ) );
         }
     }
-
-    public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetDeclaration}'";
+    */
 }

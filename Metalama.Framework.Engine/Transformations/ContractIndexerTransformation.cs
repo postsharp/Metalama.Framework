@@ -3,27 +3,143 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransformation
+internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 {
-    private readonly MethodKind? _targetMethodKind;
+    public new IIndexer TargetMember => (IIndexer) base.TargetMember;
 
-    public ContractIndexerTransformation( ContractAdvice advice, IIndexer overriddenIndexer, MethodKind? targetMethodKind ) :
-        base( advice, overriddenIndexer, ObjectReader.Empty )
+    public ContractIndexerTransformation(
+        Advice advice,
+        IIndexer targetIndexer,
+        IParameter? indexerParameter,
+        ContractDirection contractDirection,
+        TemplateMember<IMethod> template,
+        IObjectReader templateArguments,
+        IObjectReader tags ) : base( advice, targetIndexer, (IDeclaration?)indexerParameter ?? targetIndexer, contractDirection, template, templateArguments, tags )
     {
-        this._targetMethodKind = targetMethodKind;
     }
 
+    public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+    {
+        switch ( this.ContractTarget )
+        {
+            case IIndexer:
+                {
+                    Invariant.Assert( this.ContractTarget == this.TargetMember );
+                    Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
+
+                    bool? inputResult, outputResult;
+                    BlockSyntax? inputContractBlock, outputContractBlock;
+
+                    if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
+                    {
+                        Invariant.Assert( this.TargetMember.SetMethod is not null );
+
+                        inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), out inputContractBlock );
+                    }
+                    else
+                    {
+                        inputResult = null;
+                        inputContractBlock = null;
+                    }
+
+                    if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
+                    {
+                        Invariant.Assert( this.TargetMember.GetMethod is not null );
+
+                        var returnVariableName = context.GetReturnValueVariableName();
+                        outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), out outputContractBlock );
+                    }
+                    else
+                    {
+                        outputResult = null;
+                        outputContractBlock = null;
+                    }
+
+                    if ( inputResult == false || outputResult == false )
+                    {
+                        return Array.Empty<InsertedStatement>();
+                    }
+
+                    var statements = new List<InsertedStatement>();
+
+                    if ( inputContractBlock != null )
+                    {
+                        statements.Add( new InsertedStatement( inputContractBlock, this.TargetMember.SetMethod.AssertNotNull().Parameters[^1], this, InsertedStatementKind.InputContract ) );
+                    }
+
+                    if ( outputContractBlock != null )
+                    {
+                        statements.Add( new InsertedStatement( outputContractBlock, this.TargetMember.GetMethod.AssertNotNull().ReturnParameter, this, InsertedStatementKind.OutputContract ) );
+                    }
+
+                    return statements;
+                }
+
+            case IParameter parameter:
+                {
+                    Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
+
+                    bool? inputResult, outputResult;
+                    BlockSyntax? inputContractBlock, outputContractBlock;
+                    var valueSyntax = IdentifierName( parameter.Name );
+
+                    if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
+                    {
+                        Invariant.Assert( parameter.RefKind is not RefKind.Out );
+                        inputResult = this.TryExecuteTemplate( context, valueSyntax, out inputContractBlock );
+                    }
+                    else
+                    {
+                        inputResult = null;
+                        inputContractBlock = null;
+                    }
+
+                    if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
+                    {
+                        Invariant.Assert( parameter.RefKind is not RefKind.None );
+                        outputResult = this.TryExecuteTemplate( context, valueSyntax, out outputContractBlock );
+                    }
+                    else
+                    {
+                        outputResult = null;
+                        outputContractBlock = null;
+                    }
+
+                    if ( inputResult == false || outputResult == false )
+                    {
+                        return Array.Empty<InsertedStatement>();
+                    }
+
+                    var statements = new List<InsertedStatement>();
+
+                    if ( inputContractBlock != null )
+                    {
+                        statements.Add( new InsertedStatement( inputContractBlock, parameter, this, InsertedStatementKind.InputContract ) );
+                    }
+
+                    if ( outputContractBlock != null )
+                    {
+                        statements.Add( new InsertedStatement( outputContractBlock, parameter, this, InsertedStatementKind.OutputContract ) );
+                    }
+
+                    return statements;
+                }
+
+            default:
+                throw new AssertionFailedException( $"Unsupported contract target: {this.ContractTarget}" );
+        }
+    }
+
+    public override FormattableString ToDisplayString() => $"Add default contract to indexer '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified)}'";
+
+    /*
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
@@ -205,6 +321,5 @@ internal sealed class ContractIndexerTransformation : OverrideIndexerBaseTransfo
 
         return this.GetInjectedMembersImpl( context, getterBody, setterBody );
     }
-
-    public override string ToString() => $"Add default contract to property '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+    */
 }
