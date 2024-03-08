@@ -128,7 +128,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                 designTimeConfiguration.Value,
                 cancellationToken.ToTestable() );
 
-            aspectInstances = result.AspectInstances;
+            aspectInstances = result.AspectInstances.Where( i => !i.IsSkipped ).ToImmutableArray();
 
             this._aspectInstanceCache.TryAdd( compilation, aspectInstances );
         }

@@ -121,11 +121,14 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             return CodeLensSummary.NotAvailable;
         }
 
-        var aspectInstances = syntaxTreeResult.AspectInstances.Where( i => i.TargetDeclarationId == symbolId )
+        var aspectInstances = syntaxTreeResult.AspectInstances
+            .Where( i => !i.IsSkipped )
+            .Where( i => i.TargetDeclarationId == symbolId )
             .Select( i => i.AspectClassFullName )
             .ToReadOnlyList();
 
-        var transformations = syntaxTreeResult.Transformations.Where( t => t.TargetDeclarationId == symbolId )
+        var transformations = syntaxTreeResult.Transformations
+            .Where( t => t.TargetDeclarationId == symbolId )
             .Select( t => t.AspectClassFullName )
             .ToReadOnlyList();
 
@@ -233,14 +236,24 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         var result = await pipeline.ExecuteAsync( preparation.PartialCompilation!, preparation.Configuration!, cancellationToken );
 
         // Index aspects and transformations.
-        var aspectInstances = result.AspectInstances.Where( i => i.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId )
+        var aspectInstances = result.AspectInstances
+            .Where( i => !i.IsSkipped )
+            .Where( i => i.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId )
             .ToDictionary( i => i, _ => new List<IIntrospectionTransformation>() );
 
         var transformations = result.Transformations.Where( t => t.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId );
 
         foreach ( var transformation in transformations )
         {
-            var aspectInstance = transformation.Advice.AspectInstance;
+            var advice = transformation.Advice;
+
+            if ( advice.AspectInstance.IsSkipped )
+            {
+                // Ignore transformations from skipped aspects.
+                continue;
+            }
+
+            var aspectInstance = advice.AspectInstance;
 
             if ( !aspectInstances.TryGetValue( aspectInstance, out var transformationList ) )
             {
@@ -268,8 +281,8 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
                 AspectPredecessorKind.Attribute => $"Custom attribute",
                 AspectPredecessorKind.Fabric => $"Fabric '{((IIntrospectionFabric) predecessor.Instance).FullName}'",
                 AspectPredecessorKind.Inherited => $"Inherited from '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
-                AspectPredecessorKind.ChildAspect => $"Child of '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
-                AspectPredecessorKind.RequiredAspect => $"Required by '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
+                AspectPredecessorKind.ChildAspect => $"Child of '{((IIntrospectionAspectInstance) predecessor.Instance).AspectClass}' on '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
+                AspectPredecessorKind.RequiredAspect => $"Required by '{((IIntrospectionAspectInstance) predecessor.Instance).AspectClass}' on '{((IIntrospectionAspectInstance) predecessor.Instance).TargetDeclaration}'",
                 _ => $""
             };
 
@@ -317,8 +330,8 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
 
             var transformationText = aspectInstanceTransformations.Count switch
             {
-                0 => $"(The aspect does not provide any transformation.)",
-                1 => $"(The aspect transforms 1 child declaration.)",
+                0 => "(The aspect does not provide any transformation.)",
+                1 => "(The aspect transforms 1 child declaration.)",
                 _ => $"(The aspect transforms {aspectInstanceTransformations.Count} child declarations.)"
             };
 
@@ -341,8 +354,8 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             {
                 var transformationsOnChildren = aspectInstance.Key.Advice.SelectMany( a => a.Transformations )
                     .Where(
-                        t => !(t.TargetDeclaration.TryGetSerializableId( out var transformedDeclarationId )
-                               && transformedDeclarationId != symbolId) )
+                        t => t.TargetDeclaration.TryGetSerializableId( out var transformedDeclarationId )
+                               && transformedDeclarationId != symbolId )
                     .Select( t => t.TargetDeclaration )
                     .Distinct()
                     .ToReadOnlyList();
@@ -351,7 +364,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
                 {
                     var transformationText = transformationsOnChildren.Count switch
                     {
-                        1 => $"(The aspect also transforms 1 child declaration.)",
+                        1 => "(The aspect also transforms 1 child declaration.)",
                         _ => $"(The aspect also transforms {transformationsOnChildren.Count} child declarations.)"
                     };
 

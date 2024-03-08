@@ -94,8 +94,101 @@ public sealed class CodeLensTests : DesignTimeTestBase
             new[]
             {
                 new[] { "RepositoryAspect", "Repository", "Custom attribute", "Introduce method 'Repository.Get(int)'." },
-                new[] { "InjectedLogger", "Repository.Get(int)", "Child of 'Repository'", "Introduce field 'Repository._logger'." }
+                new[] { "InjectedLogger", "Repository.Get(int)", "Child of 'RepositoryAspect' on 'Repository'", "Introduce field 'Repository._logger'." }
             },
             details.Entries.SelectAsReadOnlyList( e => e.Fields.SelectAsReadOnlyList( f => f.Text ) ) );
+    }
+
+    [Fact]
+    public async Task SkippedAspect()
+    {
+        using var testContext = this.CreateTestContext();
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        const string code = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Diagnostics;
+
+            [assembly: AspectOrder(typeof(MyChildAspect), typeof(MyAspect))]
+
+            class MyChildAspect : TypeAspect
+            {
+                [Introduce]
+                int child;
+            }
+
+            public class MyAspect : TypeAspect
+            {
+                public MyAspect(bool skip)
+                {
+                    this.skip = skip;
+                }
+
+                private readonly bool skip;
+
+                [Introduce]
+                int i;
+
+                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                {
+                    if (skip)
+                    {
+                        builder.SkipAspect();
+                    }
+
+                    builder.Outbound.AddAspect<MyChildAspect>();
+
+                    builder.Advice.IntroduceMethod(builder.Target, nameof(Template));
+                }
+
+                [Template]
+                void Template() { }
+            }
+
+            [MyAspect(skip: false)]
+            class C1;
+
+            [MyAspect(skip: true)]
+            class C2;
+            """;
+
+        var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
+        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
+
+        var compilation = (await workspaceProvider.GetCompilationAsync( projectKey ))!;
+
+        // We need to run the pipeline because code lens does not run it on its own.
+        var pipeline = factory.CreatePipeline( compilation );
+        await pipeline.ExecuteAsync( compilation, AsyncExecutionContext.Get() );
+
+        // Test the CodeLens service.
+        var c1Id = compilation.GetTypeByMetadataName( "C1" )!.GetSerializableId();
+        var c2Id = compilation.GetTypeByMetadataName( "C2" )!.GetSerializableId();
+
+        var codeLensService = new CodeLensServiceImpl( factory.ServiceProvider );
+
+        var summary1 = await codeLensService.GetCodeLensSummaryAsync( projectKey, c1Id, default );
+
+        Assert.Equal( "2 aspects", summary1.Description );
+
+        var details1 = await codeLensService.GetCodeLensDetailsAsync( projectKey, c1Id, default );
+
+        Assert.Equal(
+            [
+                [ "MyAspect", "C1", "Custom attribute", "Introduce field 'C1.i'."],
+                [ "MyChildAspect", "C1", "Child of 'MyAspect' on 'C1'", "Introduce field 'C1.child'."],
+                [ "MyAspect", "C1", "Custom attribute", "Introduce method 'C1.Template()'." ],
+                [ "", "", "", "(The aspect also transforms 1 child declaration.)" ]
+            ],
+            details1.Entries.SelectAsReadOnlyList( e => e.Fields.SelectAsReadOnlyList( f => f.Text ) ) );
+
+        var summary2 = await codeLensService.GetCodeLensSummaryAsync( projectKey, c2Id, default );
+
+        Assert.Equal( "no aspect", summary2.Description );
+
+        var details2 = await codeLensService.GetCodeLensDetailsAsync( projectKey, c2Id, default );
+
+        Assert.Empty( details2.Entries );
     }
 }

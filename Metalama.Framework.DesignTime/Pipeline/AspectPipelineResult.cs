@@ -468,7 +468,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     new(
                         targetDeclarationId,
                         predecessorDeclarationId,
-                        aspectInstance.AspectClass.FullName ) );
+                        aspectInstance.AspectClass.FullName,
+                        aspectInstance.IsSkipped ) );
             }
 
             // Split transformations by syntax tree.
