@@ -19,6 +19,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Licensing;
 
@@ -35,6 +36,7 @@ public sealed class LicenseVerifier : IProjectService
     private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
 
     private readonly ITempFileManager _tempFileManager;
+    private int _reportedErrorCount;
 
     private readonly struct RedistributionLicenseFeatures { }
 
@@ -66,7 +68,7 @@ public sealed class LicenseVerifier : IProjectService
             : assemblyName;
     }
 
-    private static bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumptionService service )
+    private bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumptionService service )
     {
         var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
 
@@ -79,6 +81,7 @@ public sealed class LicenseVerifier : IProjectService
 
         if ( !service.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
         {
+            Interlocked.Increment( ref this._reportedErrorCount );
             diagnosticAdder.Report( LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
 
             return false;
@@ -97,7 +100,7 @@ public sealed class LicenseVerifier : IProjectService
 
         foreach ( var closureProject in project.ClosureProjects )
         {
-            if ( IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
+            if ( this.IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
             {
                 this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
             }
@@ -123,6 +126,8 @@ public sealed class LicenseVerifier : IProjectService
                  && !(fabricInstance.Driver is ProjectFabricDriver { Kind: FabricKind.Transitive } fabricDriver
                       && this.IsProjectWithValidRedistributionLicense( fabricDriver.CompileTimeProject )) )
             {
+                Interlocked.Increment( ref this._reportedErrorCount );
+
                 throw new DiagnosticException(
                     LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
                         null,
@@ -140,7 +145,7 @@ public sealed class LicenseVerifier : IProjectService
             _ => this.CanConsumeForCurrentProject( LicenseRequirement.Professional )
         };
 
-    internal static bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
+    internal bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
         var manager = serviceProvider.GetService<IProjectLicenseConsumptionService>();
 
@@ -151,7 +156,7 @@ public sealed class LicenseVerifier : IProjectService
 
         return aspectClass switch
         {
-            IAspectClassImpl { Project: { } } aspectClassImpl when IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
+            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
             _ => manager.CanConsume( LicenseRequirement.Professional, serviceProvider.GetService<IProjectOptions>()?.ProjectName )
@@ -206,22 +211,36 @@ public sealed class LicenseVerifier : IProjectService
 
         var hasLicenseError = false;
 
+        // Check the use of Metalama.Framework.Sdk.
+        if ( compilation.References.Any( r => r.Display?.EndsWith( "metalama.framework.sdk.dll", StringComparison.OrdinalIgnoreCase ) ?? false ) )
+        {
+            if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
+            {
+                diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
+            }
+
+            hasLicenseError = true;
+        }
+
         if ( maxAspectClasses == 0 )
         {
-            hasLicenseError = true;
+            if ( consumedAspectClassNames.Count > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+            {
+                hasLicenseError = true;
 
-            // Possible causes can be:
-            // 1. No license string has been registered.
-            // 2. We have a license string, but one not eligible for Metalama.
-            // 3. We have a project-bound license string and the project name does not match.
+                // Possible causes can be:
+                // 1. No license string has been registered.
+                // 2. We have a license string, but one not eligible for Metalama.
+                // 3. We have a project-bound license string and the project name does not match.
 
-            var diagnostic = string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString )
-                ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
-                : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
-                    null,
-                    this._licenseConsumptionService.LicenseString! );
+                var diagnostic = string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString )
+                    ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
+                    : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
+                        null,
+                        this._licenseConsumptionService.LicenseString! );
 
-            diagnostics.Report( diagnostic );
+                diagnostics.Report( diagnostic );
+            }
         }
         else
         {
@@ -240,21 +259,6 @@ public sealed class LicenseVerifier : IProjectService
                             null,
                             (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
                 }
-            }
-        }
-
-        // Check the use of Metalama.Framework.Sdk.
-        if ( !hasLicenseError )
-        {
-            // Verify SDK license
-            if ( compilation.References.Any( r => r.Display?.EndsWith( "metalama.framework.sdk.dll", StringComparison.OrdinalIgnoreCase ) ?? false ) )
-            {
-                if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
-                {
-                    diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
-                }
-
-                hasLicenseError = true;
             }
         }
 
