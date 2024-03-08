@@ -75,6 +75,18 @@ namespace Metalama.Framework.Code
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestNamedType( containingDeclaration ),
                 _ => null
             };
+        
+        /// <summary>
+        /// Gets the declaring <see cref="IMemberOrNamedType"/> of a given declaration if the declaration if not an <see cref="IMemberOrNamedType"/>, or the <see cref="IMemberOrNamedType"/> itself if the given declaration is itself an <see cref="IMemberOrNamedType"/>. 
+        /// </summary>
+        public static IMemberOrNamedType? GetClosestMemberOrNamedType( this IDeclaration declaration )
+            => declaration switch
+            {
+                INamedType namedType => namedType.ToNonNullableType(),
+                IMember member => member,
+                { ContainingDeclaration: { } containingDeclaration } => GetClosestMemberOrNamedType( containingDeclaration ),
+                _ => null
+            };
 
         /// <summary>
         /// Gets the topmost type of a nested type, i.e. a type that is not contained in any other type. If the given type is not a given type,
