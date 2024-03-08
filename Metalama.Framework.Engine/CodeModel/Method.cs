@@ -26,16 +26,13 @@ internal sealed class Method : MethodBase, IMethodImpl
     {
         if ( symbol.MethodKind is RoslynMethodKind.Constructor or RoslynMethodKind.StaticConstructor )
         {
-            throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
+            throw new ArgumentException( nameof(symbol), "Cannot use the Method class with constructors." );
         }
 
-        // This is intentionally debug-only to not break existing code. Should be non-conditional on the next non-RC version.
-#if DEBUG
         if ( symbol.PartialDefinitionPart != null )
         {
-            throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use partial implementation to instantiate the Method class." );
+            throw new ArgumentException( nameof(symbol), "Cannot use partial implementation to instantiate the Method class." );
         }
-#endif
     }
 
     [Memo]
