@@ -85,6 +85,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     input.AspectLayers,
                     input.FirstCompilationModel.AssertNotNull(),
                     null,
+                    input.Configuration,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
                     new PipelineContributorSources(
                         input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.OverflowAspectSources ),

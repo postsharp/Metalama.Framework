@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -73,18 +72,22 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         var aspectInstance = result.Value.AspectInstanceResults.Single().AspectInstance;
         var aspectClass = aspectInstance.AspectClass;
 
-        var licenseVerifier = serviceProvider.GetRequiredService<LicenseVerifier>();
-
-        if ( !isComputingPreview && !licenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
+        if ( result.IsSuccessful )
         {
-            diagnosticAdder.Report(
-                LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
-                    aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )
-                        .AssertNotNull( "Live templates should be always applied on a target." )
-                        .GetDiagnosticLocation(),
-                    ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
+            var licenseVerifier = result.Value.Configuration.ServiceProvider.GetService<LicenseVerifier>();
 
-            return default;
+            if ( !isComputingPreview && licenseVerifier != null
+                                     && !licenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
+            {
+                diagnosticAdder.Report(
+                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
+                        aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )
+                            .AssertNotNull( "Live templates should be always applied on a target." )
+                            .GetDiagnosticLocation(),
+                        ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
+
+                return default;
+            }
         }
 
         if ( !result.IsSuccessful )

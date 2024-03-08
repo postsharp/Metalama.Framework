@@ -12,10 +12,8 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Services;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -163,7 +161,10 @@ public sealed class LicenseVerifier : IProjectService
         };
     }
 
-    internal void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
+    internal void VerifyCompilationResult(
+        CompileTimeProject project,
+        IEnumerable<AspectInstanceResult> aspectInstanceResults,
+        UserDiagnosticSink diagnostics )
     {
         // List all aspect classed, that are used.
         var aspectClasses = aspectInstanceResults
@@ -190,7 +191,7 @@ public sealed class LicenseVerifier : IProjectService
         aspectClasses.RemoveWhere( c => typeof(ContractAspect).IsAssignableFrom( c.Type ) );
 
         // All aspects from redistributable libraries are for free.
-        aspectClasses.RemoveWhere( c => c is AspectClass { Project: { } project } && this.IsProjectWithValidRedistributionLicense( project ) );
+        aspectClasses.RemoveWhere( c => c is AspectClass { Project: { } aspectProject } && this.IsProjectWithValidRedistributionLicense( aspectProject ) );
 
         // List remaining aspect classes.
         var consumedAspectClassNames =
@@ -212,14 +213,18 @@ public sealed class LicenseVerifier : IProjectService
         var hasLicenseError = false;
 
         // Check the use of Metalama.Framework.Sdk.
-        if ( compilation.References.Any( r => r.Display?.EndsWith( "metalama.framework.sdk.dll", StringComparison.OrdinalIgnoreCase ) ?? false ) )
+        if ( consumedAspectClassNames.Count > 0 )
         {
-            if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
+            if ( project.ClosureReferencesMetalamaSdk )
             {
-                diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
-            }
+                if ( !this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) )
+                {
+                    Interlocked.Increment( ref this._reportedErrorCount );
+                    diagnostics.Report( LicensingDiagnosticDescriptors.RoslynApiNotAvailable.CreateRoslynDiagnostic( null, default ) );
+                }
 
-            hasLicenseError = true;
+                hasLicenseError = true;
+            }
         }
 
         if ( maxAspectClasses == 0 )

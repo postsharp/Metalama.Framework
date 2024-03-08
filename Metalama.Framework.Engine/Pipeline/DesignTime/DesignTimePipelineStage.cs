@@ -75,6 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     input.AspectLayers,
                     input.FirstCompilationModel.AssertNotNull(),
                     pipelineStepsResult.LastCompilation,
+                    input.Configuration,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
                     new PipelineContributorSources(
                         input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.OverflowAspectSources ),

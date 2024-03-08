@@ -107,6 +107,9 @@ namespace Metalama.Framework.Engine.CompileTime
             => this.ClosureProjects.SelectMany( p => p.Manifest?.OptionTypes ?? Enumerable.Empty<string>() )
                 .ToReadOnlyList();
 
+        [Memo]
+        public bool ClosureReferencesMetalamaSdk => this.ClosureProjects.Any( p => p.Manifest?.ReferencesMetalamaSdk == true );
+
         /// <summary>
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
         /// </summary>
@@ -342,6 +345,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 .Select( t => t.FullName.AssertNotNull() )
                 .ToReadOnlyList();
 
+            // Since this method is used for SDK assemblies, we assume that Metalama SDK is used.
+            const bool referencesMetalamaSdk = true;
+
             // Create a manifest.
             var manifest = new CompileTimeProjectManifest(
                 assemblyIdentity.ToString(),
@@ -357,7 +363,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 null,
                 projectHash,
                 Array.Empty<CompileTimeFileManifest>(),
-                Array.Empty<CompileTimeDiagnosticManifest>() );
+                Array.Empty<CompileTimeDiagnosticManifest>(),
+                referencesMetalamaSdk );
 
             compileTimeProject = new CompileTimeProject(
                 serviceProvider,

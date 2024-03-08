@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             ulong sourceHash,
             IReadOnlyList<CompileTimeFileManifest> files,
             IReadOnlyList<CompileTimeDiagnosticManifest> diagnostics,
+            bool referencesMetalamaSdk,
             string? metalamaVersion = null,
             int manifestVersion = 0 )
         {
@@ -49,6 +50,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             this.SourceHash = sourceHash;
             this.Files = files;
             this.Diagnostics = diagnostics;
+            this.ReferencesMetalamaSdk = referencesMetalamaSdk;
             this.MetalamaVersion = AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
             this.ManifestVersion = manifestVersion == 0 ? CurrentManifestVersion : manifestVersion;
 
@@ -130,6 +132,8 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
         /// Gets the list of diagnostics produced during the compilation.
         /// </summary>
         public IReadOnlyList<CompileTimeDiagnosticManifest>? Diagnostics { get; }
+
+        public bool ReferencesMetalamaSdk { get; }
 
         public static CompileTimeProjectManifest Deserialize( Stream stream )
         {
