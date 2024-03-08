@@ -63,6 +63,13 @@ namespace Metalama.Framework.Engine.Advising
                 this._scope = introduceAttribute.Scope;
             }
 
+            if ( this._scope == IntroductionScope.Target )
+            {
+                this._scope = aspect.TargetDeclaration.GetTarget( sourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
+                    ? IntroductionScope.Instance
+                    : IntroductionScope.Static;
+            }
+
             this.OverrideStrategy = overrideStrategy;
             this._buildAction = buildAction;
             this.Tags = tags;
@@ -114,12 +121,7 @@ namespace Metalama.Framework.Engine.Advising
                     this.Builder.IsStatic = true;
 
                     break;
-
-                case IntroductionScope.Target:
-                    this.Builder.IsStatic = targetDeclaration.IsStatic;
-
-                    break;
-
+                    
                 default:
                     throw new AssertionFailedException( $"Unexpected IntroductionScope: {this._scope}." );
             }
