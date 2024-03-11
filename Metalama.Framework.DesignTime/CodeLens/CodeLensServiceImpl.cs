@@ -136,7 +136,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
 
         var (text, tooltip) = distinctAspectCount switch
         {
-            0 => ("no aspect", "This declaration is not affected by any aspect."),
+            0 => ("0 aspects", "This declaration is not affected by any aspect."),
             1 => ("1 aspect", $"This declaration is affected by the aspect '{distinctAspects.Single()}'."),
             _ => ($"{distinctAspectCount} aspects",
                   $"This declaration is affected by the aspects {string.Join( ", ", distinctAspects.SelectAsReadOnlyList( i => $"'{i}'" ) )}.")
