@@ -338,37 +338,39 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
             AddEntry( aspectInstance.Key, transformationText );
         }
 
-        // Add transformations by execution order.
-        foreach ( var transformation in aspectInstances.SelectMany( i => i.Value ).OrderBy( t => t.Order ) )
+        foreach ( var (aspectInstance, instanceTransformations) in aspectInstances )
         {
-            var aspectInstance = transformation.Advice.AspectInstance;
-
-            var description = MetalamaStringFormatter.Format( transformation.Description );
-
-            AddEntry( aspectInstance, description );
-        }
-
-        foreach ( var aspectInstance in aspectInstances.Where( a => a.Value.Count > 1 ) )
-        {
-            if ( aspectInstance.Key.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId )
+            // Add transformations by execution order.
+            foreach ( var transformation in instanceTransformations.OrderBy( t => t.Order ) )
             {
-                var transformationsOnChildren = aspectInstance.Key.Advice.SelectMany( a => a.Transformations )
-                    .Where(
-                        t => t.TargetDeclaration.TryGetSerializableId( out var transformedDeclarationId )
-                               && transformedDeclarationId != symbolId )
-                    .Select( t => t.TargetDeclaration )
-                    .Distinct()
-                    .ToReadOnlyList();
+                var description = MetalamaStringFormatter.Format( transformation.Description );
 
-                if ( transformationsOnChildren.Count > 0 )
+                AddEntry( aspectInstance, description );
+            }
+
+            // Add child transformations note.
+            if ( instanceTransformations.Count > 1 )
+            {
+                if ( aspectInstance.TargetDeclaration.TryGetSerializableId( out var id ) && id == symbolId )
                 {
-                    var transformationText = transformationsOnChildren.Count switch
-                    {
-                        1 => "(The aspect also transforms 1 child declaration.)",
-                        _ => $"(The aspect also transforms {transformationsOnChildren.Count} child declarations.)"
-                    };
+                    var transformationsOnChildrenCount = aspectInstance.Advice.SelectMany( a => a.Transformations )
+                        .Where(
+                            t => t.TargetDeclaration.TryGetSerializableId( out var transformedDeclarationId )
+                                   && transformedDeclarationId != symbolId )
+                        .Select( t => t.TargetDeclaration )
+                        .Distinct()
+                        .Count();
 
-                    AddEntry( aspectInstance.Key, transformationText );
+                    if ( transformationsOnChildrenCount > 0 )
+                    {
+                        var transformationText = transformationsOnChildrenCount switch
+                        {
+                            1 => "(The aspect also transforms 1 child declaration.)",
+                            _ => $"(The aspect also transforms {transformationsOnChildrenCount} child declarations.)"
+                        };
+
+                        AddEntry( aspectInstance, transformationText );
+                    }
                 }
             }
         }
