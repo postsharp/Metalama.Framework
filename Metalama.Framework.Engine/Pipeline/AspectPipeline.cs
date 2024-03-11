@@ -220,7 +220,10 @@ namespace Metalama.Framework.Engine.Pipeline
 
             // Set NormalizeWhitespace setting for the compilation.
             var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
-            var triviaMatters = !string.IsNullOrWhiteSpace( projectOptions.TransformedFilesOutputPath ) || projectOptions.DebugTransformedCode == true || projectOptions.IsTest;
+
+            var triviaMatters = !string.IsNullOrWhiteSpace( projectOptions.TransformedFilesOutputPath ) || projectOptions.DebugTransformedCode == true
+                                                                                                        || projectOptions.IsTest;
+
             var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
             var preserveTrivia = triviaMatters;
             CompilationContext.SetTriviaHandling( compilation, normalizeWhitespace, preserveTrivia );
@@ -412,7 +415,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 // If there is no aspect in the compilation, don't execute the pipeline.
                 return new AspectPipelineResult(
                     compilation,
-                    pipelineConfiguration.ProjectModel );
+                    pipelineConfiguration.ProjectModel,
+                    pipelineConfiguration );
             }
 
             var contributorSources = this.CreatePipelineContributorSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
@@ -446,9 +450,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 pipelineConfiguration.AspectLayers,
                 compilationModel,
                 compilationModel,
+                pipelineConfiguration,
                 null,
                 contributorSources,
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );
+
+            var allAspects = Enumerable.Empty<AspectInstanceResult>();
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {
@@ -470,6 +477,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 else
                 {
                     pipelineStageResult = stageResult.Value;
+                    allAspects = allAspects.Union( stageResult.Value.AspectInstanceResults );
                 }
             }
 
@@ -484,7 +492,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     var compileTimeProject = pipelineConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
                     var licensingDiagnostics = new UserDiagnosticSink( compileTimeProject );
-                    licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                    licenseVerifier.VerifyCompilationResult( compileTimeProject, allAspects, licensingDiagnostics );
                     pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
                 }
             }

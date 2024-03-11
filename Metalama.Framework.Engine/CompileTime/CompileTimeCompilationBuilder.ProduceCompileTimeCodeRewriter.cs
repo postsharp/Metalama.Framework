@@ -74,6 +74,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public bool FoundCompileTimeCode { get; private set; }
 
+            public bool ReferencesMetalamaSdk { get; private set; }
+
             private SemanticModelProvider RunTimeSemanticModelProvider => this._helper.SemanticModelProvider;
 
             public ProduceCompileTimeCodeRewriter(
@@ -930,16 +932,16 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             success =
                                 this._templateCompiler.TryCompile(
-                                        TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
-                                        this._compileTimeCompilation,
-                                        propertyNode,
-                                        TemplateCompilerSemantics.Default,
-                                        this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                        this._diagnosticAdder,
-                                        this._cancellationToken,
-                                        out _,
-                                        out transformedGetDeclaration,
-                                        out var getterApiVersion );
+                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.GetMethod.AssertNotNull() ),
+                                    this._compileTimeCompilation,
+                                    propertyNode,
+                                    TemplateCompilerSemantics.Default,
+                                    this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedGetDeclaration,
+                                    out var getterApiVersion );
 
                             this.AddToManifest( propertySymbol, getterApiVersion );
                         }
@@ -1257,16 +1259,16 @@ namespace Metalama.Framework.Engine.CompileTime
                         {
                             success =
                                 this._templateCompiler.TryCompile(
-                                      TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
-                                      this._compileTimeCompilation,
-                                      addAccessor,
-                                      TemplateCompilerSemantics.Default,
-                                      this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                      this._diagnosticAdder,
-                                      this._cancellationToken,
-                                      out _,
-                                      out transformedAddDeclaration,
-                                      out var addApiVersion );
+                                    TemplateNameHelper.GetCompiledTemplateName( eventSymbol.AddMethod.AssertNotNull() ),
+                                    this._compileTimeCompilation,
+                                    addAccessor,
+                                    TemplateCompilerSemantics.Default,
+                                    this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedAddDeclaration,
+                                    out var addApiVersion );
 
                             maxApiVersion ??= addApiVersion;
                         }
@@ -1274,17 +1276,17 @@ namespace Metalama.Framework.Engine.CompileTime
                         if ( success )
                         {
                             success =
-                                  this._templateCompiler.TryCompile(
-                                      TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
-                                      this._compileTimeCompilation,
-                                      removeAccessor,
-                                      TemplateCompilerSemantics.Default,
-                                      this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
-                                      this._diagnosticAdder,
-                                      this._cancellationToken,
-                                      out _,
-                                      out transformedRemoveDeclaration,
-                                      out var removeApiVersion );
+                                this._templateCompiler.TryCompile(
+                                    TemplateNameHelper.GetCompiledTemplateName( eventSymbol.RemoveMethod.AssertNotNull() ),
+                                    this._compileTimeCompilation,
+                                    removeAccessor,
+                                    TemplateCompilerSemantics.Default,
+                                    this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ),
+                                    this._diagnosticAdder,
+                                    this._cancellationToken,
+                                    out _,
+                                    out transformedRemoveDeclaration,
+                                    out var removeApiVersion );
 
                             if ( maxApiVersion == null || removeApiVersion > maxApiVersion )
                             {
@@ -1579,19 +1581,26 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken )
-                          && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
-                          !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
-                            && node == memberAccessExpressionSyntax.Name) )
+
+                var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
+
+                // Detect references to Metalama.Framework.Sdk.
+                if ( !this.ReferencesMetalamaSdk
+                     && symbol?.ContainingAssembly?.Name.Equals( "metalama.framework.sdk", StringComparison.OrdinalIgnoreCase ) == true )
                 {
-                    // Fully qualifies simple identifiers.
+                    this.ReferencesMetalamaSdk = true;
+                }
 
-                    var symbol = this.RunTimeSemanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetSymbolInfo( node ).Symbol;
-
+                // Fully qualifies simple identifiers.
+                if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken )
+                     && node is { IsVar: false, Parent: not (QualifiedNameSyntax or AliasQualifiedNameSyntax) } &&
+                     !(node.Parent is MemberAccessExpressionSyntax memberAccessExpressionSyntax
+                       && node == memberAccessExpressionSyntax.Name) )
+                {
                     switch ( symbol )
                     {
                         case INamespaceOrTypeSymbol namespaceOrType:
-                            return this.CreateTypeSyntax(namespaceOrType).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
+                            return this.CreateTypeSyntax( namespaceOrType ).WithTriviaFrom( nodeWithoutPreprocessorDirectives );
 
                         case { IsStatic: true }
                             when node.Parent is not MemberAccessExpressionSyntax
@@ -1606,7 +1615,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                     return MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
-                                            this.CreateTypeSyntax(symbol.ContainingType),
+                                            this.CreateTypeSyntax( symbol.ContainingType ),
                                             IdentifierName( node.Identifier.Text ) )
                                         .WithTriviaFrom( nodeWithoutPreprocessorDirectives );
                             }

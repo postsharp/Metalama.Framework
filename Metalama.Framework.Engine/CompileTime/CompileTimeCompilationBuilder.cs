@@ -214,7 +214,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         CancellationToken cancellationToken,
         out Compilation? compileTimeCompilation,
         out ILocationAnnotationMap? locationAnnotationMap,
-        out TemplateProjectManifest? compilationResultManifest )
+        out TemplateProjectManifest? compilationResultManifest,
+        out bool referencesMetalamaSdk )
     {
         locationAnnotationMap = null;
 
@@ -223,6 +224,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         {
             compileTimeCompilation = null;
             compilationResultManifest = null;
+            referencesMetalamaSdk = false;
 
             return true;
         }
@@ -288,6 +290,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         locationAnnotationMap = templateCompiler.LocationAnnotationMap;
         compilationResultManifest = produceCompileTimeCodeRewriter.GetManifest();
+        referencesMetalamaSdk = produceCompileTimeCodeRewriter.ReferencesMetalamaSdk;
 
         if ( !produceCompileTimeCodeRewriter.Success )
         {
@@ -1039,7 +1042,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                             cancellationToken,
                             out var compileTimeCompilation,
                             out var locationAnnotationMap,
-                            out var compilationResultManifest ) )
+                            out var compilationResultManifest,
+                            out var referencesMetalamaSdk ) )
                     {
                         project = null;
 
@@ -1155,7 +1159,8 @@ internal sealed partial class CompileTimeCompilationBuilder
                             projectLicenseInfo?.RedistributionLicenseKey,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFileManifest( f ) ).ToArray(),
-                            diagnostics.SelectAsArray( d => new CompileTimeDiagnosticManifest( d, sourceFilePathIndexes! ) ) );
+                            diagnostics.SelectAsArray( d => new CompileTimeDiagnosticManifest( d, sourceFilePathIndexes! ) ),
+                            referencesMetalamaSdk );
 
                         project = CompileTimeProject.Create(
                             this._serviceProvider,
