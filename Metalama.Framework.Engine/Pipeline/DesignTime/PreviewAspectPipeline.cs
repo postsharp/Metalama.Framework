@@ -37,6 +37,8 @@ public sealed class PreviewAspectPipeline : AspectPipeline
         AspectPipelineConfiguration configuration,
         TestableCancellationToken cancellationToken )
     {
+        CompilationContext.SetTriviaHandling( compilation.Compilation, normalizeWhitespace: true, preserveTrivia: true );
+
         var result = await this.ExecuteAsync( compilation, diagnostics, configuration, cancellationToken );
 
         if ( result.IsSuccessful )
