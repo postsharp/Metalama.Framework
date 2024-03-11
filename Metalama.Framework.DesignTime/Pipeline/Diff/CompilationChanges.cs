@@ -171,14 +171,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     continue;
                 }
 
-                // At design time, the collection of syntax trees can contain duplicates.
+                // At design time, the collection of syntax trees can contain duplicates,
+                // which may not even have the same text (e.g. one could contain `internal class C`, while the other just `class C`).
                 if ( newTrees.TryGetValue( newSyntaxTree.FilePath, out var existingNewTree ) )
                 {
-                    if ( existingNewTree.SyntaxTree != newSyntaxTree )
-                    {
-                        throw new AssertionFailedException( $"Syntax tree mismatch for '{newSyntaxTree.FilePath}'." );
-                    }
-
                     continue;
                 }
 
