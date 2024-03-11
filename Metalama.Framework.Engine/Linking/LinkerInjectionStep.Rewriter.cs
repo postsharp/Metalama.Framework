@@ -967,10 +967,10 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration );
+                var constructor = (IConstructor) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( constructor );
 
-                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, Array.Empty<StatementSyntax>(), node );
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( constructor, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -991,10 +991,10 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration );
+                var method = (IMethod) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
-                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, Array.Empty<StatementSyntax>(), node );
+                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -1015,10 +1015,10 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration );
+                var method = (IMethod) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
-                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, Array.Empty<StatementSyntax>(), node );
+                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.

@@ -28,6 +28,11 @@ internal sealed partial class LinkerInjectionStep
         public string? ReturnValueVariableName { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether the context was used for any input contract statements.
+        /// </summary>
+        public bool WasUsedForInputContracts { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether the context was used for any output contract statements.
         /// </summary>
         public bool WasUsedForOutputContracts { get; private set; }
@@ -55,6 +60,11 @@ internal sealed partial class LinkerInjectionStep
         public void MarkAsUsedForOutputContracts()
         {
             this.WasUsedForOutputContracts = true;
+        }
+
+        public void MarkAsUsedForInputContracts()
+        {
+            this.WasUsedForInputContracts = true;
         }
     }
 }

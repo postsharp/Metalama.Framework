@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -106,19 +105,16 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         };
 
     protected override ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context )
-        => context.AspectReferenceSyntaxProvider.GetPropertyReference(
-            this.ParentAdvice.AspectLayerId,
-            this.OverriddenDeclaration,
-            AspectReferenceTargetKind.PropertyGetAccessor,
-            context.SyntaxGenerator );
+        => TransformationHelper.CreatePropertyProceedGetExpression(
+            context.AspectReferenceSyntaxProvider, 
+            context.SyntaxGenerationContext, 
+            this.OverriddenDeclaration, 
+            this.ParentAdvice.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
-        => SyntaxFactory.AssignmentExpression(
-            SyntaxKind.SimpleAssignmentExpression,
-            context.AspectReferenceSyntaxProvider.GetPropertyReference(
-                this.ParentAdvice.AspectLayerId,
-                this.OverriddenDeclaration,
-                AspectReferenceTargetKind.PropertySetAccessor,
-                context.SyntaxGenerator ),
-            SyntaxFactory.IdentifierName( "value" ) );
+        => TransformationHelper.CreatePropertyProceedSetExpression(
+            context.AspectReferenceSyntaxProvider,
+            context.SyntaxGenerationContext,
+            this.OverriddenDeclaration,
+            this.ParentAdvice.AspectLayerId );
 }

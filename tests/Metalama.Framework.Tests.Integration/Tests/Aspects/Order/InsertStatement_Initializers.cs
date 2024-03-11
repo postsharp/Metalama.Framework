@@ -14,64 +14,63 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Order.InsertStatement_I
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Order.InsertStatement_Initializers;
 
-[AttributeUsage( AttributeTargets.Parameter | AttributeTargets.ReturnValue )]
-internal class Test1Attribute : Attribute, IAspect<IParameter>
+internal class Test1Attribute : ConstructorAspect
 {
-    public void BuildAspect(IAspectBuilder<IParameter> builder)
+    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
     {
-        var direction = builder.Target.IsReturnParameter ? ContractDirection.Output : ContractDirection.Both;
-        builder.Advice.AddContract(builder.Target, nameof(Validate), direction, args: new { order = 1 });
-        builder.Advice.AddContract(builder.Target, nameof(Validate), direction, args: new { order = 2 });
-    }
-
-    public void BuildEligibility(IEligibilityBuilder<IParameter> builder)
-    {
+        builder.Advice.AddInitializer(builder.Target, nameof(Template), args: new { order = 1 });
+        builder.Advice.AddInitializer(builder.Target, nameof(Template), args: new { order = 2 });
     }
 
     [Template]
-    public void Validate(dynamic? value, [CompileTime] int order)
+    public void Template([CompileTime] int order)
     {
-        Console.WriteLine($"Contract by aspect 1 on {meta.Target.Parameter}, ordinal {order}");
+        Console.WriteLine($"Contract by aspect 1 on {meta.Target.Declaration}, ordinal {order}");
     }
 }
 
-internal class OverrideAttribute : OverrideMethodAspect
+internal class OverrideAttribute : ConstructorAspect
 {
-    public override dynamic? OverrideMethod()
+    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
     {
-        Console.WriteLine($"Override.");
-        return meta.Proceed();
-    }
-}
-
-[AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
-internal class Test2Attribute : Attribute, IAspect<IParameter>
-{
-    public void BuildAspect(IAspectBuilder<IParameter> builder)
-    {
-        var direction = builder.Target.IsReturnParameter ? ContractDirection.Output : ContractDirection.Both;
-        builder.Advice.AddContract(builder.Target, nameof(Validate), direction, args: new { order = 1 });
-        builder.Advice.AddContract(builder.Target, nameof(Validate), direction, args: new { order = 2 });
-    }
-
-    public void BuildEligibility(IEligibilityBuilder<IParameter> builder)
-    {
+        builder.Advice.Override(builder.Target, nameof(Template));
     }
 
     [Template]
-    public void Validate(dynamic? value, [CompileTime] int order)
+    public void Template()
     {
-        Console.WriteLine($"Contract by aspect 2 on {meta.Target.Parameter}, ordinal {order}");
+        Console.WriteLine($"Constructor override.");
+        meta.Proceed();
+    }
+}
+
+internal class Test2Attribute : ConstructorAspect
+{
+    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+    {
+        builder.Advice.AddInitializer(builder.Target, nameof(Template), args: new { order = 1 });
+        builder.Advice.AddInitializer(builder.Target, nameof(Template), args: new { order = 2 });
+    }
+
+    [Template]
+    public void Template([CompileTime] int order)
+    {
+        Console.WriteLine($"Contract by aspect 2 on {meta.Target.Declaration}, ordinal {order}");
     }
 }
 
 // <target>
 internal class Target
 {
-    [return: Test1, Test2]
-    private int NoOverride([Test1, Test2] ref int p1, [Test1, Test2] ref int p2) => 42;
+    [Test1, Test2]
+    public Target()
+    {
+        Console.WriteLine($"Constructor source (no override).");
+    }
 
-    [Override]
-    [return: Test1, Test2]
-    private int Override([Test1, Test2] ref int p1, [Test1, Test2] ref int p2) => 42;
+    [Test1, Override, Test2]
+    public Target(int o)
+    {
+        Console.WriteLine($"Constructor source (with override).");
+    }
 }

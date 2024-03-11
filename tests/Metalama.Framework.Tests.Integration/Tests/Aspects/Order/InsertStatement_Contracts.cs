@@ -31,7 +31,7 @@ internal class Test1Attribute : Attribute, IAspect<IParameter>
     [Template]
     public void Validate(dynamic? value, [CompileTime] int order)
     {
-        Console.WriteLine($"Contract on {value} by aspect 1, ordinal {order}");
+        Console.WriteLine($"[Test1] on {value}, ordinal {order}");
     }
 }
 
@@ -61,7 +61,7 @@ internal class Test2Attribute : Attribute, IAspect<IParameter>
     [Template]
     public void Validate(dynamic? value, [CompileTime] int order)
     {
-        Console.WriteLine($"Contract on {value} by aspect 2, ordinal {order}");
+        Console.WriteLine($"[Test2] on {value}, ordinal {order}");
     }
 }
 

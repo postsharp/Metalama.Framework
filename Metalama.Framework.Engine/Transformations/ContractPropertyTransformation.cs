@@ -66,12 +66,12 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
 
         if ( inputContractBlock != null )
         {
-            statements.Add( new InsertedStatement( inputContractBlock, this.TargetMember.SetMethod.AssertNotNull(), this, InsertedStatementKind.InputContract ) );
+            statements.Add( new InsertedStatement( inputContractBlock, this.TargetMember.SetMethod.AssertNotNull().Parameters[0], this, InsertedStatementKind.InputContract ) );
         }
 
         if ( outputContractBlock != null )
         {
-            statements.Add( new InsertedStatement( outputContractBlock, this.TargetMember.GetMethod.AssertNotNull(), this, InsertedStatementKind.OutputContract ) );
+            statements.Add( new InsertedStatement( outputContractBlock, this.TargetMember.GetMethod.AssertNotNull().ReturnParameter, this, InsertedStatementKind.OutputContract ) );
         }
 
         return statements;

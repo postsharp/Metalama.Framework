@@ -21,7 +21,10 @@ internal class Target
   [NotNull]
   public string Q
   {
-    get => q!;
+    get
+    {
+      return q!;
+    }
     set
     {
       if (value == null)

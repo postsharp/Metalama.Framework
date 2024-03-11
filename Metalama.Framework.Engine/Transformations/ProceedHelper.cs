@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal static class ProceedHelper
 {
-    public static (ExpressionSyntax Syntax, IType Result) CreateProceedExpression(
+    public static (ExpressionSyntax Syntax, IType? Result) CreateProceedExpression(
         SyntaxGenerationContext generationContext,
         ExpressionSyntax invocationExpression,
         TemplateKind selectedTemplateKind,

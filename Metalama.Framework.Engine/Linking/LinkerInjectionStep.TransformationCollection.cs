@@ -39,7 +39,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
-        private readonly ConcurrentDictionary<IDeclaration, List<InsertedStatement>> _insertedStatementsByTargetDeclaration;
+        private readonly ConcurrentDictionary<IMethodBase, List<InsertedStatement>> _insertedStatementsByTargetMethodBase;
 
         private readonly ConcurrentDictionary<IDeclaration, List<InjectedMember>> _injectedMembersByTargetDeclaration;
         private readonly ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
@@ -68,7 +68,7 @@ internal sealed partial class LinkerInjectionStep
             this._symbolMemberLevelTransformations = new();
             this._introductionMemberLevelTransformations = new();
             this._builderToTransformationMap = new();
-            this._insertedStatementsByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
+            this._insertedStatementsByTargetMethodBase = new( finalCompilationModel.Comparers.Default );
             this._injectedMembersByTargetDeclaration = new( finalCompilationModel.Comparers.Default);
             this._introducedParametersByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
             this._lateTypeLevelTransformations = new( finalCompilationModel.Comparers.Default );
@@ -156,11 +156,11 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMember targetMember, IReadOnlyList<InsertedStatement> statements )
+        public void AddInsertedStatements( IMethodBase targetMethod, IReadOnlyList<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
-            var statementList = this._insertedStatementsByTargetDeclaration.GetOrAdd( targetMember, _ => new() );
+            var statementList = this._insertedStatementsByTargetMethodBase.GetOrAdd( targetMethod, _ => new() );
 
             lock ( statementList )
             {
@@ -320,30 +320,18 @@ internal sealed partial class LinkerInjectionStep
 
         internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( InjectedMember injectedMember )
         {
-            return this.GetInjectedEntryStatements( injectedMember.Declaration, injectedMember );
+            return this.GetInjectedEntryStatements( (IMethodBase)injectedMember.Declaration, injectedMember );
         }
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMember sourceMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMethodBase sourceMethodBase )
         {
-            return this.GetInjectedEntryStatements( sourceMember, null );
+            return this.GetInjectedEntryStatements( sourceMethodBase, null );
         }
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IDeclaration targetDeclaration, InjectedMember? targetInjectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMethodBase targetMethodBase, InjectedMember? targetInjectedMember )
         {
             // PERF: Iterating and reversing should be avoided.
-            (var canonicalTarget, var statementFilter) =
-                targetDeclaration switch
-                {
-                    IMethod { MethodKind: Code.MethodKind.PropertyGet } =>
-                        (targetDeclaration.ContainingDeclaration.AssertNotNull(),
-                         static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet }),
-                    IMethod { MethodKind: Code.MethodKind.PropertySet } =>
-                        (targetDeclaration.ContainingDeclaration.AssertNotNull(),
-                         static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertySet }),
-                    _ => (targetDeclaration, (Func<InsertedStatement, bool>?) null),
-                };
-
-            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( canonicalTarget, out var insertedStatements ) )
+            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethodBase, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
@@ -352,8 +340,15 @@ internal sealed partial class LinkerInjectionStep
             MemberLayerIndex? bottomBound;
             MemberLayerIndex? topBound;
 
+            var rootMember =
+                targetMethodBase switch
+                {
+                    IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } propertyAccessor => (IMember) propertyAccessor.ContainingDeclaration.AssertNotNull(),
+                    _ => targetMethodBase,
+                };
+
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
-            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( canonicalTarget, out var injectedMembers ) )
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( rootMember, out var injectedMembers ) )
             {
                 hasInjectedMembers = false;
                 if ( targetInjectedMember == null )
@@ -363,7 +358,7 @@ internal sealed partial class LinkerInjectionStep
                 }
                 else
                 {
-                    throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                    throw new AssertionFailedException( $"Missing injected member for {rootMember}" );
                 }
             }
             else
@@ -382,7 +377,7 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( targetInjectedMemberIndex < 0 )
                     {
-                        throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                        throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
                     }
 
                     bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
@@ -395,7 +390,7 @@ internal sealed partial class LinkerInjectionStep
 
             var statements = new List<StatementSyntax>();
 
-            if ( canonicalTarget is IConstructor )
+            if ( targetMethodBase is IConstructor )
             {
                 if ( (!hasInjectedMembers && targetInjectedMember == null) || (hasInjectedMembers && targetInjectedMember == injectedMembers![^1]) )
                 {
@@ -418,8 +413,7 @@ internal sealed partial class LinkerInjectionStep
                         s =>
                             s.Kind == InsertedStatementKind.InputContract
                             && (bottomBound == null || GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound)
-                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound)
-                            && (statementFilter == null || statementFilter( s )) );
+                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound) );
 
             var orderedInputContractStatements = OrderInputContractStatements( inputContractStatements );
 
@@ -436,25 +430,13 @@ internal sealed partial class LinkerInjectionStep
 
         internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( InjectedMember injectedMember )
         {
-            return this.GetInjectedExitStatements( injectedMember.Declaration, injectedMember );
+            return this.GetInjectedExitStatements( (IMethodBase) injectedMember.Declaration, injectedMember );
         }
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( IDeclaration targetDeclaration, InjectedMember targetInjectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( IMethodBase targetMethodBase, InjectedMember targetInjectedMember )
         {
             // PERF: Iterating and reversing should be avoided.
-            (var canonicalTarget, var statementFilter) =
-                targetDeclaration switch
-                {
-                    IMethod { MethodKind: Code.MethodKind.PropertyGet } =>
-                        (targetDeclaration.ContainingDeclaration.AssertNotNull(),
-                         static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet }),
-                    IMethod { MethodKind: Code.MethodKind.PropertySet } =>
-                        (targetDeclaration.ContainingDeclaration.AssertNotNull(),
-                         static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertySet }),
-                    _ => (targetDeclaration, (Func<InsertedStatement, bool>?) null),
-                };
-
-            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( canonicalTarget, out var insertedStatements ) )
+            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethodBase, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
@@ -462,10 +444,17 @@ internal sealed partial class LinkerInjectionStep
             MemberLayerIndex? bottomBound;
             MemberLayerIndex? topBound;
 
+            var rootMember =
+                targetMethodBase switch
+                {
+                    IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } propertyAccessor => (IMember) propertyAccessor.ContainingDeclaration.AssertNotNull(),
+                    _ => targetMethodBase,
+                };
+
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
-            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( canonicalTarget, out var injectedMembers ) )
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( rootMember, out var injectedMembers ) )
             {
-                throw new AssertionFailedException( $"Missing injected member for {targetDeclaration} (exit statements are not supported on source members)." );
+                throw new AssertionFailedException( $"Missing injected member for {targetMethodBase} (exit statements are not supported on source members)." );
             }
             else
             {
@@ -482,7 +471,7 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( targetInjectedMemberIndex < 0 )
                     {
-                        throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                        throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
                     }
 
                     bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
@@ -502,8 +491,7 @@ internal sealed partial class LinkerInjectionStep
                         s =>
                             s.Kind == InsertedStatementKind.OutputContract
                             && (bottomBound == null || GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound)
-                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound)
-                            && (statementFilter == null || statementFilter( s )) );
+                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound) );
 
             var orderedOutputContractStatements = OrderOutputContractStatements( outputContractStatements );
 
@@ -537,9 +525,7 @@ internal sealed partial class LinkerInjectionStep
             return statements
                 .OrderBy( s => s.ContextDeclaration switch
                     {
-                        IProperty => 0,
                         IParameter { IsReturnParameter: false } parameter => parameter.Index, // Parameters are checked in order they appear in code.
-                        IIndexer indexer => indexer.Parameters.Count, // Indexer value should be checked after parameters.
                         _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
                     } )
                 .ThenByDescending( s => s.Transformation.OrderWithinPipeline )
@@ -553,10 +539,8 @@ internal sealed partial class LinkerInjectionStep
             return statements
                 .OrderBy( s => s.ContextDeclaration switch
                 {
-                    IProperty => 0,
                     IParameter { IsReturnParameter: false } parameter => parameter.Index, // Parameters are checked in order they appear in code.
-                    IIndexer indexer => indexer.Parameters.Count, // Indexer return value should be checked after out/ref parameters.
-                    IParameter { IsReturnParameter: true, ContainingDeclaration: IMethod method } => method.Parameters.Count, // Method return value contracts are ordered after
+                    IParameter { IsReturnParameter: true, ContainingDeclaration: IMethod method } => method.Parameters.Count, // Method return value contracts are ordered after other parameters
                     _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
                 } )
                 .ThenByDescending( s => s.Transformation.OrderWithinPipeline )
