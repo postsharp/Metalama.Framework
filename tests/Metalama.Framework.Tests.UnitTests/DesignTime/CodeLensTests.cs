@@ -185,7 +185,7 @@ public sealed class CodeLensTests : DesignTimeTestBase
 
         var summary2 = await codeLensService.GetCodeLensSummaryAsync( projectKey, c2Id, default );
 
-        Assert.Equal( "no aspect", summary2.Description );
+        Assert.Equal( "0 aspects", summary2.Description );
 
         var details2 = await codeLensService.GetCodeLensDetailsAsync( projectKey, c2Id, default );
 
