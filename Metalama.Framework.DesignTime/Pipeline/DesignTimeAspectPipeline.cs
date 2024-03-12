@@ -77,6 +77,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     // ReSharper disable once InconsistentlySynchronizedField
     internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
+    internal ImmutableArray<PortableExecutableReference> MetadataReferences { get; }
+
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
@@ -84,18 +86,19 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         pipelineFactory,
         projectOptions,
         compilation.GetProjectKey(),
-        compilation.References.OfType<PortableExecutableReference>() ) { }
+        compilation.References.OfType<PortableExecutableReference>().ToImmutableArray() ) { }
 
     public DesignTimeAspectPipeline(
         DesignTimeAspectPipelineFactory pipelineFactory,
         IProjectOptions projectOptions,
         ProjectKey projectKey,
-        IEnumerable<PortableExecutableReference> metadataReferences )
+        ImmutableArray<PortableExecutableReference> metadataReferences )
         : base(
             GetServiceProvider( pipelineFactory.ServiceProvider, projectOptions, metadataReferences ),
             pipelineFactory.Domain )
     {
         this.ProjectKey = projectKey;
+        this.MetadataReferences = metadataReferences;
         this._pipelineFactory = pipelineFactory;
         this._entryPointConsumer = (IDesignTimeEntryPointConsumer?) this.ServiceProvider.Global.Underlying.GetService( typeof(IDesignTimeEntryPointConsumer) );
         this._projectVersionProvider = this.ServiceProvider.Global.GetRequiredService<ProjectVersionProvider>();
@@ -196,7 +199,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private static ServiceProvider<IProjectService> GetServiceProvider(
         ServiceProvider<IGlobalService> serviceProvider,
         IProjectOptions projectOptions,
-        IEnumerable<PortableExecutableReference> metadataReferences )
+        ImmutableArray<PortableExecutableReference> metadataReferences )
     {
         var projectServiceProvider = serviceProvider.WithProjectScopedServices( projectOptions, metadataReferences );
 

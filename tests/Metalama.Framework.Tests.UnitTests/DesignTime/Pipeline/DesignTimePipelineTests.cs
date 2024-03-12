@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
@@ -1364,5 +1365,44 @@ class D{version}
             SyntaxFactory.ParseSyntaxTree( secondFileCode, options, "C.cs" ) );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+    }
+
+    [Fact]
+    public void AssemblyLocatorTest()
+    {
+        // Tests that IAssemblyLocator contains the correct references when project changes.
+
+        using var testContext = this.CreateTestContext();
+
+        var dependencyPath = Path.Combine( testContext.BaseDirectory, "dependency.dll" );
+
+        var dependency = CreateCSharpCompilation( code: new Dictionary<string, string>(), "dependency" );
+        var emitResult = dependency.Emit( dependencyPath );
+
+        Assert.True( emitResult.Success );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var compilation = CreateCSharpCompilation( code: new Dictionary<string, string>() );
+
+        var pipeline1 = factory.CreatePipeline( compilation );
+
+        var pipeline2 = factory.CreatePipeline( compilation );
+
+        Assert.Same( pipeline1, pipeline2 );
+
+        var assemblyLocator1 = pipeline1.ServiceProvider.GetRequiredService<IAssemblyLocator>();
+
+        Assert.False( assemblyLocator1.TryFindAssembly( new( "dependency" ), out _ ) );
+
+        var dependencyReference = MetadataReference.CreateFromFile( dependencyPath );
+        compilation = compilation.AddReferences( dependencyReference );
+
+        var pipeline3 = factory.CreatePipeline( compilation );
+
+        var assemblyLocator2 = pipeline3.ServiceProvider.GetRequiredService<IAssemblyLocator>();
+
+        Assert.True( assemblyLocator2.TryFindAssembly( new( "dependency" ), out var foundReference ) );
+        Assert.Same( dependencyReference, foundReference );
     }
 }

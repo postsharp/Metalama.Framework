@@ -137,39 +137,79 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
             return null;
         }
 
-        // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
-        // is called only once, and we prefer a single instance for the simplicity of debugging. 
+        var referencesArray = references.ToImmutableArray();
 
-        if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out var pipeline ) )
+        bool TryGetPipeline( out DesignTimeAspectPipeline? pipeline )
         {
-            // TODO: we must validate that the project options and metadata references are still identical to those cached, otherwise we should create a new pipeline.
+            if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
+            {
+                var pipelineOptions = pipeline.ServiceProvider.GetRequiredService<IProjectOptions>();
+
+                static bool ReferencesAreEqual( ImmutableArray<PortableExecutableReference> x, ImmutableArray<PortableExecutableReference> y )
+                {
+                    if ( x.Equals( y ) )
+                    {
+                        return true;
+                    }
+
+                    var xArray = x.ToArray();
+                    var yArray = y.ToArray();
+
+                    if ( xArray.Length != yArray.Length )
+                    {
+                        return false;
+                    }
+
+                    // Also ensure none of the paths are null, because we cannot reliably compare those.
+                    return xArray.Zip( yArray, ( x, y ) => (x, y) ).All( pair => pair.x.FilePath == pair.y.FilePath && pair.x.FilePath != null );
+                }
+
+                if ( ProjectOptionsEqualityComparer.Equals( x: projectOptions, y: pipelineOptions )
+                     && ReferencesAreEqual( referencesArray, pipeline.MetadataReferences ) )
+                {
+                    return true;
+                }
+                else
+                {
+                    this._pipelinesByProjectKey.TryRemove( projectKey, out _ );
+                    pipeline = null;
+
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        if ( TryGetPipeline( out var pipeline ) )
+        {
             return pipeline;
         }
-        else
+
+        // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
+        // is called only once, and we prefer a single instance for the simplicity of debugging.
+        lock ( this._pipelinesByProjectKey )
         {
-            lock ( this._pipelinesByProjectKey )
+            if ( TryGetPipeline( out pipeline ) )
             {
-                if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    return pipeline;
-                }
-
-                pipeline = new DesignTimeAspectPipeline( this, projectOptions, projectKey, references );
-
-                if ( !this._pipelinesByProjectKey.TryAdd( projectKey, pipeline ) )
-                {
-                    throw new AssertionFailedException( $"The pipeline '{projectKey}' has already been created." );
-                }
-
-                foreach ( var listener in this._newPipelineListeners )
-                {
-                    listener.TrySetResult( pipeline );
-                }
+                cancellationToken.ThrowIfCancellationRequested();
 
                 return pipeline;
             }
+
+            pipeline = new DesignTimeAspectPipeline( this, projectOptions, projectKey, referencesArray );
+
+            if ( !this._pipelinesByProjectKey.TryAdd( projectKey, pipeline ) )
+            {
+                throw new AssertionFailedException( $"The pipeline '{projectKey}' has already been created." );
+            }
+
+            foreach ( var listener in this._newPipelineListeners )
+            {
+                listener.TrySetResult( pipeline );
+            }
+
+            return pipeline;
         }
     }
 

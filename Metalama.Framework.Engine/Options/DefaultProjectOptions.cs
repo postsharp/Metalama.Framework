@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
 using System.Collections.Immutable;
 using System.IO;
 
@@ -48,7 +47,7 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? TargetFramework => "net6.0";
 
-    public virtual string? TargetFrameworkMoniker => throw new NotSupportedException();
+    public virtual string? TargetFrameworkMoniker => null;
 
     public virtual string? Configuration => "Debug";
 
