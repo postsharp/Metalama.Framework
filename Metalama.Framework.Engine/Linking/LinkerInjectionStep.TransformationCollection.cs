@@ -46,6 +46,8 @@ internal sealed partial class LinkerInjectionStep
 
         private readonly ConcurrentDictionary<INamedType, LateTypeLevelTransformations> _lateTypeLevelTransformations;
 
+        private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
+
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
 
         public IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> BuilderToTransformationMap => this._builderToTransformationMap;
@@ -54,6 +56,8 @@ internal sealed partial class LinkerInjectionStep
             => this._introducedParametersByTargetDeclaration;
 
         public IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> LateTypeLevelTransformations => this._lateTypeLevelTransformations;
+
+        public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
@@ -72,6 +76,7 @@ internal sealed partial class LinkerInjectionStep
             this._injectedMembersByTargetDeclaration = new( finalCompilationModel.Comparers.Default);
             this._introducedParametersByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
             this._lateTypeLevelTransformations = new( finalCompilationModel.Comparers.Default );
+            this._transformationsCausingAuxiliaryOverrides = new();
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )
@@ -294,6 +299,14 @@ internal sealed partial class LinkerInjectionStep
             var wasAdded = this._builderToTransformationMap.TryAdd( declarationBuilder, introduceDeclarationTransformation );
 
             Invariant.Assert( wasAdded );
+        }
+
+        public void AddTransformationCausingAuxiliaryOverride( ITransformation causalTransformation )
+        {
+            lock ( this._transformationsCausingAuxiliaryOverrides )
+            {
+                this._transformationsCausingAuxiliaryOverrides.Add( causalTransformation );
+            }
         }
 
         public bool TryGetIntroduceDeclarationTransformation(

@@ -99,7 +99,7 @@ internal sealed partial class LinkerInjectionStep
                 default );
         }
 
-        public MemberDeclarationSyntax GetAuxiliaryOutputContractMember(IMember member, CompilationModel compilationModel, AspectLayerId aspectLayerId, string? returnVariableName )
+        public MemberDeclarationSyntax GetAuxiliaryContractMember(IMember member, CompilationModel compilationModel, AspectLayerId aspectLayerId, string? returnVariableName )
         {
             switch ( member )
             {

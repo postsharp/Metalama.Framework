@@ -49,6 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             IReadOnlyCollection<InjectedMember> injectedMembers,
             IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
             IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> introducedParametersByTargetDeclaration,
+            ISet<ITransformation> transformationsCausingAuxiliaryOverrides,
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
@@ -108,10 +109,16 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( injectedMember.Transformation is IInsertStatementTransformation insertStatementTransformation)
+                if ( injectedMember.Transformation != null && transformationsCausingAuxiliaryOverrides.Contains( injectedMember.Transformation ) )
                 {
-                    // These are auxiliary overrides created as a result of insert statement. We treat them as normal overrides.
-                    var list = overriddenDeclarations.GetOrAdd( insertStatementTransformation.TargetMember, _ => new List<ISymbol>() );
+                    var overriddenMember = injectedMember.Transformation switch
+                    {
+                        IInsertStatementTransformation insertMember => insertMember.TargetMember,
+                        _ => throw new AssertionFailedException( $"Unsupported transformation {injectedMember.Transformation}."),
+                    };
+
+                    // These are auxiliary overrides created as a result of another transformation.
+                    var list = overriddenDeclarations.GetOrAdd( overriddenMember, _ => new List<ISymbol>() );
 
                     lock ( list )
                     {

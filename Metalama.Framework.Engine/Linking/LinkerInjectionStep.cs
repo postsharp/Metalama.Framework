@@ -168,10 +168,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             if ( RequiresAuxiliaryMember(pair.Key, pair.Value) )
             {
+                pair.Value.Complete();
+
+                transformationCollection.AddTransformationCausingAuxiliaryOverride( pair.Value.OriginTransformation );
+
                 auxiliaryMemberTransformations
                     .GetOrAdd( pair.Key, _ => new() )
                     .InjectAuxiliaryContractMember(
-                        pair.Value.AssertNotNull().OriginTransformation,
+                        pair.Value.OriginTransformation,
                         pair.Value.ReturnValueVariableName );
             }
         }
@@ -278,6 +282,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             transformationCollection.InjectedMembers,
             transformationCollection.BuilderToTransformationMap,
             transformationCollection.IntroducedParametersByTargetDeclaration,
+            transformationCollection.TransformationsCausingAuxiliaryOverrides,
             this._concurrentTaskRunner,
             cancellationToken );
 
@@ -588,10 +593,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // Auxiliary member is needed for output contracts
             if ( RequiresAuxiliaryMember( overriddenMember, insertStatementContext ) )
             {
+                insertStatementContext.Complete();
+
+                transformationCollection.AddTransformationCausingAuxiliaryOverride( insertStatementContext.OriginTransformation );
+
                 auxiliaryMemberTransformations
                     .GetOrAdd( overriddenMember, _ => new() )
                     .InjectAuxiliaryContractMember(
-                        insertStatementContext.AssertNotNull().OriginTransformation,
+                        insertStatementContext.OriginTransformation,
                         insertStatementContext.ReturnValueVariableName );
             }
         }
@@ -880,7 +889,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             }
         }
 
-        foreach ( var outputContractAuxiliaryMember in transformations.AuxiliaryContractMembers )
+        foreach ( var auxiliaryContractMember in transformations.AuxiliaryContractMembers )
         {
             // Having a record in this list means that there is an output contract, which requires a trivial body that will act as a receiver of contracts.
             // If there is no output contract, we don't get here at all and all input contracts are injected into the preceding override or source.
@@ -890,14 +899,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // <output_contracts>
             // return returnValue;
 
-            var aspectLayerId = outputContractAuxiliaryMember.OriginTransformation.ParentAdvice.AspectLayerId;
-            var compilationModel = (CompilationModel)outputContractAuxiliaryMember.OriginTransformation.ParentAdvice.SourceCompilation;
+            var aspectLayerId = auxiliaryContractMember.OriginTransformation.ParentAdvice.AspectLayerId;
+            var compilationModel = (CompilationModel)auxiliaryContractMember.OriginTransformation.ParentAdvice.SourceCompilation;
 
             transformationCollection.AddInjectedMember(
                 new InjectedMember(
-                    outputContractAuxiliaryMember.OriginTransformation,
+                    auxiliaryContractMember.OriginTransformation,
                     member.DeclarationKind,
-                    auxiliaryMemberFactory.GetAuxiliaryOutputContractMember( member, compilationModel, aspectLayerId, outputContractAuxiliaryMember.ReturnVariableName ),
+                    auxiliaryMemberFactory.GetAuxiliaryContractMember( member, compilationModel, aspectLayerId, auxiliaryContractMember.ReturnVariableName ),
                     aspectLayerId,
                     InjectedMemberSemantic.AuxiliaryBody,
                     member ) );

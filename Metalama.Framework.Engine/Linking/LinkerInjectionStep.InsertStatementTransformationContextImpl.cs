@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
+using System;
 
 #if DEBUG
 #endif
@@ -65,6 +66,18 @@ internal sealed partial class LinkerInjectionStep
         public void MarkAsUsedForInputContracts()
         {
             this.WasUsedForInputContracts = true;
+        }
+
+        internal void Complete()
+        {
+            if ( this.WasUsedForOutputContracts )
+            {
+                // Allocate return value name if there was any output contract.
+                // This is to have the return variable allocated even though we may not use it in some cases.
+                // Doing this later would cause the variable name order to be strange.
+
+                _ = this.GetReturnValueVariableName();
+            }
         }
     }
 }
