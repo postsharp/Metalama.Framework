@@ -329,8 +329,13 @@ namespace Metalama.Framework.Engine.CodeModel
                 { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
                     syntaxReferences.All(
                         sr =>
-                            sr.GetSyntax() is BasePropertyDeclarationSyntax { AccessorList: { } } propertyDecl
-                            && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) ),
+                            sr.GetSyntax() switch
+                            {
+                                BasePropertyDeclarationSyntax { AccessorList: { } } propertyDecl when
+                                    propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) => true,
+                                ParameterSyntax parameter => true,
+                                _ => false,
+                            } ),
                 { GetMethod: { } getMethod } => getMethod.IsCompilerGenerated(),
                 { SetMethod: { } setMethod } => setMethod.IsCompilerGenerated(),
                 _ => null

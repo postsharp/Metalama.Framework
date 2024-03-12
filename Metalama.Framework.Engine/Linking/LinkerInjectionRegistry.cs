@@ -117,8 +117,16 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException( $"Unsupported transformation {injectedMember.Transformation}."),
                     };
 
+                    var rootMember =
+                        overriddenMember switch
+                        {
+                            IMethod { ContainingDeclaration: IProperty property } => property,
+                            IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                            _ => overriddenMember,
+                        };
+
                     // These are auxiliary overrides created as a result of another transformation.
-                    var list = overriddenDeclarations.GetOrAdd( overriddenMember, _ => new List<ISymbol>() );
+                    var list = overriddenDeclarations.GetOrAdd( rootMember, _ => new List<ISymbol>() );
 
                     lock ( list )
                     {
@@ -170,6 +178,9 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var declaration = value.Key;
                 var overrides = value.Value;
+
+                // Overrides are only supported for root type members, i.e. not for accessors.
+                Invariant.Assert( declaration is not { ContainingDeclaration: IMember } );
 
                 var overrideTargetSymbol = GetOverrideTargetSymbol( declaration ).AssertNotNull();
 

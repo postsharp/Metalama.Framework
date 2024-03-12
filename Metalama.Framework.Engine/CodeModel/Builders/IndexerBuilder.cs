@@ -6,27 +6,19 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerImpl
+internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder, IIndexerImpl
 {
-    private IType _type;
-
-    public bool HasInitOnlySetter { get; private set; }
 
     public ParameterBuilderList Parameters { get; } = new();
 
-    public RefKind RefKind { get; set; }
-
-    public Writeability Writeability
+    public override Writeability Writeability
     {
         get
             => this switch
@@ -57,28 +49,9 @@ internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerI
         }
     }
 
-    public IType Type
-    {
-        get => this._type;
-        set
-        {
-            this.CheckNotFrozen();
-
-            this._type = this.Translate( value );
-        }
-    }
-
     IParameterList IHasParameters.Parameters => this.Parameters;
 
     IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
-
-    public IMethodBuilder? GetMethod { get; }
-
-    IMethod? IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
-
-    IMethod? IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
-
-    public IMethodBuilder? SetMethod { get; }
 
     public IIndexer? OverriddenIndexer { get; set; }
 
@@ -107,51 +80,11 @@ internal sealed class IndexerBuilder : MemberBuilder, IIndexerBuilder, IIndexerI
         INamedType targetType,
         bool hasGetter,
         bool hasSetter )
-        : base( targetType, "this[]", advice )
+        : base( advice, targetType, "this[]", hasGetter, hasSetter, false, false )
     {
         Invariant.Assert( hasGetter || hasSetter );
 
-        this._type = targetType.Compilation.GetCompilationModel().Cache.SystemObjectType;
-
-        if ( hasGetter )
-        {
-            this.GetMethod = new AccessorBuilder( this, MethodKind.PropertyGet, false );
-        }
-
-        if ( hasSetter )
-        {
-            this.SetMethod = new AccessorBuilder( this, MethodKind.PropertySet, false );
-        }
-
         this.HasInitOnlySetter = false;
-    }
-
-    public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
-
-    public IEnumerable<IMethod> Accessors
-    {
-        get
-        {
-            if ( this.GetMethod != null )
-            {
-                yield return this.GetMethod;
-            }
-
-            if ( this.SetMethod != null )
-            {
-                yield return this.SetMethod;
-            }
-        }
-    }
-
-    public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
-
-    public override void Freeze()
-    {
-        base.Freeze();
-
-        ((DeclarationBuilder?) this.GetMethod)?.Freeze();
-        ((DeclarationBuilder?) this.SetMethod)?.Freeze();
     }
 
     public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = default )

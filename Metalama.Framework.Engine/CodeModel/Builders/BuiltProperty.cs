@@ -7,37 +7,18 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltProperty : BuiltMember, IPropertyImpl
+internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
-    public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( builder, compilation )
     {
-        this.PropertyBuilder = builder;
     }
 
-    public PropertyBuilder PropertyBuilder { get; }
-
-    protected override MemberBuilder MemberBuilder => this.PropertyBuilder;
-
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
-
-    public RefKind RefKind => this.PropertyBuilder.RefKind;
-
-    public Writeability Writeability => this.PropertyBuilder.Writeability;
+    public PropertyBuilder PropertyBuilder => (PropertyBuilder)this.MemberBuilder;
 
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
-
-    [Memo]
-    public IType Type => this.Compilation.Factory.GetIType( this.PropertyBuilder.Type );
-
-    [Memo]
-    public IMethod? GetMethod => this.PropertyBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.GetMethod ) : null;
-
-    [Memo]
-    public IMethod? SetMethod => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
 
     [Memo]
     public IProperty? OverriddenProperty => this.Compilation.Factory.GetDeclaration( this.PropertyBuilder.OverriddenProperty );
@@ -63,12 +44,6 @@ internal sealed class BuiltProperty : BuiltMember, IPropertyImpl
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => this.PropertyBuilder.ToTypedExpressionSyntax( syntaxGenerationContext );
-
-    public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
-
-    public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
-
-    public IEnumerable<IMethod> Accessors => this.PropertyBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 }

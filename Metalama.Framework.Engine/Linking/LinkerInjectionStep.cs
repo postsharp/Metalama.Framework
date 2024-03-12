@@ -23,7 +23,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -189,6 +188,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             var transformations = transformationPair.Value;
 
             this.IndexAuxiliaryMemberTransformations(
+                input.CompilationModel,
                 transformationCollection,
                 aspectReferenceSyntaxProvider,
                 injectionNameProvider,
@@ -622,108 +622,90 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         switch ( insertStatementTransformation.TargetMember )
         {
-            case MethodBase methodBase:
+            case IPropertyOrIndexer propertyOrIndexer:
                 {
-                    var primaryDeclaration = methodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
+                    SyntaxNode primaryDeclaration;
+                    SyntaxGenerationContext syntaxGenerationContext;
 
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+                    switch ( propertyOrIndexer)
+                    {
+                        case PropertyOrIndexer sourcePropertyOrIndexer:
+                            primaryDeclaration = sourcePropertyOrIndexer.GetPrimaryDeclarationSyntax().AssertNotNull();
+                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+                            break;
+
+                        default:
+                            var propertyOrIndexerBuilder = propertyOrIndexer as PropertyOrIndexerBuilder
+                                ?? (PropertyOrIndexerBuilder) ((BuiltPropertyOrIndexer) insertStatementTransformation.TargetMember).Builder;
+
+                            var positionInSyntaxTree = GetSyntaxTreePosition( propertyOrIndexerBuilder.ToInsertPosition() );
+
+                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                                propertyOrIndexerBuilder.PrimarySyntaxTree.AssertNotNull(),
+                                positionInSyntaxTree );
+
+                            propertyOrIndexer = propertyOrIndexerBuilder;
+
+                            break;
+                    }
+
+                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+
+                    if ( propertyOrIndexer.GetMethod != null )
+                    {
+                        transformationCollection.AddInsertedStatements(
+                            propertyOrIndexer.GetMethod,
+                            insertedStatements
+                            .Where( s =>
+                                s.ContextDeclaration.IsContainedIn( propertyOrIndexer.GetMethod )
+                                || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter && parameter.ContainingDeclaration == indexer) )
+                            .ToList() );
+                    }
+
+                    if ( propertyOrIndexer.SetMethod != null )
+                    {
+                        transformationCollection.AddInsertedStatements(
+                            propertyOrIndexer.SetMethod,
+                            insertedStatements
+                            .Where( s =>
+                                s.ContextDeclaration.IsContainedIn( propertyOrIndexer.SetMethod )
+                                || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter && parameter.ContainingDeclaration == indexer) )
+                            .ToList() );
+                    }
+
+                    break;
+                }
+
+            case IMethodBase methodBase:
+                {
+                    SyntaxNode primaryDeclaration;
+                    SyntaxGenerationContext syntaxGenerationContext;
+
+                    switch ( methodBase )
+                    {
+                        case MethodBase sourceMethodBase:
+                            primaryDeclaration = sourceMethodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
+                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+                            break;
+
+                        default:
+                            var methodBaseBuilder = methodBase as MethodBaseBuilder
+                                ?? (MethodBaseBuilder) ((BuiltMethodBase) insertStatementTransformation.TargetMember).Builder;
+
+                            var positionInSyntaxTree = GetSyntaxTreePosition( methodBaseBuilder.ToInsertPosition() );
+
+                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                                methodBaseBuilder.PrimarySyntaxTree.AssertNotNull(),
+                                positionInSyntaxTree );
+
+                            methodBase = methodBaseBuilder;
+
+                            break;
+                    }
 
                     var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
 
                     transformationCollection.AddInsertedStatements( methodBase, insertedStatements );
-
-                    break;
-                }
-
-            case IConstructor { } builtOrBuilderConstructor:
-                {
-                    var constructorBuilder = insertStatementTransformation.TargetMember as ConstructorBuilder
-                                             ?? ((BuiltConstructor) insertStatementTransformation.TargetMember).ConstructorBuilder;
-
-                    Invariant.Assert( !((IConstructor) constructorBuilder).IsPrimary );
-
-                    var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.ToInsertPosition() );
-
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                        constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
-                        positionInSyntaxTree );
-
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
-
-                    transformationCollection.AddInsertedStatements( constructorBuilder, insertedStatements );
-
-                    break;
-                }
-
-            case IMethod { } builtOrBuilderMethod:
-                {
-                    var methodBuilder = insertStatementTransformation.TargetMember as MethodBuilder
-                                        ?? (MethodBuilder) ((BuiltMethod) insertStatementTransformation.TargetMember).Builder;
-
-                    var positionInSyntaxTree = GetSyntaxTreePosition( methodBuilder.ToInsertPosition() );
-
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                        methodBuilder.PrimarySyntaxTree.AssertNotNull(),
-                        positionInSyntaxTree );
-
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
-
-                    transformationCollection.AddInsertedStatements( methodBuilder, insertedStatements );
-
-                    break;
-                }
-
-            case Property property:
-                {
-                    var primaryDeclaration = property.GetPrimaryDeclarationSyntax().AssertNotNull();
-
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
-
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
-
-                    if ( property.GetMethod != null )
-                    {
-                        transformationCollection.AddInsertedStatements( 
-                            property.GetMethod, 
-                            insertedStatements.Where( s => s.ContextDeclaration.IsContainedIn( property.GetMethod ) ).ToList() );
-                    }
-
-                    if ( property.SetMethod != null )
-                    {
-                        transformationCollection.AddInsertedStatements( 
-                            property.SetMethod, 
-                            insertedStatements.Where( s => s.ContextDeclaration.IsContainedIn( property.SetMethod ) ).ToList() );
-                    }
-
-                    break;
-                }
-
-            case IProperty { } builtOrBuilderProperty:
-                {
-                    var propertyBuilder = insertStatementTransformation.TargetMember as PropertyBuilder
-                                          ?? (PropertyBuilder) ((BuiltProperty) insertStatementTransformation.TargetMember).Builder;
-
-                    var positionInSyntaxTree = GetSyntaxTreePosition( propertyBuilder.ToInsertPosition() );
-
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                        propertyBuilder.PrimarySyntaxTree.AssertNotNull(),
-                        positionInSyntaxTree );
-
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
-
-                    if ( propertyBuilder.GetMethod != null )
-                    {
-                        transformationCollection.AddInsertedStatements(
-                            propertyBuilder.GetMethod,
-                            insertedStatements.Where( s => s.ContextDeclaration.IsContainedIn( propertyBuilder.GetMethod ) ).ToList() );
-                    }
-
-                    if ( propertyBuilder.SetMethod != null )
-                    {
-                        transformationCollection.AddInsertedStatements(
-                            propertyBuilder.SetMethod,
-                            insertedStatements.Where( s => s.ContextDeclaration.IsContainedIn( propertyBuilder.SetMethod ) ).ToList() );
-                    }
 
                     break;
                 }
@@ -792,7 +774,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 #if DEBUG
             foreach ( var statement in statements )
             {
-                    if ( statement.Statement is BlockSyntax block )
+                if ( statement.Statement is BlockSyntax block )
                 {
                     if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
                     {
@@ -860,6 +842,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private void IndexAuxiliaryMemberTransformations( 
+        CompilationModel finalCompilationModel,
         TransformationCollection transformationCollection,
         AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
         LinkerInjectionNameProvider injectionNameProvider,
@@ -867,7 +850,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         IMember member,
         AuxiliaryMemberTransformations transformations )
     {
-        var auxiliaryMemberFactory = new AuxiliaryMemberFactory( this._compilationContext, aspectReferenceSyntaxProvider, injectionNameProvider, injectionHelperProvider, transformationCollection );
+        var auxiliaryMemberFactory = new AuxiliaryMemberFactory( this._compilationContext, finalCompilationModel, aspectReferenceSyntaxProvider, injectionNameProvider, injectionHelperProvider, transformationCollection );
 
         if ( transformations.ShouldInjectAuxiliarySourceMember )
         {
@@ -899,17 +882,25 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // <output_contracts>
             // return returnValue;
 
-            var aspectLayerId = auxiliaryContractMember.OriginTransformation.ParentAdvice.AspectLayerId;
+            var advice = auxiliaryContractMember.OriginTransformation.ParentAdvice;
             var compilationModel = (CompilationModel)auxiliaryContractMember.OriginTransformation.ParentAdvice.SourceCompilation;
+
+            var rootMember =
+                member switch
+                {
+                    IMethod { ContainingDeclaration: IProperty property } => property,
+                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                    _ => member,
+                };
 
             transformationCollection.AddInjectedMember(
                 new InjectedMember(
                     auxiliaryContractMember.OriginTransformation,
                     member.DeclarationKind,
-                    auxiliaryMemberFactory.GetAuxiliaryContractMember( member, compilationModel, aspectLayerId, auxiliaryContractMember.ReturnVariableName ),
-                    aspectLayerId,
+                    auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, compilationModel, advice, auxiliaryContractMember.ReturnVariableName ),
+                    advice.AspectLayerId,
                     InjectedMemberSemantic.AuxiliaryBody,
-                    member ) );
+                    rootMember ) );
         }
     }
 
@@ -918,7 +909,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // TODO: This is not optimal for automatic properties, because we wany the auxiliary member only for the initial block of transformations before the first override.
         return
             insertStatementContext.WasUsedForOutputContracts
-            || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
+            || (member is IFieldOrProperty { IsAutoPropertyOrField: true } or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
                 && (insertStatementContext.WasUsedForInputContracts || insertStatementContext.WasUsedForOutputContracts));
     }
 }

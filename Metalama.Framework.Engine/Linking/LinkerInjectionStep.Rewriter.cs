@@ -500,21 +500,21 @@ internal sealed partial class LinkerInjectionStep
 
                             break;
 
-                        case IProperty property:
-                            if ( property.GetMethod != null )
+                        case IPropertyOrIndexer propertyOrIndexer:
+                            if ( propertyOrIndexer.GetMethod != null )
                             {
-                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements( property.GetMethod, injectedMember );
-                                var getExitStatements = this._transformationCollection.GetInjectedExitStatements( property.GetMethod, injectedMember );
+                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements( propertyOrIndexer.GetMethod, injectedMember );
+                                var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod, injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( property.GetMethod, getEntryStatements, getExitStatements, injectedNode );
+                                injectedNode = InjectStatementsIntoMemberDeclaration( propertyOrIndexer.GetMethod, getEntryStatements, getExitStatements, injectedNode );
                             }
 
-                            if ( property.SetMethod != null )
+                            if ( propertyOrIndexer.SetMethod != null )
                             {
-                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements( property.SetMethod, injectedMember );
-                                var setExitStatements = this._transformationCollection.GetInjectedExitStatements( property.SetMethod, injectedMember );
+                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements( propertyOrIndexer.SetMethod, injectedMember );
+                                var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod, injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( property.SetMethod, setEntryStatements, setExitStatements, injectedNode );
+                                injectedNode = InjectStatementsIntoMemberDeclaration( propertyOrIndexer.SetMethod, setEntryStatements, setExitStatements, injectedNode );
                             }
 
                             break;
@@ -627,11 +627,24 @@ internal sealed partial class LinkerInjectionStep
                                         SyntaxKind.GetAccessorDeclaration,
                                         ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
-                case PropertyDeclarationSyntax { AccessorList: { } accessorList } property:
+                case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
+
+                    return
+                        indexer.PartialUpdate(
+                            expressionBody: null,
+                            semicolonToken: default( SyntaxToken ),
+                            accessorList: AccessorList(
+                                SingletonList(
+                                    AccessorDeclaration(
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+
+                case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
                     Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } );
 
                     return
-                        property.WithAccessorList(
+                        propertyOrIndexer.WithAccessorList(
                             accessorList.WithAccessors(
                                 List(
                                     accessorList.Accessors.SelectAsArray(
@@ -737,6 +750,7 @@ internal sealed partial class LinkerInjectionStep
                 ConstructorDeclarationSyntax constructor => Singleton( this.VisitConstructorDeclarationCore( constructor ) ),
                 MethodDeclarationSyntax method => Singleton( this.VisitMethodDeclarationCore( method ) ),
                 PropertyDeclarationSyntax property => Singleton( this.VisitPropertyDeclarationCore( property ) ),
+                IndexerDeclarationSyntax indexer => Singleton( this.VisitIndexerDeclarationCore( indexer ) ),
                 OperatorDeclarationSyntax @operator => Singleton( this.VisitOperatorDeclarationCore( @operator ) ),
                 EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
                 FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
@@ -1104,6 +1118,39 @@ internal sealed partial class LinkerInjectionStep
             {
                 var existingFlags = node.GetLinkerDeclarationFlags();
                 node = node.WithLinkerDeclarationFlags( existingFlags | flags );
+            }
+
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
+
+            return node;
+        }
+
+        private IndexerDeclarationSyntax VisitIndexerDeclarationCore( IndexerDeclarationSyntax node )
+        {
+            var originalNode = node;
+
+            node = (IndexerDeclarationSyntax) this.VisitIndexerDeclaration( node )!;
+
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+
+            if ( symbol != null )
+            {
+                var declaration = (IPropertyOrIndexer) this._compilation.GetDeclaration( symbol );
+
+                if ( symbol.GetMethod != null )
+                {
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.GetMethod.AssertNotNull() );
+                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.GetMethod, entryStatements, Array.Empty<StatementSyntax>(), node );
+                }
+
+                if ( symbol.SetMethod != null )
+                {
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
+                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.SetMethod, entryStatements, Array.Empty<StatementSyntax>(), node );
+                }
             }
 
             // Rewrite attributes.

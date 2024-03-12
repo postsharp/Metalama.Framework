@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
@@ -11,11 +12,10 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 #if DEBUG
 #endif
@@ -27,19 +27,22 @@ internal sealed partial class LinkerInjectionStep
     private class AuxiliaryMemberFactory
     {
         private readonly CompilationContext _compilationContext;
+        private readonly CompilationModel _finalCompilationModel;
         private readonly AspectReferenceSyntaxProvider _aspectReferenceSyntaxProvider;
         private readonly LinkerInjectionNameProvider _injectionNameProvider;
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly TransformationCollection _transformationCollection;
 
         public AuxiliaryMemberFactory(
-            CompilationContext compilationContext, 
+            CompilationContext compilationContext,
+            CompilationModel finalCompilationModel,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             LinkerInjectionNameProvider linkerInjectionNameProvider,
             LinkerInjectionHelperProvider injectionHelperProvider, 
             TransformationCollection transformationCollection )
         {
             this._compilationContext = compilationContext;
+            this._finalCompilationModel = finalCompilationModel;
             this._aspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this._injectionNameProvider = linkerInjectionNameProvider;
             this._injectionHelperProvider = injectionHelperProvider;
@@ -99,16 +102,16 @@ internal sealed partial class LinkerInjectionStep
                 default );
         }
 
-        public MemberDeclarationSyntax GetAuxiliaryContractMember(IMember member, CompilationModel compilationModel, AspectLayerId aspectLayerId, string? returnVariableName )
+        public MemberDeclarationSyntax GetAuxiliaryContractMember(IMember member, CompilationModel compilationModel, Advice advice, string? returnVariableName )
         {
             switch ( member )
             {
                 case IMethod method:
-                    return this.GetAuxiliaryOutputContractMethod(method, compilationModel, aspectLayerId, returnVariableName.AssertNotNull() );
+                    return this.GetAuxiliaryOutputContractMethod(method, compilationModel, advice.AspectLayerId, returnVariableName.AssertNotNull() );
                 case IProperty property:
-                    return this.GetAuxiliaryOutputContractProperty( property, compilationModel, aspectLayerId, returnVariableName );
+                    return this.GetAuxiliaryOutputContractProperty( property, compilationModel, advice.AspectLayerId, returnVariableName );
                 case IIndexer indexer:
-                    return this.GetAuxiliaryOutputContractIndexer( indexer, compilationModel, aspectLayerId, returnVariableName.AssertNotNull() );
+                    return this.GetAuxiliaryOutputContractIndexer( indexer, compilationModel, advice, returnVariableName.AssertNotNull() );
                 default:
                     throw new AssertionFailedException($"Unsupported kind: {member.DeclarationKind}");
             }
@@ -326,9 +329,119 @@ internal sealed partial class LinkerInjectionStep
                     null );
         }
 
-        private MemberDeclarationSyntax GetAuxiliaryOutputContractIndexer( IIndexer indexer, CompilationModel compilationModel, AspectLayerId aspectLayerId, string returnVariableName )
+        private MemberDeclarationSyntax GetAuxiliaryOutputContractIndexer( IIndexer indexer, CompilationModel compilationModel, Advice advice, string returnVariableName )
         {
-            throw new NotImplementedException();
+            var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
+            var syntaxGenerationContext =
+                primaryDeclaration != null
+                ? this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration )
+                : this._compilationContext.GetSyntaxGenerationContext( indexer.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+            // TODO: Should return expression body when there is no variable, but expression body inliners do not work yet.
+            var getAccessorBody =
+                indexer.GetMethod != null
+                ? returnVariableName != null
+                    ? Block(
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                IdentifierName(
+                                    Identifier(
+                                        TriviaList(),
+                                        SyntaxKind.VarKeyword,
+                                        "var",
+                                        "var",
+                                        TriviaList( ElasticSpace ) ) ),
+                                SingletonSeparatedList(
+                                    VariableDeclarator(
+                                        Identifier( returnVariableName ),
+                                        null,
+                                        EqualsValueClause(
+                                            this._aspectReferenceSyntaxProvider.GetIndexerReference(
+                                                advice.AspectLayerId,
+                                                indexer,
+                                                AspectReferenceTargetKind.PropertyGetAccessor,
+                                                syntaxGenerationContext.SyntaxGenerator ) ) ) ) ) ),
+                        ReturnStatement(
+                            TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
+                            IdentifierName( returnVariableName ),
+                            Token( SyntaxKind.SemicolonToken ) ) )
+                    : Block(
+                        ReturnStatement(
+                            TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
+                            TransformationHelper.CreateIndexerProceedGetExpression(
+                                this._aspectReferenceSyntaxProvider,
+                                syntaxGenerationContext,
+                                indexer,
+                                advice.AspectLayerId ),
+                            Token( SyntaxKind.SemicolonToken ) ) )
+                : null;
+
+            var setAccessorDeclarationKind = (indexer.IsStatic, indexer.Writeability) switch
+            {
+                (true, not Writeability.None ) => SyntaxKind.SetAccessorDeclaration,
+                (false, Writeability.ConstructorOnly ) =>
+                    syntaxGenerationContext.SupportsInitAccessors ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+                (false, Writeability.InitOnly ) => SyntaxKind.InitAccessorDeclaration,
+                (false, Writeability.All ) => SyntaxKind.SetAccessorDeclaration,
+                _ => SyntaxKind.None
+            };
+
+            // TODO: Should return expression body, but expression body inliners do not work yet.
+            var setAccessorBody =
+                indexer.SetMethod != null
+                ? Block(
+                    ExpressionStatement(
+                        TransformationHelper.CreateIndexerProceedSetExpression(
+                            this._aspectReferenceSyntaxProvider,
+                            syntaxGenerationContext,
+                            indexer,
+                            advice.AspectLayerId ) ) )
+                : null;
+
+            var modifiers = indexer
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
+                .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+
+            return
+                IndexerDeclaration(
+                    List<AttributeListSyntax>(),
+                    modifiers,
+                    syntaxGenerationContext.SyntaxGenerator.IndexerType( indexer ).WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                    null,
+                    Token(SyntaxKind.ThisKeyword),
+                    TransformationHelper.GetIndexerOverrideParameterList(
+                            this._finalCompilationModel,
+                            syntaxGenerationContext,
+                            indexer,
+                            this._injectionNameProvider.GetAuxiliaryType( advice.Aspect, indexer ) ),
+                    AccessorList(
+                        List(
+                            new[]
+                                {
+                                    getAccessorBody != null
+                                        ? AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            Token(SyntaxKind.GetKeyword),
+                                            getAccessorBody is BlockSyntax getBlock ?getBlock : default,
+                                            default,
+                                            default )
+                                        : null,
+                                    setAccessorBody != null
+                                        ? AccessorDeclaration(
+                                            setAccessorDeclarationKind,
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration ? Token(SyntaxKind.SetKeyword) : Token(SyntaxKind.InitKeyword),
+                                            setAccessorBody is BlockSyntax setBlock ?setBlock : default,
+                                            default,
+                                            default )
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) ),
+                    null,
+                    default );
         }
     }
 }

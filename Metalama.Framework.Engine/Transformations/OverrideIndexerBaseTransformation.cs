@@ -52,7 +52,11 @@ namespace Metalama.Framework.Engine.Transformations
                         context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                         null,
                         Token( SyntaxKind.ThisKeyword ),
-                        this.GetParameterList( context ),
+                        TransformationHelper.GetIndexerOverrideParameterList(
+                            context.Compilation,
+                            context.SyntaxGenerationContext,
+                            this.OverriddenDeclaration,
+                            context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration ) ),
                         AccessorList(
                             List(
                                 new[]
@@ -83,14 +87,6 @@ namespace Metalama.Framework.Engine.Transformations
             return overrides;
         }
 
-        private BracketedParameterListSyntax GetParameterList( MemberInjectionContext context )
-        {
-            var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, removeDefaultValues: true );
-            var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration );
-
-            return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName ) );
-        }
-
         protected SyntaxUserExpression CreateProceedDynamicExpression( MemberInjectionContext context, IMethod accessor, TemplateKind templateKind )
             => accessor.MethodKind switch
             {
@@ -106,20 +102,17 @@ namespace Metalama.Framework.Engine.Transformations
             };
 
         protected override ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context )
-            => context.AspectReferenceSyntaxProvider.GetIndexerReference(
-                this.ParentAdvice.AspectLayerId,
-                this.OverriddenDeclaration,
-                AspectReferenceTargetKind.PropertyGetAccessor,
-                context.SyntaxGenerator );
+            => TransformationHelper.CreateIndexerProceedGetExpression( 
+                context.AspectReferenceSyntaxProvider, 
+                context.SyntaxGenerationContext, 
+                this.OverriddenDeclaration, 
+                this.ParentAdvice.AspectLayerId );
 
         protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
-            => AssignmentExpression(
-                SyntaxKind.SimpleAssignmentExpression,
-                context.AspectReferenceSyntaxProvider.GetIndexerReference(
-                    this.ParentAdvice.AspectLayerId,
-                    this.OverriddenDeclaration,
-                    AspectReferenceTargetKind.PropertySetAccessor,
-                    context.SyntaxGenerator ),
-                IdentifierName( "value" ) );
+            => TransformationHelper.CreateIndexerProceedSetExpression(
+                context.AspectReferenceSyntaxProvider,
+                context.SyntaxGenerationContext,
+                this.OverriddenDeclaration,
+                this.ParentAdvice.AspectLayerId );
     }
 }

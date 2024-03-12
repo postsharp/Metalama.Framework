@@ -81,9 +81,25 @@ internal sealed partial class LinkerInjectionStep
 
         public void AddInjectedMember( InjectedMember injectedMember )
         {
+            this.AddInjectedMember( injectedMember.Declaration.ToInsertPosition(), injectedMember );
+        }
+
+        public void AddInjectedMembers( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
+        {
+            foreach ( var injectedMember in injectedMembers )
+            {
+                this.AddInjectedMember( injectMemberTransformation.InsertPosition, injectedMember );
+            }
+        }
+
+        private void AddInjectedMember( InsertPosition insertPosition, InjectedMember injectedMember )
+        {
+            // Injected member should always be root type member (not an accessor).
+            Invariant.Assert( injectedMember.Declaration is not { ContainingDeclaration: IMember } );
+
             this._injectedMembers.Add( injectedMember );
 
-            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( injectedMember.Declaration.ToInsertPosition(), _ => new List<InjectedMember>() );
+            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => new List<InjectedMember>() );
 
             lock ( nodes )
             {
@@ -96,29 +112,6 @@ internal sealed partial class LinkerInjectionStep
             lock ( declarationInjectedMembers )
             {
                 declarationInjectedMembers.Add( injectedMember );
-            }
-        }
-
-        public void AddInjectedMembers( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
-        {
-            foreach ( var injectedMember in injectedMembers )
-            {
-                this._injectedMembers.Add( injectedMember );
-
-                var nodes = this._injectedMembersByInsertPosition.GetOrAdd( injectMemberTransformation.InsertPosition, _ => new List<InjectedMember>() );
-
-                lock ( nodes )
-                {
-                    nodes.Add( injectedMember );
-                }
-
-                var declarationInjectedMembers =
-                    this._injectedMembersByTargetDeclaration.GetOrAdd( injectedMember.Declaration, _ => new List<InjectedMember>() );
-
-                lock ( declarationInjectedMembers )
-                {
-                    declarationInjectedMembers.Add( injectedMember );
-                }
             }
         }
 
@@ -356,8 +349,9 @@ internal sealed partial class LinkerInjectionStep
             var rootMember =
                 targetMethodBase switch
                 {
-                    IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } propertyAccessor => (IMember) propertyAccessor.ContainingDeclaration.AssertNotNull(),
-                    _ => targetMethodBase,
+                    IMethod { ContainingDeclaration: IProperty property } => property,
+                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                    _ => (IMember) targetMethodBase,
                 };
 
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
@@ -460,8 +454,9 @@ internal sealed partial class LinkerInjectionStep
             var rootMember =
                 targetMethodBase switch
                 {
-                    IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } propertyAccessor => (IMember) propertyAccessor.ContainingDeclaration.AssertNotNull(),
-                    _ => targetMethodBase,
+                    IMethod { ContainingDeclaration: IProperty property } => property,
+                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                    _ => (IMember) targetMethodBase,
                 };
 
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
