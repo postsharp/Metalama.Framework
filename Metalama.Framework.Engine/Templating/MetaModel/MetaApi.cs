@@ -81,7 +81,18 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public ContractDirection ContractDirection => this._contractDirection ?? throw this.CreateInvalidOperationException( nameof(this.ContractDirection), nameof(Framework.Aspects.ContractDirection) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
-            => (this._common.Staticity, this._type, this.Declaration) switch
+        {
+            Exception CreateException()
+            {
+                var explanation = this.Declaration is IParameter parameter
+                    ? (FormattableString)$"the target parameter is contained in a static {parameter.DeclaringMember.DeclarationKind}"
+                    : $"the target {this.Declaration.DeclarationKind} is static";
+
+                return TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
+                (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind, explanation) );
+            }
+
+            return (this._common.Staticity, this._type, this.Declaration) switch
             {
                 (_, null, _) => throw this.CreateInvalidOperationException( expressionName ),
 
@@ -91,17 +102,16 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                         linkerAnnotation ),
 
                 (MetaApiStaticity.AlwaysStatic, _, _)
-                    => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                        (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
+                    => throw CreateException(),
 
-                (MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false })
+                (MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false } or IParameter { DeclaringMember.IsStatic: false })
                     => new ThisInstanceUserReceiver(
                         this.Type,
                         linkerAnnotation ),
 
-                _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+                _ => throw CreateException()
             };
+        }
 
         public IMetaTarget Target => this;
 

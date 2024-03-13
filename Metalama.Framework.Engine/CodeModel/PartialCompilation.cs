@@ -267,6 +267,15 @@ namespace Metalama.Framework.Engine.CodeModel
             var trees = ImmutableHashSet.CreateBuilder<SyntaxTree>();
             var derivedTypesBuilder = new DerivedTypeIndex.Builder( compilationContext );
 
+            void AddTree( SyntaxTree newTree )
+            {
+                // At design time, the collection of syntax trees can contain duplicates.
+                if ( !trees.Any( t => t.FilePath == newTree.FilePath ) )
+                {
+                    trees.Add( newTree );
+                }
+            }
+
             void AddTypeRecursive( INamedTypeSymbol type )
             {
                 if ( type is IErrorTypeSymbol )
@@ -292,7 +301,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Find relevant syntax trees
                     foreach ( var syntaxReference in type.DeclaringSyntaxReferences )
                     {
-                        trees.Add( syntaxReference.SyntaxTree );
+                        AddTree( syntaxReference.SyntaxTree );
                     }
 
                     // Add base types recursively.
@@ -321,7 +330,7 @@ namespace Metalama.Framework.Engine.CodeModel
             foreach ( var syntaxTree in syntaxTrees )
             {
                 // We need to add the SyntaxTree even if it does not contain any type.
-                trees.Add( syntaxTree );
+                AddTree( syntaxTree );
 
                 var semanticModel = semanticModelProvider.GetSemanticModel( syntaxTree );
 

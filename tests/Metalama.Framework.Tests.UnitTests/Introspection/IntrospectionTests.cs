@@ -155,4 +155,58 @@ class MyClass
         Assert.False( compilerOutput.HasMetalamaSucceeded );
         Assert.NotEmpty( compilerOutput.Diagnostics );
     }
+
+    [Fact]
+    public async Task Options()
+    {
+        const string code = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Code.DeclarationBuilders;
+            using Metalama.Framework.Options;
+
+            public class Options : IHierarchicalOptions<IDeclaration>
+            {
+                public string? Path { get; set; }
+
+                public IHierarchicalOptions GetDefaultOptions(OptionsInitializationContext context) => new Options { Path = "Start" };
+
+                public object ApplyChanges(object changes, in ApplyChangesContext context)
+                {
+                    var other = (Options)changes;
+
+                    return new Options { Path = $"{this.Path}->{other.Path}" };
+                }
+            }
+
+            class Aspect : TypeAspect
+            {
+                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                {
+                    base.BuildAspect(builder);
+
+                    var options = builder.Target.Enhancements().GetOptions<Options>();
+                }
+            }
+
+            [Aspect]
+            class Target;
+            """;
+
+        using var testContext = this.CreateTestContext();
+        var compilation = testContext.CreateCompilationModel( code );
+
+        var compiler = new IntrospectionCompiler( testContext.ServiceProvider, testContext.Domain );
+        var compilerOutput = await compiler.CompileAsync( compilation );
+
+        Assert.True( compilerOutput.HasMetalamaSucceeded );
+        Assert.Empty( compilerOutput.Diagnostics );
+        var aspectInstances = compilerOutput.AspectInstances;
+        Assert.Single( aspectInstances );
+        Assert.Empty( aspectInstances[0].Diagnostics );
+        Assert.Empty( aspectInstances[0].Advice );
+        var aspectClass = compilerOutput.AspectClasses.Single( x => x.ShortName == "Aspect" );
+        Assert.Same( aspectInstances[0], aspectClass.Instances[0] );
+        Assert.Same( aspectClass, aspectInstances[0].AspectClass );
+    }
 }

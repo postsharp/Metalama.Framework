@@ -29,7 +29,7 @@ public enum AdviceOutcome
     New,
 
     /// <summary>
-    /// There was a conflict and the advice was ignored.
+    /// The advice was ignored, possibly because of a conflict.
     /// </summary>
     Ignore,
 

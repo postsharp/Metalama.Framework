@@ -36,6 +36,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     input.AspectLayers,
                     input.FirstCompilationModel.AssertNotNull(),
                     pipelineStepsResult.LastCompilation,
+                    input.Configuration,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ),
                     input.ContributorSources with
                     {

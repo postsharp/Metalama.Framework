@@ -1330,4 +1330,39 @@ class D{version}
         Assert.True( factory.TryExecute( testContext.ProjectOptions, updatedCompilation, default, out var updatedResults ) );
         Assert.Contains( updatedResults.GetAllDiagnostics(), d => d.GetMessage( CultureInfo.InvariantCulture ).Contains( "Option='THE_UPDATED_VALUE'" ) );
     }
+
+    [Fact]
+    public void SameFileTwiceTest()
+    {
+        // This tests a situation that happens in VS for some reason when a new C# file is added to a project.
+
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string> { ["Empty.cs"] = string.Empty };
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var compilation = CreateCSharpCompilation( code );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+
+        var firstFileCode = """
+            class C
+            {
+            }
+            """;
+
+        var secondFileCode = """
+            internal class C
+            {
+            }
+            """;
+
+        var options = compilation.SyntaxTrees[0].Options;
+        compilation = compilation.AddSyntaxTrees(
+            SyntaxFactory.ParseSyntaxTree( firstFileCode, options, "C.cs" ),
+            SyntaxFactory.ParseSyntaxTree( secondFileCode, options, "C.cs" ) );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+    }
 }
