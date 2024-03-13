@@ -30,11 +30,13 @@ internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSym
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
                 (int) this.Kind );
 
-    public IntermediateSymbolSemantic<TSymbol> ToTyped<TSymbol>() where TSymbol : ISymbol => new( (TSymbol) this.Symbol, this.Kind );
+    public IntermediateSymbolSemantic<TSymbol> ToTyped<TSymbol>() 
+        where TSymbol : ISymbol => new( (TSymbol) this.Symbol, this.Kind );
 
     public IntermediateSymbolSemantic WithSymbol( ISymbol symbol ) => new( symbol, this.Kind );
 
-    public IntermediateSymbolSemantic<TSymbol> WithSymbol<TSymbol>( TSymbol symbol ) where TSymbol : ISymbol => new( symbol, this.Kind );
+    public IntermediateSymbolSemantic<TSymbol> WithSymbol<TSymbol>( TSymbol symbol ) 
+        where TSymbol : ISymbol => new( symbol, this.Kind );
 
     public override string ToString()
         =>
