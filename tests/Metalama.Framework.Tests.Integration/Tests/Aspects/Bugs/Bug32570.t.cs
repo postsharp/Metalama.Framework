@@ -2,8 +2,8 @@ public class TargetType
 {
   public int Foo(int x)
   {
-    global::System.Int32 returnValue;
     global::System.Console.WriteLine("Validate x");
+    global::System.Int32 returnValue;
     global::System.Console.WriteLine("Overridden");
     Console.WriteLine("Original");
     returnValue = x;

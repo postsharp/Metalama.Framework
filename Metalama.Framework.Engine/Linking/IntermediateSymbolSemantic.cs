@@ -83,10 +83,8 @@ namespace Metalama.Framework.Engine.Linking
                 (byte) this.Kind );
         }
 
-        public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )
-        {
-            return new IntermediateSymbolSemantic( value.Symbol, value.Kind );
-        }
+        public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value ) 
+            => new IntermediateSymbolSemantic( value.Symbol, value.Kind );
 
         public override string ToString()
         {

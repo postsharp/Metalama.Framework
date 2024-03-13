@@ -6,8 +6,7 @@ public record SomeRecord(int X, int Y, string Z)
   {
     get
     {
-      global::System.String returnValue;
-      returnValue = this._z;
+      var returnValue = this._z;
       global::System.Console.WriteLine("Aspect");
       return returnValue;
     }

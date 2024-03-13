@@ -17,4 +17,8 @@ internal class Target : ITarget
       this._p = value;
     }
   }
+  public Target()
+  {
+    this.P = "42";
+  }
 }

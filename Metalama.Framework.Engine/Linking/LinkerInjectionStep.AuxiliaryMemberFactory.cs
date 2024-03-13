@@ -17,9 +17,6 @@ using System.Threading.Tasks;
 using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-#if DEBUG
-#endif
-
 namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
@@ -28,6 +25,7 @@ internal sealed partial class LinkerInjectionStep
     {
         private readonly CompilationContext _compilationContext;
         private readonly CompilationModel _finalCompilationModel;
+        private readonly LexicalScopeFactory _lexicalScopeFactory;
         private readonly AspectReferenceSyntaxProvider _aspectReferenceSyntaxProvider;
         private readonly LinkerInjectionNameProvider _injectionNameProvider;
         private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
@@ -36,6 +34,7 @@ internal sealed partial class LinkerInjectionStep
         public AuxiliaryMemberFactory(
             CompilationContext compilationContext,
             CompilationModel finalCompilationModel,
+            LexicalScopeFactory lexicalScopeFactory,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             LinkerInjectionNameProvider linkerInjectionNameProvider,
             LinkerInjectionHelperProvider injectionHelperProvider, 
@@ -43,6 +42,7 @@ internal sealed partial class LinkerInjectionStep
         {
             this._compilationContext = compilationContext;
             this._finalCompilationModel = finalCompilationModel;
+            this._lexicalScopeFactory = lexicalScopeFactory;
             this._aspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this._injectionNameProvider = linkerInjectionNameProvider;
             this._injectionHelperProvider = injectionHelperProvider;
@@ -83,8 +83,9 @@ internal sealed partial class LinkerInjectionStep
 
             return ConstructorDeclaration(
                 List<AttributeListSyntax>(),
-                constructor.GetSyntaxModifierList( ModifierCategories.Unsafe )
-                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
+                constructor
+                    .GetSyntaxModifierList( ModifierCategories.Unsafe )
+                    .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                 Identifier( constructor.DeclaringType.Name ),
                 parameters,
                 ConstructorInitializer(
@@ -107,17 +108,17 @@ internal sealed partial class LinkerInjectionStep
             switch ( member )
             {
                 case IMethod method:
-                    return this.GetAuxiliaryOutputContractMethod(method, compilationModel, advice.AspectLayerId, returnVariableName.AssertNotNull() );
+                    return this.GetAuxiliaryContractMethod(method, compilationModel, advice.AspectLayerId, returnVariableName );
                 case IProperty property:
-                    return this.GetAuxiliaryOutputContractProperty( property, compilationModel, advice.AspectLayerId, returnVariableName );
+                    return this.GetAuxiliaryContractProperty( property, compilationModel, advice.AspectLayerId, returnVariableName );
                 case IIndexer indexer:
-                    return this.GetAuxiliaryOutputContractIndexer( indexer, compilationModel, advice, returnVariableName.AssertNotNull() );
+                    return this.GetAuxiliaryContractIndexer( indexer, compilationModel, advice, returnVariableName.AssertNotNull() );
                 default:
                     throw new AssertionFailedException($"Unsupported kind: {member.DeclarationKind}");
             }
         }
 
-        private MemberDeclarationSyntax GetAuxiliaryOutputContractMethod( IMethod method, CompilationModel compilationModel, AspectLayerId aspectLayerId, string returnVariableName )
+        private MemberDeclarationSyntax GetAuxiliaryContractMethod( IMethod method, CompilationModel compilationModel, AspectLayerId aspectLayerId, string? returnVariableName )
         {
             var primaryDeclaration = method.GetPrimaryDeclarationSyntax();
             var syntaxGenerationContext =
@@ -137,34 +138,41 @@ internal sealed partial class LinkerInjectionStep
                            method.Parameters.SelectAsReadOnlyList(
                                p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) );
 
-            var (isAsync, emulatedTemplateKind) =
-                (asyncInfo, iteratorInfo) switch
-                {
-                    (_, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable } ) => (true, TemplateKind.IAsyncEnumerable),
-                    ({ IsAsync: true }, _ ) => (true, TemplateKind.Default),
-                    _ => (false, TemplateKind.Default)
-                };
+            var (useStateMachine, emulatedTemplateKind) = (returnVariableName != null, asyncInfo, iteratorInfo) switch
+            {
+                (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable } ) => (
+                    false, TemplateKind.IEnumerable),
+                (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator } ) => (
+                    false, TemplateKind.IEnumerator),
+                (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable } ) => (false, TemplateKind.IAsyncEnumerable),
+                (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerator } ) => (false, TemplateKind.IAsyncEnumerator),
+                (false, { IsAsync: true }, _ ) when method.ReturnType.Is( Code.SpecialType.Void ) => (true, TemplateKind.Default),
+                (false, { IsAsync: true }, _ ) => (false, TemplateKind.Async),
+                (true, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable } ) => (true, TemplateKind.IAsyncEnumerable),
+                (true, { IsAsync: true }, _ ) => (true, TemplateKind.Default),
+                _ => (false, TemplateKind.Default),
+            };
 
             var proceedExpression = ProceedHelper.CreateProceedExpression( syntaxGenerationContext, invocationExpression, emulatedTemplateKind, method ).Syntax;
 
             var modifiers = method
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async | ModifierCategories.Unsafe )
-                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+                .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             TypeSyntax? returnType = null;
             var isVoidReturning = method.GetAsyncInfo().ResultType.Is( Code.SpecialType.Void );
 
             if ( !method.IsAsync )
             {
-                if ( isAsync )
+                if ( useStateMachine )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
-                    modifiers = modifiers.Add( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AsyncKeyword ) );
+                    modifiers = modifiers.Add( TokenWithTrailingSpace( SyntaxKind.AsyncKeyword ) );
                 }
             }
             else
             {
-                if ( !isAsync )
+                if ( !useStateMachine )
                 {
                     // If the template is not async but the overridden declaration is, we have to remove the async modifier.
                     modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
@@ -179,33 +187,59 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
-            returnType ??= syntaxGenerationContext.SyntaxGenerator.Type( method.ReturnType.GetSymbol() );
+            BlockSyntax body;
 
-            var body =
-                isVoidReturning
-                ? Block( ExpressionStatement( proceedExpression ) )
-                : Block(
+            if ( returnVariableName != null && !isVoidReturning )
+            {
+                if ( emulatedTemplateKind is TemplateKind.IEnumerable or TemplateKind.IAsyncEnumerable )
+                {
+                    var returnItemName = this._lexicalScopeFactory.GetLexicalScope( method ).GetUniqueIdentifier( "returnItem" );
+                    body = Block(
+                        CreateLocalVariableDeclaration( returnVariableName ),
+                        CreateEnumerableEpilogue( returnItemName, IdentifierName( returnVariableName ) ) );
+                }
+                else if ( iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator
+                         or EnumerableKind.IAsyncEnumerator )
+                {
+                    body = Block(
+                        CreateLocalVariableDeclaration( returnVariableName ),
+                        CreateEnumeratorEpilogue( IdentifierName( returnVariableName ) ) );
+                }
+                else
+                {
+                    body = Block(
+                        CreateLocalVariableDeclaration( returnVariableName ),
+                        ReturnStatement(
+                            TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
+                            IdentifierName( returnVariableName ),
+                            Token( SyntaxKind.SemicolonToken ) ) );
+                }
+
+                StatementSyntax CreateLocalVariableDeclaration( string variableName ) =>
                     LocalDeclarationStatement(
                         VariableDeclaration(
-                            IdentifierName(
-                                Identifier(
-                                    TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "var",
-                                    "var",
-                                    TriviaList( ElasticSpace ) ) ),
+                            VarIdentifier(),
                             SingletonSeparatedList(
                                 VariableDeclarator(
-                                    Identifier( returnVariableName ),
+                                    Identifier( variableName ),
                                     null,
-                                    EqualsValueClause( proceedExpression ) ) ) ) ),
+                                    EqualsValueClause( proceedExpression ) ) ) ) );
+            }
+            else if ( !isVoidReturning )
+            {
+                body = Block(
                     ReturnStatement(
                         TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                        IdentifierName( returnVariableName ),
+                        proceedExpression,
                         Token( SyntaxKind.SemicolonToken ) ) );
+            }
+            else
+            {
+                body = Block( ExpressionStatement( proceedExpression ) );
+            }
 
-            // TODO: Output contract marker (linker helper).
-            // TODO: Epilogues.
+            returnType ??= syntaxGenerationContext.SyntaxGenerator.Type( method.ReturnType.GetSymbol() );
+
             return MethodDeclaration(
                 List<AttributeListSyntax>(),
                 modifiers,
@@ -217,9 +251,69 @@ internal sealed partial class LinkerInjectionStep
                 syntaxGenerationContext.SyntaxGenerator.ConstraintClauses( method ),
                 body,
                 null );
+
+            StatementSyntax CreateEnumerableEpilogue( string itemName, ExpressionSyntax enumerableExpression )
+            {
+                return
+                    ForEachStatement(
+                        List<AttributeListSyntax>(),
+                        method.IsAsync
+                            ? Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) )
+                            : default,
+                        Token( SyntaxKind.ForEachKeyword ),
+                        Token( SyntaxKind.OpenParenToken ),
+                        VarIdentifier(),
+                        Identifier( itemName ),
+                        Token( TriviaList( ElasticSpace ), SyntaxKind.InKeyword, TriviaList( ElasticSpace ) ),
+                        enumerableExpression,
+                        Token( SyntaxKind.CloseParenToken ),
+                        Block(
+                            YieldStatement(
+                                SyntaxKind.YieldReturnStatement,
+                                Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                IdentifierName( itemName ),
+                                Token( SyntaxKind.SemicolonToken ) ) ) );
+            }
+
+            StatementSyntax CreateEnumeratorEpilogue( ExpressionSyntax enumeratorExpression )
+            {
+                ExpressionSyntax moveNextExpression =
+                    method.IsAsync
+                        ? AwaitExpression(
+                            Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                            InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    enumeratorExpression,
+                                    IdentifierName( "MoveNextAsync" ) ) ) )
+                        : InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                enumeratorExpression,
+                                IdentifierName( "MoveNext" ) ) );
+
+                return
+                    WhileStatement(
+                        List<AttributeListSyntax>(),
+                        Token( TriviaList(), SyntaxKind.WhileKeyword, TriviaList() ),
+                        Token( TriviaList(), SyntaxKind.OpenParenToken, TriviaList() ),
+                        moveNextExpression,
+                        Token( TriviaList(), SyntaxKind.CloseParenToken, TriviaList() ),
+                        Block(
+                            YieldStatement(
+                                SyntaxKind.YieldReturnStatement,
+                                Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    enumeratorExpression,
+                                    IdentifierName( "Current" ) ),
+                                Token( SyntaxKind.SemicolonToken ) ) ) );
+            }
         }
 
-        private MemberDeclarationSyntax GetAuxiliaryOutputContractProperty( IProperty property, CompilationModel compilationModel, AspectLayerId aspectLayerId, string? returnVariableName )
+        private MemberDeclarationSyntax GetAuxiliaryContractProperty( IProperty property, CompilationModel compilationModel, AspectLayerId aspectLayerId, string? returnVariableName )
         {
             var primaryDeclaration = property.GetPrimaryDeclarationSyntax();
             var syntaxGenerationContext =
@@ -234,13 +328,7 @@ internal sealed partial class LinkerInjectionStep
                     ? Block(
                         LocalDeclarationStatement(
                             VariableDeclaration(
-                                IdentifierName(
-                                    Identifier(
-                                        TriviaList(),
-                                        SyntaxKind.VarKeyword,
-                                        "var",
-                                        "var",
-                                        TriviaList( ElasticSpace ) ) ),
+                                VarIdentifier(),
                                 SingletonSeparatedList(
                                     VariableDeclarator(
                                         Identifier( returnVariableName ),
@@ -329,7 +417,7 @@ internal sealed partial class LinkerInjectionStep
                     null );
         }
 
-        private MemberDeclarationSyntax GetAuxiliaryOutputContractIndexer( IIndexer indexer, CompilationModel compilationModel, Advice advice, string returnVariableName )
+        private MemberDeclarationSyntax GetAuxiliaryContractIndexer( IIndexer indexer, CompilationModel compilationModel, Advice advice, string returnVariableName )
         {
             var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
             var syntaxGenerationContext =
@@ -344,13 +432,7 @@ internal sealed partial class LinkerInjectionStep
                     ? Block(
                         LocalDeclarationStatement(
                             VariableDeclaration(
-                                IdentifierName(
-                                    Identifier(
-                                        TriviaList(),
-                                        SyntaxKind.VarKeyword,
-                                        "var",
-                                        "var",
-                                        TriviaList( ElasticSpace ) ) ),
+                                VarIdentifier(),
                                 SingletonSeparatedList(
                                     VariableDeclarator(
                                         Identifier( returnVariableName ),

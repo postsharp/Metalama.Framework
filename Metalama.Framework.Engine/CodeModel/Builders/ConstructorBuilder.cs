@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -19,7 +18,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public override IMember? OverriddenMember => null;
 
-    public override bool IsExplicitInterfaceImplementation => throw new NotSupportedException();
+    public override bool IsExplicitInterfaceImplementation => false;
 
     public IInjectMemberTransformation ToTransformation()
         => this.IsStatic

@@ -165,11 +165,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         void FlushPendingInsertStatementContext(KeyValuePair<IMember, InsertStatementTransformationContextImpl> pair)
         {
-            if ( RequiresAuxiliaryMember(pair.Key, pair.Value) )
+            if ( RequiresAuxiliaryContractMember(pair.Key, pair.Value) )
             {
                 pair.Value.Complete();
 
                 transformationCollection.AddTransformationCausingAuxiliaryOverride( pair.Value.OriginTransformation );
+
+                // This may be the only "override" present, so make sure all other effects of overrides are present.
+                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection, buildersWithSynthesizedSetters );
 
                 auxiliaryMemberTransformations
                     .GetOrAdd( pair.Key, _ => new() )
@@ -190,6 +193,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             this.IndexAuxiliaryMemberTransformations(
                 input.CompilationModel,
                 transformationCollection,
+                lexicalScopeFactory,
                 aspectReferenceSyntaxProvider,
                 injectionNameProvider,
                 injectionHelperProvider,
@@ -539,11 +543,49 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             return;
         }
 
+        AddSynthesizedSetterForPropertyIfRequired(
+            overrideDeclarationTransformation.OverriddenDeclaration,
+            transformationCollection,
+            buildersWithSynthesizedSetters );
+
+        if (overrideDeclarationTransformation.OverriddenDeclaration is IConstructor { IsPrimary: true } overriddenConstructor)
+        {
+            auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectAuxiliarySourceMember();
+            transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
+        }
+
+        if ( overrideDeclarationTransformation.OverriddenDeclaration is IMember overriddenMember
+             && pendingInsertStatementContexts.TryGetValue( overriddenMember, out var insertStatementContext ) )
+        {
+            // Remove context for the insert statement (there should be no race since we parallelize based on containing type).
+            pendingInsertStatementContexts.TryRemove( overriddenMember, out _ );
+
+            // Auxiliary member is needed for output contracts
+            if ( RequiresAuxiliaryContractMember( overriddenMember, insertStatementContext ) )
+            {
+                insertStatementContext.Complete();
+
+                transformationCollection.AddTransformationCausingAuxiliaryOverride( insertStatementContext.OriginTransformation );
+
+                auxiliaryMemberTransformations
+                    .GetOrAdd( overriddenMember, _ => new() )
+                    .InjectAuxiliaryContractMember(
+                        insertStatementContext.OriginTransformation,
+                        insertStatementContext.ReturnValueVariableName );
+            }
+        }
+    }
+
+    private static void AddSynthesizedSetterForPropertyIfRequired(
+        IDeclaration overriddenDeclaration, 
+        TransformationCollection transformationCollection, 
+        HashSet<PropertyBuilder> buildersWithSynthesizedSetters )
+    {         
         // If this is an auto-property that does not override a base property, we can add synthesized init-only setter.
         // If this is overridden property we need to:
         //  1) Block inlining of the first override (force the trampoline).
         //  2) Substitute all sets of the property (can be only in constructors) to use the first override instead.
-        if ( overrideDeclarationTransformation.OverriddenDeclaration is IProperty
+        if ( overriddenDeclaration is IProperty
             {
                 IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod.IsImplicitlyDeclared: true,
                 OverriddenProperty: null or { SetMethod: not null }
@@ -575,33 +617,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
                 default:
                     throw new AssertionFailedException( $"Unexpected declaration: '{overriddenAutoProperty}'." );
-            }
-        }
-
-        if (overrideDeclarationTransformation.OverriddenDeclaration is IConstructor { IsPrimary: true } overriddenConstructor)
-        {
-            auxiliaryMemberTransformations.GetOrAdd( overriddenConstructor, _ => new() ).InjectAuxiliarySourceMember();
-            transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
-        }
-
-        if ( overrideDeclarationTransformation.OverriddenDeclaration is IMember overriddenMember
-             && pendingInsertStatementContexts.TryGetValue( overriddenMember, out var insertStatementContext ) )
-        {
-            // Remove context for the insert statement (there should be no race since we parallelize based on containing type).
-            pendingInsertStatementContexts.TryRemove( overriddenMember, out _ );
-
-            // Auxiliary member is needed for output contracts
-            if ( RequiresAuxiliaryMember( overriddenMember, insertStatementContext ) )
-            {
-                insertStatementContext.Complete();
-
-                transformationCollection.AddTransformationCausingAuxiliaryOverride( insertStatementContext.OriginTransformation );
-
-                auxiliaryMemberTransformations
-                    .GetOrAdd( overriddenMember, _ => new() )
-                    .InjectAuxiliaryContractMember(
-                        insertStatementContext.OriginTransformation,
-                        insertStatementContext.ReturnValueVariableName );
             }
         }
     }
@@ -844,13 +859,22 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     private void IndexAuxiliaryMemberTransformations( 
         CompilationModel finalCompilationModel,
         TransformationCollection transformationCollection,
+        LexicalScopeFactory lexicalScopeFactory,
         AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
         LinkerInjectionNameProvider injectionNameProvider,
         LinkerInjectionHelperProvider injectionHelperProvider,
         IMember member,
         AuxiliaryMemberTransformations transformations )
     {
-        var auxiliaryMemberFactory = new AuxiliaryMemberFactory( this._compilationContext, finalCompilationModel, aspectReferenceSyntaxProvider, injectionNameProvider, injectionHelperProvider, transformationCollection );
+        var auxiliaryMemberFactory =
+            new AuxiliaryMemberFactory(
+                this._compilationContext,
+                finalCompilationModel,
+                lexicalScopeFactory,
+                aspectReferenceSyntaxProvider,
+                injectionNameProvider,
+                injectionHelperProvider,
+                transformationCollection );
 
         if ( transformations.ShouldInjectAuxiliarySourceMember )
         {
@@ -872,18 +896,18 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             }
         }
 
-        foreach ( var auxiliaryContractMember in transformations.AuxiliaryContractMembers )
+        foreach ( var (originTransformation, returnVariableName) in transformations.AuxiliaryContractMembers )
         {
             // Having a record in this list means that there is an output contract, which requires a trivial body that will act as a receiver of contracts.
-            // If there is no output contract, we don't get here at all and all input contracts are injected into the preceding override or source.
+            // Usually this means that there is an output contract, otherwise all input contracts are injected into the preceding override or source.
             // Example:
             // <input_contracts> 
             // var returnValue = meta.Proceed();
             // <output_contracts>
             // return returnValue;
 
-            var advice = auxiliaryContractMember.OriginTransformation.ParentAdvice;
-            var compilationModel = (CompilationModel)auxiliaryContractMember.OriginTransformation.ParentAdvice.SourceCompilation;
+            var advice = originTransformation.ParentAdvice;
+            var compilationModel = (CompilationModel) originTransformation.ParentAdvice.SourceCompilation;
 
             var rootMember =
                 member switch
@@ -895,21 +919,24 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             transformationCollection.AddInjectedMember(
                 new InjectedMember(
-                    auxiliaryContractMember.OriginTransformation,
+                    originTransformation,
                     member.DeclarationKind,
-                    auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, compilationModel, advice, auxiliaryContractMember.ReturnVariableName ),
+                    auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, compilationModel, advice, returnVariableName ),
                     advice.AspectLayerId,
                     InjectedMemberSemantic.AuxiliaryBody,
                     rootMember ) );
         }
     }
 
-    private static bool RequiresAuxiliaryMember( IMember member, InsertStatementTransformationContextImpl insertStatementContext )
+    private static bool RequiresAuxiliaryContractMember( IMember member, InsertStatementTransformationContextImpl insertStatementContext )
     {
-        // TODO: This is not optimal for automatic properties, because we wany the auxiliary member only for the initial block of transformations before the first override.
+        // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
+        //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
         return
             insertStatementContext.WasUsedForOutputContracts
-            || (member is IFieldOrProperty { IsAutoPropertyOrField: true } or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
+            || (member is IFieldOrProperty { IsAutoPropertyOrField: true } 
+                       or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
+                       or IMethod { IsPartial: true, HasImplementation: false }
                 && (insertStatementContext.WasUsedForInputContracts || insertStatementContext.WasUsedForOutputContracts));
     }
 }
