@@ -24,7 +24,6 @@ internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSym
 
     public override int GetHashCode()
         =>
-
             // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
             HashCode.Combine(
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
@@ -40,7 +39,6 @@ internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSym
 
     public override string ToString()
         =>
-
             // Coverage: ignore (useful for debugging)
             $"({this.Kind}, {this.Symbol})";
 }
@@ -64,7 +62,6 @@ internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<Interm
 
     public override int GetHashCode()
         =>
-
             // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
             HashCode.Combine(
                 StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
@@ -74,7 +71,6 @@ internal readonly struct IntermediateSymbolSemantic<TSymbol> : IEquatable<Interm
 
     public override string ToString()
         =>
-
             // Coverage: ignore (useful for debugging)
             $"({this.Kind}, {this.Symbol})";
 }
