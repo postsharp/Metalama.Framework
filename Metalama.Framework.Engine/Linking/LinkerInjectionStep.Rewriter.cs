@@ -503,18 +503,32 @@ internal sealed partial class LinkerInjectionStep
                         case IPropertyOrIndexer propertyOrIndexer:
                             if ( propertyOrIndexer.GetMethod != null )
                             {
-                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements( propertyOrIndexer.GetMethod, injectedMember );
+                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
+                                    propertyOrIndexer.GetMethod,
+                                    injectedMember );
+
                                 var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod, injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( propertyOrIndexer.GetMethod, getEntryStatements, getExitStatements, injectedNode );
+                                injectedNode = InjectStatementsIntoMemberDeclaration(
+                                    propertyOrIndexer.GetMethod,
+                                    getEntryStatements,
+                                    getExitStatements,
+                                    injectedNode );
                             }
 
                             if ( propertyOrIndexer.SetMethod != null )
                             {
-                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements( propertyOrIndexer.SetMethod, injectedMember );
+                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
+                                    propertyOrIndexer.SetMethod,
+                                    injectedMember );
+
                                 var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod, injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( propertyOrIndexer.SetMethod, setEntryStatements, setExitStatements, injectedNode );
+                                injectedNode = InjectStatementsIntoMemberDeclaration(
+                                    propertyOrIndexer.SetMethod,
+                                    setEntryStatements,
+                                    setExitStatements,
+                                    injectedNode );
                             }
 
                             break;
@@ -583,7 +597,7 @@ internal sealed partial class LinkerInjectionStep
 
                 // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
-                    return method.WithBody( ReplaceBlock( entryStatements, exitStatements,body ) );
+                    return method.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     var returnsVoid =
@@ -604,7 +618,7 @@ internal sealed partial class LinkerInjectionStep
                 case MethodDeclarationSyntax { Body: null, ExpressionBody: null } method:
                     return method.PartialUpdate(
                         body: Block( entryStatements.Concat( exitStatements ) ),
-                        semicolonToken: default( SyntaxToken ) );
+                        semicolonToken: default(SyntaxToken) );
 
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
                     return @operator.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
@@ -635,7 +649,7 @@ internal sealed partial class LinkerInjectionStep
                     return
                         indexer.PartialUpdate(
                             expressionBody: null,
-                            semicolonToken: default( SyntaxToken ),
+                            semicolonToken: default(SyntaxToken),
                             accessorList: AccessorList(
                                 SingletonList(
                                     AccessorDeclaration(
@@ -664,18 +678,20 @@ internal sealed partial class LinkerInjectionStep
                                                                 exitStatements,
                                                                 expressionBody.Expression,
                                                                 a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" ),
+                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" )
                                                 }
                                                 : a ) ) ) );
 
                     static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, IDeclaration contextDeclaration )
-                        => (accessorDeclaration.Kind(), contextDeclaration) switch
+                    {
+                        return (accessorDeclaration.Kind(), contextDeclaration) switch
                         {
                             (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertyGet }) => true,
                             (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
                             (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
-                            _ => false,
+                            _ => false
                         };
+                    }
 
                 default:
                     throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
@@ -707,7 +723,7 @@ internal sealed partial class LinkerInjectionStep
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     returnStatement );
 
-                        case { Statements: [ LocalDeclarationStatementSyntax localDeclarationStatement, ForEachStatementSyntax foreachStatement] }:
+                        case { Statements: [LocalDeclarationStatementSyntax localDeclarationStatement, ForEachStatementSyntax foreachStatement] }:
                             return
                                 Block(
                                     Block( List( entryStatements ) )
@@ -716,7 +732,14 @@ internal sealed partial class LinkerInjectionStep
                                     Block( List( exitStatements ) ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     foreachStatement );
 
-                        case { Statements: [ LocalDeclarationStatementSyntax bufferedEnumerableLocal, LocalDeclarationStatementSyntax returnValueLocal, WhileStatementSyntax whileStatement] }:
+                        case
+                        {
+                            Statements:
+                            [
+                                LocalDeclarationStatementSyntax bufferedEnumerableLocal, LocalDeclarationStatementSyntax returnValueLocal,
+                                WhileStatementSyntax whileStatement
+                            ]
+                        }:
                             return
                                 Block(
                                     Block( List( entryStatements ) )
@@ -724,28 +747,30 @@ internal sealed partial class LinkerInjectionStep
                                     bufferedEnumerableLocal,
                                     returnValueLocal,
                                     Block(
-                                        List(
-                                            exitStatements.Select( (s, i) =>
-                                            {
-                                                if ( i == 0 )
-                                                {
-                                                    return s;
-                                                }
-                                                else
-                                                {
-                                                    var declarator = returnValueLocal.Declaration.Variables.Single();
-                                                    return
-                                                        Block(
-                                                            ExpressionStatement(
-                                                                AssignmentExpression(
-                                                                    SyntaxKind.SimpleAssignmentExpression,
-                                                                    IdentifierName( declarator.Identifier.ValueText ),
-                                                                    declarator.Initializer.AssertNotNull().Value ) ),
-                                                            s )
-                                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                                                }
-                                            } ) ) )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                            List(
+                                                exitStatements.Select(
+                                                    ( s, i ) =>
+                                                    {
+                                                        if ( i == 0 )
+                                                        {
+                                                            return s;
+                                                        }
+                                                        else
+                                                        {
+                                                            var declarator = returnValueLocal.Declaration.Variables.Single();
+
+                                                            return
+                                                                Block(
+                                                                        ExpressionStatement(
+                                                                            AssignmentExpression(
+                                                                                SyntaxKind.SimpleAssignmentExpression,
+                                                                                IdentifierName( declarator.Identifier.ValueText ),
+                                                                                declarator.Initializer.AssertNotNull().Value ) ),
+                                                                        s )
+                                                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                                        }
+                                                    } ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     whileStatement );
 
                         default:
@@ -764,7 +789,11 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
-            BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, IReadOnlyList<StatementSyntax> exitStatements, ExpressionSyntax targetExpression, bool returnsVoid )
+            BlockSyntax ReplaceExpression(
+                IReadOnlyList<StatementSyntax> entryStatements,
+                IReadOnlyList<StatementSyntax> exitStatements,
+                ExpressionSyntax targetExpression,
+                bool returnsVoid )
             {
                 // Auxiliary bodies that may receive exit statements are never expression bodies.
                 Invariant.Assert( exitStatements.Count == 0 );
@@ -946,7 +975,7 @@ internal sealed partial class LinkerInjectionStep
                         default,
                         node.Modifiers,
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
 
                     fieldDeclaration = this.ReplaceAttributes( fieldDeclaration, attributes );
 
@@ -1028,7 +1057,11 @@ internal sealed partial class LinkerInjectionStep
                 var constructor = (IConstructor) this._compilation.GetDeclaration( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( constructor );
 
-                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( constructor, entryStatements, Array.Empty<StatementSyntax>(), node );
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                    constructor,
+                    entryStatements,
+                    Array.Empty<StatementSyntax>(),
+                    node );
             }
 
             // Rewrite attributes.
@@ -1150,7 +1183,11 @@ internal sealed partial class LinkerInjectionStep
                 var declaration = (IProperty) this._compilation.GetDeclaration( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
 
-                node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.SetMethod, entryStatements, Array.Empty<StatementSyntax>(), node );
+                node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                    declaration.SetMethod,
+                    entryStatements,
+                    Array.Empty<StatementSyntax>(),
+                    node );
             }
 
             if ( this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
@@ -1187,13 +1224,23 @@ internal sealed partial class LinkerInjectionStep
                 if ( symbol.GetMethod != null )
                 {
                     var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.GetMethod.AssertNotNull() );
-                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.GetMethod, entryStatements, Array.Empty<StatementSyntax>(), node );
+
+                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                        declaration.GetMethod,
+                        entryStatements,
+                        Array.Empty<StatementSyntax>(),
+                        node );
                 }
 
                 if ( symbol.SetMethod != null )
                 {
                     var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
-                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.SetMethod, entryStatements, Array.Empty<StatementSyntax>(), node );
+
+                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                        declaration.SetMethod,
+                        entryStatements,
+                        Array.Empty<StatementSyntax>(),
+                        node );
                 }
             }
 
@@ -1263,7 +1310,7 @@ internal sealed partial class LinkerInjectionStep
                         node.Modifiers,
                         Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
 
                     eventDeclaration = this.ReplaceAttributes( eventDeclaration, attributes );
 

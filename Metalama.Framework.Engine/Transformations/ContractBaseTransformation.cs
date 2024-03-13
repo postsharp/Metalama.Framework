@@ -104,18 +104,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
 
         var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.Template.Declaration );
 
-        if ( !templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out var filterBody ) )
-        {
-            contractBlock = null;
-
-            return false;
-        }
-        else
-        {
-            contractBlock = filterBody;
-        }
-
-        return true;
+        return templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out contractBlock );
     }
 
     public override TransformationObservability Observability => TransformationObservability.None;

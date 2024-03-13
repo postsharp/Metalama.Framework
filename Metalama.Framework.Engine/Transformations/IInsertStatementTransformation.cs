@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations
         IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
         /// <summary>
-        /// Context declaration.
+        /// Gets the member that statements will be inserted into (may differ from <see cref="ITransformationBase.TargetDeclaration"/> e.g. for builders).
         /// </summary>
         IMember TargetMember { get; }
     }

@@ -21,13 +21,13 @@ internal sealed partial class LinkerInjectionStep
 
         public bool ShouldInjectAuxiliarySourceMember => this._shouldInjectAuxiliarySourceMember;
 
-        public IReadOnlyList<(IInsertStatementTransformation OriginTransformation, string? ReturnVariableName)> AuxiliaryContractMembers =>
-            (IReadOnlyList<(IInsertStatementTransformation, string?)>?) this._auxiliaryContractMembers
-            ?? Array.Empty<(IInsertStatementTransformation, string?)>();
+        public IReadOnlyList<(IInsertStatementTransformation OriginTransformation, string? ReturnVariableName)> AuxiliaryContractMembers
+            => (IReadOnlyList<(IInsertStatementTransformation, string?)>?) this._auxiliaryContractMembers
+               ?? Array.Empty<(IInsertStatementTransformation, string?)>();
 
         public void InjectAuxiliarySourceMember() => this._shouldInjectAuxiliarySourceMember = true;
 
-        public void InjectAuxiliaryContractMember(IInsertStatementTransformation originTransformation, string? returnVariableName)
+        public void InjectAuxiliaryContractMember( IInsertStatementTransformation originTransformation, string? returnVariableName )
         {
             this._auxiliaryContractMembers ??= new List<(IInsertStatementTransformation, string?)>();
             this._auxiliaryContractMembers.Add( (originTransformation, returnVariableName) );

@@ -280,7 +280,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         var injectionRegistry = new LinkerInjectionRegistry(
             transformationComparer,
-            input.CompilationModel,
             intermediateCompilation,
             transformations,
             transformationCollection.InjectedMembers,

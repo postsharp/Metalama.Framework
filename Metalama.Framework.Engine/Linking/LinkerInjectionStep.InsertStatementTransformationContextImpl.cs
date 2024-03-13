@@ -5,10 +5,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
-using System;
-
-#if DEBUG
-#endif
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -45,7 +41,7 @@ internal sealed partial class LinkerInjectionStep
             CompilationModel compilation,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             IInsertStatementTransformation originTransformation,
-            IMember contextMember ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) 
+            IMember contextMember ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
             this.ContextMember = contextMember;
             this.OriginTransformation = originTransformation;
@@ -55,18 +51,12 @@ internal sealed partial class LinkerInjectionStep
         {
             var lexicalScope = this.LexicalScopeProvider.GetLexicalScope( this.ContextMember );
 
-            return this.ReturnValueVariableName ??= lexicalScope.GetUniqueIdentifier("returnValue");
+            return this.ReturnValueVariableName ??= lexicalScope.GetUniqueIdentifier( "returnValue" );
         }
 
-        public void MarkAsUsedForOutputContracts()
-        {
-            this.WasUsedForOutputContracts = true;
-        }
+        public void MarkAsUsedForOutputContracts() => this.WasUsedForOutputContracts = true;
 
-        public void MarkAsUsedForInputContracts()
-        {
-            this.WasUsedForInputContracts = true;
-        }
+        public void MarkAsUsedForInputContracts() => this.WasUsedForInputContracts = true;
 
         internal void Complete()
         {
