@@ -37,9 +37,10 @@ class Test
     }
 }";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey, projectName: projectName );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, licenseKey, projectName: projectName );
 
-            AssertEmptyOrSdkOnly( diagnostics );
+            Assert.Empty( diagnostics );
+            Assert.Empty( notifications );
         }
     }
 }

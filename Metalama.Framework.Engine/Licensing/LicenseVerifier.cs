@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Maintenance;
+using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
@@ -30,13 +31,14 @@ public sealed class LicenseVerifier : IProjectService
     internal const string LicenseUsageFilePrefix = "usage-";
 
     private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
-    private readonly IProjectOptions _projectOptions;
-    private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
-
     private readonly ITempFileManager _tempFileManager;
+    private readonly IToastNotificationDetectionService? _toastNotificationDetectionService;
+    private readonly IProjectOptions _projectOptions;
+
+    private readonly Dictionary<CompileTimeProject, RedistributionLicenseFeatures> _redistributionLicenseFeaturesByProject = new();
     private int _reportedErrorCount;
 
-    private readonly struct RedistributionLicenseFeatures { }
+    private readonly struct RedistributionLicenseFeatures;
 
     private static string GetConsumptionDataDirectory( ITempFileManager tempFileManager )
         => tempFileManager.GetTempDirectory(
@@ -52,6 +54,7 @@ public sealed class LicenseVerifier : IProjectService
     {
         this._licenseConsumptionService = serviceProvider.GetRequiredService<IProjectLicenseConsumptionService>();
         this._tempFileManager = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
+        this._toastNotificationDetectionService = serviceProvider.Global.GetBackstageService<IToastNotificationDetectionService>();
         this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
     }
 
@@ -200,16 +203,12 @@ public sealed class LicenseVerifier : IProjectService
                 .OrderBy( x => x )
                 .ToReadOnlyList();
 
-        // Check availability of a license and enforce maximal number of classes.
-        var maxAspectClasses = this switch
+        // Show toast notifications if needed and if Metalama is used in the project.
+        if ( consumedAspectClassNames.Count > 0 )
         {
-            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Ultimate ) => int.MaxValue,
-            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) => 10,
-            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) => 5,
-            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Free ) => 3,
-            _ => 0
-        };
-
+            this._toastNotificationDetectionService?.Detect();
+        }
+        
         var hasLicenseError = false;
 
         // Check the use of Metalama.Framework.Sdk.
@@ -226,6 +225,16 @@ public sealed class LicenseVerifier : IProjectService
                 hasLicenseError = true;
             }
         }
+        
+        // Check availability of a license and enforce maximal number of classes.
+        var maxAspectClasses = this switch
+        {
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Ultimate ) => int.MaxValue,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Professional ) => 10,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Starter ) => 5,
+            _ when this.CanConsumeForCurrentProject( LicenseRequirement.Free ) => 3,
+            _ => 0
+        };
 
         if ( maxAspectClasses == 0 )
         {

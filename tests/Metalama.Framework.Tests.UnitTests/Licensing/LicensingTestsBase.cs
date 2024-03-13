@@ -1,13 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Application;
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Testing;
+using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Xunit;
@@ -17,9 +23,23 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public abstract class LicensingTestsBase : UnitTestClass
     {
-        protected LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
+        private readonly ITestOutputHelper _logger;
 
-        protected async Task<DiagnosticBag> GetDiagnosticsAsync(
+        protected LicensingTestsBase( ITestOutputHelper logger ) : base( logger )
+        {
+            this._logger = logger;
+        }
+
+        protected override void ConfigureServices( IAdditionalServiceCollection services )
+        {
+            base.ConfigureServices( services );
+
+            
+
+            
+        }
+
+        protected async Task<(DiagnosticBag, List<ToastNotification>)> GetDiagnosticsAndNotificationsAsync(
             string code,
             string? licenseKey,
             string? assemblyName = "AspectCountTests.ArbitraryNamespace",
@@ -27,7 +47,26 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         {
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddProjectLicenseConsumptionManagerForTest( licenseKey ) );
+            
+            mocks.BackstageServices.Add<BackstageUserInterfaceTestServices>(
+                p =>
+                {
+                    var backstageUserInterfaceTestServices = new BackstageUserInterfaceTestServices( this._logger, p, licenseKey );
 
+                    return backstageUserInterfaceTestServices;
+                } );
+            
+            mocks.BackstageServices.Add<IToastNotificationDetectionService>(
+                p =>
+                {
+                    var backstageUserInterfaceTestServices = p.GetRequiredService<BackstageUserInterfaceTestServices>();
+
+                    var toastNotificationDetectionService =
+                        backstageUserInterfaceTestServices.Provider.GetRequiredBackstageService<IToastNotificationDetectionService>();
+
+                    return toastNotificationDetectionService;
+                } );
+            
             var testContextOptions = this.GetDefaultTestContextOptions() with { ProjectName = projectName };
 
             using var testContext = this.CreateTestContext( testContextOptions, mocks );
@@ -55,22 +94,10 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 }
             }
 
-            return diagnostics;
-        }
+            var backstageUserInterfaceTestServices = testContext.ServiceProvider.Global.GetRequiredBackstageService<BackstageUserInterfaceTestServices>();
+            var notifications = backstageUserInterfaceTestServices.Notifications;
 
-        protected static void AssertEmptyOrSdkOnly( DiagnosticBag diagnostics )
-        {
-            // We want to assert that the diagnostics are empty, but unit tests reference Metalama.Framework.Sdk,
-            // so we need to ignore the Roslyn API license error, if present.
-            // The SDK license error is tested in integration tests separately.
-            if ( diagnostics.Count == 0 )
-            {
-                return;
-            }
-
-            // First, we need to make sure there is only one diagnostic in total. Running the next assert only would ignore other diagnostics.
-            Assert.Single( diagnostics );
-            Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.RoslynApiNotAvailable.Id );
+            return (diagnostics, notifications);
         }
 
         protected static string? GetLicenseKey( string? name )

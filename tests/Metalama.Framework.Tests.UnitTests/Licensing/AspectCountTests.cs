@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Testing;
+using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Engine.Licensing;
 using System.Globalization;
 using System.Text;
@@ -223,15 +224,29 @@ namespace {0}
                     aspectApplicationBuilder.ToString(),
                     contractsApplicationBuilder.ToString() ) );
 
-            var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey, aspectNamespace, projectName );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync(
+                sourceCodeBuilder.ToString(),
+                licenseKey,
+                aspectNamespace,
+                projectName );
 
             if ( expectedErrorId == null )
             {
-                AssertEmptyOrSdkOnly( diagnostics );
+                Assert.Empty( diagnostics );
+                Assert.Empty( notifications );
             }
             else
             {
                 Assert.Single( diagnostics, d => d.Id == expectedErrorId );
+
+                if ( expectedErrorId == _noLicenseKeyErrorId )
+                {
+                    Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.RequiresLicense );
+                }
+                else
+                {
+                    Assert.Empty( notifications );
+                }
             }
         }
 
@@ -275,9 +290,10 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-            AssertEmptyOrSdkOnly( diagnostics );
+            Assert.Empty( diagnostics );
+            Assert.Empty( notifications );
         }
 
         [Fact]
@@ -340,9 +356,10 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-            AssertEmptyOrSdkOnly( diagnostics );
+            Assert.Empty( diagnostics );
+            Assert.Empty( notifications );
         }
 
         [Fact]
@@ -423,9 +440,10 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Single( diagnostics, d => d.Id == _tooManyAspectClassesErrorId );
+            Assert.Empty( notifications );
         }
 
         [Fact]
@@ -498,9 +516,10 @@ interface ITargetInterface
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-            AssertEmptyOrSdkOnly( diagnostics );
+            Assert.Empty( diagnostics );
+            Assert.Empty( notifications );
         }
 
         [Theory]
@@ -589,15 +608,25 @@ class TargetClass : ITargetInterface
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, licenseKey );
 
             if ( expectedErrorId == null )
             {
-                AssertEmptyOrSdkOnly( diagnostics );
+                Assert.Empty( diagnostics );
+                Assert.Empty( notifications );
             }
             else
             {
                 Assert.Single( diagnostics, d => d.Id == expectedErrorId );
+                
+                if ( expectedErrorId == _noLicenseKeyErrorId )
+                {
+                    Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.RequiresLicense );
+                }
+                else
+                {
+                    Assert.Empty( notifications );
+                }
             }
         }
 
@@ -667,9 +696,10 @@ class TargetClass : ITargetInterface
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-            AssertEmptyOrSdkOnly( diagnostics );
+            Assert.Empty( diagnostics );
+            Assert.Empty( notifications );
         }
     }
 }

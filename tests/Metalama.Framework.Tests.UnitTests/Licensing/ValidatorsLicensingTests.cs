@@ -91,10 +91,14 @@ class TargetClass
         public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
-            
-            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey, projectName: projectName );
+
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync(
+                _declarationValidationAspectAppliedCode,
+                licenseKey,
+                projectName: projectName );
 
             Assert.Single( diagnostics, d => d.Id == expectedDiagnosticId );
+            Assert.Empty( notifications );
         }
 
         [Theory]
@@ -110,9 +114,10 @@ class TargetClass
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
             
-            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );
+            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );
 
             Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO02" : "LAMA0801") );
+            Assert.Empty( notifications );
         }
     }
 }
