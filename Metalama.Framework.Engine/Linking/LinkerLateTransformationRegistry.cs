@@ -19,7 +19,7 @@ internal class LinkerLateTransformationRegistry
     private readonly ISet<INamedTypeSymbol> _typesWithRemovedPrimaryConstructor;
     private readonly ISet<ISymbol> _primaryConstructorInitializedMembers;
 
-    public LinkerLateTransformationRegistry( 
+    public LinkerLateTransformationRegistry(
         PartialCompilation intermediateCompilation,
         IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> lateTypeLevelTransformations )
     {
@@ -27,17 +27,20 @@ internal class LinkerLateTransformationRegistry
         HashSet<INamedTypeSymbol> typesWithRemovedPrimaryConstructor;
         HashSet<ISymbol> primaryConstructorInitializedMembers;
 
-        this._typesWithRemovedPrimaryConstructor = typesWithRemovedPrimaryConstructor = new HashSet<INamedTypeSymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
-        this._primaryConstructorInitializedMembers = primaryConstructorInitializedMembers = new HashSet<ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+        this._typesWithRemovedPrimaryConstructor = typesWithRemovedPrimaryConstructor =
+            new HashSet<INamedTypeSymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
-        foreach (var lateTypeLevelTransformationPair in lateTypeLevelTransformations )
+        this._primaryConstructorInitializedMembers =
+            primaryConstructorInitializedMembers = new HashSet<ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+
+        foreach ( var lateTypeLevelTransformationPair in lateTypeLevelTransformations )
         {
             var type = lateTypeLevelTransformationPair.Key;
             var transformations = lateTypeLevelTransformationPair.Value;
 
             var typeSymbol = intermediateCompilation.CompilationContext.SymbolTranslator.Translate( type.GetSymbol().AssertNotNull() ).AssertNotNull();
 
-            if (transformations.ShouldRemovePrimaryConstructor)
+            if ( transformations.ShouldRemovePrimaryConstructor )
             {
                 typesWithRemovedPrimaryConstructor.Add( typeSymbol );
 
@@ -90,7 +93,6 @@ internal class LinkerLateTransformationRegistry
 
                             if ( eventDeclaration is VariableDeclaratorSyntax eventFieldDeclarator )
                             {
-
                                 if ( eventFieldDeclarator.Initializer == null )
                                 {
                                     continue;
@@ -106,10 +108,7 @@ internal class LinkerLateTransformationRegistry
         }
     }
 
-    public bool HasRemovedPrimaryConstructor(INamedTypeSymbol type)
-    {
-        return this._typesWithRemovedPrimaryConstructor.Contains(type);
-    }
+    public bool HasRemovedPrimaryConstructor( INamedTypeSymbol type ) => this._typesWithRemovedPrimaryConstructor.Contains( type );
 
 #pragma warning disable CA1822 // Mark members as static
     public IReadOnlyList<IFieldSymbol> GetPrimaryConstructorFields( INamedTypeSymbol type )
@@ -118,9 +117,9 @@ internal class LinkerLateTransformationRegistry
 #if ROSLYN_4_8_0_OR_GREATER
         var typeSyntax =
             (TypeDeclarationSyntax) type.DeclaringSyntaxReferences.Select( r => r.GetSyntax() )
-            .Single( d => d is TypeDeclarationSyntax { ParameterList: not null } );
+                .Single( d => d is TypeDeclarationSyntax { ParameterList: not null } );
 
-        if (typeSyntax is RecordDeclarationSyntax)
+        if ( typeSyntax is RecordDeclarationSyntax )
         {
             return Array.Empty<IFieldSymbol>();
         }
@@ -140,10 +139,7 @@ internal class LinkerLateTransformationRegistry
         return type.GetMembers().OfType<IPropertySymbol>().Where( p => p.GetPrimaryDeclaration() is ParameterSyntax ).ToArray();
     }
 
-    public bool IsPrimaryConstructorInitializedMember( ISymbol symbol )
-    {
-        return this._primaryConstructorInitializedMembers.Contains( symbol );
-    }
+    public bool IsPrimaryConstructorInitializedMember( ISymbol symbol ) => this._primaryConstructorInitializedMembers.Contains( symbol );
 
     public ArgumentListSyntax? GetPrimaryConstructorBaseArgumentList( IMethodSymbol constructor )
     {
@@ -154,7 +150,7 @@ internal class LinkerLateTransformationRegistry
 #if ROSLYN_4_8_0_OR_GREATER
         var typeSyntax =
             (TypeDeclarationSyntax) type.DeclaringSyntaxReferences.Select( r => r.GetSyntax() )
-            .Single( d => d is TypeDeclarationSyntax { ParameterList: not null } );
+                .Single( d => d is TypeDeclarationSyntax { ParameterList: not null } );
 #else
         var typeSyntax =
             (RecordDeclarationSyntax) type.DeclaringSyntaxReferences.Select( r => r.GetSyntax() )

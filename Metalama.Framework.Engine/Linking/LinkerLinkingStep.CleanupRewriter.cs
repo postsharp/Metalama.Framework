@@ -8,102 +8,77 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerLinkingStep
 {
-    internal sealed partial class LinkerLinkingStep
+    private sealed class CleanupRewriter : SafeSyntaxRewriter
     {
-        private sealed class CleanupRewriter : SafeSyntaxRewriter
+        private readonly IProjectOptions? _projectOptions;
+        private readonly SyntaxGenerationContext _generationContext;
+
+        public CleanupRewriter( IProjectOptions? projectOptions, SyntaxGenerationContext generationContext )
         {
-            private readonly IProjectOptions? _projectOptions;
-            private readonly SyntaxGenerationContext _generationContext;
+            this._projectOptions = projectOptions;
+            this._generationContext = generationContext;
+        }
 
-            public CleanupRewriter( IProjectOptions? projectOptions, SyntaxGenerationContext generationContext )
+        public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
+            => node
+                .WithBody( this.RewriteBodyBlock( node.Body ) );
+
+        public override SyntaxNode VisitOperatorDeclaration( OperatorDeclarationSyntax node )
+            => node
+                .WithBody( this.RewriteBodyBlock( node.Body ) );
+
+        public override SyntaxNode VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
+            => node
+                .WithBody( this.RewriteBodyBlock( node.Body ) );
+
+        public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            => node
+                .WithBody( this.RewriteBodyBlock( node.Body ) );
+
+        public override SyntaxNode VisitDestructorDeclaration( DestructorDeclarationSyntax node )
+            => node
+                .WithBody( this.RewriteBodyBlock( node.Body ) );
+
+        public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node ) => this.VisitBasePropertyDeclaration( node );
+
+        public override SyntaxNode VisitIndexerDeclaration( IndexerDeclarationSyntax node ) => this.VisitBasePropertyDeclaration( node );
+
+        public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node ) => this.VisitBasePropertyDeclaration( node );
+
+        private SyntaxNode VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
+            => node.WithAccessorList(
+                node.AccessorList?.WithAccessors(
+                    List(
+                        node.AccessorList.Accessors
+                            .SelectAsReadOnlyList( a => a.WithBody( this.RewriteBodyBlock( a.Body ) ) ) ) ) );
+
+        private BlockSyntax? RewriteBodyBlock( BlockSyntax? block )
+        {
+            if ( block == null )
             {
-                this._projectOptions = projectOptions;
-                this._generationContext = generationContext;
+                return null;
             }
-
-            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
+            else if ( this._projectOptions?.FormatOutput == true )
             {
-                return
-                    node
-                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+                var countLabelUsesWalker = new CountLabelUsesWalker();
+                countLabelUsesWalker.Visit( block );
+
+                var withFlattenedBlocks = new CleanupBodyRewriter( this._generationContext ).Visit( block );
+
+                var withoutTrivialLabels =
+                    new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters, this._generationContext ).Visit( withFlattenedBlocks );
+
+                var withoutTrailingReturns = new RemoveTrailingReturnRewriter( this._generationContext ).Visit( withoutTrivialLabels );
+
+                return (BlockSyntax?) withoutTrailingReturns;
             }
-
-            public override SyntaxNode VisitOperatorDeclaration( OperatorDeclarationSyntax node )
+            else
             {
-                return
-                    node
-                        .WithBody( this.RewriteBodyBlock( node.Body ) );
-            }
-
-            public override SyntaxNode VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
-            {
-                return
-                    node
-                        .WithBody( this.RewriteBodyBlock( node.Body ) );
-            }
-
-            public override SyntaxNode VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
-            {
-                return
-                    node
-                        .WithBody( this.RewriteBodyBlock( node.Body ) );
-            }
-
-            public override SyntaxNode VisitDestructorDeclaration( DestructorDeclarationSyntax node )
-            {
-                return
-                    node
-                        .WithBody( this.RewriteBodyBlock( node.Body ) );
-            }
-
-            public override SyntaxNode VisitPropertyDeclaration( PropertyDeclarationSyntax node )
-            {
-                return this.VisitBasePropertyDeclaration( node );
-            }
-
-            public override SyntaxNode VisitIndexerDeclaration( IndexerDeclarationSyntax node )
-            {
-                return this.VisitBasePropertyDeclaration( node );
-            }
-
-            public override SyntaxNode VisitEventDeclaration( EventDeclarationSyntax node )
-            {
-                return this.VisitBasePropertyDeclaration( node );
-            }
-
-            private SyntaxNode VisitBasePropertyDeclaration( BasePropertyDeclarationSyntax node )
-            {
-                return
-                    node.WithAccessorList(
-                        node.AccessorList?.WithAccessors(
-                            List(
-                                node.AccessorList.Accessors
-                                    .SelectAsReadOnlyList( a => a.WithBody( this.RewriteBodyBlock( a.Body ) ) ) ) ) );
-            }
-
-            private BlockSyntax? RewriteBodyBlock( BlockSyntax? block )
-            {
-                if ( block == null )
-                {
-                    return null;
-                }
-                else if ( this._projectOptions?.FormatOutput == true )
-                {
-                    var countLabelUsesWalker = new CountLabelUsesWalker();
-                    countLabelUsesWalker.Visit( block );
-
-                    var withFlattenedBlocks = new CleanupBodyRewriter( this._generationContext ).Visit( block );
-                    var withoutTrivialLabels = new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters, this._generationContext ).Visit( withFlattenedBlocks );
-                    var withoutTrailingReturns = new RemoveTrailingReturnRewriter( this._generationContext ).Visit( withoutTrivialLabels );
-
-                    return (BlockSyntax?) withoutTrailingReturns;
-                }
-                else
-                {
-                    return (BlockSyntax?) new CleanupBodyRewriter( this._generationContext ).Visit( block );
-                }
+                return (BlockSyntax?) new CleanupBodyRewriter( this._generationContext ).Visit( block );
             }
         }
     }

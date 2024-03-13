@@ -643,13 +643,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             case IPropertyOrIndexer propertyOrIndexer:
                 {
-                    SyntaxNode primaryDeclaration;
                     SyntaxGenerationContext syntaxGenerationContext;
 
                     switch ( propertyOrIndexer )
                     {
                         case PropertyOrIndexer sourcePropertyOrIndexer:
-                            primaryDeclaration = sourcePropertyOrIndexer.GetPrimaryDeclarationSyntax().AssertNotNull();
+                            var primaryDeclaration = sourcePropertyOrIndexer.GetPrimaryDeclarationSyntax().AssertNotNull();
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
                             break;
@@ -681,8 +680,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                     s =>
                                         s.ContextDeclaration.IsContainedIn( propertyOrIndexer.GetMethod )
                                         || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter
-                                                                                  && parameter.ContainingDeclaration == indexer) )
-                                .ToList() );
+                                                                                  && ReferenceEquals( parameter.ContainingDeclaration, indexer )) )
+                                .ToReadOnlyList() );
                     }
 
                     if ( propertyOrIndexer.SetMethod != null )
@@ -694,8 +693,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                     s =>
                                         s.ContextDeclaration.IsContainedIn( propertyOrIndexer.SetMethod )
                                         || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter
-                                                                                  && parameter.ContainingDeclaration == indexer) )
-                                .ToList() );
+                                                                                  && ReferenceEquals( parameter.ContainingDeclaration, indexer )) )
+                                .ToReadOnlyList() );
                     }
 
                     break;

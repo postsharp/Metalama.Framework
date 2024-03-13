@@ -7,84 +7,85 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerLinkingStep
 {
-    internal sealed partial class LinkerLinkingStep
+    // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
+    private sealed class RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter, SyntaxGenerationContext generationContext )
+        : SafeSyntaxRewriter
     {
-        // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
-        private sealed class RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter, SyntaxGenerationContext generationContext ) : SafeSyntaxRewriter
+        public override SyntaxNode VisitBlock( BlockSyntax node )
         {
-            public override SyntaxNode VisitBlock( BlockSyntax node )
+            var newStatements = new List<StatementSyntax>();
+            var anyChange = false;
+
+            var nextStatement = node.Statements.Count > 0 ? (StatementSyntax?) this.Visit( node.Statements[0] ) : null;
+
+            if ( node.Statements.Count > 0 && nextStatement != node.Statements[0] )
             {
-                var newStatements = new List<StatementSyntax>();
-                var anyChange = false;
+                anyChange = true;
+            }
 
-                var nextStatement = node.Statements.Count > 0 ? (StatementSyntax?) this.Visit( node.Statements[0] ) : null;
+            for ( var i = 0; i < node.Statements.Count; i++ )
+            {
+                var currentStatement = nextStatement;
+                nextStatement = i + 1 < node.Statements.Count ? (StatementSyntax?) this.Visit( node.Statements[i + 1] ) : null;
 
-                if ( node.Statements.Count > 0 && nextStatement != node.Statements[0] )
+                if ( i + 1 < node.Statements.Count && nextStatement != node.Statements[i + 1] )
                 {
                     anyChange = true;
                 }
 
-                for ( var i = 0; i < node.Statements.Count; i++ )
+                if ( currentStatement == null )
                 {
-                    var currentStatement = nextStatement;
-                    nextStatement = i + 1 < node.Statements.Count ? (StatementSyntax?) this.Visit( node.Statements[i + 1] ) : null;
+                    continue;
+                }
 
-                    if ( i + 1 < node.Statements.Count && nextStatement != node.Statements[i + 1] )
+                if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: var gotoLabel } } gotoStatement
+                     && nextStatement is LabeledStatementSyntax { Identifier.ValueText: var declaredLabel } labeledStatement
+                     && gotoLabel == declaredLabel
+                     && observedLabelCounter.TryGetValue( declaredLabel, out var counter )
+                     && counter == 1 )
+                {
+                    if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.PreserveTrivia )
+                         || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.PreserveTrivia ) )
                     {
-                        anyChange = true;
-                    }
-
-                    if ( currentStatement == null )
-                    {
-                        continue;
-                    }
-
-                    if ( currentStatement is GotoStatementSyntax { Expression: IdentifierNameSyntax { Identifier.ValueText: var gotoLabel } } gotoStatement
-                         && nextStatement is LabeledStatementSyntax { Identifier.ValueText: var declaredLabel } labeledStatement
-                         && gotoLabel == declaredLabel
-                         && observedLabelCounter.TryGetValue( declaredLabel, out var counter )
-                         && counter == 1 )
-                    {
-                        if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.PreserveTrivia ) || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.PreserveTrivia ) )
-                        {
-                            List<SyntaxTrivia> trivia =
-                            [
-                                ElasticMarker,
-                                .. gotoStatement.GetLeadingTrivia(),
-                                .. gotoStatement.GetTrailingTrivia(),
-                                ElasticMarker,
-                                .. labeledStatement.GetLeadingTrivia(),
-                                .. labeledStatement.Statement.GetLeadingTrivia()
-                            ];
+                        List<SyntaxTrivia> trivia =
+                        [
+                            ElasticMarker,
+                            .. gotoStatement.GetLeadingTrivia(),
+                            .. gotoStatement.GetTrailingTrivia(),
+                            ElasticMarker,
+                            .. labeledStatement.GetLeadingTrivia(),
+                            .. labeledStatement.Statement.GetLeadingTrivia()
+                        ];
 
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                            newStatements.Add( labeledStatement.Statement.WithLeadingTrivia( trivia ) );
+                        newStatements.Add( labeledStatement.Statement.WithLeadingTrivia( trivia ) );
 #pragma warning restore LAMA0832
-                        }
-                        else
-                        {
-                            newStatements.Add( labeledStatement.Statement );
-                        }
-
-                        anyChange = true;
-                        nextStatement = null;
-
-                        continue;
+                    }
+                    else
+                    {
+                        newStatements.Add( labeledStatement.Statement );
                     }
 
-                    newStatements.Add( currentStatement );
+                    anyChange = true;
+                    nextStatement = null;
+
+                    continue;
                 }
 
-                if ( anyChange )
-                {
-                    return node.WithStatements( List( newStatements ) );
-                }
-                else
-                {
-                    return node;
-                }
+                newStatements.Add( currentStatement );
+            }
+
+            if ( anyChange )
+            {
+                return node.WithStatements( List( newStatements ) );
+            }
+            else
+            {
+                return node;
             }
         }
     }

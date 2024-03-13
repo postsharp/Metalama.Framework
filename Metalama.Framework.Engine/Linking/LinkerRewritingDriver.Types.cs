@@ -38,7 +38,7 @@ internal sealed partial class LinkerRewritingDriver
                                         } ) ) )
                         : default );
 #else
-        throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+            throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
         }
 
@@ -60,7 +60,7 @@ internal sealed partial class LinkerRewritingDriver
                     RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
                     parameterList: default(ParameterListSyntax) );
 #else
-        throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+            throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
         }
 

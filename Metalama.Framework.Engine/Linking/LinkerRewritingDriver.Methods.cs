@@ -13,333 +13,327 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerRewritingDriver
 {
-    internal sealed partial class LinkerRewritingDriver
+    private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
+        MethodDeclarationSyntax methodDeclaration,
+        IMethodSymbol symbol,
+        SyntaxGenerationContext generationContext )
     {
-        private IReadOnlyList<MemberDeclarationSyntax> RewriteMethod(
-            MethodDeclarationSyntax methodDeclaration,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
+        if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
         {
-            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
+            if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: not null } )
             {
-                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: { } } )
-                {
-                    // This is a partial method declaration that is not to be transformed.
-                    return new[] { methodDeclaration };
-                }
-
-                var members = new List<MemberDeclarationSyntax>();
-
-                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
-                {
-                    // This is a partial method declaration that did not have any body.
-                    // Keep it as is and add a new declaration that will contain the override.
-                    members.Add( methodDeclaration );
-                }
-
-                var lastOverride = this.InjectionRegistry.GetLastOverride( symbol );
-
-                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
-                {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
-                }
-                else
-                {
-                    members.Add( this.GetTrampolineForMethod( methodDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
-                }
-
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && this.ShouldGenerateSourceMember( symbol ) )
-                {
-                    members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
-                }
-
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && this.ShouldGenerateEmptyMember( symbol ) )
-                {
-                    members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
-                }
-
-                return members;
+                // This is a partial method declaration that is not to be transformed.
+                return new[] { methodDeclaration };
             }
-            else if ( this.InjectionRegistry.IsOverride( symbol ) )
+
+            var members = new List<MemberDeclarationSyntax>();
+
+            if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
             {
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
-                {
-                    return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
-                }
-                else
-                {
-                    return Array.Empty<MemberDeclarationSyntax>();
-                }
+                // This is a partial method declaration that did not have any body.
+                // Keep it as is and add a new declaration that will contain the override.
+                members.Add( methodDeclaration );
             }
-            else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
-            {
-                Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
 
-                return new[]
-                {
-                    this.GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
-                    this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext )
-                };
+            var lastOverride = this.InjectionRegistry.GetLastOverride( symbol );
+
+            if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+            {
+                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
             }
-            else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+            else
+            {
+                members.Add( this.GetTrampolineForMethod( methodDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+            }
+
+            if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                 && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                 && this.ShouldGenerateSourceMember( symbol ) )
+            {
+                members.Add( this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
+            }
+
+            if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                 && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                 && this.ShouldGenerateEmptyMember( symbol ) )
+            {
+                members.Add( this.GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
+            }
+
+            return members;
+        }
+        else if ( this.InjectionRegistry.IsOverride( symbol ) )
+        {
+            if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                 && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
             {
                 return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
             }
             else
             {
-                return new[] { methodDeclaration };
+                return Array.Empty<MemberDeclarationSyntax>();
+            }
+        }
+        else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
+        {
+            Invariant.Assert( symbol is { IsOverride: true, IsSealed: false } or { IsVirtual: true } );
+
+            return new[]
+            {
+                this.GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext )
+            };
+        }
+        else if ( this.AnalysisRegistry.HasAnySubstitutions( symbol ) )
+        {
+            return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default, symbol.IsAsync ) };
+        }
+        else
+        {
+            return new[] { methodDeclaration };
+        }
+
+        MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
+        {
+            var linkedBody = this.GetSubstitutedBody(
+                symbol.ToSemantic( semanticKind ),
+                new SubstitutionContext(
+                    this,
+                    generationContext,
+                    new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
+
+            var modifiers = methodDeclaration.Modifiers;
+
+            if ( isAsync && !symbol.IsAsync )
+            {
+                modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
+            }
+            else if ( !isAsync && symbol.IsAsync )
+            {
+                modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
             }
 
-            MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
-            {
-                var linkedBody = this.GetSubstitutedBody(
-                    symbol.ToSemantic( semanticKind ),
-                    new SubstitutionContext(
-                        this,
-                        generationContext,
-                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
+            // Trivia processing:
+            //   * For block bodies methods, we preserve trivia of the opening/closing brace.
+            //   * For expression bodied methods:
+            //       int Foo() <trivia_leading_equals_value> => <trivia_trailing_equals_value> <expression> <trivia_leading_semicolon> ; <trivia_trailing_semicolon>
+            //       int Foo() <trivia_leading_equals_value> { <trivia_trailing_equals_value> <linked_body> <trivia_leading_semicolon> } <trivia_trailing_semicolon>
 
-                var modifiers = methodDeclaration.Modifiers;
-
-                if ( isAsync && !symbol.IsAsync )
+            var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
+                methodDeclaration switch
                 {
-                    modifiers = modifiers.Add( Token( TriviaList( ElasticSpace ), SyntaxKind.AsyncKeyword, TriviaList( ElasticSpace ) ) );
-                }
-                else if ( !isAsync && symbol.IsAsync )
-                {
-                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
-                }
+                    { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
+                        (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
+                    { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
+                        (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
+                         semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                    { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
+                        (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
+                         semicolonToken.TrailingTrivia),
+                    _ => throw new AssertionFailedException( $"Unexpected method declaration at '{methodDeclaration.GetLocation()}'." )
+                };
 
-                // Trivia processing:
-                //   * For block bodies methods, we preserve trivia of the opening/closing brace.
-                //   * For expression bodied methods:
-                //       int Foo() <trivia_leading_equals_value> => <trivia_trailing_equals_value> <expression> <trivia_leading_semicolon> ; <trivia_trailing_semicolon>
-                //       int Foo() <trivia_leading_equals_value> { <trivia_trailing_equals_value> <linked_body> <trivia_leading_semicolon> } <trivia_trailing_semicolon>
+            var ret = methodDeclaration
+                .PartialUpdate(
+                    expressionBody: null,
+                    modifiers: modifiers,
+                    body: Block(
+                            Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                            SingletonList<StatementSyntax>( linkedBody ),
+                            Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
+                    semicolonToken: default(SyntaxToken) );
 
-                var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
-                    methodDeclaration switch
-                    {
-                        { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
-                            (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
-                        { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
-                            (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
-                             semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException( $"Unexpected method declaration at '{methodDeclaration.GetLocation()}'." )
-                    };
-
-                var ret = methodDeclaration
-                    .PartialUpdate(
-                        expressionBody: null,
-                        modifiers: modifiers,
-                        body: Block(
-                                Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
-                                SingletonList<StatementSyntax>( linkedBody ),
-                                Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ),
-                        semicolonToken: default(SyntaxToken) );
-
-                if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
-                {
-                    ret = RemoveAttributesForPartialImplementation( ret );
-                }
-
-                return ret;
-            }
-        }
-
-        private static MethodDeclarationSyntax RemoveAttributesForPartialImplementation( MethodDeclarationSyntax declaration )
-        {
-            return
-                declaration.PartialUpdate(
-                    attributeLists: List<AttributeListSyntax>(),
-                    parameterList: declaration.ParameterList.PartialUpdate(
-                        parameters: SeparatedList(
-                            declaration.ParameterList.Parameters.SelectAsArray( p => p.PartialUpdate( attributeLists: List<AttributeListSyntax>() ) ) ) ) );
-        }
-
-        private MemberDeclarationSyntax GetOriginalImplMethod(
-            MethodDeclarationSyntax method,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
-        {
-            var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-            var context = new InliningContextIdentifier( semantic );
-
-            var substitutedBody =
-                method.Body != null
-                    ? (BlockSyntax) RewriteBody( method.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
-                    : null;
-
-            var substitutedExpressionBody =
-                method.ExpressionBody != null
-                    ? (ArrowExpressionClauseSyntax) RewriteBody(
-                        method.ExpressionBody,
-                        symbol,
-                        new SubstitutionContext( this, generationContext, context ) )
-                    : null;
-
-            if ( substitutedBody == null && substitutedExpressionBody == null )
+            if ( symbol is { IsPartialDefinition: true, PartialImplementationPart: null } )
             {
-                // Partial methods with no definition.
-                substitutedBody = Block();
+                ret = RemoveAttributesForPartialImplementation( ret );
             }
 
-            return this.GetSpecialImplMethod(
-                method,
-                substitutedBody.WithSourceCodeAnnotation(),
-                substitutedExpressionBody.WithSourceCodeAnnotation(),
-                symbol,
-                GetOriginalImplMemberName( symbol ),
-                generationContext );
+            return ret;
+        }
+    }
+
+    private static MethodDeclarationSyntax RemoveAttributesForPartialImplementation( MethodDeclarationSyntax declaration )
+        => declaration.PartialUpdate(
+            List<AttributeListSyntax>(),
+            parameterList: declaration.ParameterList.PartialUpdate(
+                parameters: SeparatedList( declaration.ParameterList.Parameters.SelectAsArray( p => p.PartialUpdate( List<AttributeListSyntax>() ) ) ) ) );
+
+    private MemberDeclarationSyntax GetOriginalImplMethod(
+        MethodDeclarationSyntax method,
+        IMethodSymbol symbol,
+        SyntaxGenerationContext generationContext )
+    {
+        var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+        var context = new InliningContextIdentifier( semantic );
+
+        var substitutedBody =
+            method.Body != null
+                ? (BlockSyntax) RewriteBody( method.Body, symbol, new SubstitutionContext( this, generationContext, context ) )
+                : null;
+
+        var substitutedExpressionBody =
+            method.ExpressionBody != null
+                ? (ArrowExpressionClauseSyntax) RewriteBody(
+                    method.ExpressionBody,
+                    symbol,
+                    new SubstitutionContext( this, generationContext, context ) )
+                : null;
+
+        if ( substitutedBody == null && substitutedExpressionBody == null )
+        {
+            // Partial methods with no definition.
+            substitutedBody = Block();
         }
 
-        private MemberDeclarationSyntax GetEmptyImplMethod(
-            MethodDeclarationSyntax method,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
+        return this.GetSpecialImplMethod(
+            method,
+            substitutedBody.WithSourceCodeAnnotation(),
+            substitutedExpressionBody.WithSourceCodeAnnotation(),
+            symbol,
+            GetOriginalImplMemberName( symbol ),
+            generationContext );
+    }
+
+    private MemberDeclarationSyntax GetEmptyImplMethod(
+        MethodDeclarationSyntax method,
+        IMethodSymbol symbol,
+        SyntaxGenerationContext generationContext )
+    {
+        var returnType = symbol.ReturnType;
+
+        if ( !AsyncHelper.TryGetAsyncInfo( symbol.ReturnType, out var resultType, out _ ) )
         {
-            var returnType = symbol.ReturnType;
-
-            if ( !AsyncHelper.TryGetAsyncInfo( symbol.ReturnType, out var resultType, out _ ) )
-            {
-                resultType = returnType;
-            }
-
-            var isIterator = IteratorHelper.IsIteratorMethod( symbol );
-
-            var emptyBody =
-                isIterator
-                    ? SyntaxFactoryEx.FormattedBlock(
-                        YieldStatement(
-                            SyntaxKind.YieldBreakStatement,
-                            List<AttributeListSyntax>(),
-                            Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
-                            Token( TriviaList(), SyntaxKind.BreakKeyword, TriviaList( ElasticSpace ) ),
-                            null,
-                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
-                    : resultType.OriginalDefinition.SpecialType == SpecialType.System_Void
-                        ? SyntaxFactoryEx.FormattedBlock()
-                        : SyntaxFactoryEx.FormattedBlock(
-                            ReturnStatement(
-                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                                DefaultExpression( generationContext.SyntaxGenerator.Type( resultType ) ),
-                                Token( SyntaxKind.SemicolonToken ) ) );
-
-            return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            resultType = returnType;
         }
 
-        private MemberDeclarationSyntax GetSpecialImplMethod(
-            MethodDeclarationSyntax method,
-            BlockSyntax? body,
-            ArrowExpressionClauseSyntax? expressionBody,
-            IMethodSymbol symbol,
-            string name,
-            SyntaxGenerationContext generationContext )
-        {
-            var returnType = AsyncHelper.GetIntermediateMethodReturnType( symbol, method.ReturnType, generationContext );
+        var isIterator = IteratorHelper.IsIteratorMethod( symbol );
 
-            var modifiers = symbol
-                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
-                .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
-
-            var constraints = method.ConstraintClauses;
-
-            if ( constraints.Count == 0 && symbol.OverriddenMethod != null )
-            {
-                // Constraints may be inherited from the overridden method.
-
-                constraints = generationContext.SyntaxGenerator.TypeParameterConstraintClauses( symbol.TypeParameters );
-            }
-
-            return
-                MethodDeclaration(
-                        this.FilterAttributesOnSpecialImpl( symbol ),
-                        modifiers,
-                        returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.NormalizeWhitespace ),
+        var emptyBody =
+            isIterator
+                ? SyntaxFactoryEx.FormattedBlock(
+                    YieldStatement(
+                        SyntaxKind.YieldBreakStatement,
+                        List<AttributeListSyntax>(),
+                        Token( TriviaList(), SyntaxKind.YieldKeyword, TriviaList( ElasticSpace ) ),
+                        Token( TriviaList(), SyntaxKind.BreakKeyword, TriviaList( ElasticSpace ) ),
                         null,
-                        Identifier( name ),
-                        method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
-                        this.FilterAttributesOnSpecialImpl(
-                            symbol.Parameters,
-                            method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.PreserveTrivia ) ),
-                        constraints,
-                        body,
-                        expressionBody,
-                        expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, generationContext.NormalizeWhitespace )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
-        }
-
-        private MethodDeclarationSyntax GetTrampolineForMethod(
-            MethodDeclarationSyntax method,
-            IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
-        {
-            Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
-
-            Invariant.Implies(
-                targetSemantic.Kind is IntermediateSymbolSemanticKind.Base,
-                targetSemantic.Symbol is { IsOverride: true } or { IsVirtual: true } );
-
-            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
-
-            return method
-                .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                .WithTriviaFromIfNecessary( method, this.IntermediateCompilationContext.PreserveTrivia );
-
-            BlockSyntax GetBody()
-            {
-                var invocation =
-                    InvocationExpression(
-                        GetInvocationTarget(),
-                        ArgumentList(
-                            SeparatedList( method.ParameterList.Parameters.SelectAsReadOnlyList( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
-
-                if ( !targetSemantic.Symbol.ReturnsVoid )
-                {
-                    return SyntaxFactoryEx.FormattedBlock(
+                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
+                : resultType.OriginalDefinition.SpecialType == SpecialType.System_Void
+                    ? SyntaxFactoryEx.FormattedBlock()
+                    : SyntaxFactoryEx.FormattedBlock(
                         ReturnStatement(
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                            invocation,
+                            DefaultExpression( generationContext.SyntaxGenerator.Type( resultType ) ),
                             Token( SyntaxKind.SemicolonToken ) ) );
+
+        return this.GetSpecialImplMethod( method, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+    }
+
+    private MemberDeclarationSyntax GetSpecialImplMethod(
+        MethodDeclarationSyntax method,
+        BlockSyntax? body,
+        ArrowExpressionClauseSyntax? expressionBody,
+        IMethodSymbol symbol,
+        string name,
+        SyntaxGenerationContext generationContext )
+    {
+        var returnType = AsyncHelper.GetIntermediateMethodReturnType( symbol, method.ReturnType, generationContext );
+
+        var modifiers = symbol
+            .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
+            .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
+
+        var constraints = method.ConstraintClauses;
+
+        if ( constraints.Count == 0 && symbol.OverriddenMethod != null )
+        {
+            // Constraints may be inherited from the overridden method.
+
+            constraints = generationContext.SyntaxGenerator.TypeParameterConstraintClauses( symbol.TypeParameters );
+        }
+
+        return
+            MethodDeclaration(
+                    this.FilterAttributesOnSpecialImpl( symbol ),
+                    modifiers,
+                    returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.NormalizeWhitespace ),
+                    null,
+                    Identifier( name ),
+                    method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
+                    this.FilterAttributesOnSpecialImpl(
+                        symbol.Parameters,
+                        method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.PreserveTrivia ) ),
+                    constraints,
+                    body,
+                    expressionBody,
+                    expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
+                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, generationContext.NormalizeWhitespace )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+    }
+
+    private MethodDeclarationSyntax GetTrampolineForMethod(
+        MethodDeclarationSyntax method,
+        IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
+    {
+        Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
+
+        Invariant.Implies(
+            targetSemantic.Kind is IntermediateSymbolSemanticKind.Base,
+            targetSemantic.Symbol is { IsOverride: true } or { IsVirtual: true } );
+
+        // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+        return method
+            .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
+            .WithTriviaFromIfNecessary( method, this.IntermediateCompilationContext.PreserveTrivia );
+
+        BlockSyntax GetBody()
+        {
+            var invocation =
+                InvocationExpression(
+                    GetInvocationTarget(),
+                    ArgumentList( SeparatedList( method.ParameterList.Parameters.SelectAsReadOnlyList( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
+
+            if ( !targetSemantic.Symbol.ReturnsVoid )
+            {
+                return SyntaxFactoryEx.FormattedBlock(
+                    ReturnStatement(
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
+                        invocation,
+                        Token( SyntaxKind.SemicolonToken ) ) );
+            }
+            else
+            {
+                return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( invocation ) );
+            }
+
+            ExpressionSyntax GetInvocationTarget()
+            {
+                if ( targetSemantic.Symbol.IsStatic )
+                {
+                    return GetTargetName();
                 }
                 else
                 {
-                    return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( invocation ) );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() );
                 }
+            }
 
-                ExpressionSyntax GetInvocationTarget()
+            IdentifierNameSyntax GetTargetName()
+            {
+                if ( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base )
                 {
-                    if ( targetSemantic.Symbol.IsStatic )
-                    {
-                        return GetTargetName();
-                    }
-                    else
-                    {
-                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() );
-                    }
+                    return IdentifierName( GetOriginalImplMemberName( targetSemantic.Symbol ) );
                 }
-
-                IdentifierNameSyntax GetTargetName()
+                else
                 {
-                    if ( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base )
-                    {
-                        return IdentifierName( GetOriginalImplMemberName( targetSemantic.Symbol ) );
-                    }
-                    else
-                    {
-                        return IdentifierName( targetSemantic.Symbol.Name );
-                    }
+                    return IdentifierName( targetSemantic.Symbol.Name );
                 }
             }
         }
