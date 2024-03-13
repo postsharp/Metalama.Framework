@@ -126,7 +126,8 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
                 null,
                 0,
                 Array.Empty<CompileTimeFileManifest>(),
-                Array.Empty<CompileTimeDiagnosticManifest>() ),
+                Array.Empty<CompileTimeDiagnosticManifest>(),
+                false ),
             assembly );
 
         return new CompileTimeProject(

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -97,7 +98,17 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             input.AspectLayers,
             input.FirstCompilationModel.AssertNotNull(),
             newCompilationModel,
+            input.Configuration,
             input.Diagnostics,
-            input.ContributorSources );
+            input.ContributorSources,
+            aspectInstanceResults: aspectInstances.SelectAsImmutableArray(
+                x => new AspectInstanceResult(
+                    x.Value,
+                    AdviceOutcome.Default,
+                    default,
+                    default,
+                    default,
+                    default,
+                    default ) ) );
     }
 }

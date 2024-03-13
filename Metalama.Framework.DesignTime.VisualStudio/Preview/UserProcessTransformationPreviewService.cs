@@ -61,6 +61,10 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var newDocument = document.WithSyntaxRoot(
                 await newSyntaxTree.ToSyntaxTree( (CSharpParseOptions) syntaxTree.Options, cancellationToken ).GetRootAsync( cancellationToken ) );
 
+            // Disable the Metalama source generator: it shouldn't run on transformed code.
+            var newProject = newDocument.Project.WithAnalyzerReferences( [] );
+            newDocument = newProject.GetDocument( document.Id )!;
+
             var formattedDocument = await OutputCodeFormatter.FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
             var formattedSyntaxTree = await formattedDocument.Document.GetSyntaxTreeAsync( cancellationToken );
 

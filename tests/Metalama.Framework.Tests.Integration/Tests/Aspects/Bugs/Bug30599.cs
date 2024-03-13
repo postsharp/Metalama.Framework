@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30599
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30599
 {
     internal class Aspect : MethodAspect
     {

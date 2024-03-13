@@ -2097,6 +2097,17 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // The condition may contains constructs like typeof or nameof that need to be transformed.
             var condition = this.TransformCompileTimeCode( node.Condition );
 
+            // If the statement is not a block, wrap it in a block, to ensure chains of if-else-if statements are properly nested.
+            if ( transformedStatement is not BlockSyntax )
+            {
+                transformedStatement = Block( transformedStatement );
+            }
+
+            if ( transformedElseStatement is not null and not BlockSyntax )
+            {
+                transformedElseStatement = Block( transformedElseStatement );
+            }
+
             return IfStatement(
                 node.AttributeLists,
                 condition,

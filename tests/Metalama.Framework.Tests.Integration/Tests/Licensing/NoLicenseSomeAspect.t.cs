@@ -1,0 +1,2 @@
+// CompileTimeAspectPipeline.ExecuteAsync failed.
+// Error LAMA0809 on ``: `You must activate Metalama or register a license key before building your project. See https://postsharp.net/links/metalama-register-license.`

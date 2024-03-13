@@ -72,16 +72,22 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         var aspectInstance = result.Value.AspectInstanceResults.Single().AspectInstance;
         var aspectClass = aspectInstance.AspectClass;
 
-        if ( !isComputingPreview && !LicenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
+        if ( result.IsSuccessful )
         {
-            diagnosticAdder.Report(
-                LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
-                    aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )
-                        .AssertNotNull( "Live templates should be always applied on a target." )
-                        .GetDiagnosticLocation(),
-                    ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
+            var licenseVerifier = result.Value.Configuration.ServiceProvider.GetService<LicenseVerifier>();
 
-            return default;
+            if ( !isComputingPreview && licenseVerifier != null
+                                     && !licenseVerifier.VerifyCanApplyLiveTemplate( serviceProvider, aspectClass, diagnosticAdder ) )
+            {
+                diagnosticAdder.Report(
+                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
+                        aspectInstance.TargetDeclaration.GetSymbol( result.Value.LastCompilation.Compilation )
+                            .AssertNotNull( "Live templates should be always applied on a target." )
+                            .GetDiagnosticLocation(),
+                        ($"Apply [{aspectClass.DisplayName}] aspect", aspectClass.DisplayName) ) );
+
+                return default;
+            }
         }
 
         if ( !result.IsSuccessful )
