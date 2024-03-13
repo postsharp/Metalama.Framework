@@ -54,9 +54,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
         Advice advice,
         INamedType targetType,
         string name )
-        : base( targetType, name, advice )
-    {
-    }
+        : base( targetType, name, advice ) { }
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
     {

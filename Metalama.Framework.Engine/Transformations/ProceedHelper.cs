@@ -29,7 +29,7 @@ internal static class ProceedHelper
         IMethod overriddenMethod )
     {
         var runtimeAspectHelperType =
-            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof( RunTimeAspectHelper ) ) );
+            generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
         switch ( selectedTemplateKind )
         {
@@ -49,9 +49,8 @@ internal static class ProceedHelper
                                     MemberAccessExpression(
                                         SyntaxKind.SimpleMemberAccessExpression,
                                         runtimeAspectHelperType,
-                                        IdentifierName( nameof( RunTimeAspectHelper.Buffer ) ) ) )
-                                .WithArgumentList(
-                                    ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
+                                        IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
+                                .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation );
                     }
                     else
@@ -100,7 +99,7 @@ internal static class ProceedHelper
                 return WrapAsyncVoid( invocationExpression, overriddenMethod, false );
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
-            { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
+                { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
                 {
                     var expression = GenerateAwaitBufferAsync();
 
@@ -130,7 +129,7 @@ internal static class ProceedHelper
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             runtimeAspectHelperType,
-                            IdentifierName( nameof( RunTimeAspectHelper.Buffer ) + "Async" ) ) )
+                            IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                     .WithArgumentList( arguments )
                     .WithAdditionalAnnotations( Simplifier.Annotation );
 
@@ -183,7 +182,11 @@ internal static class ProceedHelper
         return new SyntaxUserExpression( expression, type );
     }
 
-    public static ExpressionSyntax CreateMemberAccessExpression( IMember targetMember, AspectLayerId aspectLayerId, AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
+    public static ExpressionSyntax CreateMemberAccessExpression(
+        IMember targetMember,
+        AspectLayerId aspectLayerId,
+        AspectReferenceTargetKind referenceTargetKind,
+        SyntaxGenerationContext generationContext )
     {
         ExpressionSyntax expression;
 

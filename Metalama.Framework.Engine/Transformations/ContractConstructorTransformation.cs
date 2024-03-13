@@ -21,9 +21,7 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetConstructor, contractTarget, contractDirection, template, templateArguments, tags )
-    {
-    }
+        IObjectReader tags ) : base( advice, targetConstructor, contractTarget, contractDirection, template, templateArguments, tags ) { }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
@@ -83,5 +81,6 @@ internal sealed class ContractConstructorTransformation : ContractBaseTransforma
                 throw new AssertionFailedException( $"Unsupported contract target: {this.ContractTarget}" );
         }
     }
+
     public override FormattableString ToDisplayString() => $"Add default contract to constructor '{this.TargetMember}'";
 }

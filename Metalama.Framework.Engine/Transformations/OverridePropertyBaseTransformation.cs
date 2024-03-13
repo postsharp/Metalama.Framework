@@ -45,7 +45,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
             (false, Writeability.All) => SyntaxKind.SetAccessorDeclaration,
             _ => SyntaxKind.None
         };
-        
+
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
@@ -57,7 +57,8 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
                     modifiers,
-                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
+                        .WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
                     SyntaxFactory.AccessorList(
@@ -106,9 +107,9 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
 
     protected override ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context )
         => TransformationHelper.CreatePropertyProceedGetExpression(
-            context.AspectReferenceSyntaxProvider, 
-            context.SyntaxGenerationContext, 
-            this.OverriddenDeclaration, 
+            context.AspectReferenceSyntaxProvider,
+            context.SyntaxGenerationContext,
+            this.OverriddenDeclaration,
             this.ParentAdvice.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )

@@ -27,7 +27,7 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
         {
             SyntaxKind.GetAccessorDeclaration => this.CreateProceedGetExpression( context ),
             SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => this.CreateProceedSetExpression( context ),
-            _ => throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." ),
+            _ => throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." )
         };
 
         return TransformationHelper.CreateIdentityAccessorBody(

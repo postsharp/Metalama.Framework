@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Engine.CodeModel
-{
-    internal interface IMethodBaseImpl : IMethodBase, IMemberImpl { }
-}
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal interface IMethodBaseImpl : IMethodBase, IMemberImpl { }

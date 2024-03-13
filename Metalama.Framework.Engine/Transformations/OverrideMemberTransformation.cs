@@ -34,9 +34,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
     public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
-    {
-        return ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration, this.ParentAdvice.AspectLayerId, referenceTargetKind, generationContext );
-    }
+        => ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration, this.ParentAdvice.AspectLayerId, referenceTargetKind, generationContext );
 
     public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 

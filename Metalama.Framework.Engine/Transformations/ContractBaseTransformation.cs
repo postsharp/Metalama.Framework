@@ -45,12 +45,12 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
     /// </summary>
     public IObjectReader Tags { get; }
 
-    public ContractBaseTransformation( 
-        Advice advice, 
-        IMember targetMember, 
-        IDeclaration contractTarget, 
+    public ContractBaseTransformation(
+        Advice advice,
+        IMember targetMember,
+        IDeclaration contractTarget,
         ContractDirection contractDirection,
-        TemplateMember<IMethod> template, 
+        TemplateMember<IMethod> template,
         IObjectReader templateArguments,
         IObjectReader tags ) : base( advice )
     {

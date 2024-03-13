@@ -3,23 +3,22 @@
 using Metalama.Framework.Code;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents a code transformation that insert statements into the target member.
+/// </summary>
+internal interface IInsertStatementTransformation : ITransformation
 {
     /// <summary>
-    /// Represents a code transformation that insert statements into the target member.
+    /// Provides an list of inserted statements.
     /// </summary>
-    internal interface IInsertStatementTransformation : ITransformation
-    {
-        /// <summary>
-        /// Provides an list of inserted statements.
-        /// </summary>
-        /// <param name="context">Context for providing inserted statements.</param>
-        /// <returns>A list of Inserted statements or empty list if an error occured.</returns>
-        IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
+    /// <param name="context">Context for providing inserted statements.</param>
+    /// <returns>A list of Inserted statements or empty list if an error occured.</returns>
+    IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
-        /// <summary>
-        /// Gets the member that statements will be inserted into (may differ from <see cref="ITransformationBase.TargetDeclaration"/> e.g. for builders).
-        /// </summary>
-        IMember TargetMember { get; }
-    }
+    /// <summary>
+    /// Gets the member that statements will be inserted into (may differ from <see cref="ITransformationBase.TargetDeclaration"/> e.g. for builders).
+    /// </summary>
+    IMember TargetMember { get; }
 }

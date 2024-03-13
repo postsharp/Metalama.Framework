@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 
-namespace Metalama.Framework.Engine.CodeModel
-{
-    internal interface IPropertyImpl : IProperty, IPropertyOrIndexerImpl, IUserExpression { }
-}
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal interface IPropertyImpl : IProperty, IPropertyOrIndexerImpl, IUserExpression { }

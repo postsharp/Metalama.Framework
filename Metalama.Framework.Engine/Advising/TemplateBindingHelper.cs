@@ -27,9 +27,7 @@ internal static class TemplateBindingHelper
         this TemplateMember<IMethod> template,
         IMethod targetMethod,
         IObjectReader? arguments = null )
-    {
-        return template.PartialForIntroduction( arguments ).ForIntroduction( targetMethod );
-    }
+        => template.PartialForIntroduction( arguments ).ForIntroduction( targetMethod );
 
     /// <summary>
     /// Partially binds a template with given type arguments when the target declaration is not yet known.

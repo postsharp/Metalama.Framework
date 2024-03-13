@@ -21,9 +21,14 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetIndexer, (IDeclaration?)indexerParameter ?? targetIndexer, contractDirection, template, templateArguments, tags )
-    {
-    }
+        IObjectReader tags ) : base(
+        advice,
+        targetIndexer,
+        (IDeclaration?) indexerParameter ?? targetIndexer,
+        contractDirection,
+        template,
+        templateArguments,
+        tags ) { }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
@@ -54,7 +59,12 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                         Invariant.Assert( this.TargetMember.GetMethod is not null );
 
                         var returnVariableName = context.GetReturnValueVariableName();
-                        outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), this.TargetMember.Type, out outputContractBlock );
+
+                        outputResult = this.TryExecuteTemplate(
+                            context,
+                            IdentifierName( returnVariableName ),
+                            this.TargetMember.Type,
+                            out outputContractBlock );
                     }
                     else
                     {
@@ -71,12 +81,22 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 
                     if ( inputContractBlock != null )
                     {
-                        statements.Add( new InsertedStatement( inputContractBlock, this.TargetMember.SetMethod.AssertNotNull().Parameters[^1], this, InsertedStatementKind.InputContract ) );
+                        statements.Add(
+                            new InsertedStatement(
+                                inputContractBlock,
+                                this.TargetMember.SetMethod.AssertNotNull().Parameters[^1],
+                                this,
+                                InsertedStatementKind.InputContract ) );
                     }
 
                     if ( outputContractBlock != null )
                     {
-                        statements.Add( new InsertedStatement( outputContractBlock, this.TargetMember.GetMethod.AssertNotNull().ReturnParameter, this, InsertedStatementKind.OutputContract ) );
+                        statements.Add(
+                            new InsertedStatement(
+                                outputContractBlock,
+                                this.TargetMember.GetMethod.AssertNotNull().ReturnParameter,
+                                this,
+                                InsertedStatementKind.OutputContract ) );
                     }
 
                     return statements;
@@ -137,5 +157,6 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         }
     }
 
-    public override FormattableString ToDisplayString() => $"Add default contract to indexer '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified)}'";
+    public override FormattableString ToDisplayString()
+        => $"Add default contract to indexer '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

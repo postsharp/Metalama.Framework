@@ -19,5 +19,5 @@ public enum InsertedStatementKind
     /// Insert statement into the end of an auxiliary declaration for the current version of the target declaration (source, introduction or latest override). 
     /// Statements added by one layer have their order preserved.
     /// </summary>
-    OutputContract = 100,
+    OutputContract = 100
 }

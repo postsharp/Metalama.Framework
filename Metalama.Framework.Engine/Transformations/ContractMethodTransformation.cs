@@ -12,18 +12,16 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractMethodTransformation : ContractBaseTransformation
 {
-    public new IMethod TargetMember => (IMethod)base.TargetMember;
+    public new IMethod TargetMember => (IMethod) base.TargetMember;
 
-    public ContractMethodTransformation( 
+    public ContractMethodTransformation(
         Advice advice,
         IMethod targetMethod,
         IParameter contractTarget,
         ContractDirection contractDirection,
         TemplateMember<IMethod> template,
         IObjectReader templateArguments,
-        IObjectReader tags ) : base( advice, targetMethod, contractTarget, contractDirection, template, templateArguments, tags ) 
-    {
-    }
+        IObjectReader tags ) : base( advice, targetMethod, contractTarget, contractDirection, template, templateArguments, tags ) { }
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
@@ -54,7 +52,7 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
                     var valueSyntax = IdentifierName( param.Name );
 
                     if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
-                    {   
+                    {
                         Invariant.Assert( param.RefKind is not RefKind.Out );
                         inputResult = this.TryExecuteTemplate( context, valueSyntax, param.Type, out inputContractBlock );
                     }
@@ -75,14 +73,14 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
                         outputContractBlock = null;
                     }
 
-                    if (inputResult == false || outputResult == false)
+                    if ( inputResult == false || outputResult == false )
                     {
                         return Array.Empty<InsertedStatement>();
                     }
 
                     var statements = new List<InsertedStatement>();
 
-                    if (inputContractBlock != null)
+                    if ( inputContractBlock != null )
                     {
                         statements.Add( new InsertedStatement( inputContractBlock, param, this, InsertedStatementKind.InputContract ) );
                     }

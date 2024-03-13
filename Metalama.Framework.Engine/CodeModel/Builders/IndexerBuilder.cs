@@ -15,7 +15,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder, IIndexerImpl
 {
-
     public ParameterBuilderList Parameters { get; } = new();
 
     public override Writeability Writeability

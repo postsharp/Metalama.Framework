@@ -86,8 +86,8 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-    => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
-        .GetTypedExpressionSyntax();
+        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
+            .GetTypedExpressionSyntax();
 
     public TemplateMember<IProperty>? InitializerTemplate
     {
@@ -138,8 +138,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
         MemberInjectionContext context,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
-    {
-        return this.GetInitializerExpressionOrMethod(
+        => this.GetInitializerExpressionOrMethod(
             advice,
             context,
             this.Type,
@@ -148,5 +147,4 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
             this.InitializerTags,
             out initializerExpression,
             out initializerMethod );
-    }
 }

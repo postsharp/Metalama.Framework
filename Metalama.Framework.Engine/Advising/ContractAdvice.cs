@@ -10,85 +10,89 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.Advising;
+
+internal sealed class ContractAdvice : Advice
 {
-    internal sealed class ContractAdvice : Advice
+    public ContractDirection Direction { get; }
+
+    public TemplateMember<IMethod> Template { get; }
+
+    public IObjectReader Tags { get; }
+
+    public IObjectReader TemplateArguments { get; }
+
+    public ContractAdvice(
+        IAspectInstanceInternal aspect,
+        TemplateClassInstance templateInstance,
+        IDeclaration targetDeclaration,
+        ICompilation sourceCompilation,
+        TemplateMember<IMethod> template,
+        ContractDirection direction,
+        string? layerName,
+        IObjectReader tags,
+        IObjectReader templateArguments )
+        : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
     {
-        public ContractDirection Direction { get; }
+        Invariant.Assert( direction is ContractDirection.Input or ContractDirection.Output or ContractDirection.Both );
 
-        public TemplateMember<IMethod> Template { get; }
+        this.Direction = direction;
+        this.Template = template;
+        this.Tags = tags;
+        this.TemplateArguments = templateArguments;
+    }
 
-        public IObjectReader Tags { get; }
+    public override AdviceKind AdviceKind => AdviceKind.AddContract;
 
-        public IObjectReader TemplateArguments { get; }
+    public override AdviceImplementationResult Implement(
+        ProjectServiceProvider serviceProvider,
+        CompilationModel compilation,
+        Action<ITransformation> addTransformation )
+    {
+        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-        public ContractAdvice(
-            IAspectInstanceInternal aspect,
-            TemplateClassInstance templateInstance,
-            IDeclaration targetDeclaration,
-            ICompilation sourceCompilation,
-            TemplateMember<IMethod> template,
-            ContractDirection direction,
-            string? layerName,
-            IObjectReader tags,
-            IObjectReader templateArguments )
-            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName ) 
+        switch ( targetDeclaration )
         {
-            Invariant.Assert( direction is ContractDirection.Input or ContractDirection.Output or ContractDirection.Both );
+            case IField field:
+                var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
+                addTransformation( promotedField.ToTransformation() );
+                OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 
-            this.Direction = direction;
-            this.Template = template;
-            this.Tags = tags;
-            this.TemplateArguments = templateArguments;
-        }
+                addTransformation(
+                    new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-        public override AdviceKind AdviceKind => AdviceKind.AddContract;
+                return AdviceImplementationResult.Success( promotedField );
 
-        public override AdviceImplementationResult Implement(
-            ProjectServiceProvider serviceProvider,
-            CompilationModel compilation,
-            Action<ITransformation> addTransformation )
-        {
-            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+            case IProperty property:
+                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-            switch ( targetDeclaration )
-            {
-                case IField field:
-                    var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
-                    addTransformation( promotedField.ToTransformation() );
-                    OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
-                    addTransformation( new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags) );
+                return AdviceImplementationResult.Success( property );
 
-                    return AdviceImplementationResult.Success( promotedField );
+            case IIndexer indexer:
+                addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                case IProperty property:
-                    addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                return AdviceImplementationResult.Success( indexer );
 
-                    return AdviceImplementationResult.Success( property );
+            case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
+                addTransformation(
+                    new ContractIndexerTransformation( this, indexer, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                case IIndexer indexer:
-                    addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                return AdviceImplementationResult.Success( indexer );
 
-                    return AdviceImplementationResult.Success( indexer );
+            case IParameter { ContainingDeclaration: IMethod method } parameter:
+                addTransformation(
+                    new ContractMethodTransformation( this, method, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
-                    addTransformation( new ContractIndexerTransformation( this, indexer, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                return AdviceImplementationResult.Success( method );
 
-                    return AdviceImplementationResult.Success( indexer );
+            case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
+                addTransformation(
+                    new ContractConstructorTransformation( this, constructor, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                case IParameter { ContainingDeclaration: IMethod method } parameter:
-                    addTransformation( new ContractMethodTransformation( this, method, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                return AdviceImplementationResult.Success( constructor );
 
-                    return AdviceImplementationResult.Success( method );
-
-                case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
-                    addTransformation( new ContractConstructorTransformation( this, constructor, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
-
-                    return AdviceImplementationResult.Success( constructor );
-
-                default:
-                    throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." );
-            }
+            default:
+                throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." );
         }
     }
 }

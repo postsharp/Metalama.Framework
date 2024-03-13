@@ -29,10 +29,12 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
     public IType Type => this.Compilation.Factory.GetIType( this._propertyOrIndexerBuilder.Type );
 
     [Memo]
-    public IMethod? GetMethod => this._propertyOrIndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._propertyOrIndexerBuilder.GetMethod ) : null;
+    public IMethod? GetMethod
+        => this._propertyOrIndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._propertyOrIndexerBuilder.GetMethod ) : null;
 
     [Memo]
-    public IMethod? SetMethod => this._propertyOrIndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._propertyOrIndexerBuilder.SetMethod ) : null;
+    public IMethod? SetMethod
+        => this._propertyOrIndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._propertyOrIndexerBuilder.SetMethod ) : null;
 
     public PropertyInfo ToPropertyInfo() => this._propertyOrIndexerBuilder.ToPropertyInfo();
 

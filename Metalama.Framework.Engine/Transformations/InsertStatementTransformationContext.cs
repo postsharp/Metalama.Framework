@@ -4,20 +4,24 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 
-namespace Metalama.Framework.Engine.Transformations
-{
-    /// <summary>
-    /// Context for code transformation's syntax node evaluation.
-    /// </summary>
-    internal abstract class InsertStatementTransformationContext : TransformationContext
-    {
-        protected InsertStatementTransformationContext(
-            ProjectServiceProvider serviceProvider,
-            UserDiagnosticSink diagnosticSink,
-            SyntaxGenerationContext syntaxGenerationContext,
-            CompilationModel compilation,
-            ITemplateLexicalScopeProvider lexicalScopeProvider ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
+namespace Metalama.Framework.Engine.Transformations;
 
-        public abstract string GetReturnValueVariableName();
-    }
+/// <summary>
+/// Context for code transformation's syntax node evaluation.
+/// </summary>
+internal abstract class InsertStatementTransformationContext : TransformationContext
+{
+    protected InsertStatementTransformationContext(
+        ProjectServiceProvider serviceProvider,
+        UserDiagnosticSink diagnosticSink,
+        SyntaxGenerationContext syntaxGenerationContext,
+        CompilationModel compilation,
+        ITemplateLexicalScopeProvider lexicalScopeProvider ) : base(
+        serviceProvider,
+        diagnosticSink,
+        syntaxGenerationContext,
+        compilation,
+        lexicalScopeProvider ) { }
+
+    public abstract string GetReturnValueVariableName();
 }

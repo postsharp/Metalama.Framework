@@ -12,9 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
-    public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation ) : base( builder, compilation )
-    {
-    }
+    public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation ) : base( builder, compilation ) { }
 
     public IndexerBuilder IndexerBuilder => (IndexerBuilder) this.MemberBuilder;
 

@@ -36,9 +36,9 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
     IConstructor IConstructor.Definition => this;
 
     public IConstructor? GetBaseConstructor()
-    {
-        // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always
-        // the default constructor of the base class.
-        return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
-    }
+        =>
+
+            // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always
+            // the default constructor of the base class.
+            this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
 }
