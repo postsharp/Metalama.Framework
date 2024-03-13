@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; }
 
+        public ImmutableArray<ValidatorInstance> Validators { get; }
+        
         public ImmutableArray<ReferenceValidatorInstance> ReferenceValidators { get; }
 
         public CompilationModel? FirstCompilationModel { get; }
@@ -118,6 +120,7 @@ namespace Metalama.Framework.Engine.Pipeline
             PipelineContributorSources? sources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
             ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations = default,
+            ImmutableArray<ValidatorInstance> validators = default,
             ImmutableArray<ReferenceValidatorInstance> referenceValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AspectInstanceResult> aspectInstanceResults = default,
@@ -139,6 +142,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            this.Validators = validators.IsDefault ? ImmutableArray<ValidatorInstance>.Empty : validators;
 
             this.ReferenceValidators =
                 referenceValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : referenceValidators;
@@ -172,6 +176,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.ContributorSources,
                 this.ExternallyInheritableAspects,
                 this.Annotations,
+                this.Validators,
                 this.ReferenceValidators,
                 this.AdditionalSyntaxTrees,
                 this.AspectInstanceResults,

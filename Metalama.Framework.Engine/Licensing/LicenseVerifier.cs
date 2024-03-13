@@ -12,9 +12,11 @@ using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -167,6 +169,7 @@ public sealed class LicenseVerifier : IProjectService
     internal void VerifyCompilationResult(
         CompileTimeProject project,
         IEnumerable<AspectInstanceResult> aspectInstanceResults,
+        IEnumerable<ValidatorInstance> validators,
         UserDiagnosticSink diagnostics )
     {
         // List all aspect classed, that are used.
@@ -202,13 +205,10 @@ public sealed class LicenseVerifier : IProjectService
                 .SelectAsArray( x => x.FullName )
                 .OrderBy( x => x )
                 .ToReadOnlyList();
-
-        // Show toast notifications if needed and if Metalama is used in the project.
-        if ( consumedAspectClassNames.Count > 0 )
-        {
-            this._toastNotificationDetectionService?.Detect();
-        }
         
+        // Count all validator sources
+        var validatorsCount = validators.Count();
+
         var hasLicenseError = false;
 
         // Check the use of Metalama.Framework.Sdk.
@@ -238,7 +238,7 @@ public sealed class LicenseVerifier : IProjectService
 
         if ( maxAspectClasses == 0 )
         {
-            if ( consumedAspectClassNames.Count > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+            if ( consumedAspectClassNames.Count > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
             {
                 hasLicenseError = true;
 
@@ -274,6 +274,12 @@ public sealed class LicenseVerifier : IProjectService
                             (consumedAspectClassNames.Count, maxAspectClasses, this._projectOptions.ProjectName ?? "Anonymous") ) );
                 }
             }
+        }
+        
+        // Show toast notifications if needed and if Metalama is used in the project.
+        if ( consumedAspectClassNames.Count > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+        {
+            this._toastNotificationDetectionService?.Detect();
         }
 
         // Write consumption data to disk if required.

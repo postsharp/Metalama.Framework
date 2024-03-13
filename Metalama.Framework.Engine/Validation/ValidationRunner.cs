@@ -55,8 +55,12 @@ internal sealed class ValidationRunner
         var referenceValidatorsTask = this.RunReferenceValidatorsAsync( initialCompilationWithEnhancements, userDiagnosticSink, cancellationToken );
 
         await Task.WhenAll( declarationValidatorsTask, referenceValidatorsTask );
+        
+        var declarationValidators = await declarationValidatorsTask;
+        var referenceValidators = await referenceValidatorsTask;
+        var allValidators = declarationValidators.Union<ValidatorInstance>( referenceValidators ).ToImmutableArray();
 
-        return new ValidationResult( await referenceValidatorsTask, userDiagnosticSink.ToImmutable() );
+        return new ValidationResult( allValidators, referenceValidators, userDiagnosticSink.ToImmutable() );
     }
 
     public void RunDeclarationValidators( CompilationModel compilation, CompilationModelVersion version, UserDiagnosticSink diagnosticAdder )
@@ -78,19 +82,25 @@ internal sealed class ValidationRunner
         }
     }
 
-    public async Task RunDeclarationValidatorsAsync(
+    public async Task<ImmutableArray<DeclarationValidatorInstance>> RunDeclarationValidatorsAsync(
         CompilationModel initialCompilation,
         CompilationModel finalCompilation,
         UserDiagnosticSink diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var task1 = this.RunDeclarationValidatorsAsync( initialCompilation, CompilationModelVersion.Initial, diagnosticAdder, cancellationToken );
-        var task2 = this.RunDeclarationValidatorsAsync( finalCompilation, CompilationModelVersion.Final, diagnosticAdder, cancellationToken );
+        var initialCompilationValidationTask = this.RunDeclarationValidatorsAsync( initialCompilation, CompilationModelVersion.Initial, diagnosticAdder, cancellationToken );
+        var finalCompilationValidationTask = this.RunDeclarationValidatorsAsync( finalCompilation, CompilationModelVersion.Final, diagnosticAdder, cancellationToken );
 
-        await Task.WhenAll( task1, task2 );
+        await Task.WhenAll( initialCompilationValidationTask, finalCompilationValidationTask );
+        
+        var initialCompilationValidators = await initialCompilationValidationTask;
+        var finalCompilationValidators = await finalCompilationValidationTask;
+        var allDeclarationValidators = initialCompilationValidators.Union( finalCompilationValidators ).ToImmutableArray();
+
+        return allDeclarationValidators;
     }
 
-    private async Task RunDeclarationValidatorsAsync(
+    private async Task<ImmutableArray<DeclarationValidatorInstance>> RunDeclarationValidatorsAsync(
         CompilationModel compilation,
         CompilationModelVersion version,
         UserDiagnosticSink diagnosticAdder,
@@ -98,11 +108,14 @@ internal sealed class ValidationRunner
     {
         var validators = this._sources
             .SelectMany( s => s.GetValidators( ValidatorKind.Definition, version, compilation, diagnosticAdder ) )
-            .Cast<DeclarationValidatorInstance>();
+            .Cast<DeclarationValidatorInstance>()
+            .ToImmutableArray();
 
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
 
         await this._concurrentTaskRunner.RunInParallelAsync( validators, RunValidator, cancellationToken );
+
+        return validators;
 
         void RunValidator( DeclarationValidatorInstance validator )
         {

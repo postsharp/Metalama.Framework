@@ -17,10 +17,16 @@ internal class ToastNotificationsTestServices : TestsBase, IBackstageService
     
     public List<ToastNotification> Notifications => this.UserInterface.Notifications;
 
+    public TestUserDeviceDetectionService Device => this.UserDeviceDetection;
+
+    public IIdeExtensionStatusService VsxStatus { get; }
+
     public ToastNotificationsTestServices( ITestOutputHelper logger, IServiceProvider serviceProvider, string? licenseKey ) : base(
         logger,
         serviceProvider.GetRequiredBackstageService<IApplicationInfoProvider>().CurrentApplication )
     {
+        this.VsxStatus = this.ServiceProvider.GetRequiredBackstageService<IIdeExtensionStatusService>();
+        
         this.UserDeviceDetection.IsInteractiveDevice = true;
         
         if ( licenseKey != null )

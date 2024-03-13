@@ -45,6 +45,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     },
                     pipelineStepsResult.InheritableAspectInstances,
                     ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty,
+                    ImmutableArray<ValidatorInstance>.Empty,
                     ImmutableArray<ReferenceValidatorInstance>.Empty,
                     input.AdditionalSyntaxTrees,
                     input.AspectInstanceResults ) );

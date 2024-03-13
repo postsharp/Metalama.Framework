@@ -94,6 +94,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     input.ExternallyInheritableAspects.AddRange(
                         pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
                     finalCompilation.Annotations,
+                    validationResult.Validations,
                     validationResult.ExternallyVisibleValidations,
                     additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
                         ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )

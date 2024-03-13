@@ -456,6 +456,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 additionalCompilationOutputFiles: additionalCompilationOutputFiles );
 
             var allAspects = Enumerable.Empty<AspectInstanceResult>();
+            var allValidators = Enumerable.Empty<ValidatorInstance>();
 
             foreach ( var stageConfiguration in pipelineConfiguration.Stages )
             {
@@ -478,6 +479,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     pipelineStageResult = stageResult.Value;
                     allAspects = allAspects.Union( stageResult.Value.AspectInstanceResults );
+                    allValidators = allValidators.Union( stageResult.Value.Validators );
                 }
             }
 
@@ -492,7 +494,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 {
                     var compileTimeProject = pipelineConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
                     var licensingDiagnostics = new UserDiagnosticSink( compileTimeProject );
-                    licenseVerifier.VerifyCompilationResult( compileTimeProject, allAspects, licensingDiagnostics );
+                    licenseVerifier.VerifyCompilationResult( compileTimeProject, allAspects, allValidators, licensingDiagnostics );
                     pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
                 }
             }

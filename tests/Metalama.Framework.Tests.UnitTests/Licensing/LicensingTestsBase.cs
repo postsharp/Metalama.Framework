@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
@@ -30,7 +31,8 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             string code,
             string? licenseKey,
             string? assemblyName = "AspectCountTests.ArbitraryNamespace",
-            string projectName = "TestProject" )
+            string projectName = "TestProject",
+            Action<ProjectServiceProvider>? configureServices = null )
         {
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddProjectLicenseConsumptionManagerForTest( licenseKey ) );
@@ -57,6 +59,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             var testContextOptions = this.GetDefaultTestContextOptions() with { ProjectName = projectName };
 
             using var testContext = this.CreateTestContext( testContextOptions, mocks );
+            configureServices?.Invoke( testContext.ServiceProvider );
             var domain = testContext.Domain;
 
             var inputCompilation = TestCompilationFactory.CreateCSharpCompilation( code, name: assemblyName );
