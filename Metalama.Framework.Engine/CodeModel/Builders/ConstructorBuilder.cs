@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -42,7 +43,9 @@ internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstru
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
     public ConstructorBuilder( INamedType targetType, Advice advice )
-        : base( targetType, null!, advice ) { }
+        : base( targetType, null!, advice ) 
+    {
+    }
 
     public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
     {

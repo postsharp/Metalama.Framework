@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.Utilities;
 using System.Linq;
 using System.Reflection;
 
@@ -19,7 +20,11 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     protected override MemberBuilder MemberBuilder => this.ConstructorBuilder;
 
-    public IParameterList Parameters => ParameterList.Empty;
+    [Memo]
+    public IParameterList Parameters 
+        => new ParameterList(
+            this,
+            this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
     public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
