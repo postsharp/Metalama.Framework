@@ -76,10 +76,24 @@ public static partial class EligibilityRuleFactory
                     } );
 
             // Eligibility rules for parameters.
+            static void AddCommonParameterRules( IEligibilityBuilder<IParameter> parameter )
+            {
+                parameter.DeclaringMember().MustBeExplicitlyDeclared();
+                parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
+
+                parameter.DeclaringMember().Convert()
+                    .When<IMethod>()
+                    .AddRules(
+                        method => 
+                            method.MustSatisfy(
+                                m => !(m.IsPartial && !m.HasImplementation),
+                                m => $"'{m}' must not be partial without an implementation" ) );
+            }
+
+            // Eligibility rules for parameters.
             static void AddCommonReturnParameterRules( IEligibilityBuilder<IParameter> parameter )
             {
                 parameter.MustNotBeVoid();
-
                 parameter.MustSatisfy(
                     p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );
@@ -91,8 +105,7 @@ public static partial class EligibilityRuleFactory
                     {
                         parameter.MustNotBeReturnParameter();
                         parameter.MustBeReadable();
-                        parameter.DeclaringMember().MustBeExplicitlyDeclared();
-                        parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
+                        AddCommonParameterRules( parameter );
                         AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     }) );
@@ -102,9 +115,8 @@ public static partial class EligibilityRuleFactory
                     parameter =>
                     {
                         parameter.MustSatisfyAny( p => p.MustBeWritable(), p => p.MustBeReturnParameter() );
-                        parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
-                        parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
+                        AddCommonParameterRules( parameter );
                         AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
@@ -115,9 +127,8 @@ public static partial class EligibilityRuleFactory
                     {
                         parameter.MustNotBeReturnParameter();
                         parameter.MustBeRef();
-                        parameter.DeclaringMember().MustBeExplicitlyDeclared();
                         parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
-                        parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
+                        AddCommonParameterRules( parameter );
                         AddCommonReturnParameterRules( parameter );
                         parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
@@ -126,13 +137,11 @@ public static partial class EligibilityRuleFactory
                 CreateRule<IParameter>(
                     parameter =>
                     {
-                        parameter.DeclaringMember().MustBeExplicitlyDeclared();
-
                         parameter.MustSatisfy(
                             p => !(p is { RefKind: RefKind.Out, DeclaringMember: IConstructor }),
                             _ => $"output contracts on constructors are not supported" );
 
-                        parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
+                        AddCommonParameterRules( parameter );
                         AddCommonReturnParameterRules( parameter );
                     } );
 
