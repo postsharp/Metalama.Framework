@@ -8,13 +8,14 @@ using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
+using System;
 using System.IO;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_1;
 
 var product = new Product( MetalamaDependencies.Metalama )
 {
-    Solutions = new Solution[]
-    {
+    Solutions =
+    [
         new DotNetSolution( "Metalama.sln" )
         {
             SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
@@ -23,8 +24,8 @@ var product = new Product( MetalamaDependencies.Metalama )
             
             // We don't run the tests for the whole solution because they are too slow and redundant. See #34277.
             TestMethod = BuildMethod.None,
-            FormatExclusions = new[]
-            {
+            FormatExclusions =
+            [
                 // Test payloads should not be formatted because it would break the test output comparison.
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
@@ -32,7 +33,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 
                 // XML formatting seems to be conflicting.
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
-            }
+            ]
         },
         new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
         {
@@ -48,7 +49,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         {
             IsTestOnly = true
         }
-    },
+    ],
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.Testing.UnitTesting.$(PackageVersion).nupkg",
@@ -60,8 +61,8 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies = new[]
-    {
+    ParametrizedDependencies =
+    [
         DevelopmentDependencies.PostSharpEngineering.ToDependency(),
         MetalamaDependencies.MetalamaBackstage.ToDependency(),
         MetalamaDependencies.MetalamaCompiler.ToDependency(
@@ -69,29 +70,30 @@ var product = new Product( MetalamaDependencies.Metalama )
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) ),
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
-    },
-    SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
+    ],
+    SourceDependencies = [MetalamaDependencies.MetalamaFrameworkPrivate],
     ExportedProperties = { { @"eng\Versions.props", new[] { "RoslynApiMaxVersion" } } },
     Configurations = Product.DefaultConfigurations
         .WithValue(
             BuildConfiguration.Debug,
             c => c with
             {
-                AdditionalArtifactRules = new[]
-                {
+                AdditionalArtifactRules =
+                [
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
 
                     // Do not upload uncompressed crash reports because they are too big.
                     $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
-                }
+                ]
             } ),
     SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } }
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
 product.PrepareCompleted += TestLicensesCache.FetchOnPrepareCompleted;
+product.BuildCompleted += OnBuildCompleted;
 
 var commandApp = new CommandApp();
 
@@ -139,3 +141,13 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
         arg.IsFailed = true;
     }
 }
+
+static void OnBuildCompleted( BuildCompletedEventArgs args )
+{
+    // Copy LICENSE.md to build artefacts because this file is then used in Metalama.Vsx.
+    var sourceFile = Path.Combine( args.Context.RepoDirectory, "LICENSE.md" );
+    var targetFile = Path.Combine( args.PrivateArtifactsDirectory, "LICENSE.md" );
+
+    File.Copy( sourceFile, targetFile );
+}
+    
