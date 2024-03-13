@@ -77,6 +77,17 @@ namespace Metalama.Testing.AspectTesting
                         $"The following constant(s) are not defined: {string.Join( ", ", missingConstants.SelectAsReadOnlyList( c => "'" + c + "'" ) )}.";
                 }
             }
+
+            if ( !this.IsSkipped )
+            {
+                var forbiddenConstants = this.Options.ForbiddenConstants.Where( c => this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToReadOnlyList();
+
+                if ( forbiddenConstants.Count > 0 )
+                {
+                    this.SkipReason =
+                        $"The following constant(s) are defined but forbidden: {string.Join( ", ", forbiddenConstants.SelectAsReadOnlyList( c => "'" + c + "'" ) )}.";
+                }
+            }
         }
 
         private TestInput(

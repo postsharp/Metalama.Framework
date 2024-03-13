@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+// @ForbiddenConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
 using System;
@@ -8,7 +8,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit_RecordStruct;
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit_RecordStruct_CSharp10;
 
 /*
  * Tests single OverrideConstructor advice on an implicit constructor of a record struct.

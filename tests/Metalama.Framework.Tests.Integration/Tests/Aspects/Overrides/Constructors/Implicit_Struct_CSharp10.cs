@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
+// @ForbiddenConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
 using System;
@@ -8,17 +8,17 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Testing.AspectTesting;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit_RecordStruct;
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Implicit_Struct_CSharp10;
 
 /*
- * Tests single OverrideConstructor advice on an implicit constructor of a record struct.
+ * Tests single OverrideConstructor advice on an implicit constructor of a struct.
  */
 
 public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.Override(builder.Target.Constructors.Single(c => c is { Parameters.Count: 0 }), nameof(Template));
+        builder.Advice.Override(builder.Target.Constructors.Single(), nameof(Template));
     }
 
     [Template]
@@ -31,6 +31,6 @@ public class OverrideAttribute : TypeAspect
 
 // <target>
 [Override]
-public record struct TargetStruct
+public struct TargetStruct
 {
 }
