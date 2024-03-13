@@ -23,18 +23,19 @@ internal sealed partial class LinkerRewritingDriver
 #if ROSLYN_4_8_0_OR_GREATER
             classDeclaration =
                 classDeclaration.PartialUpdate(
-                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ),
+                    RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
+                    parameterList: default(ParameterListSyntax),
                     baseList:
-                        classDeclaration.BaseList != null
+                    classDeclaration.BaseList != null
                         ? classDeclaration.BaseList.WithTypes(
                             SeparatedList(
-                            classDeclaration.BaseList.Types.SelectAsArray( b =>
-                                b switch
-                                {
-                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                    _ => b
-                                } ) ) )
+                                classDeclaration.BaseList.Types.SelectAsArray(
+                                    b =>
+                                        b switch
+                                        {
+                                            PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                            _ => b
+                                        } ) ) )
                         : default );
 #else
         throw new AssertionFailedException( "This code should not run in this Roslyn version." );
@@ -56,8 +57,8 @@ internal sealed partial class LinkerRewritingDriver
 #if ROSLYN_4_8_0_OR_GREATER
             structDeclaration =
                 structDeclaration.PartialUpdate(
-                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ) );
+                    RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
+                    parameterList: default(ParameterListSyntax) );
 #else
         throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
@@ -77,18 +78,19 @@ internal sealed partial class LinkerRewritingDriver
         {
             recordDeclaration =
                 recordDeclaration.PartialUpdate(
-                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ),
+                    RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
+                    parameterList: default(ParameterListSyntax),
                     baseList:
-                        recordDeclaration.BaseList != null
+                    recordDeclaration.BaseList != null
                         ? recordDeclaration.BaseList.WithTypes(
                             SeparatedList(
-                            recordDeclaration.BaseList.Types.SelectAsArray( b =>
-                                b switch
-                                {
-                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                    _ => b
-                                } ) ) )
+                                recordDeclaration.BaseList.Types.SelectAsArray(
+                                    b =>
+                                        b switch
+                                        {
+                                            PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                            _ => b
+                                        } ) ) )
                         : default );
         }
         else if ( recordDeclaration.ParameterList != null )
@@ -111,9 +113,11 @@ internal sealed partial class LinkerRewritingDriver
                 if ( propertySymbol != null && this.IsRewriteTarget( propertySymbol ) )
                 {
                     SyntaxGenerationContext GetSyntaxGenerationContext()
-                        => generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                    {
+                        return generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
                             recordDeclaration.SyntaxTree,
                             recordDeclaration.SpanStart );
+                    }
 
                     // Add new members that take place of synthesized positional property.
                     newMembers.AddRange(
@@ -147,7 +151,8 @@ internal sealed partial class LinkerRewritingDriver
                 }
             }
 
-            recordDeclaration = recordDeclaration.WithParameterList( recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+            recordDeclaration = recordDeclaration.WithParameterList(
+                recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
             if ( newMembers is { Count: > 0 } )
             {
@@ -162,8 +167,5 @@ internal sealed partial class LinkerRewritingDriver
     }
 
     public static SyntaxList<AttributeListSyntax> RewritePrimaryConstructorTypeAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
-    {
-        return
-            List( attributeLists.Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) != true ) );
-    }
+        => List( attributeLists.Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) != true ) );
 }
