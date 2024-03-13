@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Testing;
-using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Services;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -98,21 +96,13 @@ class TargetClass
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync(
+            var diagnostics = await this.GetDiagnosticsAsync(
                 _declarationValidationAspectAppliedCode,
                 licenseKey,
                 projectName: projectName );
 
             Assert.Single( diagnostics, d => d.Id == expectedDiagnosticId );
-            
-            if ( expectedDiagnosticId == _noLicenseKeyErrorId )
-            {
-                Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.RequiresLicense );
-            }
-            else
-            {
-                Assert.Empty( notifications );
-            }
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Theory]
@@ -129,41 +119,19 @@ class TargetClass
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
             
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey, projectName: projectName );
 
             Assert.Single( diagnostics, d => d.Id == expectedDiagnosticId );
-            
-            if ( expectedDiagnosticId == _noLicenseKeyErrorId )
-            {
-                Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.RequiresLicense );
-            }
-            else
-            {
-                Assert.Empty( notifications );
-            }
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
         
         [Fact]
         public async Task NotificationsAreTriggeredWhenOnlyValidatorsAreUsedAsync()
         {
-            // The case where some or no aspects are used is test in AspectCountTests.
-            
-            // We use the VsxNotInstalled notification to verify that the toast notification detection has been triggered.
-            // This is the only notification that can pop up when a license key is registered.
-            // The actual notification of the vsx availability is tested in Metalama Backstage.
-            
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync(
-                _declarationValidationAspectAppliedCode,
-                TestLicenseKeys.MetalamaUltimateBusiness,
-                configureServices: s =>
-                {
-                    var toastNotificationsTestServices = s.Global.GetRequiredBackstageService<ToastNotificationsTestServices>();
-                    toastNotificationsTestServices.Device.IsVisualStudioInstalled = true;
-                    toastNotificationsTestServices.VsxStatus.IsVisualStudioExtensionInstalled = false;
-                } );
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, TestLicenseKeys.MetalamaUltimateBusiness );
 
             Assert.Single( diagnostics, d => d.Id == "DEMO01" );
-            Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.VsxNotInstalled );
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
     }
 }

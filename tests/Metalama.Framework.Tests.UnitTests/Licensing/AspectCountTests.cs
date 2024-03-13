@@ -1,9 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Testing;
-using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Services;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -229,7 +227,7 @@ namespace {0}
                     aspectApplicationBuilder.ToString(),
                     contractsApplicationBuilder.ToString() ) );
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync(
+            var diagnostics = await this.GetDiagnosticsAsync(
                 sourceCodeBuilder.ToString(),
                 licenseKey,
                 aspectNamespace,
@@ -238,20 +236,19 @@ namespace {0}
             if ( expectedErrorId == null )
             {
                 Assert.Empty( diagnostics );
-                Assert.Empty( notifications );
             }
             else
             {
                 Assert.Single( diagnostics, d => d.Id == expectedErrorId );
-
-                if ( expectedErrorId == _noLicenseKeyErrorId )
-                {
-                    Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.RequiresLicense );
-                }
-                else
-                {
-                    Assert.Empty( notifications );
-                }
+            }
+            
+            if ( expectedErrorId == null && numberOfAspects == 0 && numberOfContracts == 0 )
+            {
+                Assert.False( this.ToastNotifications.WasDetectionTriggered );
+            }
+            else
+            {
+                Assert.True( this.ToastNotifications.WasDetectionTriggered );
             }
         }
 
@@ -295,10 +292,10 @@ class TargetClass
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
-            Assert.Empty( notifications );
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Fact]
@@ -361,10 +358,10 @@ class TargetClass
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
-            Assert.Empty( notifications );
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Fact]
@@ -445,10 +442,10 @@ class TargetClass
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Single( diagnostics, d => d.Id == _tooManyAspectClassesErrorId );
-            Assert.Empty( notifications );
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Fact]
@@ -521,10 +518,10 @@ interface ITargetInterface
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
-            Assert.Empty( notifications );
+            Assert.False( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Theory]
@@ -613,26 +610,18 @@ class TargetClass : ITargetInterface
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, licenseKey );
+            var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey );
 
             if ( expectedErrorId == null )
             {
                 Assert.Empty( diagnostics );
-                Assert.Empty( notifications );
             }
             else
             {
                 Assert.Single( diagnostics, d => d.Id == expectedErrorId );
-
-                if ( expectedErrorId == _noLicenseKeyErrorId )
-                {
-                    Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.RequiresLicense );
-                }
-                else
-                {
-                    Assert.Empty( notifications );
-                }
             }
+            
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Fact]
@@ -701,22 +690,15 @@ class TargetClass : ITargetInterface
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
-            Assert.Empty( notifications );
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
 
         [Fact]
         public async Task NotificationsAreTriggeredWhenOnlyAspectsAreUsedAsync()
         {
-            // The case where no aspects are used is tested by CompilationPassesWithNumberOfAspectsAsync test.
-            // The case where only validators are used is tested in ValidatorsLicensingTests.
-
-            // We use the VsxNotInstalled notification to verify that the toast notification detection has been triggered.
-            // This is the only notification that can pop up when a license key is registered.
-            // The actual notification of the vsx availability is tested in Metalama Backstage.
-
             const string code = @"
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -740,18 +722,10 @@ class TargetClass
 }
 ";
 
-            var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsAsync(
-                code,
-                TestLicenseKeys.MetalamaUltimateBusiness,
-                configureServices: s =>
-                {
-                    var toastNotificationsTestServices = s.Global.GetRequiredBackstageService<ToastNotificationsTestServices>();
-                    toastNotificationsTestServices.Device.IsVisualStudioInstalled = true;
-                    toastNotificationsTestServices.VsxStatus.IsVisualStudioExtensionInstalled = false;
-                } );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaUltimateBusiness );
 
             Assert.Empty( diagnostics );
-            Assert.Single( notifications, n => n.Kind == ToastNotificationKinds.VsxNotInstalled );
+            Assert.True( this.ToastNotifications.WasDetectionTriggered );
         }
     }
 }

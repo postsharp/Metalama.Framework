@@ -1,10 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Testing;
-using Metalama.Backstage.UserInterface;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -139,13 +137,12 @@ using System.Linq;
     
     public ChildAspectsCountTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    private Task<(DiagnosticBag, List<ToastNotification>)> GetDiagnosticsAndNotificationsWithFreeLicenseAsync( string code )
-        => this.GetDiagnosticsAndNotificationsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+    private Task<DiagnosticBag> GetDiagnosticsWithFreeLicenseAsync( string code ) => this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-    private static void AssertTooManyAspectClasses( DiagnosticBag diagnostics, IEnumerable<ToastNotification> notifications )
+    private void AssertTooManyAspectClasses( DiagnosticBag diagnostics )
     {
         Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.TooManyAspectClasses.Id );
-        Assert.Empty( notifications );
+        Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }
 
     [Fact]
@@ -158,10 +155,10 @@ using System.Linq;
                    + string.Format( _parentAspectCodeFormat, _iAspectChildAspectName ) 
                    + _targetClassCode;
 
-        var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsWithFreeLicenseAsync( code );
+        var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
         
         Assert.Empty( diagnostics );
-        Assert.Empty( notifications );
+        Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }
     
     [Fact]
@@ -174,9 +171,9 @@ using System.Linq;
                    + string.Format( _parentAspectCodeFormat, _overrideMethodChildAspectName )
                    + _targetClassCode;
 
-        var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsWithFreeLicenseAsync( code );
+        var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
-        AssertTooManyAspectClasses( diagnostics, notifications );
+        this.AssertTooManyAspectClasses( diagnostics );
     }
     
     [Fact]
@@ -189,9 +186,9 @@ using System.Linq;
                    + string.Format( _parentAspectCodeFormat, _iAspectChildAspectName ) 
                    + _targetClassCode;
 
-        var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsWithFreeLicenseAsync( code );
+        var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
-        AssertTooManyAspectClasses( diagnostics, notifications );
+        this.AssertTooManyAspectClasses( diagnostics );
     }
     
     [Fact]
@@ -206,9 +203,9 @@ using System.Linq;
                    + _targetClassCode
                    + string.Format( _fabricCodeFormat, _iAspectChildAspectName );
 
-        var (diagnostics, notifications) = await this.GetDiagnosticsAndNotificationsWithFreeLicenseAsync( code );
+        var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
         Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.FabricsNotAvailable.Id );
-        Assert.Empty( notifications );
+        Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }
 }

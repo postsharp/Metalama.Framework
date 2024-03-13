@@ -172,8 +172,10 @@ public sealed class LicenseVerifier : IProjectService
         IEnumerable<ValidatorInstance> validators,
         UserDiagnosticSink diagnostics )
     {
+        var aspectInstanceResultsArray = aspectInstanceResults.ToImmutableArray();
+        
         // List all aspect classed, that are used.
-        var aspectClasses = aspectInstanceResults
+        var aspectClasses = aspectInstanceResultsArray
 
             // Don't count skipped instances.
             .Where(
@@ -238,7 +240,7 @@ public sealed class LicenseVerifier : IProjectService
 
         if ( maxAspectClasses == 0 )
         {
-            if ( consumedAspectClassNames.Count > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+            if ( aspectInstanceResultsArray.Length > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
             {
                 hasLicenseError = true;
 
@@ -277,7 +279,7 @@ public sealed class LicenseVerifier : IProjectService
         }
         
         // Show toast notifications if needed and if Metalama is used in the project.
-        if ( consumedAspectClassNames.Count > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+        if ( aspectInstanceResultsArray.Length > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
         {
             this._toastNotificationDetectionService?.Detect();
         }
