@@ -36,7 +36,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
         {
             Invariant.Assert( this.TargetMember.SetMethod is not null );
 
-            inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), out inputContractBlock );
+            inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), this.TargetMember.Type, out inputContractBlock );
         }
         else
         {
@@ -49,7 +49,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
             Invariant.Assert( this.TargetMember.GetMethod is not null );
 
             var returnVariableName = context.GetReturnValueVariableName();
-            outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), out outputContractBlock );
+            outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), this.TargetMember.Type, out outputContractBlock );
         }
         else
         {

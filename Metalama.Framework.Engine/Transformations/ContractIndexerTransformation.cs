@@ -41,7 +41,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                     {
                         Invariant.Assert( this.TargetMember.SetMethod is not null );
 
-                        inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), out inputContractBlock );
+                        inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), this.TargetMember.Type, out inputContractBlock );
                     }
                     else
                     {
@@ -54,7 +54,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                         Invariant.Assert( this.TargetMember.GetMethod is not null );
 
                         var returnVariableName = context.GetReturnValueVariableName();
-                        outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), out outputContractBlock );
+                        outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), this.TargetMember.Type, out outputContractBlock );
                     }
                     else
                     {
@@ -93,7 +93,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                     if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
                     {
                         Invariant.Assert( parameter.RefKind is not RefKind.Out );
-                        inputResult = this.TryExecuteTemplate( context, valueSyntax, out inputContractBlock );
+                        inputResult = this.TryExecuteTemplate( context, valueSyntax, parameter.Type, out inputContractBlock );
                     }
                     else
                     {
@@ -104,7 +104,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
                     if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
                     {
                         Invariant.Assert( parameter.RefKind is not RefKind.None );
-                        outputResult = this.TryExecuteTemplate( context, valueSyntax, out outputContractBlock );
+                        outputResult = this.TryExecuteTemplate( context, valueSyntax, parameter.Type, out outputContractBlock );
                     }
                     else
                     {

@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal static class ProceedHelper
 {
-    public static (ExpressionSyntax Syntax, IType? Result) CreateProceedExpression(
+    public static (ExpressionSyntax Syntax, IType Result) CreateProceedExpression(
         SyntaxGenerationContext generationContext,
         ExpressionSyntax invocationExpression,
         TemplateKind selectedTemplateKind,
@@ -143,7 +143,7 @@ internal static class ProceedHelper
             return expression;
         }
 
-        static (ExpressionSyntax Syntax, IType? Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
+        static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
         {
             if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
             {

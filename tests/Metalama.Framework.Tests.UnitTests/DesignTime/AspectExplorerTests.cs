@@ -187,7 +187,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         AssertAspectTransformations(
             [
-                "Introduce constructor 'Target..ctor'.",
+                "Introduce constructor 'Target..ctor()'.",
                 "Introduce field 'Target.i'.",
                 "Introduce the parameter 'p'.",
                 "Provide the 'MethodAspect' aspect."

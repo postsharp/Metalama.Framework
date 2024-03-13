@@ -917,6 +917,10 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     _ => member,
                 };
 
+            // TODO: Ideally, entry + exit statements should be injected here, but it complicates the transformation collection and rewriter.
+            //       This now generates "well-known" structure, which is recognized by the rewriter, which is quite ugly.
+            //       TransformationCollection is not finalized at this point and now selects statements based on InjectedMember, which we are creating here.
+
             transformationCollection.AddInjectedMember(
                 new InjectedMember(
                     originTransformation,

@@ -716,13 +716,36 @@ internal sealed partial class LinkerInjectionStep
                                     Block( List( exitStatements ) ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     foreachStatement );
 
-                        case { Statements: [ LocalDeclarationStatementSyntax localDeclarationStatement, WhileStatementSyntax whileStatement] }:
+                        case { Statements: [ LocalDeclarationStatementSyntax bufferedEnumerableLocal, LocalDeclarationStatementSyntax returnValueLocal, WhileStatementSyntax whileStatement] }:
                             return
                                 Block(
                                     Block( List( entryStatements ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                                    localDeclarationStatement,
-                                    Block( List( exitStatements ) ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    bufferedEnumerableLocal,
+                                    returnValueLocal,
+                                    Block(
+                                        List(
+                                            exitStatements.Select( (s, i) =>
+                                            {
+                                                if ( i == 0 )
+                                                {
+                                                    return s;
+                                                }
+                                                else
+                                                {
+                                                    var declarator = returnValueLocal.Declaration.Variables.Single();
+                                                    return
+                                                        Block(
+                                                            ExpressionStatement(
+                                                                AssignmentExpression(
+                                                                    SyntaxKind.SimpleAssignmentExpression,
+                                                                    IdentifierName( declarator.Identifier.ValueText ),
+                                                                    declarator.Initializer.AssertNotNull().Value ) ),
+                                                            s )
+                                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                                }
+                                            } ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                                     whileStatement );
 
                         default:

@@ -201,9 +201,19 @@ internal sealed partial class LinkerInjectionStep
                 else if ( iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator
                          or EnumerableKind.IAsyncEnumerator )
                 {
+                    // TODO: #34577 This is wrong, the enumerator needs to be cloned/reset.
+                    var bufferedEnumeratorName = this._lexicalScopeFactory.GetLexicalScope( method ).GetUniqueIdentifier( "bufferedEnumerator" );
                     body = Block(
-                        CreateLocalVariableDeclaration( returnVariableName ),
-                        CreateEnumeratorEpilogue( IdentifierName( returnVariableName ) ) );
+                        CreateLocalVariableDeclaration( bufferedEnumeratorName ),
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                VarIdentifier(),
+                                SingletonSeparatedList(
+                                    VariableDeclarator(
+                                        Identifier( returnVariableName ),
+                                        null,
+                                        EqualsValueClause( IdentifierName( bufferedEnumeratorName ) ) ) ) ) ),
+                        CreateEnumeratorEpilogue( IdentifierName( bufferedEnumeratorName ) ) );
                 }
                 else
                 {
