@@ -9,15 +9,15 @@ using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.UnitTests.Utilities;
+namespace Metalama.Framework.Tests.UnitTests.Licensing;
 
-internal class BackstageUserInterfaceTestServices : TestsBase, IBackstageService
+internal class ToastNotificationsTestServices : TestsBase, IBackstageService
 {
     public IServiceProvider Provider => this.ServiceProvider;
     
     public List<ToastNotification> Notifications => this.UserInterface.Notifications;
 
-    public BackstageUserInterfaceTestServices( ITestOutputHelper logger, IServiceProvider serviceProvider, string? licenseKey ) : base(
+    public ToastNotificationsTestServices( ITestOutputHelper logger, IServiceProvider serviceProvider, string? licenseKey ) : base(
         logger,
         serviceProvider.GetRequiredBackstageService<IApplicationInfoProvider>().CurrentApplication )
     {

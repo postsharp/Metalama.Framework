@@ -26,6 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         }
 
         [Theory]
+        [InlineData( null, 0, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData( null, 1, _arbitraryNamespace, _arbitraryNamespace, _noLicenseKeyErrorId )]
         [InlineData( nameof( TestLicenseKeys.PostSharpFramework ), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData( nameof( TestLicenseKeys.PostSharpFramework ), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
@@ -94,11 +95,9 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
             
-            const string usingsAndOrdering = @"
+            const string usingsCode = @"
 using Metalama.Framework.Aspects;
 using System;
-
-[assembly: AspectOrder( {0} )]
 ";
 
             const string aspectPrototype = @"
@@ -185,7 +184,12 @@ namespace {0}
                 }
             }
 
-            sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, usingsAndOrdering, aspectOrderApplicationBuilder.ToString() ) );
+            sourceCodeBuilder.AppendLine( usingsCode );
+
+            if ( aspectOrderApplicationBuilder.Length > 0 )
+            {
+                sourceCodeBuilder.AppendLine( $"[assembly: AspectOrder( {aspectOrderApplicationBuilder} )]" );
+            }
 
             for ( var i = 1; i <= numberOfAspects; i++ )
             {

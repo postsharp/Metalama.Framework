@@ -1,22 +1,18 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Application;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Testing;
 using Metalama.Backstage.UserInterface;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
@@ -30,15 +26,6 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             this._logger = logger;
         }
 
-        protected override void ConfigureServices( IAdditionalServiceCollection services )
-        {
-            base.ConfigureServices( services );
-
-            
-
-            
-        }
-
         protected async Task<(DiagnosticBag, List<ToastNotification>)> GetDiagnosticsAndNotificationsAsync(
             string code,
             string? licenseKey,
@@ -48,10 +35,10 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddProjectLicenseConsumptionManagerForTest( licenseKey ) );
             
-            mocks.BackstageServices.Add<BackstageUserInterfaceTestServices>(
+            mocks.BackstageServices.Add<ToastNotificationsTestServices>(
                 p =>
                 {
-                    var backstageUserInterfaceTestServices = new BackstageUserInterfaceTestServices( this._logger, p, licenseKey );
+                    var backstageUserInterfaceTestServices = new ToastNotificationsTestServices( this._logger, p, licenseKey );
 
                     return backstageUserInterfaceTestServices;
                 } );
@@ -59,10 +46,10 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             mocks.BackstageServices.Add<IToastNotificationDetectionService>(
                 p =>
                 {
-                    var backstageUserInterfaceTestServices = p.GetRequiredService<BackstageUserInterfaceTestServices>();
+                    var toastNotificationsTestServices = p.GetRequiredService<ToastNotificationsTestServices>();
 
                     var toastNotificationDetectionService =
-                        backstageUserInterfaceTestServices.Provider.GetRequiredBackstageService<IToastNotificationDetectionService>();
+                        toastNotificationsTestServices.Provider.GetRequiredBackstageService<IToastNotificationDetectionService>();
 
                     return toastNotificationDetectionService;
                 } );
@@ -94,8 +81,8 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 }
             }
 
-            var backstageUserInterfaceTestServices = testContext.ServiceProvider.Global.GetRequiredBackstageService<BackstageUserInterfaceTestServices>();
-            var notifications = backstageUserInterfaceTestServices.Notifications;
+            var toastNotificationsTestServices = testContext.ServiceProvider.Global.GetRequiredBackstageService<ToastNotificationsTestServices>();
+            var notifications = toastNotificationsTestServices.Notifications;
 
             return (diagnostics, notifications);
         }
