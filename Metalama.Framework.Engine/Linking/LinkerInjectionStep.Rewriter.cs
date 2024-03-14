@@ -245,9 +245,15 @@ internal sealed partial class LinkerInjectionStep
             // Get the final list of attributes.
             var finalModelAttributes = this._compilation.GetAttributeCollection( target );
 
+            List<SyntaxTrivia>? firstListLeadingTrivia = null;
+            var isFirstList = true;
+
             // Remove attributes from the list.
             foreach ( var list in inputAttributeLists )
             {
+                var wasFirstList = isFirstList;
+                isFirstList = false;
+
                 // Skip the different target kinds.
                 if ( list.Target == null )
                 {
@@ -283,16 +289,23 @@ internal sealed partial class LinkerInjectionStep
                     // If we are removing a custom attribute, keep its trivia.
                     foreach ( var trivia in list.GetLeadingTrivia() )
                     {
-                        switch ( trivia.Kind() )
-                        {
-                            case SyntaxKind.MultiLineCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia:
-                                outputTrivia.Add( trivia );
+                        if( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.MultiLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia )
+                        {  
+                                // Doc comments from the 
+                                if ( wasFirstList )
+                                {
+                                    firstListLeadingTrivia ??= new List<SyntaxTrivia>();
+                                    firstListLeadingTrivia.Add( trivia );
 
-                                break;
-
-                            case SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia:
-                                outputTrivia.Add( trivia );
-                                outputTrivia.Add( ElasticLineFeed );
+                                    if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
+                                    {
+                                        firstListLeadingTrivia.Add( ElasticLineFeed );
+                                    }
+                                }
+                                else
+                                {
+                                    outputTrivia.Add( trivia );
+                                }
 
                                 break;
                         }
@@ -300,9 +313,14 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
+            var isFirstAttribute = true;
+
             // Add new attributes.
             foreach ( var attribute in finalModelAttributes )
             {
+                var wasFirstAttribute = isFirstAttribute;
+                isFirstAttribute = false;
+
                 if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
                 {
                     syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
@@ -328,6 +346,18 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                     outputAttributeLists.Add( newList );
+                }
+            }
+
+            if ( firstListLeadingTrivia != null )
+            {
+                if ( outputAttributeLists.Count > 0 )
+                {
+                    outputAttributeLists[0] = outputAttributeLists[0].WithLeadingTrivia( outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ) );
+                }
+                else
+                {
+                    outputTrivia.InsertRange( 0, firstListLeadingTrivia );
                 }
             }
         }
