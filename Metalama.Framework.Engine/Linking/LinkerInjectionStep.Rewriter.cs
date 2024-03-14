@@ -289,25 +289,28 @@ internal sealed partial class LinkerInjectionStep
                     // If we are removing a custom attribute, keep its trivia.
                     foreach ( var trivia in list.GetLeadingTrivia() )
                     {
-                        if( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.MultiLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia )
-                        {  
-                                // Doc comments from the 
-                                if ( wasFirstList )
-                                {
-                                    firstListLeadingTrivia ??= new List<SyntaxTrivia>();
-                                    firstListLeadingTrivia.Add( trivia );
+                        if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia 
+                                or SyntaxKind.MultiLineCommentTrivia 
+                                or SyntaxKind.SingleLineDocumentationCommentTrivia 
+                                or SyntaxKind.MultiLineDocumentationCommentTrivia )
+                        {
+                            // Doc comments from the 
+                            if ( wasFirstList )
+                            {
+                                firstListLeadingTrivia ??= new List<SyntaxTrivia>();
+                                firstListLeadingTrivia.Add( trivia );
 
-                                    if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
-                                    {
-                                        firstListLeadingTrivia.Add( ElasticLineFeed );
-                                    }
-                                }
-                                else
+                                if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
                                 {
-                                    outputTrivia.Add( trivia );
+                                    firstListLeadingTrivia.Add( ElasticLineFeed );
                                 }
+                            }
+                            else
+                            {
+                                outputTrivia.Add( trivia );
+                            }
 
-                                break;
+                            break;
                         }
                     }
                 }
