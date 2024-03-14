@@ -616,6 +616,8 @@ internal sealed partial class LinkerInjectionStep
                             body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, returnsVoid ) );
 
                 case MethodDeclarationSyntax { Body: null, ExpressionBody: null } method:
+                    Invariant.Assert( method.Modifiers.All( m => !m.IsKind( SyntaxKind.AbstractKeyword ) && !m.IsKind( SyntaxKind.ExternKeyword ) ) );
+
                     return method.PartialUpdate(
                         body: Block( entryStatements.Concat( exitStatements ) ),
                         semicolonToken: default(SyntaxToken) );

@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Inlining;
 
+// ReSharper disable once UnusedType.Local
 internal sealed class PropertyGetExpressionBodyInliner : PropertyGetInliner
 {
     public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
