@@ -39,12 +39,14 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations> _introductionMemberLevelTransformations;
         private readonly ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
 
-        private readonly ConcurrentDictionary<IDeclaration, List<InsertedStatement>> _insertedStatementsByTargetDeclaration;
+        private readonly ConcurrentDictionary<IMethodBase, List<InsertedStatement>> _insertedStatementsByTargetMethodBase;
 
         private readonly ConcurrentDictionary<IDeclaration, List<InjectedMember>> _injectedMembersByTargetDeclaration;
         private readonly ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> _introducedParametersByTargetDeclaration;
 
         private readonly ConcurrentDictionary<INamedType, LateTypeLevelTransformations> _lateTypeLevelTransformations;
+
+        private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
 
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
 
@@ -55,30 +57,53 @@ internal sealed partial class LinkerInjectionStep
 
         public IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> LateTypeLevelTransformations => this._lateTypeLevelTransformations;
 
+        public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
+
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._injectedMembers = new();
-            this._injectedMembersByInsertPosition = new();
-            this._injectedInterfacesByTargetTypeDeclaration = new();
-            this._removedVariableDeclaratorSyntax = new();
-            this._autoPropertyWithSynthesizedSetterSyntax = new();
-            this._additionalDeclarationFlags = new();
-            this._nodesWithModifiedAttributes = new();
-            this._symbolMemberLevelTransformations = new();
-            this._introductionMemberLevelTransformations = new();
-            this._builderToTransformationMap = new();
-            this._insertedStatementsByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
-            this._injectedMembersByTargetDeclaration = new( finalCompilationModel.Comparers.Default);
-            this._introducedParametersByTargetDeclaration = new( finalCompilationModel.Comparers.Default );
-            this._lateTypeLevelTransformations = new( finalCompilationModel.Comparers.Default );
+            this._injectedMembers = new ConcurrentBag<InjectedMember>();
+            this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
+            this._injectedInterfacesByTargetTypeDeclaration = new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
+            this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
+            this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
+            this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
+            this._nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
+            this._symbolMemberLevelTransformations = new ConcurrentDictionary<SyntaxNode, MemberLevelTransformations>();
+            this._introductionMemberLevelTransformations = new ConcurrentDictionary<IDeclarationBuilder, MemberLevelTransformations>();
+            this._builderToTransformationMap = new ConcurrentDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation>();
+
+            this._insertedStatementsByTargetMethodBase =
+                new ConcurrentDictionary<IMethodBase, List<InsertedStatement>>( finalCompilationModel.Comparers.Default );
+
+            this._injectedMembersByTargetDeclaration = new ConcurrentDictionary<IDeclaration, List<InjectedMember>>( finalCompilationModel.Comparers.Default );
+
+            this._introducedParametersByTargetDeclaration =
+                new ConcurrentDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>>( finalCompilationModel.Comparers.Default );
+
+            this._lateTypeLevelTransformations = new ConcurrentDictionary<INamedType, LateTypeLevelTransformations>( finalCompilationModel.Comparers.Default );
+            this._transformationsCausingAuxiliaryOverrides = new HashSet<ITransformation>();
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )
+            => this.AddInjectedMember( injectedMember.Declaration.ToInsertPosition(), injectedMember );
+
+        public void AddInjectedMembers( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
         {
+            foreach ( var injectedMember in injectedMembers )
+            {
+                this.AddInjectedMember( injectMemberTransformation.InsertPosition, injectedMember );
+            }
+        }
+
+        private void AddInjectedMember( InsertPosition insertPosition, InjectedMember injectedMember )
+        {
+            // Injected member should always be root type member (not an accessor).
+            Invariant.Assert( injectedMember.Declaration is not { ContainingDeclaration: IMember } );
+
             this._injectedMembers.Add( injectedMember );
 
-            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( injectedMember.Declaration.ToInsertPosition(), _ => new List<InjectedMember>() );
+            var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => new List<InjectedMember>() );
 
             lock ( nodes )
             {
@@ -91,29 +116,6 @@ internal sealed partial class LinkerInjectionStep
             lock ( declarationInjectedMembers )
             {
                 declarationInjectedMembers.Add( injectedMember );
-            }
-        }
-
-        public void AddInjectedMembers( IInjectMemberTransformation injectMemberTransformation, IEnumerable<InjectedMember> injectedMembers )
-        {
-            foreach ( var injectedMember in injectedMembers )
-            {
-                this._injectedMembers.Add( injectedMember );
-
-                var nodes = this._injectedMembersByInsertPosition.GetOrAdd( injectMemberTransformation.InsertPosition, _ => new List<InjectedMember>() );
-
-                lock ( nodes )
-                {
-                    nodes.Add( injectedMember );
-                }
-
-                var declarationInjectedMembers =
-                    this._injectedMembersByTargetDeclaration.GetOrAdd( injectedMember.Declaration, _ => new List<InjectedMember>() );
-
-                lock ( declarationInjectedMembers )
-                {
-                    declarationInjectedMembers.Add( injectedMember );
-                }
             }
         }
 
@@ -156,11 +158,11 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMember targetMember, IReadOnlyList<InsertedStatement> statements )
+        public void AddInsertedStatements( IMethodBase targetMethod, IReadOnlyList<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
-            var statementList = this._insertedStatementsByTargetDeclaration.GetOrAdd( targetMember, _ => new() );
+            var statementList = this._insertedStatementsByTargetMethodBase.GetOrAdd( targetMethod, _ => new List<InsertedStatement>() );
 
             lock ( statementList )
             {
@@ -205,15 +207,15 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
+        // ReSharper disable once InconsistentlySynchronizedField
         public bool IsRemovedSyntax( VariableDeclaratorSyntax variableDeclarator ) => this._removedVariableDeclaratorSyntax.Contains( variableDeclarator );
 
+        // ReSharper disable once InconsistentlySynchronizedField
         public bool IsAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax propertyDeclaration )
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
-        public bool IsNodeWithModifiedAttributes( SyntaxNode node )
-        {
-            return this._nodesWithModifiedAttributes.Contains( node );
-        }
+        // ReSharper disable once InconsistentlySynchronizedField
+        public bool IsNodeWithModifiedAttributes( SyntaxNode node ) => this._nodesWithModifiedAttributes.Contains( node );
 
         public IReadOnlyList<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
         {
@@ -258,21 +260,14 @@ internal sealed partial class LinkerInjectionStep
         }
 
         public bool TryGetMemberLevelTransformations( SyntaxNode node, [NotNullWhen( true )] out MemberLevelTransformations? memberLevelTransformations )
-        {
-            return this._symbolMemberLevelTransformations.TryGetValue( node, out memberLevelTransformations );
-        }
+            => this._symbolMemberLevelTransformations.TryGetValue( node, out memberLevelTransformations );
 
         public bool TryGetMemberLevelTransformations(
             IDeclarationBuilder builder,
             [NotNullWhen( true )] out MemberLevelTransformations? memberLevelTransformations )
-        {
-            return this._introductionMemberLevelTransformations.TryGetValue( builder, out memberLevelTransformations );
-        }
+            => this._introductionMemberLevelTransformations.TryGetValue( builder, out memberLevelTransformations );
 
-        public bool HasMemberLevelTransformations( SyntaxNode syntax )
-        {
-            return this._symbolMemberLevelTransformations.ContainsKey( syntax );
-        }
+        public bool HasMemberLevelTransformations( SyntaxNode syntax ) => this._symbolMemberLevelTransformations.ContainsKey( syntax );
 
         public async Task FinalizeAsync(
             IConcurrentTaskRunner concurrentTaskRunner,
@@ -296,54 +291,38 @@ internal sealed partial class LinkerInjectionStep
             Invariant.Assert( wasAdded );
         }
 
+        public void AddTransformationCausingAuxiliaryOverride( ITransformation causalTransformation )
+        {
+            lock ( this._transformationsCausingAuxiliaryOverrides )
+            {
+                this._transformationsCausingAuxiliaryOverrides.Add( causalTransformation );
+            }
+        }
+
         public bool TryGetIntroduceDeclarationTransformation(
             IDeclarationBuilder replacedBuilder,
             [NotNullWhen( true )] out IIntroduceDeclarationTransformation? introduceDeclarationTransformation )
-        {
-            return this._builderToTransformationMap.TryGetValue( replacedBuilder, out introduceDeclarationTransformation );
-        }
+            => this._builderToTransformationMap.TryGetValue( replacedBuilder, out introduceDeclarationTransformation );
 
         public MemberLevelTransformations GetOrAddMemberLevelTransformations( SyntaxNode declarationSyntax )
-        {
-            return this._symbolMemberLevelTransformations.GetOrAdd( declarationSyntax, static _ => new MemberLevelTransformations() );
-        }
+            => this._symbolMemberLevelTransformations.GetOrAdd( declarationSyntax, static _ => new MemberLevelTransformations() );
 
         public MemberLevelTransformations GetOrAddMemberLevelTransformations( IDeclarationBuilder declarationBuilder )
-        {
-            return this._introductionMemberLevelTransformations.GetOrAdd( declarationBuilder, static _ => new MemberLevelTransformations() );
-        }
+            => this._introductionMemberLevelTransformations.GetOrAdd( declarationBuilder, static _ => new MemberLevelTransformations() );
 
         public LateTypeLevelTransformations GetOrAddLateTypeLevelTransformations( INamedType type )
-        {
-            return this._lateTypeLevelTransformations.GetOrAdd( type, static _ => new LateTypeLevelTransformations() );
-        }
+            => this._lateTypeLevelTransformations.GetOrAdd( type, static _ => new LateTypeLevelTransformations() );
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( InjectedMember injectedMember )
-        {
-            return this.GetInjectedInitialStatements( injectedMember.Declaration, injectedMember );
-        }
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( InjectedMember injectedMember )
+            => this.GetInjectedEntryStatements( (IMethodBase) injectedMember.Declaration, injectedMember );
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IMember sourceMember )
-        {
-            return this.GetInjectedInitialStatements( sourceMember, null );
-        }
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMethodBase sourceMethodBase )
+            => this.GetInjectedEntryStatements( sourceMethodBase, null );
 
-        internal IReadOnlyList<StatementSyntax> GetInjectedInitialStatements( IDeclaration targetDeclaration, InjectedMember? targetInjectedMember )
+        internal IReadOnlyList<StatementSyntax> GetInjectedEntryStatements( IMethodBase targetMethodBase, InjectedMember? targetInjectedMember )
         {
             // PERF: Iterating and reversing should be avoided.
-            (var canonicalTarget, var statementFilter) =
-                targetDeclaration switch
-                {
-                    IMethod { MethodKind: Code.MethodKind.PropertyGet } =>
-                        (targetDeclaration.ContainingDeclaration.AssertNotNull(),
-                         static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet }),
-                    IMethod { MethodKind: Code.MethodKind.PropertySet } =>
-                        (targetDeclaration.ContainingDeclaration.AssertNotNull(),
-                         static ( InsertedStatement s ) => s.ContextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertySet }),
-                    _ => (targetDeclaration, (Func<InsertedStatement, bool>?) null),
-                };
-
-            if ( !this._insertedStatementsByTargetDeclaration.TryGetValue( canonicalTarget, out var insertedStatements ) )
+            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethodBase, out var insertedStatements ) )
             {
                 return ImmutableArray<StatementSyntax>.Empty;
             }
@@ -352,10 +331,19 @@ internal sealed partial class LinkerInjectionStep
             MemberLayerIndex? bottomBound;
             MemberLayerIndex? topBound;
 
+            var rootMember =
+                targetMethodBase switch
+                {
+                    IMethod { ContainingDeclaration: IProperty property } => property,
+                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                    _ => (IMember) targetMethodBase
+                };
+
             // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
-            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( canonicalTarget, out var injectedMembers ) )
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( rootMember, out var injectedMembers ) )
             {
                 hasInjectedMembers = false;
+
                 if ( targetInjectedMember == null )
                 {
                     bottomBound = null;
@@ -363,12 +351,15 @@ internal sealed partial class LinkerInjectionStep
                 }
                 else
                 {
-                    throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                    throw new AssertionFailedException( $"Missing injected member for {rootMember}" );
                 }
             }
             else
             {
+                injectedMembers = injectedMembers.ToOrderedList( x => GetTransformationMemberLayerIndex( x.Transformation ) );
+
                 hasInjectedMembers = true;
+
                 if ( targetInjectedMember == null )
                 {
                     bottomBound = null;
@@ -380,20 +371,21 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( targetInjectedMemberIndex < 0 )
                     {
-                        throw new AssertionFailedException( $"Missing injected members for {targetDeclaration}" );
+                        throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
                     }
 
                     bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
+
                     topBound =
                         targetInjectedMemberIndex >= injectedMembers.Count - 1
-                        ? null
-                        : GetTransformationMemberLayerIndex( injectedMembers[targetInjectedMemberIndex + 1].Transformation );
+                            ? null
+                            : GetTransformationMemberLayerIndex( injectedMembers[targetInjectedMemberIndex + 1].Transformation );
                 }
             }
 
             var statements = new List<StatementSyntax>();
 
-            if ( canonicalTarget is IConstructor )
+            if ( targetMethodBase is IConstructor )
             {
                 if ( (!hasInjectedMembers && targetInjectedMember == null) || (hasInjectedMembers && targetInjectedMember == injectedMembers![^1]) )
                 {
@@ -410,18 +402,103 @@ internal sealed partial class LinkerInjectionStep
             }
 
             // For non-initializer statements we have to select a range of statements that fits this injected member.
-            var currentEntryStatements =
+            var inputContractStatements =
                 insertedStatements
                     .Where(
                         s =>
                             s.Kind == InsertedStatementKind.InputContract
                             && (bottomBound == null || GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound)
-                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound)
-                            && (statementFilter == null || statementFilter( s )) );
+                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound) );
 
-            var orderedCurrentEntryStatements = OrderEntryStatements( currentEntryStatements );
+            var orderedInputContractStatements = OrderInputContractStatements( inputContractStatements );
 
-            statements.AddRange( orderedCurrentEntryStatements.Select( s => s.Statement ) );
+            statements.AddRange(
+                orderedInputContractStatements.Select(
+                    s =>
+                        s.Statement switch
+                        {
+                            BlockSyntax block => block.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                            _ => s.Statement
+                        } ) );
+
+            return statements;
+        }
+
+        internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( InjectedMember injectedMember )
+            => this.GetInjectedExitStatements( (IMethodBase) injectedMember.Declaration, injectedMember );
+
+        internal IReadOnlyList<StatementSyntax> GetInjectedExitStatements( IMethodBase targetMethodBase, InjectedMember targetInjectedMember )
+        {
+            // PERF: Iterating and reversing should be avoided.
+            if ( !this._insertedStatementsByTargetMethodBase.TryGetValue( targetMethodBase, out var insertedStatements ) )
+            {
+                return ImmutableArray<StatementSyntax>.Empty;
+            }
+
+            MemberLayerIndex? bottomBound;
+            MemberLayerIndex? topBound;
+
+            var rootMember =
+                targetMethodBase switch
+                {
+                    IMethod { ContainingDeclaration: IProperty property } => property,
+                    IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                    _ => (IMember) targetMethodBase
+                };
+
+            // If trying to get inserted statements for a source declaration, we need to first find the first injected member.
+            if ( !this._injectedMembersByTargetDeclaration.TryGetValue( rootMember, out var injectedMembers ) )
+            {
+                throw new AssertionFailedException( $"Missing injected member for {targetMethodBase} (exit statements are not supported on source members)." );
+            }
+            else
+            {
+                if ( targetInjectedMember == null )
+                {
+                    bottomBound = null;
+                    topBound = GetTransformationMemberLayerIndex( injectedMembers.First().Transformation );
+                }
+                else
+                {
+                    injectedMembers = injectedMembers.ToOrderedList( x => GetTransformationMemberLayerIndex( x.Transformation ) );
+
+                    var targetInjectedMemberIndex = injectedMembers.IndexOf( targetInjectedMember );
+
+                    if ( targetInjectedMemberIndex < 0 )
+                    {
+                        throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
+                    }
+
+                    bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
+
+                    topBound =
+                        targetInjectedMemberIndex >= injectedMembers.Count - 1
+                            ? null
+                            : GetTransformationMemberLayerIndex( injectedMembers[targetInjectedMemberIndex + 1].Transformation );
+                }
+            }
+
+            var statements = new List<StatementSyntax>();
+
+            // For non-initializer statements we have to select a range of statements that fits this injected member.
+            var outputContractStatements =
+                insertedStatements
+                    .Where(
+                        s =>
+                            s.Kind == InsertedStatementKind.OutputContract
+                            && (bottomBound == null || GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound)
+                            && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound) );
+
+            var orderedOutputContractStatements = OrderOutputContractStatements( outputContractStatements );
+
+            statements.AddRange(
+                orderedOutputContractStatements.Select(
+                    s =>
+                        s.Statement switch
+                        {
+                            BlockSyntax block => block.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                            _ => s.Statement
+                        } ) );
 
             return statements;
         }
@@ -439,21 +516,44 @@ internal sealed partial class LinkerInjectionStep
                     } )
                 .ThenBy( s => (s.ContextDeclaration as IMember)?.ToDisplayString() );
 
-        private static IEnumerable<InsertedStatement> OrderEntryStatements( IEnumerable<InsertedStatement> statements )
-        {
-            // Makes sure that the order is not changed when override is added in the middle of aspects that insert statements.
-            return statements
-                .OrderByDescending( s => s.Transformation.OrderWithinPipeline )
-                .ThenByDescending( s => s.Transformation.OrderWithinPipelineStepAndType )
-                .ThenBy( s => s.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
-        }
+        private static IEnumerable<InsertedStatement> OrderInputContractStatements( IEnumerable<InsertedStatement> statements )
+            =>
+
+                // Makes sure that the order is not changed when override is added in the middle of aspects that insert statements.
+                statements
+                    .OrderBy(
+                        s => s.ContextDeclaration switch
+                        {
+                            IParameter { IsReturnParameter: false } parameter => parameter.Index, // Parameters are checked in order they appear in code.
+                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
+                        } )
+                    .ThenByDescending( s => s.Transformation.OrderWithinPipeline )
+                    .ThenByDescending( s => s.Transformation.OrderWithinPipelineStepAndType )
+                    .ThenBy( s => s.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
+
+        private static IEnumerable<InsertedStatement> OrderOutputContractStatements( IEnumerable<InsertedStatement> statements )
+            =>
+
+                // Makes sure that the order is not changed when override is added in the middle of aspects that insert statements.
+                statements
+                    .OrderBy(
+                        s => s.ContextDeclaration switch
+                        {
+                            IParameter { IsReturnParameter: false } parameter => parameter.Index, // Parameters are checked in order they appear in code.
+                            IParameter { IsReturnParameter: true, ContainingDeclaration: IMethod method } =>
+                                method.Parameters.Count, // Method return value contracts are ordered after other parameters
+                            _ => throw new AssertionFailedException( $"Unexpected declaration: '{s.ContextDeclaration}'." )
+                        } )
+                    .ThenByDescending( s => s.Transformation.OrderWithinPipeline )
+                    .ThenByDescending( s => s.Transformation.OrderWithinPipelineStepAndType )
+                    .ThenBy( s => s.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance );
 
         private static MemberLayerIndex GetTransformationMemberLayerIndex( ITransformation? transformation )
             => transformation != null
-            ? new MemberLayerIndex(
-                transformation.OrderWithinPipeline,
-                transformation.OrderWithinPipelineStepAndType,
-                transformation.OrderWithinPipelineStepAndTypeAndAspectInstance )
-            : new MemberLayerIndex(0,0,0);
+                ? new MemberLayerIndex(
+                    transformation.OrderWithinPipeline,
+                    transformation.OrderWithinPipelineStepAndType,
+                    transformation.OrderWithinPipelineStepAndTypeAndAspectInstance )
+                : new MemberLayerIndex( 0, 0, 0 );
     }
 }

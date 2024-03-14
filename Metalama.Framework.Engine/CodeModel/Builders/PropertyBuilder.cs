@@ -14,26 +14,18 @@ using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using MethodKind = Metalama.Framework.Code.MethodKind;
-using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
+internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPropertyImpl
 {
     private readonly List<IAttributeData> _fieldAttributes;
-    private IType _type;
     private IExpression? _initializerExpression;
     private TemplateMember<IProperty>? _initializerTemplate;
 
-    public bool HasInitOnlySetter { get; private set; }
-
-    public RefKind RefKind { get; set; }
-
     public IReadOnlyList<IAttributeData> FieldAttributes => this._fieldAttributes;
 
-    public virtual Writeability Writeability
+    public override Writeability Writeability
     {
         get
             => this switch
@@ -59,25 +51,6 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     bool? IFieldOrProperty.IsAutoPropertyOrField => this.IsAutoPropertyOrField;
 
     protected IObjectReader InitializerTags { get; }
-
-    public IType Type
-    {
-        get => this._type;
-        set
-        {
-            this.CheckNotFrozen();
-
-            this._type = this.Translate( value );
-        }
-    }
-
-    public IMethodBuilder? GetMethod { get; }
-
-    IMethod? IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
-
-    IMethod? IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
-
-    public IMethodBuilder? SetMethod { get; }
 
     public IProperty? OverriddenProperty { get; set; }
 
@@ -110,6 +83,8 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
 
     public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
+    bool IExpression.IsAssignable => this.Writeability != Writeability.None;
+
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
             .GetTypedExpressionSyntax();
@@ -136,25 +111,13 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
         bool hasImplicitGetter,
         bool hasImplicitSetter,
         IObjectReader initializerTags )
-        : base( targetType, name, advice )
+        : base( advice, targetType, name, hasGetter, hasSetter, hasImplicitGetter, hasImplicitSetter )
     {
         // TODO: Sanity checks.
 
         Invariant.Assert( hasGetter || hasSetter );
         Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
         Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
-
-        this._type = targetType.Compilation.GetCompilationModel().Cache.SystemObjectType;
-
-        if ( hasGetter )
-        {
-            this.GetMethod = new AccessorBuilder( this, MethodKind.PropertyGet, hasImplicitGetter );
-        }
-
-        if ( hasSetter )
-        {
-            this.SetMethod = new AccessorBuilder( this, MethodKind.PropertySet, hasImplicitSetter );
-        }
 
         this.IsAutoPropertyOrField = isAutoProperty;
         this.InitializerTags = initializerTags;
@@ -164,47 +127,18 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
 
     public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
 
-    public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
-
-    public IEnumerable<IMethod> Accessors
-    {
-        get
-        {
-            if ( this.GetMethod != null )
-            {
-                yield return this.GetMethod;
-            }
-
-            if ( this.SetMethod != null )
-            {
-                yield return this.SetMethod;
-            }
-        }
-    }
-
-    public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
-
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
     public bool IsRequired { get; set; }
 
     public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
 
-    public override void Freeze()
-    {
-        base.Freeze();
-
-        ((DeclarationBuilder?) this.GetMethod)?.Freeze();
-        ((DeclarationBuilder?) this.SetMethod)?.Freeze();
-    }
-
     protected internal virtual bool GetPropertyInitializerExpressionOrMethod(
         Advice advice,
         MemberInjectionContext context,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
-    {
-        return this.GetInitializerExpressionOrMethod(
+        => this.GetInitializerExpressionOrMethod(
             advice,
             context,
             this.Type,
@@ -213,7 +147,4 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
             this.InitializerTags,
             out initializerExpression,
             out initializerMethod );
-    }
-
-    bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 }

@@ -21,19 +21,19 @@ public class TestClass
   }
   public IEnumerator Enumerator(string text)
   {
-    var returnValue = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerator_Source(text));
-    var contractEnumerator = returnValue;
+    var bufferedEnumerator = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerator_Source(text));
+    var returnValue = bufferedEnumerator;
     global::System.Console.WriteLine($"Advice");
-    while (contractEnumerator.MoveNext())
+    while (returnValue.MoveNext())
     {
-      if (contractEnumerator.Current is null)
+      if (returnValue.Current is null)
       {
         throw new global::System.ArgumentNullException("<return>");
       }
     }
-    while (returnValue.MoveNext())
+    while (bufferedEnumerator.MoveNext())
     {
-      yield return returnValue.Current;
+      yield return bufferedEnumerator.Current;
     }
   }
   private IEnumerator Enumerator_Source(string text)
@@ -61,19 +61,19 @@ public class TestClass
   }
   public IEnumerator<string> EnumeratorT(string text)
   {
-    var returnValue = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.EnumeratorT_Source(text));
-    var contractEnumerator = returnValue;
+    var bufferedEnumerator = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.EnumeratorT_Source(text));
+    var returnValue = bufferedEnumerator;
     global::System.Console.WriteLine($"Advice");
-    while (contractEnumerator.MoveNext())
+    while (returnValue.MoveNext())
     {
-      if (contractEnumerator.Current is null)
+      if (returnValue.Current is null)
       {
         throw new global::System.ArgumentNullException("<return>");
       }
     }
-    while (returnValue.MoveNext())
+    while (bufferedEnumerator.MoveNext())
     {
-      yield return returnValue.Current;
+      yield return bufferedEnumerator.Current;
     }
   }
   private IEnumerator<string> EnumeratorT_Source(string text)

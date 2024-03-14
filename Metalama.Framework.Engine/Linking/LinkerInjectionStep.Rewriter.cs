@@ -493,25 +493,42 @@ internal sealed partial class LinkerInjectionStep
                     {
                         case IMethod or IConstructor:
                             // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
-                            var entryStatements = this._transformationCollection.GetInjectedInitialStatements( injectedMember );
+                            var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
+                            var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
 
-                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, injectedNode );
+                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, exitStatements, injectedNode );
 
                             break;
 
-                        case IProperty property:
-                            if ( property.GetMethod != null )
+                        case IPropertyOrIndexer propertyOrIndexer:
+                            if ( propertyOrIndexer.GetMethod != null )
                             {
-                                var getEntryStatements = this._transformationCollection.GetInjectedInitialStatements( property.GetMethod, injectedMember );
+                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
+                                    propertyOrIndexer.GetMethod,
+                                    injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( property.GetMethod, getEntryStatements, injectedNode );
+                                var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod, injectedMember );
+
+                                injectedNode = InjectStatementsIntoMemberDeclaration(
+                                    propertyOrIndexer.GetMethod,
+                                    getEntryStatements,
+                                    getExitStatements,
+                                    injectedNode );
                             }
 
-                            if ( property.SetMethod != null )
+                            if ( propertyOrIndexer.SetMethod != null )
                             {
-                                var setEntryStatements = this._transformationCollection.GetInjectedInitialStatements( property.SetMethod, injectedMember );
+                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
+                                    propertyOrIndexer.SetMethod,
+                                    injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration( property.SetMethod, setEntryStatements, injectedNode );
+                                var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod, injectedMember );
+
+                                injectedNode = InjectStatementsIntoMemberDeclaration(
+                                    propertyOrIndexer.SetMethod,
+                                    setEntryStatements,
+                                    setExitStatements,
+                                    injectedNode );
                             }
 
                             break;
@@ -558,9 +575,10 @@ internal sealed partial class LinkerInjectionStep
         private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration(
             IMemberOrNamedType contextDeclaration,
             IReadOnlyList<StatementSyntax> entryStatements,
+            IReadOnlyList<StatementSyntax> exitStatements,
             MemberDeclarationSyntax currentNode )
         {
-            if ( entryStatements.Count == 0 )
+            if ( entryStatements.Count == 0 && exitStatements.Count == 0 )
             {
                 return currentNode;
             }
@@ -568,18 +586,18 @@ internal sealed partial class LinkerInjectionStep
             switch ( currentNode )
             {
                 case ConstructorDeclarationSyntax { Body: { } body } constructor:
-                    return constructor.WithBody( ReplaceBlock( entryStatements, body ) );
+                    return constructor.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
 
                 case ConstructorDeclarationSyntax { ExpressionBody: { } expressionBody } constructor:
                     return
                         constructor.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default(SyntaxToken),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression, true ) );
+                            body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, true ) );
 
                 // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
-                    return method.WithBody( ReplaceBlock( entryStatements, body ) );
+                    return method.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     var returnsVoid =
@@ -595,20 +613,24 @@ internal sealed partial class LinkerInjectionStep
                         method.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default(SyntaxToken),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression, returnsVoid ) );
+                            body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, returnsVoid ) );
 
-                case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
-                    throw new AssertionFailedException( $"Method without body not supported: {contextDeclaration}" );
+                case MethodDeclarationSyntax { Body: null, ExpressionBody: null } method:
+                    Invariant.Assert( method.Modifiers.All( m => !m.IsKind( SyntaxKind.AbstractKeyword ) && !m.IsKind( SyntaxKind.ExternKeyword ) ) );
+
+                    return method.PartialUpdate(
+                        body: Block( entryStatements.Concat( exitStatements ) ),
+                        semicolonToken: default(SyntaxToken) );
 
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
-                    return @operator.WithBody( ReplaceBlock( entryStatements, body ) );
+                    return @operator.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
 
                 case OperatorDeclarationSyntax { ExpressionBody: { } expressionBody } @operator:
                     return
                         @operator.PartialUpdate(
                             expressionBody: null,
                             semicolonToken: default(SyntaxToken),
-                            body: ReplaceExpression( entryStatements, expressionBody.Expression, false ) );
+                            body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
                     Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
@@ -621,13 +643,26 @@ internal sealed partial class LinkerInjectionStep
                                 SingletonList(
                                     AccessorDeclaration(
                                         SyntaxKind.GetAccessorDeclaration,
-                                        ReplaceExpression( entryStatements, expressionBody.Expression, false ) ) ) ) );
+                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
-                case PropertyDeclarationSyntax { AccessorList: { } accessorList } property:
+                case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
+
+                    return
+                        indexer.PartialUpdate(
+                            expressionBody: null,
+                            semicolonToken: default(SyntaxToken),
+                            accessorList: AccessorList(
+                                SingletonList(
+                                    AccessorDeclaration(
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
+
+                case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
                     Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } );
 
                     return
-                        property.WithAccessorList(
+                        propertyOrIndexer.WithAccessorList(
                             accessorList.WithAccessors(
                                 List(
                                     accessorList.Accessors.SelectAsArray(
@@ -635,45 +670,136 @@ internal sealed partial class LinkerInjectionStep
                                             IsMatchingAccessor( a, contextDeclaration )
                                                 ? a switch
                                                 {
-                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, body ) ),
+                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) ),
                                                     { ExpressionBody: { } expressionBody } =>
                                                         a.PartialUpdate(
                                                             expressionBody: null,
                                                             semicolonToken: default(SyntaxToken),
                                                             body: ReplaceExpression(
                                                                 entryStatements,
+                                                                exitStatements,
                                                                 expressionBody.Expression,
                                                                 a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" ),
+                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" )
                                                 }
                                                 : a ) ) ) );
 
                     static bool IsMatchingAccessor( AccessorDeclarationSyntax accessorDeclaration, IDeclaration contextDeclaration )
-                        => (accessorDeclaration.Kind(), contextDeclaration) switch
+                    {
+                        return (accessorDeclaration.Kind(), contextDeclaration) switch
                         {
                             (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertyGet }) => true,
                             (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
                             (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
-                            _ => false,
+                            _ => false
                         };
+                    }
 
                 default:
                     throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
             }
 
-            BlockSyntax ReplaceBlock( IReadOnlyList<StatementSyntax> entryStatements, BlockSyntax targetBlock )
+            BlockSyntax ReplaceBlock( IReadOnlyList<StatementSyntax> entryStatements, IReadOnlyList<StatementSyntax> exitStatements, BlockSyntax targetBlock )
             {
-                return
-                    Block(
-                        Block( List( entryStatements ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                        targetBlock
-                            .WithSourceCodeAnnotationIfNotGenerated()
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                if ( exitStatements.Count > 0 )
+                {
+                    // Patterns recognizing bodies generated by AuxiliaryMemberFactory.
+                    switch ( targetBlock )
+                    {
+                        case { Statements: [ExpressionStatementSyntax expressionStatement] }:
+                            return
+                                Block(
+                                    Block( List( entryStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    expressionStatement,
+                                    Block( List( exitStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+
+                        case { Statements: [LocalDeclarationStatementSyntax localDeclarationStatement, ReturnStatementSyntax returnStatement] }:
+                            return
+                                Block(
+                                    Block( List( entryStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    localDeclarationStatement,
+                                    Block( List( exitStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    returnStatement );
+
+                        case { Statements: [LocalDeclarationStatementSyntax localDeclarationStatement, ForEachStatementSyntax foreachStatement] }:
+                            return
+                                Block(
+                                    Block( List( entryStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    localDeclarationStatement,
+                                    Block( List( exitStatements ) ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    foreachStatement );
+
+                        case
+                        {
+                            Statements:
+                            [
+                                LocalDeclarationStatementSyntax bufferedEnumerableLocal, LocalDeclarationStatementSyntax returnValueLocal,
+                                WhileStatementSyntax whileStatement
+                            ]
+                        }:
+                            return
+                                Block(
+                                    Block( List( entryStatements ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    bufferedEnumerableLocal,
+                                    returnValueLocal,
+                                    Block(
+                                            List(
+                                                exitStatements.Select(
+                                                    ( s, i ) =>
+                                                    {
+                                                        if ( i == 0 )
+                                                        {
+                                                            return s;
+                                                        }
+                                                        else
+                                                        {
+                                                            var declarator = returnValueLocal.Declaration.Variables.Single();
+
+                                                            return
+                                                                Block(
+                                                                        ExpressionStatement(
+                                                                            AssignmentExpression(
+                                                                                SyntaxKind.SimpleAssignmentExpression,
+                                                                                IdentifierName( declarator.Identifier.ValueText ),
+                                                                                declarator.Initializer.AssertNotNull().Value ) ),
+                                                                        s )
+                                                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                                        }
+                                                    } ) ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    whileStatement );
+
+                        default:
+                            throw new AssertionFailedException( $"Unsupported form of body with exit statements for: {contextDeclaration}" );
+                    }
+                }
+                else
+                {
+                    return
+                        Block(
+                            Block( List( entryStatements ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                            targetBlock
+                                .WithSourceCodeAnnotationIfNotGenerated()
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                }
             }
 
-            BlockSyntax ReplaceExpression( IReadOnlyList<StatementSyntax> entryStatements, ExpressionSyntax targetExpression, bool returnsVoid )
+            BlockSyntax ReplaceExpression(
+                IReadOnlyList<StatementSyntax> entryStatements,
+                IReadOnlyList<StatementSyntax> exitStatements,
+                ExpressionSyntax targetExpression,
+                bool returnsVoid )
             {
+                // Auxiliary bodies that may receive exit statements are never expression bodies.
+                Invariant.Assert( exitStatements.Count == 0 );
+
                 return
                     Block(
                         Block( List( entryStatements ) )
@@ -699,6 +825,7 @@ internal sealed partial class LinkerInjectionStep
                 ConstructorDeclarationSyntax constructor => Singleton( this.VisitConstructorDeclarationCore( constructor ) ),
                 MethodDeclarationSyntax method => Singleton( this.VisitMethodDeclarationCore( method ) ),
                 PropertyDeclarationSyntax property => Singleton( this.VisitPropertyDeclarationCore( property ) ),
+                IndexerDeclarationSyntax indexer => Singleton( this.VisitIndexerDeclarationCore( indexer ) ),
                 OperatorDeclarationSyntax @operator => Singleton( this.VisitOperatorDeclarationCore( @operator ) ),
                 EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
                 FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
@@ -850,7 +977,7 @@ internal sealed partial class LinkerInjectionStep
                         default,
                         node.Modifiers,
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
 
                     fieldDeclaration = this.ReplaceAttributes( fieldDeclaration, attributes );
 
@@ -929,10 +1056,14 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+                var constructor = (IConstructor) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( constructor );
 
-                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+                node = (ConstructorDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                    constructor,
+                    entryStatements,
+                    Array.Empty<StatementSyntax>(),
+                    node );
             }
 
             // Rewrite attributes.
@@ -951,12 +1082,12 @@ internal sealed partial class LinkerInjectionStep
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalNode );
 
-            if ( symbol != null )
+            if ( symbol != null && symbol is not { PartialImplementationPart: not null } )
             {
-                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+                var method = (IMethod) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
-                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+                node = (MethodDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -977,10 +1108,10 @@ internal sealed partial class LinkerInjectionStep
 
             if ( symbol != null )
             {
-                var declaration = (IMember) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration );
+                var method = (IMethod) this._compilation.GetDeclaration( symbol );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( method );
 
-                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration, entryStatements, node );
+                node = (OperatorDeclarationSyntax) InjectStatementsIntoMemberDeclaration( method, entryStatements, Array.Empty<StatementSyntax>(), node );
             }
 
             // Rewrite attributes.
@@ -1052,9 +1183,13 @@ internal sealed partial class LinkerInjectionStep
             if ( symbol != null && symbol.SetMethod != null )
             {
                 var declaration = (IProperty) this._compilation.GetDeclaration( symbol );
-                var entryStatements = this._transformationCollection.GetInjectedInitialStatements( declaration.SetMethod.AssertNotNull() );
+                var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
 
-                node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration( declaration.SetMethod, entryStatements, node );
+                node = (PropertyDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                    declaration.SetMethod,
+                    entryStatements,
+                    Array.Empty<StatementSyntax>(),
+                    node );
             }
 
             if ( this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
@@ -1066,6 +1201,49 @@ internal sealed partial class LinkerInjectionStep
             {
                 var existingFlags = node.GetLinkerDeclarationFlags();
                 node = node.WithLinkerDeclarationFlags( existingFlags | flags );
+            }
+
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
+
+            return node;
+        }
+
+        private IndexerDeclarationSyntax VisitIndexerDeclarationCore( IndexerDeclarationSyntax node )
+        {
+            var originalNode = node;
+
+            node = (IndexerDeclarationSyntax) this.VisitIndexerDeclaration( node )!;
+
+            var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
+            var symbol = semanticModel.GetDeclaredSymbol( originalNode );
+
+            if ( symbol != null )
+            {
+                var declaration = (IPropertyOrIndexer) this._compilation.GetDeclaration( symbol );
+
+                if ( symbol.GetMethod != null )
+                {
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.GetMethod.AssertNotNull() );
+
+                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                        declaration.GetMethod,
+                        entryStatements,
+                        Array.Empty<StatementSyntax>(),
+                        node );
+                }
+
+                if ( symbol.SetMethod != null )
+                {
+                    var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
+
+                    node = (IndexerDeclarationSyntax) InjectStatementsIntoMemberDeclaration(
+                        declaration.SetMethod,
+                        entryStatements,
+                        Array.Empty<StatementSyntax>(),
+                        node );
+                }
             }
 
             // Rewrite attributes.
@@ -1134,7 +1312,7 @@ internal sealed partial class LinkerInjectionStep
                         node.Modifiers,
                         Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
 
                     eventDeclaration = this.ReplaceAttributes( eventDeclaration, attributes );
 

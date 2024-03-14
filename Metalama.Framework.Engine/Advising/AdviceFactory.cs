@@ -68,7 +68,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         => this.WithTemplateProvider( TemplateProvider.FromInstance( templateProvider ) );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
-        => this.ValidateTemplateName( templateName, templateKind, required: true )!.Value;
+        => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
 
     private TemplateMemberRef? ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false, bool ignoreMissing = false )
     {
@@ -1618,7 +1618,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                         MetalamaStringFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
             }
 
-            return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
+            return this.AddContractImpl<IParameter>( targetParameter, template, kind, tags, args );
         }
     }
 
@@ -1628,11 +1628,10 @@ internal sealed class AdviceFactory : IAdviceFactory
         ContractDirection kind = ContractDirection.Default,
         object? tags = null,
         object? args = null )
-        => this.AddFilterImpl<IPropertyOrIndexer>( targetMember, targetMember, template, kind, tags, args );
+        => this.AddContractImpl<IPropertyOrIndexer>( targetMember, template, kind, tags, args );
 
-    private AdviceResult<T> AddFilterImpl<T>(
+    private AdviceResult<T> AddContractImpl<T>(
         IDeclaration targetDeclaration,
-        IMember targetMember,
         string template,
         ContractDirection direction,
         object? tags,
@@ -1660,34 +1659,23 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         this.CheckContractEligibility( targetDeclaration, direction );
 
+        direction = ContractAspectHelper.GetEffectiveDirection( direction, targetDeclaration );
+
         var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
             .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-        if ( !this._state.ContractAdvices.TryGetValue( targetMember, out var advice ) )
-        {
-            this._state.ContractAdvices[targetMember] = advice = new ContractAdvice(
-                this._state.AspectInstance,
-                this._templateInstance,
-                targetMember,
-                this._compilation,
-                this._layerName );
+        var advice = new ContractAdvice(
+            this._state.AspectInstance,
+            this._templateInstance,
+            targetDeclaration,
+            this._compilation,
+            boundTemplate,
+            direction,
+            this._layerName,
+            this.GetObjectReader( tags ),
+            this.GetObjectReader( args ) );
 
-            result = this.ExecuteAdvice<T>( advice );
-        }
-        else
-        {
-            result = new AdviceResult<T>(
-                advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<IDeclaration, T>(),
-                this._state.CurrentCompilation,
-                AdviceOutcome.Default,
-                this._state.AspectBuilder.AssertNotNull(),
-                advice.AdviceKind,
-                Array.Empty<IInterfaceImplementationResult>(),
-                Array.Empty<IInterfaceMemberImplementationResult>() );
-        }
-
-        // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
-        advice.Contracts.Add( new Contract( targetDeclaration, boundTemplate, direction, this.GetObjectReader( tags ), this.GetObjectReader( args ) ) );
+        result = this.ExecuteAdvice<T>( advice );
 
         return result;
     }

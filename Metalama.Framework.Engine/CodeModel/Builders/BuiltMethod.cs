@@ -13,11 +13,11 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltMethod : BuiltMember, IMethodImpl
+internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 {
     private readonly MethodBuilder _methodBuilder;
 
-    public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( builder, compilation )
     {
         this._methodBuilder = builder;
     }
@@ -26,8 +26,10 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._methodBuilder;
 
+    protected override MethodBaseBuilder MethodBaseBuilder => this._methodBuilder;
+
     [Memo]
-    public IParameterList Parameters
+    public override IParameterList Parameters
         => new ParameterList(
             this,
             this.GetCompilationModel().GetParameterCollection( this._methodBuilder.ToTypedRef<IHasParameters>() ) );
@@ -47,7 +49,7 @@ internal sealed class BuiltMethod : BuiltMember, IMethodImpl
 
     IHasAccessors? IMethod.DeclaringMember => null;
 
-    System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
+    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
     [Memo]
     public IParameter ReturnParameter => new BuiltParameter( this._methodBuilder.ReturnParameter, this.Compilation );

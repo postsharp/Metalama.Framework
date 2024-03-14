@@ -25,11 +25,11 @@ internal class Target
   {
     get
     {
-      if (y == 0)
+      if (x == 0)
       {
         throw new global::System.ArgumentException();
       }
-      if (x == 0)
+      if (y == 0)
       {
         throw new global::System.ArgumentException();
       }
@@ -38,11 +38,11 @@ internal class Target
     }
     set
     {
-      if (y == 0)
+      if (x == 0)
       {
         throw new global::System.ArgumentException();
       }
-      if (x == 0)
+      if (y == 0)
       {
         throw new global::System.ArgumentException();
       }

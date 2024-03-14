@@ -29,28 +29,28 @@ public class TestClass
   }
   public IEnumerator Enumerator(string text)
   {
-    var returnValue = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerator_Source(text));
-    var contractEnumerator = returnValue;
+    var bufferedEnumerator = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.Enumerator_Source(text));
+    var returnValue = bufferedEnumerator;
     global::System.Console.WriteLine("Advice 1");
-    while (contractEnumerator.MoveNext())
-    {
-      if (contractEnumerator.Current is null)
-      {
-        throw new global::System.ArgumentNullException("<return>");
-      }
-    }
-    contractEnumerator = returnValue;
-    global::System.Console.WriteLine("Advice 2");
-    while (contractEnumerator.MoveNext())
-    {
-      if (contractEnumerator.Current is null)
-      {
-        throw new global::System.ArgumentNullException("<return>");
-      }
-    }
     while (returnValue.MoveNext())
     {
-      yield return returnValue.Current;
+      if (returnValue.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    returnValue = bufferedEnumerator;
+    global::System.Console.WriteLine("Advice 2");
+    while (returnValue.MoveNext())
+    {
+      if (returnValue.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    while (bufferedEnumerator.MoveNext())
+    {
+      yield return bufferedEnumerator.Current;
     }
   }
   private IEnumerator Enumerator_Source(string text)
@@ -86,28 +86,28 @@ public class TestClass
   }
   public IEnumerator<string> EnumeratorT(string text)
   {
-    var returnValue = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.EnumeratorT_Source(text));
-    var contractEnumerator = returnValue;
+    var bufferedEnumerator = global::Metalama.Framework.RunTime.RunTimeAspectHelper.Buffer(this.EnumeratorT_Source(text));
+    var returnValue = bufferedEnumerator;
     global::System.Console.WriteLine("Advice 1");
-    while (contractEnumerator.MoveNext())
-    {
-      if (contractEnumerator.Current is null)
-      {
-        throw new global::System.ArgumentNullException("<return>");
-      }
-    }
-    contractEnumerator = returnValue;
-    global::System.Console.WriteLine("Advice 2");
-    while (contractEnumerator.MoveNext())
-    {
-      if (contractEnumerator.Current is null)
-      {
-        throw new global::System.ArgumentNullException("<return>");
-      }
-    }
     while (returnValue.MoveNext())
     {
-      yield return returnValue.Current;
+      if (returnValue.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    returnValue = bufferedEnumerator;
+    global::System.Console.WriteLine("Advice 2");
+    while (returnValue.MoveNext())
+    {
+      if (returnValue.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    while (bufferedEnumerator.MoveNext())
+    {
+      yield return bufferedEnumerator.Current;
     }
   }
   private IEnumerator<string> EnumeratorT_Source(string text)

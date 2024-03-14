@@ -189,6 +189,12 @@ namespace Metalama.Testing.AspectTesting
         public List<string> RequiredConstants { get; } = new();
 
         /// <summary>
+        /// Gets the set of preprocessor symbols that are forbidden for this test, test would be skipped if any is present.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @ForbiddenConstant(constant)</c>.
+        /// </summary>
+        public List<string> ForbiddenConstants { get; } = new();
+
+        /// <summary>
         /// Gets the set of preprocessor symbols that are defined for this test.
         /// To add an item into this collection from a test, add this comment to your test file: <c>// @DefinedConstant(constant)</c>.
         /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
@@ -405,6 +411,8 @@ namespace Metalama.Testing.AspectTesting
 
             this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
 
+            this.ForbiddenConstants.AddRange( baseOptions.ForbiddenConstants );
+
             this.DefinedConstants.AddRange( baseOptions.DefinedConstants );
 
             this.DependencyDefinedConstants.AddRange( baseOptions.DependencyDefinedConstants );
@@ -566,6 +574,11 @@ namespace Metalama.Testing.AspectTesting
 
                     case "RequiredConstant":
                         this.RequiredConstants.Add( optionArg );
+
+                        break;
+
+                    case "ForbiddenConstant":
+                        this.ForbiddenConstants.Add( optionArg );
 
                         break;
 

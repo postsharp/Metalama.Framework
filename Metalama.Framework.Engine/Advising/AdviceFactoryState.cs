@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -19,8 +18,6 @@ internal sealed class AdviceFactoryState
     private readonly int _orderWithinType;
     private int _nextTransformationOrder;
 
-    public Dictionary<IMember, ContractAdvice> ContractAdvices { get; }
-
     public CompilationModel CurrentCompilation { get; }
 
     public IAspectInstanceInternal AspectInstance { get; }
@@ -34,7 +31,7 @@ internal sealed class AdviceFactoryState
     public IntrospectionPipelineListener? IntrospectionListener { get; }
 
     public List<ITransformation> Transformations { get; } = new();
-    
+
     public IAspectBuilder? AspectBuilder { get; set; }
 
     public UserCodeExecutionContext ExecutionContext { get; }
@@ -56,11 +53,10 @@ internal sealed class AdviceFactoryState
         this.AspectInstance = aspectInstance;
         this.ServiceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
-        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.Comparers.Default );
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
         this.ExecutionContext = executionContext;
     }
-    
+
     public void AddTransformations( List<ITransformation> transformations )
     {
         this.Transformations.AddRange( transformations );

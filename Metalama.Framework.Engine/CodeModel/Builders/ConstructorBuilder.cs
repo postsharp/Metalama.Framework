@@ -1,29 +1,23 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl
+internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
     public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
     bool IConstructor.IsPrimary => false;
 
-    IParameterList IHasParameters.Parameters => (IParameterList) this.Parameters;
-
-    public IParameterBuilderList Parameters => ParameterBuilderList.Empty;
+    public override IMember? OverriddenMember => null;
 
     public override bool IsExplicitInterfaceImplementation => false;
-
-    public override IMember? OverriddenMember => null;
 
     public IInjectMemberTransformation ToTransformation()
         => this.IsStatic
@@ -42,21 +36,11 @@ internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstru
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
     public ConstructorBuilder( INamedType targetType, Advice advice )
-        : base( targetType, null!, advice ) { }
+        : base( advice, targetType, null! ) { }
 
-    public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-    {
-        throw new NotImplementedException();
-    }
-
-    public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-    {
-        throw new NotImplementedException();
-    }
-
-    public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
+    public System.Reflection.ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
     IConstructor IConstructor.Definition => this;
 
-    public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
+    public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 }

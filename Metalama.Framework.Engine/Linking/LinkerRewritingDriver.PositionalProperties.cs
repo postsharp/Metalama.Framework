@@ -34,8 +34,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this.InjectionRegistry.GetLastOverride( symbol );
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for auto property.
                     members.Add(
@@ -53,21 +52,6 @@ namespace Metalama.Framework.Engine.Linking
                 else
                 {
                     members.Add( this.GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
-                }
-
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     && this.ShouldGenerateSourceMember( symbol ) )
-                {
-                    members.Add(
-                        this.GetOriginalImplProperty(
-                            symbol,
-                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
-                            recordParameter.Type.AssertNotNull(),
-                            recordParameter.Default,
-                            null,
-                            null,
-                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
