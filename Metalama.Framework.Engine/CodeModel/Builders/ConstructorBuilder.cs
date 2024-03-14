@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -39,7 +38,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
     public ConstructorBuilder( INamedType targetType, Advice advice )
         : base( advice, targetType, null! ) { }
 
-    public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
+    public System.Reflection.ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
     IConstructor IConstructor.Definition => this;
 
