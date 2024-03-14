@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; }
 
+        public bool HasDeclarationValidator { get; }
+        
         public ImmutableArray<ReferenceValidatorInstance> ReferenceValidators { get; }
 
         public CompilationModel? FirstCompilationModel { get; }
@@ -118,6 +120,7 @@ namespace Metalama.Framework.Engine.Pipeline
             PipelineContributorSources? sources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
             ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations = default,
+            bool hasDeclarationValidator = false,
             ImmutableArray<ReferenceValidatorInstance> referenceValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AspectInstanceResult> aspectInstanceResults = default,
@@ -139,6 +142,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            this.HasDeclarationValidator = hasDeclarationValidator;
 
             this.ReferenceValidators =
                 referenceValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : referenceValidators;
@@ -172,6 +176,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.ContributorSources,
                 this.ExternallyInheritableAspects,
                 this.Annotations,
+                this.HasDeclarationValidator,
                 this.ReferenceValidators,
                 this.AdditionalSyntaxTrees,
                 this.AspectInstanceResults,
