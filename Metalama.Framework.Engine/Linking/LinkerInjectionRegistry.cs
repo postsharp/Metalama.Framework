@@ -121,8 +121,7 @@ internal sealed class LinkerInjectionRegistry
                 var rootMember =
                     overriddenMember switch
                     {
-                        IMethod { ContainingDeclaration: IProperty property } => property,
-                        IMethod { ContainingDeclaration: IIndexer indexer } => indexer,
+                        IMethod { ContainingDeclaration: IPropertyOrIndexer propertyOrIndexer } => propertyOrIndexer,
                         _ => overriddenMember
                     };
 

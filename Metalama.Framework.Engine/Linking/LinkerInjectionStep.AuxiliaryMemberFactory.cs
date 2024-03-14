@@ -445,8 +445,7 @@ internal sealed partial class LinkerInjectionStep
                                             default,
                                             default )
                                         : null
-                                }.Where( a => a != null )
-                                .AssertNoneNull() ) ),
+                                }.WhereNotNull() ) ),
                     null,
                     null );
         }

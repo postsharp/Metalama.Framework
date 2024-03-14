@@ -201,9 +201,9 @@ internal static class ProceedHelper
 
         if ( targetMember is IGeneric { TypeParameters.Count: > 0 } generic )
         {
-            memberName = GenericName( memberNameString )
-                .WithTypeArgumentList(
-                    TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsReadOnlyList( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+            memberName = GenericName(
+                Identifier( memberNameString ),
+                TypeArgumentList( SeparatedList( generic.TypeParameters.SelectAsReadOnlyList( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
         }
         else
         {
