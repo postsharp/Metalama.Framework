@@ -12,15 +12,16 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
+        [InlineData( null )]
         [InlineData( nameof(TestLicenseKeys.PostSharpFramework) )]
-        [InlineData(  nameof(TestLicenseKeys.PostSharpUltimate) )]
-        [InlineData(  nameof(TestLicenseKeys.MetalamaFreePersonal) )]
-        [InlineData(  nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
-        [InlineData(  nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
-        [InlineData(  nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
-        [InlineData(  nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
+        [InlineData( nameof(TestLicenseKeys.PostSharpUltimate) )]
+        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal) )]
+        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
+        [InlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
+        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
+        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
         [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
-        public async Task CompilationPassesWithValidLicenseAsync( string licenseKeyName, string projectName = "TestProject" )
+        public async Task CompilationPassesWithNoMetalamaUsageAsync( string licenseKeyName, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
             
@@ -39,7 +40,8 @@ class Test
 
             var diagnostics = await this.GetDiagnosticsAsync( code, licenseKey, projectName: projectName );
 
-            AssertEmptyOrSdkOnly( diagnostics );
+            Assert.Empty( diagnostics );
+            Assert.False( this.ToastNotifications.WasDetectionTriggered );
         }
     }
 }

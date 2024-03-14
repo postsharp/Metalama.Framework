@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Linking
                 .Where( m => m.Kind == SyntaxTreeTransformationKind.Replace )
                 .ToDictionary( m => m.OldTree.AssertNotNull(), m => m.NewTree.AssertNotNull() );
 
-            this._injectedMembers = injectedMembers.ToList();
+            this._injectedMembers = injectedMembers.ToReadOnlyList();
             this._builderToTransformationMap = builderToTransformationMap;
             this._introducedParametersByTargetDeclaration = introducedParametersByTargetDeclaration;
 
