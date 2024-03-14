@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Services;
 using System;
 using System.Collections.Generic;
@@ -169,7 +168,7 @@ public sealed class LicenseVerifier : IProjectService
     internal void VerifyCompilationResult(
         CompileTimeProject project,
         IEnumerable<AspectInstanceResult> aspectInstanceResults,
-        IEnumerable<ValidatorInstance> validators,
+        bool compilationHasValidator,
         UserDiagnosticSink diagnostics )
     {
         var aspectInstanceResultsArray = aspectInstanceResults.ToImmutableArray();
@@ -208,9 +207,6 @@ public sealed class LicenseVerifier : IProjectService
                 .OrderBy( x => x )
                 .ToReadOnlyList();
         
-        // Count all validator sources
-        var validatorsCount = validators.Count();
-
         var hasLicenseError = false;
 
         // Check the use of Metalama.Framework.Sdk.
@@ -238,9 +234,14 @@ public sealed class LicenseVerifier : IProjectService
             _ => 0
         };
 
+        // We need to check for reported license errors here,
+        // because aspect or validator instances might not be created when not allowed by the registered license.
+        var areLicensedFeaturesUsed = aspectInstanceResultsArray.Length > 0 || compilationHasValidator || this._reportedErrorCount > 0 || hasLicenseError; 
+
         if ( maxAspectClasses == 0 )
         {
-            if ( aspectInstanceResultsArray.Length > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+            // We don't fail on missing license when no licensed features are used. 
+            if ( areLicensedFeaturesUsed )
             {
                 hasLicenseError = true;
 
@@ -279,7 +280,7 @@ public sealed class LicenseVerifier : IProjectService
         }
         
         // Show toast notifications if needed and if Metalama is used in the project.
-        if ( aspectInstanceResultsArray.Length > 0 || validatorsCount > 0 || this._reportedErrorCount > 0 || hasLicenseError )
+        if ( areLicensedFeaturesUsed )
         {
             this._toastNotificationDetectionService?.Detect();
         }

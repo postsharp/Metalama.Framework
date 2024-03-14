@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject, null );
 
             // Discover the validators.
-            ImmutableArray<ValidatorInstance> validators;
+            bool hasDeclarationValidator;
             ImmutableArray<ReferenceValidatorInstance> referenceValidators;
 
             var validatorSources = pipelineStepsResult.ValidatorSources;
@@ -51,14 +51,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources );
                 var initialCompilation = pipelineStepsResult.FirstCompilation;
                 var finalCompilation = pipelineStepsResult.LastCompilation;
-                var declarationValidators = await validatorRunner.RunDeclarationValidatorsAsync( initialCompilation, finalCompilation, diagnosticSink, cancellationToken );
+                hasDeclarationValidator = await validatorRunner.RunDeclarationValidatorsAsync( initialCompilation, finalCompilation, diagnosticSink, cancellationToken );
                 referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
-                validators = declarationValidators.Union<ValidatorInstance>( referenceValidators ).ToImmutableArray();
             }
             else
             {
+                hasDeclarationValidator = false;
                 referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
-                validators = ImmutableArray<ValidatorInstance>.Empty;
             }
 
             // Generate the additional syntax trees.
@@ -87,7 +86,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         ImmutableArray<IHierarchicalOptionsSource>.Empty ),
                     pipelineStepsResult.InheritableAspectInstances,
                     pipelineStepsResult.LastCompilation.Annotations,
-                    validators,
+                    hasDeclarationValidator,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
                     input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ),

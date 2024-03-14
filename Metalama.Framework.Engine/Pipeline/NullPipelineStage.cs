@@ -44,10 +44,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         ValidatorSources = input.ContributorSources.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources )
                     },
                     pipelineStepsResult.InheritableAspectInstances,
-                    ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty,
-                    ImmutableArray<ValidatorInstance>.Empty,
-                    ImmutableArray<ReferenceValidatorInstance>.Empty,
-                    input.AdditionalSyntaxTrees,
-                    input.AspectInstanceResults ) );
+                    additionalSyntaxTrees: input.AdditionalSyntaxTrees,
+                    aspectInstanceResults: input.AspectInstanceResults ) );
     }
 }

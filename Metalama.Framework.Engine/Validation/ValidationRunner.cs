@@ -56,11 +56,10 @@ internal sealed class ValidationRunner
 
         await Task.WhenAll( declarationValidatorsTask, referenceValidatorsTask );
         
-        var declarationValidators = await declarationValidatorsTask;
+        var hasDeclarationValidator = await declarationValidatorsTask;
         var referenceValidators = await referenceValidatorsTask;
-        var allValidators = declarationValidators.Union<ValidatorInstance>( referenceValidators ).ToImmutableArray();
 
-        return new ValidationResult( allValidators, referenceValidators, userDiagnosticSink.ToImmutable() );
+        return new ValidationResult( hasDeclarationValidator, referenceValidators, userDiagnosticSink.ToImmutable() );
     }
 
     public void RunDeclarationValidators( CompilationModel compilation, CompilationModelVersion version, UserDiagnosticSink diagnosticAdder )
@@ -82,7 +81,7 @@ internal sealed class ValidationRunner
         }
     }
 
-    public async Task<ImmutableArray<DeclarationValidatorInstance>> RunDeclarationValidatorsAsync(
+    public async Task<bool> RunDeclarationValidatorsAsync(
         CompilationModel initialCompilation,
         CompilationModel finalCompilation,
         UserDiagnosticSink diagnosticAdder,
@@ -93,14 +92,13 @@ internal sealed class ValidationRunner
 
         await Task.WhenAll( initialCompilationValidationTask, finalCompilationValidationTask );
         
-        var initialCompilationValidators = await initialCompilationValidationTask;
-        var finalCompilationValidators = await finalCompilationValidationTask;
-        var allDeclarationValidators = initialCompilationValidators.Union( finalCompilationValidators ).ToImmutableArray();
+        var hasInitialCompilationValidator = await initialCompilationValidationTask;
+        var hasFinalCompilationValidator = await finalCompilationValidationTask;
 
-        return allDeclarationValidators;
+        return hasInitialCompilationValidator || hasFinalCompilationValidator;
     }
 
-    private async Task<ImmutableArray<DeclarationValidatorInstance>> RunDeclarationValidatorsAsync(
+    private async Task<bool> RunDeclarationValidatorsAsync(
         CompilationModel compilation,
         CompilationModelVersion version,
         UserDiagnosticSink diagnosticAdder,
@@ -115,7 +113,7 @@ internal sealed class ValidationRunner
 
         await this._concurrentTaskRunner.RunInParallelAsync( validators, RunValidator, cancellationToken );
 
-        return validators;
+        return validators.Any();
 
         void RunValidator( DeclarationValidatorInstance validator )
         {
