@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
