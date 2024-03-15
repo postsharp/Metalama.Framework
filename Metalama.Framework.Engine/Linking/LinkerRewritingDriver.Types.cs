@@ -26,17 +26,15 @@ internal sealed partial class LinkerRewritingDriver
                     RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
                     parameterList: default(ParameterListSyntax),
                     baseList:
-                    classDeclaration.BaseList != null
-                        ? classDeclaration.BaseList.WithTypes(
-                            SeparatedList(
-                                classDeclaration.BaseList.Types.SelectAsArray(
-                                    b =>
-                                        b switch
-                                        {
-                                            PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                            _ => b
-                                        } ) ) )
-                        : default );
+                    classDeclaration.BaseList?.WithTypes(
+                        SeparatedList(
+                            classDeclaration.BaseList.Types.SelectAsArray(
+                                b =>
+                                    b switch
+                                    {
+                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                        _ => b
+                                    } ) ) ) );
 #else
             throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
@@ -81,17 +79,15 @@ internal sealed partial class LinkerRewritingDriver
                     RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
                     parameterList: default(ParameterListSyntax),
                     baseList:
-                    recordDeclaration.BaseList != null
-                        ? recordDeclaration.BaseList.WithTypes(
-                            SeparatedList(
-                                recordDeclaration.BaseList.Types.SelectAsArray(
-                                    b =>
-                                        b switch
-                                        {
-                                            PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                            _ => b
-                                        } ) ) )
-                        : default );
+                    recordDeclaration.BaseList?.WithTypes(
+                        SeparatedList(
+                            recordDeclaration.BaseList.Types.SelectAsArray(
+                                b =>
+                                    b switch
+                                    {
+                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                        _ => b
+                                    } ) ) ) );
         }
         else if ( recordDeclaration.ParameterList != null )
         {

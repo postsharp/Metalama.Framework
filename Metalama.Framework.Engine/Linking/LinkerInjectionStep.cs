@@ -15,7 +15,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -144,7 +143,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             return GetCanonicalTargetDeclaration( transformation.TargetDeclaration ) switch
             {
                 INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
-                ICompilation compilation => transformation.TransformedSyntaxTree,
+                ICompilation => transformation.TransformedSyntaxTree,
                 var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" )
             };
 
@@ -702,13 +701,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             case IMethodBase methodBase:
                 {
-                    SyntaxNode primaryDeclaration;
                     SyntaxGenerationContext syntaxGenerationContext;
 
                     switch ( methodBase )
                     {
                         case MethodBase sourceMethodBase:
-                            primaryDeclaration = sourceMethodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
+                            var primaryDeclaration = sourceMethodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
 
                             break;
