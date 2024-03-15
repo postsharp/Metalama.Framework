@@ -36,7 +36,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         {
             case IIndexer:
                 {
-                    Invariant.Assert( this.ContractTarget == this.TargetMember );
+                    Invariant.Assert( ReferenceEquals( this.ContractTarget, this.TargetMember ) );
                     Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
                     bool? inputResult, outputResult;

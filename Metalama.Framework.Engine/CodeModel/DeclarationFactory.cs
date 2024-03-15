@@ -151,9 +151,9 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         methodSymbol = methodSymbol.PartialDefinitionPart ?? methodSymbol;
 
         return (IMethod) this._defaultCache.GetOrAdd(
-                methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-                static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
-                this._compilationModel );
+            methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            this._compilationModel );
     }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
@@ -523,8 +523,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     internal IMethod GetMethod( SubstitutedMethod substitutedMethod )
-    {
-        return (IMethod) this._defaultCache.GetOrAdd(
+        => (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromSubstitutedDeclaration( substitutedMethod ).As<ICompilationElement>(),
             static ( l, c ) =>
             {
@@ -538,7 +537,6 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                         .AssertCast<INamedTypeSymbol>() );
             },
             this._compilationModel );
-    }
 
     internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options )
         => (IMethod) this._defaultCache.GetOrAdd(

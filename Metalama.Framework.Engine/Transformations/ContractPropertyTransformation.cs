@@ -24,7 +24,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        Invariant.Assert( this.ContractTarget == this.TargetMember );
+        Invariant.Assert( ReferenceEquals( this.ContractTarget, this.TargetMember ) );
         Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
         bool? inputResult, outputResult;

@@ -94,6 +94,7 @@ public static partial class EligibilityRuleFactory
             static void AddCommonReturnParameterRules( IEligibilityBuilder<IParameter> parameter )
             {
                 parameter.MustNotBeVoid();
+
                 parameter.MustSatisfy(
                     p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );

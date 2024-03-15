@@ -33,13 +33,12 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     public Compilation Compilation { get; }
 
     CompilationModel ITemplateReflectionContext.GetCompilationModel( ICompilation sourceCompilation )
-    {
-        // When the current CompilationContext is used for reflecting the template code
-        // (because the template is defined in source code, so it does not have its own ITemplateReflectionContext),
-        // we use the source compilation.
+        =>
 
-        return (CompilationModel) sourceCompilation;
-    }
+            // When the current CompilationContext is used for reflecting the template code
+            // (because the template is defined in source code, so it does not have its own ITemplateReflectionContext),
+            // we use the source compilation.
+            (CompilationModel) sourceCompilation;
 
     public bool IsCacheable => false;
 
@@ -107,23 +106,15 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     [Memo]
     internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
 
-    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
-    {
-        return SyntaxGenerationContext.Create( this, node );
-    }
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node ) => SyntaxGenerationContext.Create( this, node );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxTree tree, int nodeSpanStart )
-    {
-        return SyntaxGenerationContext.Create( this, tree, nodeSpanStart );
-    }
+        => SyntaxGenerationContext.Create( this, tree, nodeSpanStart );
 
     [Memo]
     internal SyntaxGenerationContext DefaultSyntaxGenerationContext => this.GetSyntaxGenerationContext( false );
 
-    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial )
-    {
-        return SyntaxGenerationContext.Create( this, isPartial );
-    }
+    internal SyntaxGenerationContext GetSyntaxGenerationContext( bool isPartial ) => SyntaxGenerationContext.Create( this, isPartial );
 
     [Memo]
     internal SymbolTranslator SymbolTranslator => new( this );
@@ -150,6 +141,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         {
             // This shouldn't happen. If it does, default to the safer, but less efficient options.
             Invariant.Assert( false );
+
             return (true, true);
         }
     }

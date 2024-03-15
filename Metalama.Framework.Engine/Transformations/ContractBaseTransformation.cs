@@ -45,7 +45,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
     /// </summary>
     public IObjectReader Tags { get; }
 
-    public ContractBaseTransformation(
+    protected ContractBaseTransformation(
         Advice advice,
         IMember targetMember,
         IDeclaration contractTarget,
@@ -54,7 +54,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
         IObjectReader templateArguments,
         IObjectReader tags ) : base( advice )
     {
-        Invariant.Assert( contractDirection is not ContractDirection.None or ContractDirection.Default );
+        Invariant.Assert( contractDirection is not ContractDirection.None );
 
         this.TargetMember = targetMember;
         this.ContractTarget = contractTarget;

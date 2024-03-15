@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline
     [UsedImplicitly]
     public sealed class SourceTransformer : ISourceTransformerWithServices
     {
-        public IServiceProvider? InitializeServices( InitializeServicesContext context )
+        public IServiceProvider InitializeServices( InitializeServicesContext context )
         {
             var dotNetSdkDirectory = GetDotNetSdkDirectory( context.AnalyzerConfigOptionsProvider );
 

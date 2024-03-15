@@ -103,7 +103,7 @@ internal class InjectedMember
         this.Kind = kind;
     }
 
-    public override string? ToString() => this.Transformation?.ToString() ?? "(linker auxiliary)";
+    public override string ToString() => this.Transformation?.ToString() ?? "(linker auxiliary)";
 
     internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax ) => new( this, newSyntax );
 }
