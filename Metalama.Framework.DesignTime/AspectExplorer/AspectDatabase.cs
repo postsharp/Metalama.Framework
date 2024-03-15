@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Introspection;
@@ -124,12 +125,21 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
 
             var pipeline = new IntrospectionAspectPipeline( designTimeConfiguration.Value.ServiceProvider, this._pipelineFactory.Domain, options: null );
 
-            var result = await pipeline.ExecuteAsync(
-                PartialCompilation.CreateComplete( compilation ),
-                designTimeConfiguration.Value,
-                cancellationToken.ToTestable() );
+            try
+            {
+                var result = await pipeline.ExecuteAsync(
+                    PartialCompilation.CreateComplete( compilation ),
+                    designTimeConfiguration.Value,
+                    cancellationToken.ToTestable() );
 
-            aspectInstances = result.AspectInstances.Where( i => !i.IsSkipped ).ToImmutableArray();
+                aspectInstances = result.AspectInstances.Where( i => !i.IsSkipped ).ToImmutableArray();
+            }
+            catch ( Exception ex )
+            {
+                DesignTimeExceptionHandler.ReportException( ex );
+
+                aspectInstances = ImmutableArray<IIntrospectionAspectInstance>.Empty;
+            }
 
             this._aspectInstanceCache.TryAdd( compilation, aspectInstances );
         }
