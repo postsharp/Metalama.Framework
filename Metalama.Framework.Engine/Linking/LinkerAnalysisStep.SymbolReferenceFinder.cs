@@ -169,7 +169,7 @@ internal sealed partial class LinkerAnalysisStep
 
                     var foundSymbol = identifierRecord.GetSymbol( currentSemanticModel! );
 
-                    if ( comparer.Equals( targetSymbol, LinkerSymbolHelper.GetCanonicalDefinition( foundSymbol ) ) )
+                    if ( comparer.Equals( targetSymbol, foundSymbol.GetCanonicalDefinition() ) )
                     {
                         yield return identifierRecord.Node;
                     }

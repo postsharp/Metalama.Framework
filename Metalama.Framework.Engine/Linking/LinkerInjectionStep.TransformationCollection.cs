@@ -57,6 +57,7 @@ internal sealed partial class LinkerInjectionStep
 
         public IReadOnlyDictionary<INamedType, LateTypeLevelTransformations> LateTypeLevelTransformations => this._lateTypeLevelTransformations;
 
+        // ReSharper disable once InconsistentlySynchronizedField
         public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )

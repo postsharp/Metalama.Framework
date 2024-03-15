@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -22,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
 {
-    private class AuxiliaryMemberFactory
+    private sealed class AuxiliaryMemberFactory
     {
         private readonly CompilationContext _compilationContext;
         private readonly CompilationModel _finalCompilationModel;
@@ -115,7 +114,7 @@ internal sealed partial class LinkerInjectionStep
                     return this.GetAuxiliaryContractMethod( method, compilationModel, advice.AspectLayerId, returnVariableName );
 
                 case IProperty property:
-                    return this.GetAuxiliaryContractProperty( property, compilationModel, advice.AspectLayerId, returnVariableName );
+                    return this.GetAuxiliaryContractProperty( property, advice.AspectLayerId, returnVariableName );
 
                 case IIndexer indexer:
                     return this.GetAuxiliaryContractIndexer( indexer, compilationModel, advice, returnVariableName.AssertNotNull() );
@@ -148,7 +147,7 @@ internal sealed partial class LinkerInjectionStep
                     ArgumentList(
                         SeparatedList(
                             method.Parameters.SelectAsReadOnlyList(
-                                p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) );
+                                p => Argument( null, InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) );
 
             var (useStateMachine, emulatedTemplateKind) = (returnVariableName != null, asyncInfo, iteratorInfo) switch
             {
@@ -342,7 +341,6 @@ internal sealed partial class LinkerInjectionStep
 
         private MemberDeclarationSyntax GetAuxiliaryContractProperty(
             IProperty property,
-            CompilationModel compilationModel,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {

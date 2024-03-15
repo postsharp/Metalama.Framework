@@ -94,7 +94,7 @@ internal sealed class LinkerInjectionRegistry
 
         void ProcessInjectedMember( InjectedMember injectedMember )
         {
-            var injectedMemberSymbol = GetSymbolForInjectedMember( injectedMember );
+            var injectedMemberSymbol = GetCanonicalSymbolForInjectedMember( injectedMember );
 
             // Basic maps.
             symbolToInjectedMemberMap[injectedMemberSymbol] = injectedMember;
@@ -201,7 +201,7 @@ internal sealed class LinkerInjectionRegistry
         concurrentTaskRunner.RunInParallelAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-        ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember )
+        ISymbol GetCanonicalSymbolForInjectedMember( InjectedMember injectedMember )
         {
             var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.TargetSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
@@ -283,7 +283,7 @@ internal sealed class LinkerInjectionRegistry
                 var symbolNode = intermediateNode.AssertNotNull() switch
                 {
                     EventFieldDeclarationSyntax eventFieldNode => (SyntaxNode) eventFieldNode.Declaration.Variables.First(),
-                    _ => intermediateNode!
+                    _ => intermediateNode
                 };
 
                 return intermediateSemanticModel.GetDeclaredSymbol( symbolNode ).GetCanonicalDefinition();

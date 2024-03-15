@@ -12,6 +12,8 @@ internal sealed partial class LinkerInjectionStep
 {
     private sealed class InsertStatementTransformationContextImpl : InsertStatementTransformationContext
     {
+        // ReSharper disable once MemberCanBePrivate.Local
+        
         /// <summary>
         /// Gets the member for which this context exists.
         /// </summary>

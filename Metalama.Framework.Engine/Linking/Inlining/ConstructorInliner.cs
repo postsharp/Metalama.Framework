@@ -26,7 +26,7 @@ internal sealed class ConstructorInliner : Inliner
             expectedNumberOfParameters == (objectCreationExpression.ArgumentList?.Arguments.Count ?? 0)
             && (objectCreationExpression.ArgumentList?.Arguments
                     .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
-                    ?.All(
+                    .All(
                         a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextConstructor.Parameters[a.Index] ) )
                 ?? false);
     }
@@ -59,7 +59,7 @@ internal sealed class ConstructorInliner : Inliner
             return false;
         }
 
-        if ( invocationExpression.ArgumentList is not { Arguments: [{ Expression: ObjectCreationExpressionSyntax { } objectCreationExpression }] } )
+        if ( invocationExpression.ArgumentList is not { Arguments: [{ Expression: ObjectCreationExpressionSyntax objectCreationExpression }] } )
         {
             return false;
         }
