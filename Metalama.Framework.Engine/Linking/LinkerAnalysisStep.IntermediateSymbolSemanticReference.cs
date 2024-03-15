@@ -2,13 +2,12 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerAnalysisStep
 {
-    internal sealed partial class LinkerAnalysisStep
-    {
-        public record struct IntermediateSymbolSemanticReference(
-            IntermediateSymbolSemantic<IMethodSymbol> ContainingSemantic,
-            IntermediateSymbolSemantic TargetSemantic,
-            SyntaxNode ReferencingNode );
-    }
+    public record struct IntermediateSymbolSemanticReference(
+        IntermediateSymbolSemantic<IMethodSymbol> ContainingSemantic,
+        IntermediateSymbolSemantic TargetSemantic,
+        SyntaxNode ReferencingNode );
 }

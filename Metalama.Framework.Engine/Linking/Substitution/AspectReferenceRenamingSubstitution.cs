@@ -9,125 +9,107 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking.Substitution
+namespace Metalama.Framework.Engine.Linking.Substitution;
+
+internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNodeSubstitution
 {
-    internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNodeSubstitution
+    protected ResolvedAspectReference AspectReference { get; }
+
+    public override SyntaxNode TargetNode => this.AspectReference.RootNode;
+
+    protected AspectReferenceRenamingSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base( compilationContext )
     {
-        protected ResolvedAspectReference AspectReference { get; }
+        this.AspectReference = aspectReference;
+    }
 
-        public override SyntaxNode TargetNode => this.AspectReference.RootNode;
-
-        protected AspectReferenceRenamingSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
-            compilationContext )
+    public sealed override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    {
+        if ( this.AspectReference.RootNode != this.AspectReference.SymbolSourceNode )
         {
-            this.AspectReference = aspectReference;
-        }
+            // Root node is different that symbol source node - this is introduction in form:
+            // <helper_type>.<helper_member>(<symbol_source_node>);
+            // We need to get to symbol source node.
 
-        public sealed override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
-        {
-            if ( this.AspectReference.RootNode != this.AspectReference.SymbolSourceNode )
+            currentNode = this.AspectReference.RootNode switch
             {
-                // Root node is different that symbol source node - this is introduction in form:
-                // <helper_type>.<helper_member>(<symbol_source_node>);
-                // We need to get to symbol source node.
+                InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
+                    argumentList.Arguments[0].Expression,
+                _ => throw new AssertionFailedException( $"{this.AspectReference.RootNode.Kind()} is not in a supported form." )
+            };
+        }
 
-                currentNode = this.AspectReference.RootNode switch
-                {
-                    InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
-                        argumentList.Arguments[0].Expression,
-                    _ => throw new AssertionFailedException( $"{this.AspectReference.RootNode.Kind()} is not in a supported form." )
-                };
-            }
-
-            switch ( currentNode )
+        switch ( currentNode )
+        {
+            case MemberAccessExpressionSyntax
             {
-                case MemberAccessExpressionSyntax
-                {
-                    Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
-                    Name.Identifier.Text: LinkerInjectionHelperProvider.FinalizeMemberName
-                } finalizerMemberAccess:
-                    return this.SubstituteFinalizerMemberAccess( finalizerMemberAccess );
+                Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
+                Name.Identifier.Text: LinkerInjectionHelperProvider.FinalizeMemberName
+            } finalizerMemberAccess:
+                return this.SubstituteFinalizerMemberAccess( finalizerMemberAccess );
 
-                case MemberAccessExpressionSyntax
-                {
-                    Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
-                    Name.Identifier.Text: var operatorName
-                } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
-                    return this.SubstituteOperatorMemberAccess( substitutionContext );
-
-                case ObjectCreationExpressionSyntax objectCreationExpression:
-                    return this.SubstituteConstructorMemberAccess( objectCreationExpression );
-
-                case MemberAccessExpressionSyntax memberAccessExpression:
-                    return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
-
-                case ElementAccessExpressionSyntax elementAccessExpression:
-                    return this.SubstituteElementAccess( elementAccessExpression );
-
-                case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-                    return this.SubstituteConditionalAccess( conditionalAccessExpression );
-
-                default:
-                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
-            }
-        }
-
-        protected abstract string GetTargetMemberName();
-
-        protected virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
-        {
-            return
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    IdentifierName( this.GetTargetMemberName() ) );
-        }
-
-        protected virtual SyntaxNode SubstituteConstructorMemberAccess( ObjectCreationExpressionSyntax currentNode )
-        {
-            return
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    IdentifierName( this.GetTargetMemberName() ) );
-        }
-
-        private SyntaxNode SubstituteOperatorMemberAccess( SubstitutionContext substitutionContext )
-        {
-            var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
-
-            return
-                MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                    IdentifierName( this.GetTargetMemberName() ) );
-        }
-
-        protected abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
-
-        protected virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode )
-            => throw new NotSupportedException( $"Element access is not supported by {this.GetType().Name}" );
-
-        private SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode )
-        {
-            var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
-
-            if ( this.CompilationContext.SymbolComparer.Is( this.AspectReference.ContainingSemantic.Symbol.ContainingType, targetSymbol.ContainingType ) )
+            case MemberAccessExpressionSyntax
             {
-                if ( this.AspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
-                {
-                    throw new AssertionFailedException( Justifications.CoverageMissing );
-                }
-                else
-                {
-                    var rewriter = new ConditionalAccessRewriter( this.GetTargetMemberName() );
+                Expression: IdentifierNameSyntax { Identifier.Text: LinkerInjectionHelperProvider.HelperTypeName },
+                Name.Identifier.Text: var operatorName
+            } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
+                return this.SubstituteOperatorMemberAccess( substitutionContext );
 
-                    return (ExpressionSyntax) rewriter.Visit( currentNode )!;
-                }
-            }
-            else if ( this.CompilationContext.SymbolComparer.Is( targetSymbol.ContainingType, this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
+            case ObjectCreationExpressionSyntax objectCreationExpression:
+                return this.SubstituteConstructorMemberAccess( objectCreationExpression );
+
+            case MemberAccessExpressionSyntax memberAccessExpression:
+                return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
+
+            case ElementAccessExpressionSyntax elementAccessExpression:
+                return this.SubstituteElementAccess( elementAccessExpression );
+
+            case ConditionalAccessExpressionSyntax conditionalAccessExpression:
+                return this.SubstituteConditionalAccess( conditionalAccessExpression );
+
+            default:
+                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+        }
+    }
+
+    protected abstract string GetTargetMemberName();
+
+    protected virtual SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
+        => MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            ThisExpression(),
+            IdentifierName( this.GetTargetMemberName() ) );
+
+    protected virtual SyntaxNode SubstituteConstructorMemberAccess( ObjectCreationExpressionSyntax currentNode )
+        => MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            ThisExpression(),
+            IdentifierName( this.GetTargetMemberName() ) );
+
+    private SyntaxNode SubstituteOperatorMemberAccess( SubstitutionContext substitutionContext )
+    {
+        var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+
+        return
+            MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                IdentifierName( this.GetTargetMemberName() ) );
+    }
+
+    protected abstract SyntaxNode? SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext );
+
+    protected virtual SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode )
+        => throw new NotSupportedException( $"Element access is not supported by {this.GetType().Name}" );
+
+    private SyntaxNode SubstituteConditionalAccess( ConditionalAccessExpressionSyntax currentNode )
+    {
+        var targetSymbol = this.AspectReference.ResolvedSemantic.Symbol;
+
+        if ( this.CompilationContext.SymbolComparer.Is( this.AspectReference.ContainingSemantic.Symbol.ContainingType, targetSymbol.ContainingType ) )
+        {
+            if ( this.AspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
             {
-                throw new AssertionFailedException( $"Resolved symbol {this.AspectReference.ContainingSemantic.Symbol} is declared in a derived class." );
+                throw new AssertionFailedException( Justifications.CoverageMissing );
             }
             else
             {
@@ -136,13 +118,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 return (ExpressionSyntax) rewriter.Visit( currentNode )!;
             }
         }
+        else if ( this.CompilationContext.SymbolComparer.Is( targetSymbol.ContainingType, this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
+        {
+            throw new AssertionFailedException( $"Resolved symbol {this.AspectReference.ContainingSemantic.Symbol} is declared in a derived class." );
+        }
+        else
+        {
+            var rewriter = new ConditionalAccessRewriter( this.GetTargetMemberName() );
 
-        protected static SimpleNameSyntax RewriteName( SimpleNameSyntax name, string targetMemberName )
-            => name switch
-            {
-                GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." )
-            };
+            return (ExpressionSyntax) rewriter.Visit( currentNode )!;
+        }
     }
+
+    protected static SimpleNameSyntax RewriteName( SimpleNameSyntax name, string targetMemberName )
+        => name switch
+        {
+            GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+            IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+            _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." )
+        };
 }

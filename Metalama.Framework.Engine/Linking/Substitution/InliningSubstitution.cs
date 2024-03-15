@@ -10,78 +10,77 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking.Substitution
+namespace Metalama.Framework.Engine.Linking.Substitution;
+
+/// <summary>
+/// Substitutes a node using an inliner.
+/// </summary>
+internal sealed class InliningSubstitution : SyntaxNodeSubstitution
 {
-    /// <summary>
-    /// Substitutes a node using an inliner.
-    /// </summary>
-    internal sealed class InliningSubstitution : SyntaxNodeSubstitution
+    private readonly InliningSpecification _specification;
+
+    public override SyntaxNode TargetNode => this._specification.ReplacedRootNode;
+
+    public InliningSubstitution( CompilationContext compilationContext, InliningSpecification specification ) : base( compilationContext )
     {
-        private readonly InliningSpecification _specification;
+        this._specification = specification;
+    }
 
-        public override SyntaxNode TargetNode => this._specification.ReplacedRootNode;
+    public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
+    {
+        var statements = new List<StatementSyntax>();
 
-        public InliningSubstitution( CompilationContext compilationContext, InliningSpecification specification ) : base( compilationContext )
+        if ( this._specification.DeclareReturnVariable )
         {
-            this._specification = specification;
+            statements.Add(
+                LocalDeclarationStatement(
+                        VariableDeclaration(
+                            context.SyntaxGenerationContext.SyntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
+                            SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
+                    .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
         }
 
-        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
+        // Get substituted body of the target.
+        var substitutedBody = context.RewritingDriver.GetSubstitutedBody(
+            this._specification.TargetSemantic,
+            context.WithInliningContext( this._specification.ContextIdentifier ) );
+
+        // Let the inliner to transform that.
+        var inlinedBody = this._specification.Inliner.Inline( context.SyntaxGenerationContext, this._specification, currentNode, substitutedBody );
+
+        statements.Add( inlinedBody );
+
+        if ( this._specification.ReturnLabelIdentifier != null )
         {
-            var statements = new List<StatementSyntax>();
-
-            if ( this._specification.DeclareReturnVariable )
-            {
-                statements.Add(
-                    LocalDeclarationStatement(
-                            VariableDeclaration(
-                                context.SyntaxGenerationContext.SyntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
-                                SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
-                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
-            }
-
-            // Get substituted body of the target.
-            var substitutedBody = context.RewritingDriver.GetSubstitutedBody(
-                this._specification.TargetSemantic,
-                context.WithInliningContext( this._specification.ContextIdentifier ) );
-
-            // Let the inliner to transform that.
-            var inlinedBody = this._specification.Inliner.Inline( context.SyntaxGenerationContext, this._specification, currentNode, substitutedBody );
-
-            statements.Add( inlinedBody );
-
-            if ( this._specification.ReturnLabelIdentifier != null )
-            {
-                statements.Add(
-                    LabeledStatement(
-                            Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
-                            EmptyStatement() )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
-                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
-            }
-
-            return SyntaxFactoryEx.FormattedBlock( statements )
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+            statements.Add(
+                LabeledStatement(
+                        Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
+                        EmptyStatement() )
+                    .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
         }
 
-        private static ITypeSymbol GetReturnType( ISymbol symbol )
+        return SyntaxFactoryEx.FormattedBlock( statements )
+            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+    }
+
+    private static ITypeSymbol GetReturnType( ISymbol symbol )
+    {
+        switch ( symbol )
         {
-            switch ( symbol )
-            {
-                case IMethodSymbol method:
-                    return method.ReturnType;
+            case IMethodSymbol method:
+                return method.ReturnType;
 
-                case IPropertySymbol property:
-                    return property.Type;
+            case IPropertySymbol property:
+                return property.Type;
 
-                case IEventSymbol @event:
-                    return @event.Type;
+            case IEventSymbol @event:
+                return @event.Type;
 
-                default:
-                    throw new AssertionFailedException( $"{symbol} is not supported." );
-            }
+            default:
+                throw new AssertionFailedException( $"{symbol} is not supported." );
         }
     }
 }

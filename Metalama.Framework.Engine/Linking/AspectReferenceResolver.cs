@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking;
 /// <summary>
 /// Resolves aspect references.
 /// </summary>
-internal sealed partial class AspectReferenceResolver
+internal sealed class AspectReferenceResolver
 {
     private readonly LinkerInjectionRegistry _injectionRegistry;
     private readonly IReadOnlyList<AspectLayerId> _orderedLayers;
@@ -550,7 +550,7 @@ internal sealed partial class AspectReferenceResolver
                     // Referencing type's constructor.
                     switch ( expression.Parent )
                     {
-                        case InvocationExpressionSyntax { ArgumentList.Arguments: [] } invocationExpression:
+                        case InvocationExpressionSyntax { ArgumentList.Arguments: [] }:
                             rootNode = expression;
                             targetSymbol = containingSymbol.ContainingType.StaticConstructors.FirstOrDefault().AssertNotNull();
                             targetSymbolSource = expression;

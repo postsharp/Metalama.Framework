@@ -2,12 +2,11 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Engine.Transformations
-{
-    internal interface IIntroduceInterfaceTransformation : ITransformation
-    {
-        INamedType InterfaceType { get; }
+namespace Metalama.Framework.Engine.Transformations;
 
-        INamedType TargetType { get; }
-    }
+internal interface IIntroduceInterfaceTransformation : ITransformation
+{
+    INamedType InterfaceType { get; }
+
+    INamedType TargetType { get; }
 }

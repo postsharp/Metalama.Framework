@@ -2,87 +2,74 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
 {
-    internal readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
+    /// <summary>
+    /// Gets the index of the aspect layer. Zero is the state before any transformation.
+    /// </summary>
+    public int LayerIndex { get; }
+
+    // ReSharper disable once MemberCanBePrivate.Local
+    /// <summary>
+    /// Gets the index of the aspect instance within the target type.
+    /// </summary>
+    public int InstanceIndex { get; }
+
+    // ReSharper disable once MemberCanBePrivate.Local
+    /// <summary>
+    /// Gets the index of the transformation within the aspect instance.
+    /// </summary>
+    public int TransformationIndex { get; }
+
+    public MemberLayerIndex( int layerIndex, int instanceIndex, int transformationIndex )
     {
-        /// <summary>
-        /// Gets the index of the aspect layer. Zero is the state before any transformation.
-        /// </summary>
-        public int LayerIndex { get; }
+        this.LayerIndex = layerIndex;
+        this.InstanceIndex = instanceIndex;
+        this.TransformationIndex = transformationIndex;
+    }
 
-        // ReSharper disable once MemberCanBePrivate.Local
-        /// <summary>
-        /// Gets the index of the aspect instance within the target type.
-        /// </summary>
-        public int InstanceIndex { get; }
+    public int CompareTo( MemberLayerIndex other )
+    {
+        var layerDiff = this.LayerIndex - other.LayerIndex;
 
-        // ReSharper disable once MemberCanBePrivate.Local
-        /// <summary>
-        /// Gets the index of the transformation within the aspect instance.
-        /// </summary>
-        public int TransformationIndex { get; }
-
-        public MemberLayerIndex( int layerIndex, int instanceIndex, int transformationIndex )
+        if ( layerDiff == 0 )
         {
-            this.LayerIndex = layerIndex;
-            this.InstanceIndex = instanceIndex;
-            this.TransformationIndex = transformationIndex;
-        }
+            var instanceDiff = this.InstanceIndex - other.InstanceIndex;
 
-        public int CompareTo( MemberLayerIndex other )
-        {
-            var layerDiff = this.LayerIndex - other.LayerIndex;
-
-            if ( layerDiff == 0 )
+            if ( instanceDiff == 0 )
             {
-                var instanceDiff = this.InstanceIndex - other.InstanceIndex;
-
-                if ( instanceDiff == 0 )
-                {
-                    return this.TransformationIndex - other.TransformationIndex;
-                }
-                else
-                {
-                    return instanceDiff;
-                }
+                return this.TransformationIndex - other.TransformationIndex;
             }
             else
             {
-                return layerDiff;
+                return instanceDiff;
             }
         }
-
-        public bool Equals( MemberLayerIndex other )
+        else
         {
-            return this.CompareTo( other ) == 0;
+            return layerDiff;
         }
-
-        public override bool Equals( object? obj )
-        {
-            return obj is MemberLayerIndex mli && this.Equals( mli );
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine( this.LayerIndex, this.InstanceIndex, this.TransformationIndex );
-        }
-
-        public override string ToString()
-        {
-            return $"({this.LayerIndex}, {this.InstanceIndex}, {this.TransformationIndex})";
-        }
-
-        public static bool operator ==( MemberLayerIndex a, MemberLayerIndex b ) => a.Equals( b );
-
-        public static bool operator !=( MemberLayerIndex a, MemberLayerIndex b ) => !a.Equals( b );
-
-        public static bool operator <( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) < 0;
-
-        public static bool operator <=( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) <= 0;
-
-        public static bool operator >( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) > 0;
-
-        public static bool operator >=( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) >= 0;
     }
+
+    public bool Equals( MemberLayerIndex other ) => this.CompareTo( other ) == 0;
+
+    public override bool Equals( object? obj ) => obj is MemberLayerIndex mli && this.Equals( mli );
+
+    public override int GetHashCode() => HashCode.Combine( this.LayerIndex, this.InstanceIndex, this.TransformationIndex );
+
+    public override string ToString() => $"({this.LayerIndex}, {this.InstanceIndex}, {this.TransformationIndex})";
+
+    public static bool operator ==( MemberLayerIndex a, MemberLayerIndex b ) => a.Equals( b );
+
+    public static bool operator !=( MemberLayerIndex a, MemberLayerIndex b ) => !a.Equals( b );
+
+    public static bool operator <( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) < 0;
+
+    public static bool operator <=( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) <= 0;
+
+    public static bool operator >( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) > 0;
+
+    public static bool operator >=( MemberLayerIndex a, MemberLayerIndex b ) => a.CompareTo( b ) >= 0;
 }

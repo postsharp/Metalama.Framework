@@ -423,30 +423,30 @@ internal sealed partial class LinkerInjectionStep
                     AccessorList(
                         List(
                             new[]
-                                {
-                                    getAccessorBody != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.GetAccessorDeclaration,
-                                            List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            Token( SyntaxKind.GetKeyword ),
-                                            getAccessorBody is BlockSyntax getBlock ? getBlock : default,
-                                            default,
-                                            default )
-                                        : null,
-                                    setAccessorBody != null
-                                        ? AccessorDeclaration(
-                                            setAccessorDeclarationKind,
-                                            List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration
-                                                ? Token( SyntaxKind.SetKeyword )
-                                                : Token( SyntaxKind.InitKeyword ),
-                                            setAccessorBody is BlockSyntax setBlock ? setBlock : default,
-                                            default,
-                                            default )
-                                        : null
-                                }.WhereNotNull() ) ),
+                            {
+                                getAccessorBody != null
+                                    ? AccessorDeclaration(
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        Token( SyntaxKind.GetKeyword ),
+                                        getAccessorBody is BlockSyntax getBlock ? getBlock : default,
+                                        default,
+                                        default )
+                                    : null,
+                                setAccessorBody != null
+                                    ? AccessorDeclaration(
+                                        setAccessorDeclarationKind,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration
+                                            ? Token( SyntaxKind.SetKeyword )
+                                            : Token( SyntaxKind.InitKeyword ),
+                                        setAccessorBody is BlockSyntax setBlock ? setBlock : default,
+                                        default,
+                                        default )
+                                    : null
+                            }.WhereNotNull() ) ),
                     null,
                     null );
         }

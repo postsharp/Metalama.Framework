@@ -24,12 +24,14 @@ internal sealed class InlinerProvider
         new PropertyGetReturnInliner(),
         new PropertyGetCastReturnInliner(),
         new PropertyGetLocalDeclarationInliner(),
+
         // new PropertyGetExpressionBodyInliner(),
         new PropertySetValueAssignmentInliner(),
+
         // new PropertySetExpressionBodyInliner(),
         new EventAddAssignmentInliner(),
         new EventRemoveAssignmentInliner(),
-        new ConstructorInliner(),
+        new ConstructorInliner()
     };
 
     public bool TryGetInliner( ResolvedAspectReference aspectReference, SemanticModel semanticModel, out Inliner? inliner )

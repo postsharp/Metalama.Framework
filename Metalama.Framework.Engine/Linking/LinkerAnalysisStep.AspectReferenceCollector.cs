@@ -13,226 +13,224 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerAnalysisStep
 {
-    internal sealed partial class LinkerAnalysisStep
+    private sealed class AspectReferenceCollector
     {
-        private sealed class AspectReferenceCollector
+        private readonly PartialCompilation _intermediateCompilation;
+        private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+        private readonly LinkerInjectionRegistry _injectionRegistry;
+        private readonly AspectReferenceResolver _referenceResolver;
+        private readonly SemanticModelProvider _semanticModelProvider;
+
+        public AspectReferenceCollector(
+            ProjectServiceProvider serviceProvider,
+            PartialCompilation intermediateCompilation,
+            LinkerInjectionRegistry injectionRegistry,
+            AspectReferenceResolver referenceResolver )
         {
-            private readonly PartialCompilation _intermediateCompilation;
-            private readonly IConcurrentTaskRunner _concurrentTaskRunner;
-            private readonly LinkerInjectionRegistry _injectionRegistry;
-            private readonly AspectReferenceResolver _referenceResolver;
-            private readonly SemanticModelProvider _semanticModelProvider;
+            this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
+            this._injectionRegistry = injectionRegistry;
+            this._referenceResolver = referenceResolver;
+            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+            this._intermediateCompilation = intermediateCompilation;
+        }
 
-            public AspectReferenceCollector(
-                ProjectServiceProvider serviceProvider,
-                PartialCompilation intermediateCompilation,
-                LinkerInjectionRegistry injectionRegistry,
-                AspectReferenceResolver referenceResolver )
+        public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
+            CancellationToken cancellationToken )
+        {
+            var aspectReferences =
+                new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>(
+                    IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( this._intermediateCompilation.CompilationContext ) );
+
+            // Add implicit references going from final semantic to the last override.
+            var overriddenMembers = this._injectionRegistry.GetOverriddenMembers();
+            await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
+
+            void ProcessOverriddenMember( ISymbol overriddenMember )
             {
-                this._semanticModelProvider = intermediateCompilation.Compilation.GetSemanticModelProvider();
-                this._injectionRegistry = injectionRegistry;
-                this._referenceResolver = referenceResolver;
-                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-                this._intermediateCompilation = intermediateCompilation;
-            }
-
-            public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
-                CancellationToken cancellationToken )
-            {
-                var aspectReferences =
-                    new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>(
-                        IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( this._intermediateCompilation.CompilationContext ) );
-
-                // Add implicit references going from final semantic to the last override.
-                var overriddenMembers = this._injectionRegistry.GetOverriddenMembers();
-                await this._concurrentTaskRunner.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
-
-                void ProcessOverriddenMember( ISymbol overriddenMember )
+                switch ( overriddenMember )
                 {
-                    switch ( overriddenMember )
-                    {
-                        case IMethodSymbol method:
-                            AddImplicitReference(
-                                method,
-                                method,
-                                this._injectionRegistry.GetLastOverride( method ),
-                                AspectReferenceTargetKind.Self );
+                    case IMethodSymbol method:
+                        AddImplicitReference(
+                            method,
+                            method,
+                            this._injectionRegistry.GetLastOverride( method ),
+                            AspectReferenceTargetKind.Self );
 
-                            break;
+                        break;
 
-                        case IPropertySymbol property:
-                            if ( property.GetMethod != null )
-                            {
-                                AddImplicitReference(
-                                    property.GetMethod,
-                                    property,
-                                    this._injectionRegistry.GetLastOverride( property ),
-                                    AspectReferenceTargetKind.PropertyGetAccessor );
-                            }
-
-                            if ( property.SetMethod != null )
-                            {
-                                AddImplicitReference(
-                                    property.SetMethod,
-                                    property,
-                                    this._injectionRegistry.GetLastOverride( property ),
-                                    AspectReferenceTargetKind.PropertySetAccessor );
-                            }
-
-                            break;
-
-                        case IEventSymbol @event:
-                            AddImplicitReference(
-                                @event.AddMethod.AssertNotNull(),
-                                @event,
-                                this._injectionRegistry.GetLastOverride( @event ),
-                                AspectReferenceTargetKind.EventAddAccessor );
-
-                            AddImplicitReference(
-                                @event.RemoveMethod.AssertNotNull(),
-                                @event,
-                                this._injectionRegistry.GetLastOverride( @event ),
-                                AspectReferenceTargetKind.EventRemoveAccessor );
-
-                            break;
-                    }
-
-                    void AddImplicitReference(
-                        IMethodSymbol containingSymbol,
-                        ISymbol target,
-                        ISymbol lastOverrideSymbol,
-                        AspectReferenceTargetKind targetKind )
-                    {
-                        // Implicit reference pointing from final semantic to the last override.
-                        var containingSemantic = containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
-
-                        var sourceNode =
-                            containingSymbol.GetPrimaryDeclaration() switch
-                            {
-                                ConstructorDeclarationSyntax constructor => constructor.Body ?? (SyntaxNode?) constructor.ExpressionBody ?? constructor,
-                                MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
-                                DestructorDeclarationSyntax destructor => destructor.Body
-                                                                          ?? (SyntaxNode?) destructor.ExpressionBody
-                                                                          ?? throw new AssertionFailedException(
-                                                                              $"'{containingSymbol}' has no implementation." ),
-                                OperatorDeclarationSyntax @operator => @operator.Body
-                                                                       ?? (SyntaxNode?) @operator.ExpressionBody
-                                                                       ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
-                                ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body
-                                                                                          ?? (SyntaxNode?) conversionOperator.ExpressionBody
-                                                                                          ?? throw new AssertionFailedException(
-                                                                                              $"'{containingSymbol}' has no implementation." ),
-                                AccessorDeclarationSyntax accessor => accessor.Body
-                                                                      ?? (SyntaxNode?) accessor.ExpressionBody
-                                                                      ?? accessor ?? throw new AssertionFailedException(
-                                                                          $"'{containingSymbol}' has no implementation." ),
-                                VariableDeclaratorSyntax declarator => declarator
-                                                                       ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
-                                ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
-                                ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
-                                _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
-                            };
-
-                        var resolvedReference =
-                            new ResolvedAspectReference(
-                                containingSemantic,
-                                null,
-                                target,
-                                lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                sourceNode,
-                                sourceNode,
-                                sourceNode,
-                                targetKind,
-                                isInlineable: true,
-                                hasCustomReceiver: true );
-
-                        var wasAdded = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
-
-                        Invariant.Assert( wasAdded );
-                    }
-                }
-
-                // Analyze introduced method bodies.
-                var injectedMembers = this._injectionRegistry.GetInjectedMembers();
-                await this._concurrentTaskRunner.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
-
-                void ProcessInjectedMember( InjectedMember injectedMember )
-                {
-                    var symbol = this._injectionRegistry.GetSymbolForInjectedMember( injectedMember );
-
-                    switch ( symbol )
-                    {
-                        case IMethodSymbol methodSymbol:
-                            AnalyzeIntroducedBody( methodSymbol );
-
-                            break;
-
-                        case IPropertySymbol propertySymbol:
-                            if ( propertySymbol.GetMethod != null )
-                            {
-                                AnalyzeIntroducedBody( propertySymbol.GetMethod );
-                            }
-
-                            if ( propertySymbol.SetMethod != null )
-                            {
-                                AnalyzeIntroducedBody( propertySymbol.SetMethod );
-                            }
-
-                            break;
-
-                        case IEventSymbol eventSymbol:
-                            AnalyzeIntroducedBody( eventSymbol.AddMethod.AssertNotNull() );
-                            AnalyzeIntroducedBody( eventSymbol.RemoveMethod.AssertNotNull() );
-
-                            break;
-
-                        case IFieldSymbol:
-                            // NOP.
-                            break;
-
-                        default:
-                            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                            throw new AssertionFailedException( $"Don't know how to process ' {symbol?.Kind.ToString() ?? "(null)"}'." );
-                    }
-                }
-
-                return aspectReferences;
-
-                void AnalyzeIntroducedBody( IMethodSymbol symbol )
-                {
-                    var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                    var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
-
-                    var nodesWithAspectReference = syntax.GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind );
-
-                    var nodesContainingAspectReferences = new HashSet<SyntaxNode>();
-
-                    foreach ( var nodeWithAspectReference in nodesWithAspectReference )
-                    {
-                        var currentNode = nodeWithAspectReference.Parent.AssertNotNull();
-
-                        while ( currentNode != syntax.Parent )
+                    case IPropertySymbol property:
+                        if ( property.GetMethod != null )
                         {
-                            nodesContainingAspectReferences.Add( currentNode );
-
-                            currentNode = currentNode.Parent.AssertNotNull();
+                            AddImplicitReference(
+                                property.GetMethod,
+                                property,
+                                this._injectionRegistry.GetLastOverride( property ),
+                                AspectReferenceTargetKind.PropertyGetAccessor );
                         }
-                    }
 
-                    var aspectReferenceCollector = new AspectReferenceWalker(
-                        this._referenceResolver,
-                        this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
-                        symbol,
-                        nodesContainingAspectReferences );
+                        if ( property.SetMethod != null )
+                        {
+                            AddImplicitReference(
+                                property.SetMethod,
+                                property,
+                                this._injectionRegistry.GetLastOverride( property ),
+                                AspectReferenceTargetKind.PropertySetAccessor );
+                        }
 
-                    aspectReferenceCollector.Visit( syntax );
+                        break;
 
-                    var wasAdded = aspectReferences.TryAdd( semantic, aspectReferenceCollector.AspectReferences );
+                    case IEventSymbol @event:
+                        AddImplicitReference(
+                            @event.AddMethod.AssertNotNull(),
+                            @event,
+                            this._injectionRegistry.GetLastOverride( @event ),
+                            AspectReferenceTargetKind.EventAddAccessor );
+
+                        AddImplicitReference(
+                            @event.RemoveMethod.AssertNotNull(),
+                            @event,
+                            this._injectionRegistry.GetLastOverride( @event ),
+                            AspectReferenceTargetKind.EventRemoveAccessor );
+
+                        break;
+                }
+
+                void AddImplicitReference(
+                    IMethodSymbol containingSymbol,
+                    ISymbol target,
+                    ISymbol lastOverrideSymbol,
+                    AspectReferenceTargetKind targetKind )
+                {
+                    // Implicit reference pointing from final semantic to the last override.
+                    var containingSemantic = containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
+
+                    var sourceNode =
+                        containingSymbol.GetPrimaryDeclaration() switch
+                        {
+                            ConstructorDeclarationSyntax constructor => constructor.Body ?? (SyntaxNode?) constructor.ExpressionBody ?? constructor,
+                            MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
+                            DestructorDeclarationSyntax destructor => destructor.Body
+                                                                      ?? (SyntaxNode?) destructor.ExpressionBody
+                                                                      ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
+                            OperatorDeclarationSyntax @operator => @operator.Body
+                                                                   ?? (SyntaxNode?) @operator.ExpressionBody
+                                                                   ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
+                            ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body
+                                                                                      ?? (SyntaxNode?) conversionOperator.ExpressionBody
+                                                                                      ?? throw new AssertionFailedException(
+                                                                                          $"'{containingSymbol}' has no implementation." ),
+                            AccessorDeclarationSyntax accessor => accessor.Body
+                                                                  ?? (SyntaxNode?) accessor.ExpressionBody
+                                                                  ?? accessor ?? throw new AssertionFailedException(
+                                                                      $"'{containingSymbol}' has no implementation." ),
+                            VariableDeclaratorSyntax declarator => declarator
+                                                                   ?? throw new AssertionFailedException( $"'{containingSymbol}' has no implementation." ),
+                            ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
+                            ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
+                            _ => throw new AssertionFailedException( $"Unexpected syntax for '{containingSymbol}'." )
+                        };
+
+                    var resolvedReference =
+                        new ResolvedAspectReference(
+                            containingSemantic,
+                            null,
+                            target,
+                            lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            sourceNode,
+                            sourceNode,
+                            sourceNode,
+                            targetKind,
+                            true,
+                            true );
+
+                    var wasAdded = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
 
                     Invariant.Assert( wasAdded );
                 }
+            }
+
+            // Analyze introduced method bodies.
+            var injectedMembers = this._injectionRegistry.GetInjectedMembers();
+            await this._concurrentTaskRunner.RunInParallelAsync( injectedMembers, ProcessInjectedMember, cancellationToken );
+
+            void ProcessInjectedMember( InjectedMember injectedMember )
+            {
+                var symbol = this._injectionRegistry.GetSymbolForInjectedMember( injectedMember );
+
+                switch ( symbol )
+                {
+                    case IMethodSymbol methodSymbol:
+                        AnalyzeIntroducedBody( methodSymbol );
+
+                        break;
+
+                    case IPropertySymbol propertySymbol:
+                        if ( propertySymbol.GetMethod != null )
+                        {
+                            AnalyzeIntroducedBody( propertySymbol.GetMethod );
+                        }
+
+                        if ( propertySymbol.SetMethod != null )
+                        {
+                            AnalyzeIntroducedBody( propertySymbol.SetMethod );
+                        }
+
+                        break;
+
+                    case IEventSymbol eventSymbol:
+                        AnalyzeIntroducedBody( eventSymbol.AddMethod.AssertNotNull() );
+                        AnalyzeIntroducedBody( eventSymbol.RemoveMethod.AssertNotNull() );
+
+                        break;
+
+                    case IFieldSymbol:
+                        // NOP.
+                        break;
+
+                    default:
+                        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+                        throw new AssertionFailedException( $"Don't know how to process ' {symbol?.Kind.ToString() ?? "(null)"}'." );
+                }
+            }
+
+            return aspectReferences;
+
+            void AnalyzeIntroducedBody( IMethodSymbol symbol )
+            {
+                var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
+                var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
+
+                var nodesWithAspectReference = syntax.GetAnnotatedNodes( AspectReferenceAnnotationExtensions.AnnotationKind );
+
+                var nodesContainingAspectReferences = new HashSet<SyntaxNode>();
+
+                foreach ( var nodeWithAspectReference in nodesWithAspectReference )
+                {
+                    var currentNode = nodeWithAspectReference.Parent.AssertNotNull();
+
+                    while ( currentNode != syntax.Parent )
+                    {
+                        nodesContainingAspectReferences.Add( currentNode );
+
+                        currentNode = currentNode.Parent.AssertNotNull();
+                    }
+                }
+
+                var aspectReferenceCollector = new AspectReferenceWalker(
+                    this._referenceResolver,
+                    this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
+                    symbol,
+                    nodesContainingAspectReferences );
+
+                aspectReferenceCollector.Visit( syntax );
+
+                var wasAdded = aspectReferences.TryAdd( semantic, aspectReferenceCollector.AspectReferences );
+
+                Invariant.Assert( wasAdded );
             }
         }
     }
