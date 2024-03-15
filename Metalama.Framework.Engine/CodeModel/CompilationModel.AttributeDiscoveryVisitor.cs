@@ -137,6 +137,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
                             break;
 
+                        case SyntaxKind.TypeKeyword:
+                        case SyntaxKind.TypeVarKeyword:
+                            // Using Default because we don't support types and generic parameter references at the moment.
+                            IndexAttribute( declaration, DeclarationRefTargetKind.Default );
+
+                            break;
+
                         default:
                             throw new AssertionFailedException( $"Unexpected attribute target: '{targetKind}'." );
                     }
