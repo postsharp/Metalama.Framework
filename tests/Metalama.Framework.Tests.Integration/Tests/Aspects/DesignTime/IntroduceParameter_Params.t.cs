@@ -1,9 +1,1 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_Params
-{
-  partial class TestClass
-  {
-    public TestClass(global::System.Int32 param1, global::System.Int32 introduced1 = 42, global::System.String introduced2 = "42", global::System.Int32[] param2) : this(param1, param2)
-    {
-    }
-  }
-}
+// Error LAMA0041 on `TestClass`: `'Exception of type 'System.InvalidOperationException' thrown while executing BuildAspect for aspect [IntroductionAttribute] applied to 'TestClass': Cannot add an IntroduceParameter advice to 'TestClass.TestClass(int, params int[])' because ''TestClass.TestClass(int, params int[])'' must not have params parameter. Check the IsAdviceEligible(AdviceKind.IntroduceParameter) method. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
