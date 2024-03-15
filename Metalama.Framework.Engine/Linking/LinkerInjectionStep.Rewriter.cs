@@ -259,9 +259,9 @@ internal sealed partial class LinkerInjectionStep
                     // If we are removing a custom attribute, keep its trivia.
                     foreach ( var trivia in list.GetLeadingTrivia() )
                     {
-                        if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia 
-                                or SyntaxKind.MultiLineCommentTrivia 
-                                or SyntaxKind.SingleLineDocumentationCommentTrivia 
+                        if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia
+                                or SyntaxKind.MultiLineCommentTrivia
+                                or SyntaxKind.SingleLineDocumentationCommentTrivia
                                 or SyntaxKind.MultiLineDocumentationCommentTrivia )
                         {
                             List<SyntaxTrivia> targetList;
@@ -326,7 +326,12 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( outputAttributeLists.Count > 0 )
                 {
-                    outputAttributeLists[0] = outputAttributeLists[0].WithLeadingTrivia( outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ) );
+                    syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+
+                    outputAttributeLists[0] =
+                        outputAttributeLists[0].WithLeadingTriviaIfNecessary(
+                            outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
+                            syntaxGenerationContext.PreserveTrivia );
                 }
                 else
                 {
