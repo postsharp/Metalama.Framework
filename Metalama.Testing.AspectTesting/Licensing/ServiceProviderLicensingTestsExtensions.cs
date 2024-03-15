@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Services;
+using System;
 using System.IO;
 
 namespace Metalama.Testing.AspectTesting.Licensing
@@ -10,18 +11,29 @@ namespace Metalama.Testing.AspectTesting.Licensing
     {
         public static ProjectServiceProvider AddLicenseConsumptionManagerForTest( this ProjectServiceProvider serviceProvider, TestInput testInput )
         {
-            string? licenseKey = null;
-            
+            string? licenseKey;
+
             if ( testInput.Options.LicenseFile != null )
             {
                 licenseKey = File.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.LicenseFile ) );
             }
             else if ( testInput.Options.LicenseExpression != null )
             {
-                licenseKey = TestOptions.ReadLicenseExpression( testInput.Options.LicenseExpression );
+                if ( testInput.Options.LicenseExpression.Equals( "none", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    licenseKey = null;
+                }
+                else
+                {
+                    licenseKey = TestOptions.ReadLicenseExpression( testInput.Options.LicenseExpression );
+                }
+            }
+            else
+            {
+                return serviceProvider;
             }
 
-            return licenseKey == null ? serviceProvider : serviceProvider.Underlying.AddProjectLicenseConsumptionManagerForTest( licenseKey );
+            return serviceProvider.Underlying.AddProjectLicenseConsumptionManagerForTest( licenseKey );
         }
     }
 }

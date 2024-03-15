@@ -49,11 +49,11 @@ namespace Metalama.Framework.Aspects
         CancellationToken CancellationToken { get; }
 
         /// <summary>
-        /// Skips the application of the aspect to the code. Any provided advice is ignored, but provided children aspects
-        /// and diagnostics are preserved. In multi-layer aspects, the next layers of the aspect are skipped. 
+        /// Skips the application of the aspect to the code. Any provided advice and child aspects are ignored, but provided
+        /// diagnostics are preserved. In multi-layer aspects, the next layers of the aspect are skipped. 
         /// </summary>
         /// <remarks>
-        /// Note that reporting an error automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
+        /// Note that reporting an error automatically causes the aspect to be skipped.
         /// </remarks>
         void SkipAspect();
 

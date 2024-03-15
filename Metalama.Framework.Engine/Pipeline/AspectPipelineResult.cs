@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; }
 
+        public bool HasDeclarationValidator { get; }
+        
         public ImmutableArray<ReferenceValidatorInstance> ReferenceValidators { get; }
 
         public CompilationModel? FirstCompilationModel { get; }
@@ -84,10 +86,13 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<ITransformationBase> Transformations { get; }
 
+        public AspectPipelineConfiguration Configuration { get; }
+
         // Creates an empty instance, when there is no aspect in the project.
         internal AspectPipelineResult(
             PartialCompilation lastCompilation,
-            ProjectModel project )
+            ProjectModel project,
+            AspectPipelineConfiguration configuration )
         {
             this.LastCompilation = lastCompilation;
             this.Diagnostics = ImmutableUserDiagnosticList.Empty;
@@ -97,6 +102,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.ExternallyInheritableAspects = ImmutableArray<IAspectInstance>.Empty;
             this.ReferenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
             this.Project = project;
+            this.Configuration = configuration;
             this.AdditionalSyntaxTrees = ImmutableArray<IntroducedSyntaxTree>.Empty;
             this.AdditionalCompilationOutputFiles = ImmutableArray<AdditionalCompilationOutputFile>.Empty;
             this.Transformations = ImmutableArray<ITransformationBase>.Empty;
@@ -109,10 +115,12 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompilationModel firstCompilationModel,
             CompilationModel? lastCompilationModel, // Nullable because it can be created lazily.
+            AspectPipelineConfiguration configuration,
             ImmutableUserDiagnosticList? diagnostics = null,
             PipelineContributorSources? sources = default,
             ImmutableArray<IAspectInstance> inheritableAspectInstances = default,
             ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>? annotations = default,
+            bool hasDeclarationValidator = false,
             ImmutableArray<ReferenceValidatorInstance> referenceValidators = default,
             ImmutableArray<IntroducedSyntaxTree> additionalSyntaxTrees = default,
             ImmutableArray<AspectInstanceResult> aspectInstanceResults = default,
@@ -130,9 +138,11 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AspectLayers = aspectLayers;
             this.FirstCompilationModel = firstCompilationModel.AssertNotNull();
             this.LastCompilationModelOrNull = lastCompilationModel;
+            this.Configuration = configuration;
             this.AspectInstanceResults = aspectInstanceResults.IsDefault ? ImmutableArray<AspectInstanceResult>.Empty : aspectInstanceResults;
             this.ExternallyInheritableAspects = inheritableAspectInstances.IsDefault ? ImmutableArray<IAspectInstance>.Empty : inheritableAspectInstances;
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
+            this.HasDeclarationValidator = hasDeclarationValidator;
 
             this.ReferenceValidators =
                 referenceValidators.IsDefault ? ImmutableArray<ReferenceValidatorInstance>.Empty : referenceValidators;
@@ -161,10 +171,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.AspectLayers,
                 this.FirstCompilationModel.AssertNotNull(),
                 this.LastCompilationModel.AssertNotNull(),
+                this.Configuration,
                 this.Diagnostics.Concat( diagnostics ),
                 this.ContributorSources,
                 this.ExternallyInheritableAspects,
                 this.Annotations,
+                this.HasDeclarationValidator,
                 this.ReferenceValidators,
                 this.AdditionalSyntaxTrees,
                 this.AspectInstanceResults,

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime
@@ -40,6 +41,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var diagnosticSink = new UserDiagnosticSink( this.CompileTimeProject, null );
 
             // Discover the validators.
+            bool hasDeclarationValidator;
             ImmutableArray<ReferenceValidatorInstance> referenceValidators;
 
             var validatorSources = pipelineStepsResult.ValidatorSources;
@@ -49,11 +51,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources );
                 var initialCompilation = pipelineStepsResult.FirstCompilation;
                 var finalCompilation = pipelineStepsResult.LastCompilation;
-                await validatorRunner.RunDeclarationValidatorsAsync( initialCompilation, finalCompilation, diagnosticSink, cancellationToken );
+                hasDeclarationValidator = await validatorRunner.RunDeclarationValidatorsAsync( initialCompilation, finalCompilation, diagnosticSink, cancellationToken );
                 referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
             }
             else
             {
+                hasDeclarationValidator = false;
                 referenceValidators = ImmutableArray<ReferenceValidatorInstance>.Empty;
             }
 
@@ -75,6 +78,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     input.AspectLayers,
                     input.FirstCompilationModel.AssertNotNull(),
                     pipelineStepsResult.LastCompilation,
+                    input.Configuration,
                     input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( diagnosticSink.ToImmutable() ),
                     new PipelineContributorSources(
                         input.ContributorSources.AspectSources.AddRange( pipelineStepsResult.OverflowAspectSources ),
@@ -82,6 +86,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         ImmutableArray<IHierarchicalOptionsSource>.Empty ),
                     pipelineStepsResult.InheritableAspectInstances,
                     pipelineStepsResult.LastCompilation.Annotations,
+                    hasDeclarationValidator,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
                     input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ),

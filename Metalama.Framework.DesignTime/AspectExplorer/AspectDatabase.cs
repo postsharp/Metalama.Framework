@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
@@ -91,7 +92,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             .Select( aspectClass => aspectClass.TypeId.Id );
 
         var fabrics = pipeline.Fabrics ?? ImmutableArray<string>.Empty;
-        var fabricsIds = fabrics.Select( fabric => compilation.GetTypeByMetadataName( fabric )!.GetSerializableTypeId().Id );
+        var fabricsIds = fabrics.Select( fabric => compilation.GetTypeByMetadataName( fabric )?.GetSerializableTypeId().Id ).WhereNotNull();
 
         return aspectClassesIds.Concat( fabricsIds ).ToArray();
     }
@@ -128,7 +129,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                 designTimeConfiguration.Value,
                 cancellationToken.ToTestable() );
 
-            aspectInstances = result.AspectInstances;
+            aspectInstances = result.AspectInstances.Where( i => !i.IsSkipped ).ToImmutableArray();
 
             this._aspectInstanceCache.TryAdd( compilation, aspectInstances );
         }

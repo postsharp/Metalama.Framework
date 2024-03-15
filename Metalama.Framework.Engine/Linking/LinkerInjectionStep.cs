@@ -952,5 +952,5 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
                     or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
                     or IMethod { IsPartial: true, HasImplementation: false }
-                && (insertStatementContext.WasUsedForInputContracts || insertStatementContext.WasUsedForOutputContracts));
+                && insertStatementContext.WasUsedForInputContracts);
 }

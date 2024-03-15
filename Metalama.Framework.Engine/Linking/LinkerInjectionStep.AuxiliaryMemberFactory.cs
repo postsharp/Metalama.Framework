@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -445,8 +446,7 @@ internal sealed partial class LinkerInjectionStep
                                             default,
                                             default )
                                         : null
-                                }.Where( a => a != null )
-                                .AssertNoneNull() ) ),
+                                }.WhereNotNull() ) ),
                     null,
                     null );
         }

@@ -146,10 +146,15 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
-        => (IMethod) this._defaultCache.GetOrAdd(
-            methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
-            this._compilationModel );
+    {
+        // Standardize on the partial definition part for partial methods.
+        methodSymbol = methodSymbol.PartialDefinitionPart ?? methodSymbol;
+
+        return (IMethod) this._defaultCache.GetOrAdd(
+                methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
+                static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+                this._compilationModel );
+    }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
         => (IProperty) this._defaultCache.GetOrAdd(

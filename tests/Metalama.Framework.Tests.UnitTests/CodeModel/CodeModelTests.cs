@@ -1690,6 +1690,7 @@ public partial class C
             Assert.Equal( 2, type.Sources.Length );
             var partialMethod = type.Methods.OfName( "PartialNonVoid" ).Single();
             Assert.Equal( 2, partialMethod.Sources.Length );
+            Assert.True( partialMethod.HasImplementation );
             Assert.Single( partialMethod.Sources, s => s.IsImplementationPart );
         }
 

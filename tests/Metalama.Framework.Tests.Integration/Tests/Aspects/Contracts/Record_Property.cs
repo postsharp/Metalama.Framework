@@ -1,6 +1,8 @@
 using Metalama.Framework.Aspects;
 using System;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Record_Property
 {
     internal class NotNullAttribute : ContractAspect
