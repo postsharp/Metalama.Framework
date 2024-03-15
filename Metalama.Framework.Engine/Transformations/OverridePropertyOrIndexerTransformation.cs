@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -24,22 +23,16 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
     /// </summary>
     protected BlockSyntax CreateIdentityAccessorBody( MemberInjectionContext context, SyntaxKind accessorDeclarationKind )
     {
-        switch ( accessorDeclarationKind )
+        var proceedExpression = accessorDeclarationKind switch
         {
-            case SyntaxKind.GetAccessorDeclaration:
-                return SyntaxFactoryEx.FormattedBlock(
-                    SyntaxFactory.ReturnStatement(
-                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                        this.CreateProceedGetExpression( context ),
-                        SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
+            SyntaxKind.GetAccessorDeclaration => this.CreateProceedGetExpression( context ),
+            SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => this.CreateProceedSetExpression( context ),
+            _ => throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." )
+        };
 
-            case SyntaxKind.SetAccessorDeclaration:
-            case SyntaxKind.InitAccessorDeclaration:
-                return SyntaxFactoryEx.FormattedBlock( SyntaxFactory.ExpressionStatement( this.CreateProceedSetExpression( context ) ) );
-
-            default:
-                throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." );
-        }
+        return TransformationHelper.CreateIdentityAccessorBody(
+            accessorDeclarationKind,
+            proceedExpression );
     }
 
     protected abstract ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context );

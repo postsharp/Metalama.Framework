@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -46,7 +45,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
             (false, Writeability.All) => SyntaxKind.SetAccessorDeclaration,
             _ => SyntaxKind.None
         };
-        
+
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe )
             .Insert( 0, SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
@@ -58,7 +57,8 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
                     modifiers,
-                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
+                        .WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
                     SyntaxFactory.AccessorList(
@@ -106,19 +106,16 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
         };
 
     protected override ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context )
-        => context.AspectReferenceSyntaxProvider.GetPropertyReference(
-            this.ParentAdvice.AspectLayerId,
+        => TransformationHelper.CreatePropertyProceedGetExpression(
+            context.AspectReferenceSyntaxProvider,
+            context.SyntaxGenerationContext,
             this.OverriddenDeclaration,
-            AspectReferenceTargetKind.PropertyGetAccessor,
-            context.SyntaxGenerator );
+            this.ParentAdvice.AspectLayerId );
 
     protected override ExpressionSyntax CreateProceedSetExpression( MemberInjectionContext context )
-        => SyntaxFactory.AssignmentExpression(
-            SyntaxKind.SimpleAssignmentExpression,
-            context.AspectReferenceSyntaxProvider.GetPropertyReference(
-                this.ParentAdvice.AspectLayerId,
-                this.OverriddenDeclaration,
-                AspectReferenceTargetKind.PropertySetAccessor,
-                context.SyntaxGenerator ),
-            SyntaxFactory.IdentifierName( "value" ) );
+        => TransformationHelper.CreatePropertyProceedSetExpression(
+            context.AspectReferenceSyntaxProvider,
+            context.SyntaxGenerationContext,
+            this.OverriddenDeclaration,
+            this.ParentAdvice.AspectLayerId );
 }

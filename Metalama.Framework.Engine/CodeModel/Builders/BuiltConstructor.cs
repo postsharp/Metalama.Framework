@@ -9,9 +9,9 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
+internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 {
-    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation ) : base( compilation, constructorBuilder )
+    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation ) : base( constructorBuilder, compilation )
     {
         this.ConstructorBuilder = constructorBuilder;
     }
@@ -20,13 +20,9 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
 
     protected override MemberBuilder MemberBuilder => this.ConstructorBuilder;
 
-    [Memo]
-    public IParameterList Parameters 
-        => new ParameterList(
-            this,
-            this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
+    protected override MethodBaseBuilder MethodBaseBuilder => this.ConstructorBuilder;
 
-    public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
+    public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     public ConstructorInitializerKind InitializerKind => this.ConstructorBuilder.InitializerKind;
 
@@ -39,9 +35,9 @@ internal sealed class BuiltConstructor : BuiltMember, IConstructorImpl
     IConstructor IConstructor.Definition => this;
 
     public IConstructor? GetBaseConstructor()
-    {
+        =>
+
         // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always
         // the default constructor of the base class.
-        return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
-    }
+            this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
 }

@@ -6,6 +6,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Eligibility;
 
@@ -92,6 +93,10 @@ public static partial class EligibilityRuleFactory
             builder.DeclaringType().MustBeRunTimeOnly();
             builder.MustNotBeStatic();
             builder.MustNotBeRecordCopyConstructor();
+
+            builder.MustSatisfy(
+                c => c.Parameters.All( p => !p.IsParams ),
+                c => $"'{c}' must not have params parameter" );
         } );
 
     private static readonly IEligibilityRule<IDeclaration> _addInitializerRule = CreateRule<IDeclaration, IMemberOrNamedType>(

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Engine.CodeModel
-{
-    internal interface IIndexerImpl : IIndexer, IFieldOrPropertyOrIndexerImpl { }
-}
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal interface IIndexerImpl : IIndexer, IPropertyOrIndexerImpl { }

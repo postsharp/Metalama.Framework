@@ -15,12 +15,10 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
+internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethodImpl
 {
     private bool _isReadOnly;
     private bool _isIteratorMethod;
-
-    public ParameterBuilderList Parameters { get; } = new();
 
     public GenericParameterBuilderList TypeParameters { get; } = new();
 
@@ -49,38 +47,12 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     {
         base.Freeze();
 
-        foreach ( var parameter in this.Parameters )
-        {
-            parameter.Freeze();
-        }
-
         foreach ( var typeParameter in this.TypeParameters )
         {
             typeParameter.Freeze();
         }
 
         this.ReturnParameter.Freeze();
-    }
-
-    public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-    {
-        this.CheckNotFrozen();
-
-        var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind, this.ParentAdvice );
-        parameter.DefaultValue = defaultValue;
-        this.Parameters.Add( parameter );
-
-        return parameter;
-    }
-
-    public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-    {
-        this.CheckNotFrozen();
-
-        var iType = this.Compilation.Factory.GetTypeByReflectionType( type );
-        TypedConstant? typedConstant = defaultValue != null ? TypedConstant.Create( defaultValue.Value.Value, iType ) : null;
-
-        return this.AddParameter( name, iType, refKind, typedConstant );
     }
 
     public ITypeParameterBuilder AddTypeParameter( string name )
@@ -132,7 +104,7 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
             _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
         };
 
-    System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
+    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
@@ -166,14 +138,13 @@ internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
         string name,
         DeclarationKind declarationKind = DeclarationKind.Method,
         OperatorKind operatorKind = OperatorKind.None )
-        : base( targetType, name, advice )
+        : base( advice, targetType, name )
     {
         Invariant.Assert(
             declarationKind == DeclarationKind.Operator
                             ==
                             (operatorKind != OperatorKind.None) );
 
-        this.Name = name;
         this.DeclarationKind = declarationKind;
         this.OperatorKind = operatorKind;
 

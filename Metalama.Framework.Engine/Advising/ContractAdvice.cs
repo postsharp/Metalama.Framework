@@ -6,183 +6,93 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.Advising;
+
+internal sealed class ContractAdvice : Advice
 {
-    internal sealed class ContractAdvice : Advice
+    public ContractDirection Direction { get; }
+
+    public TemplateMember<IMethod> Template { get; }
+
+    public IObjectReader Tags { get; }
+
+    public IObjectReader TemplateArguments { get; }
+
+    public ContractAdvice(
+        IAspectInstanceInternal aspect,
+        TemplateClassInstance templateInstance,
+        IDeclaration targetDeclaration,
+        ICompilation sourceCompilation,
+        TemplateMember<IMethod> template,
+        ContractDirection direction,
+        string? layerName,
+        IObjectReader tags,
+        IObjectReader templateArguments )
+        : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
     {
-        public ContractAdvice(
-            IAspectInstanceInternal aspect,
-            TemplateClassInstance templateInstance,
-            IDeclaration targetDeclaration,
-            ICompilation sourceCompilation,
-            string? layerName )
-            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName ) { }
+        Invariant.Assert( direction is ContractDirection.Input or ContractDirection.Output or ContractDirection.Both );
 
-        public override AdviceKind AdviceKind => AdviceKind.AddContract;
+        this.Direction = direction;
+        this.Template = template;
+        this.Tags = tags;
+        this.TemplateArguments = templateArguments;
+    }
 
-        public override AdviceImplementationResult Implement(
-            ProjectServiceProvider serviceProvider,
-            CompilationModel compilation,
-            Action<ITransformation> addTransformation )
+    public override AdviceKind AdviceKind => AdviceKind.AddContract;
+
+    public override AdviceImplementationResult Implement(
+        ProjectServiceProvider serviceProvider,
+        CompilationModel compilation,
+        Action<ITransformation> addTransformation )
+    {
+        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+        switch ( targetDeclaration )
         {
-#if DEBUG
-            if ( this.LastAdviceImplementationResult != null )
-            {
-                throw new AssertionFailedException( "Implement has already been called." );
-            }
-#endif
-            return this.LastAdviceImplementationResult = this.ImplementCore( serviceProvider, compilation, addTransformation );
-        }
+            case IField field:
+                var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
+                addTransformation( promotedField.ToTransformation() );
+                OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 
-        public AdviceImplementationResult? LastAdviceImplementationResult { get; private set; }
+                addTransformation(
+                    new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-        private AdviceImplementationResult ImplementCore(
-            ProjectServiceProvider serviceProvider,
-            CompilationModel compilation,
-            Action<ITransformation> addTransformation )
-        {
-            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+                return AdviceImplementationResult.Success( promotedField );
 
-            switch ( targetDeclaration )
-            {
-                case IMethod { ContainingDeclaration: IProperty containingProperty } propertyAccessor:
-                    addTransformation( new ContractPropertyTransformation( this, containingProperty, propertyAccessor.MethodKind ) );
+            case IProperty property:
+                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                    return AdviceImplementationResult.Success( containingProperty );
+                return AdviceImplementationResult.Success( property );
 
-                case IProperty property:
-                    addTransformation( new ContractPropertyTransformation( this, property, null ) );
+            case IIndexer indexer:
+                addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                    return AdviceImplementationResult.Success( property );
+                return AdviceImplementationResult.Success( indexer );
 
-                case IMethod { ContainingDeclaration: IIndexer containingIndexer } indexerAccessor:
-                    addTransformation( new ContractIndexerTransformation( this, containingIndexer, indexerAccessor.MethodKind ) );
+            case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
+                addTransformation(
+                    new ContractIndexerTransformation( this, indexer, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                    return AdviceImplementationResult.Success( containingIndexer );
+                return AdviceImplementationResult.Success( indexer );
 
-                case IIndexer indexer:
-                    addTransformation( new ContractIndexerTransformation( this, indexer, null ) );
+            case IParameter { ContainingDeclaration: IMethod method } parameter:
+                addTransformation(
+                    new ContractMethodTransformation( this, method, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                    return AdviceImplementationResult.Success( indexer );
+                return AdviceImplementationResult.Success( method );
 
-                case IMethod method:
-                    addTransformation( new ContractMethodTransformation( this, method ) );
+            case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
+                addTransformation(
+                    new ContractConstructorTransformation( this, constructor, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
 
-                    return AdviceImplementationResult.Success( method );
+                return AdviceImplementationResult.Success( constructor );
 
-                case IConstructor constructor:
-                    addTransformation( new ContractConstructorTransformation( this, constructor ) );
-
-                    return AdviceImplementationResult.Success( constructor );
-
-                case IField field:
-                    var promotedField = new PromotedField( serviceProvider, field, ObjectReader.Empty, this );
-                    addTransformation( promotedField.ToTransformation() );
-                    OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
-                    addTransformation( new ContractPropertyTransformation( this, promotedField, null ) );
-
-                    return AdviceImplementationResult.Success( promotedField );
-
-                default:
-                    throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." );
-            }
-        }
-
-        public List<Contract> Contracts { get; } = new();
-
-        public bool TryExecuteTemplates(
-            IDeclaration targetMember,
-            TransformationContext context,
-            ContractDirection direction,
-            string? returnValueLocalName,
-            Func<Contract, bool>? contractFilter,
-            [NotNullWhen( true )] out List<StatementSyntax>? statements )
-        {
-            statements = new List<StatementSyntax>();
-
-            foreach ( var contract in this.Contracts )
-            {
-                if ( !contract.AppliesTo( direction ) )
-                {
-                    continue;
-                }
-
-                var contractTarget = contract.TargetDeclaration.GetTarget( targetMember.Compilation );
-
-                if ( contractFilter != null && !contractFilter( contract ) )
-                {
-                    continue;
-                }
-
-                var parameterName = contractTarget switch
-                {
-                    IParameter { IsReturnParameter: true } => returnValueLocalName.AssertNotNull(),
-                    IParameter parameter => parameter.Name,
-                    IFieldOrPropertyOrIndexer when direction == ContractDirection.Input => "value",
-                    IFieldOrPropertyOrIndexer when direction == ContractDirection.Output => returnValueLocalName.AssertNotNull(),
-                    _ => throw new AssertionFailedException( $"Unexpected kind of declaration: '{contractTarget}'." )
-                };
-
-                var parameterType = ((IHasType) contractTarget).Type;
-                ExpressionSyntax parameterExpression = IdentifierName( parameterName );
-                parameterExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterExpression, parameterType.GetSymbol() );
-
-                var metaApiProperties = new MetaApiProperties(
-                    this.SourceCompilation,
-                    context.DiagnosticSink,
-                    contract.Template.Cast(),
-                    contract.Tags,
-                    this.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    this.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default );
-
-                var metaApi = MetaApi.ForDeclaration(
-                    contractTarget,
-                    metaApiProperties,
-                    direction );
-
-                var boundTemplate = contract.Template.ForContract( parameterExpression, contract.TemplateArguments );
-
-                var expansionContext = new TemplateExpansionContext(
-                    context,
-                    this.TemplateInstance.TemplateProvider,
-                    metaApi,
-                    targetMember,
-                    boundTemplate,
-                    null,
-                    this.AspectLayerId );
-
-                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( contract.Template.Declaration );
-
-                if ( !templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out var filterBody ) )
-                {
-                    statements = null;
-
-                    return false;
-                }
-                else
-                {
-                    // TODO: This method should not use linker annotations.
-                    statements.Add(
-                        Block( filterBody.Statements )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
-                }
-            }
-
-            return true;
+            default:
+                throw new AssertionFailedException( $"Unexpected kind of declaration: '{targetDeclaration}'." );
         }
     }
 }

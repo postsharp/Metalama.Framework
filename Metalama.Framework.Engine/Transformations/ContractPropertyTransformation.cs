@@ -3,167 +3,88 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ContractPropertyTransformation : OverridePropertyBaseTransformation, IInsertStatementTransformation
+internal sealed class ContractPropertyTransformation : ContractBaseTransformation
 {
-    private readonly MethodKind? _targetMethodKind;
+    public new IProperty TargetMember => (IProperty) base.TargetMember;
 
-    public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration, MethodKind? targetMethodKind ) :
-        base( advice, overriddenDeclaration, ObjectReader.Empty )
+    public ContractPropertyTransformation(
+        Advice advice,
+        IProperty targetProperty,
+        ContractDirection contractDirection,
+        TemplateMember<IMethod> template,
+        IObjectReader templateArguments,
+        IObjectReader tags ) : base( advice, targetProperty, targetProperty, contractDirection, template, templateArguments, tags ) { }
+
+    public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        this._targetMethodKind = targetMethodKind;
-    }
+        Invariant.Assert( this.ContractTarget == this.TargetMember );
+        Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
-    public IMember TargetMember => this.OverriddenDeclaration;
+        bool? inputResult, outputResult;
+        BlockSyntax? inputContractBlock, outputContractBlock;
 
-    public IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
-    {
-        if ( this.OverriddenDeclaration.SetMethod == null )
+        if ( this.ContractDirection is ContractDirection.Input or ContractDirection.Both )
         {
-            return Array.Empty<InsertedStatement>();
-        }
+            Invariant.Assert( this.TargetMember.SetMethod is not null );
 
-        var advice = (ContractAdvice) this.ParentAdvice;
-
-        if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, null, out var inputFilterBodies )
-             || inputFilterBodies.Count == 0 )
-        {
-            return Array.Empty<InsertedStatement>();
-        }
-
-        return inputFilterBodies.SelectAsArray(
-            b => new InsertedStatement( b, this.OverriddenDeclaration.SetMethod, this, InsertedStatementKind.InputContract ) );
-    }
-
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
-    {
-        var advice = (ContractAdvice) this.ParentAdvice;
-        BlockSyntax? getterBody;
-
-        // Local function that executes the filter for one of the accessors.
-        bool TryExecuteFilters(
-            IMethod? accessor,
-            ContractDirection direction,
-            [NotNullWhen( true )] out List<StatementSyntax>? statements,
-            [NotNullWhen( true )] out ExpressionSyntax? proceedExpression,
-            out string? returnValueLocalName )
-        {
-            if ( accessor != null
-                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
-                 && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
-            {
-                if ( direction == ContractDirection.Output )
-                {
-                    returnValueLocalName = context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
-                }
-                else
-                {
-                    returnValueLocalName = null;
-                }
-
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, context, direction, returnValueLocalName, null, out statements )
-                     || statements.Count == 0 )
-                {
-                    proceedExpression = null;
-
-                    return false;
-                }
-
-                var templateKind =
-                    accessor.GetIteratorInfo() switch
-                    {
-                        { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable } => TemplateKind.IEnumerable,
-                        { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator } => TemplateKind.IEnumerator,
-                        _ => TemplateKind.Default,
-                    };
-
-                proceedExpression = this.CreateProceedDynamicExpression( context, accessor, templateKind )
-                    .ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
-
-                return true;
-            }
-            else
-            {
-                statements = null;
-                proceedExpression = null;
-                returnValueLocalName = null;
-
-                return false;
-            }
-        }
-
-        // Process the getter (output filters).
-        if ( TryExecuteFilters(
-                this.OverriddenDeclaration.GetMethod,
-                ContractDirection.Output,
-                out var getterStatements,
-                out var getterProceedExpression,
-                out var getterReturnValueLocalName ) )
-        {
-            getterStatements.Insert(
-                0,
-                SyntaxFactory.LocalDeclarationStatement(
-                    SyntaxFactory.VariableDeclaration( SyntaxFactoryEx.VarIdentifier() )
-                        .WithVariables(
-                            SyntaxFactory.SingletonSeparatedList(
-                                SyntaxFactory.VariableDeclarator(
-                                        SyntaxFactory.Identifier( default, getterReturnValueLocalName!, new( SyntaxFactory.ElasticSpace ) ) )
-                                    .WithInitializer( SyntaxFactory.EqualsValueClause( getterProceedExpression ) ) ) ) ) );
-
-            getterStatements.Add(
-                SyntaxFactory.ReturnStatement(
-                    SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                    SyntaxFactory.IdentifierName( getterReturnValueLocalName! ),
-                    SyntaxFactory.Token( SyntaxKind.SemicolonToken ) ) );
-
-            getterBody = SyntaxFactoryEx.FormattedBlock( getterStatements );
+            inputResult = this.TryExecuteTemplate( context, IdentifierName( "value" ), this.TargetMember.Type, out inputContractBlock );
         }
         else
         {
-            getterBody = null;
+            inputResult = null;
+            inputContractBlock = null;
         }
 
-        // We need to force an empty override for auto properties with input contracts.
-        // This is caused by a current design of the linker - auto-property deconstruction happens during the final rewriting and
-        // insert statement transformation requires a body to insert statements into.
-        var isAutoProperty = ((IProperty) this.OverriddenDeclaration).IsAutoPropertyOrField.AssertNotNull();
-
-        // The same goes for record properties
-        var isRecordProperty = this.OverriddenDeclaration.ContainingDeclaration is INamedType { TypeKind: TypeKind.RecordClass or TypeKind.RecordStruct };
-
-        var requiresEmptyOverride =
-            advice.Contracts.Any( c => c.AppliesTo( ContractDirection.Input ) )
-            && (isAutoProperty || isRecordProperty);
-
-        // Return if we have no filter at this point. This may be an error condition.
-        if ( getterBody == null && !requiresEmptyOverride )
+        if ( this.ContractDirection is ContractDirection.Output or ContractDirection.Both )
         {
-            return Array.Empty<InjectedMember>();
-        }
+            Invariant.Assert( this.TargetMember.GetMethod is not null );
 
-        if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )
+            var returnVariableName = context.GetReturnValueVariableName();
+            outputResult = this.TryExecuteTemplate( context, IdentifierName( returnVariableName ), this.TargetMember.Type, out outputContractBlock );
+        }
+        else
         {
-            getterBody = this.CreateIdentityAccessorBody( context, SyntaxKind.GetAccessorDeclaration );
+            outputResult = null;
+            outputContractBlock = null;
         }
 
-        return
-            this.GetInjectedMembersImpl(
-                context,
-                getterBody,
-                this.OverriddenDeclaration.SetMethod != null
-                    ? this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration )
-                    : null );
+        if ( inputResult == false || outputResult == false )
+        {
+            return Array.Empty<InsertedStatement>();
+        }
+
+        var statements = new List<InsertedStatement>();
+
+        if ( inputContractBlock != null )
+        {
+            statements.Add(
+                new InsertedStatement(
+                    inputContractBlock,
+                    this.TargetMember.SetMethod.AssertNotNull().Parameters[0],
+                    this,
+                    InsertedStatementKind.InputContract ) );
+        }
+
+        if ( outputContractBlock != null )
+        {
+            statements.Add(
+                new InsertedStatement(
+                    outputContractBlock,
+                    this.TargetMember.GetMethod.AssertNotNull().ReturnParameter,
+                    this,
+                    InsertedStatementKind.OutputContract ) );
+        }
+
+        return statements;
     }
 
-    public override string ToString() => $"Add default contract to property '{this.TargetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
+    public override FormattableString ToDisplayString()
+        => $"Add contract to property '{this.TargetMember.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}'";
 }

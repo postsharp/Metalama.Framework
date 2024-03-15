@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
-
 namespace Metalama.Framework.Engine.Transformations;
 
 public enum InsertedStatementKind
@@ -17,6 +15,9 @@ public enum InsertedStatementKind
     /// </summary>
     InputContract = -100,
 
-    [Obsolete]
-    OutputContract = 100,
+    /// <summary>
+    /// Insert statement into the end of an auxiliary declaration for the current version of the target declaration (source, introduction or latest override). 
+    /// Statements added by one layer have their order preserved.
+    /// </summary>
+    OutputContract = 100
 }

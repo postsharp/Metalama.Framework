@@ -47,9 +47,9 @@ class TargetCode
     [return: Aspect]
     string? Method([Aspect] string? arg)
     {
-      global::System.String? returnValue;
       arg?.ToString();
       arg!.ToString();
+      global::System.String? returnValue;
       returnValue = arg;
       returnValue?.ToString();
       returnValue!.ToString();
@@ -103,9 +103,9 @@ class TargetCode
     [return: Aspect]
     string Method([Aspect] string arg)
     {
+      arg.ToString();
+      arg.ToString();
       global::System.String returnValue;
-      arg.ToString();
-      arg.ToString();
       returnValue = arg;
       returnValue.ToString();
       returnValue.ToString();
@@ -160,9 +160,9 @@ class TargetCode
     [return: Aspect]
     string Method([Aspect] string arg)
     {
-      global::System.String returnValue;
       arg?.ToString();
       arg.ToString();
+      global::System.String returnValue;
       returnValue = arg;
       returnValue?.ToString();
       returnValue.ToString();

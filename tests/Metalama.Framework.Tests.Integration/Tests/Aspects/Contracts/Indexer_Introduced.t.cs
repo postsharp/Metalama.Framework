@@ -23,15 +23,15 @@ internal class Target
     }
     set
     {
-      if (value == null)
-      {
-        throw new global::System.ArgumentNullException();
-      }
       if (x == null)
       {
         throw new global::System.ArgumentNullException();
       }
       if (y == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      if (value == null)
       {
         throw new global::System.ArgumentNullException();
       }
@@ -41,10 +41,6 @@ internal class Target
   {
     get
     {
-      if (index == null)
-      {
-        throw new global::System.ArgumentNullException();
-      }
       global::System.String? returnValue;
       returnValue = default(global::System.String? );
       if (returnValue == null)
@@ -56,10 +52,6 @@ internal class Target
     set
     {
       if (value == null)
-      {
-        throw new global::System.ArgumentNullException();
-      }
-      if (index == null)
       {
         throw new global::System.ArgumentNullException();
       }

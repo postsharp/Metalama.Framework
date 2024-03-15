@@ -27,5 +27,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AutoPrope
     internal class Target : ITarget
     {
         public string P { get; } = null!;
+
+        public Target()
+        {
+            this.P = "42";
+        }
     }
 }
