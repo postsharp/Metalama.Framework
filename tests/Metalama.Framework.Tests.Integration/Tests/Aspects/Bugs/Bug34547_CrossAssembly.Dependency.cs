@@ -1,0 +1,29 @@
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Fabrics;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug34547_CrossAssembly;
+
+public class Fabric : TransitiveProjectFabric
+{
+    public override void AmendProject(IProjectAmender amender)
+    {
+        amender.Outbound
+            .SelectMany(compilation => compilation.AllTypes)
+            .Where(type => type.Accessibility is Metalama.Framework.Code.Accessibility.Public)
+            .SelectMany(type => type.Methods)
+            .Where(method => method.Accessibility is Accessibility.Public)
+            .AddAspectIfEligible<LogAttribute>();
+    }
+}
+
+public class LogAttribute : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        return meta.Proceed();
+    }
+}
+
+// <target>
+public delegate void D();

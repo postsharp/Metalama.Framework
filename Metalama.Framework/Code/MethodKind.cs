@@ -66,6 +66,11 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Lambda.
         /// </summary>
-        Lambda
+        Lambda,
+
+        /// <summary>
+        /// Delegate invocation.
+        /// </summary>
+        DelegateInvoke
     }
 }
