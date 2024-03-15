@@ -294,20 +294,23 @@ internal sealed partial class LinkerInjectionStep
                                 or SyntaxKind.SingleLineDocumentationCommentTrivia 
                                 or SyntaxKind.MultiLineDocumentationCommentTrivia )
                         {
-                            // Doc comments from the 
+                            List<SyntaxTrivia> targetList;
+
                             if ( wasFirstList )
                             {
-                                firstListLeadingTrivia ??= new List<SyntaxTrivia>();
-                                firstListLeadingTrivia.Add( trivia );
-
-                                if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
-                                {
-                                    firstListLeadingTrivia.Add( ElasticLineFeed );
-                                }
+                                // Trivia preceding the first attribute list needs to before the first final attribute list.
+                                targetList = firstListLeadingTrivia ??= new List<SyntaxTrivia>();
                             }
                             else
                             {
-                                outputTrivia.Add( trivia );
+                                targetList = outputTrivia;
+                            }
+
+                            targetList.Add( trivia );
+
+                            if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
+                            {
+                                targetList.Add( ElasticLineFeed );
                             }
 
                             break;
@@ -316,14 +319,9 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
-            var isFirstAttribute = true;
-
             // Add new attributes.
             foreach ( var attribute in finalModelAttributes )
             {
-                var wasFirstAttribute = isFirstAttribute;
-                isFirstAttribute = false;
-
                 if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
                 {
                     syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
