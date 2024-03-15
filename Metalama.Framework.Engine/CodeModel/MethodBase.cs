@@ -56,12 +56,12 @@ namespace Metalama.Framework.Engine.CodeModel
                 SymbolMethodKind.UserDefinedOperator => MethodKind.Operator,
                 SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
                 SymbolMethodKind.AnonymousFunction => MethodKind.Lambda,
+                SymbolMethodKind.DelegateInvoke => MethodKind.DelegateInvoke,
                 SymbolMethodKind.BuiltinOperator or
-                    SymbolMethodKind.DelegateInvoke or
-                    SymbolMethodKind.ReducedExtension or
-                    SymbolMethodKind.DeclareMethod or
-                    SymbolMethodKind.FunctionPointerSignature => throw new NotSupportedException(
-                        $"The method '{this.Symbol}' is not supported because it is of kind {this.MethodSymbol.MethodKind}." ),
+                SymbolMethodKind.ReducedExtension or
+                SymbolMethodKind.DeclareMethod or
+                SymbolMethodKind.FunctionPointerSignature => throw new NotSupportedException(
+                    $"The method '{this.Symbol}' is not supported because it is of kind {this.MethodSymbol.MethodKind}." ),
                 _ => throw new AssertionFailedException( $"The method '{this.Symbol}' is not expected because it is of kind {this.MethodSymbol.MethodKind}." )
             };
 
