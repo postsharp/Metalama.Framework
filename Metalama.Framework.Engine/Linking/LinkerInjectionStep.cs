@@ -802,8 +802,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                         throw new AssertionFailedException( "GeneratedCodeAnnotationKind annotation missing." );
                     }
                 }
-#endif
             }
+#endif
 
             return statements;
         }
