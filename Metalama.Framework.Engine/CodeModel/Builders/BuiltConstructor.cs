@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel.Collections;
-using Metalama.Framework.Engine.Utilities;
 using System.Linq;
 using System.Reflection;
 
@@ -37,7 +34,7 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
     public IConstructor? GetBaseConstructor()
         =>
 
-        // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always
-        // the default constructor of the base class.
+            // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always
+            // the default constructor of the base class.
             this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
 }

@@ -18,7 +18,7 @@ internal abstract class BuiltMethodBase : BuiltMember, IMethodBaseImpl
     protected abstract MethodBaseBuilder MethodBaseBuilder { get; }
 
     [Memo]
-    public  IParameterList Parameters
+    public IParameterList Parameters
         => new ParameterList(
             this,
             this.GetCompilationModel().GetParameterCollection( this.MethodBaseBuilder.ToTypedRef<IHasParameters>() ) );
