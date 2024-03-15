@@ -28,12 +28,6 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     protected override MethodBaseBuilder MethodBaseBuilder => this._methodBuilder;
 
-    [Memo]
-    public override IParameterList Parameters
-        => new ParameterList(
-            this,
-            this.GetCompilationModel().GetParameterCollection( this._methodBuilder.ToTypedRef<IHasParameters>() ) );
-
     public MethodKind MethodKind => this._methodBuilder.MethodKind;
 
     public OperatorKind OperatorKind => this._methodBuilder.OperatorKind;
