@@ -13,14 +13,14 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public override ExpressionSyntax Serialize( TimeSpan obj, SyntaxSerializationContext serializationContext )
         {
             return ObjectCreationExpression(
-                serializationContext.GetTypeSyntax( typeof(TimeSpan) ),
-                ArgumentList(
-                    SingletonSeparatedList(
-                        Argument(
-                            LiteralExpression(
-                                SyntaxKind.NumericLiteralExpression,
-                                Literal( obj.Ticks ) ) ) ) ),
-                null )
+                    serializationContext.GetTypeSyntax( typeof(TimeSpan) ),
+                    ArgumentList(
+                        SingletonSeparatedList(
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NumericLiteralExpression,
+                                    Literal( obj.Ticks ) ) ) ) ),
+                    null )
                 .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
         }
 

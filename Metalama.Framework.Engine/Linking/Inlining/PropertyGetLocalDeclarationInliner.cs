@@ -97,6 +97,6 @@ internal sealed class PropertyGetLocalDeclarationInliner : PropertyGetInliner
                 linkedTargetBody )
             .WithFormattingAnnotationsFrom( currentStatement )
             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-            .AddTriviaFromIfNecessay( currentNode, syntaxGenerationContext.PreserveTrivia );
+            .AddTriviaFromIfNecessary( currentNode, syntaxGenerationContext.PreserveTrivia );
     }
 }

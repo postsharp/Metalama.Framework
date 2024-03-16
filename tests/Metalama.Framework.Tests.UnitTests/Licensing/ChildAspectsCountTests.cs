@@ -141,6 +141,7 @@ using System.Linq;
 
     private void AssertTooManyAspectClasses( DiagnosticBag diagnostics )
     {
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.TooManyAspectClasses.Id );
         Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }

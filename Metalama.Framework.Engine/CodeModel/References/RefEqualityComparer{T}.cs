@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     : RuntimeHelpers.GetHashCode( obj.Target );
 
                 // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
-                return HashCode.Combine( targetHashCode, (int)obj.TargetKind );
+                return HashCode.Combine( targetHashCode, (int) obj.TargetKind );
             }
         }
 

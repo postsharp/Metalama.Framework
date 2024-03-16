@@ -413,7 +413,7 @@ namespace Metalama.Framework.Engine.Templating
                         suppressNullableWarning = false;
                     }
 
-                    if ( typeSymbol?.IsNullable() == false )
+                    if ( typeSymbol.IsNullable() == false )
                     {
                         suppressNullableWarning = false;
                     }

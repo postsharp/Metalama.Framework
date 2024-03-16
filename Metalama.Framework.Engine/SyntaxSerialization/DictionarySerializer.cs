@@ -11,126 +11,125 @@ using System.Collections.Immutable;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.SyntaxSerialization
+namespace Metalama.Framework.Engine.SyntaxSerialization;
+
+internal sealed class DictionarySerializer : ObjectSerializer
 {
-    internal sealed class DictionarySerializer : ObjectSerializer
+    public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
+
+    public override ExpressionSyntax Serialize( object dictionary, SyntaxSerializationContext serializationContext )
     {
-        public DictionarySerializer( SyntaxSerializationService serializers ) : base( serializers ) { }
+        var dictionaryType = dictionary.GetType();
+        var keyType = dictionaryType.GetGenericArguments()[0];
+        var valueType = dictionaryType.GetGenericArguments()[1];
 
-        public override ExpressionSyntax Serialize( object dictionary, SyntaxSerializationContext serializationContext )
+        var creationExpression = ObjectCreationExpression( serializationContext.GetTypeSyntax( dictionaryType ) );
+
+        var defaultComparer = typeof(EqualityComparer<>)
+            .MakeGenericType( keyType )
+            .GetProperty( nameof(EqualityComparer<int>.Default), BindingFlags.Public | BindingFlags.Static )
+            .AssertNotNull()
+            .GetValue( null );
+
+        var actualComparer = typeof(Dictionary<,>)
+            .MakeGenericType( keyType, valueType )
+            .GetProperty( nameof(Dictionary<int, int>.Comparer), BindingFlags.Public | BindingFlags.Instance )
+            .AssertNotNull()
+            .GetValue( dictionary )
+            .AssertNotNull();
+
+        if ( keyType == typeof(string) )
         {
-            var dictionaryType = dictionary.GetType();
-            var keyType = dictionaryType.GetGenericArguments()[0];
-            var valueType = dictionaryType.GetGenericArguments()[1];
+            string? comparerName = null;
 
-            var creationExpression = ObjectCreationExpression( serializationContext.GetTypeSyntax( dictionaryType ) );
-
-            var defaultComparer = typeof(EqualityComparer<>)
-                .MakeGenericType( keyType )
-                .GetProperty( nameof(EqualityComparer<int>.Default), BindingFlags.Public | BindingFlags.Static )
-                .AssertNotNull()
-                .GetValue( null );
-
-            var actualComparer = typeof(Dictionary<,>)
-                .MakeGenericType( keyType, valueType )
-                .GetProperty( nameof(Dictionary<int, int>.Comparer), BindingFlags.Public | BindingFlags.Instance )
-                .AssertNotNull()
-                .GetValue( dictionary )
-                .AssertNotNull();
-
-            if ( keyType == typeof(string) )
+            if ( actualComparer is StringComparer sc )
             {
-                string? comparerName = null;
-
-                if ( actualComparer is StringComparer sc )
+                if ( sc == StringComparer.Ordinal )
                 {
-                    if ( sc == StringComparer.Ordinal )
-                    {
-                        comparerName = "Ordinal";
-                    }
-                    else if ( sc == StringComparer.OrdinalIgnoreCase )
-                    {
-                        comparerName = "OrdinalIgnoreCase";
-                    }
-                    else if ( sc == StringComparer.InvariantCulture )
-                    {
-                        comparerName = "InvariantCulture";
-                    }
-                    else if ( sc == StringComparer.InvariantCultureIgnoreCase )
-                    {
-                        comparerName = "InvariantCultureIgnoreCase";
-                    }
-                    else if ( sc.Equals( StringComparer.CurrentCulture ) )
-                    {
-                        comparerName = "CurrentCulture";
-                    }
-                    else if ( sc.Equals( StringComparer.CurrentCultureIgnoreCase ) )
-                    {
-                        comparerName = "CurrentCultureIgnoreCase";
-                    }
-                    else
-                    {
-                        // Unknown string comparer
-                        throw SerializationDiagnosticDescriptors.UnsupportedDictionaryComparer.CreateException( sc.GetType() );
-                    }
+                    comparerName = "Ordinal";
                 }
-                else if ( actualComparer.Equals( EqualityComparer<string>.Default ) )
+                else if ( sc == StringComparer.OrdinalIgnoreCase )
                 {
-                    // It's the default string comparer.
+                    comparerName = "OrdinalIgnoreCase";
+                }
+                else if ( sc == StringComparer.InvariantCulture )
+                {
+                    comparerName = "InvariantCulture";
+                }
+                else if ( sc == StringComparer.InvariantCultureIgnoreCase )
+                {
+                    comparerName = "InvariantCultureIgnoreCase";
+                }
+                else if ( sc.Equals( StringComparer.CurrentCulture ) )
+                {
+                    comparerName = "CurrentCulture";
+                }
+                else if ( sc.Equals( StringComparer.CurrentCultureIgnoreCase ) )
+                {
+                    comparerName = "CurrentCultureIgnoreCase";
                 }
                 else
                 {
-                    // Unknown custom comparer for a string-keyed dictionary
-                    throw SerializationDiagnosticDescriptors.UnsupportedDictionaryComparer.CreateException( actualComparer.GetType() );
-                }
-
-                if ( comparerName != null )
-                {
-                    var comparerExpression = MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            serializationContext.GetTypeSyntax( typeof(StringComparer) ),
-                            IdentifierName( comparerName ) );
-
-                    creationExpression = creationExpression.AddArgumentListArguments( Argument( comparerExpression ) );
+                    // Unknown string comparer
+                    throw SerializationDiagnosticDescriptors.UnsupportedDictionaryComparer.CreateException( sc.GetType() );
                 }
             }
-            else if ( actualComparer != defaultComparer )
+            else if ( actualComparer.Equals( EqualityComparer<string>.Default ) )
             {
-                // Unknown custom comparer
+                // It's the default string comparer.
+            }
+            else
+            {
+                // Unknown custom comparer for a string-keyed dictionary
                 throw SerializationDiagnosticDescriptors.UnsupportedDictionaryComparer.CreateException( actualComparer.GetType() );
             }
 
-            var lt = new List<InitializerExpressionSyntax>();
-            var nonGenericDictionary = (IDictionary) dictionary;
-
-            foreach ( var key in nonGenericDictionary.Keys )
+            if ( comparerName != null )
             {
-                var value = nonGenericDictionary[key];
+                var comparerExpression = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    serializationContext.GetTypeSyntax( typeof(StringComparer) ),
+                    IdentifierName( comparerName ) );
 
-                lt.Add(
-                    InitializerExpression(
-                        SyntaxKind.ComplexElementInitializerExpression,
-                        SeparatedList<ExpressionSyntax>(
-                            new SyntaxNodeOrToken[]
-                            {
-                                this.Service.Serialize( key, serializationContext ),
-                                Token( SyntaxKind.CommaToken ),
-                                this.Service.Serialize( value, serializationContext )
-                            } ) ) );
+                creationExpression = creationExpression.AddArgumentListArguments( Argument( comparerExpression ) );
             }
-
-            creationExpression = creationExpression.WithInitializer(
-                    InitializerExpression(
-                        SyntaxKind.CollectionInitializerExpression,
-                        SeparatedList<ExpressionSyntax>( lt ) ) );
-
-            return creationExpression;
+        }
+        else if ( actualComparer != defaultComparer )
+        {
+            // Unknown custom comparer
+            throw SerializationDiagnosticDescriptors.UnsupportedDictionaryComparer.CreateException( actualComparer.GetType() );
         }
 
-        public override Type InputType => typeof(IReadOnlyDictionary<,>);
+        var lt = new List<InitializerExpressionSyntax>();
+        var nonGenericDictionary = (IDictionary) dictionary;
 
-        public override Type OutputType => typeof(Dictionary<,>);
+        foreach ( var key in nonGenericDictionary.Keys )
+        {
+            var value = nonGenericDictionary[key];
 
-        protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
+            lt.Add(
+                InitializerExpression(
+                    SyntaxKind.ComplexElementInitializerExpression,
+                    SeparatedList<ExpressionSyntax>(
+                        new SyntaxNodeOrToken[]
+                        {
+                            this.Service.Serialize( key, serializationContext ),
+                            Token( SyntaxKind.CommaToken ),
+                            this.Service.Serialize( value, serializationContext )
+                        } ) ) );
+        }
+
+        creationExpression = creationExpression.WithInitializer(
+            InitializerExpression(
+                SyntaxKind.CollectionInitializerExpression,
+                SeparatedList<ExpressionSyntax>( lt ) ) );
+
+        return creationExpression;
     }
+
+    public override Type InputType => typeof(IReadOnlyDictionary<,>);
+
+    public override Type OutputType => typeof(Dictionary<,>);
+
+    protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(IDictionary<,>) );
 }

@@ -427,18 +427,13 @@ internal sealed partial class LinkerInjectionStep
             var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
             var baseList = node.BaseList;
-
             var parameterList = node.GetParameterList();
 
-            if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
-            {
-                this.ApplyMemberLevelTransformationsToPrimaryConstructor(
-                    node,
-                    memberLevelTransformations,
-                    syntaxGenerationContext,
-                    out baseList,
-                    out parameterList );
-            }
+            this.ApplyMemberLevelTransformationsToPrimaryConstructor(
+                node,
+                syntaxGenerationContext,
+                ref baseList,
+                ref parameterList );
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -889,16 +884,20 @@ internal sealed partial class LinkerInjectionStep
 
         private void ApplyMemberLevelTransformationsToPrimaryConstructor(
             TypeDeclarationSyntax typeDeclaration,
-            MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext,
-            out BaseListSyntax? newBaseList,
-            out ParameterListSyntax? newParameterList )
+            ref BaseListSyntax? baseList,
+            ref ParameterListSyntax? parameterList )
         {
+            if ( !this._transformationCollection.TryGetMemberLevelTransformations( typeDeclaration, out var memberLevelTransformations ) )
+            {
+                return;
+            }
+            
             Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
             Invariant.AssertNot( typeDeclaration.GetParameterList() == null );
 
-            newParameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
-            newBaseList = typeDeclaration.BaseList;
+            parameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            baseList = typeDeclaration.BaseList;
 
             if ( memberLevelTransformations.Arguments.Length > 0 )
             {
@@ -929,7 +928,7 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 // TODO: This may be slower than replacing specific index.
-                newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
+                baseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
             }
         }
 

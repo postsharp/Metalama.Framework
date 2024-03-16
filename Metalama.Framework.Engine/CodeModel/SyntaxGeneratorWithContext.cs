@@ -255,7 +255,7 @@ internal sealed class SyntaxGeneratorWithContext : OurSyntaxGenerator
         => BracketedParameterList( this.ParameterListParameters( indexer, compilation, removeDefaultValues ) );
 
     private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IHasParameters method, CompilationModel compilation, bool removeDefaultValues )
-        => this.ParameterListParameters(method.Parameters, compilation, removeDefaultValues );
+        => this.ParameterListParameters( method.Parameters, compilation, removeDefaultValues );
 
     private SeparatedSyntaxList<ParameterSyntax> ParameterListParameters( IReadOnlyList<IParameter> parameters, CompilationModel compilation, bool removeDefaultValues )
         => SeparatedList(

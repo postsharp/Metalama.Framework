@@ -1699,7 +1699,12 @@ public partial class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = """
+#if !NET5_0_OR_GREATER
+            var code =
+#else
+            const string code =
+#endif
+                """
                 record R(int P);
 
                 """;

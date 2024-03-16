@@ -270,7 +270,7 @@ namespace Metalama.Framework.Engine.CodeModel
             void AddTree( SyntaxTree newTree )
             {
                 // At design time, the collection of syntax trees can contain duplicates.
-                if ( !trees.Any( t => t.FilePath == newTree.FilePath ) )
+                if ( trees.All( t => t.FilePath != newTree.FilePath ) )
                 {
                     trees.Add( newTree );
                 }

@@ -108,7 +108,7 @@ public sealed partial class CompilationChangesTests
 
         code.Clear();
 
-        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(this.RemoveSyntaxTree ) );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(this.RemoveSyntaxTree) );
 
         var changes = this.CompareSyntaxTrees( compilation1, compilation2 );
 

@@ -86,6 +86,7 @@ namespace Metalama.Testing.AspectTesting
                 .AddLicenseConsumptionManagerForTest( testInput );
 
             var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
+
             var isLicensingRequiredForCompilation = testScenario switch
             {
                 TestScenario.ApplyCodeFix => false,

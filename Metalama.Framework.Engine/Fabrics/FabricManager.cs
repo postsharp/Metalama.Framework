@@ -60,18 +60,21 @@ namespace Metalama.Framework.Engine.Fabrics
                 .OrderByDescending( x => x.Depth )
                 .ThenBy( x => x.Type )
                 .ToArray();
+
             var transitiveFabricTypeNames = transitiveFabricTypes.SelectAsReadOnlyList( x => x.Type );
+
             var transitiveFabricDrivers = transitiveFabricTypes
                 .SelectMany( x => this.CreateDrivers( x.Project, x.Type, compilationModel, diagnosticAdder ) )
                 .ToReadOnlyList();
 
             // Discover the fabrics inside the current project.
             var fabricTypeNames = compileTimeProject.FabricTypes
-                    .OrderBy( t => t )
-                    .ToImmutableArray();
+                .OrderBy( t => t )
+                .ToImmutableArray();
+
             var fabricDrivers = fabricTypeNames
-                    .SelectMany( x => this.CreateDrivers( compileTimeProject, x, compilationModel, diagnosticAdder ) )
-                    .ToOrderedList( x => x );
+                .SelectMany( x => this.CreateDrivers( compileTimeProject, x, compilationModel, diagnosticAdder ) )
+                .ToOrderedList( x => x );
 
             var allFabricTypeNames = fabricTypeNames.Concat( transitiveFabricTypeNames ).ToImmutableArray();
 

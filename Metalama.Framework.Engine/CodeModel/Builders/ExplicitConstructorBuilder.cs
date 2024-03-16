@@ -17,6 +17,6 @@ internal class ExplicitConstructorBuilder : ConstructorBuilder
     {
         Invariant.Assert( targetType.Constructors.All( c => c.IsImplicitlyDeclared ) );
 
-        this.OriginalConstructor = (IConstructorImpl) targetType.Constructors.First( c => c.Parameters.Count == 0);
+        this.OriginalConstructor = (IConstructorImpl) targetType.Constructors.First( c => c.Parameters.Count == 0 );
     }
 }

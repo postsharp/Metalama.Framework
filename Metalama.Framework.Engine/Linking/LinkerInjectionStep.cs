@@ -668,7 +668,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             break;
                     }
 
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+                    var insertedStatements = GetInsertedStatements( syntaxGenerationContext );
 
                     if ( propertyOrIndexer.GetMethod != null )
                     {
@@ -726,7 +726,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             break;
                     }
 
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+                    var insertedStatements = GetInsertedStatements( syntaxGenerationContext );
 
                     transformationCollection.AddInsertedStatements( methodBase, insertedStatements );
 
@@ -743,9 +743,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
         }
 
-        IReadOnlyList<InsertedStatement> GetInsertedStatements(
-            IInsertStatementTransformation insertStatementTransformation,
-            SyntaxGenerationContext syntaxGenerationContext )
+        IReadOnlyList<InsertedStatement> GetInsertedStatements( SyntaxGenerationContext syntaxGenerationContext )
         {
             // Contexts for inserting statements are reused until the next override of the target declaration.
             var context =

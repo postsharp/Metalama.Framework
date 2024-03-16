@@ -11,7 +11,6 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Microsoft.CodeAnalysis;
 using PostSharp.Patterns.Model;
 using System;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;

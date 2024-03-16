@@ -66,5 +66,5 @@ internal abstract class Inliner
         InliningSpecification specification,
         SyntaxNode currentNode,
         StatementSyntax linkedTargetBody )
-        => linkedTargetBody.AddTriviaFromIfNecessay( currentNode, syntaxGenerationContext.PreserveTrivia );
+        => linkedTargetBody.AddTriviaFromIfNecessary( currentNode, syntaxGenerationContext.PreserveTrivia );
 }

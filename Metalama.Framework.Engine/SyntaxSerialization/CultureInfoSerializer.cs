@@ -6,13 +6,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Globalization;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.SyntaxSerialization
+namespace Metalama.Framework.Engine.SyntaxSerialization;
+
+internal sealed class CultureInfoSerializer : ObjectSerializer<CultureInfo>
 {
-    internal sealed class CultureInfoSerializer : ObjectSerializer<CultureInfo>
-    {
-        public override ExpressionSyntax Serialize( CultureInfo obj, SyntaxSerializationContext serializationContext )
-        {
-            return ObjectCreationExpression(
+    public override ExpressionSyntax Serialize( CultureInfo obj, SyntaxSerializationContext serializationContext )
+        => ObjectCreationExpression(
                 serializationContext.GetTypeSyntax( typeof(CultureInfo) ),
                 ArgumentList(
                     SeparatedList(
@@ -22,9 +21,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) )
                         } ) ),
                 null )
-                .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
-        }
+            .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
 
-        public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
-    }
+    public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 }

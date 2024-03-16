@@ -662,7 +662,7 @@ public class TestOptions
                     else
                     {
                         // The version may be a valid number but still not recognized by the current version of Roslyn.
-                        if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor( n ) )
+                        if ( double.TryParse( optionArg, out var n ) && n >= 10 && Math.Abs( n - Math.Floor( n ) ) <= double.Epsilon )
                         {
                             this.SkipReason = $"@LanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
                         }
@@ -683,7 +683,7 @@ public class TestOptions
                     else
                     {
                         // The version may be a valid number but still not recognized by the current version of Roslyn.
-                        if ( double.TryParse( optionArg, out var n ) && n >= 10 && n == Math.Floor( n ) )
+                        if ( double.TryParse( optionArg, out var n ) && n >= 10 && Math.Abs( n - Math.Floor( n ) ) <= double.Epsilon )
                         {
                             this.SkipReason = $"@DependencyLanguageVersion '{optionArg}' is not recognized by the current version of Roslyn.";
                         }

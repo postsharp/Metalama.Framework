@@ -228,12 +228,13 @@ internal sealed partial class LinkerAnalysisStep
             }
         }
 
+        // ReSharper disable once NotAccessedPositionalProperty.Local
         private record struct MethodCacheRecord(
             IMethodSymbol Method,
             Dictionary<string, List<SyntaxSymbolCacheRecord<IdentifierNameSyntax>>> IdentifierLookup,
             List<SyntaxSymbolCacheRecord<InvocationExpressionSyntax>> InvocationExpressions );
 
-        private class SyntaxSymbolCacheRecord<TSyntax>
+        private sealed class SyntaxSymbolCacheRecord<TSyntax>
             where TSyntax : SyntaxNode
         {
             private volatile bool _isInitialized;

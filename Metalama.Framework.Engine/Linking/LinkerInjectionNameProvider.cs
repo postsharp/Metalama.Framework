@@ -169,7 +169,7 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
                     this._nameCollisionCounters.AddOrUpdate(
                         (finalContainingType, hint),
                         new StrongBox<int>( 1 ),
-                        ( k, v ) =>
+                        ( _, v ) =>
                         {
                             // If the strong box is already present, it means that other thread ran through before us, we have to only assert.
                             Invariant.Assert( v.Value > 1 );

@@ -268,8 +268,6 @@ internal sealed partial class LinkerInjectionStep
             [NotNullWhen( true )] out MemberLevelTransformations? memberLevelTransformations )
             => this._introductionMemberLevelTransformations.TryGetValue( builder, out memberLevelTransformations );
 
-        public bool HasMemberLevelTransformations( SyntaxNode syntax ) => this._symbolMemberLevelTransformations.ContainsKey( syntax );
-
         public async Task FinalizeAsync(
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
@@ -436,7 +434,7 @@ internal sealed partial class LinkerInjectionStep
                 return ImmutableArray<StatementSyntax>.Empty;
             }
 
-            MemberLayerIndex? bottomBound;
+            MemberLayerIndex bottomBound;
             MemberLayerIndex? topBound;
 
             var rootMember =
@@ -454,29 +452,21 @@ internal sealed partial class LinkerInjectionStep
             }
             else
             {
-                if ( targetInjectedMember == null )
+                injectedMembers = injectedMembers.ToOrderedList( x => GetTransformationMemberLayerIndex( x.Transformation ) );
+
+                var targetInjectedMemberIndex = injectedMembers.IndexOf( targetInjectedMember );
+
+                if ( targetInjectedMemberIndex < 0 )
                 {
-                    bottomBound = null;
-                    topBound = GetTransformationMemberLayerIndex( injectedMembers.First().Transformation );
+                    throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
                 }
-                else
-                {
-                    injectedMembers = injectedMembers.ToOrderedList( x => GetTransformationMemberLayerIndex( x.Transformation ) );
 
-                    var targetInjectedMemberIndex = injectedMembers.IndexOf( targetInjectedMember );
+                bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
 
-                    if ( targetInjectedMemberIndex < 0 )
-                    {
-                        throw new AssertionFailedException( $"Missing injected members for {targetMethodBase}" );
-                    }
-
-                    bottomBound = GetTransformationMemberLayerIndex( targetInjectedMember.Transformation );
-
-                    topBound =
-                        targetInjectedMemberIndex >= injectedMembers.Count - 1
-                            ? null
-                            : GetTransformationMemberLayerIndex( injectedMembers[targetInjectedMemberIndex + 1].Transformation );
-                }
+                topBound =
+                    targetInjectedMemberIndex >= injectedMembers.Count - 1
+                        ? null
+                        : GetTransformationMemberLayerIndex( injectedMembers[targetInjectedMemberIndex + 1].Transformation );
             }
 
             var statements = new List<StatementSyntax>();
@@ -487,7 +477,7 @@ internal sealed partial class LinkerInjectionStep
                     .Where(
                         s =>
                             s.Kind == InsertedStatementKind.OutputContract
-                            && (bottomBound == null || GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound)
+                            && GetTransformationMemberLayerIndex( s.Transformation ) >= bottomBound
                             && (topBound == null || GetTransformationMemberLayerIndex( s.Transformation ) < topBound) );
 
             var orderedOutputContractStatements = OrderOutputContractStatements( outputContractStatements );

@@ -130,7 +130,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
 
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel!, testResult.PipelineDiagnostics, serviceProvider );
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, serviceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,

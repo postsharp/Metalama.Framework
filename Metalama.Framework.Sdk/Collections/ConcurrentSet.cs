@@ -13,12 +13,12 @@ internal sealed class ConcurrentSet<T> : IReadOnlyCollectionWithContains<T>
 
     public ConcurrentSet()
     {
-        this._dictionary = new();
+        this._dictionary = new ConcurrentDictionary<T, byte>();
     }
 
-    public ConcurrentSet(IEqualityComparer<T> comparer)
+    public ConcurrentSet( IEqualityComparer<T> comparer )
     {
-        this._dictionary = new( comparer );
+        this._dictionary = new ConcurrentDictionary<T, byte>( comparer );
     }
 
     public bool Add( T value ) => this._dictionary.TryAdd( value, 0 );

@@ -14,7 +14,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -167,7 +166,7 @@ internal static class DesignTimeSyntaxTreeGenerator
         return additionalSyntaxTreeDictionary.Values.AsReadOnly();
     }
 
-    private static IReadOnlyList<ConstructorDeclarationSyntax> CreateInjectedConstructors(
+    private static IEnumerable<ConstructorDeclarationSyntax> CreateInjectedConstructors(
         CompilationModel initialCompilationModel,
         CompilationModel finalCompilationModel,
         SyntaxGenerationContext syntaxGenerationContext,
@@ -419,14 +418,9 @@ internal static class DesignTimeSyntaxTreeGenerator
             LineFeed );
     }
 
-    private class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, Code.RefKind RefKind)[]>
+    private sealed class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, Code.RefKind RefKind)[]>
     {
-        private readonly StructuralSymbolComparer _symbolComparer;
-
-        public ConstructorSignatureEqualityComparer()
-        {
-            this._symbolComparer = StructuralSymbolComparer.Default;
-        }
+        private readonly StructuralSymbolComparer _symbolComparer = StructuralSymbolComparer.Default;
 
         public bool Equals( (ISymbol Type, Code.RefKind RefKind)[]? x, (ISymbol Type, Code.RefKind RefKind)[]? y )
         {
@@ -456,7 +450,7 @@ internal static class DesignTimeSyntaxTreeGenerator
             return true;
         }
 
-        public int GetHashCode( [DisallowNull] (ISymbol Type, Code.RefKind RefKind)[] obj )
+        public int GetHashCode( (ISymbol Type, Code.RefKind RefKind)[] obj )
         {
             var hashCode = obj.Length;
 

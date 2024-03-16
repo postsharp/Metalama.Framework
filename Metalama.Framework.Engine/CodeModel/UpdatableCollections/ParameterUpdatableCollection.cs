@@ -64,8 +64,8 @@ internal sealed class ParameterUpdatableCollection : UpdatableDeclarationCollect
 
         var lastParam =
             this.Count > 0
-            ? (Ref<IParameter>?)this[this.Count - 1]
-            : null;
+                ? (Ref<IParameter>?) this[this.Count - 1]
+                : null;
 
         if ( lastParam is { Target: IParameterSymbol { IsParams: true } } )
         {

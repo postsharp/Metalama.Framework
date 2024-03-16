@@ -45,7 +45,7 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 
     public SyntaxTree? PrimarySyntaxTree => this.SourceMember.PrimarySyntaxTree;
 
-    public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new System.NotImplementedException();
+    public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
     public Ref<IDeclaration> ToRef() => Ref.FromSubstitutedDeclaration( this );
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.AspectWorkbench.ViewModels;
+using Metalama.Framework.Engine;
 using Microsoft.Win32;
 using PostSharp;
 using System;
@@ -40,7 +41,7 @@ namespace Metalama.AspectWorkbench.Views
             switch ( e.PropertyName )
             {
                 case nameof(MainViewModel.SourceCode):
-                    this.sourceTextBox.Text = this._viewModel.SourceCode;
+                    this.sourceTextBox.Text = this._viewModel.SourceCode.AssertNotNull();
 
                     break;
 

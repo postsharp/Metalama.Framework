@@ -50,7 +50,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
-        public IMethodBase MethodBase => (IMethodBase?) this._method ?? (IMethodBase?)this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+        public IMethodBase MethodBase
+            => (IMethodBase?) this._method ?? (IMethodBase?) this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
         public IField Field => this._fieldOrPropertyOrIndexer as IField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
@@ -70,7 +71,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IParameterList Parameters => this.MethodBase?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethodBase) );
+        public IParameterList Parameters => this.MethodBase.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethodBase) );
 
         public IParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
@@ -85,11 +86,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             Exception CreateException()
             {
                 var explanation = this.Declaration is IParameter parameter
-                    ? (FormattableString)$"the target parameter is contained in a static {parameter.DeclaringMember.DeclarationKind}"
+                    ? (FormattableString) $"the target parameter is contained in a static {parameter.DeclaringMember.DeclarationKind}"
                     : $"the target {this.Declaration.DeclarationKind} is static";
 
                 return TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind, explanation) );
+                    (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind, explanation) );
             }
 
             return (this._common.Staticity, this._type, this.Declaration) switch
