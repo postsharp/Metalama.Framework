@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking;
 internal sealed partial class LinkerAnalysisStep
 {
     /// <summary>
-    /// Walks method bodies, counting return statements.
+    /// Walks syntax trees, looking for and resolving aspect references.
     /// </summary>
     private sealed class AspectReferenceWalker : SafeSyntaxWalker
     {

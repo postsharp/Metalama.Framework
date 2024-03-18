@@ -17,6 +17,9 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerAnalysisStep
 {
+    /// <summary>
+    /// Collects aspect reference in the intermediate compilation.
+    /// </summary>
     private sealed class AspectReferenceCollector
     {
         private readonly PartialCompilation _intermediateCompilation;

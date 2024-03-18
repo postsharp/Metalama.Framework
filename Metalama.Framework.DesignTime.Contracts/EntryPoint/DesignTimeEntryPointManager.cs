@@ -111,6 +111,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             //   2) Creating a new mutex fails, i.e. the mutex was created in the meantime by a process with higher set of rights.
             // The probability of mutex being destroyed when we call TryOpenExisting again is fairly low.
 
+            // ReSharper disable once BadSemicolonSpaces
             for ( var i = 0; ; i++ )
             {
                 // First try opening the mutex.
@@ -130,6 +131,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
                         if ( i < 3 )
                         {
                             // Mutex was probably created in the meantime and is not accessible - we will restart.
+                            // ReSharper disable once RedundantJumpStatement
                             continue;
                         }
                         else

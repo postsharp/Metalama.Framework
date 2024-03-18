@@ -86,6 +86,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             cancellationToken.ToTestable() );
 
         var aspectClasses = pipeline.AspectClasses ?? [];
+
         var aspectClassesIds = aspectClasses
             .OfType<AspectClass>()
             .Where( aspectClass => !aspectClass.IsAbstract )
@@ -136,7 +137,6 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
 
         var compilationContext = CompilationContextFactory.GetInstance( compilation );
         var typeIdResolver = compilationContext.SerializableTypeIdResolver;
-        var reflectionMapper = ((ICompilationServices) compilationContext).ReflectionMapper;
 
         var aspectClassFullName = typeIdResolver.ResolveId( aspectClass ).GetReflectionFullName();
 

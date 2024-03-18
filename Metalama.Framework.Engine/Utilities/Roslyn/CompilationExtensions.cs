@@ -51,7 +51,7 @@ public static class CompilationExtensions
 
         if ( tree == null )
         {
-            return LanguageVersionFacts.MapSpecifiedToEffectiveVersion( LanguageVersion.Default );
+            return LanguageVersion.Default.MapSpecifiedToEffectiveVersion();
         }
 
         return ((CSharpParseOptions) tree.Options).LanguageVersion;

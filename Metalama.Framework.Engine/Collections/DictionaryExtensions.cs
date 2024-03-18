@@ -10,7 +10,7 @@ public static class DictionaryExtensions
     public static bool TryAdd<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, TValue value )
         where TKey : notnull
     {
-        if ( dictionary.TryGetValue( key, out _) )
+        if ( dictionary.TryGetValue( key, out _ ) )
         {
             return false;
         }

@@ -310,13 +310,13 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
                 }
+                
                 var symbol = this._semanticModel.GetDeclaredSymbol( node );
 
 #if ROSLYN_4_8_0_OR_GREATER
-                if ( symbol is not null 
-                    && this._currentScope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.CompileTimeOnly
-                    && node is TypeDeclarationSyntax { ParameterList: not null }
-                    && node is ClassDeclarationSyntax or StructDeclarationSyntax )
+                if ( symbol is not null
+                     && this._currentScope is TemplatingScope.RunTimeOrCompileTime or TemplatingScope.CompileTimeOnly
+                     && node is TypeDeclarationSyntax { ParameterList: not null } and (ClassDeclarationSyntax or StructDeclarationSyntax) )
                 {
                     // C#12 primary constructors (non-record types) are not supported.
                     this.Report(

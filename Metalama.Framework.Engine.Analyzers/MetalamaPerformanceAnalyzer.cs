@@ -49,10 +49,10 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.ReportDiagnostics );
         context.EnableConcurrentExecution();
 
-        context.RegisterCompilationStartAction( this.InitializeCompilation );
+        context.RegisterCompilationStartAction( InitializeCompilation );
     }
 
-    private void InitializeCompilation( CompilationStartAnalysisContext context )
+    private static void InitializeCompilation( CompilationStartAnalysisContext context )
     {
         context.RegisterOperationAction( AnalyzeNormalizeWhitespace, OperationKind.Invocation, OperationKind.MethodReference );
 
@@ -74,7 +74,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         {
             IInvocationOperation invocation => invocation.TargetMethod,
             IMethodReferenceOperation methodReference => methodReference.Method,
-            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation?.GetType()}'." )
+            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation.GetType()}'." )
         };
 
         if ( method.Name == nameof(SyntaxExtensions.NormalizeWhitespace) )
@@ -151,7 +151,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         {
             IInvocationOperation invocation => invocation.TargetMethod,
             IMethodReferenceOperation methodReference => methodReference.Method,
-            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation?.GetType()}'." )
+            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation.GetType()}'." )
         };
 
         if ( method.Name is nameof(SyntaxNodeExtensions.WithLeadingTrivia) or nameof(SyntaxNodeExtensions.WithTrailingTrivia)

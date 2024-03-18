@@ -130,13 +130,17 @@ namespace Metalama.Framework.Aspects
 
             if ( !iter.MoveNext() )
             {
-                return ParameterIsValid( first.Parameter, targetType ) ? new[] { first.Parameter } : null;
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
+                return ParameterIsValid( first!.Parameter, targetType ) ? new[] { first.Parameter } : null;
             }
 
             var distinctByParameter = new HashSet<IParameter>();
 
-            AddIfValid( distinctByParameter, first.Parameter, targetType );
-            AddIfValid( distinctByParameter, iter.Current.Parameter, targetType );
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            AddIfValid( distinctByParameter, first!.Parameter, targetType );
+            
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            AddIfValid( distinctByParameter, iter.Current!.Parameter, targetType );
 
             while ( iter.MoveNext() )
             {

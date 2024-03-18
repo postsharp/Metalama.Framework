@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable SA1414
 
@@ -28,7 +27,7 @@ internal class ValueTupleComparer
             return this._c1.Equals( x.Item1, y.Item1 ) && this._c2.Equals( x.Item2, y.Item2 );
         }
 
-        public int GetHashCode( [DisallowNull] (T1, T2) x )
+        public int GetHashCode( (T1, T2) x )
         {
             return HashCode.Combine(
                 x.Item1 is not null ? this._c1.GetHashCode( x.Item1! ) : 0,

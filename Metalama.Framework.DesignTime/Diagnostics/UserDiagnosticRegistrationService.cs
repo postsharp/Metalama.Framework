@@ -95,7 +95,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                     // Duplicates here would cause an exception in RegisterDescriptors.
                     // They can happen if the diagnostic is defined as a property, since it is reported from its backing field as well.
                     // Also, the case where the same diagnostic ID is defined in multiple places shouldn't throw either.
-                    if ( !missingDiagnostics.Any( d => d.Id == diagnostic.Id ) )
+                    if ( missingDiagnostics.All( d => d.Id != diagnostic.Id ) )
                     {
                         missingDiagnostics.Add( diagnostic );
                     }
