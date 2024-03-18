@@ -34,28 +34,28 @@ public class TestClass
   }
   public async IAsyncEnumerator<string> AsyncEnumerator(string text)
   {
-    var returnValue = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(text)));
-    var contractEnumerator = returnValue;
+    var bufferedEnumerator = (await global::Metalama.Framework.RunTime.RunTimeAspectHelper.BufferAsync(this.AsyncEnumerator_Source(text)));
+    var returnValue = bufferedEnumerator;
     global::System.Console.WriteLine("Advice 1");
-    while (await contractEnumerator.MoveNextAsync())
-    {
-      if (contractEnumerator.Current is null)
-      {
-        throw new global::System.ArgumentNullException("<return>");
-      }
-    }
-    contractEnumerator = returnValue;
-    global::System.Console.WriteLine("Advice 2");
-    while (await contractEnumerator.MoveNextAsync())
-    {
-      if (contractEnumerator.Current is null)
-      {
-        throw new global::System.ArgumentNullException("<return>");
-      }
-    }
     while (await returnValue.MoveNextAsync())
     {
-      yield return returnValue.Current;
+      if (returnValue.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    returnValue = bufferedEnumerator;
+    global::System.Console.WriteLine("Advice 2");
+    while (await returnValue.MoveNextAsync())
+    {
+      if (returnValue.Current is null)
+      {
+        throw new global::System.ArgumentNullException("<return>");
+      }
+    }
+    while (await bufferedEnumerator.MoveNextAsync())
+    {
+      yield return bufferedEnumerator.Current;
     }
   }
   private async IAsyncEnumerator<string> AsyncEnumerator_Source(string text)

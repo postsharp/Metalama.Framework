@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface IMethodImpl : IMethod, IMemberImpl, IGenericInternal
+internal interface IMethodImpl : IMethod, IMethodBaseImpl, IGenericInternal
 {
     bool? IsIteratorMethod { get; }
 }

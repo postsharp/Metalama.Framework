@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -83,7 +82,6 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var introducedParameters = new Dictionary<IConstructor, List<IParameter>>( finalCompilationModel.Comparers.Default);
                 var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( true );
 
                 foreach ( var transformation in orderedTransformations )
@@ -109,11 +107,6 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         members = members.AddRange( injectedMembers );
                     }
 
-                    if (transformation is IntroduceParameterTransformation introduceParameterTransformation)
-                    {
-                        introducedParameters.GetOrAdd( (IConstructor) introduceParameterTransformation.TargetMember, _ => new() ).Add( introduceParameterTransformation.Parameter );
-                    }
-
                     if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
                     {
                         baseList ??= BaseList();
@@ -121,7 +114,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     }
                 }
 
-                members = members.AddRange( CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key, introducedParameters ) );
+                members = members.AddRange( CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key ) );
 
                 // Create a class.
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
@@ -176,8 +169,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext,
-            INamedType type,
-            Dictionary<IConstructor, List<IParameter>> introducedParameterMap )
+            INamedType type)
         {
             // TODO: This will not work properly with universal constructor builders.
             var initialType = type.Translate( initialCompilationModel );
@@ -191,17 +183,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 existingSignatures.Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
             }
 
-            foreach ( var parameterKeyValuePair in introducedParameterMap )
+            foreach ( var constructor in type.Constructors )
             {
-                var initialConstructor = parameterKeyValuePair.Key.Translate( initialCompilationModel );
-                var finalConstructor = parameterKeyValuePair.Key.Translate( finalCompilationModel );
-                var introducedParameters = parameterKeyValuePair.Value;
+                var initialConstructor = constructor.Translate( initialCompilationModel );
+                var finalConstructor = constructor.Translate( finalCompilationModel );
 
                 // TODO: Currently we don't see introduced parameters in builder code model.
-                var finalParameters =
-                    finalConstructor is BuiltConstructor
-                    ? finalConstructor.Parameters.ToImmutableArray().AddRange( introducedParameters )
-                    : finalConstructor.Parameters.ToImmutableArray();
+                var finalParameters = finalConstructor.Parameters.ToImmutableArray();
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 

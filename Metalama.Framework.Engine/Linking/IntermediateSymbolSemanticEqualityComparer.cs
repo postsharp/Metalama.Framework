@@ -7,63 +7,62 @@ using System.Collections.Generic;
 
 #pragma warning disable SA1402 // File may only contain a single type
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed class IntermediateSymbolSemanticEqualityComparer : IEqualityComparer<IntermediateSymbolSemantic>
 {
-    internal sealed class IntermediateSymbolSemanticEqualityComparer : IEqualityComparer<IntermediateSymbolSemantic>
+    private readonly IEqualityComparer<ISymbol> _symbolComparer;
+
+    internal IntermediateSymbolSemanticEqualityComparer(IEqualityComparer<ISymbol> symbolComparer)
     {
-        private readonly IEqualityComparer<ISymbol> _symbolComparer;
-
-        internal IntermediateSymbolSemanticEqualityComparer(IEqualityComparer<ISymbol> symbolComparer)
-        {
-            this._symbolComparer = symbolComparer;
-        }
-        
-        public static IEqualityComparer<IntermediateSymbolSemantic> ForCompilation(CompilationContext context)
-        {
-            return new IntermediateSymbolSemanticEqualityComparer( context.SymbolComparer );
-        }
-
-        public bool Equals( IntermediateSymbolSemantic x, IntermediateSymbolSemantic y )
-        {
-            return this._symbolComparer.Equals( x.Symbol, y.Symbol )
-                   && x.Kind == y.Kind;
-        }
-
-        public int GetHashCode( IntermediateSymbolSemantic x )
-        {
-            // PERF: Cast enum to byte otherwise it will be boxed within the method.
-            return HashCode.Combine(
-                this._symbolComparer.GetHashCode( x.Symbol ),
-                (byte) x.Kind );
-        }
+        this._symbolComparer = symbolComparer;
     }
-    internal sealed class IntermediateSymbolSemanticEqualityComparer<TSymbol> : IEqualityComparer<IntermediateSymbolSemantic<TSymbol>>
-        where TSymbol : ISymbol
+    
+    public static IEqualityComparer<IntermediateSymbolSemantic> ForCompilation(CompilationContext context)
     {
-        private readonly IEqualityComparer<ISymbol> _symbolComparer;
+        return new IntermediateSymbolSemanticEqualityComparer( context.SymbolComparer );
+    }
 
-        internal IntermediateSymbolSemanticEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
-        {
-            this._symbolComparer = symbolComparer;
-        }
+    public bool Equals( IntermediateSymbolSemantic x, IntermediateSymbolSemantic y )
+    {
+        return this._symbolComparer.Equals( x.Symbol, y.Symbol )
+               && x.Kind == y.Kind;
+    }
 
-        public static IEqualityComparer<IntermediateSymbolSemantic<TSymbol>> ForCompilation( CompilationContext context )
-        {
-            return new IntermediateSymbolSemanticEqualityComparer<TSymbol>( context.SymbolComparer );
-        }
+    public int GetHashCode( IntermediateSymbolSemantic x )
+    {
+        // PERF: Cast enum to byte otherwise it will be boxed within the method.
+        return HashCode.Combine(
+            this._symbolComparer.GetHashCode( x.Symbol ),
+            (byte) x.Kind );
+    }
+}
+internal sealed class IntermediateSymbolSemanticEqualityComparer<TSymbol> : IEqualityComparer<IntermediateSymbolSemantic<TSymbol>>
+    where TSymbol : ISymbol
+{
+    private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
-        public bool Equals( IntermediateSymbolSemantic<TSymbol> x, IntermediateSymbolSemantic<TSymbol> y )
-        {
-            return this._symbolComparer.Equals( x.Symbol, y.Symbol )
-                   && x.Kind == y.Kind;
-        }
+    internal IntermediateSymbolSemanticEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
+    {
+        this._symbolComparer = symbolComparer;
+    }
 
-        public int GetHashCode( IntermediateSymbolSemantic<TSymbol> x )
-        {
-            // PERF: Cast enum to byte otherwise it will be boxed within the method.
-            return HashCode.Combine(
-                this._symbolComparer.GetHashCode( x.Symbol ),
-                (byte)x.Kind );
-        }
+    public static IEqualityComparer<IntermediateSymbolSemantic<TSymbol>> ForCompilation( CompilationContext context )
+    {
+        return new IntermediateSymbolSemanticEqualityComparer<TSymbol>( context.SymbolComparer );
+    }
+
+    public bool Equals( IntermediateSymbolSemantic<TSymbol> x, IntermediateSymbolSemantic<TSymbol> y )
+    {
+        return this._symbolComparer.Equals( x.Symbol, y.Symbol )
+               && x.Kind == y.Kind;
+    }
+
+    public int GetHashCode( IntermediateSymbolSemantic<TSymbol> x )
+    {
+        // PERF: Cast enum to byte otherwise it will be boxed within the method.
+        return HashCode.Combine(
+            this._symbolComparer.GetHashCode( x.Symbol ),
+            (byte)x.Kind );
     }
 }

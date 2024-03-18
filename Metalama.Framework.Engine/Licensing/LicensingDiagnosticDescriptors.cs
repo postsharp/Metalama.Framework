@@ -10,6 +10,7 @@ public static class LicensingDiagnosticDescriptors
     internal const string NoLicenseKeyRegisteredId = "LAMA0809";
     internal const string RedistributionLicenseInvalidId = "LAMA0803";
     internal const string TooManyAspectClassesId = "LAMA0800";
+    internal const string FabricsNotAvailableId = "LAMA0801";
 
     // Reserved range: 800-819
 
@@ -25,7 +26,7 @@ public static class LicensingDiagnosticDescriptors
 
     internal static readonly DiagnosticDefinition<(string FabricName, string Feature)> FabricsNotAvailable =
         new(
-            "LAMA0801",
+            FabricsNotAvailableId,
             _category,
             "The '{0}' fabric cannot {1} because this feature is not covered by your license. You can only {1} from an aspect.",
             Severity.Error,

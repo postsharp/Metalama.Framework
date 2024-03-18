@@ -19,10 +19,7 @@ internal class Target
   [NotZero]
   public int this[int x, int y]
   {
-    get
-    {
-      return q;
-    }
+    get => q;
     set
     {
       if (value == 0)

@@ -143,7 +143,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
                         builder.WithTarget(method).Outbound.AddAspect<MethodAspect>();
                     }
 
-                    if (builder.Target.Constructors.OfExactSignature([]) is { } constructor)
+                    if (builder.Target.Constructors.OfExactSignature(Array.Empty<IType>()) is { } constructor)
                     {
                         builder.Advice.IntroduceParameter(constructor, "p", typeof(int), TypedConstant.Create(0));
                     }
@@ -166,7 +166,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
                 }
             }
 
-            class MyAttribute : Attribute;
+            class MyAttribute : Attribute { }
 
             [Aspect]
             class Target
@@ -187,7 +187,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         AssertAspectTransformations(
             [
-                "Introduce constructor 'Target..ctor'.",
+                "Introduce constructor 'Target..ctor()'.",
                 "Introduce field 'Target.i'.",
                 "Introduce the parameter 'p'.",
                 "Provide the 'MethodAspect' aspect."

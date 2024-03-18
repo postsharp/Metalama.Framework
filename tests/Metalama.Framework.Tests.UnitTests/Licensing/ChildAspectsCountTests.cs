@@ -139,9 +139,12 @@ using System.Linq;
 
     private Task<DiagnosticBag> GetDiagnosticsWithFreeLicenseAsync( string code ) => this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
-    private static void AssertTooManyAspectClasses( DiagnosticBag diagnostics )
-        => Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.TooManyAspectClasses.Id );
-    
+    private void AssertTooManyAspectClasses( DiagnosticBag diagnostics )
+    {
+        Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.TooManyAspectClasses.Id );
+        Assert.True( this.ToastNotifications.WasDetectionTriggered );
+    }
+
     [Fact]
     public async Task CompilationPassesWhenChildAspectsAreNotAttributesAsync()
     {
@@ -154,7 +157,8 @@ using System.Linq;
 
         var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
         
-        AssertEmptyOrSdkOnly( diagnostics );
+        Assert.Empty( diagnostics );
+        Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }
     
     [Fact]
@@ -169,7 +173,7 @@ using System.Linq;
 
         var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
-        AssertTooManyAspectClasses( diagnostics );
+        this.AssertTooManyAspectClasses( diagnostics );
     }
     
     [Fact]
@@ -184,7 +188,7 @@ using System.Linq;
 
         var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
-        AssertTooManyAspectClasses( diagnostics );
+        this.AssertTooManyAspectClasses( diagnostics );
     }
     
     [Fact]
@@ -202,5 +206,6 @@ using System.Linq;
         var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
         Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.FabricsNotAvailable.Id );
+        Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }
 }

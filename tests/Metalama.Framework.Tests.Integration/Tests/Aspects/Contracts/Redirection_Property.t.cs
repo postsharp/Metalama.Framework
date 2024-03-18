@@ -14,11 +14,11 @@ internal class Target
   }
   public void Foo(global::System.String p, global::System.String q)
   {
-    if (q == null)
+    if (p == null)
     {
       throw new global::System.ArgumentNullException();
     }
-    if (p == null)
+    if (q == null)
     {
       throw new global::System.ArgumentNullException();
     }
