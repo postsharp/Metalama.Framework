@@ -152,16 +152,13 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
                         return true;
                     }
 
-                    var xArray = x.ToArray();
-                    var yArray = y.ToArray();
-
-                    if ( xArray.Length != yArray.Length )
+                    if ( x.Length != y.Length )
                     {
                         return false;
                     }
 
                     // Also ensure none of the paths are null, because we cannot reliably compare those.
-                    return xArray.Zip( yArray, ( x, y ) => (x, y) ).All( pair => pair.x.FilePath == pair.y.FilePath && pair.x.FilePath != null );
+                    return x.Zip( y, ( x, y ) => (x, y) ).All( pair => pair.x.FilePath == pair.y.FilePath && pair.x.FilePath != null );
                 }
 
                 if ( ProjectOptionsEqualityComparer.Equals( x: projectOptions, y: pipelineOptions )
