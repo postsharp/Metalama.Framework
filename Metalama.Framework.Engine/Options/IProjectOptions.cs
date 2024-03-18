@@ -171,5 +171,7 @@ namespace Metalama.Framework.Engine.Options
         string? TransformedFilesOutputPath { get; }
 
         bool IsTest { get; }
+
+        // Note: when adding a new property, also update ProjectOptionsEqualityComparer.
     }
 }
