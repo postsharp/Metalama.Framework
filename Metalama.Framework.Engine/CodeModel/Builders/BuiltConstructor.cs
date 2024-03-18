@@ -25,6 +25,7 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 
     bool IConstructor.IsPrimary => false;
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public ConstructorBuilder ConstructorBuilder { get; }
 
     public ConstructorInfo ToConstructorInfo() => this.ConstructorBuilder.ToConstructorInfo();

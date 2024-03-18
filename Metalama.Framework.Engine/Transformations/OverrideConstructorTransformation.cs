@@ -16,7 +16,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class OverrideConstructorTransformation : OverrideMemberTransformation
+internal sealed class OverrideConstructorTransformation : OverrideMemberTransformation
 {
     private new IConstructor OverriddenDeclaration => (IConstructor) base.OverriddenDeclaration;
 

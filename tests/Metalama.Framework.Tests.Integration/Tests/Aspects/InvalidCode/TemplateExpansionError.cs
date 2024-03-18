@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.TemplateEx
         private int CompileTimeExceptionMethod()
         {
             throw new Exception();
-        }    
+        }
     }
 
     class TargetCode

@@ -4,5 +4,5 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IEventImpl : IEvent, IHasAccessorsImpl { }
+    internal interface IEventImpl : IEvent, IHasAccessorsImpl;
 }

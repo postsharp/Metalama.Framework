@@ -4,10 +4,8 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryStruct;
 
@@ -38,6 +36,8 @@ public class OverrideAttribute : TypeAspect
         meta.Proceed();
     }
 }
+
+#pragma warning disable CS9113 // Parameter is unread.
 
 // <target>
 [Override]

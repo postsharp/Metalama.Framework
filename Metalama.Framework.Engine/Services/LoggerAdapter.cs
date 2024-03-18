@@ -6,7 +6,7 @@ using Compiler = Metalama.Compiler.Services;
 
 namespace Metalama.Framework.Engine.Services;
 
-internal class LoggerAdapter : Compiler::ILogger
+internal sealed class LoggerAdapter : Compiler::ILogger
 {
     public LoggerAdapter( Backstage::ILogger backstageLogger )
     {

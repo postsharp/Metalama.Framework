@@ -13,5 +13,5 @@ namespace Metalama.Framework.Engine.Templating
     [AttributeUsage( AttributeTargets.Method )]
     [EditorBrowsable( EditorBrowsableState.Never )]
     [PublicAPI]
-    public sealed class TestTemplateAttribute : TemplateAttribute { }
+    public sealed class TestTemplateAttribute : TemplateAttribute;
 }

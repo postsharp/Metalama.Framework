@@ -11,7 +11,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia_D
 
 public sealed class RequiredAttribute : PropertyAspect
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public string ErrorMessage { get; set; }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     public override void BuildAspect(IAspectBuilder<IProperty> builder)
     {

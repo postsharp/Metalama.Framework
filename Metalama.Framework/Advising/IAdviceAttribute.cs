@@ -5,4 +5,4 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Advising;
 
 [RunTimeOrCompileTime]
-public interface IAdviceAttribute { }
+public interface IAdviceAttribute;

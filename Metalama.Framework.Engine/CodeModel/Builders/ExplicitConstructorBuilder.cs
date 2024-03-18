@@ -7,16 +7,16 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class ExplicitConstructorBuilder : ConstructorBuilder
+internal sealed class ExplicitConstructorBuilder : ConstructorBuilder
 {
-    internal IConstructorImpl OriginalConstructor { get; }
+    private IConstructorImpl _originalConstructor;
 
-    public override Ref<IDeclaration> ToRef() => this.OriginalConstructor.ToRef();
+    public override Ref<IDeclaration> ToRef() => this._originalConstructor.ToRef();
 
     public ExplicitConstructorBuilder( INamedType targetType, Advice advice ) : base( targetType, advice )
     {
         Invariant.Assert( targetType.Constructors.All( c => c.IsImplicitlyDeclared ) );
 
-        this.OriginalConstructor = (IConstructorImpl) targetType.Constructors.First( c => c.Parameters.Count == 0 );
+        this._originalConstructor = (IConstructorImpl) targetType.Constructors.First( c => c.Parameters.Count == 0 );
     }
 }

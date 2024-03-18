@@ -9,4 +9,4 @@ namespace Metalama.Framework.Services;
 /// </summary>
 /// <seealso cref="IProjectService"/>
 [CompileTime]
-public interface IProjectService : IService { }
+public interface IProjectService : IService;

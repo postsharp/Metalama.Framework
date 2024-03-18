@@ -1,4 +1,10 @@
-﻿using Metalama.Framework.Aspects;
+﻿#if TESTOPTIONS
+// RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
+using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.NestedCompileTimeElseIf;
@@ -37,3 +43,5 @@ class TargetM1;
 // <target>
 [Aspect(I = 1)]
 class Target1;
+
+#endif

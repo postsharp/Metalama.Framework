@@ -12,7 +12,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class OverrideConstructorAdvice : OverrideMemberAdvice<IConstructor>
+    internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstructor>
     {
         private readonly BoundTemplateMethod _boundTemplate;
 

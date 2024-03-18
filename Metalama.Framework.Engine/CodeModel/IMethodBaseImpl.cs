@@ -4,4 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface IMethodBaseImpl : IMethodBase, IMemberImpl { }
+internal interface IMethodBaseImpl : IMethodBase, IMemberImpl;

@@ -10,5 +10,5 @@ namespace Metalama.Framework.Code
     /// </summary>
     [CompileTime]
     [PublicAPI]
-    public sealed class CodeDisplayContext { }
+    public sealed class CodeDisplayContext;
 }

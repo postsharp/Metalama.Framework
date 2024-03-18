@@ -10,5 +10,5 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     /// </summary>
     public sealed record CodeFixModel( ICodeActionModel CodeAction, ImmutableArray<Diagnostic> Diagnostic );
 
-    public interface ICodeActionModel { }
+    public interface ICodeActionModel;
 }

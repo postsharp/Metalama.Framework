@@ -16,5 +16,5 @@ namespace Metalama.Framework.Fabrics
     /// <seealso href="@fabrics"/> 
     /// <seealso href="@exposing-configuration"/>
     /// <seealso href="@fabrics-adding-aspects"/>
-    public abstract class TransitiveProjectFabric : ProjectFabric { }
+    public abstract class TransitiveProjectFabric : ProjectFabric;
 }

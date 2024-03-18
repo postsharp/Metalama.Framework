@@ -9,7 +9,7 @@ namespace System.Linq;
 
 public static partial class LinqExtensions
 {
-    private interface INonMaterialized { }
+    private interface INonMaterialized;
 
     private class ConcatenatedList<T> : INonMaterialized, IReadOnlyList<T>
     {

@@ -17,7 +17,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal partial class EligibilityHelper
+internal sealed partial class EligibilityHelper
 {
     private readonly object _prototype;
     private readonly ProjectServiceProvider _serviceProvider;

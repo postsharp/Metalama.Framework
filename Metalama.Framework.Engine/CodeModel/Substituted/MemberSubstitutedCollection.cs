@@ -12,7 +12,7 @@ using System.Linq;
 namespace Metalama.Framework.Engine.CodeModel.Substituted;
 
 // TODO: caching (reuse old instances)
-internal class MemberSubstitutedCollection<T> : ISourceMemberCollection<T>
+internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T>
     where T : class, IMemberOrNamedType
 {
     public MemberSubstitutedCollection( ISourceMemberCollection<T> source, INamedTypeSymbol substitutedType )

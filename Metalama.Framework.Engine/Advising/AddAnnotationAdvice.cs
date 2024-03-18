@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class AddAnnotationAdvice : Advice
+internal sealed class AddAnnotationAdvice : Advice
 {
     public AddAnnotationAdvice(
         IAspectInstanceInternal aspect,

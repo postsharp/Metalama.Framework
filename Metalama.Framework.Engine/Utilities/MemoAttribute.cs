@@ -7,5 +7,5 @@ namespace Metalama.Framework.Engine.Utilities
 {
     [AttributeUsage( AttributeTargets.Property )]
     [PublicAPI]
-    public sealed class MemoAttribute : Attribute { }
+    public sealed class MemoAttribute : Attribute;
 }

@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing;
 
-public class ChildAspectsCountTests : LicensingTestsBase
+public sealed class ChildAspectsCountTests : LicensingTestsBase
 {
     private const string _namespace = "ChildAspectsCountTests";
     

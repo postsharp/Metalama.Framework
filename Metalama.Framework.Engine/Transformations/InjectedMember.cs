@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Transformations;
 /// Represents a member to be introduced in a type and encapsulates the information needed by the <see cref="AspectLinker"/>
 /// to perform the linking.
 /// </summary>
-internal class InjectedMember
+internal sealed class InjectedMember
 {
     public DeclarationKind Kind { get; }
 
@@ -77,7 +77,7 @@ internal class InjectedMember
         semantic,
         declaration ) { }
 
-    protected InjectedMember(
+    private InjectedMember(
         InjectedMember prototype,
         MemberDeclarationSyntax syntax ) : this(
         prototype.Transformation,

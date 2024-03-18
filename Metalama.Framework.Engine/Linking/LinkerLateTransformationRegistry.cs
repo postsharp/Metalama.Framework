@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Linking;
 /// <summary>
 /// Stores information about transformations that are unrelated to linking but has to be performed during linking. 
 /// </summary>
-internal class LinkerLateTransformationRegistry
+internal sealed class LinkerLateTransformationRegistry
 {
     private readonly ISet<INamedTypeSymbol> _typesWithRemovedPrimaryConstructor;
     private readonly ISet<ISymbol> _primaryConstructorInitializedMembers;

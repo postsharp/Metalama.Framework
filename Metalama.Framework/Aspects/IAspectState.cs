@@ -9,4 +9,4 @@ namespace Metalama.Framework.Aspects;
 /// <see cref="IAspectBuilder"/> interface.
 /// </summary>
 [CompileTime]
-public interface IAspectState : ICompileTimeSerializable { }
+public interface IAspectState : ICompileTimeSerializable;

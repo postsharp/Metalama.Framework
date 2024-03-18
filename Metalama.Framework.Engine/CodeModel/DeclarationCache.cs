@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class DeclarationCache : IDeclarationCache
+internal sealed class DeclarationCache : IDeclarationCache
 {
     private readonly ConcurrentDictionary<MethodInfo, object> _cache = new();
     private readonly CompilationModel _compilation;
