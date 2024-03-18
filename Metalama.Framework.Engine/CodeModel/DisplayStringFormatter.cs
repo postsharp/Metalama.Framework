@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-public static class DisplayStringFormatter
+internal static class DisplayStringFormatter
 {
     public static string Format(
         CodeDisplayFormat? format,

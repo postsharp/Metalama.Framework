@@ -31,7 +31,7 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors;
     private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers;
 
-    public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
+    internal ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
     internal bool IsMutable { get; }
 

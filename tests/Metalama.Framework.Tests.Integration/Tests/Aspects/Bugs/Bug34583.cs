@@ -1,5 +1,5 @@
 #if TESTOPTIONS
-// RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
 #endif
 
 #if ROSLYN_4_8_0_OR_GREATER

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using JetBrains.Annotations;
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -105,7 +104,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> GetExportedAnnotations()
+        internal ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> GetExportedAnnotations()
         {
             var builder = new ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder();
 
@@ -347,9 +346,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel WithAspectRepository( AspectRepository aspectRepository, string? debugLabel )
             => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository, debugLabel );
-
-        internal CompilationModel WithExternalAnnotationProvider( IExternalAnnotationProvider? annotationProvider, string? debugLabel )
-            => this.ExternalAnnotationProvider == annotationProvider ? this : new CompilationModel( this, annotationProvider, debugLabel );
 
         [Memo]
         public INamedTypeCollection Types
@@ -613,6 +609,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool BelongsToCurrentProject => true;
 
-        public IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
+        internal IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
     }
 }
