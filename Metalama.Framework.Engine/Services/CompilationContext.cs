@@ -136,8 +136,11 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     /// </summary>
     public static void SetTriviaHandling( Compilation compilation, bool normalizeWhitespace, bool preserveTrivia )
     {
-        var tuple = (normalizeWhitespace, preserveTrivia);
-        _triviaHandlingDictionary.AddOrUpdate( compilation.AssemblyName.AssertNotNull(), tuple, ( _, _ ) => tuple );
+        // If trivia handling was previously set, don't reset it in case the previous computation is still running.
+        _triviaHandlingDictionary.AddOrUpdate(
+            compilation.AssemblyName.AssertNotNull(),
+            (normalizeWhitespace, preserveTrivia),
+            ( _, existing ) => (normalizeWhitespace || existing.NormalizeWhitespace, preserveTrivia || existing.PreserveTrivia) );
     }
 
     private (bool NormalizeWhitespace, bool PreserveTrivia) GetTriviaHandling()
