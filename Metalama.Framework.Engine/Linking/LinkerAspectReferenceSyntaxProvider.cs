@@ -19,6 +19,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
         => InvocationExpression(
             LinkerInjectionHelperProvider.GetFinalizeMemberExpression()
                 .WithAspectReferenceAnnotation(
+                    null,
                     aspectLayer,
                     AspectReferenceOrder.Previous,
                     flags: AspectReferenceFlags.Inlineable ) );
@@ -27,6 +28,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
         => InvocationExpression(
             LinkerInjectionHelperProvider.GetStaticConstructorMemberExpression()
                 .WithAspectReferenceAnnotation(
+                    null,
                     aspectLayer,
                     AspectReferenceOrder.Previous,
                     flags: AspectReferenceFlags.Inlineable ),
@@ -39,6 +41,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
         => InvocationExpression(
             LinkerInjectionHelperProvider.GetConstructorMemberExpression()
                 .WithAspectReferenceAnnotation(
+                    overriddenConstructor.ToSerializableId(),
                     aspectLayer,
                     AspectReferenceOrder.Previous,
                     flags: AspectReferenceFlags.Inlineable ),
@@ -68,6 +71,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                     InvocationExpression(
                         LinkerInjectionHelperProvider.GetPropertyMemberExpression()
                             .WithAspectReferenceAnnotation(
+                                targetProperty.ToSerializableId(),
                                 aspectLayer,
                                 AspectReferenceOrder.Previous,
                                 targetKind,
@@ -79,6 +83,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                 return
                     CreateMemberAccessExpression( targetProperty, syntaxGenerator )
                         .WithAspectReferenceAnnotation(
+                            targetProperty.ToSerializableId(),
                             aspectLayer,
                             AspectReferenceOrder.Previous,
                             targetKind,
@@ -98,6 +103,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                         targetIndexer.Parameters.SelectAsReadOnlyList(
                             p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) )
             .WithAspectReferenceAnnotation(
+                targetIndexer.ToSerializableId(),
                 aspectLayer,
                 AspectReferenceOrder.Previous,
                 targetKind,
@@ -111,6 +117,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                     targetOperator.ReturnType,
                     targetOperator.Parameters.SelectAsReadOnlyList( p => p.Type ) )
                 .WithAspectReferenceAnnotation(
+                    targetOperator.ToSerializableId(),
                     aspectLayer,
                     AspectReferenceOrder.Previous,
                     flags: AspectReferenceFlags.Inlineable ),

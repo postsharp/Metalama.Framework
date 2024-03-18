@@ -12,6 +12,8 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -78,13 +80,16 @@ internal sealed class AspectReferenceResolver
     private readonly CompilationModel _finalCompilationModel;
     private readonly SafeSymbolComparer _comparer;
     private readonly ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>> _overrideIndicesCache;
+    private readonly PartialCompilation _intermediateCompilation;
 
     public AspectReferenceResolver(
+        PartialCompilation intermediateCompilation,
         LinkerInjectionRegistry injectionRegistry,
         IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
         CompilationModel finalCompilationModel,
         CompilationContext intermediateCompilationContext )
     {
+        this._intermediateCompilation = intermediateCompilation;
         this._injectionRegistry = injectionRegistry;
 
         var indexedLayers =
@@ -99,14 +104,25 @@ internal sealed class AspectReferenceResolver
         this._overrideIndicesCache = new ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>>( intermediateCompilationContext.SymbolComparer );
     }
 
-    public ResolvedAspectReference Resolve(
+    public ResolvedAspectReference? Resolve(
         IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
         IMethodSymbol? containingLocalFunction,
-        ISymbol referencedSymbol,
         ExpressionSyntax expression,
         AspectReferenceSpecification referenceSpecification,
         SemanticModel semanticModel )
     {
+        var referencedSymbol =
+            this.GetSymbolFromDeclarationId(referenceSpecification)
+            ?? GetSymbolFromSemanticModel( semanticModel, expression );
+
+        Invariant.Assert( referencedSymbol != null );
+
+        if (referencedSymbol == null)
+        {
+            // TODO: Error.
+            return null;
+        }
+
         // Get the reference root node, the local symbol that is referenced, and the node that was the source for the symbol.
         //   1) Normal reference:
         //     this.Foo()
@@ -127,7 +143,7 @@ internal sealed class AspectReferenceResolver
         //     __LinkerInjectionHelpers__.__AsyncVoidMethod(this.Foo)(<args>)
         //                                                  ^^^^^^^^  - aspect reference
         //                                                  ^^^^^^^^  - symbol source
-        //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node            
+        //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
 
         this.ResolveTarget(
             containingSemantic.Symbol,
@@ -143,8 +159,6 @@ internal sealed class AspectReferenceResolver
         // resolvedReferencedSymbolSourceNode is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
 
         var targetKind = referenceSpecification.TargetKind;
-        var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
-        var hasCustomReceiver = (referenceSpecification.Flags & AspectReferenceFlags.CustomReceiver) != 0;
 
         if ( targetKind == AspectReferenceTargetKind.Self && resolvedReferencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
         {
@@ -281,8 +295,72 @@ internal sealed class AspectReferenceResolver
                 resolvedRootNode,
                 resolvedReferencedSymbolSourceNode,
                 targetKind,
-                isInlineable,
-                hasCustomReceiver );
+                referenceSpecification.Flags );
+        }
+    }
+
+    private ISymbol? GetSymbolFromDeclarationId( AspectReferenceSpecification referenceSpecification )
+    {
+        if ( referenceSpecification.TargetDeclarationId != null )
+        {
+            var candidateSymbols = DocumentationCommentId.GetSymbolsForDeclarationId( referenceSpecification.TargetDeclarationId.Value.Id, this._intermediateCompilation.Compilation );
+
+            /* TODO: Open generics and possibly other declarations cannot be resolved using this method.
+             *       Uncomment the following too see failing tests.
+             * Invariant.Assert( candidateSymbols.Length == 1 );
+             */
+
+            if ( candidateSymbols.Length == 1 )
+            {
+                return candidateSymbols[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private static ISymbol? GetSymbolFromSemanticModel( SemanticModel semanticModel, SyntaxNode node )
+    {
+        var nodeWithSymbol = node switch
+        {
+            ConditionalAccessExpressionSyntax conditionalAccess => GetConditionalMemberName( conditionalAccess ),
+            _ => node
+        };
+
+        var symbolInfo = semanticModel.GetSymbolInfo( nodeWithSymbol );
+        var referencedSymbol = symbolInfo.Symbol;
+
+        if ( referencedSymbol == null )
+        {
+            // This is a workaround for a problem I don't fully understand.
+            // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
+            // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
+
+            if ( symbolInfo.CandidateSymbols.Length == 1 )
+            {
+                return symbolInfo.CandidateSymbols[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return referencedSymbol;
+
+        static MemberBindingExpressionSyntax GetConditionalMemberName( ConditionalAccessExpressionSyntax conditionalAccess )
+        {
+            var walker = new ConditionalAccessExpressionWalker();
+
+            walker.Visit( conditionalAccess );
+
+            return walker.FoundName.AssertNotNull();
         }
     }
 
@@ -758,4 +836,31 @@ internal sealed class AspectReferenceResolver
     }
 
     private record struct OverrideIndex( MemberLayerIndex Index, InjectedMember Override );
+
+    private sealed class ConditionalAccessExpressionWalker : SafeSyntaxWalker
+    {
+        private ConditionalAccessExpressionSyntax? _context;
+
+        public MemberBindingExpressionSyntax? FoundName { get; private set; }
+
+        public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+        {
+            if ( this._context == null )
+            {
+                this._context = node;
+
+                this.Visit( node.WhenNotNull );
+
+                this._context = null;
+            }
+        }
+
+        public override void VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
+        {
+            if ( this._context != null )
+            {
+                this.FoundName = node;
+            }
+        }
+    }
 }

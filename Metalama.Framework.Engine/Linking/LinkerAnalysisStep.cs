@@ -69,6 +69,7 @@ internal sealed partial class LinkerAnalysisStep : AspectLinkerPipelineStep<Link
 
         var referenceResolver =
             new AspectReferenceResolver(
+                input.IntermediateCompilation,
                 input.InjectionRegistry,
                 input.OrderedAspectLayers,
                 input.FinalCompilationModel,

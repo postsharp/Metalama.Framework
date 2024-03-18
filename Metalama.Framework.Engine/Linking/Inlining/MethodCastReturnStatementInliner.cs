@@ -49,7 +49,7 @@ internal sealed class MethodCastReturnStatementInliner : MethodInliner
         }
 
         // The invocation needs to be inlineable in itself.
-        if ( !IsInlineableInvocation( semanticModel, aspectReference.ContainingSemantic.Symbol, invocationExpression ) )
+        if ( !IsInlineableInvocation( semanticModel, aspectReference, invocationExpression ) )
         {
             return false;
         }

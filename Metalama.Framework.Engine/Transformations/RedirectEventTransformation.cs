@@ -88,7 +88,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
                 this._targetEvent.IsStatic
                     ? IdentifierName( this._targetEvent.Name )
                     : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
-                        .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+                        .WithAspectReferenceAnnotation( this.OverriddenDeclaration.ToSerializableId(), this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

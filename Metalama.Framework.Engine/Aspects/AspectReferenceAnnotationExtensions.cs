@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 
@@ -64,13 +65,14 @@ namespace Metalama.Framework.Engine.Aspects
         /// <returns>Annotated syntax node.</returns>
         internal static T WithAspectReferenceAnnotation<T>(
             this T node,
+            SerializableDeclarationId? targetDeclarationId,
             AspectLayerId aspectLayerId,
             AspectReferenceOrder order,
             AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self,
             AspectReferenceFlags flags = AspectReferenceFlags.None )
             where T : SyntaxNode
         {
-            return node.WithAspectReferenceAnnotation( new AspectReferenceSpecification( aspectLayerId, order, targetKind, flags ) );
+            return node.WithAspectReferenceAnnotation( new AspectReferenceSpecification( targetDeclarationId, aspectLayerId, order, targetKind, flags ) );
         }
     }
 }

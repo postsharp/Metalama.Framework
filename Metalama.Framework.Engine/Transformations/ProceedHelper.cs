@@ -243,6 +243,7 @@ internal static class ProceedHelper
 
         return expression
             .WithAspectReferenceAnnotation(
+                targetMember.ToSerializableId(),
                 aspectLayerId,
                 AspectReferenceOrder.Previous,
                 referenceTargetKind,

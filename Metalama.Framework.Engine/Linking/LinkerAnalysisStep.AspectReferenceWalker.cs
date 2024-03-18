@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking;
@@ -16,6 +18,7 @@ internal sealed partial class LinkerAnalysisStep
     private sealed class AspectReferenceWalker : SafeSyntaxWalker
     {
         private readonly AspectReferenceResolver _referenceResolver;
+        private readonly Compilation _intermediateCompilation;
         private readonly SemanticModel _semanticModel;
         private readonly IMethodSymbol _containingSymbol;
         private readonly Stack<IMethodSymbol> _localFunctionStack;
@@ -25,10 +28,12 @@ internal sealed partial class LinkerAnalysisStep
 
         public AspectReferenceWalker(
             AspectReferenceResolver referenceResolver,
+            Compilation intermediateCompilation,
             SemanticModel semanticModel,
             IMethodSymbol containingSymbol,
             HashSet<SyntaxNode> nodesContainingAspectReferences )
         {
+            this._intermediateCompilation = intermediateCompilation;
             this._referenceResolver = referenceResolver;
             this._semanticModel = semanticModel;
             this.AspectReferences = new List<ResolvedAspectReference>();
@@ -63,30 +68,6 @@ internal sealed partial class LinkerAnalysisStep
 
             if ( node.TryGetAspectReference( out var aspectReference ) )
             {
-                var nodeWithSymbol = node switch
-                {
-                    ConditionalAccessExpressionSyntax conditionalAccess => GetConditionalMemberName( conditionalAccess ),
-                    _ => node
-                };
-
-                var symbolInfo = this._semanticModel.GetSymbolInfo( nodeWithSymbol );
-                var referencedSymbol = symbolInfo.Symbol;
-
-                if ( referencedSymbol == null )
-                {
-                    // This is a workaround for a problem I don't fully understand.
-                    // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
-                    // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
-
-                    if ( symbolInfo.CandidateSymbols.Length == 1 )
-                    {
-                        referencedSymbol = symbolInfo.CandidateSymbols[0];
-                    }
-                    else
-                    {
-                        return;
-                    }
-                }
 
                 IMethodSymbol? localFunction = null;
 
@@ -98,54 +79,20 @@ internal sealed partial class LinkerAnalysisStep
                 var resolvedReference = this._referenceResolver.Resolve(
                     this._containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                     localFunction,
-                    referencedSymbol,
                     (ExpressionSyntax) node,
                     aspectReference,
                     this._semanticModel );
 
-                this.AspectReferences.Add( resolvedReference );
+                if ( resolvedReference != null )
+                {
+                    this.AspectReferences.Add( resolvedReference );
+                }
             }
 
             if ( this._nodesContainingAspectReferences.Contains( node ) )
             {
                 // Visit only when an aspect reference exists in the subtree of the node.
                 base.VisitCore( node );
-            }
-
-            static MemberBindingExpressionSyntax GetConditionalMemberName( ConditionalAccessExpressionSyntax conditionalAccess )
-            {
-                var walker = new ConditionalAccessExpressionWalker();
-
-                walker.Visit( conditionalAccess );
-
-                return walker.FoundName.AssertNotNull();
-            }
-        }
-
-        private sealed class ConditionalAccessExpressionWalker : SafeSyntaxWalker
-        {
-            private ConditionalAccessExpressionSyntax? _context;
-
-            public MemberBindingExpressionSyntax? FoundName { get; private set; }
-
-            public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
-            {
-                if ( this._context == null )
-                {
-                    this._context = node;
-
-                    this.Visit( node.WhenNotNull );
-
-                    this._context = null;
-                }
-            }
-
-            public override void VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
-            {
-                if ( this._context != null )
-                {
-                    this.FoundName = node;
-                }
             }
         }
     }

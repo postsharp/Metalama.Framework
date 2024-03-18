@@ -153,7 +153,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     transformedNode =
                         this.Visit( annotatedExpression )!
-                            .WithAspectReferenceAnnotation( new AspectLayerId( this._aspectName, this._layerName ), order, target, flags )
+                            .WithAspectReferenceAnnotation( null, new AspectLayerId( this._aspectName, this._layerName ), order, target, flags )
                             .WithLeadingTrivia( originalNode.GetLeadingTrivia() )
                             .WithTrailingTrivia( originalNode.GetTrailingTrivia() );
 

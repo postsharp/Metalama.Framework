@@ -85,7 +85,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
                         IdentifierName( this._targetMethod.Name ) );
 
             return expression
-                .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+                .WithAspectReferenceAnnotation( this.OverriddenDeclaration.ToSerializableId(), this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

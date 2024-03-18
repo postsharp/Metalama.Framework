@@ -108,7 +108,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
                 this._targetProperty.IsStatic
                     ? IdentifierName( this._targetProperty.Name )
                     : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
-                        .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+                        .WithAspectReferenceAnnotation( this.OverriddenDeclaration.ToSerializableId(), this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

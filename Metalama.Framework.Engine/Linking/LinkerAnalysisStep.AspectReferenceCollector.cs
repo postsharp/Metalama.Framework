@@ -144,8 +144,7 @@ internal sealed partial class LinkerAnalysisStep
                             sourceNode,
                             sourceNode,
                             targetKind,
-                            true,
-                            true );
+                            AspectReferenceFlags.Inlineable | AspectReferenceFlags.CustomReceiver | AspectReferenceFlags.ImplicitlyInlineableInvocation );
 
                     var wasAdded = aspectReferences.TryAdd( containingSemantic, new[] { resolvedReference } );
 
@@ -222,6 +221,7 @@ internal sealed partial class LinkerAnalysisStep
 
                 var aspectReferenceCollector = new AspectReferenceWalker(
                     this._referenceResolver,
+                    this._intermediateCompilation.Compilation,
                     this._semanticModelProvider.GetSemanticModel( syntax.SyntaxTree ),
                     symbol,
                     nodesContainingAspectReferences );

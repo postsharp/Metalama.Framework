@@ -121,15 +121,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAspectInstanceInternal? AspectInstance => this._common.AspectInstance;
 
-        public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+        public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( null, this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
-        public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+        public object Base => this.GetThisOrBase( "meta.Base", new AspectReferenceSpecification( null, this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public object ThisType
-            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
+            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( null, this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
         public object BaseType
-            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
+            => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( null, this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
         public IObjectReader Tags => this._common.Tags;
 
