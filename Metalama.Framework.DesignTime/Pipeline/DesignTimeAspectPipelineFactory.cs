@@ -297,7 +297,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         TestableCancellationToken cancellationToken = default )
         => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
 
-    internal async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         bool autoResumePipeline,
         AsyncExecutionContext executionContext,

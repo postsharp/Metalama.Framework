@@ -13,7 +13,7 @@ internal sealed class IntermediateSymbolSemanticEqualityComparer : IEqualityComp
 {
     private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
-    internal IntermediateSymbolSemanticEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
+    private IntermediateSymbolSemanticEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
     {
         this._symbolComparer = symbolComparer;
     }
@@ -39,7 +39,7 @@ internal sealed class IntermediateSymbolSemanticEqualityComparer<TSymbol> : IEqu
 {
     private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
-    internal IntermediateSymbolSemanticEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
+    private IntermediateSymbolSemanticEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
     {
         this._symbolComparer = symbolComparer;
     }

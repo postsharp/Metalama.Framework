@@ -11,7 +11,7 @@ internal sealed class AspectReferenceTargetEqualityComparer : IEqualityComparer<
 {
     private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
-    internal AspectReferenceTargetEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
+    private AspectReferenceTargetEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
     {
         this._symbolComparer = symbolComparer;
     }

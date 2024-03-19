@@ -162,6 +162,6 @@ internal sealed partial class LinkerRewritingDriver
         return recordDeclaration;
     }
 
-    public static SyntaxList<AttributeListSyntax> RewritePrimaryConstructorTypeAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
+    private static SyntaxList<AttributeListSyntax> RewritePrimaryConstructorTypeAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
         => List( attributeLists.Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) != true ) );
 }

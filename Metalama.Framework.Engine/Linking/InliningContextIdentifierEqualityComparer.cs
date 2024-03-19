@@ -13,7 +13,7 @@ internal sealed class InliningContextIdentifierEqualityComparer : IEqualityCompa
 {
     private readonly IEqualityComparer<ISymbol> _symbolComparer;
 
-    internal InliningContextIdentifierEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
+    private InliningContextIdentifierEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
     {
         this._symbolComparer = symbolComparer;
     }

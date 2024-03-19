@@ -265,6 +265,7 @@ namespace Metalama.Framework.CompilerExtensions
                                 // Extract the file to disk.
                                 using var stream = currentAssembly.GetManifestResourceStream( resourceName )!;
 
+                                // ReSharper disable once InconsistentNaming
                                 const uint ERROR_SHARING_VIOLATION = 0x80070020;
 
                                 try
@@ -430,6 +431,8 @@ namespace Metalama.Framework.CompilerExtensions
 
                     // It seems assemblies loaded into an ALC don't participate in COM type equivalence.
                     // Since we need that for the DesignTime.Contracts assembly, load it without using ALC.
+
+                    // ReSharper disable once StringStartsWithIsCultureSpecific
                     if ( name.StartsWith( $"{_designTimeContractsAssemblyName}," ) )
                     {
                         return Assembly.LoadFile( embeddedAssembly.Path );

@@ -15,6 +15,10 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal abstract class ContractBaseTransformation : BaseTransformation, IInsertStatementTransformation
 {
+    private readonly TemplateMember<IMethod> _template;
+    private readonly IObjectReader _templateArguments;
+    private readonly IObjectReader _tags;
+    
     /// <summary>
     /// Gets the target member of the contract into which contract statements will be inserted.
     /// </summary>
@@ -23,27 +27,12 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
     /// <summary>
     /// Gets the declaration on which the contract was applied on.
     /// </summary>
-    public IDeclaration ContractTarget { get; }
+    protected IDeclaration ContractTarget { get; }
 
     /// <summary>
     /// Gets the contract direction of inserted statements.
     /// </summary>
-    public ContractDirection ContractDirection { get; }
-
-    /// <summary>
-    /// Gets the template of the contract.
-    /// </summary>
-    public TemplateMember<IMethod> Template { get; }
-
-    /// <summary>
-    /// Gets the tags that will be passed to the template.
-    /// </summary>
-    public IObjectReader TemplateArguments { get; }
-
-    /// <summary>
-    /// Gets the tags that will be passed to the template.
-    /// </summary>
-    public IObjectReader Tags { get; }
+    protected ContractDirection ContractDirection { get; }
 
     protected ContractBaseTransformation(
         Advice advice,
@@ -59,9 +48,9 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
         this.TargetMember = targetMember;
         this.ContractTarget = contractTarget;
         this.ContractDirection = contractDirection;
-        this.Template = template;
-        this.TemplateArguments = templateArguments;
-        this.Tags = tags;
+        this._template = template;
+        this._templateArguments = templateArguments;
+        this._tags = tags;
     }
 
     public override IDeclaration TargetDeclaration => this.TargetMember;
@@ -75,13 +64,13 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
         [NotNullWhen( true )] out BlockSyntax? contractBlock )
     {
         var annotatedValueExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( valueExpression, valueType.GetSymbol() );
-        var boundTemplate = this.Template.ForContract( annotatedValueExpression, this.TemplateArguments );
+        var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(
             this.ParentAdvice.SourceCompilation,
             context.DiagnosticSink,
-            this.Template.Cast(),
-            this.Tags,
+            this._template.Cast(),
+            this._tags,
             this.ParentAdvice.AspectLayerId,
             context.SyntaxGenerationContext,
             this.ParentAdvice.Aspect,
@@ -102,7 +91,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
             null,
             this.ParentAdvice.AspectLayerId );
 
-        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.Template.Declaration );
+        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._template.Declaration );
 
         return templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out contractBlock );
     }

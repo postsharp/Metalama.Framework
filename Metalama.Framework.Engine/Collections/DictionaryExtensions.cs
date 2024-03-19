@@ -4,9 +4,11 @@
 
 namespace System.Collections.Generic;
 
-public static class DictionaryExtensions
+internal static class DictionaryExtensions
 {
 #if !NET6_0_OR_GREATER
+
+    // ReSharper disable once UnusedMember.Global
     public static bool TryAdd<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, TValue value )
         where TKey : notnull
     {
@@ -22,6 +24,7 @@ public static class DictionaryExtensions
         }
     }
 
+    // ReSharper disable once UnusedMember.Global
     public static TValue GetValueOrDefault<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key )
         where TKey : notnull
     {

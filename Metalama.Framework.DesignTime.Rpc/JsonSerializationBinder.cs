@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System.Collections.Immutable;
 using Newtonsoft.Json.Serialization;
 using StreamJsonRpc.Protocol;
@@ -18,6 +19,7 @@ public sealed class JsonSerializationBinder : DefaultSerializationBinder
     private readonly ConcurrentDictionary<string, Assembly> _assemblies = new();
     private readonly Dictionary<string, string> _assemblyNames = new();
 
+    [UsedImplicitly]
     public static JsonSerializationBinder Default { get; } = new();
 
     public JsonSerializationBinder( Action<JsonSerializationBinderConfiguration>? configure = null )

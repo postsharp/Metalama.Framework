@@ -4,6 +4,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking;
 
+// ReSharper disable MemberCanBePrivate.Global
 internal readonly struct MemberLayerIndex : IComparable<MemberLayerIndex>, IEquatable<MemberLayerIndex>
 {
     /// <summary>

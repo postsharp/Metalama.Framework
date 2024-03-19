@@ -121,8 +121,8 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 
     public class GenericTestClass<T1, T2>
     {
-        public sealed class SecondSubType { }
+        public sealed class SecondSubType;
 
-        public sealed class SecondSubType<T3> { }
+        public sealed class SecondSubType<T3>;
     }
 }

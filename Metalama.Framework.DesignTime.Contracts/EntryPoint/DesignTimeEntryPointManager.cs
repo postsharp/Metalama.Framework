@@ -103,7 +103,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
         Version IDesignTimeEntryPointManager.Version => this.GetType().Assembly.GetName().Version!;
 
         // This code is duplicated from MutexHelper in Metalama.Backstage and should be kept in sync (this version does not have logging).
-        internal static Mutex OpenOrCreateMutex( string mutexName )
+        private static Mutex OpenOrCreateMutex( string mutexName )
         {
             // The number of iterations is intentionally very low.
             // We will restart if the following occurs:

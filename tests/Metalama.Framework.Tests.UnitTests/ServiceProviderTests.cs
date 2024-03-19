@@ -124,13 +124,13 @@ namespace Metalama.Framework.Tests.UnitTests
             Assert.Same( observer, testContext.ServiceProvider.Global.GetService<IDifferObserver>() );
         }
 
-        private interface ITestGlobalService : IGlobalService { }
+        private interface ITestGlobalService : IGlobalService;
 
-        private interface ITestProjectService : IProjectService { }
+        private interface ITestProjectService : IProjectService;
 
-        private sealed class TestGlobalService : ITestGlobalService { }
+        private sealed class TestGlobalService : ITestGlobalService;
 
-        private sealed class TestProjectService : ITestProjectService { }
+        private sealed class TestProjectService : ITestProjectService;
 
         private sealed class TestServiceProvider : IServiceProvider, ITempFileManager
         {

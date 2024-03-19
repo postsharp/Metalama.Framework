@@ -54,8 +54,8 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
             } when SymbolHelpers.GetOperatorKindFromName( operatorName ) != OperatorKind.None:
                 return this.SubstituteOperatorMemberAccess( substitutionContext );
 
-            case ObjectCreationExpressionSyntax objectCreationExpression:
-                return this.SubstituteConstructorMemberAccess( objectCreationExpression );
+            case ObjectCreationExpressionSyntax:
+                return this.SubstituteConstructorMemberAccess();
 
             case MemberAccessExpressionSyntax memberAccessExpression:
                 return this.SubstituteMemberAccess( memberAccessExpression, substitutionContext );
@@ -79,7 +79,7 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
             ThisExpression(),
             IdentifierName( this.GetTargetMemberName() ) );
 
-    protected virtual SyntaxNode SubstituteConstructorMemberAccess( ObjectCreationExpressionSyntax currentNode )
+    protected virtual SyntaxNode SubstituteConstructorMemberAccess()
         => MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
             ThisExpression(),

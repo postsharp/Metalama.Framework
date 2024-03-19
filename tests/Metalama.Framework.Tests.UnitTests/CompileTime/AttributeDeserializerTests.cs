@@ -552,7 +552,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public int InitOnlyProperty { get; init; }
         }
 
-        public class DerivedAttribute : TestAttribute { }
+        public class DerivedAttribute : TestAttribute;
 
         public class TestParamsAttribute : Attribute
         {

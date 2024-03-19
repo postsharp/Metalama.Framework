@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Utilities;
 
-internal class ValueTupleComparer
+internal static class ValueTupleComparer
 {
     public static IEqualityComparer<(T1, T2)> Create<T1, T2>( IEqualityComparer<T1> c1, IEqualityComparer<T2> c2 ) => new Comparer<T1, T2>( c1, c2 );
 

@@ -16,6 +16,9 @@ using OperatorKind = Metalama.Framework.Code.OperatorKind;
 
 namespace Metalama.Framework.Engine.Linking;
 
+#pragma warning disable CA1822 // Mark members as static
+
+// ReSharper disable MemberCanBeMadeStatic.Global
 internal sealed class LinkerInjectionHelperProvider
 {
     public const string HelperTypeName = "__LinkerInjectionHelpers__";
@@ -98,9 +101,7 @@ internal sealed class LinkerInjectionHelperProvider
                         parameterTypes.Select( p => syntaxGenerator.Type( p.GetSymbol().AssertNotNull() ) )
                             .Append( syntaxGenerator.Type( returnType.GetSymbol().AssertNotNull() ) ) ) ) ) );
 
-#pragma warning disable CA1822 // Mark members as static
     public TypeSyntax GetSourceType()
-#pragma warning restore CA1822 // Mark members as static
         => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
 
     public TypeSyntax GetOverriddenByType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
@@ -109,7 +110,7 @@ internal sealed class LinkerInjectionHelperProvider
     public TypeSyntax GetAuxiliaryType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
         => this.GetNumberedHelperType( syntaxGenerator, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
 
-    public TypeSyntax GetNumberedHelperType( OurSyntaxGenerator syntaxGenerator, string baseTypeName, string description, IAspectClass aspectType, int ordinal )
+    private TypeSyntax GetNumberedHelperType( OurSyntaxGenerator syntaxGenerator, string baseTypeName, string description, IAspectClass aspectType, int ordinal )
     {
         var aspectTypeSyntax = syntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
 
