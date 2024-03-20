@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        protected CodeFixRunner( ProjectServiceProvider serviceProvider )
+        protected CodeFixRunner( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
@@ -111,17 +111,17 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             {
                 var diagnostics = new DiagnosticBag();
 
-                var context = new CodeActionContext(
-                    this._serviceProvider,
+                var codeActionContext = new CodeActionContext(
+                    pipelineResult.Value.Configuration.ServiceProvider,
                     partialCompilation,
                     pipelineResult.Value.Configuration,
                     isComputingPreview,
                     cancellationToken );
 
-                var codeFixBuilder = new CodeActionBuilder( context );
+                var codeFixBuilder = new CodeActionBuilder( codeActionContext );
 
                 var userCodeExecutionContext = new UserCodeExecutionContext(
-                    configuration.ServiceProvider!.Value,
+                    codeActionContext.ServiceProvider,
                     diagnostics,
                     UserCodeDescription.Create( "executing {0}", codeFix ),
                     compilationModel: pipelineResult.Value.Compilation );
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
                 }
                 else
                 {
-                    return context.ToCodeActionResult();
+                    return codeActionContext.ToCodeActionResult();
                 }
             }
         }

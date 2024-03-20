@@ -25,7 +25,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
-    internal HierarchicalOptionsManager( ProjectServiceProvider serviceProvider )
+    internal HierarchicalOptionsManager( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

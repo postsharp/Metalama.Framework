@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly ImmutableDictionary<string, IAspectDriver> _weaverTypes;
 
-        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins, ProjectServiceProvider serviceProvider )
+        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins, in ProjectServiceProvider serviceProvider )
         {
             this._compilation = compilation;
             this._serviceProvider = serviceProvider;

@@ -98,7 +98,7 @@ internal sealed class FrameworkCompileTimeProjectFactory : IGlobalService
         return builder.Build();
     }
 
-    public CompileTimeProject CreateFrameworkProject( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, Compilation compilation )
+    public CompileTimeProject CreateFrameworkProject( in ProjectServiceProvider serviceProvider, CompileTimeDomain domain, Compilation compilation )
     {
         var assembly = compilation.SourceModule.ReferencedAssemblySymbols.First( x => x.Name == "Metalama.Framework" );
 

@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Aspects
                 options,
                 annotations );
 
-        private void Serialize( Stream stream, ProjectServiceProvider serviceProvider, Compilation compilation )
+        private void Serialize( Stream stream, in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             using var deflate = new DeflateStream( stream, CompressionLevel.Optimal, true );
             var formatter = CompileTimeSerializer.CreateSerializingInstance( serviceProvider, compilation );
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Aspects
             stream.Flush();
         }
 
-        public byte[] ToBytes( ProjectServiceProvider serviceProvider, Compilation compilation )
+        public byte[] ToBytes( in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             var stream = new MemoryStream();
             this.Serialize( stream, serviceProvider, compilation );
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Aspects
             return stream.ToArray();
         }
 
-        internal ManagedResource ToResource( ProjectServiceProvider serviceProvider, Compilation compilation )
+        internal ManagedResource ToResource( in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             var bytes = this.ToBytes( serviceProvider, compilation );
 
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Aspects
                 true );
         }
 
-        public static TransitiveAspectsManifest Deserialize( Stream stream, ProjectServiceProvider serviceProvider, Compilation compilation )
+        public static TransitiveAspectsManifest Deserialize( Stream stream, in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             using var deflate = new DeflateStream( stream, CompressionMode.Decompress );
 

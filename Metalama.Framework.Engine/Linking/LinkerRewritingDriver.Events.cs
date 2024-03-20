@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
-            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( eventDeclaration );
+            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, eventDeclaration );
 
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
@@ -169,30 +169,30 @@ namespace Metalama.Framework.Engine.Linking
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => SyntaxFactoryEx.FormattedBlock(
                 ExpressionStatement(
-                        AssignmentExpression(
-                            SyntaxKind.AddAssignmentExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                symbol.IsStatic
-                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                    : ThisExpression(),
-                                IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
-                            IdentifierName( "value" ) ),
-                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) ) );
+                    AssignmentExpression(
+                        SyntaxKind.AddAssignmentExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            symbol.IsStatic
+                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
+                                : ThisExpression(),
+                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                        IdentifierName( "value" ) ),
+                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
 
         private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => SyntaxFactoryEx.FormattedBlock(
                 ExpressionStatement(
-                        AssignmentExpression(
-                            SyntaxKind.SubtractAssignmentExpression,
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                symbol.IsStatic
-                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                    : ThisExpression(),
-                                IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
-                            IdentifierName( "value" ) ),
-                        Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) ) );
+                    AssignmentExpression(
+                        SyntaxKind.SubtractAssignmentExpression,
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            symbol.IsStatic
+                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
+                                : ThisExpression(),
+                            IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                        IdentifierName( "value" ) ),
+                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
 
         private EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
@@ -255,14 +255,17 @@ namespace Metalama.Framework.Engine.Linking
                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
                             : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         VariableDeclaration(
-                            eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                            eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                             SingletonSeparatedList(
                                 VariableDeclarator(
                                     Identifier( GetBackingFieldName( symbol ) ),
                                     null,
                                     initializer ) ) ) )
-                    .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.NormalizeWhitespace )
-                    .WithTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed ), new( ElasticLineFeed, ElasticLineFeed ), this.IntermediateCompilationContext.NormalizeWhitespace )
+                    .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithTriviaIfNecessary(
+                        new SyntaxTriviaList( ElasticLineFeed ),
+                        new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
+                        this.SyntaxGenerationOptions.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -348,8 +351,8 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         cleanAccessorList )
-                    .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.NormalizeWhitespace )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                    .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -372,27 +375,27 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     addAccessor != null
                                         ? AccessorDeclaration(
-                                                SyntaxKind.AddAccessorDeclaration,
-                                                SyntaxFactoryEx.FormattedBlock(
-                                                    ExpressionStatement(
-                                                        AssignmentExpression(
-                                                            SyntaxKind.AddAssignmentExpression,
-                                                            GetInvocationTarget(),
-                                                            IdentifierName( "value" ) ) ) ) )
+                                            SyntaxKind.AddAccessorDeclaration,
+                                            SyntaxFactoryEx.FormattedBlock(
+                                                ExpressionStatement(
+                                                    AssignmentExpression(
+                                                        SyntaxKind.AddAssignmentExpression,
+                                                        GetInvocationTarget(),
+                                                        IdentifierName( "value" ) ) ) ) )
                                         : null,
                                     removeAccessor != null
                                         ? AccessorDeclaration(
-                                                SyntaxKind.RemoveAccessorDeclaration,
-                                                SyntaxFactoryEx.FormattedBlock(
-                                                    ExpressionStatement(
-                                                        AssignmentExpression(
-                                                            SyntaxKind.SubtractAssignmentExpression,
-                                                            GetInvocationTarget(),
-                                                            IdentifierName( "value" ) ) ) ) )
+                                            SyntaxKind.RemoveAccessorDeclaration,
+                                            SyntaxFactoryEx.FormattedBlock(
+                                                ExpressionStatement(
+                                                    AssignmentExpression(
+                                                        SyntaxKind.SubtractAssignmentExpression,
+                                                        GetInvocationTarget(),
+                                                        IdentifierName( "value" ) ) ) ) )
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )
-                .WithTriviaFromIfNecessary( @event, this.IntermediateCompilationContext.PreserveTrivia );
+                .WithTriviaFromIfNecessary( @event, this.SyntaxGenerationOptions.PreserveTrivia );
 
             ExpressionSyntax GetInvocationTarget()
             {

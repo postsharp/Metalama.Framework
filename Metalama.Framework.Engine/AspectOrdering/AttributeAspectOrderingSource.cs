@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
         private readonly Compilation _compilation;
         private readonly IAttributeDeserializer _attributeDeserializer;
 
-        public AttributeAspectOrderingSource( ProjectServiceProvider serviceProvider, Compilation compilation )
+        public AttributeAspectOrderingSource( in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             this._compilation = compilation;
             this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();

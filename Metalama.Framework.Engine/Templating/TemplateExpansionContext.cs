@@ -96,7 +96,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     /// This method is used in tests, when the <see cref="CurrentSyntaxSerializationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
     /// one.
     /// </summary>
-    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, ProjectServiceProvider serviceProvider )
+    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, in ProjectServiceProvider serviceProvider )
     {
         var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
         _currentSyntaxSerializationContext.Value = serializationContext;
@@ -688,7 +688,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
                     (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
-                    targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
+                     targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
                     deduplicationKey: aspectClass?.FullName ) );
         }
     }

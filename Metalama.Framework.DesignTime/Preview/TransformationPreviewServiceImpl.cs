@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Rpc;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -29,7 +30,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
 
         // Execute the compile-time pipeline with the design-time project configuration.
         var previewPipeline = new PreviewAspectPipeline(
-            preparation.ServiceProvider!,
+            preparation.ServiceProvider.AssertNotNull(),
             ExecutionScenario.Preview,
             this.PipelineFactory.Domain );
 

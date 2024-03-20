@@ -52,7 +52,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             var compilation = this.Type.GetCompilationModel();
 
             return
-                this.ToSyntax( new( compilation, SyntaxGenerationContext.Create( compilation.CompilationContext, isNullOblivious: false ) ) )
+                this.ToSyntax(
+                        new SyntaxSerializationContext(
+                            compilation,
+                            compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, isNullOblivious: false ) ) )
                     .NormalizeWhitespace()
                     .ToString();
         }

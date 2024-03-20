@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
 
-        public ReferenceAssemblyLocator( ProjectServiceProvider serviceProvider, string additionalPackageReferences )
+        public ReferenceAssemblyLocator( in ProjectServiceProvider serviceProvider, string additionalPackageReferences )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
@@ -113,8 +113,8 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger.Trace?.Log(
                 "Assembly versions: " + string.Join(
                     ", ",
-                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }.SelectAsReadOnlyList(
-                        x => x.Assembly.Location ) ) );
+                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }
+                        .SelectAsReadOnlyList( x => x.Assembly.Location ) ) );
 
             var targetFrameworksString = string.IsNullOrEmpty( projectOptions.CompileTimeTargetFrameworks )
                 ? _defaultCompileTimeTargetFrameworks
@@ -194,7 +194,11 @@ namespace Metalama.Framework.Engine.CompileTime
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
             // Get system assemblies.
-            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( targetFrameworksString, additionalPackageReferences, additionalNugetSources );
+            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest(
+                targetFrameworksString,
+                additionalPackageReferences,
+                additionalNugetSources );
+
             this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
@@ -264,7 +268,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new InvalidOperationException(
                     "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
             }
-            
+
             var resolvedPackages = new Dictionary<string, string>();
 
             var assetsJson = JObject.Parse( File.ReadAllText( options.ProjectAssetsFile.AssertNotNull() ) );
@@ -318,7 +322,10 @@ namespace Metalama.Framework.Engine.CompileTime
             return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
         }
 
-        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string targetFrameworks, string additionalPackageReferences, string? additionalNugetSources )
+        private ReferenceAssembliesManifest GetReferenceAssembliesManifest(
+            string targetFrameworks,
+            string additionalPackageReferences,
+            string? additionalNugetSources )
         {
             using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {

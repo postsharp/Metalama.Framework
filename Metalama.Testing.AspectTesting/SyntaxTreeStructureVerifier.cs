@@ -19,7 +19,7 @@ namespace Metalama.Testing.AspectTesting
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
         [UsedImplicitly]
-        public static bool VerifyMetaSyntax( Compilation compilation, ProjectServiceProvider serviceProvider )
+        public static bool VerifyMetaSyntax( Compilation compilation, in ProjectServiceProvider serviceProvider )
         {
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {

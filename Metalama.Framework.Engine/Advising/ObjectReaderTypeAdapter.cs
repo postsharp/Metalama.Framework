@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Advising
             return true;
         }
 
-        internal ObjectReaderTypeAdapter( ProjectServiceProvider serviceProvider, Type type )
+        internal ObjectReaderTypeAdapter( in ProjectServiceProvider serviceProvider, Type type )
         {
             this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

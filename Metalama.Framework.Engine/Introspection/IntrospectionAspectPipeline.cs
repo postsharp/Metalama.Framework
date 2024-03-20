@@ -18,7 +18,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
 {
     private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
+    public IntrospectionAspectPipeline( in ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
         base( serviceProvider, ExecutionScenario.Introspection, domain )
     {
         this._options = options;

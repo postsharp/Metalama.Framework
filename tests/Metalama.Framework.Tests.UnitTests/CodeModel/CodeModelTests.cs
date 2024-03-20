@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -31,6 +32,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class CodeModelTests : UnitTestClass
     {
+        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Proof );
+        
         [Fact]
         public void ObjectIdentity()
         {
@@ -579,7 +582,7 @@ class C<T>
 
             var type = Assert.Single( compilation.Types );
 
-            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeKind.TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.SelectAsImmutableArray( p => p.Type.TypeKind ) );
         }

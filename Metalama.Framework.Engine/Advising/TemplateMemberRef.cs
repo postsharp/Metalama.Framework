@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Advising
             this._interpretedKind = interpretedKind;
         }
 
-        public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, ProjectServiceProvider serviceProvider )
+        public TemplateMember<T> GetTemplateMember<T>( CompilationModel compilation, in ProjectServiceProvider serviceProvider )
             where T : class, IMemberOrNamedType
         {
             if ( this.IsNull )

@@ -440,7 +440,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // No continue here to handle even aspect instances without a syntax tree.
                 if ( syntaxTree == null && !resultBuilders.ContainsKey( string.Empty ) )
                 {
-                    resultBuilders.Add( string.Empty, new( null ) );
+                    resultBuilders.Add( string.Empty, new SyntaxTreePipelineResult.Builder( null ) );
                 }
 
                 var targetDeclarationId = aspectInstance.TargetDeclaration.ToSerializableId();
@@ -465,7 +465,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.AspectInstances ??= ImmutableArray.CreateBuilder<DesignTimeAspectInstance>();
 
                 builder.AspectInstances.Add(
-                    new(
+                    new DesignTimeAspectInstance(
                         targetDeclarationId,
                         predecessorDeclarationId,
                         aspectInstance.AspectClass.FullName,
@@ -498,7 +498,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
                 builder.Transformations.Add(
-                    new( transformation.TargetDeclaration.ToSerializableId(), transformation.AspectClass.FullName, MetalamaStringFormatter.Format( transformation.ToDisplayString() ) ) );
+                    new DesignTimeTransformation(
+                        transformation.TargetDeclaration.ToSerializableId(),
+                        transformation.AspectClass.FullName,
+                        MetalamaStringFormatter.Format( transformation.ToDisplayString() ) ) );
             }
 
             // Split options by syntax tree.
@@ -597,7 +600,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         // the providers of referenced projects. However cross-project references are still used for PE references.
         ImmutableArray<TransitiveValidatorInstance> ITransitiveAspectsManifest.ReferenceValidators => ImmutableArray<TransitiveValidatorInstance>.Empty;
 
-        public byte[] GetSerializedTransitiveAspectManifest( ProjectServiceProvider serviceProvider, Compilation compilation )
+        public byte[] GetSerializedTransitiveAspectManifest( in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             if ( this._serializedTransitiveAspectManifest == null )
             {

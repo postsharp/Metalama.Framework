@@ -33,13 +33,12 @@ namespace Metalama.Framework.Engine.Linking
                         fieldDeclaration.Declaration.Type ) );
             }
 
-            if (this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
+            if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
             {
                 fieldDeclaration =
                     fieldDeclaration.WithDeclaration(
                         fieldDeclaration.Declaration.WithVariables(
-                            SeparatedList(
-                                fieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
+                            SeparatedList( fieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
             }
 
             members.Add( fieldDeclaration );
@@ -56,26 +55,26 @@ namespace Metalama.Framework.Engine.Linking
                 symbol switch
                 {
                     { IsReadOnly: false } => SyntaxKind.SetAccessorDeclaration,
-                    { IsReadOnly: true } => SyntaxKind.InitAccessorDeclaration,
+                    { IsReadOnly: true } => SyntaxKind.InitAccessorDeclaration
                 };
 
             var accessorList =
                 AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    Token( SyntaxKind.GetKeyword ),
-                                    null,
-                                    ArrowExpressionClause( DefaultExpression( type ) ),
-                                    Token( SyntaxKind.SemicolonToken ) ),
-                                AccessorDeclaration(
-                                    setAccessorKind,
-                                    SyntaxFactoryEx.FormattedBlock() )
-                            } ) );
+                    List(
+                        new[]
+                        {
+                            AccessorDeclaration(
+                                SyntaxKind.GetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                TokenList(),
+                                Token( SyntaxKind.GetKeyword ),
+                                null,
+                                ArrowExpressionClause( DefaultExpression( type ) ),
+                                Token( SyntaxKind.SemicolonToken ) ),
+                            AccessorDeclaration(
+                                setAccessorKind,
+                                SyntaxFactoryEx.FormattedBlock() )
+                        } ) );
 
             return
                 PropertyDeclaration(
@@ -88,10 +87,10 @@ namespace Metalama.Framework.Engine.Linking
                         type,
                         null,
                         Identifier( GetEmptyImplMemberName( symbol ) ),
-                        accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                         null,
                         null )
-                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

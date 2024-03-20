@@ -20,9 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
         protected object? Target { get; }
 
-        protected SyntaxGenerationContext GenerationContext { get; }
+        protected static SyntaxGenerationContext CurrentGenerationContext => TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-        protected SyntaxSerializationContext SerializationContext { get; }
+        protected static SyntaxSerializationContext CurrentSerializationContext => TemplateExpansionContext.CurrentSyntaxSerializationContext;
 
         protected Invoker( T member, InvokerOptions? options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
         {
@@ -38,13 +38,6 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             this.Target = target;
             this.Member = member;
-
-            // Get the SyntaxGenerationContext. We fall back to the DefaultSyntaxGenerationContext because it is easy and because invokers can be called from
-            // a non-template context e.g. a unit test or LinqPad.
-            this.GenerationContext = syntaxGenerationContext ?? TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull
-                ?? member.GetCompilationModel().CompilationContext.DefaultSyntaxGenerationContext;
-
-            this.SerializationContext = new SyntaxSerializationContext( member.GetCompilationModel(), this.GenerationContext );
 
             this._order = orderOptions switch
             {
@@ -122,7 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 receiver = receiver.WithAspectReferenceOrder( this._order );
 
                 return new ReceiverTypedExpressionSyntax(
-                    receiver.ToTypedExpressionSyntax( this.SerializationContext ),
+                    receiver.ToTypedExpressionSyntax( CurrentSerializationContext ),
                     false,
                     receiver.AspectReferenceSpecification );
             }
@@ -132,7 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
                 if ( this.Target != null )
                 {
-                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, this.SerializationContext );
+                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, CurrentSerializationContext );
 
                     return new ReceiverTypedExpressionSyntax(
                         typedExpressionSyntax,
@@ -143,7 +136,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 {
                     return new ReceiverTypedExpressionSyntax(
                         new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification )
-                            .ToTypedExpressionSyntax( this.SerializationContext ),
+                            .ToTypedExpressionSyntax( CurrentSerializationContext ),
                         false,
                         aspectReferenceSpecification );
                 }
@@ -151,7 +144,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 {
                     return new ReceiverTypedExpressionSyntax(
                         new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax(
-                            this.SerializationContext ),
+                            CurrentSerializationContext ),
                         false,
                         aspectReferenceSpecification );
                 }

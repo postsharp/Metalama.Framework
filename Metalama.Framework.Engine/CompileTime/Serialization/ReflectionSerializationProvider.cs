@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly Dictionary<Assembly, bool> _inspectedAssemblies = new();
         private readonly object _sync = new();
 
-        public ReflectionSerializationProvider( ProjectServiceProvider serviceProvider )
+        public ReflectionSerializationProvider( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

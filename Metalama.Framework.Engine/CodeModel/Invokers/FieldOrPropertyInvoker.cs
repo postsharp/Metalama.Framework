@@ -23,9 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             fieldOrProperty,
             options,
             target,
-            syntaxGenerationContext ) 
-        {
-        }
+            syntaxGenerationContext ) { }
 
         private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
         {
@@ -34,7 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var receiverInfo = this.GetReceiverInfo();
 
             var name = IdentifierName( this.GetCleanTargetMemberName() );
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
 
             ExpressionSyntax expression;
 
@@ -69,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
@@ -91,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             => new TypedExpressionSyntaxImpl(
                 this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
                 this.Member.Type,
-                this.SerializationContext.SyntaxGenerationContext,
+                CurrentSerializationContext.SyntaxGenerationContext,
                 this.IsRef() );
 
         private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
@@ -99,7 +98,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
             Invariant.Assert(
-                this.SerializationContext.SyntaxGenerationContext.Equals( (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
+                CurrentSerializationContext.SyntaxGenerationContext.Equals(
+                    (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
 
             return this.GetTypedExpressionSyntax();
         }

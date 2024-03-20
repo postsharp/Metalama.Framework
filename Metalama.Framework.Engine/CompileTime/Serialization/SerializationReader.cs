@@ -26,7 +26,11 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly SerializationBinaryReader _binaryReader;
         private readonly CompileTimeTypeFactory? _compileTimeTypeFactory;
 
-        internal SerializationReader( ProjectServiceProvider serviceProvider, Stream stream, CompileTimeSerializer formatter, bool shouldReportExceptionCause )
+        internal SerializationReader(
+            in ProjectServiceProvider serviceProvider,
+            Stream stream,
+            CompileTimeSerializer formatter,
+            bool shouldReportExceptionCause )
         {
             this._formatter = formatter;
             this._shouldReportExceptionCause = shouldReportExceptionCause;
@@ -534,7 +538,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                                      ?? throw new InvalidOperationException( $"Could not locate assembly {typeName.AssemblyName} in compilation." );
 
                 var typeSymbol = assemblySymbol.GetTypeByMetadataName( typeName.TypeName )
-                                 ?? throw new InvalidOperationException( $"Could not locate type {typeName.TypeName} in assembly {typeName.AssemblyName} in compilation." );
+                                 ?? throw new InvalidOperationException(
+                                     $"Could not locate type {typeName.TypeName} in assembly {typeName.AssemblyName} in compilation." );
 
                 result = this._compileTimeTypeFactory.AssertNotNull().Get( typeSymbol );
             }

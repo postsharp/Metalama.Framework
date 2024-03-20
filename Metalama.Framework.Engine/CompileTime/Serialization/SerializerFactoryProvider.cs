@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="nextProvider">The next provider in the chain, or <c>null</c> if there is none.</param>
-        protected SerializerFactoryProvider( ProjectServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
+        protected SerializerFactoryProvider( in ProjectServiceProvider serviceProvider, ISerializerFactoryProvider nextProvider )
         {
             this._serviceProvider = serviceProvider;
             this.NextProvider = nextProvider;

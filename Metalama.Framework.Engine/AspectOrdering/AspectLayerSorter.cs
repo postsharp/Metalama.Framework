@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
                 foreach ( var matchExpression in relationship.OrderedLayers )
                 {
-                    // Map the part string to a set of indices. We require the match to exist because it is a normal case
+                    // Map the part string to a set of indices. We don't require the match to exist because it is a normal case
                     // to specify ordering for aspects that exist but are not necessarily a part of the current compilation.
                     ImmutableArray<int> currentIndices;
 

@@ -214,8 +214,6 @@ namespace Metalama.Testing.UnitTesting
                 AssertNoError( mainRoslynCompilation );
             }
 
-            CompilationContext.SetTriviaHandling( mainRoslynCompilation, normalizeWhitespace: true, preserveTrivia: true );
-
             return mainRoslynCompilation;
         }
 

@@ -526,7 +526,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         internal DiagnosticManifest ClosureDiagnosticManifest { get; }
 
-        private DiagnosticManifest GetDiagnosticManifest( ProjectServiceProvider serviceProvider )
+        private DiagnosticManifest GetDiagnosticManifest( in ProjectServiceProvider serviceProvider )
         {
             if ( this.IsEmpty )
             {

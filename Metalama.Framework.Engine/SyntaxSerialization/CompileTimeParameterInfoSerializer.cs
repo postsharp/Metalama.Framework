@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         public override ExpressionSyntax Serialize( CompileTimeParameterInfo obj, SyntaxSerializationContext serializationContext )
             => SerializeParameter( obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull(), serializationContext );
-        
+
         public static ExpressionSyntax SerializeParameter( IParameter parameter, SyntaxSerializationContext serializationContext )
         {
             var declaringMember = parameter.DeclaringMember;
@@ -44,9 +44,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     InvocationExpression(
                         MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, memberExpression, IdentifierName( getParametersMethodName ) ) ),
                     BracketedArgumentList(
-                        SingletonSeparatedList(
-                            Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( parameter.Index ) ) ) ) ) )
-                .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
+                        SingletonSeparatedList( Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( parameter.Index ) ) ) ) ) )
+                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
         }
 
         public CompileTimeParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

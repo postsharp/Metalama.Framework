@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Testing.UnitTesting;
 using System.Linq;
@@ -10,6 +12,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
 public sealed class IteratorInfoTests : UnitTestClass
 {
+    protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Proof );
+    
     [Fact]
     public void GenericEnumerableYield()
     {

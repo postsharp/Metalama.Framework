@@ -14,7 +14,7 @@ public sealed class DesignTimeCodeFixRunner : CodeFixRunner
 {
     private readonly IAspectPipelineConfigurationProvider _configurationProvider;
 
-    public DesignTimeCodeFixRunner( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    public DesignTimeCodeFixRunner( in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._configurationProvider = serviceProvider.Global.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }

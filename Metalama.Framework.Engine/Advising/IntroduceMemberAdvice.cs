@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Advising
             IDiagnosticAdder diagnosticAdder,
             TemplateAttributeProperties? templateAttributeProperties ) { }
 
-        public sealed override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        public sealed override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
 
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Advising
                     this.Builder.IsStatic = true;
 
                     break;
-                    
+
                 default:
                     throw new AssertionFailedException( $"Unexpected IntroductionScope: {this._scope}." );
             }
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, ProjectServiceProvider serviceProvider )
+        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, in ProjectServiceProvider serviceProvider )
         {
             var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 

@@ -295,7 +295,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return method
                 .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                .WithTriviaFromIfNecessary( method, this.IntermediateCompilationContext.PreserveTrivia );
+                .WithTriviaFromIfNecessary( method, this.SyntaxGenerationOptions.PreserveTrivia );
 
             BlockSyntax GetBody()
             {

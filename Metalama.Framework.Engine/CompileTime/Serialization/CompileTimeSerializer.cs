@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             MetalamaEngineModuleInitializer.EnsureInitialized();
         }
-        
+
         private readonly ProjectServiceProvider _serviceProvider;
 
         /// <summary>
@@ -27,19 +27,20 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="CompileTimeSerializer"/> class.
         /// </summary>
-        private CompileTimeSerializer( ProjectServiceProvider serviceProvider, Compilation? compilation = null )
+        private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, Compilation? compilation = null )
             : this( serviceProvider, new CompileTimeSerializationBinder( serviceProvider ), compilation ) { }
 
-        private CompileTimeSerializer( CompileTimeProject project, ProjectServiceProvider serviceProvider, Compilation compilation ) : this(
+        private CompileTimeSerializer( CompileTimeProject project, in ProjectServiceProvider serviceProvider, Compilation compilation ) : this(
             serviceProvider,
             new CompileTimeCompileTimeSerializationBinder( serviceProvider, project ),
             compilation ) { }
 
-        public static CompileTimeSerializer CreateTestInstance( ProjectServiceProvider serviceProvider ) => new( serviceProvider );
+        public static CompileTimeSerializer CreateTestInstance( in ProjectServiceProvider serviceProvider ) => new( serviceProvider );
 
-        public static CompileTimeSerializer CreateSerializingInstance( ProjectServiceProvider serviceProvider, Compilation compilation ) => new( serviceProvider, compilation );
+        public static CompileTimeSerializer CreateSerializingInstance( in ProjectServiceProvider serviceProvider, Compilation compilation )
+            => new( serviceProvider, compilation );
 
-        public static CompileTimeSerializer CreateDeserializingInstance( ProjectServiceProvider serviceProvider, Compilation compilation )
+        public static CompileTimeSerializer CreateDeserializingInstance( in ProjectServiceProvider serviceProvider, Compilation compilation )
             => new( serviceProvider.GetRequiredService<CompileTimeProject>(), serviceProvider, compilation );
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         /// <param name="serviceProvider"></param>
         /// <param name="binder">A <see cref="CompileTimeSerializationBinder"/> customizing bindings between types and type names, or <c>null</c> to use the default implementation.</param>
-        private CompileTimeSerializer( ProjectServiceProvider serviceProvider, CompileTimeSerializationBinder binder, Compilation? compilation )
+        private CompileTimeSerializer( in ProjectServiceProvider serviceProvider, CompileTimeSerializationBinder binder, Compilation? compilation )
         {
             this._serviceProvider = serviceProvider;
             this.Binder = binder;

@@ -138,7 +138,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
-        serviceProvider = serviceProvider.WithService( new TestProjectOptionsFactory( this.ProjectOptions ) ).WithService( this.ProjectOptions.DomainObserver );
+        serviceProvider = serviceProvider
+            .WithService( new TestProjectOptionsFactory( this.ProjectOptions ) )
+            .WithService( this.ProjectOptions.DomainObserver );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );

@@ -29,7 +29,7 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
     }
 
     // This constructor is used in the compile-time scenario.
-    public ProjectLicenseConsumptionService( ProjectServiceProvider serviceProvider )
+    public ProjectLicenseConsumptionService( in ProjectServiceProvider serviceProvider )
     {
         this._impl = serviceProvider.Global.GetRequiredBackstageService<ILicenseConsumptionService>();
     }

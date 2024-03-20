@@ -48,7 +48,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
                 {
                     diagnosticAdder.Report(
-                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, new[] { SupportedCSharpVersions.FormatSupportedVersions() } ) );
+                        GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic(
+                            null,
+                            new[] { SupportedCSharpVersions.FormatSupportedVersions() } ) );
 
                     return false;
                 }
@@ -203,7 +205,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                var resultingCompilation = (PartialCompilation) await RunTimeAssemblyRewriter.RewriteAsync( resultPartialCompilation, this.ServiceProvider );
+                var resultingCompilation =
+                    (PartialCompilation) await RunTimeAssemblyRewriter.RewriteAsync( resultPartialCompilation, configuration.ServiceProvider );
+
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
                 return new CompileTimeAspectPipelineResult(
