@@ -67,13 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var receiverInfo = this.GetReceiverInfo();
             var name = IdentifierName( this.GetCleanTargetMemberName() );
-
-/* Unmerged change from project 'Metalama.Framework.Engine'
-Before:
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.CurrentGenerationContext );
-After:
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, Invoker<IEvent>.CurrentGenerationContext );
-*/
+            
             var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
 
             var expression = receiverInfo.RequiresConditionalAccess
