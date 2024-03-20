@@ -46,49 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Options = syntaxGenerationOptions ?? SyntaxGenerationOptions.Proof;
             this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
         }
-
-        /*
-        internal static SyntaxGenerationContext Create(
-            CompilationContext compilationContext,
-            SyntaxNode node,
-            SyntaxGenerationOptions options,
-            bool isPartial = false )
-            => Create( compilationContext, node.SyntaxTree, node.SpanStart, options, isPartial );
-
-        internal static SyntaxGenerationContext Create(
-            CompilationContext compilationContext,
-            SyntaxTree syntaxTree,
-            int position,
-            SyntaxGenerationOptions options,
-            bool isPartial = false )
-        {
-            var semanticModel = compilationContext.Compilation.GetCachedSemanticModel( syntaxTree );
-            var nullableContext = semanticModel.GetNullableContext( position );
-            var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
-
-            return Create( compilationContext, options, isPartial, isNullOblivious );
-        }
-
-        private record CacheKey( bool IsNullOblivious, bool IsPartial, SyntaxGenerationOptions Options );
-
-
-        internal static SyntaxGenerationContext Create(
-            CompilationContext compilationContext,
-            SyntaxGenerationOptions options,
-            bool isPartial = false,
-            bool? isNullOblivious = null )
-        {
-            isNullOblivious ??= (((CSharpCompilation) compilationContext.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
-                                != 0;
-
-            return new SyntaxGenerationContext(
-                compilationContext,
-                isNullOblivious.Value ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
-                isPartial,
-                options );
-        }
-        */
-
+        
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
 
         // used for debug assert
