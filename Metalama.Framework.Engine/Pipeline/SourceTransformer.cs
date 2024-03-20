@@ -54,9 +54,9 @@ namespace Metalama.Framework.Engine.Pipeline
                 DotNetSdkDirectory = dotNetSdkDirectory
             };
 
-            BackstageServiceFactoryInitializer.Initialize( backstageOptions );
-
-            var serviceProvider = BackstageServiceFactory.ServiceProvider;
+            // We don't use BackstageServiceFactory.ServiceProvider here, because it's lifetime goes over the lifetime of a source transformer,
+            // and we manage disposal of services at the end of the source transformer's lifetime.
+            var serviceProvider = BackstageServiceFactoryInitializer.CreateInitialized( backstageOptions );
 
             // Initialize usage reporting.
             try
@@ -123,7 +123,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 // Close logs.
-                // Logging has to be disposed as the last one, so it could be used until now.
                 this._serviceProvider.GetLoggerFactory().Dispose();
             }
         }
