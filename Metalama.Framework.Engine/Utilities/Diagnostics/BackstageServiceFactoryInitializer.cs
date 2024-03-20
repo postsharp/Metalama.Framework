@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Tools;
+using System;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
@@ -11,14 +12,30 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
         [PublicAPI]
         public static bool IsInitialized => BackstageServiceFactory.IsInitialized;
 
+        private static BackstageInitializationOptions WithTools( BackstageInitializationOptions options )
+            => options with { AddToolsExtractor = builder => builder.AddTools() };
+
+        private static void InitializeMetalamaServices()
+        {
+            Logger.Initialize();
+        }
+
         public static void Initialize( BackstageInitializationOptions options )
         {
             if ( BackstageServiceFactory.Initialize(
-                    options with { AddToolsExtractor = builder => builder.AddTools() },
+                    WithTools( options ),
                     options.ApplicationInfo.Name ) )
             {
-                Logger.Initialize();
+                InitializeMetalamaServices();
             }
+        }
+
+        public static IServiceProvider CreateInitialized( BackstageInitializationOptions options )
+        {
+            var serviceProvider = BackstageServiceFactory.CreateServiceProvider( options );
+            InitializeMetalamaServices();
+
+            return serviceProvider;
         }
     }
 }
