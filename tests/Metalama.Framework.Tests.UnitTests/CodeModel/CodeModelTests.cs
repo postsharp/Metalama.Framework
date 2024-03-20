@@ -1222,7 +1222,7 @@ public class PublicClass
             Assert.False( intType.IsNullable );
             Assert.Same( intType, intType.ToNonNullableType() );
             Assert.Same( intType, intType.UnderlyingType );
-            var nullableIntType = intType.ToNullableType();
+            var nullableIntType = (INamedType) intType.ToNullableType();
             Assert.NotSame( intType, nullableIntType );
             Assert.True( nullableIntType.IsNullable );
             Assert.Same( intType, nullableIntType.ToNonNullableType() );
@@ -1238,10 +1238,10 @@ public class PublicClass
             var objectType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(object) );
             Assert.Null( objectType.IsNullable );
             Assert.Same( objectType, objectType.UnderlyingType );
-            var nonNullableObjectType = objectType.ToNonNullableType();
+            var nonNullableObjectType = (INamedType) objectType.ToNonNullableType();
             Assert.False( nonNullableObjectType.IsNullable );
             Assert.Same( objectType, nonNullableObjectType.UnderlyingType );
-            var nullableObjectType = objectType.ToNullableType();
+            var nullableObjectType = (INamedType) objectType.ToNullableType();
             Assert.NotSame( objectType, nullableObjectType );
             Assert.True( nullableObjectType.IsNullable );
             Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullableType() );
@@ -1701,7 +1701,6 @@ public partial class C
 
             var code = """
                 record R(int P);
-
                 """;
 
 #if !NET5_0_OR_GREATER
@@ -1713,6 +1712,33 @@ public partial class C
             var property = record.Properties.OfName( "P" ).Single();
 
             Assert.Null( property.InitializerExpression );
+        }
+
+        [Fact]
+        public void NullableGeneric()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = """
+                class C<T> where T : struct
+                {
+                    T? _f;
+                }
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var field = type.Fields.Single();
+
+            var underlyingType = ((INamedType) field.Type).UnderlyingType;
+            var typeParameter = Assert.IsAssignableFrom<ITypeParameter>( underlyingType );
+            Assert.Equal( "C<T>/T", underlyingType.ToString() );
+
+            var nullable = (INamedType) typeParameter.ToNullableType();
+            Assert.Equal( "T?", nullable.ToString() );
+
+            var nonNullable = nullable.ToNonNullableType();
+            Assert.Same( typeParameter, nonNullable );
         }
 
         /*
