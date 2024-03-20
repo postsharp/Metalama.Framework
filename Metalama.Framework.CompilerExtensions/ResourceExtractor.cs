@@ -385,8 +385,9 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static Assembly? GetAssemblyCore( string name, StringBuilder? log )
         {
+            // Version operator <= throws on .Net Framework when the first operand is null, so we have to check for null explicitly.
             static bool VersionTolerantReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
-                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version <= candidate.Version;
+                => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && (requestedAssemblyName.Version == null || requestedAssemblyName.Version <= candidate.Version);
 
             static bool StrictReferenceMatchesDefinition( AssemblyName requestedAssemblyName, AssemblyName candidate )
                 => AssemblyName.ReferenceMatchesDefinition( requestedAssemblyName, candidate ) && requestedAssemblyName.Version == candidate.Version;
