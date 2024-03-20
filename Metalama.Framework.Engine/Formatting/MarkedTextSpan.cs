@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Formatting
                 throw new ArgumentNullException( nameof(tagValue) );
             }
 
-            if ( classification != null && classification.Value > this.Classification )
+            if ( classification > this.Classification )
             {
                 return false;
             }

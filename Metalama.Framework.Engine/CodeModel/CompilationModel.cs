@@ -87,6 +87,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public HierarchicalOptionsManager HierarchicalOptionsManager { get; }
 
+        internal IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
+
         public IEnumerable<T> GetAnnotations<T>( IDeclaration declaration )
             where T : class, IAnnotation
         {
@@ -321,14 +323,6 @@ namespace Metalama.Framework.Engine.CodeModel
         private CompilationModel( CompilationModel prototype, AspectRepository aspectRepository, string? debugLabel ) : this( prototype, false, debugLabel )
         {
             this.AspectRepository = aspectRepository;
-        }
-
-        private CompilationModel( CompilationModel prototype, IExternalAnnotationProvider? annotationProvider, string? debugLabel ) : this(
-            prototype,
-            false,
-            debugLabel )
-        {
-            this.ExternalAnnotationProvider = annotationProvider;
         }
 
         internal CompilationModel WithTransformationsAndAspectInstances(
@@ -608,7 +602,5 @@ namespace Metalama.Framework.Engine.CodeModel
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
 
         public override bool BelongsToCurrentProject => true;
-
-        internal IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
     }
 }

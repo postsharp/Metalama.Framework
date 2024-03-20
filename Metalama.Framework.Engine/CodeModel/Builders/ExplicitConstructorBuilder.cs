@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class ExplicitConstructorBuilder : ConstructorBuilder
 {
-    private IConstructorImpl _originalConstructor;
+    private readonly IConstructorImpl _originalConstructor;
 
     public override Ref<IDeclaration> ToRef() => this._originalConstructor.ToRef();
 

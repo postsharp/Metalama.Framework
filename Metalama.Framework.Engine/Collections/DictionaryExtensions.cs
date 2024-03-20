@@ -6,9 +6,7 @@ namespace System.Collections.Generic;
 
 internal static class DictionaryExtensions
 {
-#if !NET6_0_OR_GREATER
-
-    // ReSharper disable once UnusedMember.Global
+#if !NET6_0_OR_GREATER // ReSharper disable once UnusedMember.Global
     public static bool TryAdd<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, TValue value )
         where TKey : notnull
     {

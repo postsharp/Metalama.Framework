@@ -157,7 +157,7 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
                             builtAttribute.Builder.ParentAdvice,
                             targetDeclaration,
                             ((AttributeBuilder) builtAttribute.Builder).AttributeConstruction ) )
-                    : throw new AssertionFailedException( $"Unexpected attribute type '{a?.GetType()}'." ) ) );
+                    : throw new AssertionFailedException( $"Unexpected attribute type '{a.GetType()}'." ) ) );
 
     public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 

@@ -143,6 +143,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+            // ReSharper disable once RedundantLogicalConditionalExpressionOperand
             var projectHash =
                 additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks && additionalNugetSources is null
                 && RoslynApiVersion.Current == RoslynApiVersion.Highest
