@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 pipelineConfiguration.ServiceProvider,
                 new AspectLinkerInput(
                     pipelineStepsResult.LastCompilation,
-                    input.FirstCompilationModel,
+                    input.FirstCompilationModel.AssertNotNull(),
                     pipelineStepsResult.Transformations,
                     input.AspectLayers,
                     input.Diagnostics.DiagnosticSuppressions.Concat(

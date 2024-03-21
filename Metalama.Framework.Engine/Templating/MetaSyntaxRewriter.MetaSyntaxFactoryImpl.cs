@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Templating
                 => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
                     .AddArgumentListArguments(
                         SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Text ) ),
-                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Value, ObjectDisplayOptions.IncludeTypeSuffix ) ) );
+                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Value.AssertNotNull(), ObjectDisplayOptions.IncludeTypeSuffix ) ) );
 
             public ExpressionSyntax Literal( object value )
                 => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )

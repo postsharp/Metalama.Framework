@@ -19,7 +19,6 @@ namespace Metalama.Framework.Engine.SyntaxGeneration;
 internal static partial class SyntaxFactoryEx
 {
     private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithTrailingSpace = new();
-    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithLineFeed = new();
 
     public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
@@ -128,7 +127,7 @@ internal static partial class SyntaxFactoryEx
 
     public static LiteralExpressionSyntax LiteralExpression( object literal, ObjectDisplayOptions options = ObjectDisplayOptions.None )
     {
-        return (LiteralExpressionSyntax) LiteralExpressionOrNull( literal, options )
+        return (LiteralExpressionSyntax?) LiteralExpressionOrNull( literal, options )
                ?? throw new ArgumentOutOfRangeException( nameof(literal), $"'{literal}' is not a valid literal." );
     }
 

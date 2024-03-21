@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             this.SyntaxGenerationContext = syntaxGenerationContext;
 
             this._substitutionDictionary =
-                new Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>>( () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
+                new Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>?>( () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
         }
 
         internal SubstitutionContext WithInliningContext( InliningContextIdentifier inliningContextId )
