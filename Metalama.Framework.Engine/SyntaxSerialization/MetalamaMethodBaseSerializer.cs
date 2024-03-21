@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -160,7 +159,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
             invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
 
-            return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+            return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
         }
 
         // The following is the old code that was used alongside Intrinsics.

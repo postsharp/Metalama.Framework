@@ -331,12 +331,12 @@ namespace Metalama.Framework.Engine.Linking
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
                             indexerParameters
-                                .WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions.PreserveTrivia )
+                                .WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions )
                                 .WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) ) ),
                         accessorList,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -374,7 +374,7 @@ namespace Metalama.Framework.Engine.Linking
                                 .AssertNoneNull() ) ),
                     expressionBody: null,
                     semicolonToken: default(SyntaxToken) )
-                .WithTriviaFromIfNecessary( indexer, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( indexer, this.SyntaxGenerationOptions );
 
             ExpressionSyntax GetInvocationTarget()
             {

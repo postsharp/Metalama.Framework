@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ),
                     ArgumentList( SingletonSeparatedList( Argument( fieldInfoOrPropertyInfo ) ) ),
                     null )
-                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

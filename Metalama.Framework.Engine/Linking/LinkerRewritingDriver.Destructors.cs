@@ -159,11 +159,11 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null,
-                        destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions.PreserveTrivia ),
+                        destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Engine.Linking
             return
                 destructor
                     .WithBody( GetBody() )
-                    .WithTriviaFromIfNecessary( destructor, this.SyntaxGenerationOptions.PreserveTrivia );
+                    .WithTriviaFromIfNecessary( destructor, this.SyntaxGenerationOptions );
 
             BlockSyntax GetBody()
             {

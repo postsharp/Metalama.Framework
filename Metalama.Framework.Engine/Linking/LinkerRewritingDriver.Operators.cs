@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         Identifier( name ),
                         null,
@@ -168,12 +168,12 @@ namespace Metalama.Framework.Engine.Linking
                             symbol.Parameters,
                             @operator.ParameterList.WithTrailingTriviaIfNecessary(
                                 default(SyntaxTriviaList),
-                                this.SyntaxGenerationOptions.PreserveTrivia ) ),
+                                this.SyntaxGenerationOptions ) ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return @operator
                 .WithBody( GetBody() )
-                .WithTriviaFromIfNecessary( @operator, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( @operator, this.SyntaxGenerationOptions );
 
             BlockSyntax GetBody()
             {

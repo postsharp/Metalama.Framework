@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, memberExpression, IdentifierName( getParametersMethodName ) ) ),
                     BracketedArgumentList(
                         SingletonSeparatedList( Argument( LiteralExpression( SyntaxKind.NumericLiteralExpression, Literal( parameter.Index ) ) ) ) ) )
-                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
         }
 
         public CompileTimeParameterInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

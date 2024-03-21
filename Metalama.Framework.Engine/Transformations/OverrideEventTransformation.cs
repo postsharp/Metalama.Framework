@@ -98,7 +98,8 @@ namespace Metalama.Framework.Engine.Transformations
                         List<AttributeListSyntax>(),
                         modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration )
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         null!,
                         Identifier( eventName ),
                         AccessorList(

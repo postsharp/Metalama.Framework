@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+        public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
         public DisposeAction WithSerializeObject<T>( [UsedImplicitly] T o )
         {

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( node.Statements[i] is ReturnStatementSyntax { Expression: null } returnStatement )
                         {
                             returnStatementsToRemove++;
-                            preserveTrivia = preserveTrivia || SyntaxExtensions.ShouldTriviaBePreserved( returnStatement, generationContext.PreserveTrivia );
+                            preserveTrivia = preserveTrivia || SyntaxExtensions.ShouldTriviaBePreserved( returnStatement, generationContext.Options );
                         }
                         else
                         {

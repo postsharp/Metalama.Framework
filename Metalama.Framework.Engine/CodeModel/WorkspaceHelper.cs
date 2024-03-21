@@ -21,7 +21,7 @@ internal static class WorkspaceHelper
     private static Assembly LoadRoslynAssembly( string name )
     {
         var referencedWorkspaceAssemblyName =
-            typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
+            typeof(ContextualSyntaxGenerator).Assembly.GetReferencedAssemblies()
                 .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
         var requiredWorkspaceImplementationAssemblyName = new AssemblyName(

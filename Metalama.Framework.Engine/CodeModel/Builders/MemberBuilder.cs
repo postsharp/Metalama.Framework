@@ -197,8 +197,9 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                     List<AttributeListSyntax>(),
                     TokenList(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
-                        SyntaxFactoryEx.TokenWithTrailingSpace(SyntaxKind.StaticKeyword) ),
-                    context.SyntaxGenerator.Type( targetType.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
+                    context.SyntaxGenerator.Type( targetType.GetSymbol() )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Identifier( initializerName ),
                     null,

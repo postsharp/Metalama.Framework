@@ -87,10 +87,10 @@ namespace Metalama.Framework.Engine.Linking
                         type,
                         null,
                         Identifier( GetEmptyImplMemberName( symbol ) ),
-                        accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions ),
                         null,
                         null )
-                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

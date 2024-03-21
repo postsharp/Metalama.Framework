@@ -20,7 +20,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -226,7 +225,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-    public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+    public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     public new MetaApi MetaApi => base.MetaApi!;
 
@@ -368,7 +367,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 awaitResult
                                     ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
                                     : returnExpression )
-                            .WithAdditionalAnnotations( Simplifier.Annotation ),
+                            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ),
                         Token( SyntaxKind.SemicolonToken ) );
             }
         }

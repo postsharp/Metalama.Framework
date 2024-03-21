@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
@@ -15,6 +14,9 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -646,17 +648,9 @@ internal static class TemplateBindingHelper
                             $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) )
                 };
 
-                templateArguments.Add( CreateTemplateTypeArgument( parameter.Name, typeModel ) );
+                templateArguments.Add( new TemplateTypeArgumentFactory( typeModel, parameter.Name ) );
             }
         }
-    }
-
-    public static TemplateTypeArgument CreateTemplateTypeArgument( string name, IType type )
-    {
-        var syntax = OurSyntaxGenerator.CompileTime.Type( type.GetSymbol() ).AssertNotNull();
-        var syntaxForTypeOf = OurSyntaxGenerator.CompileTime.TypeOfExpression( type.GetSymbol() ).Type;
-
-        return new TemplateTypeArgument( name, type, syntax, syntaxForTypeOf );
     }
 
     private static void VerifyArguments( TemplateMember<IMethod> template, IObjectReader compileTimeArguments )

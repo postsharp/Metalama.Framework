@@ -14,7 +14,7 @@ internal abstract class TransformationContext
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-    public SyntaxGeneratorWithContext SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+    public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     /// <summary>
     /// Gets the last compilation model of the linker input.

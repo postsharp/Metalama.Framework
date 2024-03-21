@@ -26,9 +26,9 @@ namespace Metalama.Framework.Engine.Advising
                  && templateParameter.IsCompileTime )
             {
                 var index = templateParameter.TemplateIndex!.Value - this._template.TemplateMember.TemplateClassMember.Parameters.Length;
-                var value = (TemplateTypeArgument) this._template.TypeArguments[index]!;
+                var factory = (TemplateTypeArgumentFactory) this._template.TypeArguments[index]!;
 
-                return (ITypeImpl) value.Type;
+                return (ITypeImpl) factory.Type;
             }
             else
             {

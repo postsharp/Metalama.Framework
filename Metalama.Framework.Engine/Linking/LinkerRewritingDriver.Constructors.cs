@@ -31,54 +31,54 @@ internal sealed partial class LinkerRewritingDriver
             {
                 members.Add(
                     FieldDeclaration(
-                         List<AttributeListSyntax>(),
-                         TokenList( TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ), TokenWithTrailingSpace( SyntaxKind.ReadOnlyKeyword ) ),
-                         VariableDeclaration(
-                             generationContext.SyntaxGenerator
+                        List<AttributeListSyntax>(),
+                        TokenList( TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ), TokenWithTrailingSpace( SyntaxKind.ReadOnlyKeyword ) ),
+                        VariableDeclaration(
+                            generationContext.SyntaxGenerator
                                 .Type( primaryConstructorField.Type )
-                                .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.PreserveTrivia ),
-                             SingletonSeparatedList(
-                                 VariableDeclarator(
-                                     Identifier( TriviaList( ElasticSpace ), GetCleanPrimaryConstructorFieldName( primaryConstructorField ), default ) ) ) ),
-                         TokenWithTrailingLineFeed( SyntaxKind.SemicolonToken ) ) );
+                                .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.Options ),
+                            SingletonSeparatedList(
+                                VariableDeclarator(
+                                    Identifier( TriviaList( ElasticSpace ), GetCleanPrimaryConstructorFieldName( primaryConstructorField ), default ) ) ) ),
+                        TokenWithTrailingLineFeed( SyntaxKind.SemicolonToken ) ) );
             }
 
             foreach ( var primaryConstructorProperty in this.LateTransformationRegistry.GetPrimaryConstructorProperties( symbol.ContainingType ) )
             {
                 members.Add(
                     PropertyDeclaration(
-                         List<AttributeListSyntax>(),
-                         TokenList( TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                         generationContext.SyntaxGenerator.Type( primaryConstructorProperty.Type ),
-                         null,
-                         Identifier( TriviaList( ElasticSpace ), primaryConstructorProperty.Name, default ),
-                         AccessorList(
-                             List(
-                                 new[]
-                                 {
-                                     AccessorDeclaration(
-                                         SyntaxKind.GetAccessorDeclaration, 
-                                         List<AttributeListSyntax>(), 
-                                         TokenList(), 
-                                         Token(SyntaxKind.GetKeyword),
-                                         null, 
-                                         null, 
-                                         Token( SyntaxKind.SemicolonToken) ),
-                                     AccessorDeclaration(
-                                         SyntaxKind.InitAccessorDeclaration,
-                                         List<AttributeListSyntax>(),
-                                         TokenList(),
-                                         Token(SyntaxKind.InitKeyword),
-                                         null,
-                                         null,
-                                         Token( SyntaxKind.SemicolonToken) )
-                                 } ) ),
-                         null,
-                         null,
-                         default ) );
+                        List<AttributeListSyntax>(),
+                        TokenList( TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                        generationContext.SyntaxGenerator.Type( primaryConstructorProperty.Type ),
+                        null,
+                        Identifier( TriviaList( ElasticSpace ), primaryConstructorProperty.Name, default ),
+                        AccessorList(
+                            List(
+                                new[]
+                                {
+                                    AccessorDeclaration(
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        Token( SyntaxKind.GetKeyword ),
+                                        null,
+                                        null,
+                                        Token( SyntaxKind.SemicolonToken ) ),
+                                    AccessorDeclaration(
+                                        SyntaxKind.InitAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        Token( SyntaxKind.InitKeyword ),
+                                        null,
+                                        null,
+                                        Token( SyntaxKind.SemicolonToken ) )
+                                } ) ),
+                        null,
+                        null,
+                        default ) );
             }
 
-            if ( constructorDeclaration.Parent is RecordDeclarationSyntax { ParameterList.Parameters.Count: >0 } recordDeclaration )
+            if ( constructorDeclaration.Parent is RecordDeclarationSyntax { ParameterList.Parameters.Count: > 0 } recordDeclaration )
             {
                 members.Add(
                     MethodDeclaration(
@@ -160,14 +160,15 @@ internal sealed partial class LinkerRewritingDriver
         ConstructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
         {
             var linkedBody =
-                this.InjectionRegistry.IsOverrideTarget( symbol ) || this.InjectionRegistry.IsOverride( symbol ) || this.AnalysisRegistry.HasAnySubstitutions( symbol )
-                ? this.GetSubstitutedBody(
-                    symbol.ToSemantic( semanticKind ),
-                    new SubstitutionContext(
-                        this,
-                        generationContext,
-                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) )
-                : null;
+                this.InjectionRegistry.IsOverrideTarget( symbol ) || this.InjectionRegistry.IsOverride( symbol )
+                                                                  || this.AnalysisRegistry.HasAnySubstitutions( symbol )
+                    ? this.GetSubstitutedBody(
+                        symbol.ToSemantic( semanticKind ),
+                        new SubstitutionContext(
+                            this,
+                            generationContext,
+                            new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) )
+                    : null;
 
             var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                 constructorDeclaration switch
@@ -232,16 +233,18 @@ internal sealed partial class LinkerRewritingDriver
                         case IPropertySymbol property:
                             var primaryDeclaration = property.GetPrimaryDeclaration().AssertNotNull();
 
-                            switch (primaryDeclaration)
+                            switch ( primaryDeclaration )
                             {
                                 case PropertyDeclarationSyntax propertyDeclaration:
                                     name = propertyDeclaration.Identifier.ValueText;
                                     expression = propertyDeclaration.Initializer.AssertNotNull().Value;
+
                                     break;
 
                                 case ParameterSyntax parameterDeclaration:
                                     name = parameterDeclaration.Identifier.ValueText;
                                     expression = IdentifierName( parameterDeclaration.Identifier.ValueText );
+
                                     break;
 
                                 default:
@@ -271,68 +274,68 @@ internal sealed partial class LinkerRewritingDriver
                     {
                         linkedBody =
                             Block(
-                                Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                                linkedBody )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    linkedBody )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
-                    else if (constructorDeclaration.ExpressionBody != null)
+                    else if ( constructorDeclaration.ExpressionBody != null )
                     {
                         linkedBody =
                             Block(
-                                Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                                ExpressionStatement( constructorDeclaration.ExpressionBody.Expression ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    ExpressionStatement( constructorDeclaration.ExpressionBody.Expression ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
                         linkedBody =
                             Block(
-                                Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                                constructorDeclaration.Body.AssertNotNull().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    Block( primaryConstructorFieldAssignments ).WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                                    constructorDeclaration.Body.AssertNotNull().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                 }
             }
 
             var ret = constructorDeclaration.PartialUpdate(
                 attributeLists:
-                    isAuxiliaryForPrimaryConstructor
+                isAuxiliaryForPrimaryConstructor
                     ? GetPrimaryConstructorAttributes( constructorDeclaration )
                     : constructorDeclaration.AttributeLists,
                 modifiers:
-                    isAuxiliaryForPrimaryConstructor
-                    ? TokenList( 
-                        constructorDeclaration.Modifiers.SelectAsArray( 
+                isAuxiliaryForPrimaryConstructor
+                    ? TokenList(
+                        constructorDeclaration.Modifiers.SelectAsArray(
                             x => x.IsKind( SyntaxKind.PrivateKeyword ) ? Token( x.LeadingTrivia, SyntaxKind.PublicKeyword, x.TrailingTrivia ) : x ) )
                     : constructorDeclaration.Modifiers,
                 expressionBody:
-                    linkedBody != null
+                linkedBody != null
                     ? null
                     : constructorDeclaration.ExpressionBody,
                 body:
-                    linkedBody != null
+                linkedBody != null
                     ? Block(
-                        Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
-                        SingletonList<StatementSyntax>( linkedBody ),
-                        Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
+                            Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                            SingletonList<StatementSyntax>( linkedBody ),
+                            Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
                     : constructorDeclaration.Body,
                 parameterList:
-                    isAuxiliaryForPrimaryConstructor
+                isAuxiliaryForPrimaryConstructor
                     ? constructorDeclaration.ParameterList.WithParameters(
                         constructorDeclaration.ParameterList.Parameters.RemoveAt( constructorDeclaration.ParameterList.Parameters.Count - 1 ) )
                     : constructorDeclaration.ParameterList,
                 initializer:
-                    isAuxiliaryForPrimaryConstructor
+                isAuxiliaryForPrimaryConstructor
                     ? this.LateTransformationRegistry.GetPrimaryConstructorBaseArgumentList( symbol ) switch
                     {
                         { } arguments => ConstructorInitializer( SyntaxKind.BaseConstructorInitializer, arguments ),
-                        null => default,
+                        null => default
                     }
                     : constructorDeclaration.Initializer,
                 semicolonToken:
-                    linkedBody != null
+                linkedBody != null
                     ? default
                     : constructorDeclaration.SemicolonToken );
 
@@ -340,18 +343,18 @@ internal sealed partial class LinkerRewritingDriver
         }
     }
 
-    private static SyntaxList<AttributeListSyntax> GetPrimaryConstructorAttributes(ConstructorDeclarationSyntax constructorDeclaration)
+    private static SyntaxList<AttributeListSyntax> GetPrimaryConstructorAttributes( ConstructorDeclarationSyntax constructorDeclaration )
     {
         var typeDeclaration = (TypeDeclarationSyntax) constructorDeclaration.Parent.AssertNotNull();
 
         return
             List(
                 typeDeclaration.AttributeLists
-                .Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) == true )
-                .Select( al => al.WithTarget( null ) ) );
+                    .Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) == true )
+                    .Select( al => al.WithTarget( null ) ) );
     }
 
-    private static string GetCleanPrimaryConstructorFieldName(IFieldSymbol field)
+    private static string GetCleanPrimaryConstructorFieldName( IFieldSymbol field )
     {
         return field.Name[1..^2];
     }

@@ -290,7 +290,7 @@ namespace Metalama.Framework.Engine.Linking
                     attributes,
                     TokenList( modifiers ),
                     VariableDeclaration(
-                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
@@ -299,7 +299,7 @@ namespace Metalama.Framework.Engine.Linking
                 .WithTriviaIfNecessary(
                     new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
                     new SyntaxTriviaList( ElasticLineFeed ),
-                    this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    this.SyntaxGenerationOptions )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -488,13 +488,13 @@ namespace Metalama.Framework.Engine.Linking
                         propertyType,
                         null,
                         Identifier( name ),
-                        cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions ),
                         expressionBody,
                         initializer.WithSourceCodeAnnotation(),
                         semicolonToken: expressionBody != null || initializer != null
                             ? Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) )
                             : default )
-                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -535,7 +535,7 @@ namespace Metalama.Framework.Engine.Linking
                     expressionBody: null,
                     initializer: null,
                     semicolonToken: default(SyntaxToken) )
-                .WithTriviaFromIfNecessary( property, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( property, this.SyntaxGenerationOptions );
 
             ExpressionSyntax GetInvocationTarget()
             {

@@ -2,9 +2,8 @@
 
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -19,5 +18,5 @@ internal sealed class CompileTimeMethodInfoSerializer : MetalamaMethodBaseSerial
                 SyntaxFactoryEx.SafeCastExpression(
                     serializationContext.GetTypeSyntax( typeof(MethodInfo) ),
                     SerializeMethodBase( obj, serializationContext ) ) )
-            .WithAdditionalAnnotations( Simplifier.Annotation );
+            .WithSimplifierAnnotationIfNecessary( serializationContext.SyntaxGenerationContext );
 }

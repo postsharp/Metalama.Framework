@@ -277,7 +277,7 @@ internal sealed partial class LinkerInjectionStep
             return MethodDeclaration(
                 List<AttributeListSyntax>(),
                 modifiers,
-                returnType.WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                returnType.WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ),
                 null,
                 Identifier( this._injectionNameProvider.GetOverrideName( method.DeclaringType, aspectLayerId, method ) ),
                 syntaxGenerationContext.SyntaxGenerator.TypeParameterList( method, compilationModel ),
@@ -426,7 +426,7 @@ internal sealed partial class LinkerInjectionStep
                     List<AttributeListSyntax>(),
                     modifiers,
                     syntaxGenerationContext.SyntaxGenerator.PropertyType( property )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ),
                     null,
                     Identifier( this._injectionNameProvider.GetOverrideName( property.DeclaringType, aspectLayerId, property ) ),
                     AccessorList(
@@ -539,14 +539,14 @@ internal sealed partial class LinkerInjectionStep
                     List<AttributeListSyntax>(),
                     modifiers,
                     syntaxGenerationContext.SyntaxGenerator.IndexerType( indexer )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ),
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(
                         this._finalCompilationModel,
                         syntaxGenerationContext,
                         indexer,
-                        this._injectionNameProvider.GetAuxiliaryType( advice.Aspect, indexer ) ),
+                        this._injectionNameProvider.GetAuxiliaryType( advice.Aspect, indexer, syntaxGenerationContext ) ),
                     AccessorList(
                         List(
                             new[]

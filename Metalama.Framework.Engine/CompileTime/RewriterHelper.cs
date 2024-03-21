@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -15,20 +16,20 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class RewriterHelper
 {
+    private readonly ClassifyingCompilationContext _runTimeCompilationContext;
     private readonly Func<SyntaxNode, SyntaxNode> _rewriteThrowNotSupported;
-
-    public ISymbolClassifier SymbolClassifier { get; }
 
     public RewriterHelper(
         ClassifyingCompilationContext runTimeCompilationContext,
         Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
     {
+        this._runTimeCompilationContext = runTimeCompilationContext;
         this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
-        this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
-        this.SemanticModelProvider = runTimeCompilationContext.SemanticModelProvider;
     }
 
-    public SemanticModelProvider SemanticModelProvider { get; }
+    public SemanticModelProvider SemanticModelProvider => this._runTimeCompilationContext.SemanticModelProvider;
+
+    public ISymbolClassifier SymbolClassifier => this._runTimeCompilationContext.SymbolClassifier;
 
     private T RewriteThrowNotSupported<T>( T node )
         where T : SyntaxNode
@@ -135,7 +136,7 @@ internal sealed class RewriterHelper
                                 ? null
                                 : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                         .WithSemicolonToken( isIterator ? default : Token( SyntaxKind.SemicolonToken ) )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( method.SyntaxTree ) )
                         .WithLeadingTrivia( method.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ),
                     suppressedWarnings.ToArray() ) );
@@ -156,7 +157,7 @@ internal sealed class RewriterHelper
                 return this.RewriteThrowNotSupported(
                     property
                         .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( property.SyntaxTree ) )
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -174,7 +175,7 @@ internal sealed class RewriterHelper
                                             .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                             .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
                         .WithInitializer( null )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( property.SyntaxTree ) )
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -192,7 +193,7 @@ internal sealed class RewriterHelper
                                     .WithBody( null )
                                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                     .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                .NormalizeWhitespace()
+                .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( property.SyntaxTree ) )
                 .WithLeadingTrivia( indexer.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
                 */
@@ -212,7 +213,7 @@ internal sealed class RewriterHelper
                                                     .WithBody( null )
                                                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                                     .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( @event.SyntaxTree ) )
                         .WithLeadingTrivia( @event.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 

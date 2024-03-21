@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             return
                                 SyntaxFactoryEx.FormattedBlock(
                                         CreateAssignmentStatement( returnStatement.Expression )
-                                            .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.PreserveTrivia )
+                                            .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
                                             .WithOriginalLocationAnnotationFrom( returnStatement ),
                                         CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         {
                             var assignmentStatement =
                                 CreateAssignmentStatement( returnStatement.Expression )
-                                    .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.PreserveTrivia )
+                                    .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
                                     .WithOriginalLocationAnnotationFrom( returnStatement );
 
                             if ( this._replaceByBreakIfOmitted )
@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 identifier,
                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                 expression ),
-                            Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) )
+                            Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
 
@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.GotoKeyword ),
                             default,
                             IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
-                            Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) ) )
+                            Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
         }

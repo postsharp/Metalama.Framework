@@ -23,39 +23,38 @@ namespace Metalama.Framework.Engine.Linking
                         AspectReferenceOrder.Previous,
                         flags: AspectReferenceFlags.Inlineable ) );
 
-        public override ExpressionSyntax GetStaticConstructorReference( AspectLayerId aspectLayer)
-            =>
-                InvocationExpression(
-                    LinkerInjectionHelperProvider.GetStaticConstructorMemberExpression()
-                        .WithAspectReferenceAnnotation(
-                            aspectLayer,
-                            AspectReferenceOrder.Previous,
-                            flags: AspectReferenceFlags.Inlineable ),
-                    ArgumentList() );
+        public override ExpressionSyntax GetStaticConstructorReference( AspectLayerId aspectLayer )
+            => InvocationExpression(
+                LinkerInjectionHelperProvider.GetStaticConstructorMemberExpression()
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Previous,
+                        flags: AspectReferenceFlags.Inlineable ),
+                ArgumentList() );
 
-        public override ExpressionSyntax GetConstructorReference( AspectLayerId aspectLayer, IConstructor overriddenConstructor, OurSyntaxGenerator syntaxGenerator )
-            => 
-                InvocationExpression( 
-                    LinkerInjectionHelperProvider.GetConstructorMemberExpression()
-                        .WithAspectReferenceAnnotation(
-                            aspectLayer,
-                            AspectReferenceOrder.Previous,
-                            flags: AspectReferenceFlags.Inlineable ),
-                    ArgumentList(
-                        SingletonSeparatedList(
-                            Argument(
-                                ObjectCreationExpression(
-                                    syntaxGenerator.Type( overriddenConstructor.DeclaringType.GetSymbol() ),
-                                    ArgumentList(
-                                        SeparatedList(
-                                            overriddenConstructor.Parameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ),
-                                    null ) ) ) ) );
+        public override ExpressionSyntax GetConstructorReference(
+            AspectLayerId aspectLayer,
+            IConstructor overriddenConstructor,
+            ContextualSyntaxGenerator syntaxGenerator )
+            => InvocationExpression(
+                LinkerInjectionHelperProvider.GetConstructorMemberExpression()
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Previous,
+                        flags: AspectReferenceFlags.Inlineable ),
+                ArgumentList(
+                    SingletonSeparatedList(
+                        Argument(
+                            ObjectCreationExpression(
+                                syntaxGenerator.Type( overriddenConstructor.DeclaringType.GetSymbol() ),
+                                ArgumentList( SeparatedList( overriddenConstructor.Parameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ),
+                                null ) ) ) ) );
 
         public override ExpressionSyntax GetPropertyReference(
             AspectLayerId aspectLayer,
             IProperty targetProperty,
             AspectReferenceTargetKind targetKind,
-            OurSyntaxGenerator syntaxGenerator )
+            ContextualSyntaxGenerator syntaxGenerator )
         {
             switch (targetKind, targetProperty)
             {
@@ -91,7 +90,7 @@ namespace Metalama.Framework.Engine.Linking
             AspectLayerId aspectLayer,
             IIndexer targetIndexer,
             AspectReferenceTargetKind targetKind,
-            OurSyntaxGenerator syntaxGenerator )
+            ContextualSyntaxGenerator syntaxGenerator )
         {
             return
                 ElementAccessExpression(
@@ -107,7 +106,7 @@ namespace Metalama.Framework.Engine.Linking
                         AspectReferenceFlags.Inlineable );
         }
 
-        public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, ContextualSyntaxGenerator syntaxGenerator )
         {
             return
                 InvocationExpression(
@@ -131,7 +130,7 @@ namespace Metalama.Framework.Engine.Linking
                     ArgumentList( SingletonSeparatedList( Argument( null, default, initializerExpression ) ) ) );
         }
 
-        private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer targetIndexer, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer targetIndexer, ContextualSyntaxGenerator syntaxGenerator )
         {
             ExpressionSyntax expression;
 
@@ -153,7 +152,7 @@ namespace Metalama.Framework.Engine.Linking
             return expression;
         }
 
-        private static ExpressionSyntax CreateMemberAccessExpression( IMember targetDeclaration, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateMemberAccessExpression( IMember targetDeclaration, ContextualSyntaxGenerator syntaxGenerator )
         {
             ExpressionSyntax expression;
 

@@ -16,14 +16,13 @@ namespace Metalama.Framework.Engine.Linking
     {
         private sealed class CleanupBodyRewriter( SyntaxGenerationContext generationContext ) : SafeSyntaxRewriter
         {
-
             // TODO: Optimize (this reallocates multiple times).
 
             public override SyntaxNode VisitBlock( BlockSyntax node )
             {
                 this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
-                if ( overflowingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) )
+                if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     if ( finalStatements.Count > 0 )
@@ -53,7 +52,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
-                if ( overflowingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) )
+                if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     if ( finalStatements.Count > 0 )
@@ -161,7 +160,7 @@ namespace Metalama.Framework.Engine.Linking
                         var leadingTrivia = statement.GetLeadingTrivia();
                         var trailingTrivia = statement.GetTrailingTrivia();
 
-                        if ( leadingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) || trailingTrivia.ShouldBePreserved( generationContext.PreserveTrivia ) )
+                        if ( leadingTrivia.ShouldBePreserved( generationContext.Options ) || trailingTrivia.ShouldBePreserved( generationContext.Options ) )
                         {
                             // This is statement that carries only trivias and should be removed, trivias added to the previous and next statement.
                             if ( finalStatements.Count == 0 )
@@ -220,8 +219,8 @@ namespace Metalama.Framework.Engine.Linking
                     // Index of the last statement.
                     var lastStatementIndex = statements.Count - 1;
 
-                    if ( SyntaxExtensions.ShouldTriviaBePreserved( block.OpenBraceToken, generationContext.PreserveTrivia )
-                        || SyntaxExtensions.ShouldTriviaBePreserved( block.CloseBraceToken, generationContext.PreserveTrivia ) )
+                    if ( SyntaxExtensions.ShouldTriviaBePreserved( block.OpenBraceToken, generationContext.Options )
+                         || SyntaxExtensions.ShouldTriviaBePreserved( block.CloseBraceToken, generationContext.Options ) )
                     {
                         var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
                         var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
@@ -238,10 +237,12 @@ namespace Metalama.Framework.Engine.Linking
                         {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                             statements[firstStatementIndex] =
-                                statements[firstStatementIndex].WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
+                                statements[firstStatementIndex]
+                                    .WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
 
                             statements[lastStatementIndex] =
-                                statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
+                                statements[lastStatementIndex]
+                                    .WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
 #pragma warning restore LAMA0832
                         }
                     }

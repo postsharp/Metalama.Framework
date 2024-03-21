@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) )
                             } ) ),
                     null )
-                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
         }
 
         public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

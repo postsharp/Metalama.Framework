@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal partial class OurSyntaxGenerator
+    internal partial class ContextualSyntaxGenerator
     {
         private sealed class RemoveTypeArgumentsRewriter : SafeSyntaxRewriter
         {

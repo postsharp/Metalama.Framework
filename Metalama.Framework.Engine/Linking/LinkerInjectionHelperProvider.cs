@@ -98,12 +98,11 @@ namespace Metalama.Framework.Engine.Linking
                     IdentifierName( HelperTypeName ),
                     GenericName(
                         Identifier( _eventFieldInitializationExpressionMemberName ),
-                        TypeArgumentList(
-                            SingletonSeparatedList( eventFieldType ) ) ) );
+                        TypeArgumentList( SingletonSeparatedList( eventFieldType ) ) ) );
         }
 
         public static ExpressionSyntax GetOperatorMemberExpression(
-            OurSyntaxGenerator syntaxGenerator,
+            ContextualSyntaxGenerator syntaxGenerator,
             OperatorKind operatorKind,
             IType returnType,
             IEnumerable<IType> parameterTypes )
@@ -125,17 +124,22 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning restore CA1822 // Mark members as static
             => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
 
-        public TypeSyntax GetOverriddenByType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
-            => this.GetNumberedHelperType( syntaxGenerator, _overriddenByTypeName, "override", aspectType, ordinal );
+        public TypeSyntax GetOverriddenByType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
+            => this.GetNumberedHelperType( context, _overriddenByTypeName, "override", aspectType, ordinal );
 
-        public TypeSyntax GetAuxiliaryType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
-            => this.GetNumberedHelperType( syntaxGenerator, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
+        public TypeSyntax GetAuxiliaryType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
+            => this.GetNumberedHelperType( context, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
 
-        public TypeSyntax GetNumberedHelperType( OurSyntaxGenerator syntaxGenerator, string baseTypeName, string description, IAspectClass aspectType, int ordinal )
+        public TypeSyntax GetNumberedHelperType(
+            SyntaxGenerationContext context,
+            string baseTypeName,
+            string description,
+            IAspectClass aspectType,
+            int ordinal )
         {
-            var aspectTypeSyntax = syntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
+            var aspectTypeSyntax = context.SyntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
 
-            switch ( ordinal)
+            switch ( ordinal )
             {
                 case 0:
                     return
@@ -152,16 +156,11 @@ namespace Metalama.Framework.Engine.Linking
                             GenericName(
                                 Identifier( baseTypeName ),
                                 TypeArgumentList(
-                                    SeparatedList(
-                                        new[]
-                                        {
-                                            aspectTypeSyntax,
-                                            GetOrdinalTypeArgument(aspectType.ShortName, description, ordinal)
-                                        } ) ) ) );
+                                    SeparatedList( new[] { aspectTypeSyntax, GetOrdinalTypeArgument( aspectType.ShortName, description, ordinal ) } ) ) ) );
             }
         }
 
-        private static TypeSyntax GetOrdinalTypeArgument(string aspectName, string kind, int ordinal)
+        private static TypeSyntax GetOrdinalTypeArgument( string aspectName, string kind, int ordinal )
         {
             switch ( ordinal )
             {
@@ -194,7 +193,8 @@ namespace Metalama.Framework.Engine.Linking
 
                 default:
                     // NOTE: Lets have a beer when someone really hits this limit (without having a bug in the aspect).
-                    throw new AssertionFailedException( $"More than 100 {kind} declarations created for a single member by aspect {aspectName} (aspect authoring error)." );
+                    throw new AssertionFailedException(
+                        $"More than 100 {kind} declarations created for a single member by aspect {aspectName} (aspect authoring error)." );
             }
         }
 

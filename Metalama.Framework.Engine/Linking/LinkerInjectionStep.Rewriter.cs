@@ -58,10 +58,6 @@ internal sealed partial class LinkerInjectionStep
 
         private CompilationContext CompilationContext => this._parent._compilationContext;
 
-        private bool PreserveTrivia => this._parent._syntaxGenerationOptions.PreserveTrivia;
-
-        private bool NormalizeWhitespace => this._parent._syntaxGenerationOptions.NormalizeWhitespace;
-
         private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
 
         public override bool VisitIntoStructuredTrivia => true;
@@ -311,7 +307,7 @@ internal sealed partial class LinkerInjectionStep
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, syntaxGenerationContext.NormalizeWhitespace )
+                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, syntaxGenerationContext.Options )
                         .WithAdditionalAnnotations(
                             attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
@@ -324,7 +320,7 @@ internal sealed partial class LinkerInjectionStep
                     {
                         newList = newList.WithLeadingTriviaIfNecessary(
                             newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ),
-                            syntaxGenerationContext.PreserveTrivia );
+                            syntaxGenerationContext.Options );
 
                         outputTrivia.Clear();
                     }
@@ -343,7 +339,7 @@ internal sealed partial class LinkerInjectionStep
                         outputAttributeLists[0]
                             .WithLeadingTriviaIfNecessary(
                                 outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
-                                syntaxGenerationContext.PreserveTrivia );
+                                syntaxGenerationContext.Options );
                 }
                 else
                 {
@@ -357,7 +353,7 @@ internal sealed partial class LinkerInjectionStep
         {
             if ( attributesTuple is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     return (T) node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -494,11 +490,11 @@ internal sealed partial class LinkerInjectionStep
                             .WithIdentifier(
                                 node.Identifier.WithTrailingTriviaIfNecessary(
                                     default,
-                                    syntaxGenerationContext.PreserveTrivia || node.Identifier.ContainsDirectives ) )
+                                    syntaxGenerationContext.Options.PreserveTrivia || node.Identifier.ContainsDirectives ) )
                             .WithBaseList(
                                 BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                            .WithTrailingTriviaIfNecessary( node.Identifier.TrailingTrivia, syntaxGenerationContext.PreserveTrivia );
+                            .WithTrailingTriviaIfNecessary( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
                     }
                     else
                     {
@@ -583,7 +579,7 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                     injectedNode = injectedNode
-                        .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
+                        .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.Options )
                         .WithGeneratedCodeAnnotation(
                             injectedMember.Transformation?.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
@@ -962,7 +958,7 @@ internal sealed partial class LinkerInjectionStep
                             existingParameters.Parameters.Count - 1,
                             newParameters.Select(
                                 x => x.ToSyntax( syntaxGenerationContext )
-                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
                 else
                 {
@@ -970,7 +966,7 @@ internal sealed partial class LinkerInjectionStep
                         existingParameters.Parameters.AddRange(
                             newParameters.Select(
                                 x => x.ToSyntax( syntaxGenerationContext )
-                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
             }
         }
@@ -984,7 +980,7 @@ internal sealed partial class LinkerInjectionStep
                 return initializerSyntax;
             }
 
-            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this.NormalizeWhitespace ) );
+            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ) );
 
             if ( initializerSyntax == null )
             {
@@ -1178,7 +1174,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -1203,7 +1199,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -1310,7 +1306,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );

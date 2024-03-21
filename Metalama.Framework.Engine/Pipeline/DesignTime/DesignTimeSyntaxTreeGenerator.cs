@@ -36,13 +36,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
+            var context = initialCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
             var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
             var useNullability = partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
             var lexicalScopeFactory = new LexicalScopeFactory( finalCompilationModel );
             var injectionHelperProvider = new LinkerInjectionHelperProvider( finalCompilationModel, useNullability );
-            var injectionNameProvider = new LinkerInjectionNameProvider( finalCompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+            var injectionNameProvider = new LinkerInjectionNameProvider( finalCompilationModel, injectionHelperProvider );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.

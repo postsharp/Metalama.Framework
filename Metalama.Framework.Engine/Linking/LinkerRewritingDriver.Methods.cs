@@ -266,18 +266,18 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.NormalizeWhitespace ),
+                        returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.Options ),
                         null,
                         Identifier( name ),
                         method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
-                            method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.PreserveTrivia ) ),
+                            method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.Options ) ),
                         constraints,
                         body,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, generationContext.NormalizeWhitespace )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, generationContext.Options )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -295,7 +295,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return method
                 .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                .WithTriviaFromIfNecessary( method, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( method, this.SyntaxGenerationOptions );
 
             BlockSyntax GetBody()
             {

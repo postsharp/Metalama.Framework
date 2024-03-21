@@ -30,7 +30,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public ICompilation Compilation => this._compilation;
 
-    private OurSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
+    private ContextualSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
     protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
     {

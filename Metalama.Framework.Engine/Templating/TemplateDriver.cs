@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -37,7 +38,16 @@ namespace Metalama.Framework.Engine.Templating
             // Add the first template argument.
             var allArguments = new object?[templateArguments.Length + 1];
             allArguments[0] = templateExpansionContext.SyntaxFactory;
-            templateArguments.CopyTo( allArguments, 1 );
+
+            // Add other arguments.
+            for ( var i = 0; i < templateArguments.Length; i++ )
+            {
+                allArguments[i + 1] = templateArguments[i] switch
+                {
+                    TemplateTypeArgumentFactory factory => factory.Create( templateExpansionContext.SyntaxGenerationContext ),
+                    _ => templateArguments[i]
+                };
+            }
 
             if ( !this._userCodeInvoker.TryInvoke(
                     () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateProvider.Object, allArguments ).AssertNotNull(),
@@ -57,7 +67,7 @@ namespace Metalama.Framework.Engine.Templating
             // Prevent that by adding `yield break;` at the end of the method body.
             block = templateExpansionContext.AddYieldBreakIfNecessary( block );
 
-            block = block.NormalizeWhitespaceIfNecessary( templateExpansionContext.SyntaxGenerationContext.NormalizeWhitespace );
+            block = block.NormalizeWhitespaceIfNecessary( templateExpansionContext.SyntaxGenerationContext );
 
             // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
             var aspectClass = templateExpansionContext.MetaApi.AspectInstance?.AspectClass;

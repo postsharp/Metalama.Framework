@@ -16,7 +16,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -318,7 +317,7 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxKind.SimpleMemberAccessExpression,
                         expression,
                         SyntaxFactory.IdentifierName( member ) )
-                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                    .WithSimplifierAnnotationIfNecessary( this._syntaxSerializationContext.SyntaxGenerationContext ),
                 this._syntaxSerializationContext.SyntaxGenerationContext );
         }
 
@@ -539,6 +538,9 @@ namespace Metalama.Framework.Engine.Templating
             };
 
         public TemplateTypeArgument TemplateTypeArgument( string name, Type type )
-            => TemplateBindingHelper.CreateTemplateTypeArgument( name, TypeFactory.Implementation.GetTypeByReflectionType( type ) );
+            => TemplateTypeArgumentFactory.Create(
+                TypeFactory.Implementation.GetTypeByReflectionType( type ),
+                name,
+                this._templateExpansionContext.SyntaxGenerationContext );
     }
 }

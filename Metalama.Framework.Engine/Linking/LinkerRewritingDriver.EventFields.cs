@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( this.GetEventBackingField( eventFieldDeclaration, symbol ) );
+                    members.Add( this.GetEventBackingField( eventFieldDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -42,7 +43,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && this.ShouldGenerateEmptyMember( symbol ) )
                 {
-                    members.Add( this.GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
+                    members.Add( this.GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol, generationContext ) );
                 }
 
                 return members;
@@ -62,7 +63,8 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add(
                         this.GetEmptyImplEventField(
                             eventFieldDeclaration.Declaration.Type,
-                            symbol ) );
+                            symbol,
+                            generationContext ) );
                 }
 
                 if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
@@ -97,7 +99,7 @@ namespace Metalama.Framework.Engine.Linking
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         Identifier( symbol.Name ),
                         AccessorList(
@@ -140,7 +142,10 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private EventFieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField(
+            EventFieldDeclarationSyntax eventFieldDeclaration,
+            IEventSymbol symbol,
+            SyntaxGenerationContext context )
         {
             var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
 
@@ -148,10 +153,11 @@ namespace Metalama.Framework.Engine.Linking
                 this.GetEventBackingField(
                     eventFieldDeclaration.Declaration.Type,
                     declarator.Initializer,
-                    symbol );
+                    symbol,
+                    context );
         }
 
-        private MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol, SyntaxGenerationContext context )
         {
             var accessorList =
                 AccessorList(
@@ -162,7 +168,7 @@ namespace Metalama.Framework.Engine.Linking
                             AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
                         } ) );
 
-            return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ), context );
         }
 
         private EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
@@ -174,7 +180,7 @@ namespace Metalama.Framework.Engine.Linking
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         eventField.Declaration.Variables.Single().Identifier,
                         AccessorList(
@@ -199,7 +205,7 @@ namespace Metalama.Framework.Engine.Linking
                                                     IdentifierName( "value" ) ) ) ) )
                                 }.WhereNotNull() ) ),
                         default )
-                    .WithTriviaFromIfNecessary( eventField, this.SyntaxGenerationOptions.PreserveTrivia );
+                    .WithTriviaFromIfNecessary( eventField, this.SyntaxGenerationOptions );
 
             ExpressionSyntax GetInvocationTarget()
             {

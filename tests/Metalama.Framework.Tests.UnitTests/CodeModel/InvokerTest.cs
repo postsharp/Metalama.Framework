@@ -39,15 +39,15 @@ class TargetCode
 
 }";
 
-            var generator = OurSyntaxGenerator.Default;
-
+            
             using var testContext = this.CreateTestContext();
             var serviceProvider = testContext.ServiceProvider;
 
             var compilation = testContext.CreateCompilationModel( code );
-
+            
             var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Proof );
             var syntaxGenerationContext = syntaxSerializationContext.SyntaxGenerationContext;
+            var generator = syntaxGenerationContext.SyntaxGenerator;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxSerializationContext,

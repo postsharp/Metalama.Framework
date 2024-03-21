@@ -91,7 +91,7 @@ namespace Metalama.Compiler
     private readonly ClassifyingCompilationContext _compilationContext;
     private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-    private RunTimeAssemblyRewriter( in ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext )
+    private RunTimeAssemblyRewriter( in ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext, SyntaxTree syntaxTree )
     {
         this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
         this._compilationContext = compilationContext;
@@ -111,7 +111,7 @@ namespace Metalama.Compiler
 
         var transformedCompilation =
             await compilation.RewriteSyntaxTreesAsync(
-                _ => new RunTimeAssemblyRewriter( serviceProvider, compilationContext ),
+                oldRoot => new RunTimeAssemblyRewriter( serviceProvider, compilationContext, oldRoot.SyntaxTree ),
                 serviceProvider );
 
         if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
@@ -152,13 +152,15 @@ namespace Metalama.Compiler
 
         if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
         {
+            var syntaxGenerationContext = this._compilationContext.CompilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, node );
+
             leadingTrivia = leadingTrivia.InsertAfterFirstNonWhitespaceTrivia(
                 Trivia(
                         PragmaWarningDirectiveTrivia(
                                 Token( SyntaxKind.DisableKeyword ),
                                 true )
                             .WithErrorCodes( _suppressedWarnings )
-                            .NormalizeWhitespace()
+                            .NormalizeWhitespace( eol: syntaxGenerationContext.EndOfLine )
                             .WithLeadingTrivia( ElasticLineFeed )
                             .WithTrailingTrivia( ElasticLineFeed ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
@@ -169,7 +171,7 @@ namespace Metalama.Compiler
                                 Token( SyntaxKind.RestoreKeyword ),
                                 true )
                             .WithErrorCodes( _suppressedWarnings )
-                            .NormalizeWhitespace()
+                            .NormalizeWhitespace( eol: syntaxGenerationContext.EndOfLine )
                             .WithLeadingTrivia( ElasticLineFeed )
                             .WithTrailingTrivia( ElasticLineFeed ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );

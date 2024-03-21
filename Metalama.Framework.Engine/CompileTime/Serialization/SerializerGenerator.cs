@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
@@ -381,7 +380,8 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     var baseReflectionType = referencedProject.GetType( targetType.BaseType.GetFullName().AssertNotNull() );
                     var baseTypeSymbol = (INamedTypeSymbol) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseReflectionType );
 
-                    if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, baseTypeSymbol, out baseSerializer, out ambiguous ) && ambiguous )
+                    if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, baseTypeSymbol, out baseSerializer, out ambiguous )
+                         && ambiguous )
                     {
                         this._diagnosticAdder.Report(
                             SerializationDiagnosticDescriptors.AmbiguousBaseSerializer.CreateRoslynDiagnostic(

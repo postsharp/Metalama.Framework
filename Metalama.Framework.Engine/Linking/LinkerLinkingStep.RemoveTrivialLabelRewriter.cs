@@ -12,7 +12,8 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed partial class LinkerLinkingStep
     {
         // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
-        private sealed class RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter, SyntaxGenerationContext generationContext ) : SafeSyntaxRewriter
+        private sealed class RemoveTrivialLabelRewriter( IReadOnlyDictionary<string, int> observedLabelCounter, SyntaxGenerationContext generationContext )
+            : SafeSyntaxRewriter
         {
             public override SyntaxNode VisitBlock( BlockSyntax node )
             {
@@ -47,7 +48,8 @@ namespace Metalama.Framework.Engine.Linking
                          && observedLabelCounter.TryGetValue( declaredLabel, out var counter )
                          && counter == 1 )
                     {
-                        if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.PreserveTrivia ) || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.PreserveTrivia ) )
+                        if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.Options )
+                             || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.Options ) )
                         {
                             List<SyntaxTrivia> trivia =
                             [

@@ -6,23 +6,21 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public record SyntaxGenerationOptions : IProjectService
 {
-    public bool NormalizeWhitespace { get; }
+    internal bool NormalizeWhitespace { get; }
 
-    public bool PreserveTrivia { get; }
+    internal bool PreserveTrivia { get; }
 
-    internal SyntaxGenerationOptions( bool normalizeWhitespace, bool preserveTrivia )
+    internal bool AddFormattingAnnotations { get; }
+
+    internal SyntaxGenerationOptions( bool normalizeWhitespace, bool preserveTrivia, bool addFormattingAnnotations )
     {
         this.NormalizeWhitespace = normalizeWhitespace;
         this.PreserveTrivia = preserveTrivia;
+        this.AddFormattingAnnotations = addFormattingAnnotations;
     }
-
-    /// <summary>
-    /// Gets options for fast creation of the syntax tree when the object model does not need to be rendered as text.
-    /// </summary>
-    public static SyntaxGenerationOptions Draft { get; } = new( false, false );
 
     /// <summary>
     /// Gets options that the creation of fully formatted code.
     /// </summary>
-    public static SyntaxGenerationOptions Proof { get; } = new( true, true );
+    internal static SyntaxGenerationOptions Proof { get; } = new( true, true, true );
 }

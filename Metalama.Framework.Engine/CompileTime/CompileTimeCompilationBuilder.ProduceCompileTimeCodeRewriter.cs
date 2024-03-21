@@ -578,7 +578,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? SyntaxFactoryEx.FormattedBlock() : null,
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
-                                    .NormalizeWhitespace();
+                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine );
 
                                 members.Add( newMethod );
                             }
@@ -617,7 +617,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         null,
                                         SyntaxFactoryEx.FormattedBlock(),
                                         null )
-                                    .NormalizeWhitespace() );
+                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                         }
 
                         var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, constructorName );
@@ -625,8 +625,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         if ( deserializingConstructor != null && serializerType != null )
                         {
-                            members.Add( deserializingConstructor.NormalizeWhitespace() );
-                            members.Add( serializerType.NormalizeWhitespace() );
+                            members.Add( deserializingConstructor.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
+                            members.Add( serializerType.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                         }
                         else
                         {
@@ -1513,7 +1513,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private TypeSyntax CreateTypeSyntax( INamespaceOrTypeSymbol symbol )
             {
                 var unnestedType = this._currentContext.NestedType;
-                var type = OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
+                var type = this._syntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( symbol );
 
                 static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
                     => syntax switch

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Templating;
 
@@ -66,6 +67,7 @@ internal static partial class SyntaxFactoryEx
             _ => null
         };
 
+    // TODO: Move to ContextualSyntaxGenerator use conditional simplifier annotation.
     public static ExpressionSyntax LiteralExpression( string? s )
         => s == null
             ? SyntaxFactory.ParenthesizedExpression(
@@ -128,6 +130,7 @@ internal static partial class SyntaxFactoryEx
     public static StatementSyntax EmptyStatement
         => SyntaxFactory.ExpressionStatement( EmptyExpression, SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );
 
+    // TODO: Move to ContextualSyntaxGenerator use conditional simplifier annotation.
     public static CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {
         if ( syntax is CastExpressionSyntax cast && cast.Type.IsEquivalentTo( type, topLevel: false ) )
@@ -177,13 +180,13 @@ internal static partial class SyntaxFactoryEx
 
     public static BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
         => SyntaxFactory.Block(
-            SyntaxFactory.Token( default, SyntaxKind.OpenBraceToken, new( SyntaxFactory.ElasticLineFeed ) ),
+            SyntaxFactory.Token( default, SyntaxKind.OpenBraceToken, new SyntaxTriviaList( SyntaxFactory.ElasticLineFeed ) ),
             SyntaxFactory.List(
                 statements.Select(
                     s => NeedsLineFeed( s )
                         ? s.WithTrailingTrivia( s.GetTrailingTrivia().Add( SyntaxFactory.ElasticLineFeed ) )
                         : s ) ),
-            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.CloseBraceToken, default ) );
+            SyntaxFactory.Token( new SyntaxTriviaList( SyntaxFactory.ElasticLineFeed ), SyntaxKind.CloseBraceToken, default ) );
 
     public static ExpressionStatementSyntax DiscardStatement( ExpressionSyntax discardedExpression )
         => SyntaxFactory.ExpressionStatement(
@@ -236,13 +239,13 @@ internal static partial class SyntaxFactoryEx
         return statement;
     }
 
-    internal static SyntaxToken InvocationRefKindToken( this Code.RefKind refKind )
+    internal static SyntaxToken InvocationRefKindToken( this RefKind refKind )
         => refKind switch
         {
-            Code.RefKind.None or Code.RefKind.In => default,
-            Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
-            Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
-            Code.RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
+            RefKind.None or RefKind.In => default,
+            RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
+            RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
+            RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
             _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
         };
 
@@ -250,20 +253,20 @@ internal static partial class SyntaxFactoryEx
     private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithLineFeed = new();
 
     internal static SyntaxToken TokenWithTrailingSpace( SyntaxKind kind )
-        => _tokensWithTrailingSpace.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticSpace ) ) );
+        => _tokensWithTrailingSpace.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new SyntaxTriviaList( SyntaxFactory.ElasticSpace ) ) );
 
     internal static SyntaxToken TokenWithTrailingLineFeed( SyntaxKind kind )
-        => _tokensWithLineFeed.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new( SyntaxFactory.ElasticLineFeed ) ) );
+        => _tokensWithLineFeed.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new SyntaxTriviaList( SyntaxFactory.ElasticLineFeed ) ) );
 
     public static PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
         SyntaxKind disableOrRestoreKind,
         SeparatedSyntaxList<ExpressionSyntax> errorCodes )
         => SyntaxFactory.PragmaWarningDirectiveTrivia(
-            SyntaxFactory.Token( new( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
+            SyntaxFactory.Token( new SyntaxTriviaList( SyntaxFactory.ElasticLineFeed ), SyntaxKind.HashToken, default ),
             TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
             TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
             TokenWithTrailingSpace( disableOrRestoreKind ),
             errorCodes,
-            SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new( SyntaxFactory.ElasticLineFeed ) ),
+            SyntaxFactory.Token( default, SyntaxKind.EndOfDirectiveToken, new SyntaxTriviaList( SyntaxFactory.ElasticLineFeed ) ),
             isActive: true );
 }

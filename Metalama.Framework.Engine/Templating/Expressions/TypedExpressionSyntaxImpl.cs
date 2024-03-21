@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -179,7 +178,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
             var cast = (ExpressionSyntax) generationContext.SyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
-            var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithAdditionalAnnotations( Simplifier.Annotation );
+            var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithSimplifierAnnotationIfNecessary( generationContext );
 
             return new TypedExpressionSyntaxImpl( expression, targetType, generationContext, this.IsReferenceable, this.CanBeNull );
         }

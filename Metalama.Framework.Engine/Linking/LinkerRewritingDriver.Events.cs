@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Linking
                      && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for event field.
-                    members.Add( this.GetEventBackingField( eventDeclaration, symbol ) );
+                    members.Add( this.GetEventBackingField( eventDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && this.ShouldGenerateEmptyMember( symbol ) )
                 {
-                    members.Add( this.GetEmptyImplEvent( eventDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplEvent( eventDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new MemberDeclarationSyntax[]
                 {
-                    this.GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
+                    this.GetEventBackingField( eventDeclaration, symbol, generationContext ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
                 };
             }
             else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
@@ -194,7 +194,10 @@ namespace Metalama.Framework.Engine.Linking
                         IdentifierName( "value" ) ),
                     Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
 
-        private EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField(
+            EventDeclarationSyntax eventDeclaration,
+            IEventSymbol symbol,
+            SyntaxGenerationContext context )
         {
             EqualsValueClauseSyntax? initializerExpression;
 
@@ -229,11 +232,15 @@ namespace Metalama.Framework.Engine.Linking
                     break;
             }
 
-            return this.GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
+            return this.GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol, context );
         }
 
         // Event backing field is intentionally an event field to handle thread-safety.
-        private EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField(
+            TypeSyntax eventType,
+            EqualsValueClauseSyntax? initializer,
+            IEventSymbol symbol,
+            SyntaxGenerationContext context )
         {
             if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
             {
@@ -255,17 +262,17 @@ namespace Metalama.Framework.Engine.Linking
                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
                             : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         VariableDeclaration(
-                            eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                            eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                             SingletonSeparatedList(
                                 VariableDeclarator(
                                     Identifier( GetBackingFieldName( symbol ) ),
                                     null,
                                     initializer ) ) ) )
-                    .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .NormalizeWhitespaceIfNecessary( context )
                     .WithTriviaIfNecessary(
                         new SyntaxTriviaList( ElasticLineFeed ),
                         new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
-                        this.SyntaxGenerationOptions.NormalizeWhitespace )
+                        this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -296,7 +303,8 @@ namespace Metalama.Framework.Engine.Linking
                 @event.Type,
                 transformedAccessorList.WithSourceCodeAnnotation(),
                 symbol,
-                GetOriginalImplMemberName( symbol ) );
+                GetOriginalImplMemberName( symbol ),
+                generationContext );
 
             AccessorDeclarationSyntax TransformAccessor( AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol accessorSymbol )
             {
@@ -320,12 +328,17 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol, SyntaxGenerationContext context )
         {
-            return this.GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetEmptyImplMemberName( symbol ), context );
         }
 
-        private MemberDeclarationSyntax GetSpecialImplEvent( TypeSyntax eventType, AccessorListSyntax accessorList, IEventSymbol symbol, string name )
+        private MemberDeclarationSyntax GetSpecialImplEvent(
+            TypeSyntax eventType,
+            AccessorListSyntax accessorList,
+            IEventSymbol symbol,
+            string name,
+            SyntaxGenerationContext context )
         {
             var cleanAccessorList =
                 accessorList.WithAccessors(
@@ -351,8 +364,8 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         cleanAccessorList )
-                    .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .NormalizeWhitespaceIfNecessary( context )
+                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -395,7 +408,7 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) ) )
-                .WithTriviaFromIfNecessary( @event, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( @event, this.SyntaxGenerationOptions );
 
             ExpressionSyntax GetInvocationTarget()
             {

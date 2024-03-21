@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ namespace Metalama.Framework.Engine.Transformations
         private new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
 
         public RedirectPropertyTransformation( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty )
-            : base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+            : base( advice, overriddenDeclaration, ObjectReader.Empty )
         {
             this._targetProperty = targetProperty;
         }
@@ -39,7 +38,8 @@ namespace Metalama.Framework.Engine.Transformations
                     PropertyDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         null,
                         Identifier(
                             context.InjectionNameProvider.GetOverrideName(

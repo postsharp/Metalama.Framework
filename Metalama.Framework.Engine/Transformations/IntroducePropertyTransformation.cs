@@ -45,7 +45,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             PropertyDeclaration(
                 propertyBuilder.GetAttributeLists( context, Ref.FromBuilder( this.IntroducedDeclaration ) ).AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
                         (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )

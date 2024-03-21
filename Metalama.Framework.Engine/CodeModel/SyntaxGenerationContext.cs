@@ -5,17 +5,26 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class SyntaxGenerationContext
     {
+        private readonly CompilationContext? _compilationContext;
+
+        public string EndOfLine { get; }
+
+        public SyntaxGenerationOptions Options { get; }
+
         private Compilation Compilation => this.CompilationContext.Compilation;
 
-        internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
+        internal ContextualSyntaxGenerator SyntaxGenerator { get; }
 
-        internal CompilationContext CompilationContext { get; }
+        internal CompilationContext CompilationContext => this._compilationContext ?? throw new InvalidOperationException();
+
+        internal bool HasCompilationContext => this._compilationContext != null;
 
         internal bool IsPartial { get; }
 
@@ -25,28 +34,38 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
 
-        internal bool NormalizeWhitespace => this.Options.NormalizeWhitespace;
-
-        internal bool PreserveTrivia => this.Options.PreserveTrivia;
-
         [Memo]
         internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof(IsExternalInit).FullName! ) != null;
-
-        public SyntaxGenerationOptions Options { get; }
 
         // Should only be called by CompilationContext
         internal SyntaxGenerationContext(
             CompilationContext compilationContext,
-            OurSyntaxGenerator syntaxGenerator,
+            bool isNullOblivious,
             bool isPartial,
-            SyntaxGenerationOptions? syntaxGenerationOptions )
+            SyntaxGenerationOptions syntaxGenerationOptions,
+            string endOfLine )
         {
-            this.CompilationContext = compilationContext;
+            this._compilationContext = compilationContext;
             this.IsPartial = isPartial;
-            this.Options = syntaxGenerationOptions ?? SyntaxGenerationOptions.Proof;
-            this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
+            this.Options = syntaxGenerationOptions;
+            this.EndOfLine = endOfLine;
+            this.SyntaxGenerator = new ContextualSyntaxGenerator( this, !isNullOblivious );
         }
-        
+
+        internal static SyntaxGenerationContext Contextless { get; } = new( false, false, SyntaxGenerationOptions.Proof, "\r\n" );
+
+        private SyntaxGenerationContext(
+            bool isNullOblivious,
+            bool isPartial,
+            SyntaxGenerationOptions syntaxGenerationOptions,
+            string endOfLine )
+        {
+            this.IsPartial = isPartial;
+            this.Options = syntaxGenerationOptions;
+            this.EndOfLine = endOfLine;
+            this.SyntaxGenerator = new ContextualSyntaxGenerator( this, !isNullOblivious );
+        }
+
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
 
         // used for debug assert

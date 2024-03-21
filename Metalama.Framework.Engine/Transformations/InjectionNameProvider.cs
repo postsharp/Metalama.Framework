@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -25,6 +26,6 @@ namespace Metalama.Framework.Engine.Transformations
             IDeclaration targetDeclaration,
             InitializerKind reason );
 
-        internal abstract TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember );
+        internal abstract TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember, SyntaxGenerationContext context );
     }
 }

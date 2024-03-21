@@ -48,7 +48,8 @@ namespace Metalama.Framework.Engine.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         null,
                         Identifier(
                             context.InjectionNameProvider.GetOverrideName(

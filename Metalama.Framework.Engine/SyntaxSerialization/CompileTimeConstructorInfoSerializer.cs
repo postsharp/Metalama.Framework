@@ -2,10 +2,9 @@
 
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Templating;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
@@ -17,7 +16,7 @@ internal sealed class CompileTimeConstructorInfoSerializer : MetalamaMethodBaseS
                 SyntaxFactoryEx.SafeCastExpression(
                     serializationContext.GetTypeSyntax( typeof(ConstructorInfo) ),
                     SerializeMethodBase( obj, serializationContext ) ) )
-            .WithAdditionalAnnotations( Simplifier.Annotation );
+            .WithSimplifierAnnotationIfNecessary( serializationContext.SyntaxGenerationContext );
 
     public CompileTimeConstructorInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 }

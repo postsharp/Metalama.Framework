@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -14,7 +15,7 @@ public static partial class SyntaxFactoryDebugHelper
     /// </summary>
     public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation )
     {
-        MetaSyntaxRewriter rewriter = new( compilation, RoslynApiVersion.Current );
+        MetaSyntaxRewriter rewriter = new( CompilationContextFactory.GetInstance( compilation ), RoslynApiVersion.Current );
 
         try
         {

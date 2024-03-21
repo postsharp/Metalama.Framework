@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -49,14 +48,17 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                     List<AttributeListSyntax>(),
                     TokenList( modifiers ),
                     context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(
                         context.Compilation,
                         context.SyntaxGenerationContext,
                         this.OverriddenDeclaration,
-                        context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration ) ),
+                        context.InjectionNameProvider.GetOverriddenByType(
+                            this.ParentAdvice.Aspect,
+                            this.OverriddenDeclaration,
+                            context.SyntaxGenerationContext ) ),
                     AccessorList(
                         List(
                             new[]
