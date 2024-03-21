@@ -9,7 +9,7 @@ namespace Metalama.Tool.Licensing;
 [UsedImplicitly]
 internal class ResetLicenseUsageCommand : LicenseUsageBaseCommand
 {
-    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
+    protected override void Execute( LicenseUsageCommandContext context )
     {
         var deleted = 0;
 

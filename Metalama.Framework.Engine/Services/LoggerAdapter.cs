@@ -18,11 +18,11 @@ internal sealed class LoggerAdapter : Compiler::ILogger
         static Compiler::ILogWriter CreateWriter( Func<Backstage::ILogWriter?> getBackstageWriter ) => new LogWriterAdapter( getBackstageWriter );
     }
 
-    public Compiler::ILogWriter Trace { get; set; }
+    public Compiler::ILogWriter Trace { get; }
 
-    public Compiler::ILogWriter Info { get; set; }
+    public Compiler::ILogWriter Info { get; }
 
-    public Compiler::ILogWriter Warning { get; set; }
+    public Compiler::ILogWriter Warning { get; }
 
-    public Compiler::ILogWriter Error { get; set; }
+    public Compiler::ILogWriter Error { get; }
 }

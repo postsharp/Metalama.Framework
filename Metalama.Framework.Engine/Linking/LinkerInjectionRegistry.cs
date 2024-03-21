@@ -35,7 +35,6 @@ internal sealed class LinkerInjectionRegistry
     private readonly IReadOnlyDictionary<ISymbol, InjectedMember> _symbolToInjectedMemberMap;
     private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
     private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
-    private readonly IReadOnlyDictionary<ISymbol, ISymbol> _auxiliarySourceMemberMap;
     private readonly ISet<ISymbol> _auxiliarySourceMembers;
 
     // TODO: This is used only for mapping of constructors with introduced parameters (limitation of code model).
@@ -57,7 +56,6 @@ internal sealed class LinkerInjectionRegistry
         ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
         ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
         ConcurrentDictionary<InjectedMember, ISymbol> injectedMemberToSymbolMap;
-        ConcurrentDictionary<ISymbol, ISymbol> auxiliarySourceMemberMap;
         HashSet<ISymbol> auxiliarySourceMembers;
 
         this._comparer = comparer;
@@ -73,8 +71,7 @@ internal sealed class LinkerInjectionRegistry
 
         this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
 
-        this._auxiliarySourceMemberMap = auxiliarySourceMemberMap =
-            new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
+        var auxiliarySourceMemberMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
         this._auxiliarySourceMembers = auxiliarySourceMembers = new HashSet<ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
@@ -441,18 +438,6 @@ internal sealed class LinkerInjectionRegistry
         }
     }
 
-    public ISymbol? GetAuxiliarySourceSymbol( ISymbol symbol )
-    {
-        if ( this._auxiliarySourceMemberMap.TryGetValue( symbol, out var auxiliarySourceSymbol ) )
-        {
-            return auxiliarySourceSymbol;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
     public bool IsAuxiliarySourceSymbol( ISymbol symbol ) => this._auxiliarySourceMembers.Contains( symbol );
 
     /// <summary>
@@ -480,7 +465,7 @@ internal sealed class LinkerInjectionRegistry
 
             default:
                 var overrides = this.GetOverridesForSymbol( symbol );
-                var lastOverride = overrides.Count > 0 ? overrides[overrides.Count - 1] : null;
+                var lastOverride = overrides.Count > 0 ? overrides[^1] : null;
 
                 if ( lastOverride == null )
                 {

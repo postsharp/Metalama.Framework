@@ -21,9 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
 
-        internal LanguageVersion LanguageVersion => this.Compilation.GetLanguageVersion();
-
-        internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
+        internal bool RequiresStructFieldInitialization => this.Compilation.GetLanguageVersion() < (LanguageVersion) 1100;
 
         internal bool NormalizeWhitespace => this.CompilationContext.NormalizeWhitespace;
 

@@ -12,6 +12,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers;
 /// </summary>
 internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, IComparer<ISymbol>
 {
+    // ReSharper disable UnusedMember.Global
     public static readonly StructuralSymbolComparer Default =
         new(
             StructuralSymbolComparerOptions.ContainingDeclaration |
@@ -65,13 +66,15 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             StructuralSymbolComparerOptions.Name |
             StructuralSymbolComparerOptions.GenericParameterCount |
             StructuralSymbolComparerOptions.ParameterTypes |
-            StructuralSymbolComparerOptions.ParameterModifiers );
+            StructuralSymbolComparerOptions.ParameterModifiers );            
 
     internal static readonly StructuralSymbolComparer NameOblivious = new(
         StructuralSymbolComparerOptions.GenericArguments |
         StructuralSymbolComparerOptions.GenericParameterCount |
         StructuralSymbolComparerOptions.ParameterModifiers |
         StructuralSymbolComparerOptions.ParameterTypes );
+
+    // ReSharper enable UnusedMember.Global
 
     private static readonly StructuralSymbolComparer _nonRecursive = new(
         StructuralSymbolComparerOptions.Name |

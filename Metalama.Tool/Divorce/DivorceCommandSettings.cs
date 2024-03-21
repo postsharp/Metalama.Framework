@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace Metalama.Tool.Divorce;
 
-internal class DivorceCommandSettings : BaseCommandSettings
+internal sealed class DivorceCommandSettings : BaseCommandSettings
 {
     [UsedImplicitly]
     [Description( "Force the divorce feature, even if the working directory is not known to be clean." )]

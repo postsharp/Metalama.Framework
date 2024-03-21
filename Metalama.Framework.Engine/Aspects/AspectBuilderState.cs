@@ -15,6 +15,8 @@ namespace Metalama.Framework.Engine.Aspects;
 
 internal sealed class AspectBuilderState
 {
+    private readonly AdviceFactoryState _adviceFactoryState;
+    
     public ProjectServiceProvider ServiceProvider { get; }
 
     public UserDiagnosticSink Diagnostics { get; }
@@ -30,8 +32,6 @@ internal sealed class AspectBuilderState
     public CancellationToken CancellationToken { get; }
 
     public IAspectInstanceInternal AspectInstance { get; }
-
-    public AdviceFactoryState AdviceFactoryState { get; }
     
     public string? Layer { get; }
 
@@ -50,7 +50,7 @@ internal sealed class AspectBuilderState
         this.CancellationToken = cancellationToken;
         this.AspectInstance = aspectInstance;
         this.CancellationToken = cancellationToken;
-        this.AdviceFactoryState = adviceFactoryState;
+        this._adviceFactoryState = adviceFactoryState;
         this.Layer = layer;
     }
 
@@ -63,7 +63,7 @@ internal sealed class AspectBuilderState
                 this.AspectInstance,
                 outcome,
                 this.Diagnostics.ToImmutable(),
-                this.AdviceFactoryState.Transformations.ToImmutableArray(),
+                this._adviceFactoryState.Transformations.ToImmutableArray(),
                 this.AspectSources,
                 this.ValidatorSources,
                 this.OptionsSources )

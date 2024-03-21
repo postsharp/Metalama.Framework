@@ -33,7 +33,7 @@ internal sealed class DeclarationCache : IDeclarationCache
         return (T) value;
     }
 
-    public T GetOrAdd<T>( Func<CompilationModel, T> func )
+    private T GetOrAdd<T>( Func<CompilationModel, T> func )
         where T : notnull
     {
         if ( !this._cache.TryGetValue( func.Method, out var value ) )

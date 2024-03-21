@@ -483,7 +483,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return value;
         }
 
-        public Ref<TOut> As<TOut>()
+        internal Ref<TOut> As<TOut>()
             where TOut : class, ICompilationElement
             => new( this.Target, this._compilationContext, this.TargetKind );
 

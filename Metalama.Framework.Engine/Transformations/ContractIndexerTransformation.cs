@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 {
-    public new IIndexer TargetMember => (IIndexer) base.TargetMember;
+    private new IIndexer TargetMember => (IIndexer) base.TargetMember;
 
     public ContractIndexerTransformation(
         Advice advice,

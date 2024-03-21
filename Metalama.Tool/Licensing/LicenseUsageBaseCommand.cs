@@ -112,8 +112,8 @@ internal abstract class LicenseUsageBaseCommand : BaseCommand<LicenseUsageComman
         }
 
         // Execute the command.
-        this.Execute( new LicenseUsageCommandContext( context, files, horizon ), settings );
+        this.Execute( new LicenseUsageCommandContext( context, files ) );
     }
 
-    protected abstract void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings );
+    protected abstract void Execute( LicenseUsageCommandContext context );
 }

@@ -57,7 +57,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
 
     public abstract IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
-    public bool TryExecuteTemplate(
+    protected bool TryExecuteTemplate(
         TransformationContext context,
         ExpressionSyntax valueExpression,
         IType valueType,

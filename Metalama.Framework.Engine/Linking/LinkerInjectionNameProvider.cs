@@ -128,9 +128,6 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
         return this._injectionHelperProvider.GetOverriddenByType( this._syntaxGenerator, aspect.AspectClass, ordinal );
     }
 
-    // ReSharper disable once MemberCanBeMadeStatic.Global
-    internal TypeSyntax GetSourceType() => this._injectionHelperProvider.GetSourceType();
-
     internal TypeSyntax GetAuxiliaryType( IAspectInstanceInternal aspect, IMember targetMember )
     {
         var ordinal = this._auxiliaryCounters.AddOrUpdate( (aspect.AspectClass.Type, targetMember), 0, ( _, v ) => v + 1 );

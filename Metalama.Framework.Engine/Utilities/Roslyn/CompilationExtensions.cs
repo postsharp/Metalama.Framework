@@ -45,7 +45,7 @@ public static class CompilationExtensions
 
     public static SemanticModelProvider GetSemanticModelProvider( this Compilation compilation ) => SemanticModelProvider.GetInstance( compilation );
 
-    public static LanguageVersion GetLanguageVersion( this Compilation compilation )
+    internal static LanguageVersion GetLanguageVersion( this Compilation compilation )
     {
         var tree = compilation.SyntaxTrees.FirstOrDefault();
 

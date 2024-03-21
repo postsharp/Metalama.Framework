@@ -4,7 +4,7 @@ using Metalama.Backstage.UserInterface;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing;
 
-public sealed class TestToastNotificationDetectionService : IToastNotificationDetectionService
+internal sealed class TestToastNotificationDetectionService : IToastNotificationDetectionService
 {
     public bool WasDetectionTriggered { get; private set; }
 

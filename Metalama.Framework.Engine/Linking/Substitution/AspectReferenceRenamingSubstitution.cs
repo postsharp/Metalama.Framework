@@ -79,7 +79,7 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
             ThisExpression(),
             IdentifierName( this.GetTargetMemberName() ) );
 
-    protected virtual SyntaxNode SubstituteConstructorMemberAccess()
+    private SyntaxNode SubstituteConstructorMemberAccess()
         => MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
             ThisExpression(),

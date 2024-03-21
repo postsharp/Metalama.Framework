@@ -431,9 +431,7 @@ internal static class TemplateBindingHelper
             };
         }
 
-        var translatedFromType = fromType.ForCompilation( toType.Compilation );
-
-        if ( translatedFromType != null )
+        if ( fromType.TryForCompilation( toType.Compilation, out var translatedFromType ) )
         {
             fromType = translatedFromType;
         }
@@ -441,9 +439,7 @@ internal static class TemplateBindingHelper
         {
             // This can happen when fromType is private, because toType compilation does not import private members.
             // In that case, try to translate the other way around.
-            var translatedToType = toType.ForCompilation( fromType.Compilation );
-
-            if ( translatedToType != null )
+            if ( toType.TryForCompilation( fromType.Compilation, out var translatedToType ) )
             {
                 toType = translatedToType;
             }

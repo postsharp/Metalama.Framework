@@ -34,6 +34,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         DiagnosticSeverity.Warning,
         true );
 
+    // ReSharper disable once MemberCanBePrivate.Global
     internal static readonly DiagnosticDescriptor WithTrivia = new(
         "LAMA0832",
         "Avoid WithLeadingTrivia and WithTrailingTrivia calls.",
@@ -105,8 +106,8 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
                      { IsIdentity: true } or { IsImplicit: true, IsReference: true } &&
                  syntaxNodePartialUpdateExtensionsSymbol.GetMembers( "PartialUpdate" )
                      .OfType<IMethodSymbol>()
-                     .SingleOrDefault( m => SymbolEqualityComparer.Default.Equals( m.Parameters[0].Type, method.ContainingType ) ) is { } partialUdateMethod &&
-                 partialUdateMethod.Parameters.Any(
+                     .SingleOrDefault( m => SymbolEqualityComparer.Default.Equals( m.Parameters[0].Type, method.ContainingType ) ) is { } partialUpdateMethod &&
+                 partialUpdateMethod.Parameters.Any(
                      p => method.Name.AsSpan( "With".Length ).Equals( p.Name.AsSpan(), StringComparison.InvariantCultureIgnoreCase ) ) )
             {
                 invocation = invocationOperation;

@@ -10,7 +10,7 @@ namespace Metalama.Tool.Licensing;
 [UsedImplicitly]
 internal class PrintLicenseUsageDetailsCommand : LicenseUsageBaseCommand
 {
-    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
+    protected override void Execute( LicenseUsageCommandContext context )
     {
         var table = new Table();
         table.AddColumn( "Aspect Class Name" );

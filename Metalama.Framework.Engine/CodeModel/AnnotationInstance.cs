@@ -7,13 +7,14 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 public readonly struct AnnotationInstance
 {
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public Ref<IDeclaration> TargetDeclaration { get; }
 
     public IAnnotation Annotation { get; }
 
     public bool Export { get; }
 
-    public AnnotationInstance( IAnnotation annotation, bool export, Ref<IDeclaration> targetDeclaration )
+    internal AnnotationInstance( IAnnotation annotation, bool export, Ref<IDeclaration> targetDeclaration )
     {
         this.Annotation = annotation;
         this.Export = export;

@@ -28,8 +28,6 @@ internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T
 
     public CompilationModel Compilation => this._source.Compilation;
 
-    public INamespaceOrTypeSymbol DeclaringTypeOrNamespace => this._substitutedType;
-
     public IEnumerator<Ref<T>> GetEnumerator()
     {
         foreach ( var sourceRef in this._source )

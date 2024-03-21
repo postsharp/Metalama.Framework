@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
-using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public abstract class LicensingTestsBase : UnitTestClass
     {
-        public TestToastNotificationDetectionService ToastNotifications { get; } = new();
+        private protected TestToastNotificationDetectionService ToastNotifications { get; } = new();
 
         protected LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
@@ -25,8 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             string code,
             string? licenseKey,
             string? assemblyName = "AspectCountTests.ArbitraryNamespace",
-            string projectName = "TestProject",
-            Action<ProjectServiceProvider>? configureServices = null )
+            string projectName = "TestProject" )
         {
             var mocks = new AdditionalServiceCollection();
             mocks.ProjectServices.Add( sp => sp.AddProjectLicenseConsumptionManagerForTest( licenseKey ) );
