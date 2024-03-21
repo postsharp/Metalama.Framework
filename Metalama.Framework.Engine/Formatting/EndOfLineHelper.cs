@@ -2,9 +2,6 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Formatting
 {
