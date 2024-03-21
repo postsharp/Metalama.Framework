@@ -163,8 +163,8 @@ namespace Metalama.Compiler
                                 true )
                             .WithErrorCodes( _suppressedWarnings )
                             .NormalizeWhitespace( eol: syntaxGenerationContext.EndOfLine )
-                            .StructuredTriviaWithLeadingLineFeedIfNecessary( syntaxGenerationContext )
-                            .StructuredTriviaWithTrailingLineFeedIfNecessary( syntaxGenerationContext ) )
+                            .StructuredTriviaWithRequiredLeadingLineFeed( syntaxGenerationContext )
+                            .StructuredTriviaWithRequiredTrailingLineFeed( syntaxGenerationContext ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
 
             trailingTrivia = trailingTrivia.InsertBeforeLastNonWhitespaceTrivia(
@@ -174,8 +174,8 @@ namespace Metalama.Compiler
                                 true )
                             .WithErrorCodes( _suppressedWarnings )
                             .NormalizeWhitespace( eol: syntaxGenerationContext.EndOfLine )
-                            .StructuredTriviaWithLeadingLineFeedIfNecessary( syntaxGenerationContext )
-                            .StructuredTriviaWithTrailingLineFeedIfNecessary( syntaxGenerationContext ) )
+                            .StructuredTriviaWithRequiredLeadingLineFeed( syntaxGenerationContext )
+                            .StructuredTriviaWithRequiredTrailingLineFeed( syntaxGenerationContext ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
         }
 
@@ -351,7 +351,7 @@ namespace Metalama.Compiler
         }
 
         var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod )
-            .WithTrailingLineFeedIfNecessary( this._syntaxGenerationContext );
+            .WithOptionalTrailingLineFeed( this._syntaxGenerationContext );
 
         return (T) transformedNode.WithIncludeInReferenceAssemblyAnnotation()
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
@@ -395,9 +395,9 @@ namespace Metalama.Compiler
                         {
                             AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
-                            AttributeArgument( syntaxFactory.SyntaxGenerator.LiteralExpression( isAsyncMethod ) )
+                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
-                            AttributeArgument( syntaxFactory.SyntaxGenerator.LiteralExpression( isIteratorMethod ) )
+                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
                         } ) ) );
 

@@ -197,10 +197,12 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                         { SemicolonToken: var semicolonToken } => (
-                            semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
+                            semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                            semicolonToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
                             generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList),
                         _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
@@ -337,12 +339,12 @@ namespace Metalama.Framework.Engine.Linking
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
                             indexerParameters
-                                .WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions )
+                                .WithOptionalTrailingTrivia( default(SyntaxTriviaList), this.SyntaxGenerationOptions )
                                 .WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) ) ),
                         accessorList,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
+                    .WithOptionalLeadingAndTrailingLineFeed( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

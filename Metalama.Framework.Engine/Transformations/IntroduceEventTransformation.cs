@@ -56,7 +56,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                     VariableDeclaration(
                         syntaxGenerator.Type( eventBuilder.Type.GetSymbol() )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         SeparatedList(
                             new[]
                             {
@@ -73,11 +73,11 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                     syntaxGenerator.Type( eventBuilder.Type.GetSymbol() )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                        .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     eventBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options )
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options )
                         : null,
                     this.IntroducedDeclaration.GetCleanName(),
                     GenerateAccessorList(),

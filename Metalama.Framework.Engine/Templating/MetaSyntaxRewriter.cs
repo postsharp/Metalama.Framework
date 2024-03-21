@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Templating
 
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true )
             => lineFeed
-                ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
+                ? new[] { this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia, Whitespace( this._indentTriviaStack.Peek() ) }
                 : new[] { Whitespace( this._indentTriviaStack.Peek() ) };
 
         protected static SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();

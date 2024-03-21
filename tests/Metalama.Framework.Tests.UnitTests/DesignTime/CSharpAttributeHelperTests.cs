@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Refactoring;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -584,10 +586,13 @@ namespace Test
             var semanticModel = await this._testFileDocument!.GetSemanticModelAsync();
             var symbolToBeDecorated = semanticModel!.GetDeclaredSymbol( syntaxNodeToBeDecorated );
 
+            var context = CompilationContextFactory.GetInstance( semanticModel.Compilation ).GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, syntaxNodeToBeDecorated );
+
             var resultSolution = await CSharpAttributeHelper.AddAttributeAsync(
                 this._testFileDocument,
                 symbolToBeDecorated!,
                 attributeDescription,
+                context,
                 this._cancellationTokenSource.Token );
 
             var resultDocument = resultSolution.GetDocument( this._testFileDocument.Id );

@@ -57,7 +57,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                     SyntaxFactory.List<AttributeListSyntax>(),
                     modifiers,
                     context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
-                        .WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.Options ),
+                        .WithOptionalTrailingTrivia( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
                     SyntaxFactory.AccessorList(

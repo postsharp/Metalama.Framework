@@ -72,7 +72,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
         var introducedMethod = MethodDeclaration(
             List<AttributeListSyntax>(),
             modifiers,
-            returnType.WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+            returnType.WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
             null,
             Identifier(
                 context.InjectionNameProvider.GetOverrideName(

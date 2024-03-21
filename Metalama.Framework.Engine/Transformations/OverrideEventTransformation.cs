@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Transformations
                         modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
                         context.SyntaxGenerator.EventType( this.OverriddenDeclaration )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         null!,
                         Identifier( eventName ),
                         AccessorList(

@@ -638,7 +638,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             case SyntaxKind.TypeOfExpression:
                 {
                     var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
-                    var typeOfString = this.MetaSyntaxFactory.Context.SyntaxGenerator.TypeOfExpression( type ).ToString();
+                    var typeOfString = this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type ).ToString();
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
                         .AddArgumentListArguments(
@@ -719,7 +719,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetDynamicSyntax) ) )
                     .AddArgumentListArguments(
                         Argument(
-                            this.MetaSyntaxFactory.Context.SyntaxGenerator.SafeCastExpression(
+                            this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.SafeCastExpression(
                                 NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ),
                                 expression ) ) );
 
@@ -1046,7 +1046,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             }
             else
             {
-                return this.MetaSyntaxFactory.Context.SyntaxGenerator.LiteralExpression( symbolName );
+                return SyntaxFactoryEx.LiteralExpression( symbolName );
             }
         }
         else if ( this._compileTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )
@@ -1335,7 +1335,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         addStatementStatement = this.DeepIndent(
             addStatementStatement.WithLeadingTrivia(
-                GetCommentFromNode( node.Parent! )
+                this.GetCommentFromNode( node.Parent! )
                     .AddRange( addStatementStatement.GetLeadingTrivia() ) ) );
 
         this._currentMetaContext.Statements.Add( addStatementStatement );
@@ -1344,7 +1344,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private void AddAddStatementStatement( SyntaxNode node, ExpressionSyntax statementExpression )
         => this.AddTemplateSyntaxFactoryStatement( node, nameof(ITemplateSyntaxFactory.AddStatement), Argument( statementExpression ) );
 
-    private static SyntaxTriviaList GetCommentFromNode( SyntaxNode node )
+    private SyntaxTriviaList GetCommentFromNode( SyntaxNode node )
     {
         var text = _endOfLineRegex.Replace( node.ToString(), " " );
 
@@ -1353,7 +1353,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             text = text.Substring( 0, 117 ) + "...";
         }
 
-        return TriviaList( Comment( "// " + text ), ElasticCarriageReturnLineFeed );
+        return TriviaList( Comment( "// " + text ), this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia );
     }
 
     private ParameterSyntax CreateTemplateSyntaxFactoryParameter()
@@ -1908,13 +1908,14 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         // The statement is run-time code and has been transformed into an expression creating the StatementSyntax.
                         // We need to generate the code adding this code to the list of statements, i.e. `statements.Add( expression )`.
 
-                        var leadingTrivia = TriviaList( ElasticCarriageReturnLineFeed )
+                        var leadingTrivia = TriviaList( this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia )
                             .AddRange( this.GetIndentation() )
-                            .AddRange( GetCommentFromNode( singleStatement ) )
-                            .Add( ElasticCarriageReturnLineFeed )
+                            .AddRange( this.GetCommentFromNode( singleStatement ) )
+                            .Add( this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia )
                             .AddRange( this.GetIndentation() );
 
-                        var trailingTrivia = TriviaList( ElasticCarriageReturnLineFeed, ElasticCarriageReturnLineFeed );
+                        var eol = this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia;
+                        var trailingTrivia = TriviaList( eol, eol );
 
                         // TemplateSyntaxFactory.Add( __s, expression )
                         var add =
@@ -2324,7 +2325,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                 {
-                    return this.Transform( this.MetaSyntaxFactory.Context.SyntaxGenerator.TypeOrNamespace( namespaceOrType ) );
+                    return this.Transform( this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( namespaceOrType ) );
                 }
                 else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                 {
@@ -2350,7 +2351,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                             return this.MetaSyntaxFactory.MemberAccessExpression(
                                 this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                this.Transform( this.MetaSyntaxFactory.Context.SyntaxGenerator.TypeOrNamespace( symbol.ContainingType ) ),
+                                this.Transform( this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( symbol.ContainingType ) ),
                                 this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                     }
                 }
@@ -2396,7 +2397,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             case INamespaceOrTypeSymbol namespaceOrType:
                 // If we have a generic type, we do not write the generic arguments.
-                var nameExpression = this.MetaSyntaxFactory.Context.SyntaxGenerator.TypeOrNamespace( namespaceOrType );
+                var nameExpression = this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( namespaceOrType );
 
                 transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                     ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )

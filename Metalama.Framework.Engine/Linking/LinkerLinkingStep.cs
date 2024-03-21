@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                         new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
                             .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
-                    var syntaxGenerationContext = input.IntermediateCompilation.CompilationContext.GetSyntaxGenerationContext(
+                    var syntaxGenerationContext = input.SourceCompilationModel.CompilationContext.GetSyntaxGenerationContext(
                         this._syntaxGenerationOptions,
                         modifiedSyntaxTree.OldTree!,
                         0 );

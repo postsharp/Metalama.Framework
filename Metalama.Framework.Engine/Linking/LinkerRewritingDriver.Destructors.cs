@@ -82,9 +82,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
                     };
 
@@ -163,11 +163,11 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null,
-                        destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions ),
+                        destructor.ParameterList.WithOptionalTrailingTrivia( default(SyntaxTriviaList), this.SyntaxGenerationOptions ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
+                    .WithOptionalLeadingAndTrailingLineFeed( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

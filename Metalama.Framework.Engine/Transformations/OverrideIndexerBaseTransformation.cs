@@ -48,7 +48,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
                     List<AttributeListSyntax>(),
                     TokenList( modifiers ),
                     context.SyntaxGenerator.IndexerType( this.OverriddenDeclaration )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                        .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(

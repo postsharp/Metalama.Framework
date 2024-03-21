@@ -56,19 +56,19 @@ namespace Metalama.Framework.Engine.Templating
 
         public void AddComments( List<StatementOrTrivia> list, params string?[]? comments )
         {
-            static IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
+            IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
             {
                 if ( comment.ContainsOrdinal( '\n' ) || comment.ContainsOrdinal( '\r' ) )
                 {
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                     yield return SyntaxFactory.Comment( "/* " + comment + " */" );
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                 }
                 else
                 {
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                     yield return SyntaxFactory.Comment( "// " + comment );
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                 }
             }
 

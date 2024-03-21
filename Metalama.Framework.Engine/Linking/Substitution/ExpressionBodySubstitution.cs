@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                                 TriviaList(),
                                                 SyntaxKind.SemicolonToken,
                                                 arrowExpressionClause.Expression.GetTrailingTrivia()
-                                                    .AddLineFeedIfNecessary( substitutionContext.SyntaxGenerationContext ) ) ) )
+                                                    .AddOptionalLineFeed( substitutionContext.SyntaxGenerationContext ) ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }

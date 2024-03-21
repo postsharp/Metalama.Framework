@@ -308,9 +308,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                             var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
                                                 .WithArgumentList(
                                                     AttributeArgumentList(
-                                                        SingletonSeparatedList(
-                                                            AttributeArgument(
-                                                                this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( originalId ) ) ) ) );
+                                                        SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
 
                                             // Transform the type.
                                             TypeDeclarationSyntax transformedChild;
@@ -650,8 +648,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     var originalPathAttribute = Attribute( this._originalPathTypeSyntax )
                         .WithArgumentList(
                             AttributeArgumentList(
-                                SingletonSeparatedList(
-                                    AttributeArgument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
+                                SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
 
                     transformedNode = transformedNode
                         .WithAttributeLists( transformedNode.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalPathAttribute ) ) ) );
@@ -1464,7 +1461,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( typeSymbol != null )
                     {
-                        return this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.Name );
+                        return SyntaxFactoryEx.LiteralExpression( typeSymbol.Name );
                     }
                 }
 

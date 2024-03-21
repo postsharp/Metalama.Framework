@@ -17,28 +17,28 @@ namespace Metalama.Framework.Engine.Templating
     {
         protected sealed partial class MetaSyntaxFactoryImpl
         {
-            public SyntaxGenerationContext Context { get; }
+            public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
             public MetaSyntaxFactoryImpl( CompilationContext compileTimeCompilation )
             {
                 this.ReflectionMapper = compileTimeCompilation.ReflectionMapper;
 
                 // TODO: We would need one context for each syntax tree if we want to respect EOLs.
-                this.Context = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
+                this.SyntaxGenerationContext = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
             }
 
             public ReflectionMapper ReflectionMapper { get; }
 
             public ExpressionSyntax Null => this.LiteralExpression( this.Kind( SyntaxKind.NullLiteralExpression ) );
 
-            public TypeSyntax Type( Type type ) => this.Context.SyntaxGenerator.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
+            public TypeSyntax Type( Type type ) => this.SyntaxGenerationContext.SyntaxGenerator.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
 
             public TypeSyntax Type( ITypeSymbol type )
                 => type switch
                 {
-                    IArrayTypeSymbol arrayType => this.Context.SyntaxGenerator.ArrayTypeExpression(
-                        this.Context.SyntaxGenerator.Type( arrayType.ElementType ) ),
-                    _ => this.Context.SyntaxGenerator.TypeOrNamespace( type )
+                    IArrayTypeSymbol arrayType => this.SyntaxGenerationContext.SyntaxGenerator.ArrayTypeExpression(
+                        this.SyntaxGenerationContext.SyntaxGenerator.Type( arrayType.ElementType ) ),
+                    _ => this.SyntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( type )
                 };
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

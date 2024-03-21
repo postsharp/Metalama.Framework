@@ -42,7 +42,7 @@ internal static class PreprocessorFixer
             return node;
         }
 
-        return node.ReplaceTokens( walker.TokensToFix, ( _, token ) => token.WithTrailingTrivia( token.TrailingTrivia.AddLineFeedIfNecessary( context ) ) );
+        return node.ReplaceTokens( walker.TokensToFix, ( _, token ) => token.WithTrailingTrivia( token.TrailingTrivia.AddOptionalLineFeed( context ) ) );
     }
 
     private sealed class Walker() : SafeSyntaxWalker( SyntaxWalkerDepth.Trivia )

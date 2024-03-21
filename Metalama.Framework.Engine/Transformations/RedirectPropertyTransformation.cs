@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Transformations
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
                         context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         null,
                         Identifier(
                             context.InjectionNameProvider.GetOverrideName(

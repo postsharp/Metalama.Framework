@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.Linking
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                        eventFieldDeclaration.Declaration.Type.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         Identifier( symbol.Name ),
                         AccessorList(
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.Linking
                         new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
-                    (TriviaList(), generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList,
+                    (TriviaList(), ElasticEndOfLineTriviaList: generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList,
                      generationContext.ElasticEndOfLineTriviaList);
 
                 return
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.Linking
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                        eventField.Declaration.Type.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         eventField.Declaration.Variables.Single().Identifier,
                         AccessorList(

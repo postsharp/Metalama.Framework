@@ -133,11 +133,11 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                         { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
-                            (semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), generationContext.ElasticEndOfLineTriviaList,
+                            (semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), generationContext.ElasticEndOfLineTriviaList,
                              generationContext.ElasticEndOfLineTriviaList,
                              semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected method declaration at '{methodDeclaration.GetLocation()}'." )
@@ -272,18 +272,18 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.Options ),
+                        returnType.WithOptionalTrailingTrivia( ElasticSpace, generationContext.Options ),
                         null,
                         Identifier( name ),
                         method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
-                            method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.Options ) ),
+                            method.ParameterList.WithOptionalTrailingTrivia( default(SyntaxTriviaList), generationContext.Options ) ),
                         constraints,
                         body,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( generationContext )
+                    .WithOptionalLeadingAndTrailingLineFeed( generationContext )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

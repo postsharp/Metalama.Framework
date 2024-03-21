@@ -165,18 +165,6 @@ internal partial class ContextualSyntaxGenerator
 
     public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) _roslynSyntaxGenerator.ThisExpression();
 
-    public LiteralExpressionSyntax LiteralExpression( object literal )
-    {
-        var result = (LiteralExpressionSyntax) _roslynSyntaxGenerator.LiteralExpression( literal );
-
-        if ( result.Kind() is SyntaxKind.NullLiteralExpression or SyntaxKind.DefaultLiteralExpression )
-        {
-            throw new InvalidOperationException( $"The value {literal} could not be represented as a literal expression." );
-        }
-
-        return result;
-    }
-
     public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) _roslynSyntaxGenerator.IdentifierName( identifier );
 
     public TypeSyntax ArrayTypeExpression( TypeSyntax type )
@@ -306,7 +294,7 @@ internal partial class ContextualSyntaxGenerator
 
         if ( member == null )
         {
-            return this.CastExpression( type, this.LiteralExpression( value ) );
+            return this.CastExpression( type, LiteralExpression( value ) );
         }
         else
         {
@@ -334,7 +322,7 @@ internal partial class ContextualSyntaxGenerator
         }
         else
         {
-            return this.LiteralExpression( typedConstant.Value! );
+            return LiteralExpression( typedConstant.Value! );
         }
     }
 
@@ -478,14 +466,14 @@ internal partial class ContextualSyntaxGenerator
     public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute )
     {
         var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute ) ) )
-            .WithLeadingTriviaIfNecessary( oldNode.GetLeadingTrivia(), this._context.Options )
-            .WithTrailingLineFeedIfNecessary( this._context );
+            .WithOptionalLeadingTrivia( oldNode.GetLeadingTrivia(), this._context.Options )
+            .WithOptionalTrailingLineFeed( this._context );
 
-        oldNode = oldNode.WithLeadingTriviaIfNecessary( default(SyntaxTriviaList), this._context.Options );
+        oldNode = oldNode.WithOptionalLeadingTrivia( default(SyntaxTriviaList), this._context.Options );
 
         if ( attributeList.GetLeadingTrivia().LastOrDefault() is { RawKind: (int) SyntaxKind.WhitespaceTrivia } indentationTrivia )
         {
-            oldNode = oldNode.WithLeadingTriviaIfNecessary( indentationTrivia, this._context.Options );
+            oldNode = oldNode.WithOptionalLeadingTrivia( indentationTrivia, this._context.Options );
         }
 
         return oldNode.Kind() switch
@@ -632,11 +620,11 @@ internal partial class ContextualSyntaxGenerator
                 p => Parameter(
                     this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                     p.GetSyntaxModifierList(),
-                    this.Type( p.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, this.Options ),
+                    this.Type( p.Type.GetSymbol() ).WithOptionalTrailingTrivia( ElasticSpace, this.Options ),
                     Identifier( p.Name ),
                     removeDefaultValues || p.DefaultValue == null
                         ? null
-                        : EqualsValueClause( this.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
+                        : EqualsValueClause( LiteralExpressionOrNull( p.DefaultValue.Value.Value ).AssertNotNull() ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {
@@ -709,16 +697,6 @@ internal partial class ContextualSyntaxGenerator
         return list;
     }
 
-    // TODO: Move to ContextualSyntaxGenerator use conditional simplifier annotation.
-    public static ExpressionSyntax LiteralExpression( string? s )
-        => s == null
-            ? ParenthesizedExpression(
-                    SyntaxFactory.CastExpression(
-                        NullableType( PredefinedType( Token( SyntaxKind.StringKeyword ) ) ),
-                        SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
-                .WithAdditionalAnnotations( Simplifier.Annotation )
-            : LiteralNonNullExpression( s );
-
     public CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {
         if ( syntax is CastExpressionSyntax cast && cast.Type.IsEquivalentTo( type, topLevel: false ) )
@@ -777,7 +755,7 @@ internal partial class ContextualSyntaxGenerator
             List(
                 statements.Select(
                     s => NeedsLineFeed( s )
-                        ? s.WithTrailingLineFeedIfNecessary( this._context )
+                        ? s.WithOptionalTrailingLineFeed( this._context )
                         : s ) ),
             Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
 
@@ -785,11 +763,11 @@ internal partial class ContextualSyntaxGenerator
         SyntaxKind disableOrRestoreKind,
         SeparatedSyntaxList<ExpressionSyntax> errorCodes )
         => SyntaxFactory.PragmaWarningDirectiveTrivia(
-            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
+            Token( this._context.RequiredElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
             TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
             TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
             TokenWithTrailingSpace( disableOrRestoreKind ),
             errorCodes,
-            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.ElasticEndOfLineTriviaList ),
+            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.RequiredElasticEndOfLineTriviaList ),
             isActive: true );
 }

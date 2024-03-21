@@ -149,9 +149,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
@@ -263,14 +263,14 @@ namespace Metalama.Framework.Engine.Linking
                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
                             : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                         VariableDeclaration(
-                            eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                            eventType.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                             SingletonSeparatedList(
                                 VariableDeclarator(
                                     Identifier( GetBackingFieldName( symbol ) ),
                                     null,
                                     initializer ) ) ) )
                     .NormalizeWhitespaceIfNecessary( context )
-                    .WithTriviaIfNecessary(
+                    .WithOptionalTrivia(
                         context.ElasticEndOfLineTriviaList,
                         context.TwoElasticEndOfLinesTriviaList,
                         this.SyntaxGenerationOptions )
@@ -366,7 +366,7 @@ namespace Metalama.Framework.Engine.Linking
                         Identifier( name ),
                         cleanAccessorList )
                     .NormalizeWhitespaceIfNecessary( context )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
+                    .WithOptionalLeadingAndTrailingLineFeed( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

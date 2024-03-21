@@ -41,7 +41,8 @@ namespace Metalama.Framework.Engine.Linking
                             recordParameter.Type.AssertNotNull(),
                             EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
-                            symbol ) );
+                            symbol,
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -107,7 +108,7 @@ namespace Metalama.Framework.Engine.Linking
                     PropertyDeclaration(
                         FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
                         TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                        recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                        recordParameter.Type.AssertNotNull().WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         recordParameter.Identifier,
                         AccessorList( List( generatedAccessors ) ),
@@ -182,7 +183,7 @@ namespace Metalama.Framework.Engine.Linking
                 PropertyDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                    type.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     identifier,
                     AccessorList( List( new[] { getAccessor, setAccessor } ) ),

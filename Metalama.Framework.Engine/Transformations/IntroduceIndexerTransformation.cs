@@ -25,7 +25,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
             IndexerDeclaration(
                 indexerBuilder.GetAttributeLists( context ),
                 indexerBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 indexerBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
                         (NameSyntax) syntaxGenerator.Type( indexerBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )

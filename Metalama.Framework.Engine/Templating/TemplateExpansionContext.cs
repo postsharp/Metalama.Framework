@@ -520,7 +520,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 return
                     Block(
                             SyntaxFactoryEx.DiscardStatement(
-                                _currentSyntaxSerializationContext.Value!.SyntaxGenerator.SafeCastExpression(
+                                CurrentSyntaxSerializationContext.SyntaxGenerator.SafeCastExpression(
                                     PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
                                     returnExpression ) ),
                             ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )

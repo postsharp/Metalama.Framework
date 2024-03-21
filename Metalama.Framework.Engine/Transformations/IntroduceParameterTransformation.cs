@@ -30,7 +30,7 @@ internal sealed class IntroduceParameterTransformation : BaseTransformation, IMe
             default,
             default,
             syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type.GetSymbol() )
-                .WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, syntaxGenerationContext.Options ),
+                .WithOptionalTrailingTrivia( SyntaxFactory.ElasticSpace, syntaxGenerationContext.Options ),
             SyntaxFactory.Identifier( this.Parameter.Name ),
             null );
 

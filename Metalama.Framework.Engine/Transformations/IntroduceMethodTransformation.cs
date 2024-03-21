@@ -50,7 +50,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                         context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
@@ -69,7 +69,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ),
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
                         context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
@@ -112,7 +112,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                 MethodDeclaration(
                     methodBuilder.GetAttributeLists( context ),
                     methodBuilder.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.ReturnType( methodBuilder ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                    context.SyntaxGenerator.ReturnType( methodBuilder ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     methodBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )

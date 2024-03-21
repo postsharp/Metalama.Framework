@@ -82,9 +82,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}'." )
                     };
 
@@ -164,20 +164,20 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         this.FilterAttributesOnSpecialImpl( symbol ),
                         modifiers,
-                        @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                        @operator.ReturnType.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                         null,
                         Identifier( name ),
                         null,
                         this.FilterAttributesOnSpecialImpl(
                             symbol.Parameters,
-                            @operator.ParameterList.WithTrailingTriviaIfNecessary(
+                            @operator.ParameterList.WithOptionalTrailingTrivia(
                                 default(SyntaxTriviaList),
                                 this.SyntaxGenerationOptions ) ),
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody,
                         expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
+                    .WithOptionalLeadingAndTrailingLineFeed( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

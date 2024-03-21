@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -29,9 +30,6 @@ internal static partial class SyntaxFactoryEx
 
     internal static SyntaxToken TokenWithTrailingSpace( SyntaxKind kind )
         => _tokensWithTrailingSpace.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new SyntaxTriviaList( SyntaxFactory.ElasticSpace ) ) );
-
-    internal static SyntaxToken TokenWithTrailingLineFeed( SyntaxKind kind )
-        => _tokensWithLineFeed.GetOrAdd( kind, static k => SyntaxFactory.Token( default, k, new SyntaxTriviaList( SyntaxFactory.ElasticLineFeed ) ) );
 
     internal static SyntaxToken InvocationRefKindToken( this RefKind refKind )
         => refKind switch
@@ -116,9 +114,6 @@ internal static partial class SyntaxFactoryEx
     private static SyntaxToken LiteralImpl<T>( T value, ObjectDisplayOptions options = ObjectDisplayOptions.None )
         => LiteralFormatter<T>.Instance.Format( value, options );
 
-    public static ExpressionSyntax LiteralExpression( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
-        => LiteralExpressionOrNull( obj, options ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
-
     public static TypeSyntax ExpressionSyntaxType { get; } = SyntaxFactory.QualifiedName(
         SyntaxFactory.QualifiedName(
             SyntaxFactory.QualifiedName(
@@ -130,6 +125,12 @@ internal static partial class SyntaxFactoryEx
                 SyntaxFactory.IdentifierName( "CSharp" ) ),
             SyntaxFactory.IdentifierName( "Syntax" ) ),
         SyntaxFactory.IdentifierName( "ExpressionSyntax" ) );
+
+    public static LiteralExpressionSyntax LiteralExpression( object literal, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+    {
+        return (LiteralExpressionSyntax) LiteralExpressionOrNull( literal, options )
+               ?? throw new ArgumentOutOfRangeException( nameof(literal), $"'{literal}' is not a valid literal." );
+    }
 
     public static ExpressionSyntax? LiteralExpressionOrNull( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
         => obj switch
@@ -153,6 +154,15 @@ internal static partial class SyntaxFactoryEx
             bool b => LiteralExpression( b ),
             _ => null
         };
+
+    public static ExpressionSyntax LiteralExpression( string? s )
+        => s == null
+            ? SyntaxFactory.ParenthesizedExpression(
+                    SyntaxFactory.CastExpression(
+                        SyntaxFactory.NullableType( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) ),
+                        SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
+                .WithAdditionalAnnotations( Simplifier.Annotation )
+            : LiteralNonNullExpression( s );
 
     public static ExpressionSyntax ParseExpressionSafe( string text )
     {

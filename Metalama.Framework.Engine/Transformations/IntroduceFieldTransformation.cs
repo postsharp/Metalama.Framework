@@ -45,7 +45,7 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
                 fieldBuilder.GetSyntaxModifierList(),
                 VariableDeclaration(
                     syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                        .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( fieldBuilder.Name ),

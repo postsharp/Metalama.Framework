@@ -36,6 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             private readonly List<ITransformation> _observableTransformations;
             private readonly List<ITransformation> _replacedTransformations;
             private readonly List<ITransformation> _nonObservableTransformations;
+            static SyntaxGenerationContext _testGenerationContext = SyntaxGenerationContext.Contextless;
 
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
@@ -758,7 +759,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .WithBody(
                         method.ReturnType.ToString() == "void"
                             ? Block()
-                            : SyntaxFactoryEx.FormattedBlock(
+                            : _testGenerationContext.SyntaxGenerator.FormattedBlock(
                                 ReturnStatement(
                                     Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                     LiteralExpression(
@@ -786,7 +787,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                                                 a
                                                     .WithExpressionBody( null )
                                                     .WithBody(
-                                                        SyntaxFactoryEx.FormattedBlock(
+                                                        _testGenerationContext.SyntaxGenerator.FormattedBlock(
                                                             ReturnStatement(
                                                                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                                                                 LiteralExpression(

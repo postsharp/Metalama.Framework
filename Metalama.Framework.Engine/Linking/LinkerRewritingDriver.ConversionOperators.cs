@@ -80,9 +80,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                             arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}.'" )
                     };
 
@@ -124,7 +124,8 @@ namespace Metalama.Framework.Engine.Linking
                 substitutedBody.WithSourceCodeAnnotation(),
                 substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
-                GetOriginalImplMemberName( symbol ) );
+                GetOriginalImplMemberName( symbol ),
+                generationContext );
         }
 
         private MemberDeclarationSyntax GetEmptyImplConversionOperator(
@@ -139,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
                         DefaultExpression( @operator.Type ),
                         Token( SyntaxKind.SemicolonToken ) ) );
 
-            return this.GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), context );
         }
 
         private MemberDeclarationSyntax GetSpecialImplConversionOperator(
@@ -147,7 +148,8 @@ namespace Metalama.Framework.Engine.Linking
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
             IMethodSymbol symbol,
-            string name )
+            string name,
+            SyntaxGenerationContext context )
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
@@ -156,19 +158,19 @@ namespace Metalama.Framework.Engine.Linking
             return MethodDeclaration(
                     this.FilterAttributesOnSpecialImpl( symbol ),
                     modifiers,
-                    @operator.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                    @operator.Type.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     Identifier( name ),
                     null,
                     this.FilterAttributesOnSpecialImpl(
                         symbol.Parameters,
-                        @operator.ParameterList.WithTrailingTriviaIfNecessary(
+                        @operator.ParameterList.WithOptionalTrailingTrivia(
                             default(SyntaxTriviaList),
                             this.SyntaxGenerationOptions ) ),
                     List<TypeParameterConstraintClauseSyntax>(),
                     body,
                     expressionBody )
-                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
+                .WithOptionalLeadingAndTrailingLineFeed( context )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 

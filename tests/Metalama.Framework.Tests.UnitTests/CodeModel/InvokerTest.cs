@@ -62,17 +62,17 @@ class TargetCode
                 // Test normal case.
                 AssertEx.DynamicEquals(
                     toString.With( new TypedExpressionSyntaxImpl( generator.ThisExpression(), syntaxGenerationContext ) )
-                        .Invoke( new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
                     toString.With( new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ), InvokerOptions.NullConditional )
-                        .Invoke( new TypedExpressionSyntaxImpl( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.With( new TypedExpressionSyntaxImpl( generator.LiteralExpression( 42 ), syntaxGenerationContext ) )
-                        .Invoke( new TypedExpressionSyntaxImpl( generator.LiteralExpression( 43 ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( 42 ), syntaxGenerationContext ) )
+                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( 43 ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)42).ToString((global::System.String)43)" );
 
                 // Test static call.

@@ -52,13 +52,13 @@ internal sealed class TypeOfRewriter
                             typeSymbol.GetReflectionFullName(),
                             typeSymbol.GetReflectionToStringName()
                         }
-                        .SelectAsArray( s => Argument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( s ) ) ) );
+                        .SelectAsArray( s => Argument( SyntaxFactoryEx.LiteralExpression( s ) ) ) );
         }
         else
         {
             return InvocationExpression( memberAccess )
                 .AddArgumentListArguments(
-                    Argument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.GetSerializableTypeId().Id ) ),
+                    Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSerializableTypeId().Id ) ),
                     Argument( substitutions ) );
         }
     }

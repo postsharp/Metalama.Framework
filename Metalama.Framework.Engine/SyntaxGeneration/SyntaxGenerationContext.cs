@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration
 {
-    internal sealed class SyntaxGenerationContext
+    public sealed class SyntaxGenerationContext
     {
         private readonly CompilationContext? _compilationContext;
 
@@ -58,12 +58,14 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         [Memo]
         public SyntaxTrivia ElasticEndOfLineTrivia => SyntaxFactory.ElasticEndOfLine( this.EndOfLine );
 
+        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.AddLineFeeds ? this.RequiredElasticEndOfLineTriviaList : default;
+
         [Memo]
-        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.NormalizeWhitespace ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia ) : default;
+        public SyntaxTriviaList RequiredElasticEndOfLineTriviaList => new( this.ElasticEndOfLineTrivia );
 
         [Memo]
         public SyntaxTriviaList TwoElasticEndOfLinesTriviaList
-            => this.Options.NormalizeWhitespace ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia, this.ElasticEndOfLineTrivia ) : default;
+            => this.Options.AddLineFeeds ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia, this.ElasticEndOfLineTrivia ) : default;
 
         private SyntaxGenerationContext(
             bool isNullOblivious,

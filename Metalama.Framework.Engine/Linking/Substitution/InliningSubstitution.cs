@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             VariableDeclaration(
                                 syntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
                                 SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
-                        .WithTrailingLineFeedIfNecessary( context.SyntaxGenerationContext )
+                        .WithOptionalTrailingLineFeed( context.SyntaxGenerationContext )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
             }
 
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     LabeledStatement(
                             Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
                             EmptyStatement() )
-                        .WithTrailingLineFeedIfNecessary( context.SyntaxGenerationContext )
+                        .WithOptionalTrailingLineFeed( context.SyntaxGenerationContext )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
             }

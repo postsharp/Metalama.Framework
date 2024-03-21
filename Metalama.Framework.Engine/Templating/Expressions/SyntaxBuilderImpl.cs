@@ -86,7 +86,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     private ExpressionSyntax GetLiteralImpl( object value, SpecialType specialType, bool stronglyTyped )
     {
         var options = stronglyTyped ? ObjectDisplayOptions.IncludeTypeSuffix : ObjectDisplayOptions.None;
-        var expression = (LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value, options );
+        var expression = SyntaxFactoryEx.LiteralExpression( value, options );
 
         if ( stronglyTyped && specialType != SpecialType.String )
         {

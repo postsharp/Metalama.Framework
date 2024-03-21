@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -330,6 +331,9 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.ExternalAnnotationProvider = annotationProvider;
         }
+
+        public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
+            => this.CompilationContext.GetSyntaxGenerationContext( options, node );
 
         internal CompilationModel WithTransformationsAndAspectInstances(
             IReadOnlyCollection<ITransformation>? introducedDeclarations,

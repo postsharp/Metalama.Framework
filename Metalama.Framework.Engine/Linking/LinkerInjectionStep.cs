@@ -249,7 +249,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 #pragma warning restore CA1307
 
         // Rewrite syntax trees.
-        var intermediateCompilation = input.CompilationModel.PartialCompilation;
+        var inputCompilation = input.CompilationModel.PartialCompilation;
         var transformations = new ConcurrentBag<SyntaxTreeTransformation>();
 
         async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
@@ -272,12 +272,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             }
         }
 
-        await this._concurrentTaskRunner.RunInParallelAsync( intermediateCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
+        await this._concurrentTaskRunner.RunInParallelAsync( inputCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
 
-        var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
+        var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( inputCompilation.LanguageOptions );
         transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
-        intermediateCompilation = intermediateCompilation.Update( transformations );
+        var intermediateCompilation = inputCompilation.Update( transformations );
 
         // Report the linker intermediate compilation to tooling/tests.
         this._serviceProvider.GetService<ILinkerObserver>()
@@ -304,6 +304,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         return
             new LinkerInjectionStepOutput(
                 diagnostics,
+                input.SourceCompilationModel,
                 input.CompilationModel,
                 intermediateCompilation,
                 injectionRegistry,

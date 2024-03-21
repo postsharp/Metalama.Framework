@@ -36,11 +36,11 @@ internal sealed partial class LinkerRewritingDriver
                         VariableDeclaration(
                             generationContext.SyntaxGenerator
                                 .Type( primaryConstructorField.Type )
-                                .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.Options ),
+                                .WithOptionalTrailingTrivia( ElasticSpace, generationContext.Options ),
                             SingletonSeparatedList(
                                 VariableDeclarator(
                                     Identifier( TriviaList( ElasticSpace ), GetCleanPrimaryConstructorFieldName( primaryConstructorField ), default ) ) ) ),
-                        TokenWithTrailingLineFeed( SyntaxKind.SemicolonToken ) ) );
+                        Token( SyntaxKind.SemicolonToken ).WithOptionalTrailingLineFeed( generationContext ) ) );
             }
 
             foreach ( var primaryConstructorProperty in this.LateTransformationRegistry.GetPrimaryConstructorProperties( symbol.ContainingType ) )
@@ -176,8 +176,9 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                        (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                         semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                        (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
+                         arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
+                         semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unsupported form of constructor declaration for {symbol}." )
                 };
 

@@ -291,7 +291,8 @@ internal sealed partial class LinkerInjectionStep
 
                             if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
                             {
-                                targetList.Add( ElasticLineFeed );
+                                syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
+                                targetList.Add( syntaxGenerationContext.ElasticEndOfLineTrivia );
                             }
 
                             break;
@@ -311,7 +312,7 @@ internal sealed partial class LinkerInjectionStep
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
-                        .WithTrailingLineFeedIfNecessary( syntaxGenerationContext )
+                        .WithOptionalTrailingLineFeed( syntaxGenerationContext )
                         .WithAdditionalAnnotations(
                             attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
@@ -322,7 +323,7 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( outputTrivia.Any() && !outputAttributeLists.Any() )
                     {
-                        newList = newList.WithLeadingTriviaIfNecessary(
+                        newList = newList.WithOptionalLeadingTrivia(
                             newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ),
                             syntaxGenerationContext.Options );
 
@@ -341,7 +342,7 @@ internal sealed partial class LinkerInjectionStep
 
                     outputAttributeLists[0] =
                         outputAttributeLists[0]
-                            .WithLeadingTriviaIfNecessary(
+                            .WithOptionalLeadingTrivia(
                                 outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
                                 syntaxGenerationContext.Options );
                 }
@@ -494,13 +495,13 @@ internal sealed partial class LinkerInjectionStep
                     {
                         node = (T) node
                             .WithIdentifier(
-                                node.Identifier.WithTrailingTriviaIfNecessary(
+                                node.Identifier.WithOptionalTrailingTrivia(
                                     default,
                                     syntaxGenerationContext.Options.PreserveTrivia || node.Identifier.ContainsDirectives ) )
                             .WithBaseList(
                                 BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                            .WithTrailingTriviaIfNecessary( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
+                            .WithOptionalTrailingTrivia( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
                     }
                     else
                     {
@@ -585,7 +586,7 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                     injectedNode = injectedNode
-                        .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.Options )
+                        .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
                         .WithGeneratedCodeAnnotation(
                             injectedMember.Transformation?.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
@@ -964,7 +965,7 @@ internal sealed partial class LinkerInjectionStep
                             existingParameters.Parameters.Count - 1,
                             newParameters.Select(
                                 x => x.ToSyntax( syntaxGenerationContext )
-                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
+                                    .WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
                 else
                 {
@@ -972,7 +973,7 @@ internal sealed partial class LinkerInjectionStep
                         existingParameters.Parameters.AddRange(
                             newParameters.Select(
                                 x => x.ToSyntax( syntaxGenerationContext )
-                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
+                                    .WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
             }
         }
@@ -986,7 +987,7 @@ internal sealed partial class LinkerInjectionStep
                 return initializerSyntax;
             }
 
-            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ) );
+            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ) );
 
             if ( initializerSyntax == null )
             {
@@ -1342,6 +1343,7 @@ internal sealed partial class LinkerInjectionStep
 
         private IReadOnlyList<MemberDeclarationSyntax> VisitEventFieldDeclarationCore( EventFieldDeclarationSyntax node )
         {
+            var context = this.GetSyntaxGenerationContext( node );
             var originalNode = node;
 
             // Rewrite attributes.
@@ -1362,7 +1364,7 @@ internal sealed partial class LinkerInjectionStep
                         node.Modifiers,
                         Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, context.TwoElasticEndOfLinesTriviaList ) );
 
                     eventDeclaration = this.ReplaceAttributes( eventDeclaration, attributes );
 

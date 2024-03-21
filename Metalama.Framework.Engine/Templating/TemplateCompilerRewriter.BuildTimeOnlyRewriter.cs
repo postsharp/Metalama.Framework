@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating
             public CompileTimeOnlyRewriter( TemplateCompilerRewriter parent )
             {
                 this._parent = parent;
-                this._syntaxGenerator = this._parent.MetaSyntaxFactory.Context.SyntaxGenerator;
+                this._syntaxGenerator = this._parent.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator;
             }
 
             public override SyntaxNode VisitTypeOfExpression( TypeOfExpressionSyntax node )

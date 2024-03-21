@@ -90,10 +90,10 @@ namespace Metalama.Framework.Engine.Linking
                         type,
                         null,
                         Identifier( GetEmptyImplMemberName( symbol ) ),
-                        accessorList.WithTrailingLineFeedIfNecessary( context ),
+                        accessorList.WithOptionalTrailingLineFeed( context ),
                         null,
                         null )
-                    .WithLeadingLineFeedIfNecessary( context )
+                    .WithOptionalLeadingLineFeed( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

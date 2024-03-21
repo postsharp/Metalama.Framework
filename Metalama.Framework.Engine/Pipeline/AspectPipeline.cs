@@ -226,11 +226,10 @@ namespace Metalama.Framework.Engine.Pipeline
                                                                                                         || projectOptions.IsTest;
 
             var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
-            var preserveTrivia = triviaMatters;
 
             projectServiceProviderWithProject =
                 projectServiceProviderWithProject.WithService(
-                    new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia, projectOptions.FormatOutput ) );
+                    new SyntaxGenerationOptions( normalizeWhitespace, triviaMatters, projectOptions.FormatOutput, triviaMatters ) );
 
             // Add MetricsManager.
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

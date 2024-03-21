@@ -99,6 +99,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilationModel,
+                inputCompilationModel,
                 this._rewriter.ReplacedTransformations.Concat(
                         this._rewriter.ObservableTransformations,
                         this._rewriter.NonObservableTransformations )
