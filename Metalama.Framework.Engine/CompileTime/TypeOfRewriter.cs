@@ -52,7 +52,7 @@ internal sealed class TypeOfRewriter
                             typeSymbol.GetReflectionFullName(),
                             typeSymbol.GetReflectionToStringName()
                         }
-                        .SelectAsArray( s => Argument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( s ) ) ) );
+                        .SelectAsArray( s => Argument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( s.AssertNotNull() ) ) ) );
         }
         else
         {

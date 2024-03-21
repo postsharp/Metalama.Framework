@@ -26,5 +26,5 @@ internal abstract class InjectionNameProvider
         IDeclaration targetDeclaration,
         InitializerKind reason );
 
-        internal abstract TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember, SyntaxGenerationContext context );
+    internal abstract TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember, SyntaxGenerationContext context );
 }

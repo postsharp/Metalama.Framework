@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    internal partial class EndOfLineHelper
+    internal class EndOfLineHelper
     {
         /// <summary>
         /// Returns the first EOL string without allocating memory.
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Formatting
                                 break;
 
                             case 2:
-                                switch ( (text[trivia.SpanStart], text[trivia.SpanStart + 1]) )
+                                switch (text[trivia.SpanStart], text[trivia.SpanStart + 1])
                                 {
                                     case ('\r', '\n'):
                                         return "\r\n";

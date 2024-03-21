@@ -97,20 +97,20 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                     ConstructorInitializer(
                         SyntaxKind.ThisConstructorInitializer,
                         ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsArray( x => Argument( IdentifierName( x.Name ) ) ) ) ) ),
-                        newMethodBody,
-                        null );
+                    newMethodBody,
+                    null );
 
         return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
     }
 
     private ParameterListSyntax GetParameterList( MemberInjectionContext context )
     {
-            var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true );
+        var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true );
 
-            var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType(
-                this.ParentAdvice.Aspect,
-                this.OverriddenDeclaration,
-                context.SyntaxGenerationContext );
+        var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType(
+            this.ParentAdvice.Aspect,
+            this.OverriddenDeclaration,
+            context.SyntaxGenerationContext );
 
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
     }

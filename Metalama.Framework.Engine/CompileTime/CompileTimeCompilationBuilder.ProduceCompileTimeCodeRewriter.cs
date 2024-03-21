@@ -308,9 +308,9 @@ internal sealed partial class CompileTimeCompilationBuilder
                                         var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
                                             .WithArgumentList(
                                                 AttributeArgumentList(
-                                                        SingletonSeparatedList(
-                                                            AttributeArgument(
-                                                                this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( originalId ) ) ) ) );
+                                                    SingletonSeparatedList(
+                                                        AttributeArgument(
+                                                            this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( originalId ) ) ) ) );
 
                                         // Transform the type.
                                         TypeDeclarationSyntax transformedChild;
@@ -575,12 +575,12 @@ internal sealed partial class CompileTimeCompilationBuilder
                                                     Identifier( p.Name ),
                                                     default ) ) ) ),
                                     default,
-                                        method.ReturnType.SpecialType == SpecialType.System_Void
-                                            ? this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock()
-                                            : null,
+                                    method.ReturnType.SpecialType == SpecialType.System_Void
+                                        ? this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                                        : null,
                                     method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
                                     method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
-                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine );
+                                .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine );
 
                             members.Add( newMethod );
                         }
@@ -617,9 +617,9 @@ internal sealed partial class CompileTimeCompilationBuilder
                                     constructorName,
                                     ParameterList(),
                                     null,
-                                        this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock(),
+                                    this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock(),
                                     null )
-                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
+                                .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                     }
 
                     var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, constructorName );
@@ -627,8 +627,8 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                     if ( deserializingConstructor != null && serializerType != null )
                     {
-                            members.Add( deserializingConstructor.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
-                            members.Add( serializerType.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
+                        members.Add( deserializingConstructor.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
+                        members.Add( serializerType.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                     }
                     else
                     {
@@ -647,8 +647,9 @@ internal sealed partial class CompileTimeCompilationBuilder
             {
                 var originalPathAttribute = Attribute( this._originalPathTypeSyntax )
                     .WithArgumentList(
-                        AttributeArgumentList( SingletonSeparatedList(
-                                    AttributeArgument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
+                        AttributeArgumentList(
+                            SingletonSeparatedList(
+                                AttributeArgument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
 
                 transformedNode = transformedNode
                     .WithAttributeLists( transformedNode.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalPathAttribute ) ) ) );
@@ -784,10 +785,10 @@ internal sealed partial class CompileTimeCompilationBuilder
                 }
                 else if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                 {
-                        yield return this._helper.WithThrowNotSupportedExceptionBody(
-                            node,
-                            "Template code cannot be directly executed.",
-                            this._syntaxGenerationContext );
+                    yield return this._helper.WithThrowNotSupportedExceptionBody(
+                        node,
+                        "Template code cannot be directly executed.",
+                        this._syntaxGenerationContext );
                 }
                 else
                 {
@@ -1461,7 +1462,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 if ( typeSymbol != null )
                 {
-                        return this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.Name );
+                    return this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.Name );
                 }
             }
 
@@ -1518,7 +1519,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         private TypeSyntax CreateTypeSyntax( INamespaceOrTypeSymbol symbol )
         {
             var unnestedType = this._currentContext.NestedType;
-                var type = this._syntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( symbol );
+            var type = this._syntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( symbol );
 
             static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
             {

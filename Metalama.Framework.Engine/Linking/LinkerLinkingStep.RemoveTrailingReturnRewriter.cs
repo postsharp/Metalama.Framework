@@ -26,7 +26,7 @@ internal sealed partial class LinkerLinkingStep
                     if ( node.Statements[i] is ReturnStatementSyntax { Expression: null } returnStatement )
                     {
                         returnStatementsToRemove++;
-                            preserveTrivia = preserveTrivia || SyntaxExtensions.ShouldTriviaBePreserved( returnStatement, generationContext.Options );
+                        preserveTrivia = preserveTrivia || SyntaxExtensions.ShouldTriviaBePreserved( returnStatement, generationContext.Options );
                     }
                     else
                     {

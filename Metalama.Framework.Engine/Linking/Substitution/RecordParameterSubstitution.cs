@@ -30,7 +30,7 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {
-            var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
+        var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
 
         switch (currentNode, this._targetAccessor.MethodKind)
         {
@@ -38,7 +38,7 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
                 if ( this._returnVariableIdentifier != null )
                 {
                     return
-                            syntaxGenerator.FormattedBlock(
+                        syntaxGenerator.FormattedBlock(
                                 ExpressionStatement(
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
@@ -49,20 +49,20 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
                 else
                 {
                     return
-                            syntaxGenerator.FormattedBlock(
+                        syntaxGenerator.FormattedBlock(
                                 ReturnStatement(
                                     Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                                     CreateFieldAccessExpression(),
-                                        Token(
-                                            TriviaList(),
-                                            SyntaxKind.SemicolonToken,
-                                            substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
+                                    Token(
+                                        TriviaList(),
+                                        SyntaxKind.SemicolonToken,
+                                        substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
 
             case (ParameterSyntax, MethodKind.PropertySet):
                 return
-                        syntaxGenerator.FormattedBlock(
+                    syntaxGenerator.FormattedBlock(
                             ExpressionStatement(
                                 AssignmentExpression(
                                     SyntaxKind.SimpleAssignmentExpression,

@@ -38,8 +38,8 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
                 PropertyDeclaration(
                     List<AttributeListSyntax>(),
                     this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(
@@ -84,7 +84,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         BlockSyntax CreateGetterBody()
         {
             return
-                    context.SyntaxGenerator.FormattedBlock(
+                context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         CreateAccessTargetExpression(),
@@ -94,7 +94,7 @@ internal sealed class RedirectPropertyTransformation : OverrideMemberTransformat
         BlockSyntax CreateSetterBody()
         {
             return
-                    context.SyntaxGenerator.FormattedBlock(
+                context.SyntaxGenerator.FormattedBlock(
                     ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,

@@ -52,11 +52,11 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                    members.Add(
-                        this.GetTrampolineForProperty(
-                            propertyDeclaration,
-                            lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                            generationContext ) );
+                members.Add(
+                    this.GetTrampolineForProperty(
+                        propertyDeclaration,
+                        lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        generationContext ) );
             }
 
             if ( !propertyDeclaration.IsAutoPropertyDeclaration()
@@ -83,8 +83,8 @@ internal sealed partial class LinkerRewritingDriver
                     this.GetEmptyImplProperty(
                         symbol,
                         List<AttributeListSyntax>(),
-                            propertyDeclaration.Type,
-                            generationContext ) );
+                        propertyDeclaration.Type,
+                        generationContext ) );
             }
 
             return members;
@@ -107,7 +107,7 @@ internal sealed partial class LinkerRewritingDriver
 
             return new[]
             {
-                    this.GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
+                this.GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                 this.GetOriginalImplProperty(
                     symbol,
                     FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
@@ -161,12 +161,12 @@ internal sealed partial class LinkerRewritingDriver
                             TokenList(),
                             Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ),
                             Block(
-                                    Token(
-                                        generationContext.ElasticEndOfLineTriviaList,
-                                        SyntaxKind.OpenBraceToken,
-                                        generationContext.ElasticEndOfLineTriviaList ),
+                                Token(
+                                    generationContext.ElasticEndOfLineTriviaList,
+                                    SyntaxKind.OpenBraceToken,
+                                    generationContext.ElasticEndOfLineTriviaList ),
                                 SingletonList<StatementSyntax>( linkedBody ),
-                                    Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ),
+                                Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ),
                             null,
                             default ) );
                 }
@@ -205,7 +205,7 @@ internal sealed partial class LinkerRewritingDriver
                 propertyDeclaration.Identifier switch
                 {
                     var identifier when identifier.TrailingTrivia.HasAnyNewLine() => accessorListLeadingTrivia,
-                        _ => generationContext.ElasticEndOfLineTriviaList.AddRange( accessorListLeadingTrivia )
+                    _ => generationContext.ElasticEndOfLineTriviaList.AddRange( accessorListLeadingTrivia )
                 };
 
             return propertyDeclaration.PartialUpdate(
@@ -244,12 +244,12 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                        (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                         arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                         semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                     { SemicolonToken: var semicolonToken } => (
-                            semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
-                            generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList),
+                        semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
+                        generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList),
                     _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                 };
 
@@ -298,7 +298,7 @@ internal sealed partial class LinkerRewritingDriver
                 attributes,
                 TokenList( modifiers ),
                 VariableDeclaration(
-                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( GetBackingFieldName( symbol ) ),
@@ -307,12 +307,12 @@ internal sealed partial class LinkerRewritingDriver
             .WithTriviaIfNecessary(
                 new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
                 new SyntaxTriviaList( ElasticLineFeed ),
-                    this.SyntaxGenerationOptions )
+                this.SyntaxGenerationOptions )
             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
     private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => generationContext.SyntaxGenerator.FormattedBlock(
+        => generationContext.SyntaxGenerator.FormattedBlock(
                 ReturnStatement(
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                     MemberAccessExpression(
@@ -325,7 +325,7 @@ internal sealed partial class LinkerRewritingDriver
             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
     private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => generationContext.SyntaxGenerator.FormattedBlock(
+        => generationContext.SyntaxGenerator.FormattedBlock(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
@@ -422,8 +422,8 @@ internal sealed partial class LinkerRewritingDriver
     private MemberDeclarationSyntax GetEmptyImplProperty(
         IPropertySymbol symbol,
         SyntaxList<AttributeListSyntax> attributes,
-            TypeSyntax type,
-            SyntaxGenerationContext context )
+        TypeSyntax type,
+        SyntaxGenerationContext context )
     {
         var setAccessorKind =
             symbol switch
@@ -452,7 +452,7 @@ internal sealed partial class LinkerRewritingDriver
                             setAccessorKind != null
                                 ? AccessorDeclaration(
                                     setAccessorKind.Value,
-                                        context.SyntaxGenerator.FormattedBlock() )
+                                    context.SyntaxGenerator.FormattedBlock() )
                                 : null
                         }.Where( a => a != null )
                         .AssertNoneNull() ) );
@@ -497,20 +497,20 @@ internal sealed partial class LinkerRewritingDriver
                     propertyType,
                     null,
                     Identifier( name ),
-                        cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions ),
+                    cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions ),
                     expressionBody,
                     initializer.WithSourceCodeAnnotation(),
                     expressionBody != null || initializer != null
                         ? Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) )
                         : default )
-                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions )
+                .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
     private PropertyDeclarationSyntax GetTrampolineForProperty(
         PropertyDeclarationSyntax property,
-            IntermediateSymbolSemantic<IPropertySymbol> targetSymbol,
-            SyntaxGenerationContext context )
+        IntermediateSymbolSemantic<IPropertySymbol> targetSymbol,
+        SyntaxGenerationContext context )
     {
         var getAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.GetAccessorDeclaration );
         var setAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );
@@ -524,7 +524,7 @@ internal sealed partial class LinkerRewritingDriver
                                 getAccessor != null
                                     ? AccessorDeclaration(
                                         SyntaxKind.GetAccessorDeclaration,
-                                            context.SyntaxGenerator.FormattedBlock(
+                                        context.SyntaxGenerator.FormattedBlock(
                                             ReturnStatement(
                                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                                 GetInvocationTarget(),
@@ -533,7 +533,7 @@ internal sealed partial class LinkerRewritingDriver
                                 setAccessor != null
                                     ? AccessorDeclaration(
                                         SyntaxKind.SetAccessorDeclaration,
-                                            context.SyntaxGenerator.FormattedBlock(
+                                        context.SyntaxGenerator.FormattedBlock(
                                             ExpressionStatement(
                                                 AssignmentExpression(
                                                     SyntaxKind.SimpleAssignmentExpression,
@@ -545,7 +545,7 @@ internal sealed partial class LinkerRewritingDriver
                 expressionBody: null,
                 initializer: null,
                 semicolonToken: default(SyntaxToken) )
-                .WithTriviaFromIfNecessary( property, this.SyntaxGenerationOptions );
+            .WithTriviaFromIfNecessary( property, this.SyntaxGenerationOptions );
 
         ExpressionSyntax GetInvocationTarget()
         {

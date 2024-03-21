@@ -86,17 +86,16 @@ internal sealed class PropertyGetLocalDeclarationInliner : PropertyGetInliner
             throw new AssertionFailedException( $"The node is not expected to be a statement." );
         }
 
-            return syntaxGenerationContext.SyntaxGenerator.FormattedBlock(
+        return syntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                 LocalDeclarationStatement(
                         VariableDeclaration(
                             syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
                             SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
-                        .NormalizeWhitespaceIfNecessary( syntaxGenerationContext )
-                        .WithTrailingLineFeedIfNecessary( syntaxGenerationContext ),
+                    .NormalizeWhitespaceIfNecessary( syntaxGenerationContext )
+                    .WithTrailingLineFeedIfNecessary( syntaxGenerationContext ),
                 linkedTargetBody )
             .WithFormattingAnnotationsFrom( currentStatement )
             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                .AddTriviaFromIfNecessary( currentNode, syntaxGenerationContext.Options );
-        }
+            .AddTriviaFromIfNecessary( currentNode, syntaxGenerationContext.Options );
     }
 }

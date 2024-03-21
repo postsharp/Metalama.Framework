@@ -23,8 +23,8 @@ internal sealed class SubstitutionContext
         this.RewritingDriver = rewritingDriver;
         this.SyntaxGenerationContext = syntaxGenerationContext;
 
-            this._substitutionDictionary =
-                new Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>>( () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
+        this._substitutionDictionary =
+            new Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>?>( () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
     }
 
     internal SubstitutionContext WithInliningContext( InliningContextIdentifier inliningContextId )

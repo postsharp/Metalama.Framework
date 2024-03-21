@@ -16,8 +16,8 @@ internal sealed partial class LinkerRewritingDriver
 {
     private IReadOnlyList<MemberDeclarationSyntax> RewriteField(
         FieldDeclarationSyntax fieldDeclaration,
-            IFieldSymbol symbol,
-            SyntaxGenerationContext context )
+        IFieldSymbol symbol,
+        SyntaxGenerationContext context )
     {
         Invariant.Assert( !this.InjectionRegistry.IsOverrideTarget( symbol ) );
 
@@ -28,11 +28,11 @@ internal sealed partial class LinkerRewritingDriver
              && this.ShouldGenerateEmptyMember( symbol ) )
         {
             members.Add(
-                    GetEmptyImplField(
+                GetEmptyImplField(
                     symbol,
                     List<AttributeListSyntax>(),
-                        fieldDeclaration.Declaration.Type,
-                        context ) );
+                    fieldDeclaration.Declaration.Type,
+                    context ) );
         }
 
         if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
@@ -48,11 +48,11 @@ internal sealed partial class LinkerRewritingDriver
         return members;
     }
 
-        private static MemberDeclarationSyntax GetEmptyImplField(
+    private static MemberDeclarationSyntax GetEmptyImplField(
         IFieldSymbol symbol,
         SyntaxList<AttributeListSyntax> attributes,
-            TypeSyntax type,
-            SyntaxGenerationContext context )
+        TypeSyntax type,
+        SyntaxGenerationContext context )
     {
         var setAccessorKind =
             symbol switch
@@ -76,7 +76,7 @@ internal sealed partial class LinkerRewritingDriver
                             Token( SyntaxKind.SemicolonToken ) ),
                         AccessorDeclaration(
                             setAccessorKind,
-                                context.SyntaxGenerator.FormattedBlock() )
+                            context.SyntaxGenerator.FormattedBlock() )
                     } ) );
 
         return
@@ -90,10 +90,10 @@ internal sealed partial class LinkerRewritingDriver
                     type,
                     null,
                     Identifier( GetEmptyImplMemberName( symbol ) ),
-                        accessorList.WithTrailingLineFeedIfNecessary( context ),
+                    accessorList.WithTrailingLineFeedIfNecessary( context ),
                     null,
                     null )
-                    .WithLeadingLineFeedIfNecessary( context )
+                .WithLeadingLineFeedIfNecessary( context )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 }

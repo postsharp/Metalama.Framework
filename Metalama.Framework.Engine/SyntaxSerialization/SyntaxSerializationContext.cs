@@ -37,7 +37,7 @@ internal sealed class SyntaxSerializationContext : ISyntaxGenerationContext
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+    public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     public DisposeAction WithSerializeObject<T>( [UsedImplicitly] T o )
     {

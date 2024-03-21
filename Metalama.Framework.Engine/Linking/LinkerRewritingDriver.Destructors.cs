@@ -33,7 +33,7 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                    members.Add( this.GetTrampolineDestructor( destructorDeclaration, lastOverride, generationContext ) );
+                members.Add( this.GetTrampolineDestructor( destructorDeclaration, lastOverride, generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -47,7 +47,7 @@ internal sealed partial class LinkerRewritingDriver
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                    members.Add( this.GetEmptyImplDestructor( destructorDeclaration, symbol, generationContext ) );
+                members.Add( this.GetEmptyImplDestructor( destructorDeclaration, symbol, generationContext ) );
             }
 
             return members;
@@ -82,9 +82,9 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                        (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                         arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                         semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
                 };
 
@@ -129,18 +129,18 @@ internal sealed partial class LinkerRewritingDriver
             substitutedBody.WithSourceCodeAnnotation(),
             substitutedExpressionBody.WithSourceCodeAnnotation(),
             symbol,
-                GetOriginalImplMemberName( symbol ),
-                generationContext );
+            GetOriginalImplMemberName( symbol ),
+            generationContext );
     }
 
     private MemberDeclarationSyntax GetEmptyImplDestructor(
         DestructorDeclarationSyntax destructor,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext context )
+        IMethodSymbol symbol,
+        SyntaxGenerationContext context )
     {
-            var emptyBody = context.SyntaxGenerator.FormattedBlock();
+        var emptyBody = context.SyntaxGenerator.FormattedBlock();
 
-            return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), context );
+        return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), context );
     }
 
     private MemberDeclarationSyntax GetSpecialImplDestructor(
@@ -148,8 +148,8 @@ internal sealed partial class LinkerRewritingDriver
         BlockSyntax? body,
         ArrowExpressionClauseSyntax? expressionBody,
         IMethodSymbol symbol,
-            string name,
-            SyntaxGenerationContext context )
+        string name,
+        SyntaxGenerationContext context )
     {
         var modifiers = symbol
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
@@ -163,25 +163,25 @@ internal sealed partial class LinkerRewritingDriver
                     null,
                     Identifier( name ),
                     null,
-                        destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions ),
+                    destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions ),
                     List<TypeParameterConstraintClauseSyntax>(),
                     body,
                     expressionBody )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
+                .WithLeadingAndTrailingLineFeedIfNecessary( context )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
-        private DestructorDeclarationSyntax GetTrampolineDestructor(
-            DestructorDeclarationSyntax destructor,
-            IMethodSymbol targetSymbol,
-            SyntaxGenerationContext context )
+    private DestructorDeclarationSyntax GetTrampolineDestructor(
+        DestructorDeclarationSyntax destructor,
+        IMethodSymbol targetSymbol,
+        SyntaxGenerationContext context )
     {
         // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
         return
             destructor
                 .WithBody( GetBody() )
-                    .WithTriviaFromIfNecessary( destructor, this.SyntaxGenerationOptions );
+                .WithTriviaFromIfNecessary( destructor, this.SyntaxGenerationOptions );
 
         BlockSyntax GetBody()
         {
@@ -190,7 +190,7 @@ internal sealed partial class LinkerRewritingDriver
                     MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
                     ArgumentList() );
 
-                return context.SyntaxGenerator.FormattedBlock(
+            return context.SyntaxGenerator.FormattedBlock(
                 ReturnStatement(
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                     invocation,

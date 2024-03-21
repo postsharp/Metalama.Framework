@@ -46,14 +46,14 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {
-            var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
+        var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
 
         switch ( currentNode )
         {
             case ArrowExpressionClauseSyntax { Expression: ThrowExpressionSyntax throwExpressionSyntax }:
                 {
                     return
-                            syntaxGenerator.FormattedBlock(
+                        syntaxGenerator.FormattedBlock(
                                 ThrowStatement(
                                     throwExpressionSyntax.ThrowKeyword,
                                     throwExpressionSyntax.Expression,
@@ -68,21 +68,21 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                     if ( this._referencingSymbol.ReturnsVoid )
                     {
                         return
-                                syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
+                            syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
                         return
-                                syntaxGenerator.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                     ReturnStatement(
                                         Token( arrowExpressionClause.Expression.GetLeadingTrivia(), SyntaxKind.ReturnKeyword, TriviaList( Space ) ),
                                         arrowExpressionClause.Expression,
                                         Token(
                                             TriviaList(),
                                             SyntaxKind.SemicolonToken,
-                                                arrowExpressionClause.Expression.GetTrailingTrivia()
-                                                    .AddLineFeedIfNecessary( substitutionContext.SyntaxGenerationContext ) ) ) )
+                                            arrowExpressionClause.Expression.GetTrailingTrivia()
+                                                .AddLineFeedIfNecessary( substitutionContext.SyntaxGenerationContext ) ) ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                 }
@@ -95,7 +95,7 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                             // Both referencing and target methods return void, expression can be simply changed to 
 
                             return
-                                    syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
+                                syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -108,17 +108,17 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                         if ( this._returnVariableIdentifier != null )
                         {
                             return
-                                    syntaxGenerator.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
                                                 IdentifierName( this._returnVariableIdentifier ),
                                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                                 arrowExpressionClause.Expression ),
-                                                Token(
-                                                    TriviaList(),
-                                                    SyntaxKind.SemicolonToken,
-                                                    substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
+                                            Token(
+                                                TriviaList(),
+                                                SyntaxKind.SemicolonToken,
+                                                substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -128,7 +128,7 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                                 Invariant.Assert( this._returnVariableIdentifier == null );
 
                                 return
-                                        syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
+                                    syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else

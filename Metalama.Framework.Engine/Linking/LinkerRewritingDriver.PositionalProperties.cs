@@ -50,12 +50,12 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                    members.Add(
-                        this.GetTrampolineForPositionalProperty(
-                            recordParameter.Identifier,
-                            recordParameter.Type.AssertNotNull(),
-                            lastOverride,
-                            generationContext ) );
+                members.Add(
+                    this.GetTrampolineForPositionalProperty(
+                        recordParameter.Identifier,
+                        recordParameter.Type.AssertNotNull(),
+                        lastOverride,
+                        generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -66,8 +66,8 @@ internal sealed partial class LinkerRewritingDriver
                     this.GetEmptyImplProperty(
                         symbol,
                         List<AttributeListSyntax>(),
-                            recordParameter.Type.AssertNotNull(),
-                            generationContext ) );
+                        recordParameter.Type.AssertNotNull(),
+                        generationContext ) );
             }
 
             return members;
@@ -107,7 +107,7 @@ internal sealed partial class LinkerRewritingDriver
                 PropertyDeclaration(
                     FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
                     TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                        recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                    recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     recordParameter.Identifier,
                     AccessorList( List( generatedAccessors ) ),
@@ -153,16 +153,16 @@ internal sealed partial class LinkerRewritingDriver
         }
     }
 
-        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty(
-            SyntaxToken identifier,
-            TypeSyntax type,
-            IPropertySymbol targetSymbol,
-            SyntaxGenerationContext context )
+    private PropertyDeclarationSyntax GetTrampolineForPositionalProperty(
+        SyntaxToken identifier,
+        TypeSyntax type,
+        IPropertySymbol targetSymbol,
+        SyntaxGenerationContext context )
     {
         var getAccessor =
             AccessorDeclaration(
                 SyntaxKind.GetAccessorDeclaration,
-                    context.SyntaxGenerator.FormattedBlock(
+                context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         GetInvocationTarget(),
@@ -171,7 +171,7 @@ internal sealed partial class LinkerRewritingDriver
         var setAccessor =
             AccessorDeclaration(
                 targetSymbol.GetMethod.AssertNotNull().IsInitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    context.SyntaxGenerator.FormattedBlock(
+                context.SyntaxGenerator.FormattedBlock(
                     ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
@@ -182,7 +182,7 @@ internal sealed partial class LinkerRewritingDriver
             PropertyDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                 null,
                 identifier,
                 AccessorList( List( new[] { getAccessor, setAccessor } ) ),

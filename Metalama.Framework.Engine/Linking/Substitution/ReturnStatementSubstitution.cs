@@ -44,7 +44,7 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {
-            var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
+        var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
 
         switch ( currentNode )
         {
@@ -54,9 +54,9 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                     if ( returnStatement.Expression != null )
                     {
                         return
-                                syntaxGenerator.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                     CreateAssignmentStatement( returnStatement.Expression )
-                                            .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
+                                        .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
                                         .WithOriginalLocationAnnotationFrom( returnStatement ),
                                     CreateGotoStatement() )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -72,20 +72,20 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                     {
                         var assignmentStatement =
                             CreateAssignmentStatement( returnStatement.Expression )
-                                    .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
+                                .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
                                 .WithOriginalLocationAnnotationFrom( returnStatement );
 
                         if ( this._replaceByBreakIfOmitted )
                         {
                             return
-                                    syntaxGenerator.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                         assignmentStatement,
                                         BreakStatement(
                                             Token( SyntaxKind.BreakKeyword ),
-                                                Token(
-                                                    TriviaList(),
-                                                    SyntaxKind.SemicolonToken,
-                                                    substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
+                                            Token(
+                                                TriviaList(),
+                                                SyntaxKind.SemicolonToken,
+                                                substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -100,10 +100,10 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                             return
                                 BreakStatement(
                                         Token( SyntaxKind.BreakKeyword ),
-                                            Token(
-                                                TriviaList(),
-                                                SyntaxKind.SemicolonToken,
-                                                substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
+                                        Token(
+                                            TriviaList(),
+                                            SyntaxKind.SemicolonToken,
+                                            substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
                                     .WithOriginalLocationAnnotationFrom( returnStatement );
                         }
                         else
@@ -121,7 +121,7 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                     if ( this._referencingSymbol.ReturnsVoid )
                     {
                         return
-                                syntaxGenerator.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                     ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
                                     CreateGotoStatement() )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -129,7 +129,7 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                     else
                     {
                         return
-                                syntaxGenerator.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                     CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
                                     CreateGotoStatement() )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -144,14 +144,14 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                     if ( this._replaceByBreakIfOmitted )
                     {
                         return
-                                syntaxGenerator.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                     assignmentStatement,
                                     BreakStatement(
                                         Token( SyntaxKind.BreakKeyword ),
-                                            Token(
-                                                TriviaList(),
-                                                SyntaxKind.SemicolonToken,
-                                                substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
+                                        Token(
+                                            TriviaList(),
+                                            SyntaxKind.SemicolonToken,
+                                            substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
@@ -176,8 +176,8 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
             {
                 identifier = SyntaxFactoryEx.DiscardIdentifier();
 
-                    expression = syntaxGenerator.SafeCastExpression(
-                        syntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
+                expression = syntaxGenerator.SafeCastExpression(
+                    syntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
                     expression );
             }
 
@@ -188,7 +188,7 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                             identifier,
                             Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                             expression ),
-                            Token( default, SyntaxKind.SemicolonToken, substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
+                        Token( default, SyntaxKind.SemicolonToken, substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -200,7 +200,7 @@ internal sealed class ReturnStatementSubstitution : SyntaxNodeSubstitution
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.GotoKeyword ),
                         default,
                         IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
-                            Token( default, SyntaxKind.SemicolonToken, substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
+                        Token( default, SyntaxKind.SemicolonToken, substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

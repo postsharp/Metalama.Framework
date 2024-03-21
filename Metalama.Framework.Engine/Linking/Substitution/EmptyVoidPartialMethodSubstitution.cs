@@ -23,8 +23,8 @@ internal sealed class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitutio
         switch ( currentNode )
         {
             case MethodDeclarationSyntax:
-                    return substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock()
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                return substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             default:
                 throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );

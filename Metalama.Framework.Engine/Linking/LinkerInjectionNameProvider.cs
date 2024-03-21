@@ -27,7 +27,7 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
 
     public LinkerInjectionNameProvider(
         CompilationModel finalCompilation,
-            LinkerInjectionHelperProvider injectionHelperProvider )
+        LinkerInjectionHelperProvider injectionHelperProvider )
     {
         this._finalCompilation = finalCompilation;
         this._injectionHelperProvider = injectionHelperProvider;
@@ -118,23 +118,20 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
         return this.FindUniqueName( targetType, nameHint );
     }
 
-        internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember, SyntaxGenerationContext context )
+    internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember, SyntaxGenerationContext context )
     {
         var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
 
-            return this._injectionHelperProvider.GetOverriddenByType( context, aspect.AspectClass, ordinal );
+        return this._injectionHelperProvider.GetOverriddenByType( context, aspect.AspectClass, ordinal );
     }
 
-        internal TypeSyntax GetSourceType()
-        {
-            return this._injectionHelperProvider.GetSourceType();
-        }
+    internal TypeSyntax GetSourceType() => this._injectionHelperProvider.GetSourceType();
 
-        internal TypeSyntax GetAuxiliaryType( IAspectInstanceInternal aspect, IMember targetMember, SyntaxGenerationContext context )
+    internal TypeSyntax GetAuxiliaryType( IAspectInstanceInternal aspect, IMember targetMember, SyntaxGenerationContext context )
     {
         var ordinal = this._auxiliaryCounters.AddOrUpdate( (aspect.AspectClass.Type, targetMember), 0, ( _, v ) => v + 1 );
 
-            return this._injectionHelperProvider.GetAuxiliaryType( context, aspect.AspectClass, ordinal );
+        return this._injectionHelperProvider.GetAuxiliaryType( context, aspect.AspectClass, ordinal );
     }
 
     private string FindUniqueName( INamedType containingType, string hint )

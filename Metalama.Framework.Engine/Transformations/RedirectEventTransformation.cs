@@ -73,7 +73,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
         {
             return
-                    context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
+                context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                     ExpressionStatement(
                         AssignmentExpression(
                             assignmentKind,

@@ -77,8 +77,8 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
             MethodDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( modifiers ),
-                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                    .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 null,
                 Identifier(
                     context.InjectionNameProvider.GetOverrideName(

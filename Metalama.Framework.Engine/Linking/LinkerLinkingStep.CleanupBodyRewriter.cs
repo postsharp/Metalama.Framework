@@ -22,7 +22,7 @@ internal sealed partial class LinkerLinkingStep
         {
             this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
-                if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
+            if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
             {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 if ( finalStatements.Count > 0 )
@@ -52,7 +52,7 @@ internal sealed partial class LinkerLinkingStep
         {
             this.TransformStatementList( node.Statements, out var anyRewrittenStatement, out var finalStatements, out var overflowingTrivia );
 
-                if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
+            if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
             {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 if ( finalStatements.Count > 0 )
@@ -160,7 +160,7 @@ internal sealed partial class LinkerLinkingStep
                     var leadingTrivia = statement.GetLeadingTrivia();
                     var trailingTrivia = statement.GetTrailingTrivia();
 
-                        if ( leadingTrivia.ShouldBePreserved( generationContext.Options ) || trailingTrivia.ShouldBePreserved( generationContext.Options ) )
+                    if ( leadingTrivia.ShouldBePreserved( generationContext.Options ) || trailingTrivia.ShouldBePreserved( generationContext.Options ) )
                     {
                         // This is statement that carries only trivias and should be removed, trivias added to the previous and next statement.
                         if ( finalStatements.Count == 0 )
@@ -219,8 +219,8 @@ internal sealed partial class LinkerLinkingStep
                 // Index of the last statement.
                 var lastStatementIndex = statements.Count - 1;
 
-                    if ( SyntaxExtensions.ShouldTriviaBePreserved( block.OpenBraceToken, generationContext.Options )
-                         || SyntaxExtensions.ShouldTriviaBePreserved( block.CloseBraceToken, generationContext.Options ) )
+                if ( SyntaxExtensions.ShouldTriviaBePreserved( block.OpenBraceToken, generationContext.Options )
+                     || SyntaxExtensions.ShouldTriviaBePreserved( block.CloseBraceToken, generationContext.Options ) )
                 {
                     var leadingTrivia = block.OpenBraceToken.LeadingTrivia.AddRange( block.OpenBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
                     var trailingTrivia = block.CloseBraceToken.LeadingTrivia.AddRange( block.CloseBraceToken.TrailingTrivia.StripFirstTrailingNewLine() );
@@ -237,12 +237,12 @@ internal sealed partial class LinkerLinkingStep
                     {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                         statements[firstStatementIndex] =
-                                statements[firstStatementIndex]
-                                    .WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
+                            statements[firstStatementIndex]
+                                .WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
 
                         statements[lastStatementIndex] =
-                                statements[lastStatementIndex]
-                                    .WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
+                            statements[lastStatementIndex]
+                                .WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
 #pragma warning restore LAMA0832
                     }
                 }

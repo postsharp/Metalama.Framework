@@ -606,7 +606,7 @@ internal sealed partial class LinkerInjectionStep
 
                     using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
                     {
-                            injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions, syntaxGenerationContext );
+                        injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions, syntaxGenerationContext );
                     }
 
                     members.Add( injectedNode );

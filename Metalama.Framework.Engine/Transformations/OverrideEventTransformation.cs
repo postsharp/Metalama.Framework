@@ -99,8 +99,8 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
                     List<AttributeListSyntax>(),
                     modifiers,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                    context.SyntaxGenerator.EventType( this.OverriddenDeclaration )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null!,
                     Identifier( eventName ),
                     AccessorList(
@@ -178,10 +178,10 @@ internal sealed class OverrideEventTransformation : OverrideMemberTransformation
         switch ( accessorDeclarationKind )
         {
             case SyntaxKind.AddAccessorDeclaration:
-                    return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
+                return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
 
             case SyntaxKind.RemoveAccessorDeclaration:
-                    return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
+                return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
 
             default:
                 throw new AssertionFailedException( $"Unexpected syntax kind: {accessorDeclarationKind}." );

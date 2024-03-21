@@ -28,16 +28,16 @@ internal sealed class InliningSubstitution : SyntaxNodeSubstitution
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
     {
         var statements = new List<StatementSyntax>();
-            var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
+        var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
         if ( this._specification.DeclareReturnVariable )
         {
             statements.Add(
                 LocalDeclarationStatement(
                         VariableDeclaration(
-                                syntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
+                            syntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
                             SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
-                        .WithTrailingLineFeedIfNecessary( context.SyntaxGenerationContext )
+                    .WithTrailingLineFeedIfNecessary( context.SyntaxGenerationContext )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
         }
 
@@ -57,12 +57,12 @@ internal sealed class InliningSubstitution : SyntaxNodeSubstitution
                 LabeledStatement(
                         Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
                         EmptyStatement() )
-                        .WithTrailingLineFeedIfNecessary( context.SyntaxGenerationContext )
+                    .WithTrailingLineFeedIfNecessary( context.SyntaxGenerationContext )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
         }
 
-            return syntaxGenerator.FormattedBlock( statements )
+        return syntaxGenerator.FormattedBlock( statements )
             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
     }
 

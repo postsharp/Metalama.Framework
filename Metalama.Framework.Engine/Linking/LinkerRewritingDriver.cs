@@ -64,7 +64,7 @@ internal sealed partial class LinkerRewritingDriver
         var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
         var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
         var rewrittenBody = RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
-        var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
+        var rewrittenBlock = TransformToBlock( substitutionContext, rewrittenBody, semantic.Symbol );
 
         // Add the SourceCode annotation, if it is the source code.
         if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
@@ -130,7 +130,7 @@ internal sealed partial class LinkerRewritingDriver
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
 
-            BlockSyntax TransformToBlock( SyntaxNode node, IMethodSymbol symbol )
+        static BlockSyntax TransformToBlock( SubstitutionContext substitutionContext, SyntaxNode node, IMethodSymbol symbol )
         {
             // TODO: Convert to block.
             if ( symbol.ReturnsVoid )
@@ -173,7 +173,7 @@ internal sealed partial class LinkerRewritingDriver
 
                     case ArrowExpressionClauseSyntax rewrittenArrowClause:
                         return
-                                substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
+                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                                     ReturnStatement(
                                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                         rewrittenArrowClause.Expression,
@@ -520,7 +520,7 @@ internal sealed partial class LinkerRewritingDriver
                 return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
             case IFieldSymbol fieldSymbol:
-                    return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
+                return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
 
             case IEventSymbol eventSymbol:
                 return syntax switch

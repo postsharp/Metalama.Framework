@@ -48,8 +48,8 @@ internal sealed partial class LinkerLinkingStep
                      && observedLabelCounter.TryGetValue( declaredLabel, out var counter )
                      && counter == 1 )
                 {
-                        if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.Options )
-                             || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.Options ) )
+                    if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.Options )
+                         || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.Options ) )
                     {
                         List<SyntaxTrivia> trivia =
                         [

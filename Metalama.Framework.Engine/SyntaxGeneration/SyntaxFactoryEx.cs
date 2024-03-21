@@ -162,7 +162,7 @@ internal static partial class SyntaxFactoryEx
 
         if ( diagnostics.HasError() )
         {
-            throw new DiagnosticException( $"Code '{text}' could not be parsed as an expression.", diagnostics.ToImmutableArray(), inSourceCode: false );
+            throw new DiagnosticException( $"Code '{text}' could not be parsed as an expression.", diagnostics.ToImmutableArray(), false );
         }
 
         return expression;
@@ -177,25 +177,13 @@ internal static partial class SyntaxFactoryEx
 
         if ( enumerable.HasError() )
         {
-            throw new DiagnosticException( $"Code could not be parsed as a statement.", enumerable.ToImmutableArray(), inSourceCode: false );
+            throw new DiagnosticException( $"Code could not be parsed as a statement.", enumerable.ToImmutableArray(), false );
         }
 
         return statement;
     }
 
     private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
-    internal static SyntaxToken InvocationRefKindToken( Code.RefKind refKind )
-        => refKind switch
-        {
-            Code.RefKind.None or Code.RefKind.In => default,
-            Code.RefKind.Out => SyntaxFactory.Token( SyntaxKind.OutKeyword ),
-            Code.RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
-            Code.RefKind.RefReadOnly => SyntaxFactory.Token( SyntaxKind.InKeyword ),
-            _ => throw new AssertionFailedException( $"Unexpected RefKind: {refKind}." )
-        };
-
-    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithTrailingSpace = new();
-    private static readonly ConcurrentDictionary<SyntaxKind, SyntaxToken> _tokensWithLineFeed = new();
 
     public static StatementSyntax EmptyStatement
         => SyntaxFactory.ExpressionStatement( EmptyExpression, SyntaxFactory.MissingToken( SyntaxKind.SemicolonToken ) );

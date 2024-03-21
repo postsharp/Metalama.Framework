@@ -132,14 +132,14 @@ public class TestOptions
     /// Gets or sets a value indicating whether whitespace are taken into account while comparing the the expected output <c>t.cs</c> file with the actual output. The default behavior is <c>false</c>.
     /// To enable this option in a test, add this comment to your test file: <c>// @PreserveWhitespace</c>.
     /// </summary>
-        public bool? CompareWhitespace { get; set; }
+    public bool? CompareWhitespace { get; set; }
 
-        [Obsolete("Use CompareWhitespace")]
-        public bool? PreserveWhitespace
-        {
-            get => this.CompareWhitespace;
-            set => this.CompareWhitespace = value;
-        }
+    [Obsolete( "Use CompareWhitespace" )]
+    public bool? PreserveWhitespace
+    {
+        get => this.CompareWhitespace;
+        set => this.CompareWhitespace = value;
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether C# nullability is disabled for the compilation.
@@ -391,7 +391,7 @@ public class TestOptions
 
         this.FormatOutput ??= baseOptions.FormatOutput;
 
-            this.CompareWhitespace ??= baseOptions.CompareWhitespace;
+        this.CompareWhitespace ??= baseOptions.CompareWhitespace;
 
         this.IncludedFiles.AddRange( baseOptions.IncludedFiles );
 
@@ -565,8 +565,8 @@ public class TestOptions
                     break;
 
                 case "PreserveWhitespace":
-                    case "CompareWhitespace":
-                        this.CompareWhitespace = true;
+                case "CompareWhitespace":
+                    this.CompareWhitespace = true;
 
                     break;
 
@@ -837,7 +837,7 @@ public class TestOptions
         {
             RequireOrderedAspects = this.RequireOrderedAspects ?? testContextOptions.RequireOrderedAspects,
             FormatCompileTimeCode = this.FormatCompileTimeCode ?? testContextOptions.FormatCompileTimeCode,
-                IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses,
-                FormatOutput = this.FormatOutput ?? testContextOptions.FormatOutput
+            IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses,
+            FormatOutput = this.FormatOutput ?? testContextOptions.FormatOutput
         };
 }

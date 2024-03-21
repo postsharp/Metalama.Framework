@@ -33,7 +33,7 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                    members.Add( this.GetTrampolineForOperator( operatorDeclaration, lastOverride, generationContext ) );
+                members.Add( this.GetTrampolineForOperator( operatorDeclaration, lastOverride, generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -47,7 +47,7 @@ internal sealed partial class LinkerRewritingDriver
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                    members.Add( this.GetEmptyImplOperator( operatorDeclaration, symbol, generationContext ) );
+                members.Add( this.GetEmptyImplOperator( operatorDeclaration, symbol, generationContext ) );
             }
 
             return members;
@@ -82,9 +82,9 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
-                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
+                        (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                         arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                         semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}'." )
                 };
 
@@ -129,23 +129,23 @@ internal sealed partial class LinkerRewritingDriver
             substitutedBody.WithSourceCodeAnnotation(),
             substitutedExpressionBody.WithSourceCodeAnnotation(),
             symbol,
-                GetOriginalImplMemberName( symbol ),
-                generationContext );
+            GetOriginalImplMemberName( symbol ),
+            generationContext );
     }
 
     private MemberDeclarationSyntax GetEmptyImplOperator(
         OperatorDeclarationSyntax @operator,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext context )
+        IMethodSymbol symbol,
+        SyntaxGenerationContext context )
     {
         var emptyBody =
-                context.SyntaxGenerator.FormattedBlock(
+            context.SyntaxGenerator.FormattedBlock(
                 ReturnStatement(
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                     DefaultExpression( @operator.ReturnType ),
                     Token( SyntaxKind.SemicolonToken ) ) );
 
-            return this.GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), context );
+        return this.GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), context );
     }
 
     private MemberDeclarationSyntax GetSpecialImplOperator(
@@ -153,8 +153,8 @@ internal sealed partial class LinkerRewritingDriver
         BlockSyntax? body,
         ArrowExpressionClauseSyntax? expressionBody,
         IMethodSymbol symbol,
-            string name,
-            SyntaxGenerationContext context )
+        string name,
+        SyntaxGenerationContext context )
     {
         var modifiers = symbol
             .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
@@ -164,7 +164,7 @@ internal sealed partial class LinkerRewritingDriver
             MethodDeclaration(
                     this.FilterAttributesOnSpecialImpl( symbol ),
                     modifiers,
-                        @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
+                    @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     Identifier( name ),
                     null,
@@ -172,25 +172,25 @@ internal sealed partial class LinkerRewritingDriver
                         symbol.Parameters,
                         @operator.ParameterList.WithTrailingTriviaIfNecessary(
                             default(SyntaxTriviaList),
-                                this.SyntaxGenerationOptions ) ),
+                            this.SyntaxGenerationOptions ) ),
                     List<TypeParameterConstraintClauseSyntax>(),
                     body,
                     expressionBody,
                     expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
+                .WithLeadingAndTrailingLineFeedIfNecessary( context )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
-        private OperatorDeclarationSyntax GetTrampolineForOperator(
-            OperatorDeclarationSyntax @operator,
-            IMethodSymbol targetSymbol,
-            SyntaxGenerationContext context )
+    private OperatorDeclarationSyntax GetTrampolineForOperator(
+        OperatorDeclarationSyntax @operator,
+        IMethodSymbol targetSymbol,
+        SyntaxGenerationContext context )
     {
         // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
         return @operator
             .WithBody( GetBody() )
-                .WithTriviaFromIfNecessary( @operator, this.SyntaxGenerationOptions );
+            .WithTriviaFromIfNecessary( @operator, this.SyntaxGenerationOptions );
 
         BlockSyntax GetBody()
         {
@@ -199,7 +199,7 @@ internal sealed partial class LinkerRewritingDriver
                     IdentifierName( targetSymbol.Name ),
                     ArgumentList() );
 
-                return context.SyntaxGenerator.FormattedBlock(
+            return context.SyntaxGenerator.FormattedBlock(
                 ReturnStatement(
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                     invocation,

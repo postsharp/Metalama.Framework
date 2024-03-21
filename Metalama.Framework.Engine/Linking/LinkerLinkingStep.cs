@@ -74,18 +74,18 @@ internal sealed partial class LinkerLinkingStep : AspectLinkerPipelineStep<Linke
                     new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
                         .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
-                    var syntaxGenerationContext = input.IntermediateCompilation.CompilationContext.GetSyntaxGenerationContext(
-                        this._syntaxGenerationOptions,
-                        modifiedSyntaxTree.OldTree!,
-                        0 );
+                var syntaxGenerationContext = input.IntermediateCompilation.CompilationContext.GetSyntaxGenerationContext(
+                    this._syntaxGenerationOptions,
+                    modifiedSyntaxTree.OldTree!,
+                    0 );
 
                 var cleanRoot =
                     new CleanupRewriter(
                             input.ProjectOptions,
-                                syntaxGenerationContext )
+                            syntaxGenerationContext )
                         .Visit( linkedRoot )!;
 
-                    var fixedRoot = PreprocessorFixer.Fix( cleanRoot, syntaxGenerationContext );
+                var fixedRoot = PreprocessorFixer.Fix( cleanRoot, syntaxGenerationContext );
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( fixedRoot, syntaxTree.Options );
 

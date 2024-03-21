@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -39,7 +38,6 @@ class TargetCode
     }
 
 }";
-
             
             using var testContext = this.CreateTestContext();
             var serviceProvider = testContext.ServiceProvider;

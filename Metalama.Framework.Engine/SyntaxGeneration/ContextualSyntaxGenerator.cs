@@ -636,7 +636,7 @@ internal partial class ContextualSyntaxGenerator
                     Identifier( p.Name ),
                     removeDefaultValues || p.DefaultValue == null
                         ? null
-                        : EqualsValueClause( this.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
+                        : EqualsValueClause( this.LiteralExpression( p.DefaultValue.Value.Value.AssertNotNull() ) ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {

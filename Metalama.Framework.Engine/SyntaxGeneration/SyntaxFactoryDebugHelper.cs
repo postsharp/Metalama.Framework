@@ -2,10 +2,11 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Engine.Templating;
+namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 public static partial class SyntaxFactoryDebugHelper
 {

@@ -32,7 +32,7 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var body =
-                context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
+            context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                 this.OverriddenDeclaration.ReturnType
                 != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
                     ? ReturnStatement(
@@ -48,8 +48,8 @@ internal sealed class RedirectMethodTransformation : OverrideMemberTransformatio
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Identifier(
                         context.InjectionNameProvider.GetOverrideName(

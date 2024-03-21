@@ -228,9 +228,8 @@ public abstract class AspectPipeline : IDisposable
         var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
         var preserveTrivia = triviaMatters;
 
-            projectServiceProviderWithProject =
-                projectServiceProviderWithProject.WithService(
-                    new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia, projectOptions.FormatOutput ) );
+        projectServiceProviderWithProject =
+            projectServiceProviderWithProject.WithService( new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia, projectOptions.FormatOutput ) );
 
         // Add MetricsManager.
         projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
