@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -26,6 +27,18 @@ namespace Metalama.Framework.Engine.Templating
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
         }
 
+        internal static void CopyTemplateArguments( object?[] source, object?[] target, int index, SyntaxGenerationContext context )
+        {
+            for ( var i = 0; i < source.Length; i++ )
+            {
+                target[i + index] = source[i] switch
+                {
+                    TemplateTypeArgumentFactory factory => factory.Create( context ),
+                    _ => source[i]
+                };
+            }
+        }
+
         public bool TryExpandDeclaration(
             TemplateExpansionContext templateExpansionContext,
             object?[] templateArguments,
@@ -40,14 +53,8 @@ namespace Metalama.Framework.Engine.Templating
             allArguments[0] = templateExpansionContext.SyntaxFactory;
 
             // Add other arguments.
-            for ( var i = 0; i < templateArguments.Length; i++ )
-            {
-                allArguments[i + 1] = templateArguments[i] switch
-                {
-                    TemplateTypeArgumentFactory factory => factory.Create( templateExpansionContext.SyntaxGenerationContext ),
-                    _ => templateArguments[i]
-                };
-            }
+            CopyTemplateArguments( templateArguments, allArguments, 1, templateExpansionContext.SyntaxGenerationContext );
+            
 
             if ( !this._userCodeInvoker.TryInvoke(
                     () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateProvider.Object, allArguments ).AssertNotNull(),

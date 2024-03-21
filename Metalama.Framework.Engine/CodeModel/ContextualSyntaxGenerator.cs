@@ -37,7 +37,7 @@ internal partial class ContextualSyntaxGenerator
         _roslynSyntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
     }
 
-    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache = new();
+    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache = new( SymbolEqualityComparer.IncludeNullability);
     private readonly SyntaxGenerationContext _context;
 
     public bool IsNullAware { get; }

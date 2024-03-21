@@ -467,7 +467,7 @@ namespace Metalama.Framework.Engine.Templating
             // Add ITemplateSyntaxFactory as the first template argument.
             var allArguments = new object?[templateArguments.Length + 1];
             allArguments[0] = this.ForTemplate( templateName, templateProvider );
-            templateArguments.CopyTo( allArguments, 1 );
+            TemplateDriver.CopyTemplateArguments( templateArguments, allArguments, 1, this._templateExpansionContext.SyntaxGenerationContext );
 
             var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
 
