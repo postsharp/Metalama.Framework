@@ -23,12 +23,10 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
     /// </summary>
     public abstract class CodeFixRunner
     {
-        private readonly ProjectServiceProvider _serviceProvider;
         private readonly UserCodeInvoker _userCodeInvoker;
 
         protected CodeFixRunner( in ProjectServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 

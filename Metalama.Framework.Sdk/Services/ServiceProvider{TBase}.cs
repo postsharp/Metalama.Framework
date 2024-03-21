@@ -19,6 +19,7 @@ namespace Metalama.Framework.Engine.Services
     {
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
         private ImmutableDictionary<Type, ServiceNode> _services;
+        private Dictionary<Type, ServiceNode>? _servicesFast;
 
         public static ServiceProvider<TBase> Empty { get; } = new();
 
@@ -28,6 +29,7 @@ namespace Metalama.Framework.Engine.Services
         {
             var clone = (ServiceProvider<TBase>) this.MemberwiseClone();
             clone._services = services;
+            clone._servicesFast = null;
             clone.NextProvider = nextProvider;
 
             return clone;
@@ -57,6 +59,7 @@ namespace Metalama.Framework.Engine.Services
 
         private void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder, bool allowOverride )
         {
+#if DEBUG
             void CheckService( Type interfaceType )
             {
                 if ( !allowOverride )
@@ -67,6 +70,7 @@ namespace Metalama.Framework.Engine.Services
                     }
                 }
             }
+#endif
 
             var interfaces = service.ServiceType.GetInterfaces();
 
@@ -74,7 +78,9 @@ namespace Metalama.Framework.Engine.Services
             {
                 if ( typeof(TBase).IsAssignableFrom( interfaceType ) && interfaceType != typeof(TBase) )
                 {
+#if DEBUG
                     CheckService( interfaceType );
+#endif
 
                     builder[interfaceType] = service;
                 }
@@ -110,9 +116,22 @@ namespace Metalama.Framework.Engine.Services
         /// <summary>
         /// Gets the implementation of a given service type.
         /// </summary>
-        public object? GetService( Type serviceType ) => this.GetOwnService( serviceType ) ?? this.NextProvider?.GetService( serviceType );
+        public object? GetService( Type serviceType )
+        {
+            // We use the ImmutableDictionary to build the ServiceProvider, but to consume services, we use a Dictionary
+            // which has a O(1) access time instead of O(log(n)). The Dictionary will be used in a read-only manner only.
+            // Data races in instantiating this Dictionary do not matter.
+            this._servicesFast ??= new Dictionary<Type, ServiceNode>( this._services );
 
-        private object? GetOwnService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.GetService( this ) : null;
+            if ( this._servicesFast!.TryGetValue( serviceType, out var serviceNode ) )
+            {
+                return serviceNode.GetService( this );
+            }
+            else
+            {
+                return this.NextProvider?.GetService( serviceType );
+            }
+        }
 
         /// <summary>
         /// Returns a new <see cref="ServiceProvider{TBase}"/> where some given services have been added to the current <see cref="ServiceProvider{TBase}"/>.
