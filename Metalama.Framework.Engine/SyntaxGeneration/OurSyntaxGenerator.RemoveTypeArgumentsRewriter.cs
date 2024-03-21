@@ -6,9 +6,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.SyntaxGeneration
 {
-    internal partial class OurSyntaxGenerator
+    internal partial class ContextualSyntaxGenerator
     {
         private sealed class RemoveTypeArgumentsRewriter : SafeSyntaxRewriter
         {

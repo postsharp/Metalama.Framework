@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -48,8 +48,8 @@ internal sealed partial class LinkerLinkingStep
                      && observedLabelCounter.TryGetValue( declaredLabel, out var counter )
                      && counter == 1 )
                 {
-                    if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.PreserveTrivia )
-                         || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.PreserveTrivia ) )
+                        if ( SyntaxExtensions.ShouldTriviaBePreserved( gotoStatement, generationContext.Options )
+                             || SyntaxExtensions.ShouldTriviaBePreserved( labeledStatement, generationContext.Options ) )
                     {
                         List<SyntaxTrivia> trivia =
                         [

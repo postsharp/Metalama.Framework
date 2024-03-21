@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -17,21 +17,24 @@ namespace Metalama.Framework.Engine.Transformations
             AspectLayerId aspectLayer,
             IProperty overriddenProperty,
             AspectReferenceTargetKind targetKind,
-            OurSyntaxGenerator syntaxGenerator );
+            ContextualSyntaxGenerator syntaxGenerator );
 
         public abstract ExpressionSyntax GetIndexerReference(
             AspectLayerId aspectLayer,
             IIndexer overriddenProperty,
             AspectReferenceTargetKind targetKind,
-            OurSyntaxGenerator syntaxGenerator );
+            ContextualSyntaxGenerator syntaxGenerator );
 
         public abstract ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer );
 
         public abstract ExpressionSyntax GetStaticConstructorReference( AspectLayerId aspectLayer );
 
-        public abstract ExpressionSyntax GetConstructorReference( AspectLayerId aspectLayer, IConstructor overriddenConstructor, OurSyntaxGenerator syntaxGenerator );
+        public abstract ExpressionSyntax GetConstructorReference(
+            AspectLayerId aspectLayer,
+            IConstructor overriddenConstructor,
+            ContextualSyntaxGenerator syntaxGenerator );
 
-        public abstract ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, OurSyntaxGenerator syntaxGenerator );
+        public abstract ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, ContextualSyntaxGenerator syntaxGenerator );
 
         public abstract ExpressionSyntax GetEventFieldInitializerExpression( TypeSyntax eventFieldType, ExpressionSyntax initializerExpression );
     }

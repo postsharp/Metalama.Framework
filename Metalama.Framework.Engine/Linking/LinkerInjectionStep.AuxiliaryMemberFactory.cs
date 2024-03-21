@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -14,7 +15,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using System.Threading.Tasks;
-using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
+using static Metalama.Framework.Engine.SyntaxGeneration.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -153,8 +154,7 @@ internal sealed partial class LinkerInjectionStep
                     ProceedHelper.CreateMemberAccessExpression( method, aspectLayerId, AspectReferenceTargetKind.Self, syntaxGenerationContext ),
                     ArgumentList(
                         SeparatedList(
-                            method.Parameters.SelectAsReadOnlyList(
-                                p => Argument( null, InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) );
+                            method.Parameters.SelectAsReadOnlyList( p => Argument( null, p.RefKind.InvocationRefKindToken(), IdentifierName( p.Name ) ) ) ) ) );
 
             var (useStateMachine, emulatedTemplateKind) = (returnVariableName != null, asyncInfo, iteratorInfo) switch
             {
@@ -276,7 +276,7 @@ internal sealed partial class LinkerInjectionStep
             return MethodDeclaration(
                 List<AttributeListSyntax>(),
                 modifiers,
-                returnType.WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                returnType.WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ),
                 null,
                 Identifier( this._injectionNameProvider.GetOverrideName( method.DeclaringType, aspectLayerId, method ) ),
                 syntaxGenerationContext.SyntaxGenerator.TypeParameterList( method, compilationModel ),
@@ -424,7 +424,7 @@ internal sealed partial class LinkerInjectionStep
                     List<AttributeListSyntax>(),
                     modifiers,
                     syntaxGenerationContext.SyntaxGenerator.PropertyType( property )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ),
                     null,
                     Identifier( this._injectionNameProvider.GetOverrideName( property.DeclaringType, aspectLayerId, property ) ),
                     AccessorList(
@@ -536,14 +536,14 @@ internal sealed partial class LinkerInjectionStep
                     List<AttributeListSyntax>(),
                     modifiers,
                     syntaxGenerationContext.SyntaxGenerator.IndexerType( indexer )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ),
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.Options ),
                     null,
                     Token( SyntaxKind.ThisKeyword ),
                     TransformationHelper.GetIndexerOverrideParameterList(
                         this._finalCompilationModel,
                         syntaxGenerationContext,
                         indexer,
-                        this._injectionNameProvider.GetAuxiliaryType( advice.Aspect, indexer ) ),
+                        this._injectionNameProvider.GetAuxiliaryType( advice.Aspect, indexer, syntaxGenerationContext ) ),
                     AccessorList(
                         List(
                             new[]

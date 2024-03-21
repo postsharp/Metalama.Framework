@@ -3,7 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,12 +12,15 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal static class TransformationHelper
 {
-    public static BlockSyntax CreateIdentityAccessorBody( SyntaxKind accessorDeclarationKind, ExpressionSyntax proceedExpression )
+    public static BlockSyntax CreateIdentityAccessorBody(
+        SyntaxKind accessorDeclarationKind,
+        ExpressionSyntax proceedExpression,
+        SyntaxGenerationContext context )
     {
         switch ( accessorDeclarationKind )
         {
             case SyntaxKind.GetAccessorDeclaration:
-                return SyntaxFactoryEx.FormattedBlock(
+                return context.SyntaxGenerator.FormattedBlock(
                     SyntaxFactory.ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         proceedExpression,
@@ -25,7 +28,7 @@ internal static class TransformationHelper
 
             case SyntaxKind.SetAccessorDeclaration:
             case SyntaxKind.InitAccessorDeclaration:
-                return SyntaxFactoryEx.FormattedBlock( SyntaxFactory.ExpressionStatement( proceedExpression ) );
+                return context.SyntaxGenerator.FormattedBlock( SyntaxFactory.ExpressionStatement( proceedExpression ) );
 
             default:
                 throw new AssertionFailedException( $"Unexpected SyntaxKind: {accessorDeclarationKind}." );

@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.Templating;
+namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 // This type is copied from the Roslyn source code. The member integer values must match.
 // Resharper disable UnusedMember.Global

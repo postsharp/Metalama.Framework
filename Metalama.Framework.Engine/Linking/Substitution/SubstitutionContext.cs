@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -23,9 +23,8 @@ internal sealed class SubstitutionContext
         this.RewritingDriver = rewritingDriver;
         this.SyntaxGenerationContext = syntaxGenerationContext;
 
-        this._substitutionDictionary =
-            new Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>?>(
-                () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
+            this._substitutionDictionary =
+                new Lazy<IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>>( () => this.RewritingDriver.GetSubstitutions( inliningContextId ) );
     }
 
     internal SubstitutionContext WithInliningContext( InliningContextIdentifier inliningContextId )

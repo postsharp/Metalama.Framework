@@ -5,11 +5,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -308,7 +308,9 @@ internal sealed partial class CompileTimeCompilationBuilder
                                         var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
                                             .WithArgumentList(
                                                 AttributeArgumentList(
-                                                    SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
+                                                        SingletonSeparatedList(
+                                                            AttributeArgument(
+                                                                this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( originalId ) ) ) ) );
 
                                         // Transform the type.
                                         TypeDeclarationSyntax transformedChild;
@@ -573,10 +575,12 @@ internal sealed partial class CompileTimeCompilationBuilder
                                                     Identifier( p.Name ),
                                                     default ) ) ) ),
                                     default,
-                                    method.ReturnType.SpecialType == SpecialType.System_Void ? SyntaxFactoryEx.FormattedBlock() : null,
+                                        method.ReturnType.SpecialType == SpecialType.System_Void
+                                            ? this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                                            : null,
                                     method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
                                     method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
-                                .NormalizeWhitespace();
+                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine );
 
                             members.Add( newMethod );
                         }
@@ -613,9 +617,9 @@ internal sealed partial class CompileTimeCompilationBuilder
                                     constructorName,
                                     ParameterList(),
                                     null,
-                                    SyntaxFactoryEx.FormattedBlock(),
+                                        this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock(),
                                     null )
-                                .NormalizeWhitespace() );
+                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                     }
 
                     var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, constructorName );
@@ -623,8 +627,8 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                     if ( deserializingConstructor != null && serializerType != null )
                     {
-                        members.Add( deserializingConstructor.NormalizeWhitespace() );
-                        members.Add( serializerType.NormalizeWhitespace() );
+                            members.Add( deserializingConstructor.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
+                            members.Add( serializerType.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                     }
                     else
                     {
@@ -643,7 +647,8 @@ internal sealed partial class CompileTimeCompilationBuilder
             {
                 var originalPathAttribute = Attribute( this._originalPathTypeSyntax )
                     .WithArgumentList(
-                        AttributeArgumentList( SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
+                        AttributeArgumentList( SingletonSeparatedList(
+                                    AttributeArgument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
 
                 transformedNode = transformedNode
                     .WithAttributeLists( transformedNode.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalPathAttribute ) ) ) );
@@ -779,7 +784,10 @@ internal sealed partial class CompileTimeCompilationBuilder
                 }
                 else if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                 {
-                    yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this._helper.WithThrowNotSupportedExceptionBody(
+                            node,
+                            "Template code cannot be directly executed.",
+                            this._syntaxGenerationContext );
                 }
                 else
                 {
@@ -1453,7 +1461,7 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 if ( typeSymbol != null )
                 {
-                    return SyntaxFactoryEx.LiteralExpression( typeSymbol.Name );
+                        return this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.Name );
                 }
             }
 
@@ -1510,7 +1518,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         private TypeSyntax CreateTypeSyntax( INamespaceOrTypeSymbol symbol )
         {
             var unnestedType = this._currentContext.NestedType;
-            var type = OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
+                var type = this._syntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( symbol );
 
             static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
             {

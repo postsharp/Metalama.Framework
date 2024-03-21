@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -115,7 +116,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     {
         var semanticModel = this.Compilation.GetCachedSemanticModel( tree );
         var nullableContext = semanticModel.GetNullableContext( nodeSpanStart );
-        var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
+        var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) == 0;
 
         return this.GetSyntaxGenerationContext( options, isPartial, isNullOblivious );
     }
@@ -123,12 +124,15 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal SyntaxGenerationContext GetSyntaxGenerationContext(
         SyntaxGenerationOptions options,
         bool isPartial = false,
-        bool? isNullOblivious = null )
+        bool? isNullOblivious = null,
+        string? endOfLine = null )
     {
-        isNullOblivious ??= (((CSharpCompilation) this.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
-                            != 0;
+        endOfLine ??= "\r\n";
 
-        var cacheKey = new SyntaxGenerationContextCacheKey( isNullOblivious.Value, isPartial, options );
+        isNullOblivious ??= (((CSharpCompilation) this.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
+                            == 0;
+
+        var cacheKey = new SyntaxGenerationContextCacheKey( isNullOblivious.Value, isPartial, endOfLine, options );
 
         if ( this._syntaxGenerationContextCache.TryGetValue( cacheKey, out var context ) )
         {
@@ -139,12 +143,13 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
             cacheKey,
             k => new SyntaxGenerationContext(
                 this,
-                k.IsNullOblivious ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
+                k.IsNullOblivious,
                 k.IsPartial,
-                k.Options ) );
+                k.Options,
+                k.EndOfLine ) );
     }
 
-    private record struct SyntaxGenerationContextCacheKey( bool IsNullOblivious, bool IsPartial, SyntaxGenerationOptions Options );
+    private record struct SyntaxGenerationContextCacheKey( bool IsNullOblivious, bool IsPartial, string EndOfLine, SyntaxGenerationOptions Options );
 
     [Memo]
     internal SymbolTranslator SymbolTranslator => new( this );

@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -44,7 +44,8 @@ internal sealed class IntroduceFieldTransformation : IntroduceMemberTransformati
                 fieldBuilder.GetAttributeLists( context ),
                 fieldBuilder.GetSyntaxModifierList(),
                 VariableDeclaration(
-                    syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                    syntaxGenerator.Type( fieldBuilder.Type.GetSymbol() )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( fieldBuilder.Name ),

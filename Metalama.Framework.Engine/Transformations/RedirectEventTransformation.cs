@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -74,7 +73,7 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
         {
             return
-                SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                     ExpressionStatement(
                         AssignmentExpression(
                             assignmentKind,

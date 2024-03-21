@@ -32,7 +32,7 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
                 ArgumentList(
                     SeparatedList(
                         new[] { Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( field.Name ) ) ), Argument( allBindingFlags ) } ) ) )
-            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 
         // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
         fieldInfo = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, fieldInfo );

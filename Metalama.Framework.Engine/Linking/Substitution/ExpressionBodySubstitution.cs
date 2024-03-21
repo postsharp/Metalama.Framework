@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,12 +46,14 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {
+            var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
+
         switch ( currentNode )
         {
             case ArrowExpressionClauseSyntax { Expression: ThrowExpressionSyntax throwExpressionSyntax }:
                 {
                     return
-                        SyntaxFactoryEx.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                 ThrowStatement(
                                     throwExpressionSyntax.ThrowKeyword,
                                     throwExpressionSyntax.Expression,
@@ -65,20 +68,21 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                     if ( this._referencingSymbol.ReturnsVoid )
                     {
                         return
-                            SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
+                                syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
                         return
-                            SyntaxFactoryEx.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                     ReturnStatement(
                                         Token( arrowExpressionClause.Expression.GetLeadingTrivia(), SyntaxKind.ReturnKeyword, TriviaList( Space ) ),
                                         arrowExpressionClause.Expression,
                                         Token(
                                             TriviaList(),
                                             SyntaxKind.SemicolonToken,
-                                            arrowExpressionClause.Expression.GetTrailingTrivia().Add( ElasticLineFeed ) ) ) )
+                                                arrowExpressionClause.Expression.GetTrailingTrivia()
+                                                    .AddLineFeedIfNecessary( substitutionContext.SyntaxGenerationContext ) ) ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                 }
@@ -91,7 +95,7 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                             // Both referencing and target methods return void, expression can be simply changed to 
 
                             return
-                                SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
+                                    syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -104,14 +108,17 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                         if ( this._returnVariableIdentifier != null )
                         {
                             return
-                                SyntaxFactoryEx.FormattedBlock(
+                                    syntaxGenerator.FormattedBlock(
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.SimpleAssignmentExpression,
                                                 IdentifierName( this._returnVariableIdentifier ),
                                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                                 arrowExpressionClause.Expression ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                                Token(
+                                                    TriviaList(),
+                                                    SyntaxKind.SemicolonToken,
+                                                    substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -121,7 +128,7 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                                 Invariant.Assert( this._returnVariableIdentifier == null );
 
                                 return
-                                    SyntaxFactoryEx.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
+                                        syntaxGenerator.FormattedBlock( ExpressionStatement( arrowExpressionClause.Expression ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else
@@ -136,8 +143,8 @@ internal sealed class ExpressionBodySubstitution : SyntaxNodeSubstitution
                         var returnTypeSyntax =
                             substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._originalContainingSymbol.ReturnType );
 
-                        return SyntaxFactoryEx.FormattedBlock(
-                                SyntaxFactoryEx.DiscardStatement( SyntaxFactoryEx.SafeCastExpression( returnTypeSyntax, arrowExpressionClause.Expression ) ) )
+                        return syntaxGenerator.FormattedBlock(
+                                SyntaxFactoryEx.DiscardStatement( syntaxGenerator.SafeCastExpression( returnTypeSyntax, arrowExpressionClause.Expression ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                 }

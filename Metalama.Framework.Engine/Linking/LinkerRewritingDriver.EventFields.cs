@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,7 +26,7 @@ internal sealed partial class LinkerRewritingDriver
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
             {
-                members.Add( this.GetEventBackingField( eventFieldDeclaration, symbol ) );
+                    members.Add( this.GetEventBackingField( eventFieldDeclaration, symbol, generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -35,14 +35,14 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                members.Add( this.GetTrampolineForEventField( eventFieldDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineForEventField( eventFieldDeclaration, lastOverride, generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                members.Add( this.GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
+                    members.Add( this.GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol, generationContext ) );
             }
 
             return members;
@@ -62,7 +62,8 @@ internal sealed partial class LinkerRewritingDriver
                 members.Add(
                     this.GetEmptyImplEventField(
                         eventFieldDeclaration.Declaration.Type,
-                        symbol ) );
+                            symbol,
+                            generationContext ) );
             }
 
             if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
@@ -97,13 +98,13 @@ internal sealed partial class LinkerRewritingDriver
                     FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                     eventFieldDeclaration.Modifiers,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                    eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     Identifier( symbol.Name ),
                     AccessorList(
-                        Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ),
+                            Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.OpenBraceToken, generationContext.ElasticEndOfLineTriviaList ),
                         List( new[] { transformedAdd, transformedRemove } ),
-                        Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
+                            Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, generationContext.ElasticEndOfLineTriviaList ) ),
                     default );
         }
 
@@ -121,7 +122,8 @@ internal sealed partial class LinkerRewritingDriver
                     new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
             var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
-                (TriviaList(), TriviaList( ElasticLineFeed ), TriviaList( ElasticMarker ), TriviaList( ElasticLineFeed ));
+                    (TriviaList(), generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList,
+                     generationContext.ElasticEndOfLineTriviaList);
 
             return
                 AccessorDeclaration(
@@ -129,7 +131,7 @@ internal sealed partial class LinkerRewritingDriver
                     FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.MethodKeyword, false, false )
                         .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true ) ),
                     TokenList(),
-                    Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
+                        Token( TriviaList(), accessorKeyword, generationContext.ElasticEndOfLineTriviaList ),
                     Block(
                             Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
                             SingletonList<StatementSyntax>( linkedBody ),
@@ -140,7 +142,10 @@ internal sealed partial class LinkerRewritingDriver
         }
     }
 
-    private EventFieldDeclarationSyntax GetEventBackingField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField(
+            EventFieldDeclarationSyntax eventFieldDeclaration,
+            IEventSymbol symbol,
+            SyntaxGenerationContext context )
     {
         var declarator = (VariableDeclaratorSyntax) symbol.GetPrimaryDeclaration().AssertNotNull();
 
@@ -148,24 +153,28 @@ internal sealed partial class LinkerRewritingDriver
             this.GetEventBackingField(
                 eventFieldDeclaration.Declaration.Type,
                 declarator.Initializer,
-                symbol );
+                    symbol,
+                    context );
     }
 
-    private MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
+        private MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol, SyntaxGenerationContext context )
     {
         var accessorList =
             AccessorList(
                 List(
                     new[]
                     {
-                        AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
-                        AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
+                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() ),
+                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() )
                     } ) );
 
-        return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ), context );
     }
 
-    private EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
+        private EventDeclarationSyntax GetTrampolineForEventField(
+            EventFieldDeclarationSyntax eventField,
+            IEventSymbol targetSymbol,
+            SyntaxGenerationContext context )
     {
         // TODO: Do not copy leading/trailing trivia to all declarations.
 
@@ -174,7 +183,7 @@ internal sealed partial class LinkerRewritingDriver
                     List<AttributeListSyntax>(),
                     eventField.Modifiers,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                    eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                     null,
                     eventField.Declaration.Variables.Single().Identifier,
                     AccessorList(
@@ -183,7 +192,7 @@ internal sealed partial class LinkerRewritingDriver
                             {
                                 AccessorDeclaration(
                                     SyntaxKind.AddAccessorDeclaration,
-                                    SyntaxFactoryEx.FormattedBlock(
+                                        context.SyntaxGenerator.FormattedBlock(
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.AddAssignmentExpression,
@@ -191,7 +200,7 @@ internal sealed partial class LinkerRewritingDriver
                                                 IdentifierName( "value" ) ) ) ) ),
                                 AccessorDeclaration(
                                     SyntaxKind.RemoveAccessorDeclaration,
-                                    SyntaxFactoryEx.FormattedBlock(
+                                        context.SyntaxGenerator.FormattedBlock(
                                         ExpressionStatement(
                                             AssignmentExpression(
                                                 SyntaxKind.SubtractAssignmentExpression,
@@ -199,7 +208,7 @@ internal sealed partial class LinkerRewritingDriver
                                                 IdentifierName( "value" ) ) ) ) )
                             }.WhereNotNull() ) ),
                     default )
-                .WithTriviaFromIfNecessary( eventField, this.SyntaxGenerationOptions.PreserveTrivia );
+                    .WithTriviaFromIfNecessary( eventField, this.SyntaxGenerationOptions );
 
         ExpressionSyntax GetInvocationTarget()
         {

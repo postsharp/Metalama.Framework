@@ -17,6 +17,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -227,8 +228,9 @@ public abstract class AspectPipeline : IDisposable
         var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
         var preserveTrivia = triviaMatters;
 
-        projectServiceProviderWithProject =
-            projectServiceProviderWithProject.WithService( new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia ) );
+            projectServiceProviderWithProject =
+                projectServiceProviderWithProject.WithService(
+                    new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia, projectOptions.FormatOutput ) );
 
         // Add MetricsManager.
         projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,7 +23,8 @@ internal sealed class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitutio
         switch ( currentNode )
         {
             case MethodDeclarationSyntax:
-                return SyntaxFactoryEx.FormattedBlock().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                    return substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             default:
                 throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );

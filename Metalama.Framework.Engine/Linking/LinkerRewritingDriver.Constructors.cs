@@ -1,15 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
-using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
+using static Metalama.Framework.Engine.SyntaxGeneration.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking;
@@ -36,7 +36,7 @@ internal sealed partial class LinkerRewritingDriver
                         VariableDeclaration(
                             generationContext.SyntaxGenerator
                                 .Type( primaryConstructorField.Type )
-                                .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.PreserveTrivia ),
+                                .WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.Options ),
                             SingletonSeparatedList(
                                 VariableDeclarator(
                                     Identifier( TriviaList( ElasticSpace ), GetCleanPrimaryConstructorFieldName( primaryConstructorField ), default ) ) ) ),
@@ -176,8 +176,8 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                        (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                         semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
+                         semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unsupported form of constructor declaration for {symbol}." )
                 };
 

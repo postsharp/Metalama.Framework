@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -76,8 +77,8 @@ internal sealed class OverrideOperatorTransformation : OverrideMemberTransformat
             MethodDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( modifiers ),
-                context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
-                    .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 null,
                 Identifier(
                     context.InjectionNameProvider.GetOverrideName(

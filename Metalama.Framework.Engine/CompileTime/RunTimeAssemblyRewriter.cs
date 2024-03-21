@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -90,8 +90,9 @@ namespace Metalama.Compiler
     private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
     private readonly ClassifyingCompilationContext _compilationContext;
     private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
+    private readonly SyntaxGenerationContext _syntaxGenerationContext;
 
-    private RunTimeAssemblyRewriter( in ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext )
+    private RunTimeAssemblyRewriter( in ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext, SyntaxTree syntaxTree )
     {
         this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
         this._compilationContext = compilationContext;
@@ -99,6 +100,7 @@ namespace Metalama.Compiler
         this._aspectDriverSymbol = compilationContext.SourceCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
         this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
         this._symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
+        this._syntaxGenerationContext = compilationContext.CompilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, syntaxTree, 0 );
     }
 
     private SemanticModelProvider SemanticModelProvider => this._rewriterHelper.SemanticModelProvider;
@@ -111,7 +113,7 @@ namespace Metalama.Compiler
 
         var transformedCompilation =
             await compilation.RewriteSyntaxTreesAsync(
-                _ => new RunTimeAssemblyRewriter( serviceProvider, compilationContext ),
+                oldRoot => new RunTimeAssemblyRewriter( serviceProvider, compilationContext, oldRoot.SyntaxTree ),
                 serviceProvider );
 
         if ( transformedCompilation.Compilation.GetTypeByMetadataName( "Metalama.Compiler.Intrinsics" ) == null )
@@ -152,15 +154,17 @@ namespace Metalama.Compiler
 
         if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
         {
+            var syntaxGenerationContext = this._compilationContext.CompilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, node );
+
             leadingTrivia = leadingTrivia.InsertAfterFirstNonWhitespaceTrivia(
                 Trivia(
                         PragmaWarningDirectiveTrivia(
                                 Token( SyntaxKind.DisableKeyword ),
                                 true )
                             .WithErrorCodes( _suppressedWarnings )
-                            .NormalizeWhitespace()
-                            .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) )
+                            .NormalizeWhitespace( eol: syntaxGenerationContext.EndOfLine )
+                            .StructuredTriviaWithLeadingLineFeedIfNecessary( syntaxGenerationContext )
+                            .StructuredTriviaWithTrailingLineFeedIfNecessary( syntaxGenerationContext ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
 
             trailingTrivia = trailingTrivia.InsertBeforeLastNonWhitespaceTrivia(
@@ -169,9 +173,9 @@ namespace Metalama.Compiler
                                 Token( SyntaxKind.RestoreKeyword ),
                                 true )
                             .WithErrorCodes( _suppressedWarnings )
-                            .NormalizeWhitespace()
-                            .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) )
+                            .NormalizeWhitespace( eol: syntaxGenerationContext.EndOfLine )
+                            .StructuredTriviaWithLeadingLineFeedIfNecessary( syntaxGenerationContext )
+                            .StructuredTriviaWithTrailingLineFeedIfNecessary( syntaxGenerationContext ) )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
         }
 
@@ -232,7 +236,10 @@ namespace Metalama.Compiler
 
         if ( this.MustReplaceByThrow( symbol ) )
         {
-            transformedNode = this._rewriterHelper.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
+            transformedNode = this._rewriterHelper.WithThrowNotSupportedExceptionBody(
+                node,
+                "Compile-time-only code cannot be called at run-time.",
+                this._syntaxGenerationContext );
         }
 
         if ( this.IsTemplate( symbol ) )
@@ -344,7 +351,7 @@ namespace Metalama.Compiler
         }
 
         var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod, isIteratorMethod )
-            .WithTrailingTrivia( ElasticLineFeed );
+            .WithTrailingLineFeedIfNecessary( this._syntaxGenerationContext );
 
         return (T) transformedNode.WithIncludeInReferenceAssemblyAnnotation()
             .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
@@ -388,9 +395,9 @@ namespace Metalama.Compiler
                         {
                             AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ),
-                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isAsyncMethod ) )
+                            AttributeArgument( syntaxFactory.SyntaxGenerator.LiteralExpression( isAsyncMethod ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsAsync) ) ),
-                            AttributeArgument( SyntaxFactoryEx.LiteralExpression( isIteratorMethod ) )
+                            AttributeArgument( syntaxFactory.SyntaxGenerator.LiteralExpression( isIteratorMethod ) )
                                 .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.IsIteratorMethod) ) )
                         } ) ) );
 

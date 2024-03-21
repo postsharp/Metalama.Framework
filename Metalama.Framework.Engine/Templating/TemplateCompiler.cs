@@ -212,7 +212,6 @@ namespace Metalama.Framework.Engine.Templating
                 templateName,
                 templateSyntaxKind,
                 this._compilationContext,
-                compileTimeCompilation,
                 this._syntaxTreeAnnotationMap,
                 diagnostics,
                 compileTimeCompilationContext,

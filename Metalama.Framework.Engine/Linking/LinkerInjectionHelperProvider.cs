@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -87,7 +88,7 @@ internal sealed class LinkerInjectionHelperProvider
                 TypeArgumentList( SingletonSeparatedList( eventFieldType ) ) ) );
 
     public static ExpressionSyntax GetOperatorMemberExpression(
-        OurSyntaxGenerator syntaxGenerator,
+            ContextualSyntaxGenerator syntaxGenerator,
         OperatorKind operatorKind,
         IType returnType,
         IEnumerable<IType> parameterTypes )
@@ -104,15 +105,20 @@ internal sealed class LinkerInjectionHelperProvider
     public TypeSyntax GetSourceType()
         => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
 
-    public TypeSyntax GetOverriddenByType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
-        => this.GetNumberedHelperType( syntaxGenerator, _overriddenByTypeName, "override", aspectType, ordinal );
+        public TypeSyntax GetOverriddenByType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
+            => this.GetNumberedHelperType( context, _overriddenByTypeName, "override", aspectType, ordinal );
 
-    public TypeSyntax GetAuxiliaryType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
-        => this.GetNumberedHelperType( syntaxGenerator, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
+        public TypeSyntax GetAuxiliaryType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
+            => this.GetNumberedHelperType( context, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
 
-    private TypeSyntax GetNumberedHelperType( OurSyntaxGenerator syntaxGenerator, string baseTypeName, string description, IAspectClass aspectType, int ordinal )
+        public TypeSyntax GetNumberedHelperType(
+            SyntaxGenerationContext context,
+            string baseTypeName,
+            string description,
+            IAspectClass aspectType,
+            int ordinal )
     {
-        var aspectTypeSyntax = syntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
+            var aspectTypeSyntax = context.SyntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
 
         switch ( ordinal )
         {

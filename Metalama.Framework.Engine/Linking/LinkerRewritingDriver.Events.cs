@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -30,7 +29,7 @@ internal sealed partial class LinkerRewritingDriver
                  && this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
             {
                 // Backing field for event field.
-                members.Add( this.GetEventBackingField( eventDeclaration, symbol ) );
+                    members.Add( this.GetEventBackingField( eventDeclaration, symbol, generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -39,7 +38,8 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                members.Add( this.GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+                    members.Add(
+                        this.GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ), generationContext ) );
             }
 
             if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
@@ -54,7 +54,7 @@ internal sealed partial class LinkerRewritingDriver
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                members.Add( this.GetEmptyImplEvent( eventDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplEvent( eventDeclaration, symbol, generationContext ) );
             }
 
             return members;
@@ -77,7 +77,7 @@ internal sealed partial class LinkerRewritingDriver
 
             return new MemberDeclarationSyntax[]
             {
-                this.GetEventBackingField( eventDeclaration, symbol ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
+                    this.GetEventBackingField( eventDeclaration, symbol, generationContext ), GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default )
             };
         }
         else if ( this.AnalysisRegistry.HasBaseSemanticReferences( symbol ) )
@@ -86,7 +86,7 @@ internal sealed partial class LinkerRewritingDriver
 
             return new[]
             {
-                this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                 this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext )
             };
         }
@@ -149,8 +149,9 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                        (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                         semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                 };
 
@@ -167,7 +168,7 @@ internal sealed partial class LinkerRewritingDriver
     }
 
     private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-        => SyntaxFactoryEx.FormattedBlock(
+            => generationContext.SyntaxGenerator.FormattedBlock(
             ExpressionStatement(
                 AssignmentExpression(
                     SyntaxKind.AddAssignmentExpression,
@@ -178,10 +179,10 @@ internal sealed partial class LinkerRewritingDriver
                             : ThisExpression(),
                         IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                     IdentifierName( "value" ) ),
-                Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
+                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( generationContext.ElasticEndOfLineTrivia ) ) ) );
 
     private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-        => SyntaxFactoryEx.FormattedBlock(
+            => generationContext.SyntaxGenerator.FormattedBlock(
             ExpressionStatement(
                 AssignmentExpression(
                     SyntaxKind.SubtractAssignmentExpression,
@@ -192,9 +193,12 @@ internal sealed partial class LinkerRewritingDriver
                             : ThisExpression(),
                         IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                     IdentifierName( "value" ) ),
-                Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
+                    Token( default, SyntaxKind.SemicolonToken, generationContext.ElasticEndOfLineTriviaList ) ) );
 
-    private EventFieldDeclarationSyntax GetEventBackingField( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField(
+            EventDeclarationSyntax eventDeclaration,
+            IEventSymbol symbol,
+            SyntaxGenerationContext context )
     {
         EqualsValueClauseSyntax? initializerExpression;
 
@@ -229,11 +233,15 @@ internal sealed partial class LinkerRewritingDriver
                 break;
         }
 
-        return this.GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol );
+            return this.GetEventBackingField( eventDeclaration.Type, initializerExpression, symbol, context );
     }
 
     // Event backing field is intentionally an event field to handle thread-safety.
-    private EventFieldDeclarationSyntax GetEventBackingField( TypeSyntax eventType, EqualsValueClauseSyntax? initializer, IEventSymbol symbol )
+        private EventFieldDeclarationSyntax GetEventBackingField(
+            TypeSyntax eventType,
+            EqualsValueClauseSyntax? initializer,
+            IEventSymbol symbol,
+            SyntaxGenerationContext context )
     {
         if ( initializer == null && symbol.Type is { IsValueType: false, NullableAnnotation: NullableAnnotation.NotAnnotated } )
         {
@@ -255,17 +263,17 @@ internal sealed partial class LinkerRewritingDriver
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
                         : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                     VariableDeclaration(
-                        eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                            eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 initializer ) ) ) )
-                .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .NormalizeWhitespaceIfNecessary( context )
                 .WithTriviaIfNecessary(
-                    new SyntaxTriviaList( ElasticLineFeed ),
-                    new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
-                    this.SyntaxGenerationOptions.NormalizeWhitespace )
+                        context.ElasticEndOfLineTriviaList,
+                        context.TwoElasticEndOfLinesTriviaList,
+                        this.SyntaxGenerationOptions )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -296,7 +304,8 @@ internal sealed partial class LinkerRewritingDriver
             @event.Type,
             transformedAccessorList.WithSourceCodeAnnotation(),
             symbol,
-            GetOriginalImplMemberName( symbol ) );
+                GetOriginalImplMemberName( symbol ),
+                generationContext );
 
         AccessorDeclarationSyntax TransformAccessor( AccessorDeclarationSyntax accessorDeclaration, IMethodSymbol accessorSymbol )
         {
@@ -320,10 +329,15 @@ internal sealed partial class LinkerRewritingDriver
         }
     }
 
-    private MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
-        => this.GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetEmptyImplMemberName( symbol ) );
+        private MemberDeclarationSyntax GetEmptyImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol, SyntaxGenerationContext context )
+           => return this.GetSpecialImplEvent( @event.Type, @event.AccessorList.AssertNotNull(), symbol, GetEmptyImplMemberName( symbol ), context );
 
-    private MemberDeclarationSyntax GetSpecialImplEvent( TypeSyntax eventType, AccessorListSyntax accessorList, IEventSymbol symbol, string name )
+        private MemberDeclarationSyntax GetSpecialImplEvent(
+            TypeSyntax eventType,
+            AccessorListSyntax accessorList,
+            IEventSymbol symbol,
+            string name,
+            SyntaxGenerationContext context )
     {
         var cleanAccessorList =
             accessorList.WithAccessors(
@@ -349,12 +363,15 @@ internal sealed partial class LinkerRewritingDriver
                     null,
                     Identifier( name ),
                     cleanAccessorList )
-                .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
-                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .NormalizeWhitespaceIfNecessary( context )
+                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
-    private EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IntermediateSymbolSemantic<IEventSymbol> targetSemantic )
+        private EventDeclarationSyntax GetTrampolineForEvent(
+            EventDeclarationSyntax @event,
+            IntermediateSymbolSemantic<IEventSymbol> targetSemantic,
+            SyntaxGenerationContext context )
     {
         Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
 
@@ -374,7 +391,7 @@ internal sealed partial class LinkerRewritingDriver
                                 addAccessor != null
                                     ? AccessorDeclaration(
                                         SyntaxKind.AddAccessorDeclaration,
-                                        SyntaxFactoryEx.FormattedBlock(
+                                            context.SyntaxGenerator.FormattedBlock(
                                             ExpressionStatement(
                                                 AssignmentExpression(
                                                     SyntaxKind.AddAssignmentExpression,
@@ -384,7 +401,7 @@ internal sealed partial class LinkerRewritingDriver
                                 removeAccessor != null
                                     ? AccessorDeclaration(
                                         SyntaxKind.RemoveAccessorDeclaration,
-                                        SyntaxFactoryEx.FormattedBlock(
+                                            context.SyntaxGenerator.FormattedBlock(
                                             ExpressionStatement(
                                                 AssignmentExpression(
                                                     SyntaxKind.SubtractAssignmentExpression,
@@ -393,7 +410,7 @@ internal sealed partial class LinkerRewritingDriver
                                     : null
                             }.Where( a => a != null )
                             .AssertNoneNull() ) ) )
-            .WithTriviaFromIfNecessary( @event, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( @event, this.SyntaxGenerationOptions );
 
         ExpressionSyntax GetInvocationTarget()
         {

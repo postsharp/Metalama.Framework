@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -62,7 +63,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         var transformationComparer = TransformationLinkerOrderComparer.Instance;
         var injectionHelperProvider = new LinkerInjectionHelperProvider( input.CompilationModel, supportsNullability );
-        var injectionNameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+        var injectionNameProvider = new LinkerInjectionNameProvider( input.CompilationModel, injectionHelperProvider );
         var transformationCollection = new TransformationCollection( input.CompilationModel, transformationComparer );
         var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
         var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();

@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -96,16 +97,20 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
                     ConstructorInitializer(
                         SyntaxKind.ThisConstructorInitializer,
                         ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsArray( x => Argument( IdentifierName( x.Name ) ) ) ) ) ),
-                    newMethodBody,
-                    null );
+                        newMethodBody,
+                        null );
 
         return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
     }
 
     private ParameterListSyntax GetParameterList( MemberInjectionContext context )
     {
-        var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true );
-        var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType( this.ParentAdvice.Aspect, this.OverriddenDeclaration );
+            var originalParameterList = context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true );
+
+            var overriddenByParameterType = context.InjectionNameProvider.GetOverriddenByType(
+                this.ParentAdvice.Aspect,
+                this.OverriddenDeclaration,
+                context.SyntaxGenerationContext );
 
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
     }

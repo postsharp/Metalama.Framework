@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -55,7 +55,8 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                     VariableDeclaration(
-                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        syntaxGenerator.Type( eventBuilder.Type.GetSymbol() )
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         SeparatedList(
                             new[]
                             {
@@ -71,11 +72,12 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     eventBuilder.GetAttributeLists( context ),
                     eventBuilder.GetSyntaxModifierList(),
                     Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
-                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() )
+                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     eventBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( eventBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace )
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options )
                         : null,
                     this.IntroducedDeclaration.GetCleanName(),
                     GenerateAccessorList(),
@@ -148,10 +150,12 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     // Hide initializer expression into the single statement of the add.
                     { MethodKind: MethodKind.EventAdd } when eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 }
                                                              && initializerExpression != null
-                        => SyntaxFactoryEx.FormattedBlock(
+                        => context.SyntaxGenerator.FormattedBlock(
                             ExpressionStatement(
-                                context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression( syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ), initializerExpression ) ) ),
-                    _ => SyntaxFactoryEx.FormattedBlock()
+                                context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression(
+                                    syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ),
+                                    initializerExpression ) ) ),
+                    _ => context.SyntaxGenerator.FormattedBlock()
                 };
 
             return

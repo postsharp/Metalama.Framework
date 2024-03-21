@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,12 +24,10 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
     private readonly ConcurrentDictionary<(Type AspectType, IMember OverriddenMember), int> _overriddenByCounters;
     private readonly ConcurrentDictionary<(Type AspectType, IMember TargetMember), int> _auxiliaryCounters;
     private readonly ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>> _nameCollisionCounters;
-    private readonly OurSyntaxGenerator _syntaxGenerator;
 
     public LinkerInjectionNameProvider(
         CompilationModel finalCompilation,
-        LinkerInjectionHelperProvider injectionHelperProvider,
-        OurSyntaxGenerator syntaxGenerator )
+            LinkerInjectionHelperProvider injectionHelperProvider )
     {
         this._finalCompilation = finalCompilation;
         this._injectionHelperProvider = injectionHelperProvider;
@@ -45,8 +44,6 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
         this._nameCollisionCounters =
             new ConcurrentDictionary<(INamedType Type, string Hint), StrongBox<int>>(
                 ValueTupleComparer.Create<INamedType, string>( finalCompilation.Comparers.Default, StringComparer.Ordinal ) );
-
-        this._syntaxGenerator = syntaxGenerator;
     }
 
     internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -121,18 +118,23 @@ internal sealed class LinkerInjectionNameProvider : InjectionNameProvider
         return this.FindUniqueName( targetType, nameHint );
     }
 
-    internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember )
+        internal override TypeSyntax GetOverriddenByType( IAspectInstanceInternal aspect, IMember overriddenMember, SyntaxGenerationContext context )
     {
         var ordinal = this._overriddenByCounters.AddOrUpdate( (aspect.AspectClass.Type, overriddenMember), 0, ( _, v ) => v + 1 );
 
-        return this._injectionHelperProvider.GetOverriddenByType( this._syntaxGenerator, aspect.AspectClass, ordinal );
+            return this._injectionHelperProvider.GetOverriddenByType( context, aspect.AspectClass, ordinal );
     }
 
-    internal TypeSyntax GetAuxiliaryType( IAspectInstanceInternal aspect, IMember targetMember )
+        internal TypeSyntax GetSourceType()
+        {
+            return this._injectionHelperProvider.GetSourceType();
+        }
+
+        internal TypeSyntax GetAuxiliaryType( IAspectInstanceInternal aspect, IMember targetMember, SyntaxGenerationContext context )
     {
         var ordinal = this._auxiliaryCounters.AddOrUpdate( (aspect.AspectClass.Type, targetMember), 0, ( _, v ) => v + 1 );
 
-        return this._injectionHelperProvider.GetAuxiliaryType( this._syntaxGenerator, aspect.AspectClass, ordinal );
+            return this._injectionHelperProvider.GetAuxiliaryType( context, aspect.AspectClass, ordinal );
     }
 
     private string FindUniqueName( INamedType containingType, string hint )

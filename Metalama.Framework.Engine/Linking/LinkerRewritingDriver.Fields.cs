@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +16,8 @@ internal sealed partial class LinkerRewritingDriver
 {
     private IReadOnlyList<MemberDeclarationSyntax> RewriteField(
         FieldDeclarationSyntax fieldDeclaration,
-        IFieldSymbol symbol )
+            IFieldSymbol symbol,
+            SyntaxGenerationContext context )
     {
         Invariant.Assert( !this.InjectionRegistry.IsOverrideTarget( symbol ) );
 
@@ -27,10 +28,11 @@ internal sealed partial class LinkerRewritingDriver
              && this.ShouldGenerateEmptyMember( symbol ) )
         {
             members.Add(
-                this.GetEmptyImplField(
+                    GetEmptyImplField(
                     symbol,
                     List<AttributeListSyntax>(),
-                    fieldDeclaration.Declaration.Type ) );
+                        fieldDeclaration.Declaration.Type,
+                        context ) );
         }
 
         if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
@@ -46,10 +48,11 @@ internal sealed partial class LinkerRewritingDriver
         return members;
     }
 
-    private MemberDeclarationSyntax GetEmptyImplField(
+        private static MemberDeclarationSyntax GetEmptyImplField(
         IFieldSymbol symbol,
         SyntaxList<AttributeListSyntax> attributes,
-        TypeSyntax type )
+            TypeSyntax type,
+            SyntaxGenerationContext context )
     {
         var setAccessorKind =
             symbol switch
@@ -73,7 +76,7 @@ internal sealed partial class LinkerRewritingDriver
                             Token( SyntaxKind.SemicolonToken ) ),
                         AccessorDeclaration(
                             setAccessorKind,
-                            SyntaxFactoryEx.FormattedBlock() )
+                                context.SyntaxGenerator.FormattedBlock() )
                     } ) );
 
         return
@@ -87,10 +90,10 @@ internal sealed partial class LinkerRewritingDriver
                     type,
                     null,
                     Identifier( GetEmptyImplMemberName( symbol ) ),
-                    accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        accessorList.WithTrailingLineFeedIfNecessary( context ),
                     null,
                     null )
-                .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
+                    .WithLeadingLineFeedIfNecessary( context )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 }

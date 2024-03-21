@@ -6,13 +6,12 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -51,7 +50,7 @@ internal static class ProceedHelper
                                         runtimeAspectHelperType,
                                         IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                 .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
-                                .WithAdditionalAnnotations( Simplifier.Annotation );
+                                .WithSimplifierAnnotationIfNecessary( generationContext );
                     }
                     else
                     {
@@ -81,7 +80,7 @@ internal static class ProceedHelper
                                 AwaitExpression(
                                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                         invocationExpression )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    .WithSimplifierAnnotationIfNecessary( generationContext ),
                                 resultType);
 
                         default:
@@ -90,7 +89,7 @@ internal static class ProceedHelper
                                         AwaitExpression(
                                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                             invocationExpression ) )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    .WithSimplifierAnnotationIfNecessary( generationContext ),
                                 asyncInfo.ResultType);
                     }
                 }
@@ -131,18 +130,18 @@ internal static class ProceedHelper
                             runtimeAspectHelperType,
                             IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                     .WithArgumentList( arguments )
-                    .WithAdditionalAnnotations( Simplifier.Annotation );
+                    .WithSimplifierAnnotationIfNecessary( generationContext );
 
             var expression = ParenthesizedExpression(
                     AwaitExpression(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                         bufferExpression ) )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+                .WithSimplifierAnnotationIfNecessary( generationContext );
 
             return expression;
         }
 
-        static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
+        (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
         {
             if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
             {
@@ -154,7 +153,7 @@ internal static class ProceedHelper
                         InvocationExpression(
                             LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
                             ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
-                    .WithAdditionalAnnotations( Simplifier.Annotation );
+                    .WithSimplifierAnnotationIfNecessary( generationContext );
 
             if ( await )
             {
@@ -219,7 +218,7 @@ internal static class ProceedHelper
                 expression = MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     ParenthesizedExpression(
-                        SyntaxFactoryEx.SafeCastExpression(
+                        generationContext.SyntaxGenerator.SafeCastExpression(
                             generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                             ThisExpression() ) ),
                     memberName );

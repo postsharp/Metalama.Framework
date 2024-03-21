@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -63,8 +65,7 @@ public static class SyntaxExtensions
         => propertyDeclaration.AccessorList != null
            && propertyDeclaration.AccessorList.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) );
 
-    internal static bool IsAccessModifierKeyword( this SyntaxToken token )
-        => SyntaxFacts.IsAccessibilityModifier( token.Kind() );
+    internal static bool IsAccessModifierKeyword( this SyntaxToken token ) => SyntaxFacts.IsAccessibilityModifier( token.Kind() );
 
     internal static ExpressionSyntax RemoveParenthesis( this ExpressionSyntax node )
         => node switch
@@ -111,17 +112,28 @@ public static class SyntaxExtensions
             throw new InvalidOperationException( $"Can't add parameter list to a non-record type before C# 12." );
 #endif
 
-    internal static TNode NormalizeWhitespaceIfNecessary<TNode>( this TNode node, bool normalizeWhitespace )
+    internal static TNode NormalizeWhitespaceIfNecessary<TNode>( this TNode node, SyntaxGenerationContext context )
         where TNode : SyntaxNode
     {
-        if ( !normalizeWhitespace )
+        if ( !context.Options.NormalizeWhitespace )
         {
             return node;
         }
 
 #pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
-        return node.NormalizeWhitespace( elasticTrivia: true );
+        return node.NormalizeWhitespace( elasticTrivia: true, eol: context.EndOfLine );
 #pragma warning restore LAMA0830
+    }
+
+    internal static TNode WithSimplifierAnnotationIfNecessary<TNode>( this TNode node, SyntaxGenerationContext context )
+        where TNode : SyntaxNode
+    {
+        if ( !context.Options.AddFormattingAnnotations )
+        {
+            return node;
+        }
+
+        return node.WithSimplifierAnnotation();
     }
 
     private static bool ContainsDirectives( this SyntaxTriviaList trivias )
@@ -141,10 +153,10 @@ public static class SyntaxExtensions
 
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
 
-    internal static TNode WithLeadingTriviaIfNecessary<TNode>( this TNode node, SyntaxTriviaList leadingTrivia, bool preserveTrivia )
+    internal static TNode WithLeadingTriviaIfNecessary<TNode>( this TNode node, SyntaxTriviaList leadingTrivia, SyntaxGenerationOptions options )
         where TNode : SyntaxNode
     {
-        if ( !preserveTrivia && !leadingTrivia.ContainsDirectives() )
+        if ( !options.PreserveTrivia && !leadingTrivia.ContainsDirectives() )
         {
             return node;
         }
@@ -152,14 +164,114 @@ public static class SyntaxExtensions
         return node.WithLeadingTrivia( leadingTrivia );
     }
 
-    internal static TNode WithLeadingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia leadingTrivia, bool preserveTrivia )
-        where TNode : SyntaxNode
-        => node.WithLeadingTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), preserveTrivia );
+    internal static SyntaxToken WithLeadingTriviaIfNecessary( this SyntaxToken node, SyntaxTriviaList leadingTrivia, SyntaxGenerationOptions options )
+    {
+        if ( !options.PreserveTrivia && !leadingTrivia.ContainsDirectives() )
+        {
+            return node;
+        }
 
-    internal static TNode WithTrailingTriviaIfNecessary<TNode>( this TNode node, SyntaxTriviaList trailingTrivia, bool preserveTrivia )
+        return node.WithLeadingTrivia( leadingTrivia );
+    }
+
+    internal static TNode WithLeadingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
         where TNode : SyntaxNode
     {
-        if ( !preserveTrivia && !trailingTrivia.ContainsDirectives() )
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode WithLeadingAndTrailingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : SyntaxNode
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) )
+            .WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode WithTrailingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : SyntaxNode
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static SyntaxToken WithTrailingLineFeedIfNecessary(
+        this SyntaxToken node,
+        SyntaxGenerationContext context )
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithTrailingTrivia( node.TrailingTrivia.Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode StructuredTriviaWithTrailingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : StructuredTriviaSyntax
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode StructuredTriviaWithLeadingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : StructuredTriviaSyntax
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static SyntaxTriviaList AddLineFeedIfNecessary(
+        this SyntaxTriviaList list,
+        SyntaxGenerationContext context )
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return list;
+        }
+
+        return list.Add( context.ElasticEndOfLineTrivia );
+    }
+
+    internal static TNode WithLeadingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia leadingTrivia, SyntaxGenerationOptions options )
+        where TNode : SyntaxNode
+        => node.WithLeadingTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), options );
+
+    internal static TNode WithTrailingTriviaIfNecessary<TNode>( this TNode node, SyntaxTriviaList trailingTrivia, SyntaxGenerationOptions options )
+        where TNode : SyntaxNode
+    {
+        if ( !options.PreserveTrivia && !trailingTrivia.ContainsDirectives() )
         {
             return node;
         }
@@ -167,9 +279,9 @@ public static class SyntaxExtensions
         return node.WithTrailingTrivia( trailingTrivia );
     }
 
-    internal static TNode WithTrailingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia trailingTrivia, bool preserveTrivia )
+    internal static TNode WithTrailingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia trailingTrivia, SyntaxGenerationOptions options )
         where TNode : SyntaxNode
-        => node.WithTrailingTriviaIfNecessary( new SyntaxTriviaList( trailingTrivia ), preserveTrivia );
+        => node.WithTrailingTriviaIfNecessary( new SyntaxTriviaList( trailingTrivia ), options );
 
     internal static SyntaxToken WithTrailingTriviaIfNecessary( this SyntaxToken token, SyntaxTriviaList trailingTrivia, bool preserveTrivia )
     {
@@ -181,10 +293,14 @@ public static class SyntaxExtensions
         return token.WithTrailingTrivia( trailingTrivia );
     }
 
-    internal static TNode WithTriviaIfNecessary<TNode>( this TNode node, SyntaxTriviaList leadingTrivia, SyntaxTriviaList trailingTrivia, bool preserveTrivia )
+    internal static TNode WithTriviaIfNecessary<TNode>(
+        this TNode node,
+        SyntaxTriviaList leadingTrivia,
+        SyntaxTriviaList trailingTrivia,
+        SyntaxGenerationOptions options )
         where TNode : SyntaxNode
     {
-        if ( !preserveTrivia && !leadingTrivia.ContainsDirectives() && !trailingTrivia.ContainsDirectives() )
+        if ( !options.PreserveTrivia && !leadingTrivia.ContainsDirectives() && !trailingTrivia.ContainsDirectives() )
         {
             return node;
         }
@@ -192,27 +308,34 @@ public static class SyntaxExtensions
         return node.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia );
     }
 
-    internal static TNode WithTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia leadingTrivia, SyntaxTrivia trailingTrivia, bool preserveTrivia )
+    internal static TNode WithTriviaIfNecessary<TNode>(
+        this TNode node,
+        SyntaxTrivia leadingTrivia,
+        SyntaxTrivia trailingTrivia,
+        SyntaxGenerationOptions options )
         where TNode : SyntaxNode
-        => node.WithTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), new( trailingTrivia ), preserveTrivia );
+        => node.WithTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), new SyntaxTriviaList( trailingTrivia ), options );
 
-    internal static TNode WithTriviaFromIfNecessary<TNode>( this TNode node, SyntaxNode fromNode, bool preserveTrivia )
+    internal static TNode WithTriviaFromIfNecessary<TNode>( this TNode node, SyntaxNode fromNode, SyntaxGenerationOptions options )
         where TNode : SyntaxNode
-        => node.WithTriviaIfNecessary( fromNode.GetLeadingTrivia(), fromNode.GetTrailingTrivia(), preserveTrivia );
+        => node.WithTriviaIfNecessary( fromNode.GetLeadingTrivia(), fromNode.GetTrailingTrivia(), options );
 
-    internal static bool ShouldBePreserved( this SyntaxTriviaList trivia, bool preserveTrivia ) => preserveTrivia || trivia.ContainsDirectives();
+    internal static bool ShouldBePreserved( this SyntaxTriviaList trivia, SyntaxGenerationOptions options )
+        => options.PreserveTrivia || trivia.ContainsDirectives();
 
-    internal static bool ShouldBePreserved( this IEnumerable<SyntaxTrivia> trivia, bool preserveTrivia ) => preserveTrivia || trivia.Any( t => t.IsDirective );
+    internal static bool ShouldBePreserved( this IEnumerable<SyntaxTrivia> trivia, SyntaxGenerationOptions options )
+        => options.PreserveTrivia || trivia.Any( t => t.IsDirective );
 
-    internal static bool ShouldTriviaBePreserved( this SyntaxNodeOrToken nodeOrToken, bool preserveTrivia ) => preserveTrivia || nodeOrToken.ContainsDirectives;
+    internal static bool ShouldTriviaBePreserved( this SyntaxNodeOrToken nodeOrToken, SyntaxGenerationOptions options )
+        => options.PreserveTrivia || nodeOrToken.ContainsDirectives;
 
-    internal static TNode AddTriviaFromIfNecessary<TNode>( this TNode node, SyntaxNode fromNode, bool preserveTrivia )
+    internal static TNode AddTriviaFromIfNecessary<TNode>( this TNode node, SyntaxNode fromNode, SyntaxGenerationOptions options )
         where TNode : SyntaxNode
     {
         var fromLeading = fromNode.GetLeadingTrivia();
         var fromTrailing = fromNode.GetTrailingTrivia();
 
-        if ( !preserveTrivia && !fromLeading.ContainsDirectives() && !fromTrailing.ContainsDirectives() )
+        if ( !options.PreserveTrivia && !fromLeading.ContainsDirectives() && !fromTrailing.ContainsDirectives() )
         {
             return node;
         }

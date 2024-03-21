@@ -5,7 +5,7 @@ public class TestClass
   {
     var returnValue = this.AsyncEnumerable_Source(text);
     global::System.Console.WriteLine($"Advice");
-    await foreach (var item in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object?>)returnValue)
+    await foreach (var item in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object>)returnValue)
     {
       if (item is null)
       {

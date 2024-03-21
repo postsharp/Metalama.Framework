@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -39,15 +40,15 @@ class TargetCode
 
 }";
 
-            var generator = OurSyntaxGenerator.Default;
-
+            
             using var testContext = this.CreateTestContext();
             var serviceProvider = testContext.ServiceProvider;
 
             var compilation = testContext.CreateCompilationModel( code );
-
+            
             var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Proof );
             var syntaxGenerationContext = syntaxSerializationContext.SyntaxGenerationContext;
+            var generator = syntaxGenerationContext.SyntaxGenerator;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxSerializationContext,

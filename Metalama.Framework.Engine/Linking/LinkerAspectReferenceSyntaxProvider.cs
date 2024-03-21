@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -32,11 +32,11 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                     flags: AspectReferenceFlags.Inlineable ),
             ArgumentList() );
 
-    public override ExpressionSyntax GetConstructorReference(
-        AspectLayerId aspectLayer,
-        IConstructor overriddenConstructor,
-        OurSyntaxGenerator syntaxGenerator )
-        => InvocationExpression(
+        public override ExpressionSyntax GetConstructorReference(
+            AspectLayerId aspectLayer,
+            IConstructor overriddenConstructor,
+            ContextualSyntaxGenerator syntaxGenerator )
+            => InvocationExpression(
             LinkerInjectionHelperProvider.GetConstructorMemberExpression()
                 .WithAspectReferenceAnnotation(
                     aspectLayer,
@@ -54,7 +54,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
         AspectLayerId aspectLayer,
         IProperty targetProperty,
         AspectReferenceTargetKind targetKind,
-        OurSyntaxGenerator syntaxGenerator )
+            ContextualSyntaxGenerator syntaxGenerator )
     {
         switch (targetKind, targetProperty)
         {
@@ -90,21 +90,25 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
         AspectLayerId aspectLayer,
         IIndexer targetIndexer,
         AspectReferenceTargetKind targetKind,
-        OurSyntaxGenerator syntaxGenerator )
-        => ElementAccessExpression(
+            ContextualSyntaxGenerator syntaxGenerator )
+        {
+            return
+                ElementAccessExpression(
                 CreateIndexerAccessExpression( targetIndexer, syntaxGenerator ),
                 BracketedArgumentList(
                     SeparatedList(
                         targetIndexer.Parameters.SelectAsReadOnlyList(
-                            p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) )
+                                    p => Argument( null, p.RefKind.InvocationRefKindToken(), IdentifierName( p.Name ) ) ) ) ) )
             .WithAspectReferenceAnnotation(
                 aspectLayer,
                 AspectReferenceOrder.Previous,
                 targetKind,
                 AspectReferenceFlags.Inlineable );
 
-    public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, OurSyntaxGenerator syntaxGenerator )
-        => InvocationExpression(
+        public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod targetOperator, ContextualSyntaxGenerator syntaxGenerator )
+        {
+            return
+                InvocationExpression(
             LinkerInjectionHelperProvider.GetOperatorMemberExpression(
                     syntaxGenerator,
                     targetOperator.OperatorKind,
@@ -121,7 +125,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
             LinkerInjectionHelperProvider.GetEventFieldInitializerExpressionMemberExpression( eventFieldType ),
             ArgumentList( SingletonSeparatedList( Argument( null, default, initializerExpression ) ) ) );
 
-    private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer targetIndexer, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateIndexerAccessExpression( IIndexer targetIndexer, ContextualSyntaxGenerator syntaxGenerator )
     {
         ExpressionSyntax expression;
 
@@ -131,7 +135,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
 
             expression =
                 ParenthesizedExpression(
-                    SyntaxFactoryEx.SafeCastExpression(
+                        syntaxGenerator.SafeCastExpression(
                         syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                         ThisExpression() ) );
         }
@@ -143,7 +147,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
         return expression;
     }
 
-    private static ExpressionSyntax CreateMemberAccessExpression( IMember targetDeclaration, OurSyntaxGenerator syntaxGenerator )
+        private static ExpressionSyntax CreateMemberAccessExpression( IMember targetDeclaration, ContextualSyntaxGenerator syntaxGenerator )
     {
         ExpressionSyntax expression;
 
@@ -176,7 +180,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                 expression = MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     ParenthesizedExpression(
-                        SyntaxFactoryEx.SafeCastExpression(
+                            syntaxGenerator.SafeCastExpression(
                             syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                             ThisExpression() ) ),
                     memberName );

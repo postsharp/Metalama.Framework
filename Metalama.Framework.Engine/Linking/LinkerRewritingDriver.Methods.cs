@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -47,7 +47,11 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                members.Add( this.GetTrampolineForMethod( methodDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+                    members.Add(
+                        this.GetTrampolineForMethod(
+                            methodDeclaration,
+                            lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            generationContext ) );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -84,7 +88,7 @@ internal sealed partial class LinkerRewritingDriver
 
             return new[]
             {
-                this.GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetTrampolineForMethod( methodDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                 this.GetOriginalImplMethod( methodDeclaration, symbol, generationContext )
             };
         }
@@ -129,10 +133,12 @@ internal sealed partial class LinkerRewritingDriver
                     { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                         (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                     { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                        (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                         semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                     { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
-                        (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
+                            (semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), generationContext.ElasticEndOfLineTriviaList,
+                             generationContext.ElasticEndOfLineTriviaList,
                          semicolonToken.TrailingTrivia),
                     _ => throw new AssertionFailedException( $"Unexpected method declaration at '{methodDeclaration.GetLocation()}'." )
                 };
@@ -216,7 +222,7 @@ internal sealed partial class LinkerRewritingDriver
 
         var emptyBody =
             isIterator
-                ? SyntaxFactoryEx.FormattedBlock(
+                    ? generationContext.SyntaxGenerator.FormattedBlock(
                     YieldStatement(
                         SyntaxKind.YieldBreakStatement,
                         List<AttributeListSyntax>(),
@@ -225,8 +231,8 @@ internal sealed partial class LinkerRewritingDriver
                         null,
                         Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
                 : resultType.OriginalDefinition.SpecialType == SpecialType.System_Void
-                    ? SyntaxFactoryEx.FormattedBlock()
-                    : SyntaxFactoryEx.FormattedBlock(
+                        ? generationContext.SyntaxGenerator.FormattedBlock()
+                        : generationContext.SyntaxGenerator.FormattedBlock(
                         ReturnStatement(
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             DefaultExpression( generationContext.SyntaxGenerator.Type( resultType ) ),
@@ -262,24 +268,25 @@ internal sealed partial class LinkerRewritingDriver
             MethodDeclaration(
                     this.FilterAttributesOnSpecialImpl( symbol ),
                     modifiers,
-                    returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.NormalizeWhitespace ),
+                        returnType.WithTrailingTriviaIfNecessary( ElasticSpace, generationContext.Options ),
                     null,
                     Identifier( name ),
                     method.TypeParameterList != null ? this.FilterAttributesOnSpecialImpl( symbol.TypeParameters, method.TypeParameterList ) : null,
                     this.FilterAttributesOnSpecialImpl(
                         symbol.Parameters,
-                        method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.PreserveTrivia ) ),
+                            method.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), generationContext.Options ) ),
                     constraints,
                     body,
                     expressionBody,
                     expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, generationContext.NormalizeWhitespace )
+                    .WithLeadingAndTrailingLineFeedIfNecessary( generationContext )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
     private MethodDeclarationSyntax GetTrampolineForMethod(
         MethodDeclarationSyntax method,
-        IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
+            IntermediateSymbolSemantic<IMethodSymbol> targetSemantic,
+            SyntaxGenerationContext context )
     {
         Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
 
@@ -291,7 +298,7 @@ internal sealed partial class LinkerRewritingDriver
 
         return method
             .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-            .WithTriviaFromIfNecessary( method, this.SyntaxGenerationOptions.PreserveTrivia );
+                .WithTriviaFromIfNecessary( method, this.SyntaxGenerationOptions );
 
         BlockSyntax GetBody()
         {
@@ -302,7 +309,7 @@ internal sealed partial class LinkerRewritingDriver
 
             if ( !targetSemantic.Symbol.ReturnsVoid )
             {
-                return SyntaxFactoryEx.FormattedBlock(
+                    return context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         invocation,
@@ -310,7 +317,7 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( invocation ) );
+                    return context.SyntaxGenerator.FormattedBlock( ExpressionStatement( invocation ) );
             }
 
             ExpressionSyntax GetInvocationTarget()

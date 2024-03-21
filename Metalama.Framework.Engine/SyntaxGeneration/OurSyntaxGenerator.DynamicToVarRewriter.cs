@@ -5,9 +5,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.SyntaxGeneration
 {
-    internal partial class OurSyntaxGenerator
+    internal partial class ContextualSyntaxGenerator
     {
         private sealed class DynamicToVarRewriter : SafeSyntaxRewriter
         {

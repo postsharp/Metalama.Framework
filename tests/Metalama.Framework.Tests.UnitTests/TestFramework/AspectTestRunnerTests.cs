@@ -135,11 +135,11 @@ public class Program
             var testProjectReferences = new TestProjectReferences( metadataReferences.ToImmutableArray(), null );
             var testProjectProperties = new TestProjectProperties( assemblyName: null, directory, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
             var testDirectoryOptionsReader = new TestDirectoryOptionsReader( serviceProvider, directory );
-            var testContextOptions = new TestContextOptions();
+            
 
             var testRunner = new AspectTestRunner( serviceProvider, directory, testProjectReferences, testOutputHelper );
-
             var testInput = new TestInput.Factory( serviceProvider ).FromFile( testProjectProperties, testDirectoryOptionsReader, "Test.cs" );
+            var testContextOptions = testInput.Options.ApplyToTestContextOptions( new TestContextOptions() );
 
             // A task that will be started by the test.
             var insideTestTask = new Task( () => { } );

@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -50,7 +50,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                         context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
@@ -69,7 +69,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ),
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
                         context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() )
-                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                            .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
@@ -85,11 +85,11 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             // Async iterator can have empty body and still be in iterator, returning anything is invalid.
-            var block = SyntaxFactoryEx.FormattedBlock(
+            var block = syntaxGenerator.FormattedBlock(
                 !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
                     ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
                         ? [
-                            SyntaxFactoryEx.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                 YieldStatement(
                                     SyntaxKind.YieldBreakStatement,
                                     List<AttributeListSyntax>(),
@@ -110,8 +110,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                 MethodDeclaration(
                     methodBuilder.GetAttributeLists( context ),
                     methodBuilder.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.ReturnType( methodBuilder )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                    context.SyntaxGenerator.ReturnType( methodBuilder ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     methodBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
                             (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
