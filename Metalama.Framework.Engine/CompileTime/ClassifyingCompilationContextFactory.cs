@@ -13,7 +13,7 @@ internal sealed class ClassifyingCompilationContextFactory : IProjectService, ID
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly WeakCache<Compilation, ClassifyingCompilationContext> _instances = new();
 
-    public ClassifyingCompilationContextFactory( ProjectServiceProvider serviceProvider )
+    public ClassifyingCompilationContextFactory( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
     }

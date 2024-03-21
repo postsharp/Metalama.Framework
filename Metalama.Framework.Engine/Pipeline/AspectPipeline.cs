@@ -226,7 +226,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
             var preserveTrivia = triviaMatters;
-            CompilationContext.SetTriviaHandling( compilation, normalizeWhitespace, preserveTrivia );
+
+            projectServiceProviderWithProject =
+                projectServiceProviderWithProject.WithService( new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia ) );
 
             // Add MetricsManager.
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );
@@ -376,7 +378,7 @@ namespace Metalama.Framework.Engine.Pipeline
             return allSources;
         }
 
-        private static ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( ProjectServiceProvider serviceProvider )
+        private static ImmutableArray<AdditionalCompilationOutputFile> GetAdditionalCompilationOutputFiles( in ProjectServiceProvider serviceProvider )
         {
             var provider = serviceProvider.GetService<IAdditionalOutputFileProvider>();
 

@@ -109,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             public CompilationContext CompilationContext { get; }
 
-            public TestRewriter( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+            public TestRewriter( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
             {
                 this.CompilationContext = compilationContext;
                 this._orderedAspectLayers = new List<AspectLayerId>();

@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.CodeFixFilter = codeFixFilter;
         }
 
-        public AspectPipelineConfiguration WithServiceProvider( ProjectServiceProvider serviceProvider )
+        public AspectPipelineConfiguration WithServiceProvider( in ProjectServiceProvider serviceProvider )
             => new(
                 this.Domain,
                 this.Stages,

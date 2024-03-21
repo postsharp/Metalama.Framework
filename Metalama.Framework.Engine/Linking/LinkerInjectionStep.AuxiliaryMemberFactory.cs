@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using static Metalama.Framework.Engine.Templating.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -24,7 +25,7 @@ internal sealed partial class LinkerInjectionStep
 {
     private class AuxiliaryMemberFactory
     {
-        private readonly CompilationContext _compilationContext;
+        private readonly LinkerInjectionStep _parent;
         private readonly CompilationModel _finalCompilationModel;
         private readonly LexicalScopeFactory _lexicalScopeFactory;
         private readonly AspectReferenceSyntaxProvider _aspectReferenceSyntaxProvider;
@@ -33,7 +34,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly TransformationCollection _transformationCollection;
 
         public AuxiliaryMemberFactory(
-            CompilationContext compilationContext,
+            LinkerInjectionStep parent,
             CompilationModel finalCompilationModel,
             LexicalScopeFactory lexicalScopeFactory,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
@@ -41,7 +42,7 @@ internal sealed partial class LinkerInjectionStep
             LinkerInjectionHelperProvider injectionHelperProvider,
             TransformationCollection transformationCollection )
         {
-            this._compilationContext = compilationContext;
+            this._parent = parent;
             this._finalCompilationModel = finalCompilationModel;
             this._lexicalScopeFactory = lexicalScopeFactory;
             this._aspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
@@ -49,6 +50,10 @@ internal sealed partial class LinkerInjectionStep
             this._injectionHelperProvider = injectionHelperProvider;
             this._transformationCollection = transformationCollection;
         }
+
+        private CompilationContext CompilationContext => this._parent._compilationContext;
+
+        private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
 
         public ConstructorDeclarationSyntax GetAuxiliarySourceConstructor( IConstructor constructor )
         {
@@ -58,7 +63,7 @@ internal sealed partial class LinkerInjectionStep
             var syntax = (RecordDeclarationSyntax) constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 #endif
 
-            var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( syntax );
+            var syntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, syntax );
 
             var parameters = syntax.ParameterList.AssertNotNull();
 
@@ -135,8 +140,10 @@ internal sealed partial class LinkerInjectionStep
 
             var syntaxGenerationContext =
                 primaryDeclaration != null
-                    ? this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration )
-                    : this._compilationContext.GetSyntaxGenerationContext( method.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+                    ? this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, primaryDeclaration )
+                    : this.CompilationContext.GetSyntaxGenerationContext(
+                        this.SyntaxGenerationOptions,
+                        method.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             var iteratorInfo = method.GetIteratorInfo();
             var asyncInfo = method.GetAsyncInfo();
@@ -158,7 +165,7 @@ internal sealed partial class LinkerInjectionStep
                     false, TemplateKind.IEnumerator),
                 (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable }) => (false, TemplateKind.IAsyncEnumerable),
                 (false, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerator }) => (false, TemplateKind.IAsyncEnumerator),
-                (false, { IsAsync: true }, _) when method.ReturnType.Is( Code.SpecialType.Void ) => (true, TemplateKind.Default),
+                (false, { IsAsync: true }, _) when method.ReturnType.Is( SpecialType.Void ) => (true, TemplateKind.Default),
                 (false, { IsAsync: true }, _) => (false, TemplateKind.Async),
                 (true, _, { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IAsyncEnumerable }) => (true, TemplateKind.IAsyncEnumerable),
                 (true, { IsAsync: true }, _) => (true, TemplateKind.Default),
@@ -172,7 +179,7 @@ internal sealed partial class LinkerInjectionStep
                 .Insert( 0, TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) );
 
             TypeSyntax? returnType = null;
-            var isVoidReturning = method.GetAsyncInfo().ResultType.Is( Code.SpecialType.Void );
+            var isVoidReturning = method.GetAsyncInfo().ResultType.Is( SpecialType.Void );
 
             if ( !method.IsAsync )
             {
@@ -193,7 +200,7 @@ internal sealed partial class LinkerInjectionStep
                 // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
                 // it is not awaitable
 
-                if ( method.ReturnType.Equals( Code.SpecialType.Void ) )
+                if ( method.ReturnType.Equals( SpecialType.Void ) )
                 {
                     returnType = syntaxGenerationContext.SyntaxGenerator.Type(
                         compilationModel.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(ValueTask) ) );
@@ -350,8 +357,10 @@ internal sealed partial class LinkerInjectionStep
 
             var syntaxGenerationContext =
                 primaryDeclaration != null
-                    ? this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration )
-                    : this._compilationContext.GetSyntaxGenerationContext( property.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+                    ? this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, primaryDeclaration )
+                    : this.CompilationContext.GetSyntaxGenerationContext(
+                        this.SyntaxGenerationOptions,
+                        property.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             // TODO: Should return expression body when there is no variable, but expression body inliners do not work yet.
             var getAccessorBody =
@@ -423,30 +432,30 @@ internal sealed partial class LinkerInjectionStep
                     AccessorList(
                         List(
                             new[]
-                                {
-                                    getAccessorBody != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.GetAccessorDeclaration,
-                                            List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            Token( SyntaxKind.GetKeyword ),
-                                            getAccessorBody is BlockSyntax getBlock ? getBlock : default,
-                                            default,
-                                            default )
-                                        : null,
-                                    setAccessorBody != null
-                                        ? AccessorDeclaration(
-                                            setAccessorDeclarationKind,
-                                            List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration
-                                                ? Token( SyntaxKind.SetKeyword )
-                                                : Token( SyntaxKind.InitKeyword ),
-                                            setAccessorBody is BlockSyntax setBlock ? setBlock : default,
-                                            default,
-                                            default )
-                                        : null
-                                }.WhereNotNull() ) ),
+                            {
+                                getAccessorBody != null
+                                    ? AccessorDeclaration(
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        Token( SyntaxKind.GetKeyword ),
+                                        getAccessorBody is BlockSyntax getBlock ? getBlock : default,
+                                        default,
+                                        default )
+                                    : null,
+                                setAccessorBody != null
+                                    ? AccessorDeclaration(
+                                        setAccessorDeclarationKind,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration
+                                            ? Token( SyntaxKind.SetKeyword )
+                                            : Token( SyntaxKind.InitKeyword ),
+                                        setAccessorBody is BlockSyntax setBlock ? setBlock : default,
+                                        default,
+                                        default )
+                                    : null
+                            }.WhereNotNull() ) ),
                     null,
                     null );
         }
@@ -461,8 +470,10 @@ internal sealed partial class LinkerInjectionStep
 
             var syntaxGenerationContext =
                 primaryDeclaration != null
-                    ? this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration )
-                    : this._compilationContext.GetSyntaxGenerationContext( indexer.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+                    ? this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, primaryDeclaration )
+                    : this.CompilationContext.GetSyntaxGenerationContext(
+                        this.SyntaxGenerationOptions,
+                        indexer.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
             // TODO: Should return expression body when there is no variable, but expression body inliners do not work yet.
             var getAccessorBody =

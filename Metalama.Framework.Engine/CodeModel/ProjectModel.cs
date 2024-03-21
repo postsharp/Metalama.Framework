@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private bool _isFrozen;
 
-        public ProjectModel( Compilation compilation, ProjectServiceProvider serviceProvider ) : this(
+        public ProjectModel( Compilation compilation, in ProjectServiceProvider serviceProvider ) : this(
             serviceProvider,
             compilation.ReferencedAssemblyNames,
             compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames ) { }

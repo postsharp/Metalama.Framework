@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
             invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
 
-            return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
+            return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
         }
 
         // The following is the old code that was used alongside Intrinsics.

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
-            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( eventFieldDeclaration );
+            var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, eventFieldDeclaration );
 
             if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
             {
@@ -70,8 +70,7 @@ namespace Metalama.Framework.Engine.Linking
                     eventFieldDeclaration =
                         eventFieldDeclaration.WithDeclaration(
                             eventFieldDeclaration.Declaration.WithVariables(
-                                SeparatedList(
-                                    eventFieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
+                                SeparatedList( eventFieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
                 }
 
                 members.Add( eventFieldDeclaration );
@@ -98,7 +97,7 @@ namespace Metalama.Framework.Engine.Linking
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                         eventFieldDeclaration.Modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                         null,
                         Identifier( symbol.Name ),
                         AccessorList(
@@ -131,7 +130,10 @@ namespace Metalama.Framework.Engine.Linking
                             .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true ) ),
                         TokenList(),
                         Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
-                        Block( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ), SingletonList<StatementSyntax>( linkedBody ), Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
+                        Block(
+                                Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
+                                SingletonList<StatementSyntax>( linkedBody ),
+                                Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                         null,
                         default );
@@ -153,12 +155,12 @@ namespace Metalama.Framework.Engine.Linking
         {
             var accessorList =
                 AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
-                                AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
-                            } ) );
+                    List(
+                        new[]
+                        {
+                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
+                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
+                        } ) );
 
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -172,7 +174,7 @@ namespace Metalama.Framework.Engine.Linking
                         List<AttributeListSyntax>(),
                         eventField.Modifiers,
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                         null,
                         eventField.Declaration.Variables.Single().Identifier,
                         AccessorList(
@@ -180,24 +182,24 @@ namespace Metalama.Framework.Engine.Linking
                                 new[]
                                 {
                                     AccessorDeclaration(
-                                            SyntaxKind.AddAccessorDeclaration,
-                                            SyntaxFactoryEx.FormattedBlock(
-                                                ExpressionStatement(
-                                                    AssignmentExpression(
-                                                        SyntaxKind.AddAssignmentExpression,
-                                                        GetInvocationTarget(),
-                                                        IdentifierName( "value" ) ) ) ) ),
+                                        SyntaxKind.AddAccessorDeclaration,
+                                        SyntaxFactoryEx.FormattedBlock(
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.AddAssignmentExpression,
+                                                    GetInvocationTarget(),
+                                                    IdentifierName( "value" ) ) ) ) ),
                                     AccessorDeclaration(
-                                            SyntaxKind.RemoveAccessorDeclaration,
-                                            SyntaxFactoryEx.FormattedBlock(
-                                                ExpressionStatement(
-                                                    AssignmentExpression(
-                                                        SyntaxKind.SubtractAssignmentExpression,
-                                                        GetInvocationTarget(),
-                                                        IdentifierName( "value" ) ) ) ) )
+                                        SyntaxKind.RemoveAccessorDeclaration,
+                                        SyntaxFactoryEx.FormattedBlock(
+                                            ExpressionStatement(
+                                                AssignmentExpression(
+                                                    SyntaxKind.SubtractAssignmentExpression,
+                                                    GetInvocationTarget(),
+                                                    IdentifierName( "value" ) ) ) ) )
                                 }.WhereNotNull() ) ),
                         default )
-                    .WithTriviaFromIfNecessary( eventField, this.IntermediateCompilationContext.PreserveTrivia );
+                    .WithTriviaFromIfNecessary( eventField, this.SyntaxGenerationOptions.PreserveTrivia );
 
             ExpressionSyntax GetInvocationTarget()
             {

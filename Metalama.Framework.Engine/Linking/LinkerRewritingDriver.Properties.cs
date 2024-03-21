@@ -122,7 +122,9 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
                 {
-                    propertyDeclaration = propertyDeclaration.PartialUpdate( initializer: default(EqualsValueClauseSyntax), semicolonToken: default( SyntaxToken ) );
+                    propertyDeclaration = propertyDeclaration.PartialUpdate(
+                        initializer: default(EqualsValueClauseSyntax),
+                        semicolonToken: default(SyntaxToken) );
                 }
 
                 return new[] { propertyDeclaration };
@@ -288,13 +290,16 @@ namespace Metalama.Framework.Engine.Linking
                     attributes,
                     TokenList( modifiers ),
                     VariableDeclaration(
-                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 initializer ) ) ) )
-                .WithTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), new( ElasticLineFeed ), this.IntermediateCompilationContext.NormalizeWhitespace )
+                .WithTriviaIfNecessary(
+                    new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
+                    new SyntaxTriviaList( ElasticLineFeed ),
+                    this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -386,7 +391,7 @@ namespace Metalama.Framework.Engine.Linking
                         : null;
 
                 return accessorDeclaration.PartialUpdate(
-                    modifiers: TokenList( accessorDeclaration.Modifiers.Where( t => !t.IsAccessModifierKeyword() ) ), 
+                    modifiers: TokenList( accessorDeclaration.Modifiers.Where( t => !t.IsAccessModifierKeyword() ) ),
                     body: substitutedBody,
                     expressionBody: substitutedExpressionBody );
             }
@@ -422,26 +427,26 @@ namespace Metalama.Framework.Engine.Linking
 
             var accessorList =
                 AccessorList(
-                        List(
-                            new[]
-                                {
-                                    symbol.GetMethod != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.GetAccessorDeclaration,
-                                            List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            Token( SyntaxKind.GetKeyword ),
-                                            null,
-                                            ArrowExpressionClause( DefaultExpression( type ) ),
-                                            Token( SyntaxKind.SemicolonToken ) )
-                                        : null,
-                                    setAccessorKind != null
-                                        ? AccessorDeclaration(
-                                            setAccessorKind.Value,
-                                            SyntaxFactoryEx.FormattedBlock() )
-                                        : null
-                                }.Where( a => a != null )
-                                .AssertNoneNull() ) );
+                    List(
+                        new[]
+                            {
+                                symbol.GetMethod != null
+                                    ? AccessorDeclaration(
+                                        SyntaxKind.GetAccessorDeclaration,
+                                        List<AttributeListSyntax>(),
+                                        TokenList(),
+                                        Token( SyntaxKind.GetKeyword ),
+                                        null,
+                                        ArrowExpressionClause( DefaultExpression( type ) ),
+                                        Token( SyntaxKind.SemicolonToken ) )
+                                    : null,
+                                setAccessorKind != null
+                                    ? AccessorDeclaration(
+                                        setAccessorKind.Value,
+                                        SyntaxFactoryEx.FormattedBlock() )
+                                    : null
+                            }.Where( a => a != null )
+                            .AssertNoneNull() ) );
 
             return this.GetSpecialImplProperty( attributes, type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -483,13 +488,13 @@ namespace Metalama.Framework.Engine.Linking
                         propertyType,
                         null,
                         Identifier( name ),
-                        cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                         expressionBody,
                         initializer.WithSourceCodeAnnotation(),
                         semicolonToken: expressionBody != null || initializer != null
-                            ? Token( default, SyntaxKind.SemicolonToken, new( ElasticLineFeed ) )
+                            ? Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) )
                             : default )
-                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
@@ -529,8 +534,8 @@ namespace Metalama.Framework.Engine.Linking
                                 .AssertNoneNull() ) ),
                     expressionBody: null,
                     initializer: null,
-                    semicolonToken: default( SyntaxToken ) )
-                .WithTriviaFromIfNecessary( property, this.IntermediateCompilationContext.PreserveTrivia );
+                    semicolonToken: default(SyntaxToken) )
+                .WithTriviaFromIfNecessary( property, this.SyntaxGenerationOptions.PreserveTrivia );
 
             ExpressionSyntax GetInvocationTarget()
             {

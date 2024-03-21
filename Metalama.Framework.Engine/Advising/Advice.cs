@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advising
         /// <remarks>
         /// The advice should only report diagnostics that do not take into account the target declaration(s).
         /// </remarks>
-        public virtual void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+        public virtual void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         /// <summary>
         /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.

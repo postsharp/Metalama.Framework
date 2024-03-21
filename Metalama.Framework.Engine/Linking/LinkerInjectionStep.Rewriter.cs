@@ -19,6 +19,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -28,7 +30,9 @@ internal sealed partial class LinkerInjectionStep
     {
         private readonly CompilationModel _compilation;
         private readonly SemanticModelProvider _semanticModelProvider;
-        private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
+        private readonly SyntaxGenerationContext _defaultSyntaxGenerationContext;
+
+        private readonly LinkerInjectionStep _parent;
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly TransformationCollection _transformationCollection;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
@@ -37,21 +41,28 @@ internal sealed partial class LinkerInjectionStep
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
         public Rewriter(
-            CompilationContext compilationContext,
+            LinkerInjectionStep parent,
             TransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             SyntaxTree syntaxTreeForGlobalAttributes )
         {
-            this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
+            this._parent = parent;
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
             this._transformationCollection = syntaxTransformationCollection;
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
+            this._defaultSyntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions );
         }
 
-        private bool PreserveTrivia => this._syntaxGenerationContextFactory.Default.PreserveTrivia;
+        private CompilationContext CompilationContext => this._parent._compilationContext;
+
+        private bool PreserveTrivia => this._parent._syntaxGenerationOptions.PreserveTrivia;
+
+        private bool NormalizeWhitespace => this._parent._syntaxGenerationOptions.NormalizeWhitespace;
+
+        private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
 
         public override bool VisitIntoStructuredTrivia => true;
 
@@ -260,9 +271,9 @@ internal sealed partial class LinkerInjectionStep
                     foreach ( var trivia in list.GetLeadingTrivia() )
                     {
                         if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia
-                                or SyntaxKind.MultiLineCommentTrivia
-                                or SyntaxKind.SingleLineDocumentationCommentTrivia
-                                or SyntaxKind.MultiLineDocumentationCommentTrivia )
+                            or SyntaxKind.MultiLineCommentTrivia
+                            or SyntaxKind.SingleLineDocumentationCommentTrivia
+                            or SyntaxKind.MultiLineDocumentationCommentTrivia )
                         {
                             List<SyntaxTrivia> targetList;
 
@@ -294,7 +305,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
                 {
-                    syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+                    syntaxGenerationContext ??= this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, originalDeclaringNode );
 
                     var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
                         .AssertNotNull();
@@ -326,12 +337,13 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( outputAttributeLists.Count > 0 )
                 {
-                    syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+                    syntaxGenerationContext ??= this._defaultSyntaxGenerationContext;
 
                     outputAttributeLists[0] =
-                        outputAttributeLists[0].WithLeadingTriviaIfNecessary(
-                            outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
-                            syntaxGenerationContext.PreserveTrivia );
+                        outputAttributeLists[0]
+                            .WithLeadingTriviaIfNecessary(
+                                outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
+                                syntaxGenerationContext.PreserveTrivia );
                 }
                 else
                 {
@@ -423,7 +435,7 @@ internal sealed partial class LinkerInjectionStep
             var originalNode = node;
             var members = new List<MemberDeclarationSyntax>( node.Members.Count );
             var additionalBaseList = this._transformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
-            var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+            var syntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
 
             var baseList = node.BaseList;
 
@@ -640,8 +652,8 @@ internal sealed partial class LinkerInjectionStep
                         contextDeclaration switch
                         {
                             IConstructor => true,
-                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( Code.SpecialType.Void ),
-                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( Code.SpecialType.Void ),
+                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( SpecialType.Void ),
+                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( SpecialType.Void ),
                             _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
                         };
 
@@ -669,7 +681,7 @@ internal sealed partial class LinkerInjectionStep
                             body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
 
                     return
                         property.PartialUpdate(
@@ -682,7 +694,7 @@ internal sealed partial class LinkerInjectionStep
                                         ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
                 case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
 
                     return
                         indexer.PartialUpdate(
@@ -695,7 +707,7 @@ internal sealed partial class LinkerInjectionStep
                                         ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
                 case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } );
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } );
 
                     return
                         propertyOrIndexer.WithAccessorList(
@@ -724,9 +736,9 @@ internal sealed partial class LinkerInjectionStep
                     {
                         return (accessorDeclaration.Kind(), contextDeclaration) switch
                         {
-                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertyGet }) => true,
-                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
-                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
+                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertyGet }) => true,
+                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
+                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
                             _ => false
                         };
                     }
@@ -972,8 +984,7 @@ internal sealed partial class LinkerInjectionStep
                 return initializerSyntax;
             }
 
-            var newArgumentsSyntax = newArguments.Select(
-                a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this._syntaxGenerationContextFactory.Default.NormalizeWhitespace ) );
+            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this.NormalizeWhitespace ) );
 
             if ( initializerSyntax == null )
             {
@@ -1083,7 +1094,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
             {
-                var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+                var syntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
                 node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
             }
 
@@ -1230,7 +1241,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
             {
-                node = node.WithSynthesizedSetter( this._syntaxGenerationContextFactory.Default );
+                node = node.WithSynthesizedSetter( this._defaultSyntaxGenerationContext );
             }
 
             if ( this._transformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly Type _serializerType;
 
-        public ReflectionSerializerFactory( ProjectServiceProvider serviceProvider, Type serializerType )
+        public ReflectionSerializerFactory( in ProjectServiceProvider serviceProvider, Type serializerType )
         {
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             this._serviceProvider = serviceProvider;

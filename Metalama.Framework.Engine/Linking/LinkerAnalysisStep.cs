@@ -28,10 +28,12 @@ namespace Metalama.Framework.Engine.Linking
     internal sealed partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
     {
         private readonly ProjectServiceProvider _serviceProvider;
+        private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-        public LinkerAnalysisStep( ProjectServiceProvider serviceProvider )
+        public LinkerAnalysisStep( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
+            this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
         }
 
         public override async Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerInjectionStepOutput input, CancellationToken cancellationToken )
@@ -101,7 +103,7 @@ namespace Metalama.Framework.Engine.Linking
                 resolvedReferencesBySource,
                 eventFieldRaiseReferences.SelectAsReadOnlyList( x => x.TargetSemantic ).Distinct().ToArray() );
 
-            var reachableSemantics = await reachabilityAnalyzer.RunAsync(cancellationToken);
+            var reachableSemantics = await reachabilityAnalyzer.RunAsync( cancellationToken );
 
             var reachableReferencesByContainingSemantic =
                 new ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>(
@@ -128,7 +130,7 @@ namespace Metalama.Framework.Engine.Linking
             var redirectedGetOnlyAutoProperties = GetRedirectedGetOnlyAutoProperties( input.InjectionRegistry, reachableSemantics );
 
             var redirectedSymbols = GetRedirectedSymbols(
-                input.IntermediateCompilation.CompilationContext, 
+                input.IntermediateCompilation.CompilationContext,
                 redirectedGetOnlyAutoProperties );
 
             var inlineableSemantics = await inlineabilityAnalyzer.GetInlineableSemanticsAsync( redirectedSymbols, cancellationToken );
@@ -138,8 +140,8 @@ namespace Metalama.Framework.Engine.Linking
             var nonInlinedSemantics = reachableSemantics.Except( inlinedSemantics ).ToHashSet();
 
             var nonInlinedReferencesByContainingSemantic = GetNonInlinedReferences(
-                input.IntermediateCompilation.CompilationContext, 
-                reachableReferencesByContainingSemantic, 
+                input.IntermediateCompilation.CompilationContext,
+                reachableReferencesByContainingSemantic,
                 inlinedReferences );
 
             VerifyUnsupportedInlineability(
@@ -182,7 +184,7 @@ namespace Metalama.Framework.Engine.Linking
                     cancellationToken );
 
             var substitutionGenerator = new SubstitutionGenerator(
-                this._serviceProvider,
+                this,
                 input.IntermediateCompilation.CompilationContext,
                 syntaxHandler,
                 input.InjectionRegistry,
@@ -286,10 +288,15 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         bag.Add( reference );
 
-                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd( reference.ContainingSemantic, _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
+                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd(
+                            reference.ContainingSemantic,
+                            _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
 
                         var target = reference.ResolvedSemantic.ToAspectReferenceTarget( reference.TargetKind );
-                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd( target, _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
+
+                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd(
+                            target,
+                            _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
                     }
                 }
 
@@ -307,7 +314,7 @@ namespace Metalama.Framework.Engine.Linking
             IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> reachableReferencesBySource,
             IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences )
         {
-            var result = 
+            var result =
                 new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>(
                     IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( intermediateCompilationContext ) );
 
@@ -315,7 +322,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( !inlinedReferences.ContainsKey( reachableReference ) )
                 {
-                    ((List<ResolvedAspectReference>) result.GetOrAdd( reachableReference.ContainingSemantic, _ => new List<ResolvedAspectReference>() )).Add( reachableReference );
+                    ((List<ResolvedAspectReference>) result.GetOrAdd( reachableReference.ContainingSemantic, _ => new List<ResolvedAspectReference>() )).Add(
+                        reachableReference );
                 }
             }
 
@@ -333,7 +341,10 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var nonInlinedSemantic in nonInlinedSemantics )
             {
-                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters.Length: > 0 } or IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } )
+                if ( nonInlinedSemantic.Symbol is IPropertySymbol { Parameters.Length: > 0 } or IMethodSymbol
+                    {
+                        MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor
+                    } )
                 {
                     // We only handle indexer symbol. Accessors are also not inlineable, but we don't want three messages.
                     ISymbol overrideTarget;

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Metrics
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<Type, object?> _metricProviders = new();
 
-        internal MetricManager( ProjectServiceProvider serviceProvider )
+        internal MetricManager( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

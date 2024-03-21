@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly CompileTimeTypeResolver _compileTimeTypeResolver;
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        protected AttributeDeserializer( ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
+        protected AttributeDeserializer( in ProjectServiceProvider serviceProvider, CompileTimeTypeResolver compileTimeTypeResolver )
         {
             this._serviceProvider = serviceProvider;
             this._compileTimeTypeResolver = compileTimeTypeResolver;

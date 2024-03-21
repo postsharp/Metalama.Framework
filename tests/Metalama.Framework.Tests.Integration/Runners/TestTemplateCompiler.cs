@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
         private readonly TemplateCompiler _templateCompiler;
         private bool _hasError;
 
-        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, ProjectServiceProvider serviceProvider )
+        public TestTemplateCompiler( SemanticModel semanticModel, IDiagnosticAdder diagnosticAdder, in ProjectServiceProvider serviceProvider )
         {
             this._semanticModel = semanticModel;
             this._diagnosticAdder = diagnosticAdder;

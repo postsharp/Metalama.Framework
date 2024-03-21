@@ -87,7 +87,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = compileTimeCompilationContext.DefaultSyntaxGenerationContext;
+        var syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =
@@ -2005,8 +2005,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                         } ) ) );
 
         var callRender = InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RenderInterpolatedString) ),
-                ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) );
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.RenderInterpolatedString) ),
+            ArgumentList( SingletonSeparatedList( Argument( createInterpolatedString ) ) ) );
 
         this.Unindent();
 
@@ -2018,8 +2018,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         var transformedNode = base.TransformInterpolation( node ).AssertNotNull();
 
         var fixedNode = InvocationExpression(
-                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.FixInterpolationSyntax) ),
-                ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) );
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.FixInterpolationSyntax) ),
+            ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) );
 
         return fixedNode;
     }

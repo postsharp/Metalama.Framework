@@ -29,6 +29,8 @@ namespace Metalama.Framework.Engine.Linking
     {
         private ProjectServiceProvider ServiceProvider { get; }
 
+        public SyntaxGenerationOptions SyntaxGenerationOptions { get; }
+
         private CompilationContext IntermediateCompilationContext { get; }
 
         private LinkerInjectionRegistry InjectionRegistry { get; }
@@ -45,6 +47,7 @@ namespace Metalama.Framework.Engine.Linking
             LinkerAnalysisRegistry analysisRegistry )
         {
             this.ServiceProvider = serviceProvider;
+            this.SyntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
             this.IntermediateCompilationContext = intermediateCompilationContext;
             this.InjectionRegistry = injectionRegistry;
             this.LateTransformationRegistry = lateTransformationRegistry;
@@ -74,8 +77,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Strip the trivia from the block and add a flattenable annotation.
                 return rewrittenBlock.PartialUpdate(
-                        openBraceToken: Token( new( ElasticMarker ), SyntaxKind.OpenBraceToken, new( ElasticMarker ) ),
-                        closeBraceToken: Token( new( ElasticMarker ), SyntaxKind.CloseBraceToken, new( ElasticMarker ) ) )
+                        openBraceToken: Token( new SyntaxTriviaList( ElasticMarker ), SyntaxKind.OpenBraceToken, new SyntaxTriviaList( ElasticMarker ) ),
+                        closeBraceToken: Token( new SyntaxTriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, new SyntaxTriviaList( ElasticMarker ) ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
             else
@@ -102,7 +105,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     rewrittenBlock =
                         rewrittenBlock
-                            .PartialUpdate( 
+                            .PartialUpdate(
                                 openBraceToken: rewrittenBlock.OpenBraceToken.WithoutTrivia(),
                                 closeBraceToken: rewrittenBlock.CloseBraceToken.WithoutTrivia() )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -483,13 +486,14 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol, SyntaxGenerationContext generationContext )
         {
-            if (this.AnalysisRegistry.HasAnyUnsupportedOverride(symbol))
+            if ( this.AnalysisRegistry.HasAnyUnsupportedOverride( symbol ) )
             {
                 // If there is unsupported code in overrides, we will not rewrite the member.
                 return new[] { syntax };
             }
 
-            if (this.InjectionRegistry.IsOverride(symbol) && this.AnalysisRegistry.HasAnyUnsupportedOverride( this.InjectionRegistry.GetOverrideTarget(symbol ).AssertNotNull() ) )
+            if ( this.InjectionRegistry.IsOverride( symbol )
+                 && this.AnalysisRegistry.HasAnyUnsupportedOverride( this.InjectionRegistry.GetOverrideTarget( symbol ).AssertNotNull() ) )
             {
                 // If there are any overrides with unsupported code, we will skip this member.
                 return Array.Empty<MemberDeclarationSyntax>();

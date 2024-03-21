@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Formatting
 
         private static readonly Regex _cleanReturnStatementRegex = new( @"(?<=^\s*)return(?=\s*[^\;])" );
 
-        public HtmlCodeWriter( ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
+        public HtmlCodeWriter( in ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
         {
             this._options = options;
         }

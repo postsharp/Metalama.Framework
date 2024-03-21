@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     t => (t.Type.Name.AssertNotNull(), t.MemberName),
                     t => (t.Type.Namespace.AssertNotNull(), t.Scope) );
 
-        public static SymbolClassifier GetSymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
+        public static SymbolClassifier GetSymbolClassifier( in ProjectServiceProvider serviceProvider, Compilation compilation )
         {
             return new SymbolClassifier( serviceProvider, compilation );
         }
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        private SymbolClassifier( ProjectServiceProvider serviceProvider, Compilation compilation )
+        private SymbolClassifier( in ProjectServiceProvider serviceProvider, Compilation compilation )
             : this(
                 serviceProvider,
                 compilation,

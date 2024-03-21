@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ProjectServiceProvider _serviceProvider;
         private UserCodeAttributeDeserializer? _attributeDeserializer;
 
-        public CompilationHelpers( ProjectServiceProvider serviceProvider )
+        public CompilationHelpers( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }
@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             // The service is not always available in tests, so we get it lazily.
             this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
-            
+
             return this._attributeDeserializer.TryCreateAttribute( attribute, (IDiagnosticAdder) diagnosticSink.Sink, out constructedAttribute );
         }
     }

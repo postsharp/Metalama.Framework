@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => throw new AssertionFailedException( $"Unexpected Writeability: {this.Field.Writeability}." )
             };
 
-        public PromotedField( ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
+        public PromotedField( in ProjectServiceProvider serviceProvider, IField field, IObjectReader initializerTags, Advice advice ) : base(
             advice,
             field.DeclaringType,
             field.Name,
@@ -107,7 +107,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 {
                     initializerExpression = fieldDeclaration.Initializer.Value;
                 }
-                else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && context.SyntaxGenerationContext.RequiresStructFieldInitialization )
+                else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct
+                          && context.SyntaxGenerationContext.RequiresStructFieldInitialization )
                 {
                     // In structs in C# 10, we have to initialize all introduced fields.
                     initializerExpression = SyntaxFactoryEx.Default;

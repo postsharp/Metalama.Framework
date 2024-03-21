@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         private int _recursionLevel;
 
-        public SyntaxSerializationContext( CompilationModel compilation ) : this(
+        public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions ) : this(
             compilation,
-            compilation.CompilationContext.DefaultSyntaxGenerationContext ) { }
+            compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ) ) { }
 
         public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
         {

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                 .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
         }
 
-        public CompileTimeSerializationBinder( ProjectServiceProvider serviceProvider )
+        public CompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Serialization" );
         }

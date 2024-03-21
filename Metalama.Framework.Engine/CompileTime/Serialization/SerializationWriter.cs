@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
 
         private readonly UserCodeInvoker _userCodeInvoker;
 
-        public SerializationWriter( ProjectServiceProvider serviceProvider, Stream stream, CompileTimeSerializer formatter, bool shouldReportExceptionCause )
+        public SerializationWriter( in ProjectServiceProvider serviceProvider, Stream stream, CompileTimeSerializer formatter, bool shouldReportExceptionCause )
         {
             this._serviceProvider = serviceProvider;
             this._formatter = formatter;

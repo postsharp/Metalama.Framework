@@ -112,7 +112,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this.GetCleanTargetMemberName() ),
                     TypeArgumentList(
-                        SeparatedList( this.Member.TypeArguments.SelectAsImmutableArray( t => this.GenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+                        SeparatedList(
+                            this.Member.TypeArguments.SelectAsImmutableArray( t => CurrentGenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
             }
             else
             {
@@ -121,8 +122,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this.Member.GetArguments(
                 this.Member.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, this.SerializationContext ),
-                this.GenerationContext );
+                TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ),
+                CurrentGenerationContext );
 
             if ( this.Member.MethodKind == MethodKind.LocalFunction )
             {
@@ -135,7 +136,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             }
             else
             {
-                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext ) );
+                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext ) );
 
                 return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
             }

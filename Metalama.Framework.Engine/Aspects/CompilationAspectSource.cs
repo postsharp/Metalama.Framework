@@ -25,7 +25,7 @@ internal sealed class CompilationAspectSource : IAspectSource
     private readonly IAttributeDeserializer _attributeDeserializer;
     private ImmutableDictionaryOfArray<IType, Ref<IDeclaration>>? _exclusions;
 
-    public CompilationAspectSource( ProjectServiceProvider serviceProvider, ImmutableArray<IAspectClass> aspectTypes )
+    public CompilationAspectSource( in ProjectServiceProvider serviceProvider, ImmutableArray<IAspectClass> aspectTypes )
     {
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
         this.AspectClasses = aspectTypes;

@@ -28,15 +28,11 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
         var allBindingFlags = SyntaxUtility.CreateBindingFlags( field, serializationContext );
 
         ExpressionSyntax fieldInfo = InvocationExpression(
-            MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetField" ) ),
-            ArgumentList(
-                SeparatedList(
-                    new[]
-                    {
-                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( field.Name ) ) ),
-                        Argument( allBindingFlags )
-                    } ) ) )
-            .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
+                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetField" ) ),
+                ArgumentList(
+                    SeparatedList(
+                        new[] { Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( field.Name ) ) ), Argument( allBindingFlags ) } ) ) )
+            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
 
         // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
         fieldInfo = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, fieldInfo );

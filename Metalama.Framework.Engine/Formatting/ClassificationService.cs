@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Formatting
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly ClassifyingCompilationContextFactory _classifyingCompilationContextFactory;
 
-        public ClassificationService( ProjectServiceProvider serviceProvider )
+        public ClassificationService( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
             this._classifyingCompilationContextFactory = this._serviceProvider.GetRequiredService<ClassifyingCompilationContextFactory>();

@@ -86,6 +86,7 @@ namespace Metalama.Testing.AspectTesting
                 .AddLicenseConsumptionManagerForTest( testInput );
 
             var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
+
             var isLicensingRequiredForCompilation = testScenario switch
             {
                 TestScenario.ApplyCodeFix => false,
@@ -94,7 +95,7 @@ namespace Metalama.Testing.AspectTesting
                 _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
             };
 
-            var pipeline = new CompileTimeAspectPipeline( 
+            var pipeline = new CompileTimeAspectPipeline(
                 isLicensingRequiredForCompilation ? serviceProviderForThisTestWithLicensing : serviceProviderForThisTestWithoutLicensing,
                 testContext.Domain );
 
@@ -404,8 +405,8 @@ namespace Metalama.Testing.AspectTesting
                 return null;
             }
 
-            if ( !(mainMethod is 
-                    { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } } 
+            if ( !(mainMethod is
+                    { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } }
                     or { ReturnType: INamedType { Definition.SpecialType: SpecialType.Task_T, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } }) )
             {
                 testResult.SetFailed( $"The 'Program.{mainMethodName}' method must return void, int, Task or Task<int>." );

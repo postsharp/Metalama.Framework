@@ -100,15 +100,15 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     PropertyDeclaration(
-                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                            TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                            recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
-                            null,
-                            recordParameter.Identifier,
-                            AccessorList( List( generatedAccessors ) ),
-                            null,
-                            null,
-                            default );
+                        FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
+                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                        recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                        null,
+                        recordParameter.Identifier,
+                        AccessorList( List( generatedAccessors ) ),
+                        null,
+                        null,
+                        default );
             }
 
             AccessorDeclarationSyntax GetLinkedAccessor(
@@ -171,15 +171,15 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 PropertyDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
-                        null,
-                        identifier,
-                        AccessorList( List( new[] { getAccessor, setAccessor } ) ),
-                        null,
-                        null,
-                        default );
+                    List<AttributeListSyntax>(),
+                    TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                    null,
+                    identifier,
+                    AccessorList( List( new[] { getAccessor, setAccessor } ) ),
+                    null,
+                    null,
+                    default );
 
             ExpressionSyntax GetInvocationTarget()
             {

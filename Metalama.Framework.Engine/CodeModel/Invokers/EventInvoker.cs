@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type );
         }
@@ -44,8 +44,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this.Member.GetArguments(
                 this.Member.Signature.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, this.SerializationContext ),
-                this.GenerationContext );
+                TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ),
+                CurrentGenerationContext );
 
             var expression = ConditionalAccessExpression(
                 eventAccess,
@@ -67,7 +67,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var receiverInfo = this.GetReceiverInfo();
             var name = IdentifierName( this.GetCleanTargetMemberName() );
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+            
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
 
             var expression = receiverInfo.RequiresConditionalAccess
                 ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) )

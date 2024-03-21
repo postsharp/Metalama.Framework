@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         public DiagnosticDefinitionDiscoveryService() : this(
             ServiceProvider<IProjectService>.Empty.WithServices( new UserCodeInvoker( ServiceProvider<IGlobalService>.Empty ) ) ) { }
 
-        internal DiagnosticDefinitionDiscoveryService( ProjectServiceProvider serviceProvider )
+        internal DiagnosticDefinitionDiscoveryService( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider.Underlying;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

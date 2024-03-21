@@ -10,7 +10,7 @@ internal sealed class CompileTimeCompileTimeSerializationBinder : CompileTimeSer
     private readonly CompileTimeProject _project;
     private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
 
-    public CompileTimeCompileTimeSerializationBinder( ProjectServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
+    public CompileTimeCompileTimeSerializationBinder( in ProjectServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
     {
         this._project = project;
     }

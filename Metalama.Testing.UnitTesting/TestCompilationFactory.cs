@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
@@ -213,8 +212,6 @@ namespace Metalama.Testing.UnitTesting
             {
                 AssertNoError( mainRoslynCompilation );
             }
-
-            CompilationContext.SetTriviaHandling( mainRoslynCompilation, normalizeWhitespace: true, preserveTrivia: true );
 
             return mainRoslynCompilation;
         }

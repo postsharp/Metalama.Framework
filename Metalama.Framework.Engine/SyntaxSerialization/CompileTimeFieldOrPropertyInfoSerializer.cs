@@ -28,12 +28,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             };
 
             return ObjectCreationExpression(
-                serializationContext.GetTypeSyntax( typeof( FieldOrPropertyInfo ) ),
-                ArgumentList(
-                    SingletonSeparatedList(
-                        Argument( fieldInfoOrPropertyInfo ) ) ),
-                null )
-                .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
+                    serializationContext.GetTypeSyntax( typeof(FieldOrPropertyInfo) ),
+                    ArgumentList( SingletonSeparatedList( Argument( fieldInfoOrPropertyInfo ) ) ),
+                    null )
+                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
         }
 
         public CompileTimeFieldOrPropertyInfoSerializer( SyntaxSerializationService service ) : base( service ) { }

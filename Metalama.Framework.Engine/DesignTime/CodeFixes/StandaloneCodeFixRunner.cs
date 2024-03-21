@@ -14,7 +14,7 @@ public sealed class StandaloneCodeFixRunner : CodeFixRunner
     private readonly CompileTimeDomain _domain;
     private readonly ProjectServiceProvider _serviceProvider;
 
-    public StandaloneCodeFixRunner( CompileTimeDomain domain, ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    public StandaloneCodeFixRunner( CompileTimeDomain domain, in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._domain = domain;
         this._serviceProvider = serviceProvider;

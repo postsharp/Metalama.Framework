@@ -24,17 +24,18 @@ internal sealed partial class LinkerRewritingDriver
             classDeclaration =
                 classDeclaration.PartialUpdate(
                     attributeLists: RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ),
+                    parameterList: default(ParameterListSyntax),
                     baseList:
-                        classDeclaration.BaseList != null
+                    classDeclaration.BaseList != null
                         ? classDeclaration.BaseList.WithTypes(
                             SeparatedList(
-                            classDeclaration.BaseList.Types.SelectAsArray( b =>
-                                b switch
-                                {
-                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                    _ => b
-                                } ) ) )
+                                classDeclaration.BaseList.Types.SelectAsArray(
+                                    b =>
+                                        b switch
+                                        {
+                                            PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                            _ => b
+                                        } ) ) )
                         : default );
 #else
         throw new AssertionFailedException( "This code should not run in this Roslyn version." );
@@ -57,7 +58,7 @@ internal sealed partial class LinkerRewritingDriver
             structDeclaration =
                 structDeclaration.PartialUpdate(
                     attributeLists: RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ) );
+                    parameterList: default(ParameterListSyntax) );
 #else
         throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
@@ -78,17 +79,18 @@ internal sealed partial class LinkerRewritingDriver
             recordDeclaration =
                 recordDeclaration.PartialUpdate(
                     attributeLists: RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ),
+                    parameterList: default(ParameterListSyntax),
                     baseList:
-                        recordDeclaration.BaseList != null
+                    recordDeclaration.BaseList != null
                         ? recordDeclaration.BaseList.WithTypes(
                             SeparatedList(
-                            recordDeclaration.BaseList.Types.SelectAsArray( b =>
-                                b switch
-                                {
-                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                    _ => b
-                                } ) ) )
+                                recordDeclaration.BaseList.Types.SelectAsArray(
+                                    b =>
+                                        b switch
+                                        {
+                                            PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                            _ => b
+                                        } ) ) )
                         : default );
         }
         else if ( recordDeclaration.ParameterList != null )
@@ -112,6 +114,7 @@ internal sealed partial class LinkerRewritingDriver
                 {
                     SyntaxGenerationContext GetSyntaxGenerationContext()
                         => generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                            this.SyntaxGenerationOptions,
                             recordDeclaration.SyntaxTree,
                             recordDeclaration.SpanStart );
 
@@ -147,7 +150,8 @@ internal sealed partial class LinkerRewritingDriver
                 }
             }
 
-            recordDeclaration = recordDeclaration.WithParameterList( recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+            recordDeclaration = recordDeclaration.WithParameterList(
+                recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
             if ( newMembers is { Count: > 0 } )
             {

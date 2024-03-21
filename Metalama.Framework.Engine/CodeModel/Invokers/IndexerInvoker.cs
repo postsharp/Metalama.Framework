@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
+                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
 
             return new SyntaxUserExpression( expression, this.Member.Type, isAssignable: true );
         }
@@ -40,8 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             args ??= Array.Empty<object>();
 
             var receiverInfo = this.GetReceiverInfo();
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
-            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, this.SerializationContext ).AssertNotNull();
+            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
+            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ).AssertNotNull();
 
             // TODO: Aspect references.
 

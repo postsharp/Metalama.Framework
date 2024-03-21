@@ -119,6 +119,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     SyntaxGenerationContext GetSyntaxGenerationContext()
                         => generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
+                            this._rewritingDriver.SyntaxGenerationOptions,
                             node.SyntaxTree,
                             member.SpanStart );
 

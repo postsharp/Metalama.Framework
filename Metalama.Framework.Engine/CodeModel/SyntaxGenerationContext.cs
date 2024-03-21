@@ -25,50 +25,28 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
 
-        internal bool NormalizeWhitespace => this.CompilationContext.NormalizeWhitespace;
+        internal bool NormalizeWhitespace => this.Options.NormalizeWhitespace;
 
-        internal bool PreserveTrivia => this.CompilationContext.PreserveTrivia;
+        internal bool PreserveTrivia => this.Options.PreserveTrivia;
 
         [Memo]
         internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof(IsExternalInit).FullName! ) != null;
 
-        private SyntaxGenerationContext( CompilationContext compilationContext, OurSyntaxGenerator syntaxGenerator, bool isPartial )
+        public SyntaxGenerationOptions Options { get; }
+
+        // Should only be called by CompilationContext
+        internal SyntaxGenerationContext(
+            CompilationContext compilationContext,
+            OurSyntaxGenerator syntaxGenerator,
+            bool isPartial,
+            SyntaxGenerationOptions? syntaxGenerationOptions )
         {
             this.CompilationContext = compilationContext;
             this.IsPartial = isPartial;
+            this.Options = syntaxGenerationOptions ?? SyntaxGenerationOptions.Proof;
             this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
         }
-
-        internal static SyntaxGenerationContext Create( CompilationContext compilationContext, SyntaxNode node, bool isPartial = false )
-            => Create( compilationContext, node.SyntaxTree, node.SpanStart, isPartial );
-
-        internal static SyntaxGenerationContext Create(
-            CompilationContext compilationContext,
-            SyntaxTree syntaxTree,
-            int position,
-            bool isPartial = false )
-        {
-            var semanticModel = compilationContext.Compilation.GetCachedSemanticModel( syntaxTree );
-            var nullableContext = semanticModel.GetNullableContext( position );
-            var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
-
-            return Create( compilationContext, isPartial, isNullOblivious );
-        }
-
-        internal static SyntaxGenerationContext Create(
-            CompilationContext compilationContext,
-            bool isPartial = false,
-            bool? isNullOblivious = null )
-        {
-            isNullOblivious ??= (((CSharpCompilation) compilationContext.Compilation).Options.NullableContextOptions & NullableContextOptions.Annotations)
-                                != 0;
-
-            return new SyntaxGenerationContext(
-                compilationContext,
-                isNullOblivious.Value ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
-                isPartial );
-        }
-
+        
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
 
         // used for debug assert

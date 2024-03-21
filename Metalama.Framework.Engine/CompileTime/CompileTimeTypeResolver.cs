@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected WeakCache<ITypeSymbol, Type?> Cache { get; } = new();
 
-        protected CompileTimeTypeResolver( ProjectServiceProvider serviceProvider )
+        protected CompileTimeTypeResolver( in ProjectServiceProvider serviceProvider )
         {
             this._compileTimeTypeFactory = serviceProvider.GetRequiredService<CompileTimeTypeFactory>();
         }

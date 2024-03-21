@@ -95,14 +95,14 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         /// Creates a <see cref="UserCodeExecutionContext"/> for a given <see cref="CompilationModel"/>. 
         /// </summary>
         [PublicAPI]
-        public static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation, string? description = null )
+        public static DisposeAction WithContext( in ProjectServiceProvider serviceProvider, CompilationModel compilation, string? description = null )
             => WithContext(
                 new UserCodeExecutionContext(
                     serviceProvider,
                     UserCodeDescription.Create( description ?? "executing a test method" ),
                     compilationModel: compilation ) );
 
-        internal static DisposeAction WithContext( ProjectServiceProvider serviceProvider, CompilationModel compilation, UserCodeDescription description )
+        internal static DisposeAction WithContext( in ProjectServiceProvider serviceProvider, CompilationModel compilation, UserCodeDescription description )
             => WithContext( new UserCodeExecutionContext( serviceProvider, description, compilationModel: compilation ) );
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
             this._targetType = targetDeclaration?.GetTopmostNamedType();
-            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder );
+            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider );
             this.MetaApi = metaApi;
         }
 
@@ -158,7 +158,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
             this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
 
-            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder );
+            this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider );
             this.MetaApi = metaApi;
         }
 
@@ -180,8 +180,11 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         private static ISyntaxBuilderImpl? GetSyntaxBuilder(
             CompilationModel? compilationModel,
-            ISyntaxBuilderImpl? syntaxBuilderImpl )
-            => syntaxBuilderImpl ?? (compilationModel == null ? null : new SyntaxBuilderImpl( compilationModel ));
+            ISyntaxBuilderImpl? syntaxBuilderImpl,
+            ProjectServiceProvider serviceProvider )
+            => syntaxBuilderImpl ?? (compilationModel == null
+                ? null
+                : new SyntaxBuilderImpl( compilationModel, serviceProvider.GetRequiredService<SyntaxGenerationOptions>() ));
 
         internal IDiagnosticAdder Diagnostics
             => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
@@ -241,7 +244,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 compilation,
                 this.TargetDeclaration,
                 this._throwOnUnsupportedDependencies,
-                new SyntaxBuilderImpl( compilation ),
+                GetSyntaxBuilder( compilation, null, this.ServiceProvider ),
                 this.MetaApi );
         }
 

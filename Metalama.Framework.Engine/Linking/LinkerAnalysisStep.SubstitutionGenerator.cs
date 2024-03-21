@@ -24,6 +24,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private sealed class SubstitutionGenerator
         {
+            private readonly LinkerAnalysisStep _parent;
             private readonly CompilationContext _intermediateCompilationContext;
             private readonly LinkerSyntaxHandler _syntaxHandler;
             private readonly LinkerInjectionRegistry _injectionRegistry;
@@ -48,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
             public SubstitutionGenerator(
-                ProjectServiceProvider serviceProvider,
+                LinkerAnalysisStep parent,
                 CompilationContext intermediateCompilationContext,
                 LinkerSyntaxHandler syntaxHandler,
                 LinkerInjectionRegistry injectionRegistry,
@@ -63,7 +64,8 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences,
                 IReadOnlyList<CallerAttributeReference> callerMemberReferences )
             {
-                this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+                this._concurrentTaskRunner = parent._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+                this._parent = parent;
                 this._intermediateCompilationContext = intermediateCompilationContext;
                 this._syntaxHandler = syntaxHandler;
                 this._injectionRegistry = injectionRegistry;
@@ -81,16 +83,27 @@ namespace Metalama.Framework.Engine.Linking
                         .Distinct()
                         .ToReadOnlyList();
 
-                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody( intermediateCompilationContext, redirectedSymbolReferences, x => x.ContainingSemantic );
-                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody( intermediateCompilationContext, eventFieldRaiseReferences, x => x.ContainingSemantic );
-                this._callerMemberReferencesByContainingSemantic = IndexReferenceByContainingBody( intermediateCompilationContext, callerMemberReferences, x => x.ContainingSemantic );
+                this._redirectedSymbolReferencesByContainingSemantic = IndexReferenceByContainingBody(
+                    intermediateCompilationContext,
+                    redirectedSymbolReferences,
+                    x => x.ContainingSemantic );
+
+                this._eventFieldRaiseReferencesByContainingSemantic = IndexReferenceByContainingBody(
+                    intermediateCompilationContext,
+                    eventFieldRaiseReferences,
+                    x => x.ContainingSemantic );
+
+                this._callerMemberReferencesByContainingSemantic = IndexReferenceByContainingBody(
+                    intermediateCompilationContext,
+                    callerMemberReferences,
+                    x => x.ContainingSemantic );
 
                 static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<T>> IndexReferenceByContainingBody<T>(
-                        CompilationContext compilationContext,
-                        IReadOnlyList<T> references,
-                        Func<T, IntermediateSymbolSemantic<IMethodSymbol>> getContainingSemanticFunc )
+                    CompilationContext compilationContext,
+                    IReadOnlyList<T> references,
+                    Func<T, IntermediateSymbolSemantic<IMethodSymbol>> getContainingSemanticFunc )
                 {
-                    var dict = 
+                    var dict =
                         new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<T>>(
                             IntermediateSymbolSemanticEqualityComparer<IMethodSymbol>.ForCompilation( compilationContext ) );
 
@@ -144,7 +157,9 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             var redirectionTarget = this._redirectedSymbols[reference.TargetSemantic.Symbol];
 
-                            AddSubstitution( context, new RedirectionSubstitution( this._intermediateCompilationContext, reference.ReferencingNode, redirectionTarget ) );
+                            AddSubstitution(
+                                context,
+                                new RedirectionSubstitution( this._intermediateCompilationContext, reference.ReferencingNode, redirectionTarget ) );
                         }
                     }
 
@@ -337,7 +352,10 @@ namespace Metalama.Framework.Engine.Linking
 
                         AddSubstitution(
                             context,
-                            new ForcedInitializationSubstitution( this._intermediateCompilationContext, rootNode, forcefullyInitializedType.InitializedSymbols ) );
+                            new ForcedInitializationSubstitution(
+                                this._intermediateCompilationContext,
+                                rootNode,
+                                forcefullyInitializedType.InitializedSymbols ) );
                     }
                 }
 
@@ -374,7 +392,10 @@ namespace Metalama.Framework.Engine.Linking
                             // Base references to new slot or override members are rewritten to the base member call.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceBaseSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
+                                new AspectReferenceBaseSubstitution(
+                                    this._intermediateCompilationContext,
+                                    nonInlinedReference,
+                                    this._parent._syntaxGenerationOptions ) );
 
                             break;
 
@@ -391,7 +412,10 @@ namespace Metalama.Framework.Engine.Linking
                             // Base references to a declaration in another type mean base member call.
                             AddSubstitution(
                                 context,
-                                new AspectReferenceBaseSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
+                                new AspectReferenceBaseSubstitution(
+                                    this._intermediateCompilationContext,
+                                    nonInlinedReference,
+                                    this._parent._syntaxGenerationOptions ) );
 
                             break;
 

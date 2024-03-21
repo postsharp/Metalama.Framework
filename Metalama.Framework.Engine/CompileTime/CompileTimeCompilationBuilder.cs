@@ -6,6 +6,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
@@ -97,7 +98,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         ProjectServiceProvider serviceProvider,
         CompileTimeDomain domain )
     {
-        this._serviceProvider = serviceProvider;
+        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
+        this._serviceProvider = serviceProvider.WithService( SyntaxGenerationOptions.Proof, true );
         this._domain = domain;
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
         this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();
@@ -233,9 +235,6 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
-
-        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
-        CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
 
         var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 

@@ -33,12 +33,13 @@ namespace Metalama.Framework.Engine.Transformations
             this.MemberMap = memberMap;
         }
 
-        public BaseTypeSyntax GetSyntax()
+        public BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options )
         {
             var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
 
             var generationContext = this.TargetType.GetCompilationModel()
                 .CompilationContext.GetSyntaxGenerationContext(
+                    options,
                     targetSyntax.SyntaxTree,
                     targetSyntax.Span.Start );
 

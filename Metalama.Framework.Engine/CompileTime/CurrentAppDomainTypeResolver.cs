@@ -17,7 +17,7 @@ internal abstract class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 {
     private readonly ReferenceAssemblyLocator _assemblyLocator;
 
-    protected CurrentAppDomainTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    protected CurrentAppDomainTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
     }

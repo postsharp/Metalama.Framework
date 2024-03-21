@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Formatting
         private const string _diagnosticAnnotationName = "metalama-diagnostic";
         private readonly ProjectServiceProvider _serviceProvider;
 
-        protected FormattedCodeWriter( ProjectServiceProvider serviceProvider )
+        protected FormattedCodeWriter( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
         }

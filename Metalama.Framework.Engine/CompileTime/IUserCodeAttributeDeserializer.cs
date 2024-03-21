@@ -12,7 +12,7 @@ internal interface IUserCodeAttributeDeserializer : IAttributeDeserializer, IPro
 
 internal sealed class UserCodeAttributeDeserializer : AttributeDeserializer, IUserCodeAttributeDeserializer
 {
-    public UserCodeAttributeDeserializer( ProjectServiceProvider serviceProvider ) : base(
+    public UserCodeAttributeDeserializer( in ProjectServiceProvider serviceProvider ) : base(
         serviceProvider,
         serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>() ) { }
 }

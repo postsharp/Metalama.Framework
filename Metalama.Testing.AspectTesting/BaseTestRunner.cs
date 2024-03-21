@@ -745,7 +745,7 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    private HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
+    private HtmlCodeWriter CreateHtmlCodeWriter( in ProjectServiceProvider serviceProvider, TestOptions options )
         => new( serviceProvider, this.GetHtmlCodeWriterOptions( options ) );
 
     protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );

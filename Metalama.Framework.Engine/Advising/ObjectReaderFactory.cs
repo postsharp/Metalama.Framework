@@ -29,7 +29,7 @@ internal sealed class ObjectReaderFactory : IProjectService, IDisposable
         return this._types.GetOrAdd( type, t => new ObjectReaderTypeAdapter( this._serviceProvider, t ) );
     }
 
-    public ObjectReaderFactory( ProjectServiceProvider serviceProvider )
+    public ObjectReaderFactory( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
     }
