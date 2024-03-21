@@ -10,15 +10,15 @@ internal sealed class TemplateTypeArgumentFactory
 {
     public IType Type { get; }
 
-    private readonly string _name;
+    public string Name { get; }
 
     public TemplateTypeArgumentFactory( IType type, string name )
     {
         this.Type = type;
-        this._name = name;
+        this.Name = name;
     }
 
-    public TemplateTypeArgument Create( SyntaxGenerationContext context ) => Create( this.Type, this._name, context );
+    public TemplateTypeArgument Create( SyntaxGenerationContext context ) => Create( this.Type, this.Name, context );
 
     public static TemplateTypeArgument Create( IType type, string name, SyntaxGenerationContext context )
     {

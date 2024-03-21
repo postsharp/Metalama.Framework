@@ -162,7 +162,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         if ( template != null )
         {
             templateTypeArguments.AddRange(
-                template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+                template.TemplateArguments.OfType<TemplateTypeArgumentFactory>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
         }
 
         if ( metaApi.Target.Declaration is IMethod { TypeParameters.Count: > 0 } targetMethod )
