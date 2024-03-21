@@ -20,551 +20,552 @@ using System.Threading.Tasks;
 
 // ReSharper disable AccessToModifiedClosure
 
-namespace Metalama.Framework.Engine.Formatting
+namespace Metalama.Framework.Engine.Formatting;
+
+public sealed class HtmlCodeWriter : FormattedCodeWriter
 {
-    public sealed class HtmlCodeWriter : FormattedCodeWriter
+    private readonly HtmlCodeWriterOptions _options;
+
+    private static readonly Regex _cleanAutomaticPropertiesRegex =
+        new( @"\{(\s*(private|internal|protected|private protected|protected internal)?\s*[gs]et;\s*){1,2}\}" );
+
+    private static readonly Regex _cleanReturnStatementRegex = new( @"(?<=^\s*)return(?=\s*[^\;])" );
+
+    public HtmlCodeWriter( in ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
     {
-        private readonly HtmlCodeWriterOptions _options;
+        this._options = options;
+    }
 
-        private static readonly Regex _cleanAutomaticPropertiesRegex =
-            new( @"\{(\s*(private|internal|protected|private protected|protected internal)?\s*[gs]et;\s*){1,2}\}" );
+    public Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
+        => this.WriteAsync( document, textWriter, diagnostics, null );
 
-        private static readonly Regex _cleanReturnStatementRegex = new( @"(?<=^\s*)return(?=\s*[^\;])" );
+    public async Task WriteDiffAsync(
+        Document inputDocument,
+        Document outputDocument,
+        TextWriter inputTextWriter,
+        TextWriter outputTextWriter,
+        IEnumerable<Diagnostic> inputDiagnostics )
+    {
+        var oldSyntaxTree = await inputDocument.GetSyntaxTreeAsync();
+        var newSyntaxTree = await outputDocument.GetSyntaxTreeAsync();
+        await this.WriteAsync( inputDocument, inputTextWriter, inputDiagnostics, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, true ) );
+        await this.WriteAsync( outputDocument, outputTextWriter, null, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, false ) );
+    }
 
-        public HtmlCodeWriter( ProjectServiceProvider serviceProvider, HtmlCodeWriterOptions options ) : base( serviceProvider )
+    private async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics, FileDiffInfo? diffInfo )
+    {
+        var sourceText = await document.GetTextAsync( CancellationToken.None );
+        var syntaxRoot = (await document.GetSyntaxRootAsync()).AssertNotNull();
+
+        var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles, diagnostics: diagnostics );
+
+        var finalBuilder = new StringBuilder();      // Builds the whole file.
+        var codeLineBuilder = new StringBuilder();   // Builds the current line.
+        var diagnosticBuilder = new StringBuilder(); // Builds the diagnostics of the current line.
+        var diagnosticSet = new HashSet<string>( StringComparer.Ordinal );
+        var lineNumber = 0;
+
+        void AppendEmptyDiffLine( int? number )
         {
-            this._options = options;
-        }
-
-        public Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics = null )
-            => this.WriteAsync( document, textWriter, diagnostics, null );
-
-        public async Task WriteDiffAsync(
-            Document inputDocument,
-            Document outputDocument,
-            TextWriter inputTextWriter,
-            TextWriter outputTextWriter,
-            IEnumerable<Diagnostic> inputDiagnostics )
-        {
-            var oldSyntaxTree = await inputDocument.GetSyntaxTreeAsync();
-            var newSyntaxTree = await outputDocument.GetSyntaxTreeAsync();
-            await this.WriteAsync( inputDocument, inputTextWriter, inputDiagnostics, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, true ) );
-            await this.WriteAsync( outputDocument, outputTextWriter, null, GetDiffInfo( oldSyntaxTree!, newSyntaxTree!, false ) );
-        }
-
-        private async Task WriteAsync( Document document, TextWriter textWriter, IEnumerable<Diagnostic>? diagnostics, FileDiffInfo? diffInfo )
-        {
-            var sourceText = await document.GetTextAsync( CancellationToken.None );
-            var syntaxRoot = (await document.GetSyntaxRootAsync()).AssertNotNull();
-
-            var classifiedTextSpans = await this.GetClassifiedTextSpansAsync( document, addTitles: this._options.AddTitles, diagnostics: diagnostics );
-
-            var finalBuilder = new StringBuilder();      // Builds the whole file.
-            var codeLineBuilder = new StringBuilder();   // Builds the current line.
-            var diagnosticBuilder = new StringBuilder(); // Builds the diagnostics of the current line.
-            var diagnosticSet = new HashSet<string>( StringComparer.Ordinal );
-            var lineNumber = 0;
-
-            void AppendEmptyDiffLine( int? number )
+            if ( number != null && number != 0 )
             {
-                if ( number != null && number != 0 )
+                finalBuilder.AppendLineInvariant( $"<span class='diff-Imaginary' data-height='{number}'> " );
+
+                for ( var i = 1; i < number.Value; i++ )
                 {
-                    finalBuilder.AppendLineInvariant( $"<span class='diff-Imaginary' data-height='{number}'> " );
-
-                    for ( var i = 1; i < number.Value; i++ )
-                    {
-                        finalBuilder.AppendLine();
-                    }
-
-                    finalBuilder.Append( "</span>" );
+                    finalBuilder.AppendLine();
                 }
+
+                finalBuilder.Append( "</span>" );
             }
+        }
 
-            void FlushLine( TextSpan span )
+        void FlushLine( TextSpan span )
+        {
+            var lineDiffInfo = diffInfo?.Lines[lineNumber];
+
+            // First write the imaginary diff lines before.
+            AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
+
+            // Then write the diagnostics.
+            if ( diagnosticBuilder.Length > 0 )
             {
-                var lineDiffInfo = diffInfo?.Lines[lineNumber];
+                // Figure out the indentation of the next block.
+                var indentation = "";
+                var isTag = false;
 
-                // First write the imaginary diff lines before.
-                AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesBefore );
-
-                // Then write the diagnostics.
-                if ( diagnosticBuilder.Length > 0 )
+                foreach ( var c in codeLineBuilder.ToString() )
                 {
-                    // Figure out the indentation of the next block.
-                    var indentation = "";
-                    var isTag = false;
-
-                    foreach ( var c in codeLineBuilder.ToString() )
+                    switch ( c )
                     {
-                        switch ( c )
-                        {
-                            case '<':
-                                isTag = true;
+                        case '<':
+                            isTag = true;
 
+                            break;
+
+                        case '>':
+                            isTag = false;
+
+                            break;
+
+                        case ' ' or '\t' when !isTag:
+                            indentation += c;
+
+                            break;
+
+                        default:
+                            if ( !isTag )
+                            {
+                                goto parsingIndentationFinished;
+                            }
+                            else
+                            {
                                 break;
-
-                            case '>':
-                                isTag = false;
-
-                                break;
-
-                            case ' ' or '\t' when !isTag:
-                                indentation += c;
-
-                                break;
-
-                            default:
-                                if ( !isTag )
-                                {
-                                    goto parsingIndentationFinished;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                        }
-                    }
-
-                parsingIndentationFinished:
-
-                    // Write any buffered diagnostic.
-                    var diagnosticLines = diagnosticBuilder.ToString().Split( '\n' );
-
-                    finalBuilder.Append( "<span class=\"diagLines\">" );
-
-                    foreach ( var diagnostic in diagnosticLines )
-                    {
-                        finalBuilder.Append( indentation );
-                        finalBuilder.Append( diagnostic );
-                        finalBuilder.Append( '\n' );
-                    }
-
-                    finalBuilder.Append( "</span>" );
-
-                    diagnosticBuilder.Clear();
-                    diagnosticSet.Clear();
-                }
-
-                // Find the member at the line number.
-                var line = sourceText.Lines.GetLineFromPosition( span.Start );
-                var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
-
-                // Moved to a local function due to Roslyn bug that results in assertion failure in Metalama.Compiler debug build: https://github.com/dotnet/roslyn/issues/69015
-                var members = node.AncestorsAndSelf()
-                    .Select( GetMemberTextPair )
-                    .Where( x => x.Node != null )
-                    .ToMutableList();
-
-                static (SyntaxNode? Node, string? Text) GetMemberTextPair( SyntaxNode n )
-                    => n switch
-                    {
-                        MethodDeclarationSyntax method => (method, method.Identifier.Text),
-                        BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
-                        EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
-                        BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
-                        PropertyDeclarationSyntax property => (property, property.Identifier.Text),
-                        _ => (null, null)
-                    };
-
-                finalBuilder.AppendInvariant( $"<span class='line-number'" );
-
-                if ( members.Count > 0 )
-                {
-                    var topNode = members[0].Node;
-
-                    var syntaxToken = topNode!.GetFirstToken();
-
-                    if ( (line.End < syntaxToken.Span.Start || line.Start > topNode.GetLastToken().Span.End)
-                         && string.IsNullOrWhiteSpace( sourceText.GetSubText( line.Span ).ToString() ) )
-                    {
-                        // This is a blank line.
-                    }
-                    else
-                    {
-                        members.Reverse();
-                        finalBuilder.AppendInvariant( $" data-member='{string.Join( ".", members.SelectAsReadOnlyList( x => x.Text! ) )}'" );
-                    }
-                }
-
-                finalBuilder.AppendInvariant( $">{lineNumber + 1}</span>" );
-                finalBuilder.AppendLine( codeLineBuilder.ToString() );
-                codeLineBuilder.Clear();
-
-                // Write the diff lines after, if any.
-                AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesAfter );
-
-                lineNumber++;
-            }
-
-            if ( this._options.Prolog != null )
-            {
-                finalBuilder.Append( this._options.Prolog );
-            }
-
-            finalBuilder.Append( "<pre><code class=\"nohighlight\">" );
-
-            var isTopOfTheFile = true;
-
-            foreach ( var classifiedSpan in classifiedTextSpans )
-            {
-                // Write the text between the previous span and the current one.
-                var textSpan = classifiedSpan.Span;
-
-                var subText = sourceText.GetSubText( textSpan );
-                var spanText = subText.ToString();
-
-                // Ignore blank lines on the top of the file.
-                if ( spanText.Trim().Length == 0 && isTopOfTheFile )
-                {
-                    continue;
-                }
-
-                if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
-                {
-                    List<string> classes = new();
-                    List<string> titles = new();
-
-                    const bool isLeadingTrivia = false; // string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
-
-                    if ( !isLeadingTrivia )
-                    {
-                        if ( classifiedSpan.Classification != TextSpanClassification.Default )
-                        {
-                            classes.Add( $"cr-{classifiedSpan.Classification}" );
-                        }
-
-                        if ( classifiedSpan.Tags.TryGetValue( CSharpClassTagName, out var csClassification ) )
-                        {
-                            // Ignore the header.
-                            if ( csClassification == "header" )
-                            {
-                                continue;
                             }
-
-                            foreach ( var classification in csClassification.Split( ';' ) )
-                            {
-                                foreach ( var c in classification.Split( '-' ) )
-                                {
-                                    classes.Add( "cs-" + c.Trim().ReplaceOrdinal( " ", "-" ) );
-                                }
-                            }
-                        }
-
-                        isTopOfTheFile = false;
-
-                        if ( classifiedSpan.Tags.TryGetValue( DiagnosticTagName, out var diagnosticJson ) )
-                        {
-                            var diagnostic = DiagnosticAnnotation.FromJson( diagnosticJson );
-
-                            if ( diagnostic.Severity != DiagnosticSeverity.Hidden && diagnosticSet.Add( diagnostic.Message ) )
-                            {
-                                titles.Add( diagnostic.ToString() );
-
-                                classes.Add( "diag-" + diagnostic.Severity );
-
-                                diagnosticBuilder.AppendInvariant( $"<span class=\"diagLine-{diagnostic.Severity}\">{diagnostic.Severity} {diagnostic.Id}: " );
-
-                                HtmlEncode( diagnosticBuilder, textSpan, diagnostic.Message );
-                                diagnosticBuilder.Append( "</span>\n" );
-                            }
-                        }
-
-                        string? docTitle = null;
-
-                        if ( this._options.AddTitles && !classifiedSpan.Tags.TryGetValue( "title", out docTitle ) )
-                        {
-                            docTitle = classifiedSpan.Classification switch
-                            {
-                                TextSpanClassification.Dynamic => "Dynamic member.",
-                                TextSpanClassification.CompileTime => "Compile-time code.",
-                                TextSpanClassification.RunTime => "Run-time code.",
-                                TextSpanClassification.TemplateKeyword => "Meta API.",
-                                TextSpanClassification.CompileTimeVariable => "Compile-time variable.",
-                                TextSpanClassification.GeneratedCode when classifiedSpan.Tags.TryGetValue( GeneratingAspectTagName, out var aspect ) =>
-                                    $"Generated by {aspect}.",
-                                TextSpanClassification.GeneratedCode => "Generated code.",
-                                _ => null
-                            };
-                        }
-
-                        if ( docTitle != null )
-                        {
-                            titles.Insert( 0, docTitle );
-                        }
-                    }
-
-                    if ( classes.Count > 0 || titles.Count > 0 )
-                    {
-                        codeLineBuilder.Append( "<span" );
-
-                        if ( classes.Count > 0 )
-                        {
-                            codeLineBuilder.AppendInvariant( $" class=\"{string.Join( " ", classes )}\"" );
-                        }
-
-                        if ( titles.Count > 0 )
-                        {
-                            codeLineBuilder.Append( " title=\"" );
-
-                            for ( var i = 0; i < titles.Count; i++ )
-                            {
-                                if ( i > 0 )
-                                {
-                                    codeLineBuilder.Append( "&#13;&#10;" );
-                                }
-
-                                HtmlEncode( codeLineBuilder, textSpan, titles[i], true );
-                            }
-
-                            codeLineBuilder.Append( "\"" );
-                        }
-
-                        codeLineBuilder.Append( ">" );
-                        HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
-                        codeLineBuilder.Append( "</span>" );
-                    }
-                    else
-                    {
-                        HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
                     }
                 }
-            }
 
-            FlushLine( default );
+            parsingIndentationFinished:
 
-            finalBuilder.AppendLine( "</code></pre>" );
+                // Write any buffered diagnostic.
+                var diagnosticLines = diagnosticBuilder.ToString().Split( '\n' );
 
-            if ( this._options.Epilogue != null )
-            {
-                finalBuilder.Append( this._options.Epilogue );
-            }
+                finalBuilder.Append( "<span class=\"diagLines\">" );
 
-            await textWriter.WriteAsync( finalBuilder.ToString() );
-        }
-
-        private static void HtmlEncode(
-            StringBuilder stringBuilder,
-            TextSpan span,
-            string text,
-            bool attributeEncode = false,
-            Action<TextSpan>? onNewLine = null )
-        {
-            foreach ( var c in text )
-            {
-                switch ( c )
+                foreach ( var diagnostic in diagnosticLines )
                 {
-                    case '<':
-                        stringBuilder.Append( "&lt;" );
-
-                        break;
-
-                    case '>':
-                        stringBuilder.Append( "&gt;" );
-
-                        break;
-
-                    case '&':
-                        stringBuilder.Append( "&amp;" );
-
-                        break;
-
-                    case '"' when attributeEncode:
-                        stringBuilder.Append( "&quot;" );
-
-                        break;
-
-                    case '\r':
-                        // Always ignored.
-                        break;
-
-                    case '\n' when attributeEncode:
-                        stringBuilder.Append( "&#10;" );
-
-                        break;
-
-                    case '\n':
-                        if ( onNewLine == null )
-                        {
-                            stringBuilder.Append( c );
-                        }
-                        else
-                        {
-                            onNewLine( span );
-                        }
-
-                        break;
-
-                    default:
-                        stringBuilder.Append( c );
-
-                        break;
-                }
-            }
-        }
-
-        private static async Task WriteAllAsync(
-            IProjectOptions projectOptions,
-            ProjectServiceProvider serviceProvider,
-            PartialCompilation partialCompilation,
-            string htmlExtension,
-            Func<string, FileDiffInfo?>? getDiffInfo = null )
-        {
-            var compilation = partialCompilation.Compilation;
-            var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
-
-            var workspace = new AdhocWorkspace();
-
-            var assemblyName = compilation.AssemblyName.AssertNotNull();
-
-            var projectId = ProjectId.CreateNewId( assemblyName );
-
-            var projectInfo = ProjectInfo.Create(
-                projectId,
-                VersionStamp.Create(),
-                assemblyName,
-                assemblyName,
-                "C#",
-                projectOptions.ProjectPath,
-                compilationOptions: compilation.Options,
-                metadataReferences: compilation.References );
-
-            var project = workspace.AddProject( projectInfo );
-
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
-            {
-                project = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync(), null, syntaxTree.FilePath ).Project;
-            }
-
-            var projectDirectory = Path.GetFullPath( Path.GetDirectoryName( projectOptions.ProjectPath )! );
-            var outputDirectory = Path.Combine( projectDirectory, "obj", "html", projectOptions.TargetFramework ?? "" );
-
-            foreach ( var document in project.Documents )
-            {
-                var documentPath = document.FilePath.AssertNotNull();
-                var documentFullPath = Path.GetFullPath( documentPath );
-
-                if ( !documentFullPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
-                {
-                    // Skipping this document.
-                    continue;
+                    finalBuilder.Append( indentation );
+                    finalBuilder.Append( diagnostic );
+                    finalBuilder.Append( '\n' );
                 }
 
-                var relativePath = documentFullPath.Substring( projectDirectory.Length + 1 );
-                var outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
+                finalBuilder.Append( "</span>" );
 
-                var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
-                Directory.CreateDirectory( outputSubdirectory );
-
-#if NET6_0_OR_GREATER
-                await using var textWriter = new StreamWriter( outputPath );
-#else
-                using var textWriter = new StreamWriter( outputPath );
-#endif
-                var diffInfo = getDiffInfo?.Invoke( documentPath );
-
-                await writer.WriteAsync( document, textWriter, null, diffInfo );
-            }
-        }
-
-        internal static async Task WriteAllDiffAsync(
-            IProjectOptions projectOptions,
-            ProjectServiceProvider serviceProvider,
-            PartialCompilation inputCompilation,
-            PartialCompilation outputCompilation )
-        {
-            await WriteAllAsync(
-                projectOptions,
-                serviceProvider,
-                inputCompilation,
-                ".cs.html",
-                p => GetDiffInfoForPath( p, true ) );
-
-            await WriteAllAsync(
-                projectOptions,
-                serviceProvider,
-                outputCompilation,
-                ".t.cs.html",
-                p => GetDiffInfoForPath( p, false ) );
-
-            FileDiffInfo? GetDiffInfoForPath( string path, bool isOld )
-            {
-                if ( !inputCompilation.SyntaxTrees.TryGetValue( path, out var oldTree ) )
-                {
-                    return null;
-                }
-
-                if ( !outputCompilation.SyntaxTrees.TryGetValue( path, out var newTree ) )
-                {
-                    return null;
-                }
-
-                return GetDiffInfo( oldTree, newTree, isOld );
-            }
-        }
-
-        private static FileDiffInfo GetDiffInfo( SyntaxTree oldTree, SyntaxTree newTree, bool isOld )
-        {
-            // Gets the text that should be compared by the differ. This text has no other role than diffing the lines, and we ignore the in-line changes,
-            // so we can do any transformation we want to make the diff cleaner.
-            static string GetTextToCompare( SourceText text )
-            {
-                // We remove automatic accessors of automatic properties because it better matches the property
-                // after automatic accessors have been replaced by explicit implementations.
-                // We also rewrite all return statements to make it more likely to match.
-                return _cleanReturnStatementRegex.Replace( _cleanAutomaticPropertiesRegex.Replace( text.ToString(), "" ), "result = " );
+                diagnosticBuilder.Clear();
+                diagnosticSet.Clear();
             }
 
-            var diffBuilder = new SideBySideDiffBuilder();
+            // Find the member at the line number.
+            var line = sourceText.Lines.GetLineFromPosition( span.Start );
+            var node = syntaxRoot.FindNode( line.Span, getInnermostNodeForTie: true );
 
-#pragma warning disable VSTHRD103
-            var oldText = oldTree.GetText();
-            var newText = newTree.GetText();
-#pragma warning restore VSTHRD103
+            // Moved to a local function due to Roslyn bug that results in assertion failure in Metalama.Compiler debug build: https://github.com/dotnet/roslyn/issues/69015
+            var members = node.AncestorsAndSelf()
+                .Select( GetMemberTextPair )
+                .Where( x => x.Node != null )
+                .ToMutableList();
 
-            var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
-
-            var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
-
-            var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
-
-            var imaginaryLinesBefore = 0;
-            var lineNumber = 0;
-
-            foreach ( var diffLine in diffPane.Lines )
+            static (SyntaxNode? Node, string? Text) GetMemberTextPair( SyntaxNode n )
             {
-                if ( diffLine.Type == ChangeType.Imaginary )
+                return n switch
                 {
-                    imaginaryLinesBefore++;
+                    MethodDeclarationSyntax method => (method, method.Identifier.Text),
+                    BaseFieldDeclarationSyntax field => (field, field.Declaration.Variables[0].Identifier.Text),
+                    EventDeclarationSyntax @event => (@event, @event.Identifier.Text),
+                    BaseTypeDeclarationSyntax type => (type, type.Identifier.Text),
+                    PropertyDeclarationSyntax property => (property, property.Identifier.Text),
+                    _ => (null, null)
+                };
+            }
+
+            finalBuilder.AppendInvariant( $"<span class='line-number'" );
+
+            if ( members.Count > 0 )
+            {
+                var topNode = members[0].Node;
+
+                var syntaxToken = topNode!.GetFirstToken();
+
+                if ( (line.End < syntaxToken.Span.Start || line.Start > topNode.GetLastToken().Span.End)
+                     && string.IsNullOrWhiteSpace( sourceText.GetSubText( line.Span ).ToString() ) )
+                {
+                    // This is a blank line.
                 }
                 else
                 {
-                    var lineText = text.Lines[lineNumber].ToString();
-
-                    if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
-                    {
-                        // Prefer to insert imaginary lines after a bracket than before.
-                        lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
-                    }
-                    else
-                    {
-                        lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
-                        imaginaryLinesBefore = 0;
-                    }
-
-                    lineNumber++;
+                    members.Reverse();
+                    finalBuilder.AppendInvariant( $" data-member='{string.Join( ".", members.SelectAsReadOnlyList( x => x.Text! ) )}'" );
                 }
             }
 
-            if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
-            {
-                lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
-            }
+            finalBuilder.AppendInvariant( $">{lineNumber + 1}</span>" );
+            finalBuilder.AppendLine( codeLineBuilder.ToString() );
+            codeLineBuilder.Clear();
 
-            return new FileDiffInfo( lineDiffInfos.ToArray() );
+            // Write the diff lines after, if any.
+            AppendEmptyDiffLine( lineDiffInfo?.ImaginaryLinesAfter );
+
+            lineNumber++;
         }
 
-        private sealed record FileDiffInfo( LineDiffInfo[] Lines );
+        if ( this._options.Prolog != null )
+        {
+            finalBuilder.Append( this._options.Prolog );
+        }
 
-        private sealed record LineDiffInfo( int ImaginaryLinesBefore, int ImaginaryLinesAfter, ChangeType ChangeType );
+        finalBuilder.Append( "<pre><code class=\"nohighlight\">" );
+
+        var isTopOfTheFile = true;
+
+        foreach ( var classifiedSpan in classifiedTextSpans )
+        {
+            // Write the text between the previous span and the current one.
+            var textSpan = classifiedSpan.Span;
+
+            var subText = sourceText.GetSubText( textSpan );
+            var spanText = subText.ToString();
+
+            // Ignore blank lines on the top of the file.
+            if ( spanText.Trim().Length == 0 && isTopOfTheFile )
+            {
+                continue;
+            }
+
+            if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
+            {
+                List<string> classes = new();
+                List<string> titles = new();
+
+                const bool isLeadingTrivia = false; // string.IsNullOrWhiteSpace( spanText ) && (spanText[0] == '\r' || spanText[0] == '\n');
+
+                if ( !isLeadingTrivia )
+                {
+                    if ( classifiedSpan.Classification != TextSpanClassification.Default )
+                    {
+                        classes.Add( $"cr-{classifiedSpan.Classification}" );
+                    }
+
+                    if ( classifiedSpan.Tags.TryGetValue( CSharpClassTagName, out var csClassification ) )
+                    {
+                        // Ignore the header.
+                        if ( csClassification == "header" )
+                        {
+                            continue;
+                        }
+
+                        foreach ( var classification in csClassification.Split( ';' ) )
+                        {
+                            foreach ( var c in classification.Split( '-' ) )
+                            {
+                                classes.Add( "cs-" + c.Trim().ReplaceOrdinal( " ", "-" ) );
+                            }
+                        }
+                    }
+
+                    isTopOfTheFile = false;
+
+                    if ( classifiedSpan.Tags.TryGetValue( DiagnosticTagName, out var diagnosticJson ) )
+                    {
+                        var diagnostic = DiagnosticAnnotation.FromJson( diagnosticJson );
+
+                        if ( diagnostic.Severity != DiagnosticSeverity.Hidden && diagnosticSet.Add( diagnostic.Message ) )
+                        {
+                            titles.Add( diagnostic.ToString() );
+
+                            classes.Add( "diag-" + diagnostic.Severity );
+
+                            diagnosticBuilder.AppendInvariant( $"<span class=\"diagLine-{diagnostic.Severity}\">{diagnostic.Severity} {diagnostic.Id}: " );
+
+                            HtmlEncode( diagnosticBuilder, textSpan, diagnostic.Message );
+                            diagnosticBuilder.Append( "</span>\n" );
+                        }
+                    }
+
+                    string? docTitle = null;
+
+                    if ( this._options.AddTitles && !classifiedSpan.Tags.TryGetValue( "title", out docTitle ) )
+                    {
+                        docTitle = classifiedSpan.Classification switch
+                        {
+                            TextSpanClassification.Dynamic => "Dynamic member.",
+                            TextSpanClassification.CompileTime => "Compile-time code.",
+                            TextSpanClassification.RunTime => "Run-time code.",
+                            TextSpanClassification.TemplateKeyword => "Meta API.",
+                            TextSpanClassification.CompileTimeVariable => "Compile-time variable.",
+                            TextSpanClassification.GeneratedCode when classifiedSpan.Tags.TryGetValue( GeneratingAspectTagName, out var aspect ) =>
+                                $"Generated by {aspect}.",
+                            TextSpanClassification.GeneratedCode => "Generated code.",
+                            _ => null
+                        };
+                    }
+
+                    if ( docTitle != null )
+                    {
+                        titles.Insert( 0, docTitle );
+                    }
+                }
+
+                if ( classes.Count > 0 || titles.Count > 0 )
+                {
+                    codeLineBuilder.Append( "<span" );
+
+                    if ( classes.Count > 0 )
+                    {
+                        codeLineBuilder.AppendInvariant( $" class=\"{string.Join( " ", classes )}\"" );
+                    }
+
+                    if ( titles.Count > 0 )
+                    {
+                        codeLineBuilder.Append( " title=\"" );
+
+                        for ( var i = 0; i < titles.Count; i++ )
+                        {
+                            if ( i > 0 )
+                            {
+                                codeLineBuilder.Append( "&#13;&#10;" );
+                            }
+
+                            HtmlEncode( codeLineBuilder, textSpan, titles[i], true );
+                        }
+
+                        codeLineBuilder.Append( "\"" );
+                    }
+
+                    codeLineBuilder.Append( ">" );
+                    HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
+                    codeLineBuilder.Append( "</span>" );
+                }
+                else
+                {
+                    HtmlEncode( codeLineBuilder, textSpan, spanText, onNewLine: FlushLine );
+                }
+            }
+        }
+
+        FlushLine( default );
+
+        finalBuilder.AppendLine( "</code></pre>" );
+
+        if ( this._options.Epilogue != null )
+        {
+            finalBuilder.Append( this._options.Epilogue );
+        }
+
+        await textWriter.WriteAsync( finalBuilder.ToString() );
     }
+
+    private static void HtmlEncode(
+        StringBuilder stringBuilder,
+        TextSpan span,
+        string text,
+        bool attributeEncode = false,
+        Action<TextSpan>? onNewLine = null )
+    {
+        foreach ( var c in text )
+        {
+            switch ( c )
+            {
+                case '<':
+                    stringBuilder.Append( "&lt;" );
+
+                    break;
+
+                case '>':
+                    stringBuilder.Append( "&gt;" );
+
+                    break;
+
+                case '&':
+                    stringBuilder.Append( "&amp;" );
+
+                    break;
+
+                case '"' when attributeEncode:
+                    stringBuilder.Append( "&quot;" );
+
+                    break;
+
+                case '\r':
+                    // Always ignored.
+                    break;
+
+                case '\n' when attributeEncode:
+                    stringBuilder.Append( "&#10;" );
+
+                    break;
+
+                case '\n':
+                    if ( onNewLine == null )
+                    {
+                        stringBuilder.Append( c );
+                    }
+                    else
+                    {
+                        onNewLine( span );
+                    }
+
+                    break;
+
+                default:
+                    stringBuilder.Append( c );
+
+                    break;
+            }
+        }
+    }
+
+    private static async Task WriteAllAsync(
+        IProjectOptions projectOptions,
+        ProjectServiceProvider serviceProvider,
+        PartialCompilation partialCompilation,
+        string htmlExtension,
+        Func<string, FileDiffInfo?>? getDiffInfo = null )
+    {
+        var compilation = partialCompilation.Compilation;
+        var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
+
+        var workspace = new AdhocWorkspace();
+
+        var assemblyName = compilation.AssemblyName.AssertNotNull();
+
+        var projectId = ProjectId.CreateNewId( assemblyName );
+
+        var projectInfo = ProjectInfo.Create(
+            projectId,
+            VersionStamp.Create(),
+            assemblyName,
+            assemblyName,
+            "C#",
+            projectOptions.ProjectPath,
+            compilationOptions: compilation.Options,
+            metadataReferences: compilation.References );
+
+        var project = workspace.AddProject( projectInfo );
+
+        foreach ( var syntaxTree in compilation.SyntaxTrees )
+        {
+            project = project.AddDocument( syntaxTree.FilePath, await syntaxTree.GetRootAsync(), null, syntaxTree.FilePath ).Project;
+        }
+
+        var projectDirectory = Path.GetFullPath( Path.GetDirectoryName( projectOptions.ProjectPath )! );
+        var outputDirectory = Path.Combine( projectDirectory, "obj", "html", projectOptions.TargetFramework ?? "" );
+
+        foreach ( var document in project.Documents )
+        {
+            var documentPath = document.FilePath.AssertNotNull();
+            var documentFullPath = Path.GetFullPath( documentPath );
+
+            if ( !documentFullPath.StartsWith( projectDirectory, StringComparison.OrdinalIgnoreCase ) )
+            {
+                // Skipping this document.
+                continue;
+            }
+
+            var relativePath = documentFullPath.Substring( projectDirectory.Length + 1 );
+            var outputPath = Path.Combine( outputDirectory, Path.ChangeExtension( relativePath, htmlExtension ) );
+
+            var outputSubdirectory = Path.GetDirectoryName( outputPath ).AssertNotNull();
+            Directory.CreateDirectory( outputSubdirectory );
+
+#if NET6_0_OR_GREATER
+            await using var textWriter = new StreamWriter( outputPath );
+#else
+            using var textWriter = new StreamWriter( outputPath );
+#endif
+            var diffInfo = getDiffInfo?.Invoke( documentPath );
+
+            await writer.WriteAsync( document, textWriter, null, diffInfo );
+        }
+    }
+
+    internal static async Task WriteAllDiffAsync(
+        IProjectOptions projectOptions,
+        ProjectServiceProvider serviceProvider,
+        PartialCompilation inputCompilation,
+        PartialCompilation outputCompilation )
+    {
+        await WriteAllAsync(
+            projectOptions,
+            serviceProvider,
+            inputCompilation,
+            ".cs.html",
+            p => GetDiffInfoForPath( p, true ) );
+
+        await WriteAllAsync(
+            projectOptions,
+            serviceProvider,
+            outputCompilation,
+            ".t.cs.html",
+            p => GetDiffInfoForPath( p, false ) );
+
+        FileDiffInfo? GetDiffInfoForPath( string path, bool isOld )
+        {
+            if ( !inputCompilation.SyntaxTrees.TryGetValue( path, out var oldTree ) )
+            {
+                return null;
+            }
+
+            if ( !outputCompilation.SyntaxTrees.TryGetValue( path, out var newTree ) )
+            {
+                return null;
+            }
+
+            return GetDiffInfo( oldTree, newTree, isOld );
+        }
+    }
+
+    private static FileDiffInfo GetDiffInfo( SyntaxTree oldTree, SyntaxTree newTree, bool isOld )
+    {
+        // Gets the text that should be compared by the differ. This text has no other role than diffing the lines, and we ignore the in-line changes,
+        // so we can do any transformation we want to make the diff cleaner.
+        static string GetTextToCompare( SourceText text )
+        {
+            // We remove automatic accessors of automatic properties because it better matches the property
+            // after automatic accessors have been replaced by explicit implementations.
+            // We also rewrite all return statements to make it more likely to match.
+            return _cleanReturnStatementRegex.Replace( _cleanAutomaticPropertiesRegex.Replace( text.ToString(), "" ), "result = " );
+        }
+
+        var diffBuilder = new SideBySideDiffBuilder();
+
+#pragma warning disable VSTHRD103
+        var oldText = oldTree.GetText();
+        var newText = newTree.GetText();
+#pragma warning restore VSTHRD103
+
+        var diff = diffBuilder.BuildDiffModel( GetTextToCompare( oldText ), GetTextToCompare( newText ), true );
+
+        var (text, diffPane) = isOld ? (oldText, diff.OldText) : (newText, diff.NewText);
+
+        var lineDiffInfos = new List<LineDiffInfo>( diffPane.Lines.Count );
+
+        var imaginaryLinesBefore = 0;
+        var lineNumber = 0;
+
+        foreach ( var diffLine in diffPane.Lines )
+        {
+            if ( diffLine.Type == ChangeType.Imaginary )
+            {
+                imaginaryLinesBefore++;
+            }
+            else
+            {
+                var lineText = text.Lines[lineNumber].ToString();
+
+                if ( lineText.Trim() == "{" && imaginaryLinesBefore > 0 )
+                {
+                    // Prefer to insert imaginary lines after a bracket than before.
+                    lineDiffInfos.Add( new LineDiffInfo( 0, 0, diffLine.Type ) );
+                }
+                else
+                {
+                    lineDiffInfos.Add( new LineDiffInfo( imaginaryLinesBefore, 0, diffLine.Type ) );
+                    imaginaryLinesBefore = 0;
+                }
+
+                lineNumber++;
+            }
+        }
+
+        if ( imaginaryLinesBefore != 0 && lineDiffInfos.Count > 0 )
+        {
+            lineDiffInfos[^1] = new LineDiffInfo( lineDiffInfos[^1].ImaginaryLinesBefore, imaginaryLinesBefore, lineDiffInfos[^1].ChangeType );
+        }
+
+        return new FileDiffInfo( lineDiffInfos.ToArray() );
+    }
+
+    private sealed record FileDiffInfo( LineDiffInfo[] Lines );
+
+    private sealed record LineDiffInfo( int ImaginaryLinesBefore, int ImaginaryLinesAfter, ChangeType ChangeType );
 }

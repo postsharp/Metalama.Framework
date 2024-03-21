@@ -41,10 +41,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly CompilationContext _compilationContext;
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+    private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-    public LinkerInjectionStep( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+    public LinkerInjectionStep( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
     {
         this._serviceProvider = serviceProvider;
+        this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
         this._compilationContext = compilationContext;
         this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
     }
@@ -254,7 +256,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
         {
             Rewriter rewriter = new(
-                this._compilationContext,
+                this,
                 transformationCollection,
                 suppressionsByTarget,
                 input.CompilationModel,
@@ -448,6 +450,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
 
                     var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                        this._syntaxGenerationOptions,
                         injectMemberTransformation.TransformedSyntaxTree,
                         positionInSyntaxTree );
 
@@ -475,7 +478,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     break;
 
                 case IInjectInterfaceTransformation injectInterfaceTransformation:
-                    var introducedInterface = injectInterfaceTransformation.GetSyntax();
+                    var introducedInterface = injectInterfaceTransformation.GetSyntax( this._syntaxGenerationOptions );
                     transformationCollection.AddInjectedInterface( injectInterfaceTransformation, introducedInterface );
 
                     break;
@@ -509,7 +512,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                                 Syntax: PropertyDeclarationSyntax propertyDeclaration
                                             }:
                                                 return im.WithSyntax(
-                                                    propertyDeclaration.WithSynthesizedSetter( this._compilationContext.DefaultSyntaxGenerationContext ) );
+                                                    propertyDeclaration.WithSynthesizedSetter(
+                                                        this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions ) ) );
 
                                             case { Semantic: InjectedMemberSemantic.InitializerMethod }:
                                                 return im;
@@ -648,7 +652,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     {
                         case PropertyOrIndexer sourcePropertyOrIndexer:
                             var primaryDeclaration = sourcePropertyOrIndexer.GetPrimaryDeclarationSyntax().AssertNotNull();
-                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, primaryDeclaration );
 
                             break;
 
@@ -660,6 +664,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             var positionInSyntaxTree = GetSyntaxTreePosition( propertyOrIndexerBuilder.ToInsertPosition() );
 
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                                this._syntaxGenerationOptions,
                                 propertyOrIndexerBuilder.PrimarySyntaxTree.AssertNotNull(),
                                 positionInSyntaxTree );
 
@@ -707,7 +712,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     {
                         case MethodBase sourceMethodBase:
                             var primaryDeclaration = sourceMethodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
-                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( primaryDeclaration );
+                            syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, primaryDeclaration );
 
                             break;
 
@@ -718,6 +723,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             var positionInSyntaxTree = GetSyntaxTreePosition( methodBaseBuilder.ToInsertPosition() );
 
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                                this._syntaxGenerationOptions,
                                 methodBaseBuilder.PrimarySyntaxTree.AssertNotNull(),
                                 positionInSyntaxTree );
 
@@ -874,7 +880,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     {
         var auxiliaryMemberFactory =
             new AuxiliaryMemberFactory(
-                this._compilationContext,
+                this,
                 finalCompilationModel,
                 lexicalScopeFactory,
                 aspectReferenceSyntaxProvider,

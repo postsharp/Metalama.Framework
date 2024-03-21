@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
+using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Introspection;
@@ -40,7 +41,9 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         this._eventHub = serviceProvider.GetRequiredService<AnalysisProcessEventHub>();
     }
 
-    private async Task<(DesignTimeAspectPipeline Pipeline, Compilation Compilation)?> GetPipelineAndCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+    private async Task<(DesignTimeAspectPipeline Pipeline, Compilation Compilation)?> GetPipelineAndCompilationAsync(
+        ProjectKey projectKey,
+        CancellationToken cancellationToken )
     {
         var project = await this._workspaceProvider.GetProjectAsync( projectKey, cancellationToken );
 
@@ -81,7 +84,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
 
         await pipeline.GetConfigurationAsync(
             PartialCompilation.CreateComplete( compilation ),
-            ignoreStatus: false,
+            false,
             AsyncExecutionContext.Get(),
             cancellationToken.ToTestable() );
 
@@ -112,7 +115,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         {
             var designTimeConfiguration = await designTimePipeline.GetConfigurationAsync(
                 PartialCompilation.CreateComplete( compilation ),
-                ignoreStatus: false,
+                false,
                 AsyncExecutionContext.Get(),
                 cancellationToken.ToTestable() );
 
@@ -123,14 +126,23 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                 return [];
             }
 
-            var pipeline = new IntrospectionAspectPipeline( designTimeConfiguration.Value.ServiceProvider, this._pipelineFactory.Domain, options: null );
+            var pipeline = new IntrospectionAspectPipeline( designTimeConfiguration.Value.ServiceProvider, this._pipelineFactory.Domain, null );
 
-            var result = await pipeline.ExecuteAsync(
-                PartialCompilation.CreateComplete( compilation ),
-                designTimeConfiguration.Value,
-                cancellationToken.ToTestable() );
+            try
+            {
+                var result = await pipeline.ExecuteAsync(
+                    PartialCompilation.CreateComplete( compilation ),
+                    designTimeConfiguration.Value,
+                    cancellationToken.ToTestable() );
 
-            aspectInstances = result.AspectInstances.Where( i => !i.IsSkipped ).ToImmutableArray();
+                aspectInstances = result.AspectInstances.Where( i => !i.IsSkipped ).ToImmutableArray();
+            }
+            catch ( Exception ex )
+            {
+                DesignTimeExceptionHandler.ReportException( ex );
+
+                aspectInstances = ImmutableArray<IIntrospectionAspectInstance>.Empty;
+            }
 
             this._aspectInstanceCache.TryAdd( compilation, aspectInstances );
         }
@@ -154,19 +166,26 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                         .ToArray() ) );
 
         static string? GetPredecessorFullName( IIntrospectionAspectPredecessor predecessor )
-            => predecessor switch
+        {
+            return predecessor switch
             {
                 IIntrospectionAspectInstance predecessorAspect => predecessorAspect.AspectClass.Type.FullName,
                 IIntrospectionFabric fabric => fabric.FullName,
                 _ => null
             };
+        }
 
         var predecessorAspectInstances = aspectInstances
             .Where( aspectInstance => aspectInstance.Predecessors.Any( predecessor => GetPredecessorFullName( predecessor.Instance ) == aspectClassFullName ) )
             .Select(
                 aspectInstance => new AspectDatabaseAspectInstance(
                     aspectInstance.TargetDeclaration.ToSerializableId().Id,
-                    new[] { new AspectDatabaseAspectTransformation( aspectInstance.TargetDeclaration.ToSerializableId().Id, $"Provide the '{aspectInstance.AspectClass}' aspect." ) } ) );
+                    new[]
+                    {
+                        new AspectDatabaseAspectTransformation(
+                            aspectInstance.TargetDeclaration.ToSerializableId().Id,
+                            $"Provide the '{aspectInstance.AspectClass}' aspect." )
+                    } ) );
 
         return transformationAspectInstances.Concat( predecessorAspectInstances ).ToArray();
     }

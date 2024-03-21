@@ -111,6 +111,7 @@ internal sealed partial class LinkerRewritingDriver
                     SyntaxGenerationContext GetSyntaxGenerationContext()
                     {
                         return generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                            this.SyntaxGenerationOptions,
                             recordDeclaration.SyntaxTree,
                             recordDeclaration.SpanStart );
                     }

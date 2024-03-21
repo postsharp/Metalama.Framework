@@ -14,7 +14,7 @@ internal sealed class IntrospectionPipelineListener : IProjectService
 {
     private readonly IntrospectionFactory _introspectionFactory;
 
-    public IntrospectionPipelineListener( ProjectServiceProvider serviceProvider )
+    public IntrospectionPipelineListener( in ProjectServiceProvider serviceProvider )
     {
         this._introspectionFactory = serviceProvider.GetRequiredService<IntrospectionFactory>();
     }

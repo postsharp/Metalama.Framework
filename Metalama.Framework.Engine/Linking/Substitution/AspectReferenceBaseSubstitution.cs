@@ -15,10 +15,17 @@ namespace Metalama.Framework.Engine.Linking.Substitution;
 /// </summary>
 internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingSubstitution
 {
-    public AspectReferenceBaseSubstitution( CompilationContext compilationContext, ResolvedAspectReference aspectReference ) : base(
+    private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
+
+    public AspectReferenceBaseSubstitution(
+        CompilationContext compilationContext,
+        ResolvedAspectReference aspectReference,
+        SyntaxGenerationOptions syntaxGenerationOptions ) : base(
         compilationContext,
         aspectReference )
     {
+        this._syntaxGenerationOptions = syntaxGenerationOptions;
+
         // Support only base semantics.
         Invariant.Assert( aspectReference.ResolvedSemantic.Kind == IntermediateSymbolSemanticKind.Base );
 
@@ -52,12 +59,9 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
     }
 
     protected override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
-    {
-        return
-            IdentifierName( "__LINKER_TO_BE_REMOVED__" )
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
-                .WithTriviaFromIfNecessary( currentNode, this.CompilationContext.PreserveTrivia );
-    }
+        => IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
+            .WithTriviaFromIfNecessary( currentNode, this._syntaxGenerationOptions.PreserveTrivia );
 
     protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
@@ -73,22 +77,20 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
             return currentNode
                 .WithExpression(
                     substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( hiddenSymbol.ContainingType )
-                        .WithTriviaFromIfNecessary( currentNode.Expression, this.CompilationContext.PreserveTrivia ) );
+                        .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
         }
         else
         {
             return currentNode
                 .WithExpression(
                     BaseExpression()
-                        .WithTriviaFromIfNecessary( currentNode.Expression, this.CompilationContext.PreserveTrivia ) );
+                        .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
         }
     }
 
     protected override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode )
-    {
-        return currentNode
+        => currentNode
             .WithExpression(
                 BaseExpression()
-                    .WithTriviaFromIfNecessary( currentNode.Expression, this.CompilationContext.PreserveTrivia ) );
-    }
+                    .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
 }

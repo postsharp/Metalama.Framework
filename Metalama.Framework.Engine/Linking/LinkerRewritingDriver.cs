@@ -29,6 +29,8 @@ internal sealed partial class LinkerRewritingDriver
 {
     private ProjectServiceProvider ServiceProvider { get; }
 
+    public SyntaxGenerationOptions SyntaxGenerationOptions { get; }
+
     private CompilationContext IntermediateCompilationContext { get; }
 
     private LinkerInjectionRegistry InjectionRegistry { get; }
@@ -45,6 +47,7 @@ internal sealed partial class LinkerRewritingDriver
         LinkerAnalysisRegistry analysisRegistry )
     {
         this.ServiceProvider = serviceProvider;
+        this.SyntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
         this.IntermediateCompilationContext = intermediateCompilationContext;
         this.InjectionRegistry = injectionRegistry;
         this.LateTransformationRegistry = lateTransformationRegistry;

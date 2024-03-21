@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -51,7 +52,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-        var syntaxGenerationContextFactory = compilation.CompilationContext.SyntaxGenerationContextFactory;
+        var syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
 
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;
@@ -123,7 +124,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice
             // Process all of these constructors.
             foreach ( var chainedConstructor in chainedConstructors )
             {
-                var chainedSyntaxGenerationContext = syntaxGenerationContextFactory.GetSyntaxGenerationContext(
+                var chainedSyntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(
+                    syntaxGenerationOptions,
                     constructor.GetPrimaryDeclarationSyntax()
                     ?? constructor.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
@@ -166,7 +168,8 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice
 
                     case PullActionKind.UseExpression:
                         parameterValue =
-                            pullParameterAction.Expression.AssertNotNull().ToExpressionSyntax( new( compilation, chainedSyntaxGenerationContext ) );
+                            pullParameterAction.Expression.AssertNotNull()
+                                .ToExpressionSyntax( new SyntaxSerializationContext( compilation, chainedSyntaxGenerationContext ) );
 
                         break;
 

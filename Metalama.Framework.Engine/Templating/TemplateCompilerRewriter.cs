@@ -87,7 +87,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = compileTimeCompilationContext.DefaultSyntaxGenerationContext;
+        var syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =
@@ -700,7 +700,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
         }
 
-        bool ExpressionTypeIsGenericDynamic() => expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
+        bool ExpressionTypeIsGenericDynamic()
+        {
+            return expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
+        }
 
         // ReSharper disable once ConstantConditionalAccessQualifier
         switch ( expressionType.Name )
@@ -914,8 +917,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // In the default implementation, such case would result in an exception.
 
         bool IsSubtemplateCall()
-            => this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression ) is { } symbol
-               && this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
+        {
+            return this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression ) is { } symbol
+                   && this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
+        }
 
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform
              || (this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) && !IsSubtemplateCall()) )
@@ -1575,7 +1580,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var templateSymbol = this._rootTemplateSymbol.AssertNotNull();
 
-        void AddModifier( SyntaxKind kind ) => modifiers = modifiers.Add( Token( kind ).WithTrailingTrivia( Space ) );
+        void AddModifier( SyntaxKind kind )
+        {
+            modifiers = modifiers.Add( Token( kind ).WithTrailingTrivia( Space ) );
+        }
 
         if ( templateSymbol.IsStatic )
         {

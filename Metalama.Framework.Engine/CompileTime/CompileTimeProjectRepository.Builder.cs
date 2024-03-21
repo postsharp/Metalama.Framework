@@ -65,7 +65,7 @@ internal sealed partial class CompileTimeProjectRepository
         private readonly CacheableTemplateDiscoveryContextProvider _cacheableTemplateDiscoveryContextProvider;
         private readonly ClassifyingCompilationContextFactory _classifyingCompilationContextFactory;
 
-        private static Compilation CreateEmptyCompilation( ProjectServiceProvider serviceProvider )
+        private static Compilation CreateEmptyCompilation( in ProjectServiceProvider serviceProvider )
         {
             var assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
 

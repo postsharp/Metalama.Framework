@@ -6,6 +6,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
@@ -97,7 +98,8 @@ internal sealed partial class CompileTimeCompilationBuilder
         ProjectServiceProvider serviceProvider,
         CompileTimeDomain domain )
     {
-        this._serviceProvider = serviceProvider;
+        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
+        this._serviceProvider = serviceProvider.WithService( SyntaxGenerationOptions.Proof, true );
         this._domain = domain;
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
         this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();
@@ -233,9 +235,6 @@ internal sealed partial class CompileTimeCompilationBuilder
 
         compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
         var serializableTypes = GetSerializableTypes( compilationContext, treesWithCompileTimeCode, cancellationToken );
-
-        // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
-        CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
 
         var compileTimeCompilationContext = CompilationContextFactory.GetInstance( compileTimeCompilation );
 
@@ -1021,13 +1020,15 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                     // Without this local function, the closure for this method causes a memory leak.
                     static DiagnosticAdderAdapter CreateDiagnosticAdder( IDiagnosticAdder diagnosticSink, List<Diagnostic> diagnostics )
-                        => new(
+                    {
+                        return new DiagnosticAdderAdapter(
                             diagnostic =>
                             {
                                 // Report diagnostics to the current sink and also store them for the cache.
                                 diagnosticSink.Report( diagnostic );
                                 diagnostics.Add( diagnostic );
                             } );
+                    }
 
                     var diagnosticAdder = CreateDiagnosticAdder( diagnosticSink, diagnostics );
 
@@ -1095,9 +1096,15 @@ internal sealed partial class CompileTimeCompilationBuilder
                         var templateProviderType = compilationForManifest.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
                         var optionType = compilationForManifest.GetTypeByMetadataName( typeof(IHierarchicalOptions).FullName.AssertNotNull() );
 
-                        bool IsAspect( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, aspectType );
+                        bool IsAspect( INamedTypeSymbol t )
+                        {
+                            return compilationForManifest.HasImplicitConversion( t, aspectType );
+                        }
 
-                        bool IsFabric( INamedTypeSymbol t ) => compilationForManifest.HasImplicitConversion( t, fabricType );
+                        bool IsFabric( INamedTypeSymbol t )
+                        {
+                            return compilationForManifest.HasImplicitConversion( t, fabricType );
+                        }
 
                         var allTypes = compilationForManifest.Assembly.GetAllTypes().ToReadOnlyList();
 
@@ -1286,12 +1293,10 @@ internal sealed partial class CompileTimeCompilationBuilder
     }
 
     private static Exception CreateTooManyInconsistentCacheDirectoriesException( string? runTimeAssemblyName, OutputPaths outputPaths )
-    {
-        return new InvalidOperationException(
+        => new InvalidOperationException(
             $"TryGetCompileTimeProjectImpl( '{runTimeAssemblyName}' ): too many inconsistent cache directories for the compile-time assembly. " +
             $"Please delete \"{Path.GetDirectoryName( outputPaths.Directory )}\" directory before retrying the build. " +
             $"If this occurs on a build server, please verify that the cache is correctly cleaned up between builds." );
-    }
 
     private IDisposable WithLock( string compileTimeAssemblyName ) => MutexHelper.WithGlobalLock( compileTimeAssemblyName, this._logger );
 }

@@ -327,12 +327,12 @@ internal sealed partial class LinkerRewritingDriver
                 this.FilterAttributesOnSpecialImpl(
                     symbol.Parameters,
                     indexerParameters
-                        .WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.IntermediateCompilationContext.PreserveTrivia )
+                        .WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions.PreserveTrivia )
                         .WithAdditionalParameters( (specialImplType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) ) ),
                 accessorList,
                 expressionBody,
                 expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-            .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+            .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
     private IndexerDeclarationSyntax GetTrampolineForIndexer( IndexerDeclarationSyntax indexer, IPropertySymbol targetSymbol )
@@ -369,7 +369,7 @@ internal sealed partial class LinkerRewritingDriver
                             .AssertNoneNull() ) ),
                 expressionBody: null,
                 semicolonToken: default(SyntaxToken) )
-            .WithTriviaFromIfNecessary( indexer, this.IntermediateCompilationContext.PreserveTrivia );
+            .WithTriviaFromIfNecessary( indexer, this.SyntaxGenerationOptions.PreserveTrivia );
 
         ExpressionSyntax GetInvocationTarget()
         {

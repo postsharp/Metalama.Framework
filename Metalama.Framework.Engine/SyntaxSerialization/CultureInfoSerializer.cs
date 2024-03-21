@@ -21,7 +21,7 @@ internal sealed class CultureInfoSerializer : ObjectSerializer<CultureInfo>
                             Argument( LiteralExpression( obj.UseUserOverride ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) )
                         } ) ),
                 null )
-            .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
+            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
 
     public CultureInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
 }

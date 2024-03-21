@@ -146,7 +146,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
                 $"using System; class MyAttribute : Attribute {{ public MyAttribute( object value ) {{}} }} [MyAttribute( {inputSyntax} )] class C {{}} ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
             var syntaxGenerator = new SyntaxGeneratorWithContext( OurSyntaxGenerator.Default, syntaxGenerationContext );
             var type = compilation.Types.OfName( "C" ).Single();
             var attribute = type.Attributes.Single();
@@ -173,7 +173,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var compilation = testContext.CreateCompilationModel( code );
             var method = compilation.Types.Single().Methods.Single().GetSymbol().AssertNotNull();
-            var syntaxGenerationContext = compilation.CompilationContext.DefaultSyntaxGenerationContext;
+            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
             var syntaxGenerator = new SyntaxGeneratorWithContext( OurSyntaxGenerator.Default, syntaxGenerationContext );
 
             var syntax = syntaxGenerator.TypeParameterConstraintClauses( method.TypeParameters );

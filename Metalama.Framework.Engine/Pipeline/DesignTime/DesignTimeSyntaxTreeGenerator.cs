@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Metalama.Framework.Code.RefKind;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
@@ -82,7 +83,7 @@ internal static class DesignTimeSyntaxTreeGenerator
             BaseListSyntax? baseList = null;
 
             var members = List<MemberDeclarationSyntax>();
-            var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( true );
+            var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, true );
 
             foreach ( var transformation in orderedTransformations )
             {
@@ -110,7 +111,7 @@ internal static class DesignTimeSyntaxTreeGenerator
                 if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
                 {
                     baseList ??= BaseList();
-                    baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax() );
+                    baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
                 }
             }
 
@@ -176,7 +177,7 @@ internal static class DesignTimeSyntaxTreeGenerator
         var initialType = type.Translate( initialCompilationModel );
 
         var constructors = new List<ConstructorDeclarationSyntax>();
-        var existingSignatures = new HashSet<(ISymbol Type, Code.RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
+        var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
 
         // Go through all types that will get generated constructors and index existing constructors.
         foreach ( var constructor in initialType.Constructors )
@@ -262,9 +263,9 @@ internal static class DesignTimeSyntaxTreeGenerator
         {
             return p.RefKind switch
             {
-                Code.RefKind.None or Code.RefKind.In => default,
-                Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
-                Code.RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                RefKind.None or RefKind.In => default,
+                RefKind.Ref or RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
+                RefKind.Out => Token( SyntaxKind.OutKeyword ),
                 _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" )
             };
         }
@@ -418,11 +419,11 @@ internal static class DesignTimeSyntaxTreeGenerator
             LineFeed );
     }
 
-    private sealed class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, Code.RefKind RefKind)[]>
+    private sealed class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, RefKind RefKind)[]>
     {
         private readonly StructuralSymbolComparer _symbolComparer = StructuralSymbolComparer.Default;
 
-        public bool Equals( (ISymbol Type, Code.RefKind RefKind)[]? x, (ISymbol Type, Code.RefKind RefKind)[]? y )
+        public bool Equals( (ISymbol Type, RefKind RefKind)[]? x, (ISymbol Type, RefKind RefKind)[]? y )
         {
             if ( x == null || y == null )
             {
@@ -450,7 +451,7 @@ internal static class DesignTimeSyntaxTreeGenerator
             return true;
         }
 
-        public int GetHashCode( (ISymbol Type, Code.RefKind RefKind)[] obj )
+        public int GetHashCode( (ISymbol Type, RefKind RefKind)[] obj )
         {
             var hashCode = obj.Length;
 

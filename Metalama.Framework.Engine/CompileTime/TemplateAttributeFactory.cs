@@ -26,7 +26,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
     // and we don't want to prevent GC of symbols.
     private readonly WeakCache<ISymbol, IAdviceAttribute?> _cacheBySymbol = new();
 
-    public TemplateAttributeFactory( ProjectServiceProvider serviceProvider )
+    public TemplateAttributeFactory( in ProjectServiceProvider serviceProvider )
     {
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
     }
@@ -66,7 +66,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
         if ( member == null )
         {
-            diagnosticAdder.Report( TemplatingDiagnosticDescriptors.CantResolveDeclaration.CreateRoslynDiagnostic( location: null, memberId.Id ) );
+            diagnosticAdder.Report( TemplatingDiagnosticDescriptors.CantResolveDeclaration.CreateRoslynDiagnostic( null, memberId.Id ) );
 
             adviceAttribute = null;
 

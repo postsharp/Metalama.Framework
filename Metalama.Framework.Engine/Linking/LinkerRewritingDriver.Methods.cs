@@ -291,7 +291,7 @@ internal sealed partial class LinkerRewritingDriver
 
         return method
             .PartialUpdate( body: GetBody(), modifiers: TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-            .WithTriviaFromIfNecessary( method, this.IntermediateCompilationContext.PreserveTrivia );
+            .WithTriviaFromIfNecessary( method, this.SyntaxGenerationOptions.PreserveTrivia );
 
         BlockSyntax GetBody()
         {

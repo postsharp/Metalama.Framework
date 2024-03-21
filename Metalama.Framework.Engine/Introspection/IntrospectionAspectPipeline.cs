@@ -18,7 +18,7 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
 {
     private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
+    public IntrospectionAspectPipeline( in ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
         base( serviceProvider, ExecutionScenario.Introspection, domain )
     {
         this._options = options;
@@ -28,10 +28,8 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
         => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers );
 
     private static ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics( DiagnosticBag diagnostics, CompilationModel compilation )
-    {
-        return diagnostics
+        => diagnostics
             .SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
-    }
 
     internal Task<IIntrospectionCompilationResult> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {

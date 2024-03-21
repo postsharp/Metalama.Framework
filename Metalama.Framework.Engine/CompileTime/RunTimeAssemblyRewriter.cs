@@ -86,16 +86,18 @@ namespace Metalama.Compiler
 
     private readonly INamedTypeSymbol? _aspectDriverSymbol;
     private readonly bool _removeCompileTimeOnlyCode;
-    private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
     private readonly RewriterHelper _rewriterHelper;
     private readonly IEqualityComparer<ISymbol> _symbolEqualityComparer;
+    private readonly ClassifyingCompilationContext _compilationContext;
+    private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-    private RunTimeAssemblyRewriter( ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext )
+    private RunTimeAssemblyRewriter( in ProjectServiceProvider serviceProvider, ClassifyingCompilationContext compilationContext )
     {
+        this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
+        this._compilationContext = compilationContext;
         this._rewriterHelper = new RewriterHelper( compilationContext );
         this._aspectDriverSymbol = compilationContext.SourceCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
         this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
-        this._syntaxGenerationContextFactory = compilationContext.CompilationContext.SyntaxGenerationContextFactory;
         this._symbolEqualityComparer = compilationContext.CompilationContext.SymbolComparer;
     }
 
@@ -364,7 +366,7 @@ namespace Metalama.Compiler
             return transformedNode;
         }
 
-        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod: false, isIteratorMethod )
+        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, false, isIteratorMethod )
             .WithTrailingTrivia( ElasticSpace );
 
         return transformedNode.WithIncludeInReferenceAssemblyAnnotation()
@@ -374,7 +376,7 @@ namespace Metalama.Compiler
 
     private AttributeListSyntax CreateCompiledTemplateAttribute( SyntaxNode node, Accessibility accessibility, bool isAsyncMethod, bool isIteratorMethod )
     {
-        var syntaxFactory = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+        var syntaxFactory = this._compilationContext.CompilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, node );
         var compiledTemplateAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(CompiledTemplateAttribute) );
         var accessibilityType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Accessibility) );
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Testing.UnitTesting;
@@ -13,6 +14,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class CodeModelINamedTypeCollectionOfTypeDefinitionTests : UnitTestClass
     {
+        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Proof );
+
         [Fact]
         public void NonGeneric()
         {

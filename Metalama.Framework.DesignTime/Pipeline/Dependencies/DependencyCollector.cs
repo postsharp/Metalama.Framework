@@ -28,7 +28,7 @@ internal sealed class DependencyCollector : BaseDependencyCollector, IDependency
     private readonly Dictionary<AssemblyIdentity, ProjectKey> _referencesProjects = new();
     private readonly SafeSymbolComparer _symbolEqualityComparer;
 
-    public DependencyCollector( ProjectServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :
+    public DependencyCollector( in ProjectServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :
         base( projectVersion, partialCompilation )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );

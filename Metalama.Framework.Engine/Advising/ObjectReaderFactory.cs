@@ -24,12 +24,9 @@ internal sealed class ObjectReaderFactory : IProjectService, IDisposable
             _ => new ObjectReader( instance, this.GetTypeAdapter( instance.GetType() ) )
         };
 
-    private ObjectReaderTypeAdapter GetTypeAdapter( Type type )
-    {
-        return this._types.GetOrAdd( type, t => new ObjectReaderTypeAdapter( this._serviceProvider, t ) );
-    }
+    private ObjectReaderTypeAdapter GetTypeAdapter( Type type ) => this._types.GetOrAdd( type, t => new ObjectReaderTypeAdapter( this._serviceProvider, t ) );
 
-    public ObjectReaderFactory( ProjectServiceProvider serviceProvider )
+    public ObjectReaderFactory( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
     }

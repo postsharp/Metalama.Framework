@@ -28,7 +28,7 @@ internal sealed partial class EligibilityHelper
     private readonly ConcurrentDictionary<Type, Func<EligibilityHelper, IDiagnosticAdder, bool>>
         _tryInitializeEligibilityMethods = new();
 
-    public EligibilityHelper( object prototype, ProjectServiceProvider serviceProvider, object requester )
+    public EligibilityHelper( object prototype, in ProjectServiceProvider serviceProvider, object requester )
     {
         this._prototype = prototype;
         this._serviceProvider = serviceProvider;
@@ -37,9 +37,7 @@ internal sealed partial class EligibilityHelper
     }
 
     private Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethod( Type type )
-    {
-        return this._tryInitializeEligibilityMethods.GetOrAdd( type, GetTryInitializeEligibilityMethodCore );
-    }
+        => this._tryInitializeEligibilityMethods.GetOrAdd( type, GetTryInitializeEligibilityMethodCore );
 
     private static Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethodCore( Type type )
     {
@@ -75,7 +73,7 @@ internal sealed partial class EligibilityHelper
                 return false;
             }
 
-            this._eligibilityRules.Add( new( typeof(T), ((IEligibilityBuilder<T>) builder).Build() ) );
+            this._eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(T), ((IEligibilityBuilder<T>) builder).Build() ) );
         }
 
         return true;
@@ -94,12 +92,13 @@ internal sealed partial class EligibilityHelper
             // If methods are eligible, we need to check that the target method is not a local function or a lambda.
             if ( declarationInterface.IsAssignableFrom( typeof(IMethod) ) )
             {
-                this._eligibilityRules.Add( new( typeof(IMethod), LocalFunctionEligibilityRule.Instance ) );
+                this._eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IMethod), LocalFunctionEligibilityRule.Instance ) );
             }
 
             if ( declarationInterface.IsAssignableFrom( typeof(IParameter) ) )
             {
-                this._eligibilityRules.Add( new( typeof(IParameter), LocalFunctionParameterEligibilityRule.Instance ) );
+                this._eligibilityRules.Add(
+                    new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( typeof(IParameter), LocalFunctionParameterEligibilityRule.Instance ) );
             }
 
             eligibilitySuccess &= this.GetTryInitializeEligibilityMethod( declarationInterface ).Invoke( this, diagnosticAdder );
@@ -109,9 +108,7 @@ internal sealed partial class EligibilityHelper
     }
 
     public void Add( Type type, IEligibilityRule<IDeclaration> eligibilityRule )
-    {
-        this._eligibilityRules.Add( new( type, eligibilityRule ) );
-    }
+        => this._eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( type, eligibilityRule ) );
 
     public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {

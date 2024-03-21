@@ -28,10 +28,12 @@ namespace Metalama.Framework.Engine.Linking;
 internal sealed partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerInjectionStepOutput, LinkerAnalysisStepOutput>
 {
     private readonly ProjectServiceProvider _serviceProvider;
+    private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-    public LinkerAnalysisStep( ProjectServiceProvider serviceProvider )
+    public LinkerAnalysisStep( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
+        this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
     }
 
     public override async Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerInjectionStepOutput input, CancellationToken cancellationToken )
@@ -182,7 +184,7 @@ internal sealed partial class LinkerAnalysisStep : AspectLinkerPipelineStep<Link
                 cancellationToken );
 
         var substitutionGenerator = new SubstitutionGenerator(
-            this._serviceProvider,
+            this,
             input.IntermediateCompilation.CompilationContext,
             syntaxHandler,
             input.InjectionRegistry,

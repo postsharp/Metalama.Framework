@@ -61,7 +61,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly TestRewriter _rewriter;
 
-        public LinkerTestInputBuilder( ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
+        public LinkerTestInputBuilder( in ProjectServiceProvider serviceProvider, CompilationContext compilationContext )
         {
             this._serviceProvider = serviceProvider;
             this._rewriter = new TestRewriter( serviceProvider, compilationContext );

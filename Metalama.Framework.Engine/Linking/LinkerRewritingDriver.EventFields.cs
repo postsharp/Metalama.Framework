@@ -17,7 +17,7 @@ internal sealed partial class LinkerRewritingDriver
 {
     private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
     {
-        var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( eventFieldDeclaration );
+        var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, eventFieldDeclaration );
 
         if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
         {
@@ -97,9 +97,7 @@ internal sealed partial class LinkerRewritingDriver
                     FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.EventKeyword, true, true ),
                     eventFieldDeclaration.Modifiers,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                    eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary(
-                        ElasticSpace,
-                        this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    eventFieldDeclaration.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     null,
                     Identifier( symbol.Name ),
                     AccessorList(
@@ -176,7 +174,7 @@ internal sealed partial class LinkerRewritingDriver
                     List<AttributeListSyntax>(),
                     eventField.Modifiers,
                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.EventKeyword ),
-                    eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    eventField.Declaration.Type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     null,
                     eventField.Declaration.Variables.Single().Identifier,
                     AccessorList(
@@ -201,7 +199,7 @@ internal sealed partial class LinkerRewritingDriver
                                                 IdentifierName( "value" ) ) ) ) )
                             }.WhereNotNull() ) ),
                     default )
-                .WithTriviaFromIfNecessary( eventField, this.IntermediateCompilationContext.PreserveTrivia );
+                .WithTriviaFromIfNecessary( eventField, this.SyntaxGenerationOptions.PreserveTrivia );
 
         ExpressionSyntax GetInvocationTarget()
         {

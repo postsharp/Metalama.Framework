@@ -25,7 +25,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
-    internal HierarchicalOptionsManager( ProjectServiceProvider serviceProvider )
+    internal HierarchicalOptionsManager( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
@@ -150,7 +150,5 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
             .SelectMany( s => s.Value.GetInheritableOptions( compilation, withSyntaxTree ) );
 
     internal void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
-    {
-        this.GetOptionTypeNode( options.GetType().FullName.AssertNotNull() ).SetAspectOptions( declaration, options );
-    }
+        => this.GetOptionTypeNode( options.GetType().FullName.AssertNotNull() ).SetAspectOptions( declaration, options );
 }

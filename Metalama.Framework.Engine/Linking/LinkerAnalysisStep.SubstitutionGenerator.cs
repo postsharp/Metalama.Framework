@@ -24,6 +24,7 @@ internal sealed partial class LinkerAnalysisStep
     /// </summary>
     private sealed class SubstitutionGenerator
     {
+        private readonly LinkerAnalysisStep _parent;
         private readonly CompilationContext _intermediateCompilationContext;
         private readonly LinkerSyntaxHandler _syntaxHandler;
         private readonly LinkerInjectionRegistry _injectionRegistry;
@@ -48,7 +49,7 @@ internal sealed partial class LinkerAnalysisStep
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         public SubstitutionGenerator(
-            ProjectServiceProvider serviceProvider,
+            LinkerAnalysisStep parent,
             CompilationContext intermediateCompilationContext,
             LinkerSyntaxHandler syntaxHandler,
             LinkerInjectionRegistry injectionRegistry,
@@ -63,7 +64,8 @@ internal sealed partial class LinkerAnalysisStep
             IReadOnlyList<IntermediateSymbolSemanticReference> eventFieldRaiseReferences,
             IReadOnlyList<CallerAttributeReference> callerMemberReferences )
         {
-            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+            this._concurrentTaskRunner = parent._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+            this._parent = parent;
             this._intermediateCompilationContext = intermediateCompilationContext;
             this._syntaxHandler = syntaxHandler;
             this._injectionRegistry = injectionRegistry;
@@ -349,7 +351,10 @@ internal sealed partial class LinkerAnalysisStep
 
                     AddSubstitution(
                         context,
-                        new ForcedInitializationSubstitution( this._intermediateCompilationContext, rootNode, forcefullyInitializedType.InitializedSymbols ) );
+                        new ForcedInitializationSubstitution(
+                            this._intermediateCompilationContext,
+                            rootNode,
+                            forcefullyInitializedType.InitializedSymbols ) );
                 }
             }
 
@@ -386,7 +391,10 @@ internal sealed partial class LinkerAnalysisStep
                         // Base references to new slot or override members are rewritten to the base member call.
                         AddSubstitution(
                             context,
-                            new AspectReferenceBaseSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
+                            new AspectReferenceBaseSubstitution(
+                                this._intermediateCompilationContext,
+                                nonInlinedReference,
+                                this._parent._syntaxGenerationOptions ) );
 
                         break;
 
@@ -403,7 +411,10 @@ internal sealed partial class LinkerAnalysisStep
                         // Base references to a declaration in another type mean base member call.
                         AddSubstitution(
                             context,
-                            new AspectReferenceBaseSubstitution( this._intermediateCompilationContext, nonInlinedReference ) );
+                            new AspectReferenceBaseSubstitution(
+                                this._intermediateCompilationContext,
+                                nonInlinedReference,
+                                this._parent._syntaxGenerationOptions ) );
 
                         break;
 

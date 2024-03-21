@@ -19,7 +19,7 @@ internal sealed partial class LinkerRewritingDriver
 {
     private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
     {
-        var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( eventDeclaration );
+        var generationContext = this.IntermediateCompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, eventDeclaration );
 
         if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
         {
@@ -255,17 +255,17 @@ internal sealed partial class LinkerRewritingDriver
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) )
                         : TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ) ),
                     VariableDeclaration(
-                        eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        eventType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
                                 null,
                                 initializer ) ) ) )
-                .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.NormalizeWhitespace )
+                .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithTriviaIfNecessary(
                     new SyntaxTriviaList( ElasticLineFeed ),
                     new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
-                    this.IntermediateCompilationContext.NormalizeWhitespace )
+                    this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -349,8 +349,8 @@ internal sealed partial class LinkerRewritingDriver
                     null,
                     Identifier( name ),
                     cleanAccessorList )
-                .NormalizeWhitespaceIfNecessary( this.IntermediateCompilationContext.NormalizeWhitespace )
-                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationOptions.NormalizeWhitespace )
+                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -393,7 +393,7 @@ internal sealed partial class LinkerRewritingDriver
                                     : null
                             }.Where( a => a != null )
                             .AssertNoneNull() ) ) )
-            .WithTriviaFromIfNecessary( @event, this.IntermediateCompilationContext.PreserveTrivia );
+            .WithTriviaFromIfNecessary( @event, this.SyntaxGenerationOptions.PreserveTrivia );
 
         ExpressionSyntax GetInvocationTarget()
         {

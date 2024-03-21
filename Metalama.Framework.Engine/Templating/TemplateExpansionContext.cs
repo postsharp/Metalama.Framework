@@ -38,15 +38,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
-    internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
-        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
-           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
-
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
     /// </summary>
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
-        => CurrentSyntaxGenerationContextOrNull
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
+           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
@@ -96,7 +93,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     /// This method is used in tests, when the <see cref="CurrentSyntaxSerializationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
     /// one.
     /// </summary>
-    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, ProjectServiceProvider serviceProvider )
+    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, in ProjectServiceProvider serviceProvider )
     {
         var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
         _currentSyntaxSerializationContext.Value = serializationContext;

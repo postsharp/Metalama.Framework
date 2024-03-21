@@ -102,7 +102,7 @@ internal sealed partial class LinkerRewritingDriver
                 PropertyDeclaration(
                     FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
                     TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                    recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     null,
                     recordParameter.Identifier,
                     AccessorList( List( generatedAccessors ) ),
@@ -173,7 +173,7 @@ internal sealed partial class LinkerRewritingDriver
             PropertyDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                 null,
                 identifier,
                 AccessorList( List( new[] { getAccessor, setAccessor } ) ),

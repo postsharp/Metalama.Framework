@@ -122,7 +122,9 @@ internal sealed partial class LinkerRewritingDriver
         {
             if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
             {
-                propertyDeclaration = propertyDeclaration.PartialUpdate( initializer: default(EqualsValueClauseSyntax), semicolonToken: default(SyntaxToken) );
+                propertyDeclaration = propertyDeclaration.PartialUpdate(
+                    initializer: default(EqualsValueClauseSyntax),
+                    semicolonToken: default(SyntaxToken) );
             }
 
             return new[] { propertyDeclaration };
@@ -288,7 +290,7 @@ internal sealed partial class LinkerRewritingDriver
                 attributes,
                 TokenList( modifiers ),
                 VariableDeclaration(
-                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     SingletonSeparatedList(
                         VariableDeclarator(
                             Identifier( GetBackingFieldName( symbol ) ),
@@ -297,7 +299,7 @@ internal sealed partial class LinkerRewritingDriver
             .WithTriviaIfNecessary(
                 new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
                 new SyntaxTriviaList( ElasticLineFeed ),
-                this.IntermediateCompilationContext.NormalizeWhitespace )
+                this.SyntaxGenerationOptions.NormalizeWhitespace )
             .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -486,13 +488,13 @@ internal sealed partial class LinkerRewritingDriver
                     propertyType,
                     null,
                     Identifier( name ),
-                    cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    cleanAccessorList?.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     expressionBody,
                     initializer.WithSourceCodeAnnotation(),
                     expressionBody != null || initializer != null
                         ? Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) )
                         : default )
-                .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -533,7 +535,7 @@ internal sealed partial class LinkerRewritingDriver
                 expressionBody: null,
                 initializer: null,
                 semicolonToken: default(SyntaxToken) )
-            .WithTriviaFromIfNecessary( property, this.IntermediateCompilationContext.PreserveTrivia );
+            .WithTriviaFromIfNecessary( property, this.SyntaxGenerationOptions.PreserveTrivia );
 
         ExpressionSyntax GetInvocationTarget()
         {

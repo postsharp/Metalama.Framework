@@ -160,7 +160,7 @@ internal sealed partial class LinkerRewritingDriver
             MethodDeclaration(
                     this.FilterAttributesOnSpecialImpl( symbol ),
                     modifiers,
-                    @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                    @operator.ReturnType.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     null,
                     Identifier( name ),
                     null,
@@ -168,12 +168,12 @@ internal sealed partial class LinkerRewritingDriver
                         symbol.Parameters,
                         @operator.ParameterList.WithTrailingTriviaIfNecessary(
                             default(SyntaxTriviaList),
-                            this.IntermediateCompilationContext.PreserveTrivia ) ),
+                            this.SyntaxGenerationOptions.PreserveTrivia ) ),
                     List<TypeParameterConstraintClauseSyntax>(),
                     body,
                     expressionBody,
                     expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
-                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -183,7 +183,7 @@ internal sealed partial class LinkerRewritingDriver
 
         return @operator
             .WithBody( GetBody() )
-            .WithTriviaFromIfNecessary( @operator, this.IntermediateCompilationContext.PreserveTrivia );
+            .WithTriviaFromIfNecessary( @operator, this.SyntaxGenerationOptions.PreserveTrivia );
 
         BlockSyntax GetBody()
         {

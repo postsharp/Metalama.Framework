@@ -159,11 +159,11 @@ internal sealed partial class LinkerRewritingDriver
                     null,
                     Identifier( name ),
                     null,
-                    destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.IntermediateCompilationContext.PreserveTrivia ),
+                    destructor.ParameterList.WithTrailingTriviaIfNecessary( default(SyntaxTriviaList), this.SyntaxGenerationOptions.PreserveTrivia ),
                     List<TypeParameterConstraintClauseSyntax>(),
                     body,
                     expressionBody )
-                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions.NormalizeWhitespace )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
     }
 
@@ -174,7 +174,7 @@ internal sealed partial class LinkerRewritingDriver
         return
             destructor
                 .WithBody( GetBody() )
-                .WithTriviaFromIfNecessary( destructor, this.IntermediateCompilationContext.PreserveTrivia );
+                .WithTriviaFromIfNecessary( destructor, this.SyntaxGenerationOptions.PreserveTrivia );
 
         BlockSyntax GetBody()
         {

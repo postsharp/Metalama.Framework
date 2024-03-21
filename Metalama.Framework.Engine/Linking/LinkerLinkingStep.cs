@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -37,11 +38,13 @@ internal sealed partial class LinkerLinkingStep : AspectLinkerPipelineStep<Linke
 {
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+    private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-    public LinkerLinkingStep( ProjectServiceProvider serviceProvider )
+    public LinkerLinkingStep( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+        this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
     }
 
     public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
@@ -72,7 +75,9 @@ internal sealed partial class LinkerLinkingStep : AspectLinkerPipelineStep<Linke
                         .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
                 var cleanRoot =
-                    new CleanupRewriter( input.ProjectOptions, input.IntermediateCompilation.CompilationContext.DefaultSyntaxGenerationContext )
+                    new CleanupRewriter(
+                            input.ProjectOptions,
+                            input.IntermediateCompilation.CompilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions ) )
                         .Visit( linkedRoot )!;
 
                 var fixedRoot = PreprocessorFixer.Fix( cleanRoot );

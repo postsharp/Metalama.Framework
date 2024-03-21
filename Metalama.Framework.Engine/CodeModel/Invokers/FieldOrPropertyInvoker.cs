@@ -18,12 +18,10 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
     public FieldOrPropertyInvoker(
         IFieldOrProperty fieldOrProperty,
         InvokerOptions? options = default,
-        object? target = null,
-        SyntaxGenerationContext? syntaxGenerationContext = null ) : base(
+        object? target = null ) : base(
         fieldOrProperty,
         options,
-        target,
-        syntaxGenerationContext ) { }
+        target ) { }
 
     private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
     {
@@ -32,7 +30,8 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
         var receiverInfo = this.GetReceiverInfo();
 
         var name = IdentifierName( this.GetCleanTargetMemberName() );
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, this.GenerationContext );
+
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
 
         ExpressionSyntax expression;
 
@@ -67,7 +66,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
         var expression = AssignmentExpression(
             SyntaxKind.SimpleAssignmentExpression,
             propertyAccess,
-            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, this.SerializationContext ) );
+            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
 
         return new SyntaxUserExpression( expression, this.Member.Type );
     }
@@ -89,7 +88,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
         => new TypedExpressionSyntaxImpl(
             this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
             this.Member.Type,
-            this.SerializationContext.SyntaxGenerationContext,
+            CurrentSerializationContext.SyntaxGenerationContext,
             this.IsRef() );
 
     private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
@@ -97,7 +96,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
     {
         Invariant.Assert(
-            this.SerializationContext.SyntaxGenerationContext.Equals( (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
+            CurrentSerializationContext.SyntaxGenerationContext.Equals( (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
 
         return this.GetTypedExpressionSyntax();
     }

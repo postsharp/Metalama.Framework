@@ -13,7 +13,7 @@ internal interface ISystemAttributeDeserializer : IAttributeDeserializer, IProje
 
 internal sealed class SystemAttributeDeserializer : AttributeDeserializer, ISystemAttributeDeserializer
 {
-    public SystemAttributeDeserializer( ProjectServiceProvider serviceProvider ) : base(
+    public SystemAttributeDeserializer( in ProjectServiceProvider serviceProvider ) : base(
         serviceProvider,
         serviceProvider.GetRequiredService<SystemTypeResolver>() ) { }
 }

@@ -24,428 +24,433 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace Metalama.Framework.Engine.CompileTime
+namespace Metalama.Framework.Engine.CompileTime;
+
+/// <summary>
+/// Provides the location to the reference assemblies that are needed to create the compile-time projects.
+/// This is achieved by creating an MSBuild project and restoring it.
+/// </summary>
+internal sealed class ReferenceAssemblyLocator
 {
-    /// <summary>
-    /// Provides the location to the reference assemblies that are needed to create the compile-time projects.
-    /// This is achieved by creating an MSBuild project and restoring it.
-    /// </summary>
-    internal sealed class ReferenceAssemblyLocator
+    private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
+    private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
+    private static readonly ImmutableArray<string> _defaultNugetSources = GetDefaultNuGetSources().ToImmutableArray();
+
+    private static IEnumerable<string> GetDefaultNuGetSources()
     {
-        private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
-        private const string _defaultCompileTimeTargetFrameworks = "netstandard2.0;net6.0;net48";
-        private static readonly ImmutableArray<string> _defaultNugetSources = GetDefaultNuGetSources().ToImmutableArray();
+        yield return "https://api.nuget.org/v3/index.json";
 
-        private static IEnumerable<string> GetDefaultNuGetSources()
+        if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
         {
-            yield return "https://api.nuget.org/v3/index.json";
+            var programFilesX86 = string.Empty;
 
-            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
+            try
             {
-                var programFilesX86 = string.Empty;
+                programFilesX86 = Environment.GetFolderPath( Environment.SpecialFolder.ProgramFilesX86 );
+            }
+            catch ( PlatformNotSupportedException )
+            {
+                // Do nothing, the variable stays Empty.
+            }
 
-                try
-                {
-                    programFilesX86 = Environment.GetFolderPath( Environment.SpecialFolder.ProgramFilesX86 );
-                }
-                catch ( PlatformNotSupportedException )
-                {
-                    // Do nothing, the variable stays Empty.
-                }
+            if ( programFilesX86 != string.Empty )
+            {
+                yield return Path.Combine( programFilesX86, "Microsoft SDKs\\NuGetPackages" );
+            }
+        }
+    }
 
-                if ( programFilesX86 != string.Empty )
-                {
-                    yield return Path.Combine( programFilesX86, "Microsoft SDKs\\NuGetPackages" );
-                }
+    private readonly string _cacheDirectory;
+    private readonly ILogger _logger;
+    private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
+    private readonly IPlatformInfo _platformInfo;
+    private readonly DotNetTool _dotNetTool;
+    private readonly int _restoreTimeout;
+    private readonly ImmutableArray<string> _targetFrameworks;
+
+    /// <summary>
+    /// Gets the name (without path and extension) of Metalama assemblies.
+    /// </summary>
+    private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; }
+
+    /// <summary>
+    /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
+    /// </summary>
+    public ImmutableHashSet<string> StandardAssemblyNames { get; }
+
+    /// <summary>
+    /// Gets the full path of reference system assemblies (.NET Standard and Roslyn). 
+    /// </summary>
+    private ImmutableArray<string> SystemReferenceAssemblyPaths { get; }
+
+    /// <summary>
+    /// Gets the full path of executable system assemblies for the current platform.
+    /// </summary>
+    public ImmutableArray<string> AdditionalCompileTimeAssemblyPaths { get; }
+
+    public ImmutableDictionary<string, AssemblyIdentity> StandardAssemblyIdentities { get; }
+
+    public bool IsStandardAssemblyName( string assemblyName )
+        => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
+           || this.StandardAssemblyNames.Contains( assemblyName );
+
+    /// <summary>
+    /// Gets the full path of all standard assemblies, including Metalama, Roslyn and .NET standard.
+    /// </summary>
+    public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
+
+    public ReferenceAssemblyLocator( in ProjectServiceProvider serviceProvider, string additionalPackageReferences )
+    {
+        this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
+
+        this._platformInfo = serviceProvider.Global.GetRequiredBackstageService<IPlatformInfo>();
+        this._dotNetTool = new DotNetTool( serviceProvider.Global );
+
+        var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
+
+        this._restoreTimeout = projectOptions.ReferenceAssemblyRestoreTimeout ?? 120_000;
+
+        this._logger.Trace?.Log(
+            "Assembly versions: " + string.Join(
+                ", ",
+                new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }
+                    .SelectAsReadOnlyList( x => x.Assembly.Location ) ) );
+
+        var targetFrameworksString = string.IsNullOrEmpty( projectOptions.CompileTimeTargetFrameworks )
+            ? _defaultCompileTimeTargetFrameworks
+            : projectOptions.CompileTimeTargetFrameworks;
+
+        this._targetFrameworks = targetFrameworksString.Split( ';' ).ToImmutableArray();
+
+        if ( !this._targetFrameworks.Contains( "netstandard2.0" ) )
+        {
+            throw new InvalidOperationException(
+                $"Custom MetalamaCompileTimeTargetFrameworks has to include 'netstandard2.0', but it was {this._targetFrameworks}" );
+        }
+
+        string? additionalNugetSources = null;
+
+        if ( projectOptions.RestoreSources != null )
+        {
+            var sources = projectOptions.RestoreSources
+                .Split( ';' )
+                .Except( _defaultNugetSources )
+                .ToArray();
+
+            if ( sources.Any() )
+            {
+                additionalNugetSources = string.Join( ";", sources );
             }
         }
 
-        private readonly string _cacheDirectory;
-        private readonly ILogger _logger;
-        private readonly ReferenceAssembliesManifest _referenceAssembliesManifest;
-        private readonly IPlatformInfo _platformInfo;
-        private readonly DotNetTool _dotNetTool;
-        private readonly int _restoreTimeout;
-        private readonly ImmutableArray<string> _targetFrameworks;
+        // ReSharper disable once RedundantLogicalConditionalExpressionOperand
+        var projectHash =
+            additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks && additionalNugetSources is null
+            && RoslynApiVersion.Current == RoslynApiVersion.Highest
+                ? "default"
+                : HashUtilities.HashString( $"{additionalPackageReferences}\n{targetFrameworksString}\n{additionalNugetSources}\n{RoslynApiVersion.Current}" );
 
-        /// <summary>
-        /// Gets the name (without path and extension) of Metalama assemblies.
-        /// </summary>
-        private ImmutableArray<string> MetalamaImplementationAssemblyNames { get; }
+        this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
+            .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, projectHash );
 
-        /// <summary>
-        /// Gets the name (without path and extension) of all standard assemblies, including Metalama, Roslyn and .NET standard.
-        /// </summary>
-        public ImmutableHashSet<string> StandardAssemblyNames { get; }
+        // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
+        var metalamaImplementationAssemblies =
+            new[] { typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.ToDictionary(
+                x => x.Assembly.GetName().Name.AssertNotNull(),
+                x => x.Assembly.Location );
 
-        /// <summary>
-        /// Gets the full path of reference system assemblies (.NET Standard and Roslyn). 
-        /// </summary>
-        private ImmutableArray<string> SystemReferenceAssemblyPaths { get; }
+        // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
+        MetalamaCompilerInfo.EnsureInitialized();
 
-        /// <summary>
-        /// Gets the full path of executable system assemblies for the current platform.
-        /// </summary>
-        public ImmutableArray<string> AdditionalCompileTimeAssemblyPaths { get; }
+        // Add the Metalama.Compiler.Interface assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
+        // Strangely, there can be many instances of this same assembly.
 
-        public ImmutableDictionary<string, AssemblyIdentity> StandardAssemblyIdentities { get; }
+        // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
+        var metalamaCompilerInterfaceAssembly = AppDomainUtility
+            .GetLoadedAssemblies( a => a.FullName != null! && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+            .OrderByDescending( a => a.GetName().Version )
+            .FirstOrDefault();
 
-        public bool IsStandardAssemblyName( string assemblyName )
-            => string.Equals( assemblyName, "System.Private.CoreLib", StringComparison.OrdinalIgnoreCase )
-               || this.StandardAssemblyNames.Contains( assemblyName );
-
-        /// <summary>
-        /// Gets the full path of all standard assemblies, including Metalama, Roslyn and .NET standard.
-        /// </summary>
-        public ImmutableArray<MetadataReference> StandardCompileTimeMetadataReferences { get; }
-
-        public ReferenceAssemblyLocator( ProjectServiceProvider serviceProvider, string additionalPackageReferences )
+        if ( metalamaCompilerInterfaceAssembly == null )
         {
-            this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
+            this._logger.Error?.Log( "Cannot find the Metalama.Compiler.Interface assembly in the AppDomain." );
 
-            this._platformInfo = serviceProvider.Global.GetRequiredBackstageService<IPlatformInfo>();
-            this._dotNetTool = new DotNetTool( serviceProvider.Global );
-
-            var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
-
-            this._restoreTimeout = projectOptions.ReferenceAssemblyRestoreTimeout ?? 120_000;
-
-            this._logger.Trace?.Log(
-                "Assembly versions: " + string.Join(
-                    ", ",
-                    new[] { this.GetType(), typeof(IAspect), typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory), typeof(FieldOrPropertyInfo) }.SelectAsReadOnlyList(
-                        x => x.Assembly.Location ) ) );
-
-            var targetFrameworksString = string.IsNullOrEmpty( projectOptions.CompileTimeTargetFrameworks )
-                ? _defaultCompileTimeTargetFrameworks
-                : projectOptions.CompileTimeTargetFrameworks;
-
-            this._targetFrameworks = targetFrameworksString.Split( ';' ).ToImmutableArray();
-
-            if ( !this._targetFrameworks.Contains( "netstandard2.0" ) )
+            if ( this._logger.Trace != null )
             {
-                throw new InvalidOperationException(
-                    $"Custom MetalamaCompileTimeTargetFrameworks has to include 'netstandard2.0', but it was {this._targetFrameworks}" );
-            }
-
-            string? additionalNugetSources = null;
-
-            if ( projectOptions.RestoreSources != null )
-            {
-                var sources = projectOptions.RestoreSources
-                    .Split( ';' )
-                    .Except( _defaultNugetSources )
-                    .ToArray();
-
-                if ( sources.Any() )
+                foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( _ => true ).OrderBy( a => a.ToString() ) )
                 {
-                    additionalNugetSources = string.Join( ";", sources );
+                    this._logger.Trace.Log( "Loaded: " + assembly );
                 }
             }
 
-            // ReSharper disable once RedundantLogicalConditionalExpressionOperand
-            var projectHash =
-                additionalPackageReferences is "" && targetFrameworksString is _defaultCompileTimeTargetFrameworks && additionalNugetSources is null
-                && RoslynApiVersion.Current == RoslynApiVersion.Highest
-                    ? "default"
-                    : HashUtilities.HashString(
-                        $"{additionalPackageReferences}\n{targetFrameworksString}\n{additionalNugetSources}\n{RoslynApiVersion.Current}" );
+            throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
+        }
 
-            this._cacheDirectory = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>()
-                .GetTempDirectory( TempDirectories.AssemblyLocator, CleanUpStrategy.WhenUnused, projectHash );
+        metalamaImplementationAssemblies.Add(
+            "Metalama.Compiler.Interface",
+            metalamaCompilerInterfaceAssembly.Location );
 
-            // Get Metalama implementation contract assemblies (but not the public API, for which we need a special compile-time build).
-            var metalamaImplementationAssemblies =
-                new[] { typeof(IAspectWeaver), typeof(ITemplateSyntaxFactory) }.ToDictionary(
-                    x => x.Assembly.GetName().Name.AssertNotNull(),
-                    x => x.Assembly.Location );
+        this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
+        var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
 
-            // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
-            MetalamaCompilerInfo.EnsureInitialized();
+        // Get system assemblies.
+        this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest(
+            targetFrameworksString,
+            additionalPackageReferences,
+            additionalNugetSources );
 
-            // Add the Metalama.Compiler.Interface assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
-            // Strangely, there can be many instances of this same assembly.
+        this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
 
-            // ReSharper disable once SimplifyLinqExpressionUseMinByAndMaxBy
-            var metalamaCompilerInterfaceAssembly = AppDomainUtility
-                .GetLoadedAssemblies( a => a.FullName != null! && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
-                .OrderByDescending( a => a.GetName().Version )
-                .FirstOrDefault();
+        // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
+        this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames.Concat( new[] { _compileTimeFrameworkAssemblyName } )
+            .Concat( this.SystemReferenceAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
+            .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
-            if ( metalamaCompilerInterfaceAssembly == null )
+        // Also provide our embedded assemblies.
+
+        var embeddedAssemblies =
+            new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface", "Metalama.SystemTypes" }.SelectAsImmutableArray(
+                name => (MetadataReference)
+                    MetadataReference.CreateFromStream(
+                        this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )
+                        ?? throw new InvalidOperationException( $"{name}.dll not found in assembly manifest resources." ),
+                        filePath: $"[{this.GetType().Assembly.Location}]{name}.dll" ) );
+
+        this._logger.Trace?.Log( "System assemblies: " + string.Join( ", ", this.SystemReferenceAssemblyPaths ) );
+        this._logger.Trace?.Log( "Metalama assemblies: " + string.Join( ", ", metalamaImplementationPaths ) );
+
+        this.StandardCompileTimeMetadataReferences =
+            this.SystemReferenceAssemblyPaths
+                .Concat( metalamaImplementationPaths )
+                .Select( MetadataReferenceCache.GetMetadataReference )
+                .Concat( embeddedAssemblies )
+                .ToImmutableArray();
+
+        var compilation = CSharpCompilation.Create( "ReferenceAssemblies", references: this.StandardCompileTimeMetadataReferences );
+
+        this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols
+            .GroupBy( s => s.Identity.Name )
+            .ToImmutableDictionary( s => s.Key, s => s.OrderByDescending( x => x.Identity.Version ).First().Identity );
+
+        var additionalCompileTimeAssemblies = Directory.GetFiles( this.GetAdditionalCompileTimeAssembliesDirectory(), "*.dll" );
+
+        this.AdditionalCompileTimeAssemblyPaths =
+            additionalCompileTimeAssemblies.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
+    }
+
+    private string GetAdditionalCompileTimeAssembliesDirectory()
+    {
+        string platform;
+
+        if ( Environment.Version.Major < 6 )
+        {
+            platform = this._targetFrameworks.FirstOrDefault( f => f.StartsWith( "net4", StringComparison.Ordinal ) )
+                       ?? throw new InvalidOperationException( "Custom MetalamaCompileTimeTargetFrameworks did not include .NET Framework 4.x." );
+        }
+        else
+        {
+            platform = this._targetFrameworks.FirstOrDefault( f => f is ['n', 'e', 't', >= '6' and <= '9', ..] )
+                       ?? throw new InvalidOperationException( "Custom MetalamaCompileTimeTargetFrameworks did not include .NET 6+." );
+        }
+
+        return Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
+    }
+
+    internal static string GetAdditionalPackageReferences( IProjectOptions options )
+    {
+        if ( string.IsNullOrEmpty( options.ProjectAssetsFile ) )
+        {
+            throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
+        }
+
+        if ( string.IsNullOrEmpty( options.TargetFrameworkMoniker ) && string.IsNullOrWhiteSpace( options.TargetFramework ) )
+        {
+            throw new InvalidOperationException(
+                "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
+        }
+
+        var resolvedPackages = new Dictionary<string, string>();
+
+        var assetsJson = JObject.Parse( File.ReadAllText( options.ProjectAssetsFile.AssertNotNull() ) );
+        JToken? packages = null;
+
+        if ( !string.IsNullOrEmpty( options.TargetFrameworkMoniker ) )
+        {
+            packages = assetsJson["targets"]?[options.TargetFrameworkMoniker];
+        }
+
+        if ( packages == null && !string.IsNullOrEmpty( options.TargetFramework ) )
+        {
+            packages = assetsJson["targets"]?[options.TargetFramework];
+        }
+
+        if ( packages == null )
+        {
+            throw new InvalidOperationException(
+                $"'{options.ProjectAssetsFile}' does not contain targets for '{options.TargetFrameworkMoniker}' or '{options.TargetFramework}'." );
+        }
+
+        foreach ( var package in packages )
+        {
+            var nameVersion = ((JProperty) package).Name;
+            var parts = nameVersion.Split( '/' );
+
+            var packageName = parts[0];
+            var packageVersion = parts[1];
+
+            if ( options.CompileTimePackages.Contains( packageName ) )
             {
-                this._logger.Error?.Log( "Cannot find the Metalama.Compiler.Interface assembly in the AppDomain." );
+                resolvedPackages.Add( packageName, $"\t\t<PackageReference Include=\"{packageName}\" Version=\"{packageVersion}\"/>" );
+            }
+        }
 
-                if ( this._logger.Trace != null )
+        var missingPackages = options.CompileTimePackages.Where( x => !resolvedPackages.ContainsKey( x ) ).ToReadOnlyList();
+
+        if ( missingPackages.Count > 0 )
+        {
+            throw new InvalidOperationException(
+                $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
+        }
+
+        return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x.Key ).Select( x => x.Value ) );
+    }
+
+    public bool IsSystemType( INamedTypeSymbol namedType )
+    {
+        var ns = namedType.ContainingNamespace.IsGlobalNamespace ? "" : namedType.ContainingNamespace.GetFullName().AssertNotNull();
+
+        return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
+    }
+
+    private ReferenceAssembliesManifest GetReferenceAssembliesManifest(
+        string targetFrameworks,
+        string additionalPackageReferences,
+        string? additionalNugetSources )
+    {
+        using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
+        {
+            var referencesJsonPath = Path.Combine( this._cacheDirectory, "references.json" );
+            var assembliesListPath = Path.Combine( this._cacheDirectory, "assemblies-netstandard2.0.txt" );
+
+            // See if the file is present in cache.
+            if ( File.Exists( referencesJsonPath ) )
+            {
+                this._logger.Trace?.Log( $"Reading '{referencesJsonPath}'." );
+
+                var referencesJson = File.ReadAllText( referencesJsonPath );
+
+                var manifest = JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
+
+                var missingFiles = manifest.ReferenceAssemblies.Where( f => !File.Exists( f ) ).ToReadOnlyList();
+
+                if ( missingFiles.Count == 0 )
                 {
-                    foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( _ => true ).OrderBy( a => a.ToString() ) )
+                    var additionalCompileTimeAssembliesDirectory = this.GetAdditionalCompileTimeAssembliesDirectory();
+
+                    if ( Directory.Exists( additionalCompileTimeAssembliesDirectory ) )
                     {
-                        this._logger.Trace.Log( "Loaded: " + assembly );
-                    }
-                }
-
-                throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
-            }
-
-            metalamaImplementationAssemblies.Add(
-                "Metalama.Compiler.Interface",
-                metalamaCompilerInterfaceAssembly.Location );
-
-            this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
-            var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
-
-            // Get system assemblies.
-            this._referenceAssembliesManifest = this.GetReferenceAssembliesManifest( targetFrameworksString, additionalPackageReferences, additionalNugetSources );
-            this.SystemReferenceAssemblyPaths = this._referenceAssembliesManifest.ReferenceAssemblies;
-
-            // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
-            this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames.Concat( new[] { _compileTimeFrameworkAssemblyName } )
-                .Concat( this.SystemReferenceAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
-                .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
-
-            // Also provide our embedded assemblies.
-
-            var embeddedAssemblies =
-                new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface", "Metalama.SystemTypes" }.SelectAsImmutableArray(
-                    name => (MetadataReference)
-                        MetadataReference.CreateFromStream(
-                            this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )
-                            ?? throw new InvalidOperationException( $"{name}.dll not found in assembly manifest resources." ),
-                            filePath: $"[{this.GetType().Assembly.Location}]{name}.dll" ) );
-
-            this._logger.Trace?.Log( "System assemblies: " + string.Join( ", ", this.SystemReferenceAssemblyPaths ) );
-            this._logger.Trace?.Log( "Metalama assemblies: " + string.Join( ", ", metalamaImplementationPaths ) );
-
-            this.StandardCompileTimeMetadataReferences =
-                this.SystemReferenceAssemblyPaths
-                    .Concat( metalamaImplementationPaths )
-                    .Select( MetadataReferenceCache.GetMetadataReference )
-                    .Concat( embeddedAssemblies )
-                    .ToImmutableArray();
-
-            var compilation = CSharpCompilation.Create( "ReferenceAssemblies", references: this.StandardCompileTimeMetadataReferences );
-
-            this.StandardAssemblyIdentities = compilation.SourceModule.ReferencedAssemblySymbols
-                .GroupBy( s => s.Identity.Name )
-                .ToImmutableDictionary( s => s.Key, s => s.OrderByDescending( x => x.Identity.Version ).First().Identity );
-
-            var additionalCompileTimeAssemblies = Directory.GetFiles( this.GetAdditionalCompileTimeAssembliesDirectory(), "*.dll" );
-
-            this.AdditionalCompileTimeAssemblyPaths =
-                additionalCompileTimeAssemblies.Where( p => !p.EndsWith( "TempProject.dll", StringComparison.OrdinalIgnoreCase ) ).ToImmutableArray();
-        }
-
-        private string GetAdditionalCompileTimeAssembliesDirectory()
-        {
-            string platform;
-
-            if ( Environment.Version.Major < 6 )
-            {
-                platform = this._targetFrameworks.FirstOrDefault( f => f.StartsWith( "net4", StringComparison.Ordinal ) )
-                           ?? throw new InvalidOperationException( "Custom MetalamaCompileTimeTargetFrameworks did not include .NET Framework 4.x." );
-            }
-            else
-            {
-                platform = this._targetFrameworks.FirstOrDefault( f => f is ['n', 'e', 't', >= '6' and <= '9', ..] )
-                           ?? throw new InvalidOperationException( "Custom MetalamaCompileTimeTargetFrameworks did not include .NET 6+." );
-            }
-
-            return Path.Combine( this._cacheDirectory, "bin", "Debug", platform );
-        }
-
-        internal static string GetAdditionalPackageReferences( IProjectOptions options )
-        {
-            if ( string.IsNullOrEmpty( options.ProjectAssetsFile ) )
-            {
-                throw new InvalidOperationException( "The CompileTimePackages property is defined, but ProjectAssetsFile is not." );
-            }
-
-            if ( string.IsNullOrEmpty( options.TargetFrameworkMoniker ) && string.IsNullOrWhiteSpace( options.TargetFramework ) )
-            {
-                throw new InvalidOperationException(
-                    "The CompileTimePackages property is defined, but both TargetFramework and TargetFrameworkMoniker are undefined." );
-            }
-            
-            var resolvedPackages = new Dictionary<string, string>();
-
-            var assetsJson = JObject.Parse( File.ReadAllText( options.ProjectAssetsFile.AssertNotNull() ) );
-            JToken? packages = null;
-
-            if ( !string.IsNullOrEmpty( options.TargetFrameworkMoniker ) )
-            {
-                packages = assetsJson["targets"]?[options.TargetFrameworkMoniker];
-            }
-
-            if ( packages == null && !string.IsNullOrEmpty( options.TargetFramework ) )
-            {
-                packages = assetsJson["targets"]?[options.TargetFramework];
-            }
-
-            if ( packages == null )
-            {
-                throw new InvalidOperationException(
-                    $"'{options.ProjectAssetsFile}' does not contain targets for '{options.TargetFrameworkMoniker}' or '{options.TargetFramework}'." );
-            }
-
-            foreach ( var package in packages )
-            {
-                var nameVersion = ((JProperty) package).Name;
-                var parts = nameVersion.Split( '/' );
-
-                var packageName = parts[0];
-                var packageVersion = parts[1];
-
-                if ( options.CompileTimePackages.Contains( packageName ) )
-                {
-                    resolvedPackages.Add( packageName, $"\t\t<PackageReference Include=\"{packageName}\" Version=\"{packageVersion}\"/>" );
-                }
-            }
-
-            var missingPackages = options.CompileTimePackages.Where( x => !resolvedPackages.ContainsKey( x ) ).ToReadOnlyList();
-
-            if ( missingPackages.Count > 0 )
-            {
-                throw new InvalidOperationException(
-                    $"No package was found for the following {MSBuildItemNames.MetalamaCompileTimePackage}: {string.Join( ", ", missingPackages )}" );
-            }
-
-            return string.Join( Environment.NewLine, resolvedPackages.OrderBy( x => x.Key ).Select( x => x.Value ) );
-        }
-
-        public bool IsSystemType( INamedTypeSymbol namedType )
-        {
-            var ns = namedType.ContainingNamespace.IsGlobalNamespace ? "" : namedType.ContainingNamespace.GetFullName().AssertNotNull();
-
-            return this._referenceAssembliesManifest.Types.TryGetValue( ns, out var types ) && types.Contains( namedType.MetadataName );
-        }
-
-        private ReferenceAssembliesManifest GetReferenceAssembliesManifest( string targetFrameworks, string additionalPackageReferences, string? additionalNugetSources )
-        {
-            using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
-            {
-                var referencesJsonPath = Path.Combine( this._cacheDirectory, "references.json" );
-                var assembliesListPath = Path.Combine( this._cacheDirectory, "assemblies-netstandard2.0.txt" );
-
-                // See if the file is present in cache.
-                if ( File.Exists( referencesJsonPath ) )
-                {
-                    this._logger.Trace?.Log( $"Reading '{referencesJsonPath}'." );
-
-                    var referencesJson = File.ReadAllText( referencesJsonPath );
-
-                    var manifest = JsonConvert.DeserializeObject<ReferenceAssembliesManifest>( referencesJson ).AssertNotNull();
-
-                    var missingFiles = manifest.ReferenceAssemblies.Where( f => !File.Exists( f ) ).ToReadOnlyList();
-
-                    if ( missingFiles.Count == 0 )
-                    {
-                        var additionalCompileTimeAssembliesDirectory = this.GetAdditionalCompileTimeAssembliesDirectory();
-
-                        if ( Directory.Exists( additionalCompileTimeAssembliesDirectory ) )
-                        {
-                            return manifest;
-                        }
-                        else
-                        {
-                            this._logger.Warning?.Log(
-                                $"The following directory did no longer exist so the reference project has to be rebuilt: {additionalCompileTimeAssembliesDirectory}." );
-                        }
+                        return manifest;
                     }
                     else
                     {
                         this._logger.Warning?.Log(
-                            $"The following file(s) did no longer exist so the reference project has to be rebuilt: {string.Join( ",", missingFiles )}." );
+                            $"The following directory did no longer exist so the reference project has to be rebuilt: {additionalCompileTimeAssembliesDirectory}." );
                     }
                 }
-
-                Directory.CreateDirectory( this._cacheDirectory );
-
-                GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
-
-                // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
-                // dynamic code at compile time. We prefer compilation errors.
-
-                var projectText =
-                    $"""
-                     <Project>
-                       <PropertyGroup>
-                         <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
-                         <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
-                         <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
-                       </PropertyGroup>
-                       <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-                       <PropertyGroup>
-                         <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
-                         <OutputType>Exe</OutputType>
-                         <LangVersion>latest</LangVersion>
-                         <RestoreAdditionalProjectSources>{additionalNugetSources}</RestoreAdditionalProjectSources>
-                       </PropertyGroup>
-                       <ItemGroup>
-                         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="{RoslynApiVersion.Current.ToNuGetVersionString()}" />
-                         <PackageReference Include="Metalama.Framework.RunTime" Version="{AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly ).GetPackageVersion( "Metalama.Framework.RunTime" )}" />
-                         {additionalPackageReferences}
-                       </ItemGroup>
-                       <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
-                         <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
-                       </Target>
-                       <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-                     </Project>
-                     """;
-
-                var projectFilePath = Path.Combine( this._cacheDirectory, "TempProject.csproj" );
-                this._logger.Trace?.Log( $"Writing '{projectFilePath}':" + Environment.NewLine + projectText );
-
-                File.WriteAllText( projectFilePath, projectText );
-
-                var programFilePath = Path.Combine( this._cacheDirectory, "Program.cs" );
-                this._logger.Trace?.Log( $"Writing '{programFilePath}'." );
-
-                File.WriteAllText( programFilePath, "System.Console.WriteLine(\"Hello, world.\");" );
-
-                // Try to find the `dotnet` executable.
-
-                // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
-                // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-                var arguments = $"build -bl:msbuild_{Guid.NewGuid():N}.binlog";
-
-                this._logger.Trace?.Log( $"Building with restore timeout {this._restoreTimeout}." );
-
-                this._dotNetTool.Execute( arguments, this._cacheDirectory, this._restoreTimeout );
-
-                var assemblies = File.ReadAllLines( assembliesListPath );
-
-                if ( assemblies.Length == 0 )
+                else
                 {
-                    throw new AssertionFailedException( $"The file '{assembliesListPath}' is empty." );
+                    this._logger.Warning?.Log(
+                        $"The following file(s) did no longer exist so the reference project has to be rebuilt: {string.Join( ",", missingFiles )}." );
                 }
-
-                // Build the list of exported files.
-                List<MetadataInfo> assemblyMetadatas = new();
-
-                foreach ( var assemblyPath in assemblies )
-                {
-                    if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
-                    {
-                        throw new InvalidOperationException( $"Cannot read '{assemblyPath}'." );
-                    }
-
-                    assemblyMetadatas.Add( metadataInfo );
-                }
-
-                var exportedTypes = assemblyMetadatas
-                    .SelectMany( m => m.ExportedTypes )
-                    .GroupBy( ns => ns.Key )
-                    .ToImmutableDictionary( ns => ns.Key, ns => ns.SelectMany( n => n.Value ).Distinct( StringComparer.Ordinal ).ToImmutableHashSet() );
-
-                // Done.
-                var result = new ReferenceAssembliesManifest( assemblies.ToImmutableArray(), exportedTypes );
-
-                this._logger.Trace?.Log( $"Writing '{referencesJsonPath}'." );
-
-                File.WriteAllText( referencesJsonPath, JsonConvert.SerializeObject( result, Newtonsoft.Json.Formatting.Indented ) );
-
-                return result;
             }
+
+            Directory.CreateDirectory( this._cacheDirectory );
+
+            GlobalJsonHelper.WriteCurrentVersion( this._cacheDirectory, this._platformInfo );
+
+            // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
+            // dynamic code at compile time. We prefer compilation errors.
+
+            var projectText =
+                $"""
+                 <Project>
+                   <PropertyGroup>
+                     <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
+                     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
+                     <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+                   </PropertyGroup>
+                   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+                   <PropertyGroup>
+                     <TargetFrameworks>{targetFrameworks}</TargetFrameworks>
+                     <OutputType>Exe</OutputType>
+                     <LangVersion>latest</LangVersion>
+                     <RestoreAdditionalProjectSources>{additionalNugetSources}</RestoreAdditionalProjectSources>
+                   </PropertyGroup>
+                   <ItemGroup>
+                     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="{RoslynApiVersion.Current.ToNuGetVersionString()}" />
+                     <PackageReference Include="Metalama.Framework.RunTime" Version="{AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly ).GetPackageVersion( "Metalama.Framework.RunTime" )}" />
+                     {additionalPackageReferences}
+                   </ItemGroup>
+                   <Target Name="WriteAssembliesList" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">
+                     <WriteLinesToFile File="assemblies-$(TargetFramework).txt" Overwrite="true" Lines="@(ReferencePathWithRefAssemblies)" />
+                   </Target>
+                   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+                 </Project>
+                 """;
+
+            var projectFilePath = Path.Combine( this._cacheDirectory, "TempProject.csproj" );
+            this._logger.Trace?.Log( $"Writing '{projectFilePath}':" + Environment.NewLine + projectText );
+
+            File.WriteAllText( projectFilePath, projectText );
+
+            var programFilePath = Path.Combine( this._cacheDirectory, "Program.cs" );
+            this._logger.Trace?.Log( $"Writing '{programFilePath}'." );
+
+            File.WriteAllText( programFilePath, "System.Console.WriteLine(\"Hello, world.\");" );
+
+            // Try to find the `dotnet` executable.
+
+            // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
+            // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
+            var arguments = $"build -bl:msbuild_{Guid.NewGuid():N}.binlog";
+
+            this._logger.Trace?.Log( $"Building with restore timeout {this._restoreTimeout}." );
+
+            this._dotNetTool.Execute( arguments, this._cacheDirectory, this._restoreTimeout );
+
+            var assemblies = File.ReadAllLines( assembliesListPath );
+
+            if ( assemblies.Length == 0 )
+            {
+                throw new AssertionFailedException( $"The file '{assembliesListPath}' is empty." );
+            }
+
+            // Build the list of exported files.
+            List<MetadataInfo> assemblyMetadatas = new();
+
+            foreach ( var assemblyPath in assemblies )
+            {
+                if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
+                {
+                    throw new InvalidOperationException( $"Cannot read '{assemblyPath}'." );
+                }
+
+                assemblyMetadatas.Add( metadataInfo );
+            }
+
+            var exportedTypes = assemblyMetadatas
+                .SelectMany( m => m.ExportedTypes )
+                .GroupBy( ns => ns.Key )
+                .ToImmutableDictionary( ns => ns.Key, ns => ns.SelectMany( n => n.Value ).Distinct( StringComparer.Ordinal ).ToImmutableHashSet() );
+
+            // Done.
+            var result = new ReferenceAssembliesManifest( assemblies.ToImmutableArray(), exportedTypes );
+
+            this._logger.Trace?.Log( $"Writing '{referencesJsonPath}'." );
+
+            File.WriteAllText( referencesJsonPath, JsonConvert.SerializeObject( result, Newtonsoft.Json.Formatting.Indented ) );
+
+            return result;
         }
     }
 }

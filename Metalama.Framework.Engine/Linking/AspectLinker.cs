@@ -15,7 +15,7 @@ internal sealed class AspectLinker
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly AspectLinkerInput _input;
 
-    public AspectLinker( ProjectServiceProvider serviceProvider, AspectLinkerInput input )
+    public AspectLinker( in ProjectServiceProvider serviceProvider, AspectLinkerInput input )
     {
         this._compilationContext = input.CompilationModel.CompilationContext;
         this._serviceProvider = serviceProvider;

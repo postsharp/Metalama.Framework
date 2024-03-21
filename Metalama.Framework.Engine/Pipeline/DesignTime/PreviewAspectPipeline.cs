@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Metalama.Framework.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,7 +13,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public sealed class PreviewAspectPipeline : AspectPipeline
 {
-    public PreviewAspectPipeline( ServiceProvider<IProjectService> serviceProvider, ExecutionScenario executionScenario, CompileTimeDomain? domain ) : base(
+    public PreviewAspectPipeline( ProjectServiceProvider serviceProvider, ExecutionScenario executionScenario, CompileTimeDomain? domain ) : base(
         serviceProvider,
         executionScenario,
         domain ) { }
@@ -37,8 +36,6 @@ public sealed class PreviewAspectPipeline : AspectPipeline
         AspectPipelineConfiguration configuration,
         TestableCancellationToken cancellationToken )
     {
-        CompilationContext.SetTriviaHandling( compilation.Compilation, normalizeWhitespace: true, preserveTrivia: true );
-
         var result = await this.ExecuteAsync( compilation, diagnostics, configuration, cancellationToken );
 
         if ( result.IsSuccessful )

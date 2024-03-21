@@ -120,6 +120,7 @@ internal sealed partial class LinkerLinkingStep
                 SyntaxGenerationContext GetSyntaxGenerationContext()
                 {
                     return generationContext ??= this._compilationContext.GetSyntaxGenerationContext(
+                        this._rewritingDriver.SyntaxGenerationOptions,
                         node.SyntaxTree,
                         member.SpanStart );
                 }
