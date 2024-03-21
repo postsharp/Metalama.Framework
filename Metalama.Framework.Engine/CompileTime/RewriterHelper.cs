@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -94,7 +94,7 @@ internal sealed class RewriterHelper
         }
     }
 
-    public MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
+    public MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message, SyntaxGenerationContext context )
     {
         // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
         if ( method.Body == null && method.ExpressionBody == null )
@@ -127,7 +127,7 @@ internal sealed class RewriterHelper
                     method
                         .WithBody(
                             isIterator
-                                ? SyntaxFactoryEx.FormattedBlock(
+                                ? context.SyntaxGenerator.FormattedBlock(
                                     ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
                                     YieldStatement( SyntaxKind.YieldBreakStatement ) )
                                 : null )

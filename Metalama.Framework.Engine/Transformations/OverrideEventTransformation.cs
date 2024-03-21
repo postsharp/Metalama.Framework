@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -177,10 +178,10 @@ namespace Metalama.Framework.Engine.Transformations
             switch ( accessorDeclarationKind )
             {
                 case SyntaxKind.AddAccessorDeclaration:
-                    return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
+                    return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateAddExpression( generationContext ) ) );
 
                 case SyntaxKind.RemoveAccessorDeclaration:
-                    return SyntaxFactoryEx.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
+                    return generationContext.SyntaxGenerator.FormattedBlock( ExpressionStatement( this.CreateRemoveExpression( generationContext ) ) );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected syntax kind: {accessorDeclarationKind}." );

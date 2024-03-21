@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
         private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
         public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
-            : base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+            : base( advice, overriddenDeclaration, ObjectReader.Empty )
         {
             this._targetEvent = targetEvent;
         }
@@ -74,7 +73,7 @@ namespace Metalama.Framework.Engine.Transformations
             BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
             {
                 return
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 assignmentKind,

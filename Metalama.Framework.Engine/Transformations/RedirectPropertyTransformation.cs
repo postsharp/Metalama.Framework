@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
             BlockSyntax CreateGetterBody()
             {
                 return
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerator.FormattedBlock(
                         ReturnStatement(
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             CreateAccessTargetExpression(),
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Transformations
             BlockSyntax CreateSetterBody()
             {
                 return
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerator.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,

@@ -3,7 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,6 +44,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
         {
+            var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
+
             switch ( currentNode )
             {
                 case ReturnStatementSyntax returnStatement:
@@ -52,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( returnStatement.Expression != null )
                         {
                             return
-                                SyntaxFactoryEx.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                         CreateAssignmentStatement( returnStatement.Expression )
                                             .WithTriviaFromIfNecessary( returnStatement, substitutionContext.SyntaxGenerationContext.Options )
                                             .WithOriginalLocationAnnotationFrom( returnStatement ),
@@ -76,11 +78,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             if ( this._replaceByBreakIfOmitted )
                             {
                                 return
-                                    SyntaxFactoryEx.FormattedBlock(
+                                    syntaxGenerator.FormattedBlock(
                                             assignmentStatement,
                                             BreakStatement(
                                                 Token( SyntaxKind.BreakKeyword ),
-                                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                                Token(
+                                                    TriviaList(),
+                                                    SyntaxKind.SemicolonToken,
+                                                    substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
                             else
@@ -95,7 +100,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 return
                                     BreakStatement(
                                             Token( SyntaxKind.BreakKeyword ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
+                                            Token(
+                                                TriviaList(),
+                                                SyntaxKind.SemicolonToken,
+                                                substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
                                         .WithOriginalLocationAnnotationFrom( returnStatement );
                             }
                             else
@@ -113,7 +121,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._referencingSymbol.ReturnsVoid )
                         {
                             return
-                                SyntaxFactoryEx.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                         ExpressionStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
                                         CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -121,7 +129,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         else
                         {
                             return
-                                SyntaxFactoryEx.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                         CreateAssignmentStatement( returnExpression ).WithOriginalLocationAnnotationFrom( returnExpression ),
                                         CreateGotoStatement() )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
@@ -136,11 +144,14 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         if ( this._replaceByBreakIfOmitted )
                         {
                             return
-                                SyntaxFactoryEx.FormattedBlock(
+                                syntaxGenerator.FormattedBlock(
                                         assignmentStatement,
                                         BreakStatement(
                                             Token( SyntaxKind.BreakKeyword ),
-                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                            Token(
+                                                TriviaList(),
+                                                SyntaxKind.SemicolonToken,
+                                                substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
@@ -165,8 +176,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     identifier = SyntaxFactoryEx.DiscardIdentifier();
 
-                    expression = SyntaxFactoryEx.SafeCastExpression(
-                        substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
+                    expression = syntaxGenerator.SafeCastExpression(
+                        syntaxGenerator.Type( this._originalContainingSymbol.ReturnType ),
                         expression );
                 }
 
@@ -177,7 +188,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 identifier,
                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                 expression ),
-                            Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) )
+                            Token( default, SyntaxKind.SemicolonToken, substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
 
@@ -189,7 +200,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.GotoKeyword ),
                             default,
                             IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
-                            Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) )
+                            Token( default, SyntaxKind.SemicolonToken, substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
         }

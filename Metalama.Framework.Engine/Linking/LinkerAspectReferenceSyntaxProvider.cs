@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.Linking
                         BracketedArgumentList(
                             SeparatedList(
                                 targetIndexer.Parameters.SelectAsReadOnlyList(
-                                    p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) )
+                                    p => Argument( null, p.RefKind.InvocationRefKindToken(), IdentifierName( p.Name ) ) ) ) ) )
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Previous,
@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 expression =
                     ParenthesizedExpression(
-                        SyntaxFactoryEx.SafeCastExpression(
+                        syntaxGenerator.SafeCastExpression(
                             syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                             ThisExpression() ) );
             }
@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Linking
                     expression = MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
-                            SyntaxFactoryEx.SafeCastExpression(
+                            syntaxGenerator.SafeCastExpression(
                                 syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                                 ThisExpression() ) ),
                         memberName );

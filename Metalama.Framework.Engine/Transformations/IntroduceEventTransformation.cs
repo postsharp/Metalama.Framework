@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -150,12 +150,12 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     // Hide initializer expression into the single statement of the add.
                     { MethodKind: MethodKind.EventAdd } when eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 }
                                                              && initializerExpression != null
-                        => SyntaxFactoryEx.FormattedBlock(
+                        => context.SyntaxGenerator.FormattedBlock(
                             ExpressionStatement(
                                 context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression(
                                     syntaxGenerator.Type( eventBuilder.Type.GetSymbol() ),
                                     initializerExpression ) ) ),
-                    _ => SyntaxFactoryEx.FormattedBlock()
+                    _ => context.SyntaxGenerator.FormattedBlock()
                 };
 
             return

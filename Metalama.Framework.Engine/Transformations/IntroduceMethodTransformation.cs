@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -85,12 +85,12 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             // Async iterator can have empty body and still be in iterator, returning anything is invalid.
-            var block = SyntaxFactoryEx.FormattedBlock(
+            var block = syntaxGenerator.FormattedBlock(
                 !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
                     ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
                         ?
                         [
-                            SyntaxFactoryEx.FormattedBlock(
+                            syntaxGenerator.FormattedBlock(
                                 YieldStatement(
                                     SyntaxKind.YieldBreakStatement,
                                     List<AttributeListSyntax>(),

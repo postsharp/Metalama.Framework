@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -36,7 +35,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineForEventField( eventFieldDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineForEventField( eventFieldDeclaration, lastOverride, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -103,9 +102,9 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( symbol.Name ),
                         AccessorList(
-                            Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ),
+                            Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.OpenBraceToken, generationContext.ElasticEndOfLineTriviaList ),
                             List( new[] { transformedAdd, transformedRemove } ),
-                            Token( TriviaList( ElasticMarker ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ),
+                            Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, generationContext.ElasticEndOfLineTriviaList ) ),
                         default );
             }
 
@@ -123,7 +122,8 @@ namespace Metalama.Framework.Engine.Linking
                         new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
-                    (TriviaList(), TriviaList( ElasticLineFeed ), TriviaList( ElasticMarker ), TriviaList( ElasticLineFeed ));
+                    (TriviaList(), generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList,
+                     generationContext.ElasticEndOfLineTriviaList);
 
                 return
                     AccessorDeclaration(
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Linking
                         FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.MethodKeyword, false, false )
                             .AddRange( FilterAttributeListsForTarget( eventFieldDeclaration.AttributeLists, SyntaxKind.Parameter, false, true ) ),
                         TokenList(),
-                        Token( TriviaList(), accessorKeyword, TriviaList( ElasticLineFeed ) ),
+                        Token( TriviaList(), accessorKeyword, generationContext.ElasticEndOfLineTriviaList ),
                         Block(
                                 Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ),
                                 SingletonList<StatementSyntax>( linkedBody ),
@@ -164,14 +164,17 @@ namespace Metalama.Framework.Engine.Linking
                     List(
                         new[]
                         {
-                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() ),
-                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, SyntaxFactoryEx.FormattedBlock() )
+                            AccessorDeclaration( SyntaxKind.AddAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() ),
+                            AccessorDeclaration( SyntaxKind.RemoveAccessorDeclaration, context.SyntaxGenerator.FormattedBlock() )
                         } ) );
 
             return this.GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ), context );
         }
 
-        private EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
+        private EventDeclarationSyntax GetTrampolineForEventField(
+            EventFieldDeclarationSyntax eventField,
+            IEventSymbol targetSymbol,
+            SyntaxGenerationContext context )
         {
             // TODO: Do not copy leading/trailing trivia to all declarations.
 
@@ -189,7 +192,7 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     AccessorDeclaration(
                                         SyntaxKind.AddAccessorDeclaration,
-                                        SyntaxFactoryEx.FormattedBlock(
+                                        context.SyntaxGenerator.FormattedBlock(
                                             ExpressionStatement(
                                                 AssignmentExpression(
                                                     SyntaxKind.AddAssignmentExpression,
@@ -197,7 +200,7 @@ namespace Metalama.Framework.Engine.Linking
                                                     IdentifierName( "value" ) ) ) ) ),
                                     AccessorDeclaration(
                                         SyntaxKind.RemoveAccessorDeclaration,
-                                        SyntaxFactoryEx.FormattedBlock(
+                                        context.SyntaxGenerator.FormattedBlock(
                                             ExpressionStatement(
                                                 AssignmentExpression(
                                                     SyntaxKind.SubtractAssignmentExpression,

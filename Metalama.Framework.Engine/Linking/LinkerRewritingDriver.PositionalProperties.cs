@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -51,7 +50,12 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
+                    members.Add(
+                        this.GetTrampolineForPositionalProperty(
+                            recordParameter.Identifier,
+                            recordParameter.Type.AssertNotNull(),
+                            lastOverride,
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -62,7 +66,8 @@ namespace Metalama.Framework.Engine.Linking
                         this.GetEmptyImplProperty(
                             symbol,
                             List<AttributeListSyntax>(),
-                            recordParameter.Type.AssertNotNull() ) );
+                            recordParameter.Type.AssertNotNull(),
+                            generationContext ) );
                 }
 
                 return members;
@@ -148,12 +153,16 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty( SyntaxToken identifier, TypeSyntax type, IPropertySymbol targetSymbol )
+        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty(
+            SyntaxToken identifier,
+            TypeSyntax type,
+            IPropertySymbol targetSymbol,
+            SyntaxGenerationContext context )
         {
             var getAccessor =
                 AccessorDeclaration(
                     SyntaxKind.GetAccessorDeclaration,
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerator.FormattedBlock(
                         ReturnStatement(
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             GetInvocationTarget(),
@@ -162,7 +171,7 @@ namespace Metalama.Framework.Engine.Linking
             var setAccessor =
                 AccessorDeclaration(
                     targetSymbol.GetMethod.AssertNotNull().IsInitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerator.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,

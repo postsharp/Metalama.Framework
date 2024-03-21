@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

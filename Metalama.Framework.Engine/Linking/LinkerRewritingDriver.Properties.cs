@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -53,7 +52,11 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineForProperty( propertyDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+                    members.Add(
+                        this.GetTrampolineForProperty(
+                            propertyDeclaration,
+                            lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                            generationContext ) );
                 }
 
                 if ( !propertyDeclaration.IsAutoPropertyDeclaration()
@@ -80,7 +83,8 @@ namespace Metalama.Framework.Engine.Linking
                         this.GetEmptyImplProperty(
                             symbol,
                             List<AttributeListSyntax>(),
-                            propertyDeclaration.Type ) );
+                            propertyDeclaration.Type,
+                            generationContext ) );
                 }
 
                 return members;
@@ -103,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[]
                 {
-                    this.GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetTrampolineForProperty( propertyDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                     this.GetOriginalImplProperty(
                         symbol,
                         FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, true ),
@@ -157,9 +161,12 @@ namespace Metalama.Framework.Engine.Linking
                                 TokenList(),
                                 Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ),
                                 Block(
-                                    Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ),
+                                    Token(
+                                        generationContext.ElasticEndOfLineTriviaList,
+                                        SyntaxKind.OpenBraceToken,
+                                        generationContext.ElasticEndOfLineTriviaList ),
                                     SingletonList<StatementSyntax>( linkedBody ),
-                                    Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ),
+                                    Token( generationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ),
                                 null,
                                 default ) );
                     }
@@ -198,7 +205,7 @@ namespace Metalama.Framework.Engine.Linking
                     propertyDeclaration.Identifier switch
                     {
                         var identifier when identifier.TrailingTrivia.HasAnyNewLine() => accessorListLeadingTrivia,
-                        _ => TriviaList( ElasticLineFeed ).AddRange( accessorListLeadingTrivia )
+                        _ => generationContext.ElasticEndOfLineTriviaList.AddRange( accessorListLeadingTrivia )
                     };
 
                 return propertyDeclaration.PartialUpdate(
@@ -237,11 +244,12 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                         { SemicolonToken: var semicolonToken } => (
-                            semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
-                            TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed )),
+                            semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia.Add( ElasticLineFeed ),
+                            generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList),
                         _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
@@ -304,7 +312,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => SyntaxFactoryEx.FormattedBlock(
+            => generationContext.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         MemberAccessExpression(
@@ -317,7 +325,7 @@ namespace Metalama.Framework.Engine.Linking
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => SyntaxFactoryEx.FormattedBlock(
+            => generationContext.SyntaxGenerator.FormattedBlock(
                     ExpressionStatement(
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
@@ -414,7 +422,8 @@ namespace Metalama.Framework.Engine.Linking
         private MemberDeclarationSyntax GetEmptyImplProperty(
             IPropertySymbol symbol,
             SyntaxList<AttributeListSyntax> attributes,
-            TypeSyntax type )
+            TypeSyntax type,
+            SyntaxGenerationContext context )
         {
             var setAccessorKind =
                 symbol switch
@@ -443,7 +452,7 @@ namespace Metalama.Framework.Engine.Linking
                                 setAccessorKind != null
                                     ? AccessorDeclaration(
                                         setAccessorKind.Value,
-                                        SyntaxFactoryEx.FormattedBlock() )
+                                        context.SyntaxGenerator.FormattedBlock() )
                                     : null
                             }.Where( a => a != null )
                             .AssertNoneNull() ) );
@@ -500,7 +509,8 @@ namespace Metalama.Framework.Engine.Linking
 
         private PropertyDeclarationSyntax GetTrampolineForProperty(
             PropertyDeclarationSyntax property,
-            IntermediateSymbolSemantic<IPropertySymbol> targetSymbol )
+            IntermediateSymbolSemantic<IPropertySymbol> targetSymbol,
+            SyntaxGenerationContext context )
         {
             var getAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.GetAccessorDeclaration );
             var setAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );
@@ -514,7 +524,7 @@ namespace Metalama.Framework.Engine.Linking
                                     getAccessor != null
                                         ? AccessorDeclaration(
                                             SyntaxKind.GetAccessorDeclaration,
-                                            SyntaxFactoryEx.FormattedBlock(
+                                            context.SyntaxGenerator.FormattedBlock(
                                                 ReturnStatement(
                                                     SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                                     GetInvocationTarget(),
@@ -523,7 +533,7 @@ namespace Metalama.Framework.Engine.Linking
                                     setAccessor != null
                                         ? AccessorDeclaration(
                                             SyntaxKind.SetAccessorDeclaration,
-                                            SyntaxFactoryEx.FormattedBlock(
+                                            context.SyntaxGenerator.FormattedBlock(
                                                 ExpressionStatement(
                                                     AssignmentExpression(
                                                         SyntaxKind.SimpleAssignmentExpression,

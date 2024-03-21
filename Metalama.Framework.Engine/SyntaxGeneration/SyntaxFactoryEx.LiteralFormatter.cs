@@ -9,9 +9,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.Templating;
+namespace Metalama.Framework.Engine.SyntaxGeneration;
 
-internal static partial class SyntaxFactoryEx
+internal partial class SyntaxFactoryEx
 {
     private static readonly Dictionary<Type, MethodInfo> _syntaxFactoryMethods = typeof(SyntaxFactory).GetMethods( BindingFlags.Static | BindingFlags.Public )
         .Where( m => m.Name == "Literal" && m.GetParameters().Length == 4 )

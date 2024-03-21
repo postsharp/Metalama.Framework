@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -162,6 +162,106 @@ public static class SyntaxExtensions
         }
 
         return node.WithLeadingTrivia( leadingTrivia );
+    }
+
+    internal static SyntaxToken WithLeadingTriviaIfNecessary( this SyntaxToken node, SyntaxTriviaList leadingTrivia, SyntaxGenerationOptions options )
+    {
+        if ( !options.PreserveTrivia && !leadingTrivia.ContainsDirectives() )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( leadingTrivia );
+    }
+
+    internal static TNode WithLeadingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : SyntaxNode
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode WithLeadingAndTrailingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : SyntaxNode
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) )
+            .WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode WithTrailingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : SyntaxNode
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static SyntaxToken WithTrailingLineFeedIfNecessary(
+        this SyntaxToken node,
+        SyntaxGenerationContext context )
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithTrailingTrivia( node.TrailingTrivia.Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode StructuredTriviaWithTrailingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : StructuredTriviaSyntax
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static TNode StructuredTriviaWithLeadingLineFeedIfNecessary<TNode>(
+        this TNode node,
+        SyntaxGenerationContext context )
+        where TNode : StructuredTriviaSyntax
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return node;
+        }
+
+        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) );
+    }
+
+    internal static SyntaxTriviaList AddLineFeedIfNecessary(
+        this SyntaxTriviaList list,
+        SyntaxGenerationContext context )
+    {
+        if ( !context.Options.NormalizeWhitespace )
+        {
+            return list;
+        }
+
+        return list.Add( context.ElasticEndOfLineTrivia );
     }
 
     internal static TNode WithLeadingTriviaIfNecessary<TNode>( this TNode node, SyntaxTrivia leadingTrivia, SyntaxGenerationOptions options )

@@ -32,7 +32,8 @@ internal abstract class OverridePropertyOrIndexerTransformation : OverrideMember
 
         return TransformationHelper.CreateIdentityAccessorBody(
             accessorDeclarationKind,
-            proceedExpression );
+            proceedExpression,
+            context.SyntaxGenerationContext );
     }
 
     protected abstract ExpressionSyntax CreateProceedGetExpression( MemberInjectionContext context );

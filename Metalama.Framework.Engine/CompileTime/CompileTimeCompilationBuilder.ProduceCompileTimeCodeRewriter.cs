@@ -5,11 +5,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -308,7 +308,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                             var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
                                                 .WithArgumentList(
                                                     AttributeArgumentList(
-                                                        SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
+                                                        SingletonSeparatedList(
+                                                            AttributeArgument(
+                                                                this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( originalId ) ) ) ) );
 
                                             // Transform the type.
                                             TypeDeclarationSyntax transformedChild;
@@ -575,7 +577,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         Identifier( p.Name ),
                                                         default ) ) ) ),
                                         default,
-                                        method.ReturnType.SpecialType == SpecialType.System_Void ? SyntaxFactoryEx.FormattedBlock() : null,
+                                        method.ReturnType.SpecialType == SpecialType.System_Void
+                                            ? this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                                            : null,
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
                                     .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine );
@@ -615,7 +619,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                         constructorName,
                                         ParameterList(),
                                         null,
-                                        SyntaxFactoryEx.FormattedBlock(),
+                                        this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock(),
                                         null )
                                     .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                         }
@@ -646,7 +650,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     var originalPathAttribute = Attribute( this._originalPathTypeSyntax )
                         .WithArgumentList(
                             AttributeArgumentList(
-                                SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
+                                SingletonSeparatedList(
+                                    AttributeArgument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( node.SyntaxTree.FilePath ) ) ) ) );
 
                     transformedNode = transformedNode
                         .WithAttributeLists( transformedNode.AttributeLists.Add( AttributeList( SingletonSeparatedList( originalPathAttribute ) ) ) );
@@ -782,7 +787,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                     else if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
-                        yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this._helper.WithThrowNotSupportedExceptionBody(
+                            node,
+                            "Template code cannot be directly executed.",
+                            this._syntaxGenerationContext );
                     }
                     else
                     {
@@ -1456,7 +1464,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( typeSymbol != null )
                     {
-                        return SyntaxFactoryEx.LiteralExpression( typeSymbol.Name );
+                        return this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.Name );
                     }
                 }
 

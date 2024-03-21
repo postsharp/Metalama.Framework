@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -77,12 +78,12 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         }
         else
         {
-            var expression = GetLiteralImpl( value, specialType, stronglyTyped );
+            var expression = this.GetLiteralImpl( value, specialType, stronglyTyped );
             stringBuilder.Append( expression.ToFullString() );
         }
     }
 
-    private static ExpressionSyntax GetLiteralImpl( object value, SpecialType specialType, bool stronglyTyped )
+    private ExpressionSyntax GetLiteralImpl( object value, SpecialType specialType, bool stronglyTyped )
     {
         var options = stronglyTyped ? ObjectDisplayOptions.IncludeTypeSuffix : ObjectDisplayOptions.None;
         var expression = (LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value, options );
@@ -100,7 +101,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
             if ( cast != SyntaxKind.None )
             {
-                return SyntaxFactoryEx.SafeCastExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ), expression );
+                return this._syntaxGenerationContext.SyntaxGenerator.SafeCastExpression(
+                    SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ),
+                    expression );
             }
         }
 
@@ -119,7 +122,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         }
         else
         {
-            expression = GetLiteralImpl( value, specialType, stronglyTyped );
+            expression = this.GetLiteralImpl( value, specialType, stronglyTyped );
         }
 
         IType type = this._compilation.Factory.GetSpecialType( specialType );

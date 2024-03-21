@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -39,7 +38,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) );
+                    members.Add(
+                        this.GetTrampolineForEvent( eventDeclaration, lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ), generationContext ) );
                 }
 
                 if ( !eventDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField )
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return new[]
                 {
-                    this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ),
+                    this.GetTrampolineForEvent( eventDeclaration, symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ), generationContext ),
                     this.GetOriginalImplEvent( eventDeclaration, symbol, generationContext )
                 };
             }
@@ -149,8 +149,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
                     };
 
@@ -167,7 +168,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static BlockSyntax GetImplicitAdderBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => SyntaxFactoryEx.FormattedBlock(
+            => generationContext.SyntaxGenerator.FormattedBlock(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.AddAssignmentExpression,
@@ -178,10 +179,10 @@ namespace Metalama.Framework.Engine.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ),
-                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
+                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( generationContext.ElasticEndOfLineTrivia ) ) ) );
 
         private static BlockSyntax GetImplicitRemoverBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
-            => SyntaxFactoryEx.FormattedBlock(
+            => generationContext.SyntaxGenerator.FormattedBlock(
                 ExpressionStatement(
                     AssignmentExpression(
                         SyntaxKind.SubtractAssignmentExpression,
@@ -192,7 +193,7 @@ namespace Metalama.Framework.Engine.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IEventSymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         IdentifierName( "value" ) ),
-                    Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) ) );
+                    Token( default, SyntaxKind.SemicolonToken, generationContext.ElasticEndOfLineTriviaList ) ) );
 
         private EventFieldDeclarationSyntax GetEventBackingField(
             EventDeclarationSyntax eventDeclaration,
@@ -270,8 +271,8 @@ namespace Metalama.Framework.Engine.Linking
                                     initializer ) ) ) )
                     .NormalizeWhitespaceIfNecessary( context )
                     .WithTriviaIfNecessary(
-                        new SyntaxTriviaList( ElasticLineFeed ),
-                        new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ),
+                        context.ElasticEndOfLineTriviaList,
+                        context.TwoElasticEndOfLinesTriviaList,
                         this.SyntaxGenerationOptions )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
@@ -365,11 +366,14 @@ namespace Metalama.Framework.Engine.Linking
                         Identifier( name ),
                         cleanAccessorList )
                     .NormalizeWhitespaceIfNecessary( context )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
+                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IntermediateSymbolSemantic<IEventSymbol> targetSemantic )
+        private EventDeclarationSyntax GetTrampolineForEvent(
+            EventDeclarationSyntax @event,
+            IntermediateSymbolSemantic<IEventSymbol> targetSemantic,
+            SyntaxGenerationContext context )
         {
             Invariant.Assert( targetSemantic.Kind is IntermediateSymbolSemanticKind.Base or IntermediateSymbolSemanticKind.Default );
 
@@ -389,7 +393,7 @@ namespace Metalama.Framework.Engine.Linking
                                     addAccessor != null
                                         ? AccessorDeclaration(
                                             SyntaxKind.AddAccessorDeclaration,
-                                            SyntaxFactoryEx.FormattedBlock(
+                                            context.SyntaxGenerator.FormattedBlock(
                                                 ExpressionStatement(
                                                     AssignmentExpression(
                                                         SyntaxKind.AddAssignmentExpression,
@@ -399,7 +403,7 @@ namespace Metalama.Framework.Engine.Linking
                                     removeAccessor != null
                                         ? AccessorDeclaration(
                                             SyntaxKind.RemoveAccessorDeclaration,
-                                            SyntaxFactoryEx.FormattedBlock(
+                                            context.SyntaxGenerator.FormattedBlock(
                                                 ExpressionStatement(
                                                     AssignmentExpression(
                                                         SyntaxKind.SubtractAssignmentExpression,

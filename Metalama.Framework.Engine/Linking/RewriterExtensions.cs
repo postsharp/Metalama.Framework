@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,40 +15,40 @@ namespace Metalama.Framework.Engine.Linking
         /* This is intended for processing trivia lists, but it is currently unused.
        public static SyntaxTriviaList VisitTriviaList( this CSharpSyntaxRewriter rewriter, SyntaxTriviaList triviaList )
        {
-          
+
            var dirty = false;
-    
+
     #pragma warning disable IDE0059
            var list = new List<SyntaxTrivia>();
-    
+
            foreach ( var trivia in triviaList )
            {
-               // Not used anywhere yet. 
+               // Not used anywhere yet.
                throw new AssertionFailedException( Justifications.CoverageMissing );
-    
+
                var rewrittenTrivia = rewriter.VisitTrivia( trivia );
-               
+
                list.Add( rewrittenTrivia );
-               
+
                if ( !trivia.Equals( rewrittenTrivia ) )
                {
                    dirty = true;
                }
            }
-    
+
            if ( dirty )
            {
-               // Not used anywhere yet. 
+               // Not used anywhere yet.
                throw new AssertionFailedException( Justifications.CoverageMissing );
-    
+
                // return TriviaList( list );
            }
            else
            {
                return triviaList;
            }
-          
-    
+
+
                 return triviaList;
             }
              */

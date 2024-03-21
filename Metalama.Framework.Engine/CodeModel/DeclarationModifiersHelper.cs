@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -235,19 +235,23 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 case RefKind.In:
                     AddToken( SyntaxKind.InKeyword );
+
                     break;
 
                 case RefKind.RefReadOnly:
                     AddToken( SyntaxKind.RefKeyword );
                     AddToken( SyntaxKind.ReadOnlyKeyword );
+
                     break;
 
                 case RefKind.Ref:
                     AddToken( SyntaxKind.RefKeyword );
+
                     break;
 
                 case RefKind.Out:
                     AddToken( SyntaxKind.OutKeyword );
+
                     break;
 
                 default:

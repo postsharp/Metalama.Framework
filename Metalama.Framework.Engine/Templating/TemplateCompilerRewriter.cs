@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -717,7 +718,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetDynamicSyntax) ) )
                     .AddArgumentListArguments(
-                        Argument( SyntaxFactoryEx.SafeCastExpression( NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ), expression ) ) );
+                        Argument(
+                            this.MetaSyntaxFactory.Context.SyntaxGenerator.SafeCastExpression(
+                                NullableType( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ) ),
+                                expression ) ) );
 
             case "String":
                 return CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind.StringLiteralExpression );
@@ -1042,7 +1046,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             }
             else
             {
-                return SyntaxFactoryEx.LiteralExpression( symbolName );
+                return this.MetaSyntaxFactory.Context.SyntaxGenerator.LiteralExpression( symbolName );
             }
         }
         else if ( this._compileTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )

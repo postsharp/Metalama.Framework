@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Services;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 public record SyntaxGenerationOptions : IProjectService
 {

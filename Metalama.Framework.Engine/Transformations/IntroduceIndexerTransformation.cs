@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -82,11 +81,11 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
                     indexerBuilder.GetAttributeLists( context, indexerBuilder.GetMethod ),
                     TokenList( tokens ),
                     Token( SyntaxKind.GetKeyword ),
-                    SyntaxFactoryEx.FormattedBlock(
+                    syntaxGenerator.FormattedBlock(
                         ReturnStatement(
                             Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                             DefaultExpression( syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ) ),
-                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) ),
+                            Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) ),
                     null,
                     default );
         }
@@ -108,7 +107,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
                     indexerBuilder.HasInitOnlySetter
                         ? Token( TriviaList(), SyntaxKind.InitKeyword, TriviaList( ElasticSpace ) )
                         : Token( TriviaList(), SyntaxKind.SetKeyword, TriviaList( ElasticSpace ) ),
-                    SyntaxFactoryEx.FormattedBlock(),
+                    context.SyntaxGenerator.FormattedBlock(),
                     null,
                     default );
         }

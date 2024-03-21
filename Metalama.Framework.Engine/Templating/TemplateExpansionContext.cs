@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -519,7 +520,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 return
                     Block(
                             SyntaxFactoryEx.DiscardStatement(
-                                SyntaxFactoryEx.SafeCastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), returnExpression ) ),
+                                _currentSyntaxSerializationContext.Value!.SyntaxGenerator.SafeCastExpression(
+                                    PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
+                                    returnExpression ) ),
                             ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }

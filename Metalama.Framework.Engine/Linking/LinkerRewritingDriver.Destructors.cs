@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineDestructor( destructorDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineDestructor( destructorDeclaration, lastOverride, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && this.ShouldGenerateEmptyMember( symbol ) )
                 {
-                    members.Add( this.GetEmptyImplDestructor( destructorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplDestructor( destructorDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -82,8 +82,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected destructor declaration at '{destructorDeclaration.GetLocation()}'." )
                     };
 
@@ -128,16 +129,18 @@ namespace Metalama.Framework.Engine.Linking
                 substitutedBody.WithSourceCodeAnnotation(),
                 substitutedExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
-                GetOriginalImplMemberName( symbol ) );
+                GetOriginalImplMemberName( symbol ),
+                generationContext );
         }
 
         private MemberDeclarationSyntax GetEmptyImplDestructor(
             DestructorDeclarationSyntax destructor,
-            IMethodSymbol symbol )
+            IMethodSymbol symbol,
+            SyntaxGenerationContext context )
         {
-            var emptyBody = SyntaxFactoryEx.FormattedBlock();
+            var emptyBody = context.SyntaxGenerator.FormattedBlock();
 
-            return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return this.GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), context );
         }
 
         private MemberDeclarationSyntax GetSpecialImplDestructor(
@@ -145,7 +148,8 @@ namespace Metalama.Framework.Engine.Linking
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
             IMethodSymbol symbol,
-            string name )
+            string name,
+            SyntaxGenerationContext context )
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
@@ -163,11 +167,14 @@ namespace Metalama.Framework.Engine.Linking
                         List<TypeParameterConstraintClauseSyntax>(),
                         body,
                         expressionBody )
-                    .WithTriviaIfNecessary( ElasticLineFeed, ElasticLineFeed, this.SyntaxGenerationOptions )
+                    .WithLeadingAndTrailingLineFeedIfNecessary( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
 
-        private DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax destructor, IMethodSymbol targetSymbol )
+        private DestructorDeclarationSyntax GetTrampolineDestructor(
+            DestructorDeclarationSyntax destructor,
+            IMethodSymbol targetSymbol,
+            SyntaxGenerationContext context )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
@@ -183,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                         MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
                         ArgumentList() );
 
-                return SyntaxFactoryEx.FormattedBlock(
+                return context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         invocation,

@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -334,7 +335,7 @@ namespace Metalama.Framework.Engine.CodeModel
                                 BasePropertyDeclarationSyntax { AccessorList: { } } propertyDecl when
                                     propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) => true,
                                 ParameterSyntax parameter => true,
-                                _ => false,
+                                _ => false
                             } ),
                 { GetMethod: { } getMethod } => getMethod.IsCompilerGenerated(),
                 { SetMethod: { } setMethod } => setMethod.IsCompilerGenerated(),
@@ -566,8 +567,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static int GetDepthImpl( this IDeclaration declaration ) => declaration.GetCompilationModel().GetDepth( declaration );
 
-        internal static T Translate<T>( this T declaration, ICompilation newCompilation, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+        internal static T Translate<T>(
+            this T declaration,
+            ICompilation newCompilation,
+            ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
             where T : IDeclaration
-            => declaration.Compilation == newCompilation ? declaration : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+            => declaration.Compilation == newCompilation
+                ? declaration
+                : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
     }
 }

@@ -1,8 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,10 +13,13 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class TypeOfRewriter
 {
+    private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly NameSyntax _compileTimeTypeName;
 
     public TypeOfRewriter( SyntaxGenerationContext syntaxGenerationContext )
     {
+        this._syntaxGenerationContext = syntaxGenerationContext;
+
         this._compileTimeTypeName = (NameSyntax)
             syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeOfResolver) ) );
     }
@@ -50,13 +52,13 @@ internal sealed class TypeOfRewriter
                             typeSymbol.GetReflectionFullName(),
                             typeSymbol.GetReflectionToStringName()
                         }
-                        .SelectAsArray( s => Argument( SyntaxFactoryEx.LiteralExpression( s ) ) ) );
+                        .SelectAsArray( s => Argument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( s ) ) ) );
         }
         else
         {
             return InvocationExpression( memberAccess )
                 .AddArgumentListArguments(
-                    Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSerializableTypeId().Id ) ),
+                    Argument( this._syntaxGenerationContext.SyntaxGenerator.LiteralExpression( typeSymbol.GetSerializableTypeId().Id ) ),
                     Argument( substitutions ) );
         }
     }

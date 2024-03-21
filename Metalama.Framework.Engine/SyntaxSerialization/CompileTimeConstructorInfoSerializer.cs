@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,7 +12,7 @@ internal sealed class CompileTimeConstructorInfoSerializer : MetalamaMethodBaseS
 {
     public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, SyntaxSerializationContext serializationContext )
         => SyntaxFactory.ParenthesizedExpression(
-                SyntaxFactoryEx.SafeCastExpression(
+                serializationContext.SyntaxGenerator.SafeCastExpression(
                     serializationContext.GetTypeSyntax( typeof(ConstructorInfo) ),
                     SerializeMethodBase( obj, serializationContext ) ) )
             .WithSimplifierAnnotationIfNecessary( serializationContext.SyntaxGenerationContext );

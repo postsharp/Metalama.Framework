@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Concurrent;
@@ -75,13 +75,18 @@ namespace Metalama.Framework.Engine.Linking
                         new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
                             .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
+                    var syntaxGenerationContext = input.IntermediateCompilation.CompilationContext.GetSyntaxGenerationContext(
+                        this._syntaxGenerationOptions,
+                        modifiedSyntaxTree.OldTree!,
+                        0 );
+
                     var cleanRoot =
                         new CleanupRewriter(
                                 input.ProjectOptions,
-                                input.IntermediateCompilation.CompilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions ) )
+                                syntaxGenerationContext )
                             .Visit( linkedRoot )!;
 
-                    var fixedRoot = PreprocessorFixer.Fix( cleanRoot );
+                    var fixedRoot = PreprocessorFixer.Fix( cleanRoot, syntaxGenerationContext );
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( fixedRoot, syntaxTree.Options );
 

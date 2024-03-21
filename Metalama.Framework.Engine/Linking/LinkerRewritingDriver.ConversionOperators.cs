@@ -3,7 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineConversionOperator( operatorDeclaration, lastOverride ) );
+                    members.Add( this.GetTrampolineConversionOperator( operatorDeclaration, lastOverride, generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
-                    members.Add( this.GetEmptyImplConversionOperator( operatorDeclaration, symbol ) );
+                    members.Add( this.GetEmptyImplConversionOperator( operatorDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -80,8 +80,9 @@ namespace Metalama.Framework.Engine.Linking
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
                         { ExpressionBody.ArrowToken: var arrowToken, SemicolonToken: var semicolonToken } =>
-                            (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
-                             semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                            (arrowToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             arrowToken.TrailingTrivia.AddLineFeedIfNecessary( generationContext ),
+                             semicolonToken.LeadingTrivia.AddLineFeedIfNecessary( generationContext ), semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException( $"Unexpected operator declaration at '{operatorDeclaration.GetLocation()}.'" )
                     };
 
@@ -128,10 +129,11 @@ namespace Metalama.Framework.Engine.Linking
 
         private MemberDeclarationSyntax GetEmptyImplConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
-            IMethodSymbol symbol )
+            IMethodSymbol symbol,
+            SyntaxGenerationContext context )
         {
             var emptyBody =
-                SyntaxFactoryEx.FormattedBlock(
+                context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         DefaultExpression( @operator.Type ),
@@ -172,7 +174,8 @@ namespace Metalama.Framework.Engine.Linking
 
         private ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
-            IMethodSymbol targetSymbol )
+            IMethodSymbol targetSymbol,
+            SyntaxGenerationContext context )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
@@ -187,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                         IdentifierName( targetSymbol.Name ),
                         ArgumentList() );
 
-                return SyntaxFactoryEx.FormattedBlock(
+                return context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         invocation,

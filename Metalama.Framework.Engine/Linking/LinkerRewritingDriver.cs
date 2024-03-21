@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -131,7 +130,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
 
-            static BlockSyntax TransformToBlock( SyntaxNode node, IMethodSymbol symbol )
+            BlockSyntax TransformToBlock( SyntaxNode node, IMethodSymbol symbol )
             {
                 // TODO: Convert to block.
                 if ( symbol.ReturnsVoid )
@@ -174,7 +173,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         case ArrowExpressionClauseSyntax rewrittenArrowClause:
                             return
-                                SyntaxFactoryEx.FormattedBlock(
+                                substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                                         ReturnStatement(
                                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                             rewrittenArrowClause.Expression,
@@ -523,7 +522,7 @@ namespace Metalama.Framework.Engine.Linking
                     return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
                 case IFieldSymbol fieldSymbol:
-                    return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol );
+                    return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch

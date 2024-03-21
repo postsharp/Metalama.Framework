@@ -2,27 +2,29 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using static Metalama.Framework.Engine.SyntaxGeneration.SyntaxFactoryEx;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
-namespace Metalama.Framework.Engine.CodeModel;
+namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 #pragma warning disable CA1822
 
@@ -37,7 +39,7 @@ internal partial class ContextualSyntaxGenerator
         _roslynSyntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
     }
 
-    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache = new( SymbolEqualityComparer.IncludeNullability);
+    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache = new( SymbolEqualityComparer.IncludeNullability );
     private readonly SyntaxGenerationContext _context;
 
     public bool IsNullAware { get; }
@@ -137,7 +139,7 @@ internal partial class ContextualSyntaxGenerator
                 break;
         }
 
-        return SyntaxFactoryEx.SafeCastExpression( this.Type( targetTypeSymbol ), expression );
+        return this.SafeCastExpression( this.Type( targetTypeSymbol ), expression );
     }
 
     public TypeSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
@@ -279,7 +281,7 @@ internal partial class ContextualSyntaxGenerator
 
                 clauses.Add(
                     TypeParameterConstraintClause(
-                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.WhereKeyword ),
+                        TokenWithTrailingSpace( SyntaxKind.WhereKeyword ),
                         SyntaxFactory.IdentifierName( genericParameter.Name ),
                         Token( SyntaxKind.ColonToken ),
                         SeparatedList( constraints ) ) );
@@ -477,7 +479,7 @@ internal partial class ContextualSyntaxGenerator
     {
         var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute ) ) )
             .WithLeadingTriviaIfNecessary( oldNode.GetLeadingTrivia(), this._context.Options )
-            .WithTrailingTriviaIfNecessary( ElasticCarriageReturnLineFeed, this._context.Options );
+            .WithTrailingLineFeedIfNecessary( this._context );
 
         oldNode = oldNode.WithLeadingTriviaIfNecessary( default(SyntaxTriviaList), this._context.Options );
 
@@ -528,7 +530,7 @@ internal partial class ContextualSyntaxGenerator
 
             if ( value == null )
             {
-                return SyntaxFactoryEx.Null;
+                return Null;
             }
 
             switch ( type )
@@ -552,7 +554,7 @@ internal partial class ContextualSyntaxGenerator
 
                         default:
                             {
-                                var literal = SyntaxFactoryEx.LiteralExpressionOrNull( value );
+                                var literal = LiteralExpressionOrNull( value );
 
                                 if ( literal != null )
                                 {
@@ -634,7 +636,7 @@ internal partial class ContextualSyntaxGenerator
                     Identifier( p.Name ),
                     removeDefaultValues || p.DefaultValue == null
                         ? null
-                        : EqualsValueClause( SyntaxFactoryEx.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
+                        : EqualsValueClause( this.LiteralExpression( p.DefaultValue.Value.Value ) ) ) ) );
 
     public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
     {
@@ -706,4 +708,88 @@ internal partial class ContextualSyntaxGenerator
 
         return list;
     }
+
+    // TODO: Move to ContextualSyntaxGenerator use conditional simplifier annotation.
+    public static ExpressionSyntax LiteralExpression( string? s )
+        => s == null
+            ? ParenthesizedExpression(
+                    SyntaxFactory.CastExpression(
+                        NullableType( PredefinedType( Token( SyntaxKind.StringKeyword ) ) ),
+                        SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
+                .WithAdditionalAnnotations( Simplifier.Annotation )
+            : LiteralNonNullExpression( s );
+
+    public CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
+    {
+        if ( syntax is CastExpressionSyntax cast && cast.Type.IsEquivalentTo( type, topLevel: false ) )
+        {
+            // It's already a cast to the same type, no need to cast again.
+            return cast;
+        }
+
+        var requiresParenthesis = syntax switch
+        {
+            CastExpressionSyntax => false,
+            InvocationExpressionSyntax => false,
+            MemberAccessExpressionSyntax => false,
+            ElementAccessExpressionSyntax => false,
+            IdentifierNameSyntax => false,
+            LiteralExpressionSyntax => false,
+            DefaultExpressionSyntax => false,
+            TypeOfExpressionSyntax => false,
+            ParenthesizedExpressionSyntax => false,
+            ConditionalAccessExpressionSyntax => false,
+            ObjectCreationExpressionSyntax => false,
+            ArrayCreationExpressionSyntax => false,
+            PostfixUnaryExpressionSyntax => false,
+
+            // The syntax (T)-x is ambiguous and interpreted as binary minus, not cast of unary minus.
+            PrefixUnaryExpressionSyntax { RawKind: not (int) SyntaxKind.UnaryMinusExpression } => false,
+            TupleExpressionSyntax => false,
+            ThisExpressionSyntax => false,
+            _ => true
+        };
+
+        if ( requiresParenthesis )
+        {
+            return SyntaxFactory.CastExpression( type, ParenthesizedExpression( syntax ).WithAdditionalAnnotations( Simplifier.Annotation ) )
+                .WithSimplifierAnnotationIfNecessary( this._context );
+        }
+        else
+        {
+            return SyntaxFactory.CastExpression( type, syntax ).WithAdditionalAnnotations( Simplifier.Annotation );
+        }
+    }
+
+    public BlockSyntax FormattedBlock() => this.MemoizedFormattedBlock;
+
+    [Memo]
+    private BlockSyntax MemoizedFormattedBlock => this.FormattedBlock( Array.Empty<StatementSyntax>() );
+
+    public BlockSyntax FormattedBlock( params StatementSyntax[] statements ) => this.FormattedBlock( (IEnumerable<StatementSyntax>) statements );
+
+    private static bool NeedsLineFeed( StatementSyntax statement )
+        => !statement.HasTrailingTrivia || !statement.GetTrailingTrivia()[^1].IsKind( SyntaxKind.EndOfLineTrivia );
+
+    public BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
+        => Block(
+            Token( default, SyntaxKind.OpenBraceToken, this._context.ElasticEndOfLineTriviaList ),
+            List(
+                statements.Select(
+                    s => NeedsLineFeed( s )
+                        ? s.WithTrailingLineFeedIfNecessary( this._context )
+                        : s ) ),
+            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
+
+    public PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
+        SyntaxKind disableOrRestoreKind,
+        SeparatedSyntaxList<ExpressionSyntax> errorCodes )
+        => SyntaxFactory.PragmaWarningDirectiveTrivia(
+            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
+            TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
+            TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
+            TokenWithTrailingSpace( disableOrRestoreKind ),
+            errorCodes,
+            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.ElasticEndOfLineTriviaList ),
+            isActive: true );
 }
