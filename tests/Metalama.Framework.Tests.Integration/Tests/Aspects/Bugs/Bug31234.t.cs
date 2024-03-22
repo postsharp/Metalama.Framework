@@ -24,8 +24,7 @@ public partial class TargetClass : BaseClass
     }
   }
   public TargetClass()
-  {
-    // Should invoke the first override since it changes semantics of the original declaration.
+  { // Should invoke the first override since it changes semantics of the original declaration.
     this.AbstractBaseProperty_Override = 42;
   }
 }
