@@ -52,7 +52,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
 
-    internal static SyntaxSerializationContext CurrentSyntaxSerializationContextOrNull
+    internal static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
         => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
            ?? _currentSyntaxSerializationContext.Value;
 
