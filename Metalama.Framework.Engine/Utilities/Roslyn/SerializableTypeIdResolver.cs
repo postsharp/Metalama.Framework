@@ -172,7 +172,7 @@ public sealed class SerializableTypeIdResolver
 
         private ITypeSymbol? LookupName( NameSyntax name )
         {
-            var result = (ITypeSymbol) this.LookupName( name, null );
+            var result = (ITypeSymbol?) this.LookupName( name, null );
 
             if ( !this._isNullOblivious && result != null )
             {
@@ -195,9 +195,13 @@ public sealed class SerializableTypeIdResolver
                     return this.LookupName( qualifiedName.Right, left );
 
                 case GenericNameSyntax genericName:
-                    var definition = (INamedTypeSymbol) this.LookupName( genericName.Identifier.Text, genericName.Arity, ns );
+                    var definition = (INamedTypeSymbol?) this.LookupName( genericName.Identifier.Text, genericName.Arity, ns );
 
-                    if ( genericName.IsUnboundGenericName )
+                    if ( definition == null )
+                    {
+                        return null;
+                    }
+                    else if ( genericName.IsUnboundGenericName )
                     {
                         return definition;
                     }
@@ -216,7 +220,7 @@ public sealed class SerializableTypeIdResolver
                             return definition;
                         }
 
-                        return definition.Construct( typeArguments );
+                        return definition.Construct( typeArguments! );
                     }
 
                 case AliasQualifiedNameSyntax aliasQualifiedName:
@@ -235,9 +239,9 @@ public sealed class SerializableTypeIdResolver
 
         public override ITypeSymbol? VisitIdentifierName( IdentifierNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol? DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
+        public override ITypeSymbol DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
 
-        public override ITypeSymbol? VisitPredefinedType( PredefinedTypeSyntax node )
+        public override ITypeSymbol VisitPredefinedType( PredefinedTypeSyntax node )
         {
             ITypeSymbol result = node.Keyword.Kind() switch
             {
