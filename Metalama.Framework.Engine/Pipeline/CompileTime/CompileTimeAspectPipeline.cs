@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -35,6 +36,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
             domain ) { }
+
+        protected override SyntaxGenerationOptions GetSyntaxGenerationOptions()
+        {
+            var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
+
+            return new SyntaxGenerationOptions( projectOptions.CodeFormattingOptions );
+        }
 
         private bool VerifyLanguageVersion( Compilation compilation, IDiagnosticAdder diagnosticAdder )
         {

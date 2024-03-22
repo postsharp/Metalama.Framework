@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Preview;
+using Metalama.Framework.DesignTime.VisualStudio.Preview;
 using Metalama.Framework.Engine.DesignTime;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -16,12 +18,12 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public sealed class PreviewTests : UnitTestClass
+public sealed class PreviewTests : DesignTimeTestBase
 {
     private const string _mainProjectName = "master";
 
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
-
+    
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
         base.ConfigureServices( services );
@@ -67,6 +69,7 @@ public sealed class PreviewTests : UnitTestClass
             references = null;
         }
 
+        
         var projectKey = workspace.AddOrUpdateProject( _mainProjectName, code, references );
 
         var service = new TransformationPreviewServiceImpl( serviceProvider );
@@ -75,10 +78,21 @@ public sealed class PreviewTests : UnitTestClass
         Assert.Empty( result.ErrorMessages ?? Array.Empty<string>() );
         Assert.True( result.IsSuccessful );
         Assert.NotNull( result.TransformedSyntaxTree );
+        
+        // In production, the formatting happens in the user process. For tests, we run it separately.
+        var document = workspace.GetDocument( _mainProjectName, previewedSyntaxTreeName );
 
-        var text = await result.TransformedSyntaxTree!.ToSyntaxTree( CSharpParseOptions.Default ).GetTextAsync();
+        var formattedDocument = await UserProcessTransformationPreviewService.FormatOutputAsync( document, result, default );
 
-        return text.ToString();
+
+        var text = await formattedDocument.GetTextAsync();
+
+        var s = text.ToString();
+        
+        // Check that the output is formatted.
+        Assert.DoesNotContain( "global::", s );
+        
+        return s;
     }
 
     [Fact]
@@ -191,9 +205,9 @@ class Fabric : ProjectFabric
 
         var result = await this.RunPreviewAsync( code, "target.cs" );
 
-        Assert.Contains( "Field=\"TheValue\"", result, StringComparison.Ordinal );
+        Assert.Contains( "Field = \"TheValue\"", result, StringComparison.Ordinal );
     }
-
+    
     [Fact]
     public async Task WithTypeFabric()
     {

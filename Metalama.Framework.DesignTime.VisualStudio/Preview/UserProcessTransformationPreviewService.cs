@@ -56,6 +56,17 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
                 return;
             }
 
+            var formattedSyntaxTree = await FormatOutputAsync( document, unformattedResult, cancellationToken );
+
+            result[0] = PreviewTransformationResult.Success( formattedSyntaxTree.AssertNotNull(), unformattedResult.ErrorMessages );
+        }
+
+        internal static async Task<SyntaxTree?> FormatOutputAsync(
+            Document document,
+            SerializablePreviewTransformationResult unformattedResult,
+            CancellationToken cancellationToken )
+        {
+            var syntaxTree = await document.GetSyntaxTreeAsync( cancellationToken );
             var newSyntaxTree = unformattedResult.TransformedSyntaxTree!;
 
             var newDocument = document.WithSyntaxRoot(
@@ -68,7 +79,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var formattedDocument = await OutputCodeFormatter.FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
             var formattedSyntaxTree = await formattedDocument.Document.GetSyntaxTreeAsync( cancellationToken );
 
-            result[0] = PreviewTransformationResult.Success( formattedSyntaxTree.AssertNotNull(), unformattedResult.ErrorMessages );
+            return formattedSyntaxTree;
         }
     }
 }

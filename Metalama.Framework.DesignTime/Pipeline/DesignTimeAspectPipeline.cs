@@ -22,6 +22,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
@@ -1201,11 +1202,6 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
     {
         var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
-
-        if ( projectOptions.CodeFormattingOptions != CodeFormattingOptions.Formatted )
-        {
-            throw new AssertionFailedException( "Code formatting must be enabled in the design-time pipeline." );
-        }
 
         var tryInitialize = base.TryInitialize( diagnosticAdder, compilation, projectLicenseInfo, compileTimeTreesHint, cancellationToken, out configuration );
 

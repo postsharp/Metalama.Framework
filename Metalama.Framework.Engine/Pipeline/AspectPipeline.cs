@@ -89,6 +89,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
         internal int PipelineInitializationCount { get; private set; }
 
+        protected abstract SyntaxGenerationOptions GetSyntaxGenerationOptions();
+
         protected virtual bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
@@ -220,11 +222,9 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Set NormalizeWhitespace setting for the compilation.
-            var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
 
             projectServiceProviderWithProject =
-                projectServiceProviderWithProject.WithService(
-                    new SyntaxGenerationOptions(projectOptions.CodeFormattingOptions ) );
+                projectServiceProviderWithProject.WithService( this.GetSyntaxGenerationOptions() );
 
             // Add MetricsManager.
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

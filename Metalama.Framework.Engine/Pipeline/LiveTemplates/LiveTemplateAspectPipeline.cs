@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Services;
@@ -39,6 +40,8 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         this._aspectSelector = aspectSelector;
         this._targetSymbol = targetSymbol;
     }
+
+    protected override SyntaxGenerationOptions GetSyntaxGenerationOptions() => SyntaxGenerationOptions.Formatted;
 
     private protected override PipelineContributorSources CreatePipelineContributorSources(
         AspectPipelineConfiguration configuration,
