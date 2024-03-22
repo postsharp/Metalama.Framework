@@ -213,7 +213,6 @@ namespace Metalama.Framework.Engine.Linking
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.SourceCompilationModel,
-                    input.InputCompilationModel.PartialCompilation,
                     input.IntermediateCompilation,
                     input.InjectionRegistry,
                     input.LateTransformationRegistry,

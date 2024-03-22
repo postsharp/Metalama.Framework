@@ -84,6 +84,8 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
+            // ReSharper disable RedundantLinebreak
+
             // Async iterator can have empty body and still be in iterator, returning anything is invalid.
             var block = syntaxGenerator.FormattedBlock(
                 !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
@@ -107,6 +109,8 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                                 Token( SyntaxKind.SemicolonToken ) )
                         ]
                     : [] );
+            
+            // ReSharper enable RedundantLinebreak
 
             var method =
                 MethodDeclaration(

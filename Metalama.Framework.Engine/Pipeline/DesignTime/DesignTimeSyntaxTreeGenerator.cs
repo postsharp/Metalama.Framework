@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,7 +36,6 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
-            var context = initialCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
             var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
             var useNullability = partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
@@ -419,14 +417,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 LineFeed );
         }
 
-        private class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, RefKind RefKind)[]>
+        private sealed class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, RefKind RefKind)[]>
         {
-            private readonly StructuralSymbolComparer _symbolComparer;
-
-            public ConstructorSignatureEqualityComparer()
-            {
-                this._symbolComparer = StructuralSymbolComparer.Default;
-            }
+            private readonly StructuralSymbolComparer _symbolComparer = StructuralSymbolComparer.Default;
 
             public bool Equals( (ISymbol Type, RefKind RefKind)[]? x, (ISymbol Type, RefKind RefKind)[]? y )
             {
@@ -456,7 +449,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 return true;
             }
 
-            public int GetHashCode( [DisallowNull] (ISymbol Type, RefKind RefKind)[] obj )
+            public int GetHashCode( (ISymbol Type, RefKind RefKind)[] obj )
             {
                 var hashCode = obj.Length;
 

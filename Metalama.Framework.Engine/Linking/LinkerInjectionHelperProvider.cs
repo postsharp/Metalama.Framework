@@ -110,7 +110,7 @@ internal sealed class LinkerInjectionHelperProvider
     public TypeSyntax GetAuxiliaryType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
         => this.GetNumberedHelperType( context, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
 
-    public TypeSyntax GetNumberedHelperType(
+    private TypeSyntax GetNumberedHelperType(
         SyntaxGenerationContext context,
         string baseTypeName,
         string description,
@@ -206,7 +206,7 @@ internal sealed class LinkerInjectionHelperProvider
 
         var code = @$"
 {(useNullability ? "#nullable enable" : "")}
-// NOTE: Currently all references to this type should be removed by the linker and where not possible, an error should be produced (e.g. uninlineable declarations).
+// NOTE: Currently all references to this type should be removed by the linker and where not possible, an error should be produced (e.g. non-inlineable declarations).
 internal class {HelperTypeName}
 {{
     // Members used for special aspect references, which do not use normal expression such as invocation.
