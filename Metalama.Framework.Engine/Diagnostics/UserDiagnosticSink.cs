@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                 foreach ( var diagnostic in orderedDiagnostics )
                 {
-                    if ( diagnostic.Properties?.TryGetValue( DeduplicationPropertyKey, out var deduplicationKey ) == true
+                    if ( diagnostic.Properties.TryGetValue( DeduplicationPropertyKey, out var deduplicationKey )
                          && deduplicationKey != null )
                     {
                         deduplicatedDiagnostics ??= new();

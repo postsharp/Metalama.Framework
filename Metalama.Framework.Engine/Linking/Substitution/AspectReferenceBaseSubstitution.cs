@@ -59,12 +59,9 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
     }
 
     protected override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
-    {
-        return
-            IdentifierName( "__LINKER_TO_BE_REMOVED__" )
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
-                .WithTriviaFromIfNecessary( currentNode, this._syntaxGenerationOptions.PreserveTrivia );
-    }
+        => IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
+            .WithTriviaFromIfNecessary( currentNode, this._syntaxGenerationOptions.PreserveTrivia );
 
     protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
@@ -92,10 +89,8 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
     }
 
     protected override SyntaxNode SubstituteElementAccess( ElementAccessExpressionSyntax currentNode )
-    {
-        return currentNode
+        => currentNode
             .WithExpression(
                 BaseExpression()
                     .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
-    }
 }

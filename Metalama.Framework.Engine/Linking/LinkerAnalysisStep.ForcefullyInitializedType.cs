@@ -3,21 +3,20 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerAnalysisStep
 {
-    internal sealed partial class LinkerAnalysisStep
+    private struct ForcefullyInitializedType
     {
-        private struct ForcefullyInitializedType
+        public IReadOnlyList<IntermediateSymbolSemantic<IMethodSymbol>> Constructors { get; }
+
+        public IReadOnlyList<ISymbol> InitializedSymbols { get; }
+
+        public ForcefullyInitializedType( IReadOnlyList<IntermediateSymbolSemantic<IMethodSymbol>> constructors, IReadOnlyList<ISymbol> initializedSymbols )
         {
-            public IReadOnlyList<IntermediateSymbolSemantic<IMethodSymbol>> Constructors { get; }
-
-            public IReadOnlyList<ISymbol> InitializedSymbols { get; }
-
-            public ForcefullyInitializedType( IReadOnlyList<IntermediateSymbolSemantic<IMethodSymbol>> constructors, IReadOnlyList<ISymbol> initializedSymbols )
-            {
-                this.Constructors = constructors;
-                this.InitializedSymbols = initializedSymbols;
-            }
+            this.Constructors = constructors;
+            this.InitializedSymbols = initializedSymbols;
         }
     }
 }

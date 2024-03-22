@@ -1,14 +1,18 @@
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
+#if TESTOPTIONS
+// @RequiredConstant(ROSLYN_4_8_0_OR_GREATER)
+#endif
+
+#if ROSLYN_4_8_0_OR_GREATER
+
 using System;
-using System.Collections.Concurrent;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33813;
 
 public class MyAttribute : Attribute
 {
 }
+
+#pragma warning disable CS0067 // The event 'TestClass<T>.EventField' is never used
 
 // <target>
 [type: My]
@@ -81,3 +85,5 @@ public record class TestRecord(
 [type: My]
 [return: My]
 public delegate void TestDelegate([param: My] int x);
+
+#endif

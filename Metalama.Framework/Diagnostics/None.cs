@@ -8,5 +8,5 @@ namespace Metalama.Framework.Diagnostics
     /// A type to be used as generic argument of <see cref="DiagnosticDefinition{T}"/> when there is no parameter in the message.
     /// </summary>
     [CompileTime]
-    public readonly struct None { }
+    public readonly struct None;
 }

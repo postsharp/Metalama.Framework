@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace Metalama.Tool.Divorce;
 
-internal class DivorceService
+internal sealed class DivorceService
 {
     private readonly ILogger _logger;
     private readonly string _path;

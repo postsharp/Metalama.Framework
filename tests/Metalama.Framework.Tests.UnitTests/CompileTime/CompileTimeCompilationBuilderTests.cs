@@ -161,7 +161,8 @@ class ReferencingClass
             var referencedCompilationModified = referencedCompilation.WithOptions( referencedCompilation.Options.WithAllowUnsafe( !referencedCompilation.Options.AllowUnsafe ) );
 
             var roslynCompilation = TestCompilationFactory.CreateCSharpCompilation(
-                referencingCode, additionalReferences: [referencedCompilation.ToMetadataReference(), referencedCompilationModified.ToMetadataReference()] );
+                referencingCode,
+                additionalReferences: [referencedCompilation.ToMetadataReference(), referencedCompilationModified.ToMetadataReference()] );
 
             using var testContext = this.CreateTestContext();
             var domain = testContext.Domain;

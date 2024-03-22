@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// <summary>
 /// Provide application information stored using <see cref="AssemblyMetadataAttribute"/>.
 /// </summary>
-internal class SourceTransformerApplicationInfo : ApplicationInfoBase
+internal sealed class SourceTransformerApplicationInfo : ApplicationInfoBase
 {
     private readonly bool _ignoreUnattendedProcess;
 

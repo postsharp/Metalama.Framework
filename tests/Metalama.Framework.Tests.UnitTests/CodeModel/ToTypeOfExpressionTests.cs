@@ -71,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         {
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilationModel( "/* nothing */" );
-            var syntaxSerializationContext = new SyntaxSerializationContext( compilation , SyntaxGenerationOptions.Proof );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Proof );
 
             var functionPointerTypeSymbol = compilation.GetRoslynCompilation()
                 .CreateFunctionPointerTypeSymbol(

@@ -402,9 +402,6 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
         => this._eligibilityHelper.AssertNotNull().GetIneligibilityJustification( requestedEligibility, describedObject );
 
-    ITemplateReflectionContext IAspectClassImpl.GetTemplateReflectionContext( CompilationContext compilationContext )
-        => this.GetTemplateReflectionContext( compilationContext );
-
     internal IAspect CreateDefaultInstance()
         => this._userCodeInvoker.Invoke(
             () => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull(),

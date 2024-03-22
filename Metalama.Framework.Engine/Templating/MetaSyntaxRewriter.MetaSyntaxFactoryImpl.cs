@@ -23,8 +23,6 @@ namespace Metalama.Framework.Engine.Templating
 
             public ReflectionMapper ReflectionMapper { get; }
 
-            public ExpressionSyntax Null => this.LiteralExpression( this.Kind( SyntaxKind.NullLiteralExpression ) );
-
             public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
 
             public static TypeSyntax Type( ITypeSymbol type )

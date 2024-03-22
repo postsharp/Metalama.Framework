@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
             };
         }
 
-        public IEnumerable<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType )
+        internal IEnumerable<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType )
             => this._relationships[baseType]
                 .SelectManyRecursiveDistinct( t => this._relationships[t] );
 

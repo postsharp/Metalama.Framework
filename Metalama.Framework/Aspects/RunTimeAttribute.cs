@@ -15,4 +15,4 @@ namespace Metalama.Framework.Aspects;
     AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
     | AttributeTargets.Assembly | AttributeTargets.ReturnValue | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field
     | AttributeTargets.Constructor | AttributeTargets.Event | AttributeTargets.Parameter | AttributeTargets.GenericParameter )]
-public sealed class RunTimeAttribute : ScopeAttribute { }
+public sealed class RunTimeAttribute : ScopeAttribute;

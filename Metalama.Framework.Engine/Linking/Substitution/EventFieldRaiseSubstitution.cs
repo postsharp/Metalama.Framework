@@ -6,43 +6,42 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking.Substitution
+namespace Metalama.Framework.Engine.Linking.Substitution;
+
+/// <summary>
+/// Substitutes accesses to event field delegate, i.e. the backing field.
+/// </summary>
+internal sealed class EventFieldRaiseSubstitution : SyntaxNodeSubstitution
 {
-    /// <summary>
-    /// Substitutes accesses to event field delegate, i.e. the backing field.
-    /// </summary>
-    internal sealed class EventFieldRaiseSubstitution : SyntaxNodeSubstitution
+    private readonly SyntaxNode _rootNode;
+    private readonly IEventSymbol _targetEvent;
+
+    public EventFieldRaiseSubstitution( CompilationContext compilationContext, SyntaxNode rootNode, IEventSymbol targetEvent ) : base( compilationContext )
     {
-        private readonly SyntaxNode _rootNode;
-        private readonly IEventSymbol _targetEvent;
+        this._rootNode = rootNode;
+        this._targetEvent = targetEvent;
+    }
 
-        public EventFieldRaiseSubstitution( CompilationContext compilationContext, SyntaxNode rootNode, IEventSymbol targetEvent ) : base( compilationContext )
+    public override SyntaxNode TargetNode => this._rootNode;
+
+    public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    {
+        var targetName =
+            this._targetEvent.IsEventFieldIntroduction()
+                ? LinkerRewritingDriver.GetBackingFieldName( this._targetEvent )
+                : LinkerRewritingDriver.GetOriginalImplMemberName( this._targetEvent );
+
+        switch ( currentNode )
         {
-            this._rootNode = rootNode;
-            this._targetEvent = targetEvent;
-        }
+            case IdentifierNameSyntax:
+                return IdentifierName( targetName );
 
-        public override SyntaxNode TargetNode => this._rootNode;
+            case MemberAccessExpressionSyntax { Name: IdentifierNameSyntax } memberAccess:
+                return
+                    memberAccess.WithName( IdentifierName( targetName ) );
 
-        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
-        {
-            var targetName =
-                this._targetEvent.IsEventFieldIntroduction()
-                    ? LinkerRewritingDriver.GetBackingFieldName( this._targetEvent )
-                    : LinkerRewritingDriver.GetOriginalImplMemberName( this._targetEvent );
-
-            switch ( currentNode )
-            {
-                case IdentifierNameSyntax:
-                    return IdentifierName( targetName );
-
-                case MemberAccessExpressionSyntax { Name: IdentifierNameSyntax } memberAccess:
-                    return
-                        memberAccess.WithName( IdentifierName( targetName ) );
-
-                default:
-                    throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
-            }
+            default:
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
         }
     }
 }

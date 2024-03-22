@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Data;
 using System.Linq;
 using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -1655,8 +1654,6 @@ internal sealed class AdviceFactory : IAdviceFactory
                 Array.Empty<IInterfaceMemberImplementationResult>() );
         }
 
-        AdviceResult<T> result;
-
         this.CheckContractEligibility( targetDeclaration, direction );
 
         direction = ContractAspectHelper.GetEffectiveDirection( direction, targetDeclaration );
@@ -1675,7 +1672,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             this.GetObjectReader( tags ),
             this.GetObjectReader( args ) );
 
-        result = this.ExecuteAdvice<T>( advice );
+        var result = this.ExecuteAdvice<T>( advice );
 
         return result;
     }

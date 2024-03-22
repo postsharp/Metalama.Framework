@@ -9,50 +9,47 @@ using System;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers;
+
+internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
 {
-    internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
+    public IndexerInvoker( IIndexer indexer, InvokerOptions? options = default, object? target = null ) : base( indexer, options, target ) { }
+
+    public object GetValue( params object?[] args )
+        => new SyntaxUserExpression(
+            this.CreateIndexerAccess( args ),
+            this.Member.Type,
+            isAssignable: this.Member.Writeability != Writeability.None );
+
+    public object SetValue( object? value, params object?[] args )
     {
-        public IndexerInvoker( IIndexer indexer, InvokerOptions? options = default, object? target = null ) : base( indexer, options, target ) { }
+        var propertyAccess = this.CreateIndexerAccess( args );
 
-        public object GetValue( params object?[] args )
-        {
-            return new SyntaxUserExpression(
-                this.CreateIndexerAccess( args ),
-                this.Member.Type,
-                isAssignable: this.Member.Writeability != Writeability.None );
-        }
+        var expression = AssignmentExpression(
+            SyntaxKind.SimpleAssignmentExpression,
+            propertyAccess,
+            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
 
-        public object SetValue( object? value, params object?[] args )
-        {
-            var propertyAccess = this.CreateIndexerAccess( args );
-
-            var expression = AssignmentExpression(
-                SyntaxKind.SimpleAssignmentExpression,
-                propertyAccess,
-                TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
-
-            return new SyntaxUserExpression( expression, this.Member.Type, isAssignable: true );
-        }
-
-        private ExpressionSyntax CreateIndexerAccess( object?[]? args )
-        {
-            args ??= Array.Empty<object>();
-
-            var receiverInfo = this.GetReceiverInfo();
-            var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
-            var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ).AssertNotNull();
-
-            // TODO: Aspect references.
-
-            var expression = ElementAccessExpression( receiverSyntax ).AddArgumentListArguments( argExpressions.SelectAsArray( e => Argument( e.Syntax ) ) );
-
-            return expression;
-        }
-
-        public IIndexerInvoker With( InvokerOptions options ) => this.Options == options ? this : new IndexerInvoker( this.Member, options );
-
-        public IIndexerInvoker With( object? target, InvokerOptions options = default )
-            => this.Target == target && this.Options == options ? this : new IndexerInvoker( this.Member, options, target );
+        return new SyntaxUserExpression( expression, this.Member.Type, isAssignable: true );
     }
+
+    private ExpressionSyntax CreateIndexerAccess( object?[]? args )
+    {
+        args ??= Array.Empty<object>();
+
+        var receiverInfo = this.GetReceiverInfo();
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
+        var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ).AssertNotNull();
+
+        // TODO: Aspect references.
+
+        var expression = ElementAccessExpression( receiverSyntax ).AddArgumentListArguments( argExpressions.SelectAsArray( e => Argument( e.Syntax ) ) );
+
+        return expression;
+    }
+
+    public IIndexerInvoker With( InvokerOptions options ) => this.Options == options ? this : new IndexerInvoker( this.Member, options );
+
+    public IIndexerInvoker With( object? target, InvokerOptions options = default )
+        => this.Target == target && this.Options == options ? this : new IndexerInvoker( this.Member, options, target );
 }

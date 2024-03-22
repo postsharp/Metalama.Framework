@@ -22,7 +22,7 @@ internal static class SubstitutedMemberFactory
                 .GetTarget( ReferenceResolutionOptions.Default )
                 .Parameters[parameter.Index]).ToTypedRef(),
             IMemberOrNamedType member => Substitute( member, genericMap, null ).As<T>(),
-            _ => throw new AssertionFailedException( $"Unexpected declaration of type {sourceDeclaration?.GetType()}" )
+            _ => throw new AssertionFailedException( $"Unexpected declaration of type {sourceDeclaration.GetType()}" )
         };
 
     // ReSharper disable once MethodOverloadWithOptionalParameter
@@ -50,7 +50,7 @@ internal static class SubstitutedMemberFactory
                 }
 
             default:
-                throw new AssertionFailedException( $"Unexpected source declaration type {sourceDeclaration?.GetType()}" );
+                throw new AssertionFailedException( $"Unexpected source declaration type {sourceDeclaration.GetType()}" );
         }
     }
     
@@ -59,6 +59,6 @@ internal static class SubstitutedMemberFactory
         => sourceDeclaration switch
         {
             BuiltMethod method => new SubstitutedMethod( method, substitutedType ),
-            _ => throw new AssertionFailedException( $"Unexpect declaration type {sourceDeclaration?.GetType()}" )
+            _ => throw new AssertionFailedException( $"Unexpect declaration type {sourceDeclaration.GetType()}" )
         };
 }

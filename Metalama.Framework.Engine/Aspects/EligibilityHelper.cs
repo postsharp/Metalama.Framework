@@ -17,7 +17,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal partial class EligibilityHelper
+internal sealed partial class EligibilityHelper
 {
     private readonly object _prototype;
     private readonly ProjectServiceProvider _serviceProvider;
@@ -37,9 +37,7 @@ internal partial class EligibilityHelper
     }
 
     private Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethod( Type type )
-    {
-        return this._tryInitializeEligibilityMethods.GetOrAdd( type, GetTryInitializeEligibilityMethodCore );
-    }
+        => this._tryInitializeEligibilityMethods.GetOrAdd( type, GetTryInitializeEligibilityMethodCore );
 
     private static Func<EligibilityHelper, IDiagnosticAdder, bool> GetTryInitializeEligibilityMethodCore( Type type )
     {
@@ -110,9 +108,7 @@ internal partial class EligibilityHelper
     }
 
     public void Add( Type type, IEligibilityRule<IDeclaration> eligibilityRule )
-    {
-        this._eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( type, eligibilityRule ) );
-    }
+        => this._eligibilityRules.Add( new KeyValuePair<Type, IEligibilityRule<IDeclaration>>( type, eligibilityRule ) );
 
     public EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable )
     {

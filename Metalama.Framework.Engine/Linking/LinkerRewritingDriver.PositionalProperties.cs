@@ -20,177 +20,176 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 //  * Default semantic.
 //  * Base semantic (if the property was introduced).
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed partial class LinkerRewritingDriver
 {
-    internal sealed partial class LinkerRewritingDriver
+    private IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
+        ParameterSyntax recordParameter,
+        IPropertySymbol symbol,
+        SyntaxGenerationContext generationContext )
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
-            ParameterSyntax recordParameter,
-            IPropertySymbol symbol,
-            SyntaxGenerationContext generationContext )
+        if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
         {
-            if ( this.InjectionRegistry.IsOverrideTarget( symbol ) )
+            var members = new List<MemberDeclarationSyntax>();
+            var lastOverride = (IPropertySymbol) this.InjectionRegistry.GetLastOverride( symbol );
+
+            if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
             {
-                var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IPropertySymbol) this.InjectionRegistry.GetLastOverride( symbol );
-
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
-                {
-                    // Backing field for auto property.
-                    members.Add(
-                        this.GetPropertyBackingField(
-                            recordParameter.Type.AssertNotNull(),
-                            EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
-                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
-                            symbol ) );
-                }
-
-                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
-                {
-                    members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
-                }
-                else
-                {
-                    members.Add( this.GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
-                }
-
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
-                     && this.ShouldGenerateEmptyMember( symbol ) )
-                {
-                    members.Add(
-                        this.GetEmptyImplProperty(
-                            symbol,
-                            List<AttributeListSyntax>(),
-                            recordParameter.Type.AssertNotNull() ) );
-                }
-
-                return members;
+                // Backing field for auto property.
+                members.Add(
+                    this.GetPropertyBackingField(
+                        recordParameter.Type.AssertNotNull(),
+                        EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
+                        FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
+                        symbol ) );
             }
-            else if ( this.InjectionRegistry.IsOverride( symbol ) )
-            {
-                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
-                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
-                {
-                    return Array.Empty<MemberDeclarationSyntax>();
-                }
 
-                return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+            if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
+            {
+                members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
             }
             else
             {
-                throw new AssertionFailedException( $"'{symbol}' is not an override target" );
+                members.Add( this.GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
             }
 
-            MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
+            if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                 && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                 && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                var generatedAccessors = new List<AccessorDeclarationSyntax>
-                {
-                    GetLinkedAccessor(
-                        semanticKind,
-                        SyntaxKind.GetAccessorDeclaration,
-                        symbol.GetMethod.AssertNotNull() ),
-                    GetLinkedAccessor(
-                        semanticKind,
-                        symbol.SetMethod.AssertNotNull().IsInitOnly
-                            ? SyntaxKind.InitAccessorDeclaration
-                            : SyntaxKind.SetAccessorDeclaration,
-                        symbol.SetMethod.AssertNotNull() )
-                };
-
-                return
-                    PropertyDeclaration(
-                        FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                        recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
-                        null,
-                        recordParameter.Identifier,
-                        AccessorList( List( generatedAccessors ) ),
-                        null,
-                        null,
-                        default );
+                members.Add(
+                    this.GetEmptyImplProperty(
+                        symbol,
+                        List<AttributeListSyntax>(),
+                        recordParameter.Type.AssertNotNull() ) );
             }
 
-            AccessorDeclarationSyntax GetLinkedAccessor(
-                IntermediateSymbolSemanticKind semanticKind,
-                SyntaxKind accessorSyntaxKind,
-                IMethodSymbol methodSymbol )
+            return members;
+        }
+        else if ( this.InjectionRegistry.IsOverride( symbol ) )
+        {
+            if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                 || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
             {
-                var linkedBody = this.GetSubstitutedBody(
-                    methodSymbol.ToSemantic( semanticKind ),
-                    new SubstitutionContext(
-                        this,
-                        generationContext,
-                        new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
-
-                var body =
-                    linkedBody
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
-
-                return
-                    AccessorDeclaration(
-                            accessorSyntaxKind,
-                            List<AttributeListSyntax>(),
-                            TokenList(),
-                            Token(
-                                accessorSyntaxKind switch
-                                {
-                                    SyntaxKind.GetAccessorDeclaration => SyntaxKind.GetKeyword,
-                                    SyntaxKind.SetAccessorDeclaration => SyntaxKind.SetKeyword,
-                                    SyntaxKind.InitAccessorDeclaration => SyntaxKind.InitKeyword,
-                                    _ => throw new AssertionFailedException( $"Unexpected syntax kind {accessorSyntaxKind}." )
-                                } ),
-                            null,
-                            null,
-                            default )
-                        .WithBody( body );
+                return Array.Empty<MemberDeclarationSyntax>();
             }
+
+            return new[] { GetLinkedDeclaration( IntermediateSymbolSemanticKind.Default ) };
+        }
+        else
+        {
+            throw new AssertionFailedException( $"'{symbol}' is not an override target" );
         }
 
-        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty( SyntaxToken identifier, TypeSyntax type, IPropertySymbol targetSymbol )
+        MemberDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind )
         {
-            var getAccessor =
-                AccessorDeclaration(
+            var generatedAccessors = new List<AccessorDeclarationSyntax>
+            {
+                GetLinkedAccessor(
+                    semanticKind,
                     SyntaxKind.GetAccessorDeclaration,
-                    SyntaxFactoryEx.FormattedBlock(
-                        ReturnStatement(
-                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                            GetInvocationTarget(),
-                            Token( SyntaxKind.SemicolonToken ) ) ) );
-
-            var setAccessor =
-                AccessorDeclaration(
-                    targetSymbol.GetMethod.AssertNotNull().IsInitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    SyntaxFactoryEx.FormattedBlock(
-                        ExpressionStatement(
-                            AssignmentExpression(
-                                SyntaxKind.SimpleAssignmentExpression,
-                                GetInvocationTarget(),
-                                IdentifierName( "value" ) ) ) ) );
+                    symbol.GetMethod.AssertNotNull() ),
+                GetLinkedAccessor(
+                    semanticKind,
+                    symbol.SetMethod.AssertNotNull().IsInitOnly
+                        ? SyntaxKind.InitAccessorDeclaration
+                        : SyntaxKind.SetAccessorDeclaration,
+                    symbol.SetMethod.AssertNotNull() )
+            };
 
             return
                 PropertyDeclaration(
-                    List<AttributeListSyntax>(),
+                    FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
                     TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                    type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                    recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
                     null,
-                    identifier,
-                    AccessorList( List( new[] { getAccessor, setAccessor } ) ),
+                    recordParameter.Identifier,
+                    AccessorList( List( generatedAccessors ) ),
                     null,
                     null,
                     default );
+        }
 
-            ExpressionSyntax GetInvocationTarget()
+        AccessorDeclarationSyntax GetLinkedAccessor(
+            IntermediateSymbolSemanticKind semanticKind,
+            SyntaxKind accessorSyntaxKind,
+            IMethodSymbol methodSymbol )
+        {
+            var linkedBody = this.GetSubstitutedBody(
+                methodSymbol.ToSemantic( semanticKind ),
+                new SubstitutionContext(
+                    this,
+                    generationContext,
+                    new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
+
+            var body =
+                linkedBody
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+
+            return
+                AccessorDeclaration(
+                        accessorSyntaxKind,
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        Token(
+                            accessorSyntaxKind switch
+                            {
+                                SyntaxKind.GetAccessorDeclaration => SyntaxKind.GetKeyword,
+                                SyntaxKind.SetAccessorDeclaration => SyntaxKind.SetKeyword,
+                                SyntaxKind.InitAccessorDeclaration => SyntaxKind.InitKeyword,
+                                _ => throw new AssertionFailedException( $"Unexpected syntax kind {accessorSyntaxKind}." )
+                            } ),
+                        null,
+                        null,
+                        default )
+                    .WithBody( body );
+        }
+    }
+
+    private PropertyDeclarationSyntax GetTrampolineForPositionalProperty( SyntaxToken identifier, TypeSyntax type, IPropertySymbol targetSymbol )
+    {
+        var getAccessor =
+            AccessorDeclaration(
+                SyntaxKind.GetAccessorDeclaration,
+                SyntaxFactoryEx.FormattedBlock(
+                    ReturnStatement(
+                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
+                        GetInvocationTarget(),
+                        Token( SyntaxKind.SemicolonToken ) ) ) );
+
+        var setAccessor =
+            AccessorDeclaration(
+                targetSymbol.GetMethod.AssertNotNull().IsInitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
+                SyntaxFactoryEx.FormattedBlock(
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            GetInvocationTarget(),
+                            IdentifierName( "value" ) ) ) ) );
+
+        return
+            PropertyDeclaration(
+                List<AttributeListSyntax>(),
+                TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                type.WithTrailingTriviaIfNecessary( ElasticSpace, this.SyntaxGenerationOptions.NormalizeWhitespace ),
+                null,
+                identifier,
+                AccessorList( List( new[] { getAccessor, setAccessor } ) ),
+                null,
+                null,
+                default );
+
+        ExpressionSyntax GetInvocationTarget()
+        {
+            if ( targetSymbol.IsStatic )
             {
-                if ( targetSymbol.IsStatic )
-                {
-                    return IdentifierName( targetSymbol.Name );
-                }
-                else
-                {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
-                }
+                return IdentifierName( targetSymbol.Name );
+            }
+            else
+            {
+                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
             }
         }
     }

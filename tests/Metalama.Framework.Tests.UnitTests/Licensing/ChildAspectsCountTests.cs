@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing;
 
-public class ChildAspectsCountTests : LicensingTestsBase
+public sealed class ChildAspectsCountTests : LicensingTestsBase
 {
     private const string _namespace = "ChildAspectsCountTests";
     
@@ -141,6 +141,7 @@ using System.Linq;
 
     private void AssertTooManyAspectClasses( DiagnosticBag diagnostics )
     {
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.Single( diagnostics, d => d.Id == LicensingDiagnosticDescriptors.TooManyAspectClasses.Id );
         Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }

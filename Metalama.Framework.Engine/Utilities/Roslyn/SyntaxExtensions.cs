@@ -196,17 +196,17 @@ public static class SyntaxExtensions
         where TNode : SyntaxNode
         => node.WithTriviaIfNecessary( new SyntaxTriviaList( leadingTrivia ), new( trailingTrivia ), preserveTrivia );
 
-    internal static TNode WithTriviaFromIfNecessary<TNode>(this TNode node, SyntaxNode fromNode, bool preserveTrivia)
+    internal static TNode WithTriviaFromIfNecessary<TNode>( this TNode node, SyntaxNode fromNode, bool preserveTrivia )
         where TNode : SyntaxNode
         => node.WithTriviaIfNecessary( fromNode.GetLeadingTrivia(), fromNode.GetTrailingTrivia(), preserveTrivia );
 
     internal static bool ShouldBePreserved( this SyntaxTriviaList trivia, bool preserveTrivia ) => preserveTrivia || trivia.ContainsDirectives();
 
-    internal static bool ShouldBePreserved( this IEnumerable<SyntaxTrivia> trivia, bool preserveTrivia ) => preserveTrivia || trivia.Any(t => t.IsDirective);
+    internal static bool ShouldBePreserved( this IEnumerable<SyntaxTrivia> trivia, bool preserveTrivia ) => preserveTrivia || trivia.Any( t => t.IsDirective );
 
     internal static bool ShouldTriviaBePreserved( this SyntaxNodeOrToken nodeOrToken, bool preserveTrivia ) => preserveTrivia || nodeOrToken.ContainsDirectives;
 
-    internal static TNode AddTriviaFromIfNecessay<TNode>( this TNode node, SyntaxNode fromNode, bool preserveTrivia )
+    internal static TNode AddTriviaFromIfNecessary<TNode>( this TNode node, SyntaxNode fromNode, bool preserveTrivia )
         where TNode : SyntaxNode
     {
         var fromLeading = fromNode.GetLeadingTrivia();

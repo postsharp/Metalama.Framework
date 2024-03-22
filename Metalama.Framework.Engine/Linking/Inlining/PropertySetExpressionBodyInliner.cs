@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Linking.Inlining;
 
-// ReSharper disable once UnusedType.Local
+// ReSharper disable once UnusedType.Global
 internal sealed class PropertySetExpressionBodyInliner : PropertyInliner
 {
     public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )

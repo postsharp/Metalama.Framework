@@ -11,5 +11,5 @@ namespace Metalama.Framework.Diagnostics
     /// <seealso href="@diagnostics"/>
     [CompileTime]
     [InternalImplement]
-    public interface IDiagnosticLocation { }
+    public interface IDiagnosticLocation;
 }

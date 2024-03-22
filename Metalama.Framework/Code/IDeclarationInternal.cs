@@ -4,5 +4,5 @@ using Metalama.Framework.Metrics;
 
 namespace Metalama.Framework.Code
 {
-    internal interface IDeclarationInternal : IDeclaration, IMeasurableInternal { }
+    internal interface IDeclarationInternal : IDeclaration, IMeasurableInternal;
 }

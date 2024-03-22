@@ -10,5 +10,5 @@ namespace Metalama.Framework.Metrics
     /// </summary>
     [InternalImplement]
     [CompileTime]
-    public interface IMeasurable { }
+    public interface IMeasurable;
 }

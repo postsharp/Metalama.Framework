@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -12,6 +13,7 @@ namespace Metalama.Framework.Options;
 /// specifies how the options are inherited.
 /// </summary>
 /// <seealso href="@exposing-options"/>
+[PublicAPI]
 [RunTimeOrCompileTime]
 [AttributeUsage( AttributeTargets.Class )]
 public sealed class HierarchicalOptionsAttribute : Attribute

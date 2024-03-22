@@ -4,17 +4,19 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-public record SyntaxGenerationOptions : IProjectService
+internal record SyntaxGenerationOptions : IProjectService
 {
     public bool NormalizeWhitespace { get; }
 
     public bool PreserveTrivia { get; }
 
-    internal SyntaxGenerationOptions( bool normalizeWhitespace, bool preserveTrivia )
+    public SyntaxGenerationOptions( bool normalizeWhitespace, bool preserveTrivia )
     {
         this.NormalizeWhitespace = normalizeWhitespace;
         this.PreserveTrivia = preserveTrivia;
     }
+    
+    // ReSharper disable once UnusedMember.Global
 
     /// <summary>
     /// Gets options for fast creation of the syntax tree when the object model does not need to be rendered as text.

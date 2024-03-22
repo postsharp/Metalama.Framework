@@ -236,7 +236,7 @@ internal static partial class SyntaxFactoryEx
         return statement;
     }
 
-    internal static SyntaxToken InvocationRefKindToken( this Code.RefKind refKind )
+    internal static SyntaxToken InvocationRefKindToken( Code.RefKind refKind )
         => refKind switch
         {
             Code.RefKind.None or Code.RefKind.In => default,

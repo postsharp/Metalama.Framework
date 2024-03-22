@@ -61,7 +61,7 @@ namespace Metalama.Tool
                                     .WithData( options )
                                     .WithDescription( "Prints the list of aspect classes used in recently built projects." );
 
-                                usage.AddCommand<ResetLicenseUsageCommands>( "reset" )
+                                usage.AddCommand<ResetLicenseUsageCommand>( "reset" )
                                     .WithData( options )
                                     .WithDescription( "Resets the license consumption data gathered for the past builds." );
                             } );

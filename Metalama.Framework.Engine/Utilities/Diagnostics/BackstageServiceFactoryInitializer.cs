@@ -5,37 +5,33 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Tools;
 using System;
 
-namespace Metalama.Framework.Engine.Utilities.Diagnostics
+namespace Metalama.Framework.Engine.Utilities.Diagnostics;
+
+public static class BackstageServiceFactoryInitializer
 {
-    public static class BackstageServiceFactoryInitializer
+    [PublicAPI]
+    public static bool IsInitialized => BackstageServiceFactory.IsInitialized;
+
+    private static BackstageInitializationOptions WithTools( BackstageInitializationOptions options )
+        => options with { AddToolsExtractor = builder => builder.AddTools() };
+
+    private static void InitializeMetalamaServices() => Logger.Initialize();
+
+    public static void Initialize( BackstageInitializationOptions options )
     {
-        [PublicAPI]
-        public static bool IsInitialized => BackstageServiceFactory.IsInitialized;
-
-        private static BackstageInitializationOptions WithTools( BackstageInitializationOptions options )
-            => options with { AddToolsExtractor = builder => builder.AddTools() };
-
-        private static void InitializeMetalamaServices()
+        if ( BackstageServiceFactory.Initialize(
+                WithTools( options ),
+                options.ApplicationInfo.Name ) )
         {
-            Logger.Initialize();
-        }
-
-        public static void Initialize( BackstageInitializationOptions options )
-        {
-            if ( BackstageServiceFactory.Initialize(
-                    WithTools( options ),
-                    options.ApplicationInfo.Name ) )
-            {
-                InitializeMetalamaServices();
-            }
-        }
-
-        public static IServiceProvider CreateInitialized( BackstageInitializationOptions options )
-        {
-            var serviceProvider = BackstageServiceFactory.CreateServiceProvider( options );
             InitializeMetalamaServices();
-
-            return serviceProvider;
         }
+    }
+
+    internal static IServiceProvider CreateInitialized( BackstageInitializationOptions options )
+    {
+        var serviceProvider = BackstageServiceFactory.CreateServiceProvider( options );
+        InitializeMetalamaServices();
+
+        return serviceProvider;
     }
 }

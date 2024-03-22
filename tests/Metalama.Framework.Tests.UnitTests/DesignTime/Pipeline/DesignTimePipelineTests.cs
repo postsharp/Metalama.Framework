@@ -1347,19 +1347,22 @@ class D{version}
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
 
-        var firstFileCode = """
+        const string firstFileCode =
+            """
             class C
             {
             }
             """;
 
-        var secondFileCode = """
+        const string secondFileCode =
+            """
             internal class C
             {
             }
             """;
 
         var options = compilation.SyntaxTrees[0].Options;
+        
         compilation = compilation.AddSyntaxTrees(
             SyntaxFactory.ParseSyntaxTree( firstFileCode, options, "C.cs" ),
             SyntaxFactory.ParseSyntaxTree( secondFileCode, options, "C.cs" ) );

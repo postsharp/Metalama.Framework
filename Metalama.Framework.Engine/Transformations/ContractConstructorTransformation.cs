@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractConstructorTransformation : ContractBaseTransformation
 {
-    public new IConstructor TargetMember => (IConstructor) base.TargetMember;
+    private new IConstructor TargetMember => (IConstructor) base.TargetMember;
 
     public ContractConstructorTransformation(
         Advice advice,

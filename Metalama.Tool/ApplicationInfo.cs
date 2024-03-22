@@ -4,7 +4,7 @@ using Metalama.Backstage.Application;
 
 namespace Metalama.Tool
 {
-    internal class ApplicationInfo : ApplicationInfoBase
+    internal sealed class ApplicationInfo : ApplicationInfoBase
     {
         public ApplicationInfo() : base( typeof(ApplicationInfo).Assembly ) { }
 

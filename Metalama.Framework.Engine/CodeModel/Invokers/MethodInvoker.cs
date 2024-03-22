@@ -13,195 +13,194 @@ using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
-namespace Metalama.Framework.Engine.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers;
+
+internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
 {
-    internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
+    public MethodInvoker( IMethod method, InvokerOptions? options = default, object? target = null ) : base( method, options, target ) { }
+
+    public object? Invoke( params object?[]? args )
     {
-        public MethodInvoker( IMethod method, InvokerOptions? options = default, object? target = null ) : base( method, options, target ) { }
-
-        public object? Invoke( params object?[]? args )
+        // For some reason, overload resolution chooses the wrong overload in the template,
+        // so redirect to the correct one.
+        if ( args is [IEnumerable<IExpression> expressionArgs] )
         {
-            // For some reason, overload resolution chooses the wrong overload in the template,
-            // so redirect to the correct one.
-            if ( args is [IEnumerable<IExpression> expressionArgs] )
-            {
-                return this.Invoke( expressionArgs );
-            }
-
-            args ??= Array.Empty<object>();
-
-            var parametersCount = this.Member.Parameters.Count;
-
-            if ( parametersCount > 0 && this.Member.Parameters[parametersCount - 1].IsParams )
-            {
-                // The this.Declaration has a 'params' param.
-                if ( args.Length < parametersCount - 1 )
-                {
-                    throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (this.Member, parametersCount - 1, args.Length) );
-                }
-            }
-            else if ( args.Length != parametersCount )
-            {
-                throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this.Member, parametersCount, args.Length) );
-            }
-
-            this.CheckInvocationOptionsAndTarget();
-
-            switch ( this.Member.MethodKind )
-            {
-                case MethodKind.Default:
-                case MethodKind.LocalFunction:
-                case MethodKind.ExplicitInterfaceImplementation:
-                    return this.InvokeDefaultMethod( args );
-
-                case MethodKind.EventAdd:
-                    return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Add( args[0] );
-
-                case MethodKind.EventRaise:
-                    return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Raise( args );
-
-                case MethodKind.EventRemove:
-                    return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Remove( args[0] );
-
-                case MethodKind.PropertyGet:
-                    switch ( this.Member.DeclaringMember )
-                    {
-                        case IProperty property:
-                            return property.With( this.Target, this.Options ).Value;
-
-                        case IIndexer indexer:
-                            return indexer.With( this.Target, this.Options ).GetValue( args );
-
-                        default:
-                            throw new AssertionFailedException( $"Unexpected declaration for a PropertyGet: '{this.Member.DeclaringMember}'." );
-                    }
-
-                case MethodKind.PropertySet:
-                    switch ( this.Member.DeclaringMember )
-                    {
-                        case IProperty property:
-                            ((FieldOrPropertyInvoker) property.With( this.Target, this.Options )).SetValue( args[0] );
-
-                            return null;
-
-                        case IIndexer indexer:
-                            indexer.With( this.Options ).SetValue( this.Target, args );
-
-                            return null;
-
-                        default:
-                            throw new AssertionFailedException( $"Unexpected declaration for a PropertySet: '{this.Member.DeclaringMember}'." );
-                    }
-
-                default:
-                    throw new NotImplementedException(
-                        $"Cannot generate syntax to invoke the this.Declaration '{this.Member}' because this.Declaration kind {this.Member.MethodKind} is not implemented." );
-            }
+            return this.Invoke( expressionArgs );
         }
 
-        public object? Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
+        args ??= Array.Empty<object>();
 
-        private object InvokeDefaultMethod( object?[] args )
+        var parametersCount = this.Member.Parameters.Count;
+
+        if ( parametersCount > 0 && this.Member.Parameters[parametersCount - 1].IsParams )
         {
-            SimpleNameSyntax name;
-
-            var receiverInfo = this.GetReceiverInfo();
-
-            if ( this.Member.IsGeneric )
+            // The this.Declaration has a 'params' param.
+            if ( args.Length < parametersCount - 1 )
             {
-                name = GenericName(
-                    Identifier( this.GetCleanTargetMemberName() ),
-                    TypeArgumentList(
-                        SeparatedList(
-                            this.Member.TypeArguments.SelectAsImmutableArray( t => CurrentGenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
-            }
-            else
-            {
-                name = IdentifierName( this.GetCleanTargetMemberName() );
-            }
-
-            var arguments = this.Member.GetArguments(
-                this.Member.Parameters,
-                TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ),
-                CurrentGenerationContext );
-
-            if ( this.Member.MethodKind == MethodKind.LocalFunction )
-            {
-                if ( receiverInfo.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
-                {
-                    throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this.Member );
-                }
-
-                return this.CreateInvocationExpression( receiverInfo.ToReceiverExpressionSyntax(), name, arguments, AspectReferenceTargetKind.Self );
-            }
-            else
-            {
-                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext ) );
-
-                return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
+                throw GeneralDiagnosticDescriptors.MemberRequiresAtLeastNArguments.CreateException( (this.Member, parametersCount - 1, args.Length) );
             }
         }
-
-        private SyntaxUserExpression CreateInvocationExpression(
-            ReceiverExpressionSyntax receiverTypedExpressionSyntax,
-            SimpleNameSyntax name,
-            ArgumentSyntax[]? arguments,
-            AspectReferenceTargetKind targetKind )
+        else if ( args.Length != parametersCount )
         {
-            ExpressionSyntax expression;
-            IType returnType;
-
-            if ( !receiverTypedExpressionSyntax.RequiresNullConditionalAccessMember )
-            {
-                returnType = this.Member.ReturnType;
-
-                ExpressionSyntax memberAccessExpression =
-                    MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name );
-
-                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
-                if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
-                {
-                    memberAccessExpression =
-                        memberAccessExpression.WithAspectReferenceAnnotation(
-                            receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );
-                }
-
-                expression =
-                    arguments != null
-                        ? InvocationExpression(
-                            memberAccessExpression,
-                            ArgumentList( SeparatedList( arguments ) ) )
-                        : InvocationExpression( memberAccessExpression );
-            }
-            else
-            {
-                returnType = this.Member.ReturnType.ToNullableType();
-
-                expression =
-                    arguments != null
-                        ? ConditionalAccessExpression(
-                            receiverTypedExpressionSyntax.Syntax,
-                            InvocationExpression(
-                                MemberBindingExpression( name ),
-                                ArgumentList( SeparatedList( arguments ) ) ) )
-                        : ConditionalAccessExpression(
-                            receiverTypedExpressionSyntax.Syntax,
-                            InvocationExpression( MemberBindingExpression( name ) ) );
-
-                // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
-                if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
-                {
-                    expression = expression.WithAspectReferenceAnnotation(
-                        receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );
-                }
-            }
-
-            return new SyntaxUserExpression( expression, returnType );
+            throw GeneralDiagnosticDescriptors.MemberRequiresNArguments.CreateException( (this.Member, parametersCount, args.Length) );
         }
 
-        public IMethodInvoker With( InvokerOptions options ) => this.Options == options ? this : new MethodInvoker( this.Member, options );
+        this.CheckInvocationOptionsAndTarget();
 
-        public IMethodInvoker With( object? target, InvokerOptions options = default )
-            => this.Target == target && this.Options == options ? this : new MethodInvoker( this.Member, options, target );
+        switch ( this.Member.MethodKind )
+        {
+            case MethodKind.Default:
+            case MethodKind.LocalFunction:
+            case MethodKind.ExplicitInterfaceImplementation:
+                return this.InvokeDefaultMethod( args );
+
+            case MethodKind.EventAdd:
+                return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Add( args[0] );
+
+            case MethodKind.EventRaise:
+                return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Raise( args );
+
+            case MethodKind.EventRemove:
+                return ((IEvent) this.Member.DeclaringMember!).With( this.Target, this.Options ).Remove( args[0] );
+
+            case MethodKind.PropertyGet:
+                switch ( this.Member.DeclaringMember )
+                {
+                    case IProperty property:
+                        return property.With( this.Target, this.Options ).Value;
+
+                    case IIndexer indexer:
+                        return indexer.With( this.Target, this.Options ).GetValue( args );
+
+                    default:
+                        throw new AssertionFailedException( $"Unexpected declaration for a PropertyGet: '{this.Member.DeclaringMember}'." );
+                }
+
+            case MethodKind.PropertySet:
+                switch ( this.Member.DeclaringMember )
+                {
+                    case IProperty property:
+                        ((FieldOrPropertyInvoker) property.With( this.Target, this.Options )).SetValue( args[0] );
+
+                        return null;
+
+                    case IIndexer indexer:
+                        indexer.With( this.Options ).SetValue( this.Target, args );
+
+                        return null;
+
+                    default:
+                        throw new AssertionFailedException( $"Unexpected declaration for a PropertySet: '{this.Member.DeclaringMember}'." );
+                }
+
+            default:
+                throw new NotImplementedException(
+                    $"Cannot generate syntax to invoke the this.Declaration '{this.Member}' because this.Declaration kind {this.Member.MethodKind} is not implemented." );
+        }
     }
+
+    public object? Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
+
+    private object InvokeDefaultMethod( object?[] args )
+    {
+        SimpleNameSyntax name;
+
+        var receiverInfo = this.GetReceiverInfo();
+
+        if ( this.Member.IsGeneric )
+        {
+            name = GenericName(
+                Identifier( this.GetCleanTargetMemberName() ),
+                TypeArgumentList(
+                    SeparatedList(
+                        this.Member.TypeArguments.SelectAsImmutableArray( t => CurrentGenerationContext.SyntaxGenerator.Type( t.GetSymbol() ) ) ) ) );
+        }
+        else
+        {
+            name = IdentifierName( this.GetCleanTargetMemberName() );
+        }
+
+        var arguments = this.Member.GetArguments(
+            this.Member.Parameters,
+            TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ),
+            CurrentGenerationContext );
+
+        if ( this.Member.MethodKind == MethodKind.LocalFunction )
+        {
+            if ( receiverInfo.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
+            {
+                throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this.Member );
+            }
+
+            return this.CreateInvocationExpression( receiverInfo.ToReceiverExpressionSyntax(), name, arguments, AspectReferenceTargetKind.Self );
+        }
+        else
+        {
+            var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext ) );
+
+            return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
+        }
+    }
+
+    private SyntaxUserExpression CreateInvocationExpression(
+        ReceiverExpressionSyntax receiverTypedExpressionSyntax,
+        SimpleNameSyntax name,
+        ArgumentSyntax[]? arguments,
+        AspectReferenceTargetKind targetKind )
+    {
+        ExpressionSyntax expression;
+        IType returnType;
+
+        if ( !receiverTypedExpressionSyntax.RequiresNullConditionalAccessMember )
+        {
+            returnType = this.Member.ReturnType;
+
+            ExpressionSyntax memberAccessExpression =
+                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name );
+
+            // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
+            if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
+            {
+                memberAccessExpression =
+                    memberAccessExpression.WithAspectReferenceAnnotation(
+                        receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );
+            }
+
+            expression =
+                arguments != null
+                    ? InvocationExpression(
+                        memberAccessExpression,
+                        ArgumentList( SeparatedList( arguments ) ) )
+                    : InvocationExpression( memberAccessExpression );
+        }
+        else
+        {
+            returnType = this.Member.ReturnType.ToNullableType();
+
+            expression =
+                arguments != null
+                    ? ConditionalAccessExpression(
+                        receiverTypedExpressionSyntax.Syntax,
+                        InvocationExpression(
+                            MemberBindingExpression( name ),
+                            ArgumentList( SeparatedList( arguments ) ) ) )
+                    : ConditionalAccessExpression(
+                        receiverTypedExpressionSyntax.Syntax,
+                        InvocationExpression( MemberBindingExpression( name ) ) );
+
+            // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
+            if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
+            {
+                expression = expression.WithAspectReferenceAnnotation(
+                    receiverTypedExpressionSyntax.AspectReferenceSpecification.WithTargetKind( targetKind ) );
+            }
+        }
+
+        return new SyntaxUserExpression( expression, returnType );
+    }
+
+    public IMethodInvoker With( InvokerOptions options ) => this.Options == options ? this : new MethodInvoker( this.Member, options );
+
+    public IMethodInvoker With( object? target, InvokerOptions options = default )
+        => this.Target == target && this.Options == options ? this : new MethodInvoker( this.Member, options, target );
 }

@@ -26,6 +26,7 @@ class A {}
         Assert.Null( typeClass.PrimaryConstructor );
         Assert.All( typeClass.Constructors, c => Assert.False( c.IsPrimary ) );
     }
+    
     [Fact]
     public void ImplicitConstructor_Struct()
     {
@@ -42,6 +43,7 @@ struct B {}
         Assert.Null( typeStruct.PrimaryConstructor );
         Assert.All( typeStruct.Constructors, c => Assert.False( c.IsPrimary ) );
     }
+    
     [Fact]
     public void ImplicitConstructor_RecordClass()
     {
@@ -58,6 +60,7 @@ record class C {}
         Assert.Null( typeRecordClass.PrimaryConstructor );
         Assert.All( typeRecordClass.Constructors, c => Assert.False( c.IsPrimary ) );
     }
+    
     [Fact]
     public void ImplicitConstructor_RecordStruct()
     {
@@ -74,6 +77,7 @@ record struct D {}
         Assert.Null( typeRecordStruct.PrimaryConstructor );
         Assert.All( typeRecordStruct.Constructors, c => Assert.False( c.IsPrimary ) );
     }
+    
     [Fact]
     public void ImplicitConstructor_Enum()
     {
@@ -90,6 +94,7 @@ enum E {}
         Assert.Null( typeEnum.PrimaryConstructor );
         Assert.All( typeEnum.Constructors, c => Assert.False( c.IsPrimary ) );
     }
+    
     [Fact]
     public void ImplicitConstructor_Delegate()
     {
@@ -287,9 +292,9 @@ struct B(int x) {}
 
         Assert.NotNull( typeStruct.PrimaryConstructor );
         Assert.Equal( 2, typeStruct.Constructors.Count );
-        Assert.Single( typeStruct.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: Code.SpecialType.Int32 }] ) );
+        Assert.Single( typeStruct.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ) );
         Assert.Single( typeStruct.Constructors.Where( c => c.Parameters is [] ) );
-        Assert.Equal( typeStruct.Constructors.Single( c => c.Parameters is [{ Type.SpecialType: Code.SpecialType.Int32 }] ), typeStruct.PrimaryConstructor );
+        Assert.Equal( typeStruct.Constructors.Single( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ), typeStruct.PrimaryConstructor );
     }
 #endif
 
@@ -312,9 +317,12 @@ record class C(int x) {}
 
         Assert.NotNull( typeRecordClass.PrimaryConstructor );
         Assert.Equal( 2, typeRecordClass.Constructors.Count );
-        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: Code.SpecialType.Int32 }] ) );
-        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: not Code.SpecialType.Int32 }] ) );
-        Assert.Equal( typeRecordClass.Constructors.Single( c => c.Parameters is [{ Type.SpecialType: Code.SpecialType.Int32 }] ), typeRecordClass.PrimaryConstructor );
+        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ) );
+        Assert.Single( typeRecordClass.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: not SpecialType.Int32 }] ) );
+
+        Assert.Equal(
+            typeRecordClass.Constructors.Single( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ),
+            typeRecordClass.PrimaryConstructor );
     }
 
     [Fact]
@@ -332,7 +340,7 @@ record struct D(int x) {}
 
         Assert.NotNull( typeRecordStruct.PrimaryConstructor );
         Assert.Equal( 2, typeRecordStruct.Constructors.Count );
-        Assert.Single( typeRecordStruct.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: Code.SpecialType.Int32 }] ) );
+        Assert.Single( typeRecordStruct.Constructors.Where( c => c.Parameters is [{ Type.SpecialType: SpecialType.Int32 }] ) );
         Assert.Single( typeRecordStruct.Constructors.Where( c => c.Parameters is [] ) );
         Assert.Equal( typeRecordStruct.Constructors.Single( c => c.Parameters.Count == 1 ), typeRecordStruct.PrimaryConstructor );
     }
@@ -360,7 +368,7 @@ record struct D(int x) {}
 
                 interface IFoo { }
 
-                {{kind}} Iface() : IFoo;
+                {{kind}} Interface() : IFoo;
                 """;
 
             if ( !kind.ContainsOrdinal( "struct" ) )
@@ -379,8 +387,8 @@ record struct D(int x) {}
             var noInitializer = compilation.Types.OfName( "NoInitializer" ).Single();
             Assert.Equal( ConstructorInitializerKind.None, noInitializer.PrimaryConstructor.InitializerKind );
 
-            var iface = compilation.Types.OfName( "Iface" ).Single();
-            Assert.Equal( ConstructorInitializerKind.None, iface.PrimaryConstructor.InitializerKind );
+            var @interface = compilation.Types.OfName( "Interface" ).Single();
+            Assert.Equal( ConstructorInitializerKind.None, @interface.PrimaryConstructor.InitializerKind );
 
             if ( !kind.ContainsOrdinal( "struct" ) )
             {

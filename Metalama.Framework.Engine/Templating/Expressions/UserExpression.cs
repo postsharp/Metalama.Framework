@@ -8,56 +8,55 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RefKind = Metalama.Framework.Code.RefKind;
 
-namespace Metalama.Framework.Engine.Templating.Expressions
+namespace Metalama.Framework.Engine.Templating.Expressions;
+
+/// <summary>
+/// Adds implementation methods to the public <see cref="IExpression"/> interface. 
+/// </summary>
+internal abstract class UserExpression : IUserExpression
 {
+    private string? _toString;
+
+    protected abstract ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext );
+
     /// <summary>
-    /// Adds implementation methods to the public <see cref="IExpression"/> interface. 
+    /// Creates a <see cref="TypedExpressionSyntaxImpl"/> for the given <see cref="SyntaxGenerationContext"/>.
     /// </summary>
-    internal abstract class UserExpression : IUserExpression
+    internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        => new(
+            this.ToSyntax( syntaxSerializationContext ),
+            this.Type,
+            syntaxSerializationContext.SyntaxGenerationContext,
+            this.IsReferenceable,
+            this.CanBeNull );
+
+    public abstract IType Type { get; }
+
+    public virtual RefKind RefKind => RefKind.None;
+
+    public virtual bool IsAssignable => false;
+
+    protected virtual bool IsReferenceable => false;
+
+    public ref object? Value => ref RefHelper.Wrap( this );
+
+    TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxGenerationContext );
+
+    public sealed override string ToString() => this._toString ??= this.ToStringCore();
+
+    protected virtual bool CanBeNull => true;
+
+    protected virtual string ToStringCore()
     {
-        private string? _toString;
+        var compilation = this.Type.GetCompilationModel();
 
-        protected abstract ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext );
-
-        /// <summary>
-        /// Creates a <see cref="TypedExpressionSyntaxImpl"/> for the given <see cref="SyntaxGenerationContext"/>.
-        /// </summary>
-        internal TypedExpressionSyntaxImpl ToTypedExpressionSyntax( SyntaxSerializationContext syntaxSerializationContext )
-            => new(
-                this.ToSyntax( syntaxSerializationContext ),
-                this.Type,
-                syntaxSerializationContext.SyntaxGenerationContext,
-                this.IsReferenceable,
-                this.CanBeNull );
-
-        public abstract IType Type { get; }
-
-        public virtual RefKind RefKind => RefKind.None;
-
-        public virtual bool IsAssignable => false;
-
-        internal virtual bool IsReferenceable => false;
-
-        public ref object? Value => ref RefHelper.Wrap( this );
-
-        TypedExpressionSyntax IUserExpression.ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => this.ToTypedExpressionSyntax( (SyntaxSerializationContext) syntaxGenerationContext );
-
-        public sealed override string ToString() => this._toString ??= this.ToStringCore();
-
-        protected virtual bool CanBeNull => true;
-
-        protected virtual string ToStringCore()
-        {
-            var compilation = this.Type.GetCompilationModel();
-
-            return
-                this.ToSyntax(
-                        new SyntaxSerializationContext(
-                            compilation,
-                            compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, isNullOblivious: false ) ) )
-                    .NormalizeWhitespace()
-                    .ToString();
-        }
+        return
+            this.ToSyntax(
+                    new SyntaxSerializationContext(
+                        compilation,
+                        compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, isNullOblivious: false ) ) )
+                .NormalizeWhitespace()
+                .ToString();
     }
 }

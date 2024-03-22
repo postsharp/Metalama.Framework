@@ -187,7 +187,11 @@ namespace {0}
 
             if ( aspectOrderApplicationBuilder.Length > 0 )
             {
-                sourceCodeBuilder.AppendLine( $"[assembly: AspectOrder( {aspectOrderApplicationBuilder} )]" );
+                sourceCodeBuilder.AppendLine( 
+#if NET
+                    CultureInfo.InvariantCulture, 
+#endif
+                    $"[assembly: AspectOrder( {aspectOrderApplicationBuilder} )]" );
             }
 
             for ( var i = 1; i <= numberOfAspects; i++ )

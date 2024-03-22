@@ -240,7 +240,7 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             for ( var i = 0; i < items.AssertNotNull().Length; i++ )
             {
-                if ( items![i] == null )
+                if ( items[i] == null )
                 {
                     throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be not null." );
                 }
@@ -282,7 +282,7 @@ namespace Metalama.Framework.Engine
             where TItem : IComparable<TItem>
         {
 #if DEBUG
-            return AssertSorted( items, static x => x, Comparison);
+            return AssertSorted( items, static x => x, Comparison );
 
             static int Comparison( TItem left, TItem right ) => left.CompareTo( right );
 #else
@@ -323,14 +323,17 @@ namespace Metalama.Framework.Engine
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
         [DebuggerStepThrough]
-        public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>( this IReadOnlyList<TItem> items, Func<TItem, TComparable> selectComparable, Comparison<TComparable> comparison )
+        public static IReadOnlyList<TItem> AssertSorted<TItem, TComparable>(
+            this IReadOnlyList<TItem> items,
+            Func<TItem, TComparable> selectComparable,
+            Comparison<TComparable> comparison )
         {
 #if DEBUG
             var materialized = items.Materialize();
 
             for ( var i = 1; i < materialized.Count; i++ )
             {
-                if ( comparison( selectComparable(materialized[i - 1]), selectComparable(materialized[i]) ) > 0 )
+                if ( comparison( selectComparable( materialized[i - 1] ), selectComparable( materialized[i] ) ) > 0 )
                 {
                     throw new AssertionFailedException( "The enumeration must be sorted according to the given comparison." );
                 }

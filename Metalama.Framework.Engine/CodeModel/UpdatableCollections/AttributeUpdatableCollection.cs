@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute, AttributeRef>, ISourceDeclarationCollection<IAttribute, AttributeRef>
+internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute, AttributeRef>
 {
     private readonly Ref<IDeclaration> _parent;
 

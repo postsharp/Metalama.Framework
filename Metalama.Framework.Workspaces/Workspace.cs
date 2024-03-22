@@ -287,6 +287,7 @@ namespace Metalama.Framework.Workspaces
                     projectProperties = new Dictionary<string, string> { ["TargetFramework"] = targetFramework };
                 }
 
+                // ReSharper disable once AccessToDisposedClosure
                 var msbuildProject = msbuildProjectCollection.LoadProject( roslynProject.FilePath!, projectProperties, null );
 
                 // Gets a Roslyn compilation.

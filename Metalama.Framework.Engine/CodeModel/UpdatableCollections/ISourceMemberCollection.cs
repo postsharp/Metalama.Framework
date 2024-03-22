@@ -15,11 +15,9 @@ internal interface ISourceMemberCollection<T> : ISourceDeclarationCollection<T>
 }
 
 internal interface ISourceDeclarationCollection<T> : ISourceDeclarationCollection<T, Ref<T>>
-    where T : class, IDeclaration
-{
-}
+    where T : class, IDeclaration;
 
-internal interface ISourceDeclarationCollection<TDeclaration, TRef> : IReadOnlyList<TRef>
+internal interface ISourceDeclarationCollection<TDeclaration, out TRef> : IReadOnlyList<TRef>
     where TDeclaration : class, IDeclaration
     where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
 {

@@ -38,15 +38,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
-    internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
-        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
-           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
-
     /// <summary>
     /// Gets the current <see cref="SyntaxGenerationContext"/>.
     /// </summary>
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
-        => CurrentSyntaxGenerationContextOrNull
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
+           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();

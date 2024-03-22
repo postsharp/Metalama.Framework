@@ -366,7 +366,7 @@ namespace Metalama.Compiler
             return transformedNode;
         }
 
-        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, isAsyncMethod: false, isIteratorMethod )
+        var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility, false, isIteratorMethod )
             .WithTrailingTrivia( ElasticSpace );
 
         return transformedNode.WithIncludeInReferenceAssemblyAnnotation()

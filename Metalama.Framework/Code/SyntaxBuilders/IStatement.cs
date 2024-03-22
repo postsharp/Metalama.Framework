@@ -12,5 +12,5 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// </summary>
     [CompileTime]
     [InternalImplement]
-    public interface IStatement { }
+    public interface IStatement;
 }

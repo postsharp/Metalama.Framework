@@ -4,4 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface IPropertyOrIndexerImpl : IPropertyOrIndexer, IFieldOrPropertyOrIndexerImpl { }
+internal interface IPropertyOrIndexerImpl : IPropertyOrIndexer, IFieldOrPropertyOrIndexerImpl;

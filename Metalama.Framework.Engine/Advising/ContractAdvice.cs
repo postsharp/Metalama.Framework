@@ -14,13 +14,10 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal sealed class ContractAdvice : Advice
 {
-    public ContractDirection Direction { get; }
-
-    public TemplateMember<IMethod> Template { get; }
-
-    public IObjectReader Tags { get; }
-
-    public IObjectReader TemplateArguments { get; }
+    private readonly ContractDirection _direction;
+    private readonly TemplateMember<IMethod> _template;
+    private readonly IObjectReader _tags;
+    private readonly IObjectReader _templateArguments;
 
     public ContractAdvice(
         IAspectInstanceInternal aspect,
@@ -36,10 +33,10 @@ internal sealed class ContractAdvice : Advice
     {
         Invariant.Assert( direction is ContractDirection.Input or ContractDirection.Output or ContractDirection.Both );
 
-        this.Direction = direction;
-        this.Template = template;
-        this.Tags = tags;
-        this.TemplateArguments = templateArguments;
+        this._direction = direction;
+        this._template = template;
+        this._tags = tags;
+        this._templateArguments = templateArguments;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.AddContract;
@@ -59,35 +56,35 @@ internal sealed class ContractAdvice : Advice
                 OverrideHelper.AddTransformationsForStructField( field.DeclaringType.ForCompilation( compilation ), this, addTransformation );
 
                 addTransformation(
-                    new ContractPropertyTransformation( this, promotedField, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractPropertyTransformation( this, promotedField, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( promotedField );
 
             case IProperty property:
-                addTransformation( new ContractPropertyTransformation( this, property, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                addTransformation( new ContractPropertyTransformation( this, property, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( property );
 
             case IIndexer indexer:
-                addTransformation( new ContractIndexerTransformation( this, indexer, null, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                addTransformation( new ContractIndexerTransformation( this, indexer, null, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( indexer );
 
             case IParameter { ContainingDeclaration: IIndexer indexer } parameter:
                 addTransformation(
-                    new ContractIndexerTransformation( this, indexer, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractIndexerTransformation( this, indexer, parameter, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( indexer );
 
             case IParameter { ContainingDeclaration: IMethod method } parameter:
                 addTransformation(
-                    new ContractMethodTransformation( this, method, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractMethodTransformation( this, method, parameter, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( method );
 
             case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
                 addTransformation(
-                    new ContractConstructorTransformation( this, constructor, parameter, this.Direction, this.Template, this.TemplateArguments, this.Tags ) );
+                    new ContractConstructorTransformation( this, constructor, parameter, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( constructor );
 

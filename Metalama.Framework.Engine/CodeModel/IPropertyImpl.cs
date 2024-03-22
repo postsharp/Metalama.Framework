@@ -5,4 +5,4 @@ using Metalama.Framework.CompileTimeContracts;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal interface IPropertyImpl : IProperty, IPropertyOrIndexerImpl, IUserExpression { }
+internal interface IPropertyImpl : IProperty, IPropertyOrIndexerImpl, IUserExpression;

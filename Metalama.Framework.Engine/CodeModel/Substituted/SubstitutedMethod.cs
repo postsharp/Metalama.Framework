@@ -220,6 +220,7 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
         public IEnumerator<IParameter> GetEnumerator() => this._parameters.AsEnumerable().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        
         public object ToValueArray() => new ValueArrayExpression( this );
     }
 }

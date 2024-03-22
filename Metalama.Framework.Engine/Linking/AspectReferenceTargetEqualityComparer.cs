@@ -5,36 +5,31 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed class AspectReferenceTargetEqualityComparer : IEqualityComparer<AspectReferenceTarget>
 {
-    internal sealed class AspectReferenceTargetEqualityComparer : IEqualityComparer<AspectReferenceTarget>
+    private readonly IEqualityComparer<ISymbol> _symbolComparer;
+
+    private AspectReferenceTargetEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
     {
-        private readonly IEqualityComparer<ISymbol> _symbolComparer;
+        this._symbolComparer = symbolComparer;
+    }
 
-        internal AspectReferenceTargetEqualityComparer( IEqualityComparer<ISymbol> symbolComparer)
-        {
-            this._symbolComparer = symbolComparer;
-        }
-        
-        public static IEqualityComparer<AspectReferenceTarget> ForCompilation(CompilationContext context)
-        {
-            return new AspectReferenceTargetEqualityComparer( context.SymbolComparer );
-        }
+    public static IEqualityComparer<AspectReferenceTarget> ForCompilation( CompilationContext context )
+        => new AspectReferenceTargetEqualityComparer( context.SymbolComparer );
 
-        public bool Equals( AspectReferenceTarget x, AspectReferenceTarget y )
-        {
-            return this._symbolComparer.Equals( x.Symbol, y.Symbol )
-                   && x.SemanticKind == y.SemanticKind
-                   && x.TargetKind == y.TargetKind;
-        }
+    public bool Equals( AspectReferenceTarget x, AspectReferenceTarget y )
+        => this._symbolComparer.Equals( x.Symbol, y.Symbol )
+           && x.SemanticKind == y.SemanticKind
+           && x.TargetKind == y.TargetKind;
 
-        public int GetHashCode( AspectReferenceTarget x )
-        {
+    public int GetHashCode( AspectReferenceTarget x )
+        =>
+
             // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
-            return HashCode.Combine(
+            HashCode.Combine(
                 this._symbolComparer.GetHashCode( x.Symbol ),
                 (byte) x.SemanticKind,
                 (byte) x.TargetKind );
-        }
-    }
 }
