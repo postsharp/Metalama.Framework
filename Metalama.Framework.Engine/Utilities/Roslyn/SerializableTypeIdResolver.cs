@@ -71,8 +71,14 @@ public sealed class SerializableTypeIdResolver
             }
             else if ( idString.StartsWith( Prefix, StringComparison.Ordinal ) )
             {
-                var method = (MethodDeclarationSyntax) SyntaxFactory.ParseMemberDeclaration( idString.Substring( Prefix.Length ) + " M();" );
+                var method = (MethodDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( idString.Substring( Prefix.Length ) + " M();" );
 
+                if ( method == null )
+                {
+                    // That should not happen even in case of invalid string.
+                    throw new AssertionFailedException( $"The string '{idString}' could not be parsed as a type." );
+                }
+                
                 var diagnostics = method.GetDiagnostics().ToArray();
 
                 if ( diagnostics.HasError() )
@@ -184,7 +190,7 @@ public sealed class SerializableTypeIdResolver
                     return this.LookupName( identifierName.Identifier.Text, 0, ns );
 
                 case QualifiedNameSyntax qualifiedName:
-                    var left = this.LookupName( qualifiedName.Left, ns );
+                    var left = this.LookupName( qualifiedName.Left, ns ).AssertNotNull();
 
                     return this.LookupName( qualifiedName.Right, left );
 
@@ -200,7 +206,7 @@ public sealed class SerializableTypeIdResolver
                         var previousGenericType = this._currentGenericType;
                         this._currentGenericType = definition;
 
-                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectAsArray( a => this.Visit( a )! );
+                        var typeArguments = genericName.TypeArgumentList.Arguments.SelectAsArray( this.Visit );
 
                         this._currentGenericType = previousGenericType;
 
