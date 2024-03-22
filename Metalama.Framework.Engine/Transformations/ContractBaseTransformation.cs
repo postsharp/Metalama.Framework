@@ -18,7 +18,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
     private readonly TemplateMember<IMethod> _template;
     private readonly IObjectReader _templateArguments;
     private readonly IObjectReader _tags;
-    
+
     /// <summary>
     /// Gets the target member of the contract into which contract statements will be inserted.
     /// </summary>

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,21 +17,26 @@ namespace Metalama.Framework.Engine.Templating
     {
         protected sealed partial class MetaSyntaxFactoryImpl
         {
-            public MetaSyntaxFactoryImpl( Compilation compileTimeCompilation )
+            public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+            public MetaSyntaxFactoryImpl( CompilationContext compileTimeCompilation )
             {
-                this.ReflectionMapper = CompilationContextFactory.GetInstance( compileTimeCompilation ).ReflectionMapper;
+                this.ReflectionMapper = compileTimeCompilation.ReflectionMapper;
+
+                // TODO: We would need one context for each syntax tree if we want to respect EOLs.
+                this.SyntaxGenerationContext = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
             }
 
             public ReflectionMapper ReflectionMapper { get; }
 
-            public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
+            public TypeSyntax Type( Type type ) => this.SyntaxGenerationContext.SyntaxGenerator.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
 
-            public static TypeSyntax Type( ITypeSymbol type )
+            public TypeSyntax Type( ITypeSymbol type )
                 => type switch
                 {
-                    IArrayTypeSymbol arrayType => OurSyntaxGenerator.CompileTime.ArrayTypeExpression(
-                        OurSyntaxGenerator.CompileTime.Type( arrayType.ElementType ) ),
-                    _ => OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
+                    IArrayTypeSymbol arrayType => this.SyntaxGenerationContext.SyntaxGenerator.ArrayTypeExpression(
+                        this.SyntaxGenerationContext.SyntaxGenerator.Type( arrayType.ElementType ) ),
+                    _ => this.SyntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( type )
                 };
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )
@@ -84,7 +90,7 @@ namespace Metalama.Framework.Engine.Templating
                 => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )
                     .AddArgumentListArguments(
                         SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Text ) ),
-                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Value, ObjectDisplayOptions.IncludeTypeSuffix ) ) );
+                        SyntaxFactory.Argument( SyntaxFactoryEx.LiteralExpression( token.Value.AssertNotNull(), ObjectDisplayOptions.IncludeTypeSuffix ) ) );
 
             public ExpressionSyntax Literal( object value )
                 => SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Literal) ) )

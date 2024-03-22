@@ -4,11 +4,13 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System.Collections.Generic;
+
+#if TESTRUNNER
+using System;
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.CollectionExpressions_Error;
 

@@ -28,7 +28,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 this.Validate();
 
-                return this._parent._proceedExpressionProvider!( this._parent._template!.EffectiveKind ).ToTypedExpressionSyntax( syntaxSerializationContext ).Syntax;
+                return this._parent._proceedExpressionProvider!( this._parent._template!.EffectiveKind )
+                    .ToTypedExpressionSyntax( syntaxSerializationContext )
+                    .Syntax;
             }
 
             private void Validate()

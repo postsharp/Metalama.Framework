@@ -1,7 +1,4 @@
-﻿using System;
-using Metalama.Testing.AspectTesting;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Templating;
+﻿using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Formatting.XmlComments
 {

@@ -2,8 +2,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossAssembly;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 [assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 

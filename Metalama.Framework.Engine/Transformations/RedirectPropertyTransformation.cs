@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,103 +12,104 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Transformations;
-
-/// <summary>
-/// Represents a property override, which redirects to accessors of another property without requiring template expansion.
-/// </summary>
-internal sealed class RedirectPropertyTransformation : OverrideMemberTransformation
+namespace Metalama.Framework.Engine.Transformations
 {
-    private readonly IProperty _targetProperty;
-
-    private new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
-
-    public RedirectPropertyTransformation( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty )
-        : base( advice, overriddenDeclaration, ObjectReader.Empty )
+    /// <summary>
+    /// Represents a property override, which redirects to accessors of another property without requiring template expansion.
+    /// </summary>
+    internal sealed class RedirectPropertyTransformation : OverrideMemberTransformation
     {
-        this._targetProperty = targetProperty;
-    }
+        private readonly IProperty _targetProperty;
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
-    {
-        return new[]
+        private new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
+
+        public RedirectPropertyTransformation( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty )
+            : base( advice, overriddenDeclaration, ObjectReader.Empty )
         {
-            new InjectedMember(
-                this,
-                PropertyDeclaration(
-                    List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
-                        .WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
-                    null,
-                    Identifier(
-                        context.InjectionNameProvider.GetOverrideName(
-                            this.OverriddenDeclaration.DeclaringType,
-                            this.ParentAdvice.AspectLayerId,
-                            this.OverriddenDeclaration ) ),
-                    AccessorList( List( GetAccessors() ) ),
-                    null,
-                    null ),
-                this.ParentAdvice.AspectLayerId,
-                InjectedMemberSemantic.Override,
-                this.OverriddenDeclaration )
-        };
+            this._targetProperty = targetProperty;
+        }
 
-        IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
+        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             return new[]
-                {
-                    this.OverriddenDeclaration.GetMethod != null
-                        ? AccessorDeclaration(
-                            SyntaxKind.GetAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.GetMethod.GetSyntaxModifierList(),
-                            CreateGetterBody(),
-                            null )
-                        : null,
-                    this.OverriddenDeclaration.SetMethod != null
-                        ? AccessorDeclaration(
-                            this.OverriddenDeclaration.Writeability != Writeability.InitOnly
-                                ? SyntaxKind.SetAccessorDeclaration
-                                : SyntaxKind.InitAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.SetMethod.GetSyntaxModifierList(),
-                            CreateSetterBody(),
-                            null )
-                        : null
-                }.Where( a => a != null )
-                .AssertNoneNull()
-                .ToArray();
-        }
+            {
+                new InjectedMember(
+                    this,
+                    PropertyDeclaration(
+                        List<AttributeListSyntax>(),
+                        this.OverriddenDeclaration.GetSyntaxModifierList(),
+                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                        null,
+                        Identifier(
+                            context.InjectionNameProvider.GetOverrideName(
+                                this.OverriddenDeclaration.DeclaringType,
+                                this.ParentAdvice.AspectLayerId,
+                                this.OverriddenDeclaration ) ),
+                        AccessorList( List( GetAccessors() ) ),
+                        null,
+                        null ),
+                    this.ParentAdvice.AspectLayerId,
+                    InjectedMemberSemantic.Override,
+                    this.OverriddenDeclaration )
+            };
 
-        BlockSyntax CreateGetterBody()
-        {
-            return
-                SyntaxFactoryEx.FormattedBlock(
-                    ReturnStatement(
-                        SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                        CreateAccessTargetExpression(),
-                        Token( SyntaxKind.SemicolonToken ) ) );
-        }
+            IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
+            {
+                return new[]
+                    {
+                        this.OverriddenDeclaration.GetMethod != null
+                            ? AccessorDeclaration(
+                                SyntaxKind.GetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                this.OverriddenDeclaration.GetMethod.GetSyntaxModifierList(),
+                                CreateGetterBody(),
+                                null )
+                            : null,
+                        this.OverriddenDeclaration.SetMethod != null
+                            ? AccessorDeclaration(
+                                this.OverriddenDeclaration.Writeability != Writeability.InitOnly
+                                    ? SyntaxKind.SetAccessorDeclaration
+                                    : SyntaxKind.InitAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                this.OverriddenDeclaration.SetMethod.GetSyntaxModifierList(),
+                                CreateSetterBody(),
+                                null )
+                            : null
+                    }.Where( a => a != null )
+                    .AssertNoneNull()
+                    .ToArray();
+            }
 
-        BlockSyntax CreateSetterBody()
-        {
-            return
-                SyntaxFactoryEx.FormattedBlock(
-                    ExpressionStatement(
-                        AssignmentExpression(
-                            SyntaxKind.SimpleAssignmentExpression,
+            BlockSyntax CreateGetterBody()
+            {
+                return
+                    context.SyntaxGenerator.FormattedBlock(
+                        ReturnStatement(
+                            SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             CreateAccessTargetExpression(),
-                            IdentifierName( "value" ) ) ) );
-        }
+                            Token( SyntaxKind.SemicolonToken ) ) );
+            }
 
-        ExpressionSyntax CreateAccessTargetExpression()
-        {
-            return
-                this._targetProperty.IsStatic
-                    ? IdentifierName( this._targetProperty.Name )
-                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
-                        .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+            BlockSyntax CreateSetterBody()
+            {
+                return
+                    context.SyntaxGenerator.FormattedBlock(
+                        ExpressionStatement(
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                CreateAccessTargetExpression(),
+                                IdentifierName( "value" ) ) ) );
+            }
+
+            ExpressionSyntax CreateAccessTargetExpression()
+            {
+                return
+                    this._targetProperty.IsStatic
+                        ? IdentifierName( this._targetProperty.Name )
+                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetProperty.Name ) )
+                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
+            }
         }
     }
 }

@@ -74,7 +74,6 @@ internal sealed class RiderCodeRefactoringProvider : TheCodeRefactoringProvider
 
         public CancellationToken CancellationToken => this._codeRefactoringContext.CancellationToken;
 
-        public void RegisterCodeFix( CodeAction action, ImmutableArray<Diagnostic> diagnostics )
-            => this._codeRefactoringContext.RegisterRefactoring( action );
+        public void RegisterCodeFix( CodeAction action, ImmutableArray<Diagnostic> diagnostics ) => this._codeRefactoringContext.RegisterRefactoring( action );
     }
 }

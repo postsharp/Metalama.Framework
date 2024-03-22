@@ -1,7 +1,4 @@
-﻿using System;
-using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
-
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Introductions.ReturnsVoid_IntParameter_SimpleBody
+﻿namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Introductions.ReturnsVoid_IntParameter_SimpleBody
 {
     // <target>
     class Target

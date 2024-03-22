@@ -12,7 +12,7 @@ internal static class SubstitutedMemberFactory
 {
     public static Ref<T> Substitute<T>( T sourceDeclaration, INamedTypeSymbol targetType )
         where T : class, IMemberOrNamedType
-        => Substitute( sourceDeclaration, new( targetType.TypeArguments, sourceDeclaration.Compilation.GetRoslynCompilation() ), targetType );
+        => Substitute( sourceDeclaration, new GenericMap( targetType.TypeArguments, sourceDeclaration.Compilation.GetRoslynCompilation() ), targetType );
 
     public static Ref<T> Substitute<T>( T sourceDeclaration, GenericMap genericMap )
         where T : class, IDeclaration
@@ -30,7 +30,7 @@ internal static class SubstitutedMemberFactory
         where T : class, IMemberOrNamedType
     {
         targetType ??= genericMap.Map( sourceDeclaration.DeclaringType.AssertNotNull().GetSymbol() );
-        
+
         switch ( sourceDeclaration )
         {
             case SymbolBasedDeclaration { Symbol: var sourceSymbol }:
@@ -39,7 +39,7 @@ internal static class SubstitutedMemberFactory
                     var substitutedMember = targetType.GetMembers( sourceSymbol.Name )
                         .Single( member => SymbolEqualityComparer.Default.Equals( member.OriginalDefinition, sourceSymbol ) );
 
-                    return new( substitutedMember, sourceDeclaration.GetCompilationModel().CompilationContext );
+                    return new Ref<T>( substitutedMember, sourceDeclaration.GetCompilationModel().CompilationContext );
                 }
 
             case BuiltDeclaration builtDeclaration:
@@ -53,7 +53,7 @@ internal static class SubstitutedMemberFactory
                 throw new AssertionFailedException( $"Unexpected source declaration type {sourceDeclaration.GetType()}" );
         }
     }
-    
+
     // TODO: cache (in DeclarationFactory?)
     private static SubstitutedMember Create( BuiltDeclaration sourceDeclaration, INamedTypeSymbol substitutedType )
         => sourceDeclaration switch

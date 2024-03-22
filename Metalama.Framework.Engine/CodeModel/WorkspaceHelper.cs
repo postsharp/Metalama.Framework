@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -21,7 +22,7 @@ internal static class WorkspaceHelper
     private static Assembly LoadRoslynAssembly( string name )
     {
         var referencedWorkspaceAssemblyName =
-            typeof(OurSyntaxGenerator).Assembly.GetReferencedAssemblies()
+            typeof(ContextualSyntaxGenerator).Assembly.GetReferencedAssemblies()
                 .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
         var requiredWorkspaceImplementationAssemblyName = new AssemblyName(

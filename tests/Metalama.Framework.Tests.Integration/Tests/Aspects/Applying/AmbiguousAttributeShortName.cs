@@ -1,6 +1,5 @@
 using System;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Applying.AmbiguousAttributeShortName;
 

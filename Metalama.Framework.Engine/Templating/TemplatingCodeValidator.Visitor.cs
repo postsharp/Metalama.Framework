@@ -310,7 +310,7 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
                 }
-                
+
                 var symbol = this._semanticModel.GetDeclaredSymbol( node );
 
 #if ROSLYN_4_8_0_OR_GREATER
@@ -330,7 +330,11 @@ namespace Metalama.Framework.Engine.Templating
                 if ( symbol is not null
                      && this._compilationContext.SourceCompilation.HasImplicitConversion( symbol, this._iCompileTimeSerializableType ) )
                 {
-                    SerializerGeneratorHelper.TryGetSerializer( this._compilationContext.CompilationContext, symbol, out var serializerType, out var ambiguous );
+                    SerializerGeneratorHelper.TryGetSerializer(
+                        this._compilationContext.CompilationContext,
+                        symbol,
+                        out var serializerType,
+                        out var ambiguous );
 
                     if ( ambiguous )
                     {

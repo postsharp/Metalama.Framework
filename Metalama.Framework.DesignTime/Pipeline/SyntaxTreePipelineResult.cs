@@ -80,7 +80,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.AspectInstancesHashCode = ComputeAspectInstancesHashCode( this.AspectInstances, this.Transformations );
         }
 
-        private static ulong ComputeAspectInstancesHashCode( ImmutableArray<DesignTimeAspectInstance> aspectInstances, ImmutableArray<DesignTimeTransformation> transformations )
+        private static ulong ComputeAspectInstancesHashCode(
+            ImmutableArray<DesignTimeAspectInstance> aspectInstances,
+            ImmutableArray<DesignTimeTransformation> transformations )
         {
             // Hash code shouldn't depend on the order of aspect instances (or transformations), which is why each instance is hashed separately and their hashes are XORed.
 

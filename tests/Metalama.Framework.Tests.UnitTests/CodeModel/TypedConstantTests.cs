@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Testing.UnitTesting;
 using System;
@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class TypedConstantTests : UnitTestClass
     {
-        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Proof );
+        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
         
         [Fact]
         public void Unassigned()

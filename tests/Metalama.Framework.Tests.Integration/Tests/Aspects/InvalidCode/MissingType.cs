@@ -1,9 +1,9 @@
-using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
-
 // Test that using a type that does not exist produces only C# errors, and not confusing Metalama errors.
+
+#if TESTRUNNER
+using Metalama.Framework.Aspects;
+using System.Linq;
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Aspects.InvalidCode.MissingType;
 

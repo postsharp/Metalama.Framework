@@ -10,8 +10,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     {
         private static readonly WeakCache<INamespaceOrTypeSymbol, string?> _fullNameCache = new();
 
-        public static string? GetFullName( this INamespaceOrTypeSymbol? symbol )
-            => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, GetFullNameImpl );
+        public static string? GetFullName( this INamespaceOrTypeSymbol? symbol ) => symbol == null ? null : _fullNameCache.GetOrAdd( symbol, GetFullNameImpl );
 
         private static string? GetFullNameImpl( this INamespaceOrTypeSymbol? symbol )
         {

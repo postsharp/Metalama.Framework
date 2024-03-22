@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Redirection_Property;
 
 [assembly: AspectOrder(typeof(NotNullAttribute))]

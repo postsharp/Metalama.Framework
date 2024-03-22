@@ -51,11 +51,12 @@ internal sealed partial class SymbolTranslator
         }
     }
 
-    private ISymbol? TranslateCore( (ISymbol Symbol, bool AllowMultipleCandidates) value ) => new Visitor( this, value.AllowMultipleCandidates ).Visit( value.Symbol );
+    private ISymbol? TranslateCore( (ISymbol Symbol, bool AllowMultipleCandidates) value )
+        => new Visitor( this, value.AllowMultipleCandidates ).Visit( value.Symbol );
 
     private sealed class KeyComparer : IEqualityComparer<(ISymbol Symbol, bool AllowMultipleCandidates)>
     {
-        public static readonly KeyComparer Instance = new KeyComparer();
+        public static readonly KeyComparer Instance = new();
 
         public bool Equals( (ISymbol Symbol, bool AllowMultipleCandidates) x, (ISymbol Symbol, bool AllowMultipleCandidates) y )
         {

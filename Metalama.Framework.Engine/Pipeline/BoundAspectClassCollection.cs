@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public BoundAspectClassCollection( IEnumerable<IBoundAspectClass> aspectClasses )
         {
             this.Dictionary = aspectClasses.ToImmutableDictionary( c => c.FullName, c => c );
-            
+
             this.HashCode = HashUtilities.HashStrings( this.Dictionary.Keys );
         }
 

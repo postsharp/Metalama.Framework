@@ -23,7 +23,7 @@ internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T
 
     private readonly ISourceMemberCollection<T> _source;
     private readonly INamedTypeSymbol _substitutedType;
-    
+
     public int Count => this._source.Count;
 
     public CompilationModel Compilation => this._source.Compilation;
@@ -43,8 +43,7 @@ internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T
     public ImmutableArray<MemberRef<T>> OfName( string name )
         => this._source.OfName( name ).SelectAsImmutableArray( memberRef => new MemberRef<T>( this.Substitute( memberRef.ToRef() ).As<IDeclaration>() ) );
 
-    private Ref<T> Substitute( Ref<T> sourceRef )
-        => SubstitutedMemberFactory.Substitute( sourceRef.GetTarget( this.Compilation ), this._substitutedType );
+    private Ref<T> Substitute( Ref<T> sourceRef ) => SubstitutedMemberFactory.Substitute( sourceRef.GetTarget( this.Compilation ), this._substitutedType );
 
     ISourceDeclarationCollection<T, Ref<T>> ISourceDeclarationCollection<T, Ref<T>>.Clone( CompilationModel compilation )
         => new MemberSubstitutedCollection<T>(

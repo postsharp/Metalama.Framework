@@ -16,7 +16,11 @@ public interface IAspectDatabaseService : ICompilerService
 {
     Task<IEnumerable<INamedTypeSymbol>> GetAspectClassesAsync( Compilation compilation, CancellationToken cancellationToken );
 
-    Task GetAspectInstancesAsync( Compilation compilation, INamedTypeSymbol aspectClass, IEnumerable<AspectExplorerAspectInstance>[] result, CancellationToken cancellationToken );
+    Task GetAspectInstancesAsync(
+        Compilation compilation,
+        INamedTypeSymbol aspectClass,
+        IEnumerable<AspectExplorerAspectInstance>[] result,
+        CancellationToken cancellationToken );
 
     event Action<string> AspectClassesChanged;
 

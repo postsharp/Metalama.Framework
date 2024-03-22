@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -36,7 +35,7 @@ internal sealed class EnumSerializer : ObjectSerializer
             ? Literal( Convert.ToUInt64( o, CultureInfo.InvariantCulture ) )
             : Literal( Convert.ToInt64( o, CultureInfo.InvariantCulture ) );
 
-        return SyntaxFactoryEx.SafeCastExpression(
+        return serializationContext.SyntaxGenerator.SafeCastExpression(
             typeName,
             ParenthesizedExpression(
                 LiteralExpression(

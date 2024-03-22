@@ -2,8 +2,6 @@
 // @Skipped(#33758)
 #endif
 
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Serialization;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.ReferenceType_RuntimeInterfaceImpl;

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using Metalama.Framework;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug18911

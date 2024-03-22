@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -31,13 +30,15 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
 
     public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
     {
+        var syntaxGenerator = substitutionContext.SyntaxGenerationContext.SyntaxGenerator;
+
         switch (currentNode, this._targetAccessor.MethodKind)
         {
             case (ParameterSyntax, MethodKind.PropertyGet):
                 if ( this._returnVariableIdentifier != null )
                 {
                     return
-                        SyntaxFactoryEx.FormattedBlock(
+                        syntaxGenerator.FormattedBlock(
                                 ExpressionStatement(
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
@@ -48,17 +49,20 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
                 else
                 {
                     return
-                        SyntaxFactoryEx.FormattedBlock(
+                        syntaxGenerator.FormattedBlock(
                                 ReturnStatement(
                                     Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                                     CreateFieldAccessExpression(),
-                                    Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    Token(
+                                        TriviaList(),
+                                        SyntaxKind.SemicolonToken,
+                                        substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
 
             case (ParameterSyntax, MethodKind.PropertySet):
                 return
-                    SyntaxFactoryEx.FormattedBlock(
+                    syntaxGenerator.FormattedBlock(
                             ExpressionStatement(
                                 AssignmentExpression(
                                     SyntaxKind.SimpleAssignmentExpression,

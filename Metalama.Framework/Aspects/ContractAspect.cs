@@ -33,7 +33,7 @@ namespace Metalama.Framework.Aspects
     {
         // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects
         // and then request redirection before the build layer.
-        
+
         // ReSharper disable once MemberCanBePrivate.Global
         public const string BuildLayer = "Build";
 
@@ -138,7 +138,7 @@ namespace Metalama.Framework.Aspects
 
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             AddIfValid( distinctByParameter, first!.Parameter, targetType );
-            
+
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             AddIfValid( distinctByParameter, iter.Current!.Parameter, targetType );
 
@@ -191,7 +191,9 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection( builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(), builder.Target.Type );
+            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection(
+                builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(),
+                builder.Target.Type );
 
             if ( redirectToParameters is { Count: > 0 } )
             {
@@ -199,7 +201,9 @@ namespace Metalama.Framework.Aspects
                 {
                     // TODO: Use AssertNotNull() extension method instead of `throw` if it can be made accessible.
 
-                    this.BuildAspect( builder.WithTarget( parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
+                    this.BuildAspect(
+                        builder.WithTarget(
+                            parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
                 }
             }
             else
@@ -238,7 +242,9 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection( builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(), builder.Target.Type );
+            var redirectToParameters = GetValidatedDistinctProxyParametersForRedirection(
+                builder.Target.Enhancements().GetAnnotations<RedirectToProxyParameterAnnotation>(),
+                builder.Target.Type );
 
             if ( redirectToParameters is { Count: > 0 } )
             {

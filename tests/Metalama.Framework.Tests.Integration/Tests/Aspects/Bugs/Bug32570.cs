@@ -1,4 +1,3 @@
-using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;

@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -61,7 +62,7 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
     protected override SyntaxNode SubstituteFinalizerMemberAccess( MemberAccessExpressionSyntax currentNode )
         => IdentifierName( "__LINKER_TO_BE_REMOVED__" )
             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
-            .WithTriviaFromIfNecessary( currentNode, this._syntaxGenerationOptions.PreserveTrivia );
+            .WithTriviaFromIfNecessary( currentNode, this._syntaxGenerationOptions );
 
     protected override SyntaxNode SubstituteMemberAccess( MemberAccessExpressionSyntax currentNode, SubstitutionContext substitutionContext )
     {
@@ -77,14 +78,14 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
             return currentNode
                 .WithExpression(
                     substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( hiddenSymbol.ContainingType )
-                        .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
+                        .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions ) );
         }
         else
         {
             return currentNode
                 .WithExpression(
                     BaseExpression()
-                        .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
+                        .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions ) );
         }
     }
 
@@ -92,5 +93,5 @@ internal sealed class AspectReferenceBaseSubstitution : AspectReferenceRenamingS
         => currentNode
             .WithExpression(
                 BaseExpression()
-                    .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions.PreserveTrivia ) );
+                    .WithTriviaFromIfNecessary( currentNode.Expression, this._syntaxGenerationOptions ) );
 }

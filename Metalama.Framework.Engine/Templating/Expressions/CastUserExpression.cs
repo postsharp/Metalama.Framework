@@ -4,10 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -33,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             };
 
             return SyntaxFactory.ParenthesizedExpression( syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type.GetSymbol(), valueSyntax ) )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+                .WithSimplifierAnnotationIfNecessary( syntaxSerializationContext.SyntaxGenerationContext );
         }
 
         public override IType Type { get; }

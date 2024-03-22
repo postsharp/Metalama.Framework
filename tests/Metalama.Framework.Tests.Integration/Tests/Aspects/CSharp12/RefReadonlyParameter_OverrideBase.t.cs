@@ -5,35 +5,35 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.RefReadonl
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 class TheAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-    [Template]
-    protected int M(in int i, ref readonly int j) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+  public override void BuildAspect(IAspectBuilder<INamedType> builder) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+  [Template]
+  protected int M(in int i, ref readonly int j) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 }
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052
 class B
 {
-    protected virtual int M(in int i, ref readonly int j)
-    {
-        return i + j;
-    }
-    protected virtual int this[in int i, ref readonly int j] => 42;
+  protected virtual int M(in int i, ref readonly int j)
+  {
+    return i + j;
+  }
+  protected virtual int this[in int i, ref readonly int j] => 42;
 }
 [TheAspect]
 class D : B
 {
-    protected override global::System.Int32 M(in global::System.Int32 i, ref readonly global::System.Int32 j)
+  protected override global::System.Int32 M(in global::System.Int32 i, ref readonly global::System.Int32 j)
+  {
+    global::System.Console.WriteLine($"i: Kind=In, Value={i}");
+    global::System.Console.WriteLine($"j: Kind=RefReadOnly, Value={j}");
+    return base.M(i, in j);
+  }
+  protected override global::System.Int32 this[in global::System.Int32 i, ref readonly global::System.Int32 j]
+  {
+    get
     {
-        global::System.Console.WriteLine($"i: Kind=In, Value={i}");
-        global::System.Console.WriteLine($"j: Kind=RefReadOnly, Value={j}");
-        return base.M(i, in j);
+      global::System.Console.WriteLine($"D.this[].get@i: Kind=In, Value={i}");
+      global::System.Console.WriteLine($"D.this[].get@j: Kind=RefReadOnly, Value={j}");
+      return base[i, in j];
     }
-    protected override global::System.Int32 this[in global::System.Int32 i, ref readonly global::System.Int32 j]
-    {
-        get
-        {
-            global::System.Console.WriteLine($"D.this[].get@i: Kind=In, Value={i}");
-            global::System.Console.WriteLine($"D.this[].get@j: Kind=RefReadOnly, Value={j}");
-            return base[i, in j];
-        }
-    }
+  }
 }

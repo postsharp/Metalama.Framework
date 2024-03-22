@@ -1,5 +1,4 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectInheritanceCrossAssembly.Dependency;

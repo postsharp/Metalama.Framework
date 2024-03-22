@@ -20,7 +20,7 @@ internal sealed class TimeSpanSerializer : ObjectSerializer<TimeSpan>
                                 SyntaxKind.NumericLiteralExpression,
                                 Literal( obj.Ticks ) ) ) ) ),
                 null )
-            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 
     public TimeSpanSerializer( SyntaxSerializationService service ) : base( service ) { }
 }

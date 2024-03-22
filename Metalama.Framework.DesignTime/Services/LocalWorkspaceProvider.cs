@@ -21,7 +21,7 @@ internal sealed class LocalWorkspaceProvider : WorkspaceProvider
         {
             this.Logger.Warning?.Log( $"The workspace is not yet available. Waiting." );
         }
-        
+
         return this._workspace.Task.WithCancellation( cancellationToken );
     }
 

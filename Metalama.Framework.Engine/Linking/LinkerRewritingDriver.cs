@@ -1,11 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -65,7 +64,7 @@ internal sealed partial class LinkerRewritingDriver
         var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
         var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
         var rewrittenBody = RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
-        var rewrittenBlock = TransformToBlock( rewrittenBody, semantic.Symbol );
+        var rewrittenBlock = TransformToBlock( substitutionContext, rewrittenBody, semantic.Symbol );
 
         // Add the SourceCode annotation, if it is the source code.
         if ( semantic.Kind == IntermediateSymbolSemanticKind.Default && this.InjectionRegistry.IsOverrideTarget( semantic.Symbol ) )
@@ -131,7 +130,7 @@ internal sealed partial class LinkerRewritingDriver
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
 
-        static BlockSyntax TransformToBlock( SyntaxNode node, IMethodSymbol symbol )
+        static BlockSyntax TransformToBlock( SubstitutionContext substitutionContext, SyntaxNode node, IMethodSymbol symbol )
         {
             // TODO: Convert to block.
             if ( symbol.ReturnsVoid )
@@ -174,7 +173,7 @@ internal sealed partial class LinkerRewritingDriver
 
                     case ArrowExpressionClauseSyntax rewrittenArrowClause:
                         return
-                            SyntaxFactoryEx.FormattedBlock(
+                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                                     ReturnStatement(
                                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                         rewrittenArrowClause.Expression,
@@ -521,7 +520,7 @@ internal sealed partial class LinkerRewritingDriver
                 return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
 
             case IFieldSymbol fieldSymbol:
-                return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol );
+                return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
 
             case IEventSymbol eventSymbol:
                 return syntax switch

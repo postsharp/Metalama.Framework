@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -13,6 +14,8 @@ public abstract class BaseDesignTimeAspectPipeline : AspectPipeline
         serviceProvider,
         ExecutionScenario.DesignTime,
         domain ) { }
+
+    protected sealed override SyntaxGenerationOptions GetSyntaxGenerationOptions() => SyntaxGenerationOptions.Formatted;
 
     /// <inheritdoc/>
     private protected override HighLevelPipelineStage CreateHighLevelStage(

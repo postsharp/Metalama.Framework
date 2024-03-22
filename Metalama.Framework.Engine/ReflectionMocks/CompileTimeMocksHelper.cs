@@ -24,10 +24,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         {
             var serializationContext = (SyntaxSerializationContext) syntaxGenerationContext;
 
-            return ToTypedExpressionSyntax( 
+            return ToTypedExpressionSyntax(
                 compileTimeMemberInfo.Target.GetTarget( serializationContext.CompilationModel ),
                 compileTimeMemberInfo.ReflectionType,
-                serialize, 
+                serialize,
                 syntaxGenerationContext );
         }
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
             var iType = serializationContext.CompilationModel.Factory.GetTypeByReflectionType( type );
 
-            return new(
+            return new TypedExpressionSyntax(
                 new TypedExpressionSyntaxImpl(
                     expression,
                     iType,

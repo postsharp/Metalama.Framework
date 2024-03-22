@@ -80,7 +80,8 @@ namespace Metalama.Testing.AspectTesting
 
             if ( !this.IsSkipped )
             {
-                var forbiddenConstants = this.Options.ForbiddenConstants.Where( c => this.ProjectProperties.PreprocessorSymbols.Contains( c ) ).ToReadOnlyList();
+                var forbiddenConstants = this.Options.ForbiddenConstants.Where( c => this.ProjectProperties.PreprocessorSymbols.Contains( c ) )
+                    .ToReadOnlyList();
 
                 if ( forbiddenConstants.Count > 0 )
                 {

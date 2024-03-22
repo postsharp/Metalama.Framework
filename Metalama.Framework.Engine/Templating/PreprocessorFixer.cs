@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating;
 /// </remarks>
 internal static class PreprocessorFixer
 {
-    public static T Fix<T>( T node )
+    public static T Fix<T>( T node, SyntaxGenerationContext context )
         where T : SyntaxNode
     {
         if ( !node.ContainsDirectives )
@@ -41,7 +42,7 @@ internal static class PreprocessorFixer
             return node;
         }
 
-        return node.ReplaceTokens( walker.TokensToFix, ( _, token ) => token.WithTrailingTrivia( token.TrailingTrivia.Add( SyntaxFactory.ElasticLineFeed ) ) );
+        return node.ReplaceTokens( walker.TokensToFix, ( _, token ) => token.WithTrailingTrivia( token.TrailingTrivia.AddOptionalLineFeed( context ) ) );
     }
 
     private sealed class Walker() : SafeSyntaxWalker( SyntaxWalkerDepth.Trivia )

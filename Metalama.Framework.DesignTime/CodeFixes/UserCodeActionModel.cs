@@ -15,7 +15,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 internal sealed class UserCodeActionModel : CodeActionModel
 {
     public string CompleteTitle { get; init; }
-    
+
     public UserCodeActionModel()
     {
         this.DiagnosticId = null!;

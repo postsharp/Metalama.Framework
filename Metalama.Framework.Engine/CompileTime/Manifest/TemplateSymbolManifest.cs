@@ -63,7 +63,11 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
             this._usedApiVersion = usedApiVersion;
         }
 
-        public Builder AddOrUpdateSymbol( ISymbol symbol, TemplatingScope? scope = null, TemplateInfo? templateInfo = null, RoslynApiVersion? usedApiVersion = null )
+        public Builder AddOrUpdateSymbol(
+            ISymbol symbol,
+            TemplatingScope? scope = null,
+            TemplateInfo? templateInfo = null,
+            RoslynApiVersion? usedApiVersion = null )
         {
             Builder parentBuilder;
 
@@ -80,11 +84,11 @@ internal sealed class TemplateSymbolManifest : ITemplateInfo
                 parentBuilder = this.AddOrUpdateSymbol( symbol.ContainingSymbol );
             }
 
-            parentBuilder._children ??= new();
+            parentBuilder._children ??= new Dictionary<string, List<Builder>>();
 
             if ( !parentBuilder._children.TryGetValue( symbol.Name, out var childrenList ) )
             {
-                childrenList = new();
+                childrenList = new List<Builder>();
                 parentBuilder._children[symbol.Name] = childrenList;
             }
 

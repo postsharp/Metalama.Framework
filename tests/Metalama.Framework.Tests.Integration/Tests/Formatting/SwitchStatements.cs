@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using Metalama.Testing.AspectTesting;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Templating;
+﻿using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Formatting.SwitchStatements;

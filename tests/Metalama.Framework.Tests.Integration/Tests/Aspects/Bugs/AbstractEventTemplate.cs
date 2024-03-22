@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

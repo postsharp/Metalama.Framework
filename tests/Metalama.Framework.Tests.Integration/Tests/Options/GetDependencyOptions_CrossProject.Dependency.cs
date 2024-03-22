@@ -1,6 +1,5 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Options;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.GetDependencyOptions_CrossProject;
 

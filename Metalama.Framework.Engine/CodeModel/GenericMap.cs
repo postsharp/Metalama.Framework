@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 return null;
             }
-            
+
             if ( this._typeArguments.IsEmpty )
             {
                 return type;

@@ -2,14 +2,9 @@
 // @AcceptInvalidInput
 #endif
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.CodeModel.ComplexTypedConstant_Invalid;
 

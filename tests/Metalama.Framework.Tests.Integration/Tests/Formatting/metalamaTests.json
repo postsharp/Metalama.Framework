@@ -1,5 +1,6 @@
 {
   "TestRunnerFactoryType": "Metalama.Framework.Tests.Integration.Runners.HighlightingTestRunnerFactory",
   "WriteInputHtml": true,
-  "PreserveWhitespace":  true
+  "FormatOutput": true,
+  "CompareWhitespace":  true
 }

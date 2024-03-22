@@ -184,7 +184,8 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : Bas
     }
 }
 
-internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>, ISourceDeclarationCollection<TDeclaration>
+internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>,
+                                                                       ISourceDeclarationCollection<TDeclaration>
     where TDeclaration : class, IDeclaration
 {
     protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }

@@ -1,13 +1,6 @@
 using System;
-using System.Threading.Tasks;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.SkippedWeaverAndRegularAspects;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 // Tests weaver between two regular aspects that is never run (so it doesn't have to actually exist).
 

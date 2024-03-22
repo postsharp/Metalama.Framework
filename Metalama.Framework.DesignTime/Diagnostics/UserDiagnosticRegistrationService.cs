@@ -58,7 +58,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                         {
                             Diagnostics = f.Diagnostics.AddRange(
                                 missing.Diagnostics.SelectAsReadOnlyCollection(
-                                    d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new( d ) ) ) ),
+                                    d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
                             Suppressions = f.Suppressions.AddRange( missing.Suppressions )
                         };
                     } );

@@ -6,7 +6,6 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
@@ -14,6 +13,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
@@ -99,7 +99,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         CompileTimeDomain domain )
     {
         // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
-        this._serviceProvider = serviceProvider.WithService( SyntaxGenerationOptions.Proof, true );
+        this._serviceProvider = serviceProvider.WithService( SyntaxGenerationOptions.Formatted, true );
         this._domain = domain;
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
         this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();

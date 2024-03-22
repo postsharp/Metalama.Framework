@@ -1,6 +1,3 @@
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-
 #if TEST_OPTIONS
 // @MainMethod(TestMain)
 #endif

@@ -15,7 +15,6 @@ public class Target
     // Comment mid Aspect2.
     // Comment inside Foo 1.
     Console.WriteLine("Foo"); // Comment inside Foo 2.
-    return;
   // Comment after Aspect1.
   // Comment after Foo closing brace.
   // Comment after Aspect2.

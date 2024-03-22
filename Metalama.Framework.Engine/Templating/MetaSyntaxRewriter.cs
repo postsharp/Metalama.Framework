@@ -2,6 +2,8 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="compileTimeCompilation">The <see cref="Compilation"/> used to create the compile-time assembly,
         /// possibly with no source code, but with metadata references. Used to resolve symbols in the compile-time assembly.</param>
         /// <param name="targetApiVersion"></param>
-        public MetaSyntaxRewriter( Compilation compileTimeCompilation, RoslynApiVersion targetApiVersion )
+        public MetaSyntaxRewriter( CompilationContext compileTimeCompilation, RoslynApiVersion targetApiVersion )
         {
             this.TargetApiVersion = targetApiVersion;
             this._indentTriviaStack.Push( "" );
@@ -74,7 +76,7 @@ namespace Metalama.Framework.Engine.Templating
 
         protected SyntaxTrivia[] GetIndentation( bool lineFeed = true )
             => lineFeed
-                ? new[] { ElasticCarriageReturnLineFeed, Whitespace( this._indentTriviaStack.Peek() ) }
+                ? new[] { this.MetaSyntaxFactory.SyntaxGenerationContext.ElasticEndOfLineTrivia, Whitespace( this._indentTriviaStack.Peek() ) }
                 : new[] { Whitespace( this._indentTriviaStack.Peek() ) };
 
         protected static SyntaxTrivia[] GetLineBreak() => Array.Empty<SyntaxTrivia>();

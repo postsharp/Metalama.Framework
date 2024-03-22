@@ -5,24 +5,24 @@
 [TheAspect]
 class Target
 {
-    public event global::System.EventHandler Event1
+  public event global::System.EventHandler Event1
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine("""add""");
-        }
-        remove
-        {
-        }
+      global::System.Console.WriteLine("""add""");
     }
-    public event global::System.EventHandler Event2
+    remove
     {
-        add
-        {
-        }
-        remove
-        {
-            global::System.Console.WriteLine("""remove""");
-        }
     }
+  }
+  public event global::System.EventHandler Event2
+  {
+    add
+    {
+    }
+    remove
+    {
+      global::System.Console.WriteLine("""remove""");
+    }
+  }
 }

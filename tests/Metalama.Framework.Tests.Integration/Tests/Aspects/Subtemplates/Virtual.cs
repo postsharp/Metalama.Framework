@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Virtual;

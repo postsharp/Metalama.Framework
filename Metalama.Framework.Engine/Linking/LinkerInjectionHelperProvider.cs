@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -87,7 +88,7 @@ internal sealed class LinkerInjectionHelperProvider
                 TypeArgumentList( SingletonSeparatedList( eventFieldType ) ) ) );
 
     public static ExpressionSyntax GetOperatorMemberExpression(
-        OurSyntaxGenerator syntaxGenerator,
+        ContextualSyntaxGenerator syntaxGenerator,
         OperatorKind operatorKind,
         IType returnType,
         IEnumerable<IType> parameterTypes )
@@ -101,18 +102,22 @@ internal sealed class LinkerInjectionHelperProvider
                         parameterTypes.Select( p => syntaxGenerator.Type( p.GetSymbol().AssertNotNull() ) )
                             .Append( syntaxGenerator.Type( returnType.GetSymbol().AssertNotNull() ) ) ) ) ) );
 
-    public TypeSyntax GetSourceType()
-        => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
+    public TypeSyntax GetSourceType() => QualifiedName( IdentifierName( HelperTypeName ), IdentifierName( _sourceCodeTypeName ) );
 
-    public TypeSyntax GetOverriddenByType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
-        => this.GetNumberedHelperType( syntaxGenerator, _overriddenByTypeName, "override", aspectType, ordinal );
+    public TypeSyntax GetOverriddenByType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
+        => this.GetNumberedHelperType( context, _overriddenByTypeName, "override", aspectType, ordinal );
 
-    public TypeSyntax GetAuxiliaryType( OurSyntaxGenerator syntaxGenerator, IAspectClass aspectType, int ordinal )
-        => this.GetNumberedHelperType( syntaxGenerator, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
+    public TypeSyntax GetAuxiliaryType( SyntaxGenerationContext context, IAspectClass aspectType, int ordinal )
+        => this.GetNumberedHelperType( context, _auxiliaryTypeName, "auxiliary", aspectType, ordinal );
 
-    private TypeSyntax GetNumberedHelperType( OurSyntaxGenerator syntaxGenerator, string baseTypeName, string description, IAspectClass aspectType, int ordinal )
+    private TypeSyntax GetNumberedHelperType(
+        SyntaxGenerationContext context,
+        string baseTypeName,
+        string description,
+        IAspectClass aspectType,
+        int ordinal )
     {
-        var aspectTypeSyntax = syntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
+        var aspectTypeSyntax = context.SyntaxGenerator.Type( this._finalCompilationModel.Factory.GetTypeByReflectionType( aspectType.Type ).GetSymbol() );
 
         switch ( ordinal )
         {
@@ -201,7 +206,7 @@ internal sealed class LinkerInjectionHelperProvider
 
         var code = @$"
 {(useNullability ? "#nullable enable" : "")}
-// NOTE: Currently all references to this type should be removed by the linker and where not possible, an error should be produced (e.g. uninlineable declarations).
+// NOTE: Currently all references to this type should be removed by the linker and where not possible, an error should be produced (e.g. non-inlineable declarations).
 internal class {HelperTypeName}
 {{
     // Members used for special aspect references, which do not use normal expression such as invocation.

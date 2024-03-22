@@ -55,7 +55,7 @@ internal sealed class ValidationRunner
         var referenceValidatorsTask = this.RunReferenceValidatorsAsync( initialCompilationWithEnhancements, userDiagnosticSink, cancellationToken );
 
         await Task.WhenAll( declarationValidatorsTask, referenceValidatorsTask );
-        
+
         var hasDeclarationValidator = await declarationValidatorsTask;
         var referenceValidators = await referenceValidatorsTask;
 
@@ -87,11 +87,20 @@ internal sealed class ValidationRunner
         UserDiagnosticSink diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var initialCompilationValidationTask = this.RunDeclarationValidatorsAsync( initialCompilation, CompilationModelVersion.Initial, diagnosticAdder, cancellationToken );
-        var finalCompilationValidationTask = this.RunDeclarationValidatorsAsync( finalCompilation, CompilationModelVersion.Final, diagnosticAdder, cancellationToken );
+        var initialCompilationValidationTask = this.RunDeclarationValidatorsAsync(
+            initialCompilation,
+            CompilationModelVersion.Initial,
+            diagnosticAdder,
+            cancellationToken );
+
+        var finalCompilationValidationTask = this.RunDeclarationValidatorsAsync(
+            finalCompilation,
+            CompilationModelVersion.Final,
+            diagnosticAdder,
+            cancellationToken );
 
         await Task.WhenAll( initialCompilationValidationTask, finalCompilationValidationTask );
-        
+
         var hasInitialCompilationValidator = await initialCompilationValidationTask;
         var hasFinalCompilationValidator = await finalCompilationValidationTask;
 

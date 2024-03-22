@@ -159,7 +159,7 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
         // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
         invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
 
-        return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext.NormalizeWhitespace );
+        return invokeGetMethod.NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
     }
 
     // The following is the old code that was used alongside Intrinsics.

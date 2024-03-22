@@ -1,11 +1,5 @@
-using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Fabrics;
-using Metalama.Framework.Options;
-using Metalama.Framework.Eligibility;
-using Metalama.Framework.Project;
 using Metalama.Framework.Code.DeclarationBuilders;
 using System.ComponentModel;
 

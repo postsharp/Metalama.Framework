@@ -56,7 +56,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             {
                 mutex.ReleaseMutex();
             }
-        }  
+        }
 
         // The constructor is public because it is used for tests, so we don't base tests on the singleton instance.
         // ReSharper disable once EmptyConstructor
@@ -112,7 +112,7 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
             // The probability of mutex being destroyed when we call TryOpenExisting again is fairly low.
 
             // ReSharper disable once BadSemicolonSpaces
-            for ( var i = 0; ; i++ )
+            for ( var i = 0; /* Intentionally empty. */; i++ )
             {
                 // First try opening the mutex.
                 if ( Mutex.TryOpenExisting( mutexName, out var existingMutex ) )

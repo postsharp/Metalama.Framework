@@ -1,10 +1,5 @@
-using System;
-using System.IO;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33671;
 

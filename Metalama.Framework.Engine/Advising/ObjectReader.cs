@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 0 => Empty,
                 1 => readers[nonEmptyIndex].AssertNotNull(),
-                _ => new ObjectReaderMergeWrapper( readers ),
+                _ => new ObjectReaderMergeWrapper( readers )
             };
         }
 

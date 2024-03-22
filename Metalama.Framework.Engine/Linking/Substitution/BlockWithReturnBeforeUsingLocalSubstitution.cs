@@ -87,7 +87,7 @@ internal sealed class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSu
                 throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
         }
 
-        static UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, IEnumerable<StatementSyntax> statements )
+        UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, IEnumerable<StatementSyntax> statements )
         {
             return
                 UsingStatement(
@@ -95,11 +95,17 @@ internal sealed class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSu
                     Token( TriviaList( ElasticMarker ), SyntaxKind.OpenParenToken, TriviaList( ElasticMarker ) ),
                     local.Declaration,
                     null,
-                    Token( TriviaList( ElasticMarker ), SyntaxKind.CloseParenToken, TriviaList( ElasticLineFeed ) ),
+                    Token(
+                        TriviaList( ElasticMarker ),
+                        SyntaxKind.CloseParenToken,
+                        substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
                     Block(
                         Token( local.SemicolonToken.LeadingTrivia, SyntaxKind.OpenBraceToken, local.SemicolonToken.TrailingTrivia ),
                         List( statements ),
-                        Token( TriviaList( ElasticSpace ), SyntaxKind.CloseBraceToken, TriviaList( ElasticLineFeed ) ) ) );
+                        Token(
+                            TriviaList( ElasticSpace ),
+                            SyntaxKind.CloseBraceToken,
+                            substitutionContext.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) );
         }
 
         static HashSet<StatementSyntax> GetStatementsContainingOutgoingGotoStatement(

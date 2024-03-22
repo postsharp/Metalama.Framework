@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -72,7 +72,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
         var introducedMethod = MethodDeclaration(
             List<AttributeListSyntax>(),
             modifiers,
-            returnType.WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+            returnType.WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
             null,
             Identifier(
                 context.InjectionNameProvider.GetOverrideName(
@@ -105,7 +105,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
                     ArgumentList(
                         SeparatedList(
                             this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList(
-                                p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) ),
+                                p => Argument( null, p.RefKind.InvocationRefKindToken(), IdentifierName( p.Name ) ) ) ) ) ),
             MethodKind.Finalizer =>
                 referenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
             MethodKind.Operator =>

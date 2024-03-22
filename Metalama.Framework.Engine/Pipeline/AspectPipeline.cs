@@ -17,6 +17,7 @@ using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -87,6 +88,8 @@ public abstract class AspectPipeline : IDisposable
     }
 
     internal int PipelineInitializationCount { get; private set; }
+
+    protected abstract SyntaxGenerationOptions GetSyntaxGenerationOptions();
 
     protected virtual bool TryInitialize(
         IDiagnosticAdder diagnosticAdder,
@@ -219,16 +222,9 @@ public abstract class AspectPipeline : IDisposable
         }
 
         // Set NormalizeWhitespace setting for the compilation.
-        var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
-
-        var triviaMatters = !string.IsNullOrWhiteSpace( projectOptions.TransformedFilesOutputPath ) || projectOptions.DebugTransformedCode == true
-                                                                                                    || projectOptions.IsTest;
-
-        var normalizeWhitespace = triviaMatters && !projectOptions.FormatOutput;
-        var preserveTrivia = triviaMatters;
 
         projectServiceProviderWithProject =
-            projectServiceProviderWithProject.WithService( new SyntaxGenerationOptions( normalizeWhitespace, preserveTrivia ) );
+            projectServiceProviderWithProject.WithService( this.GetSyntaxGenerationOptions() );
 
         // Add MetricsManager.
         projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

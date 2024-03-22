@@ -5,6 +5,7 @@ using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.DesignTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
@@ -83,7 +84,9 @@ internal sealed class AddAspectAttributeCodeActionModel : CodeActionModel
         var oldNode =
             await targetSymbol.DeclaringSyntaxReferences.SingleOrDefault( r => r.SyntaxTree == syntaxRoot.SyntaxTree )!.GetSyntaxAsync( cancellationToken );
 
-        var newSyntaxRoot = await CSharpAttributeHelper.AddAttributeAsync( syntaxRoot, oldNode, attributeDescription, cancellationToken );
+        var context = executionContext.Compilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, oldNode );
+
+        var newSyntaxRoot = await CSharpAttributeHelper.AddAttributeAsync( syntaxRoot, oldNode, attributeDescription, context, cancellationToken );
 
         if ( newSyntaxRoot == null )
         {

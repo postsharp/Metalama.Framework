@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -20,7 +21,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -160,7 +160,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         if ( template != null )
         {
             templateTypeArguments.AddRange(
-                template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+                template.TemplateArguments.OfType<TemplateTypeArgumentFactory>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
         }
 
         if ( metaApi.Target.Declaration is IMethod { TypeParameters.Count: > 0 } targetMethod )
@@ -223,7 +223,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-    public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+    public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     public new MetaApi MetaApi => base.MetaApi!;
 
@@ -365,7 +365,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 awaitResult
                                     ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
                                     : returnExpression )
-                            .WithAdditionalAnnotations( Simplifier.Annotation ),
+                            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ),
                         Token( SyntaxKind.SemicolonToken ) );
             }
         }
@@ -517,7 +517,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 return
                     Block(
                             SyntaxFactoryEx.DiscardStatement(
-                                SyntaxFactoryEx.SafeCastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), returnExpression ) ),
+                                CurrentSyntaxSerializationContext.SyntaxGenerator.SafeCastExpression(
+                                    PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
+                                    returnExpression ) ),
                             ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }

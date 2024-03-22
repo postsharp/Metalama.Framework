@@ -1,4 +1,3 @@
-using Metalama.Framework.Tests.Integration.Tests.Options;
 namespace Metalama.Framework.Tests.Integration.Tests.Options.BaseType;
 [MyOptions("Attribute.C")]
 [ShowOptionsAspect]

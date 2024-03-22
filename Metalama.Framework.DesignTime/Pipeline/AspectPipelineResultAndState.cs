@@ -30,7 +30,7 @@ internal sealed class AspectPipelineResultAndState
     }
 
     internal IEnumerable<Diagnostic> GetAllDiagnostics() => this.Result.SyntaxTreeResults.SelectMany( x => x.Value.Diagnostics );
-    
+
     internal ImmutableArray<Diagnostic> GetAllDiagnostics( string path )
     {
         if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )

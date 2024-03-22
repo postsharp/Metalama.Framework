@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Templating;
 #pragma warning disable CS0169 // Field is not used
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.CastSimplification;

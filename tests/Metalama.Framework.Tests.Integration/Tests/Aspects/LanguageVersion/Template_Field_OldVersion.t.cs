@@ -4,7 +4,7 @@
 [TheAspect]
 class Target
 {
-    public global::System.String Field = (global::System.String)"""
+  public global::System.String Field = (global::System.String)"""
         This is a long message.
         It has several lines.
             Some are indented

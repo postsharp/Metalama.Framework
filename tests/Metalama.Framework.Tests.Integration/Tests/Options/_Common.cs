@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
-using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Tests.Options;
 
 [assembly: AspectOrder( typeof(ShowOptionsAspect), typeof(ModifyOptionsAspect) )]

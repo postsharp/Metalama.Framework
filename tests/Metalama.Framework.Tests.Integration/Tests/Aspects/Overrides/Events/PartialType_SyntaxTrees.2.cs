@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Linq;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialType_SyntaxTrees
 {

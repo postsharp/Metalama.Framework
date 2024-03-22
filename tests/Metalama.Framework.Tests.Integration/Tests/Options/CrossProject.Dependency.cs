@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Project;
 using Metalama.Framework.Tests.Integration.Tests.Options.CrossProject;
 
 [assembly: MyOptions( "FromDependencyAssembly" )]

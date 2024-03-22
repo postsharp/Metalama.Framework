@@ -213,7 +213,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
                         if ( typeSymbol.ContainingSymbol is IMethodSymbol )
                         {
                             // Not supported.
-                            throw new AssertionFailedException( $"Cannot map {typeSymbol} because it is a generic parameter of a method ({typeSymbol.ContainingSymbol})." );
+                            throw new AssertionFailedException(
+                                $"Cannot map {typeSymbol} because it is a generic parameter of a method ({typeSymbol.ContainingSymbol})." );
                         }
                         else
                         {

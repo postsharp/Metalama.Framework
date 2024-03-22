@@ -1,5 +1,4 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Events.Simple;

@@ -49,7 +49,8 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0108",
                 "Cannot set an outside compile-time variable in a block whose execution depends on a run-time condition",
-                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}' and it was not declared inside the block. " +
+                "Cannot set the compile-time variable '{0}' here because it is part of a block whose execution depends on the run-time condition '{1}' and it was not declared inside the block. "
+                +
                 "Move the assignment out of the run-time-conditional block or move the variable into the block.",
                 _category,
                 Error );
@@ -80,7 +81,8 @@ namespace Metalama.Framework.Engine.Templating
                     _category,
                     Error );
 
-        internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind, FormattableString Explanation)>
+        internal static readonly DiagnosticDefinition<(IDeclaration Advice, string Expression, IDeclaration TargetDeclaration, DeclarationKind TargetKind,
+                FormattableString Explanation)>
             CannotUseThisInStaticContext
                 = new(
                     "LAMA0114",
@@ -589,15 +591,16 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string? Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)> AspectUsesHigherCSharpVersion
-            = new(
-                "LAMA0282",
-                "Aspect uses higher C# version than what is allowed in the project.",
-                "The aspect '{0}' uses features of C# {1}, but it is used in a project built with C# {2}. Consider specifying <LangVersion>{1}</LangVersion> in this project or removing newer language features from the template '{3}' and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
-                _category,
-                Warning );
+        internal static readonly DiagnosticDefinition<(string? Aspect, string RequiredCSharpVersion, string TargetCSharpVersion, IMemberOrNamedType Template)>
+            AspectUsesHigherCSharpVersion
+                = new(
+                    "LAMA0282",
+                    "Aspect uses higher C# version than what is allowed in the project.",
+                    "The aspect '{0}' uses features of C# {1}, but it is used in a project built with C# {2}. Consider specifying <LangVersion>{1}</LangVersion> in this project or removing newer language features from the template '{3}' and then specifying <MetalamaTemplateLanguageVersion> in the aspect project.",
+                    _category,
+                    Warning );
 
-        internal static readonly DiagnosticDefinition<INamedTypeSymbol> NonRecordPrimaryConstructorsNotSupported 
+        internal static readonly DiagnosticDefinition<INamedTypeSymbol> NonRecordPrimaryConstructorsNotSupported
             = new(
                 "LAMA0283",
                 _category,

@@ -66,7 +66,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             StructuralSymbolComparerOptions.Name |
             StructuralSymbolComparerOptions.GenericParameterCount |
             StructuralSymbolComparerOptions.ParameterTypes |
-            StructuralSymbolComparerOptions.ParameterModifiers );            
+            StructuralSymbolComparerOptions.ParameterModifiers );
 
     internal static readonly StructuralSymbolComparer NameOblivious = new(
         StructuralSymbolComparerOptions.GenericArguments |

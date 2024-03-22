@@ -8,7 +8,7 @@ namespace Metalama.Framework.Advising;
 
 /* The benefits of the design of having each advice kind return its own IAdviceResult interface are that:
     - it is possible to build fluent APIs based on advice results
-    - it is possible to extend the interfaces with more properties 
+    - it is possible to extend the interfaces with more properties
 */
 
 /// <summary>

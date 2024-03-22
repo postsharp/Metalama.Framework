@@ -111,7 +111,7 @@ internal sealed class LinkerLateTransformationRegistry
     public bool HasRemovedPrimaryConstructor( INamedTypeSymbol type ) => this._typesWithRemovedPrimaryConstructor.Contains( type );
 
 #pragma warning disable CA1822 // Mark members as static
-    
+
     // ReSharper disable once MemberCanBeMadeStatic.Global
     public IReadOnlyList<IFieldSymbol> GetPrimaryConstructorFields( INamedTypeSymbol type )
 #pragma warning restore CA1822 // Mark members as static
@@ -135,7 +135,7 @@ internal sealed class LinkerLateTransformationRegistry
     }
 
 #pragma warning disable CA1822 // Mark members as static
-    
+
     // ReSharper disable once MemberCanBeMadeStatic.Global
     public IReadOnlyList<IPropertySymbol> GetPrimaryConstructorProperties( INamedTypeSymbol type )
 #pragma warning restore CA1822 // Mark members as static

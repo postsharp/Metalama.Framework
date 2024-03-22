@@ -48,7 +48,26 @@ namespace Metalama.Framework.Engine.Options
             => this.GetBooleanOption( MSBuildPropertyNames.MetalamaEnabled, true ) && !this.GetBooleanOption( MSBuildPropertyNames.MetalamaCompileTimeProject );
 
         [Memo]
-        public override bool FormatOutput => this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatOutput );
+        public override CodeFormattingOptions CodeFormattingOptions => this.GetTextOutputOptionsCore();
+
+        private CodeFormattingOptions GetTextOutputOptionsCore()
+        {
+            if ( !string.IsNullOrEmpty( this.TransformedFilesOutputPath ) || this.DebugTransformedCode == true )
+            {
+                if ( this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatOutput ) )
+                {
+                    return CodeFormattingOptions.Formatted;
+                }
+                else
+                {
+                    return CodeFormattingOptions.Default;
+                }
+            }
+            else
+            {
+                return CodeFormattingOptions.None;
+            }
+        }
 
         [Memo]
         public override bool FormatCompileTimeCode => this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatCompileTimeCode );

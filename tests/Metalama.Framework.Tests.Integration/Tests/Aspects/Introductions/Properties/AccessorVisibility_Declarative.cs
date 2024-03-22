@@ -1,6 +1,4 @@
-﻿using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
+﻿using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.AccessorVisibility_Declarative
 {

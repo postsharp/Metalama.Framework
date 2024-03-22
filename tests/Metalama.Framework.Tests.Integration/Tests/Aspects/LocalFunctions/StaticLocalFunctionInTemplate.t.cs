@@ -1,12 +1,12 @@
 internal class C
 {
-    [TestAspect]
-    private void Foo()
+  [TestAspect]
+  private void Foo()
+  {
+    static void Local()
     {
-        static void Local()
-        {
-        }
-        Local();
-        return;
     }
+    Local();
+    return;
+  }
 }

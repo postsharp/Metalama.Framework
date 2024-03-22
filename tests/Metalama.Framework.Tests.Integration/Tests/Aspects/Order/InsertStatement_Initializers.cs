@@ -1,7 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Order.InsertStatement_Initializers;
 
 #pragma warning disable CS8618

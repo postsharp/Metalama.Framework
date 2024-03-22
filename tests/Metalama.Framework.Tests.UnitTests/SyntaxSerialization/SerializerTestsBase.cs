@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -82,7 +83,7 @@ class Expression
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Proof );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Formatted );
 
                 this.SerializationService = new SyntaxSerializationService();
             }
@@ -94,7 +95,7 @@ class Expression
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Proof );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Formatted );
 
                 this.SerializationService = new SyntaxSerializationService();
             }
