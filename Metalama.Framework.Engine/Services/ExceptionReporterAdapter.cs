@@ -2,8 +2,6 @@
 
 using Metalama.Compiler.Services;
 using System;
-using Backstage = Metalama.Backstage.Telemetry;
-using Compiler = Metalama.Compiler.Services;
 
 namespace Metalama.Framework.Engine.Services;
 
