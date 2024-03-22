@@ -67,6 +67,12 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             CancellationToken cancellationToken )
         {
             var syntaxTree = await document.GetSyntaxTreeAsync( cancellationToken );
+
+            if ( syntaxTree == null )
+            {
+                return null;
+            }
+            
             var newSyntaxTree = unformattedResult.TransformedSyntaxTree!;
 
             var newDocument = document.WithSyntaxRoot(

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Testing;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Utilities;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -187,7 +188,7 @@ namespace {0}
 
             if ( aspectOrderApplicationBuilder.Length > 0 )
             {
-                sourceCodeBuilder.AppendLine( $"[assembly: AspectOrder( {aspectOrderApplicationBuilder} )]" );
+                sourceCodeBuilder.AppendLineInvariant( $"[assembly: AspectOrder( {aspectOrderApplicationBuilder} )]" );
             }
 
             for ( var i = 1; i <= numberOfAspects; i++ )

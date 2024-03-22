@@ -83,14 +83,13 @@ public sealed class PreviewTests : DesignTimeTestBase
         var document = workspace.GetDocument( _mainProjectName, previewedSyntaxTreeName );
 
         var formattedDocument = await UserProcessTransformationPreviewService.FormatOutputAsync( document, result, default );
-
-
+        
         var text = await formattedDocument.GetTextAsync();
 
         var s = text.ToString();
         
         // Check that the output is formatted.
-        Assert.DoesNotContain( "global::", s );
+        Assert.DoesNotContain( "global::", s, StringComparison.Ordinal );
         
         return s;
     }
