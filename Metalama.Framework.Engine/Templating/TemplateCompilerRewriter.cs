@@ -2523,12 +2523,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol &&
                   this._templateMemberClassifier.SymbolClassifier.GetTemplatingScope( typeSymbol ).GetExpressionValueScope() == TemplatingScope.RunTimeOnly )
         {
-            var typeId = typeSymbol.GetSerializableTypeId().Id;
+            var typeOfString = this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( typeSymbol ).ToString();
 
             return this._typeOfRewriter.RewriteTypeOf(
                     typeSymbol,
                     this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType ) )
-                .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
+                .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeOfString ) );
         }
 
         return base.VisitTypeOfExpression( node );

@@ -90,14 +90,14 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         AssertAspectClasses(
             [
-                "typeof(global::Aspect)",
-                "typeof(global::Fabric)",
-                "typeof(global::Metalama.Framework.Validation.InternalImplementAttribute)",
-                "typeof(global::ParentAspect)"
+                "Y:global::Aspect",
+                "Y:global::Fabric",
+                "Y:global::Metalama.Framework.Validation.InternalImplementAttribute",
+                "Y:global::ParentAspect"
             ],
             aspectClasses );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "typeof(global::Aspect)" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "Y:global::Aspect" ), default );
 
         AssertAspectInstances(
             [
@@ -183,7 +183,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "typeof(global::Aspect)" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "Y:global::Aspect" ), default );
 
         AssertAspectTransformations(
             [
@@ -194,7 +194,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
             ],
             aspectInstances );
 
-        var compilationInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "typeof(global::CompilationAttribute)" ), default );
+        var compilationInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "Y:global::CompilationAttribute" ), default );
 
         AssertAspectTransformations(
             ["Introduce attribute of type 'MyAttribute' into 'project'"],
@@ -246,8 +246,8 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         AssertAspectClasses(
             [
-                "typeof(global::Aspect)",
-                "typeof(global::Metalama.Framework.Validation.InternalImplementAttribute)"
+                "Y:global::Aspect",
+                "Y:global::Metalama.Framework.Validation.InternalImplementAttribute"
             ],
             aspectClasses );
 
@@ -273,13 +273,13 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         AssertAspectClasses(
             [
-                "typeof(global::AnotherAspect)",
-                "typeof(global::Aspect)",
-                "typeof(global::Metalama.Framework.Validation.InternalImplementAttribute)"
+                "Y:global::AnotherAspect",
+                "Y:global::Aspect",
+                "Y:global::Metalama.Framework.Validation.InternalImplementAttribute"
             ],
             aspectClasses );
 
-        var aspectClass = new SerializableTypeId( "typeof(global::Aspect)" );
+        var aspectClass = new SerializableTypeId( "Y:global::Aspect" );
 
         var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, aspectClass, default );
 

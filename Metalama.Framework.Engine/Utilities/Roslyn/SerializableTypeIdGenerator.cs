@@ -10,12 +10,14 @@ public static class SerializableTypeIdGenerator
 {
     public static SerializableTypeId GetSerializableTypeId( this ITypeSymbol symbol )
     {
-        var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.TypeOfExpression( symbol, keepNullableAnnotations: true ).ToString();
+        var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type( symbol ).ToString();
 
         if ( symbol.NullableAnnotation != NullableAnnotation.None )
         {
             id += '!';
         }
+
+        id = SerializableTypeIdResolver.Prefix + id;
 
         return new SerializableTypeId( id );
     }

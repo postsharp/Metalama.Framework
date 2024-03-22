@@ -5,7 +5,7 @@ public class TestClass
   {
     var returnValue = this.AsyncEnumerable_Source(text);
     global::System.Console.WriteLine("Advice 1");
-    await foreach (var item in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object>)returnValue)
+    await foreach (var item in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object?>)returnValue)
     {
       if (item is null)
       {
@@ -13,7 +13,7 @@ public class TestClass
       }
     }
     global::System.Console.WriteLine("Advice 2");
-    await foreach (var item_1 in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object>)returnValue)
+    await foreach (var item_1 in (global::System.Collections.Generic.IAsyncEnumerable<global::System.Object?>)returnValue)
     {
       if (item_1 is null)
       {

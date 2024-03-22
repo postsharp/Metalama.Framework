@@ -10,11 +10,11 @@ internal class C
   [Retry]
   private async Task FooAsync()
   {
-    async global::System.Threading.Tasks.Task<global::System.Object> ExecuteCoreAsync()
+    async global::System.Threading.Tasks.Task<global::System.Object?> ExecuteCoreAsync()
     {
       await this.FooAsync_Source();
       object result = null;
-      return (global::System.Object)result;
+      return (global::System.Object? )result;
     }
     await global::System.Threading.Tasks.Task.Run(ExecuteCoreAsync);
     return;
