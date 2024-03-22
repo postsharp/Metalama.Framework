@@ -1027,7 +1027,7 @@ internal sealed partial class LinkerInjectionStep
                         default,
                         node.Modifiers,
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( context.ElasticEndOfLineTrivia ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, context.ElasticEndOfLineTriviaList ) );
 
                     fieldDeclaration = this.ReplaceAttributes( fieldDeclaration, attributes );
 

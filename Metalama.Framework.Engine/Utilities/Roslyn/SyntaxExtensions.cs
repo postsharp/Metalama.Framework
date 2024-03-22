@@ -164,16 +164,6 @@ public static class SyntaxExtensions
         return node.WithLeadingTrivia( leadingTrivia );
     }
 
-    internal static SyntaxToken WithOptionalLeadingTrivia( this SyntaxToken node, SyntaxTriviaList leadingTrivia, SyntaxGenerationOptions options )
-    {
-        if ( !options.TriviaMatters && !leadingTrivia.ContainsDirectives() )
-        {
-            return node;
-        }
-
-        return node.WithLeadingTrivia( leadingTrivia );
-    }
-
     internal static TNode WithOptionalLeadingLineFeed<TNode>(
         this TNode node,
         SyntaxGenerationContext context )
@@ -239,23 +229,17 @@ public static class SyntaxExtensions
     }
 
     internal static SyntaxToken WithRequiredTrailingSpace( this SyntaxToken node )
-    {
-        return node.WithTrailingTrivia( node.TrailingTrivia.Add( SyntaxFactory.ElasticSpace ) );
-    }
+        => node.WithTrailingTrivia( node.TrailingTrivia.Add( SyntaxFactory.ElasticSpace ) );
 
     internal static SyntaxToken WithRequiredTrailingLineFeed(
         this SyntaxToken node,
         SyntaxGenerationContext context )
-    {
-        return node.WithTrailingTrivia( node.TrailingTrivia.Add( context.ElasticEndOfLineTrivia ) );
-    }
+        => node.WithTrailingTrivia( node.TrailingTrivia.Add( context.ElasticEndOfLineTrivia ) );
 
     internal static SyntaxToken WithRequiredLeadingLineFeed(
         this SyntaxToken node,
         SyntaxGenerationContext context )
-    {
-        return node.WithLeadingTrivia( node.LeadingTrivia.Add( context.ElasticEndOfLineTrivia ) );
-    }
+        => node.WithLeadingTrivia( node.LeadingTrivia.Add( context.ElasticEndOfLineTrivia ) );
 
     internal static TNode StructuredTriviaWithOptionalTrailingLineFeed<TNode>(
         this TNode node,
@@ -274,9 +258,7 @@ public static class SyntaxExtensions
         this TNode node,
         SyntaxGenerationContext context )
         where TNode : StructuredTriviaSyntax
-    {
-        return node.WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
-    }
+        => node.WithTrailingTrivia( node.GetTrailingTrivia().Add( context.ElasticEndOfLineTrivia ) );
 
     internal static TNode StructuredTriviaWithOptionalLeadingLineFeed<TNode>(
         this TNode node,
@@ -295,9 +277,7 @@ public static class SyntaxExtensions
         this TNode node,
         SyntaxGenerationContext context )
         where TNode : StructuredTriviaSyntax
-    {
-        return node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) );
-    }
+        => node.WithLeadingTrivia( node.GetLeadingTrivia().Add( context.ElasticEndOfLineTrivia ) );
 
     internal static SyntaxTriviaList AddOptionalLineFeed(
         this SyntaxTriviaList list,

@@ -15,9 +15,9 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
     {
         private readonly CompilationContext? _compilationContext;
 
-        public string EndOfLine { get; }
+        internal string EndOfLine { get; }
 
-        public SyntaxGenerationOptions Options { get; }
+        internal SyntaxGenerationOptions Options { get; }
 
         private Compilation Compilation => this.CompilationContext.Compilation;
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
 
         internal ReflectionMapper ReflectionMapper => this.CompilationContext.ReflectionMapper;
 
-        internal LanguageVersion LanguageVersion => this.Compilation.GetLanguageVersion();
+        private LanguageVersion LanguageVersion => this.Compilation.GetLanguageVersion();
 
         internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
 
@@ -56,9 +56,9 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         internal static SyntaxGenerationContext Contextless { get; } = new( false, false, SyntaxGenerationOptions.Formatted, "\r\n" );
 
         [Memo]
-        public SyntaxTrivia ElasticEndOfLineTrivia => SyntaxFactory.ElasticEndOfLine( this.EndOfLine );
+        internal SyntaxTrivia ElasticEndOfLineTrivia => SyntaxFactory.ElasticEndOfLine( this.EndOfLine );
 
-        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia ) : default;
+        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? this.ElasticEndOfLineTriviaList : default;
 
         [Memo]
         public SyntaxTriviaList TwoElasticEndOfLinesTriviaList
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
 
         // used for debug assert
-        public bool Equals( SyntaxGenerationContext? other )
+        internal bool Equals( SyntaxGenerationContext? other )
         {
             return other != null &&
                    this.CompilationContext == other.CompilationContext &&

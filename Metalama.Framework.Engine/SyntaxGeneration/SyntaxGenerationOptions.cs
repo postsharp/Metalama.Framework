@@ -5,7 +5,7 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration;
 
-public record SyntaxGenerationOptions : IProjectService
+public sealed record SyntaxGenerationOptions : IProjectService
 {
     private readonly CodeFormattingOptions _codeFormattingOptions;
 

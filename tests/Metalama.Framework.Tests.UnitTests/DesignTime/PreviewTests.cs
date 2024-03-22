@@ -2,12 +2,9 @@
 
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
-using Metalama.Framework.Engine.DesignTime;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -69,7 +66,6 @@ public sealed class PreviewTests : DesignTimeTestBase
             references = null;
         }
 
-        
         var projectKey = workspace.AddOrUpdateProject( _mainProjectName, code, references );
 
         var service = new TransformationPreviewServiceImpl( serviceProvider );
