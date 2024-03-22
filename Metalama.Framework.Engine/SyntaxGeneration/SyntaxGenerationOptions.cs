@@ -1,29 +1,28 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 public record SyntaxGenerationOptions : IProjectService
 {
-    internal bool AddLineFeeds { get; }
+    private readonly CodeFormattingOptions _codeFormattingOptions;
+    
+    // We must normalize whitespace even if we later run the formatter because the formatter requires existing whitespace.
+    internal bool NormalizeWhitespace => this._codeFormattingOptions != CodeFormattingOptions.None;
+    
+    internal bool TriviaMatters => this._codeFormattingOptions != CodeFormattingOptions.None;
 
-    internal bool NormalizeWhitespace { get; }
+    internal bool AddFormattingAnnotations => this._codeFormattingOptions == CodeFormattingOptions.Formatted;
 
-    internal bool PreserveTrivia { get; }
-
-    internal bool AddFormattingAnnotations { get; }
-
-    internal SyntaxGenerationOptions( bool normalizeWhitespace, bool preserveTrivia, bool addFormattingAnnotations, bool addLineFeeds )
+    internal SyntaxGenerationOptions( CodeFormattingOptions options )
     {
-        this.NormalizeWhitespace = normalizeWhitespace;
-        this.PreserveTrivia = preserveTrivia;
-        this.AddFormattingAnnotations = addFormattingAnnotations;
-        this.AddLineFeeds = addLineFeeds;
+        this._codeFormattingOptions = options;
     }
 
     /// <summary>
     /// Gets options that the creation of fully formatted code.
     /// </summary>
-    public static SyntaxGenerationOptions Proof { get; } = new( true, true, true, true );
+    public static SyntaxGenerationOptions Formatted { get; } = new( CodeFormattingOptions.Formatted );
 }

@@ -73,7 +73,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var compilation = testContext.CreateCompilationModel( code );
             var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
-            var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, isNullOblivious: !nullable ).SyntaxGenerator;
+            var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: !nullable ).SyntaxGenerator;
 
             var typeOf = syntaxGenerator.TypeOfExpression( fieldType ).ToString();
 
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             var compilation = testContext.CreateCompilationModel( code );
             var fieldType = compilation.Types.Single().Fields.Single().Type.GetSymbol();
 
-            var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, isNullOblivious: !nullable ).SyntaxGenerator;
+            var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: !nullable ).SyntaxGenerator;
 
             var typeOf = syntaxGenerator.Type( fieldType ).ToString();
 
@@ -147,7 +147,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
                 $"using System; class MyAttribute : Attribute {{ public MyAttribute( object value ) {{}} }} [MyAttribute( {inputSyntax} )] class C {{}} ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(SyntaxGenerationOptions.Proof);
+            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(SyntaxGenerationOptions.Formatted);
             var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
             var type = compilation.Types.OfName( "C" ).Single();
             var attribute = type.Attributes.Single();
@@ -174,7 +174,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var compilation = testContext.CreateCompilationModel( code );
             var method = compilation.Types.Single().Methods.Single().GetSymbol().AssertNotNull();
-            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(SyntaxGenerationOptions.Proof);
+            var syntaxGenerationContext = compilation.CompilationContext.GetSyntaxGenerationContext(SyntaxGenerationOptions.Formatted);
             var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
             var syntax = syntaxGenerator.TypeParameterConstraintClauses( method.TypeParameters );

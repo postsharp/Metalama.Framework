@@ -393,7 +393,7 @@ internal partial class ContextualSyntaxGenerator
             typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
         }
 
-        if ( this.Options.NormalizeWhitespace )
+        if ( this.Options.TriviaMatters )
         {
             // Just calling NormalizeWhitespaceIfNecessary here produces ugly whitespace, e.g. "typeof(global::System.Int32[, ])".
             typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this._context.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
@@ -763,11 +763,11 @@ internal partial class ContextualSyntaxGenerator
         SyntaxKind disableOrRestoreKind,
         SeparatedSyntaxList<ExpressionSyntax> errorCodes )
         => SyntaxFactory.PragmaWarningDirectiveTrivia(
-            Token( this._context.RequiredElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
+            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
             TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
             TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
             TokenWithTrailingSpace( disableOrRestoreKind ),
             errorCodes,
-            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.RequiredElasticEndOfLineTriviaList ),
+            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.ElasticEndOfLineTriviaList ),
             isActive: true );
 }

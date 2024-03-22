@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating
                 this.ReflectionMapper = compileTimeCompilation.ReflectionMapper;
 
                 // TODO: We would need one context for each syntax tree if we want to respect EOLs.
-                this.SyntaxGenerationContext = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
+                this.SyntaxGenerationContext = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
             }
 
             public ReflectionMapper ReflectionMapper { get; }

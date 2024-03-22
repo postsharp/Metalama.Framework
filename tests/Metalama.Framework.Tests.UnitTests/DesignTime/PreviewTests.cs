@@ -28,6 +28,8 @@ public sealed class PreviewTests : UnitTestClass
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
     }
 
+    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { FormatOutput = true };
+
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
         string previewedSyntaxTreeName,

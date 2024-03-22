@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return null;
                 }
-                else if ( this._projectOptions?.FormatOutput == true )
+                else if ( this._projectOptions?.CodeFormattingOptions == CodeFormattingOptions.Formatted )
                 {
                     var countLabelUsesWalker = new CountLabelUsesWalker();
                     countLabelUsesWalker.Visit( block );

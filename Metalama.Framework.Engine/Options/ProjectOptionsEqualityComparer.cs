@@ -12,7 +12,7 @@ public static class ProjectOptionsEqualityComparer
             x.SourceGeneratorTouchFile == y.SourceGeneratorTouchFile &&
             x.AssemblyName == y.AssemblyName &&
             x.IsFrameworkEnabled == y.IsFrameworkEnabled &&
-            x.FormatOutput == y.FormatOutput &&
+            x.CodeFormattingOptions == y.CodeFormattingOptions &&
             x.WriteHtml == y.WriteHtml &&
             x.FormatCompileTimeCode == y.FormatCompileTimeCode &&
             x.IsUserCodeTrusted == y.IsUserCodeTrusted &&

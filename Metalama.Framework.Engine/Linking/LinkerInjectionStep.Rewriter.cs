@@ -497,7 +497,7 @@ internal sealed partial class LinkerInjectionStep
                             .WithIdentifier(
                                 node.Identifier.WithOptionalTrailingTrivia(
                                     default,
-                                    syntaxGenerationContext.Options.PreserveTrivia || node.Identifier.ContainsDirectives ) )
+                                    syntaxGenerationContext.Options.TriviaMatters || node.Identifier.ContainsDirectives ) )
                             .WithBaseList(
                                 BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )

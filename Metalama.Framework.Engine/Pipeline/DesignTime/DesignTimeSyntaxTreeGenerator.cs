@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
-            var context = initialCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
+            var context = initialCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
             var additionalSyntaxTreeDictionary = new ConcurrentDictionary<string, IntroducedSyntaxTree>();
 
             var useNullability = partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, true );
+                var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, true );
 
                 foreach ( var transformation in orderedTransformations )
                 {

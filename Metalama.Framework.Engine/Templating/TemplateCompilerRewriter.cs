@@ -87,7 +87,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-        var syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
+        var syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
         this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
         this._templateTypeArgumentType =

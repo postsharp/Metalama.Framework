@@ -5,6 +5,24 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options
 {
+    public enum CodeFormattingOptions
+    {
+        /// <summary>
+        /// A correct C# file must be generated, but it must not be nicely formatted.
+        /// </summary>
+        Default,
+        
+        /// <summary>
+        /// No text output is required, only a syntax tree.
+        /// </summary>
+        None,
+        
+        /// <summary>
+        /// The C# code must be nicely formatted.
+        /// </summary>
+        Formatted
+    }
+    
     /// <summary>
     /// Exposes project options (typically defined in MSBuild or .editorconfig) in a strongly-typed manner.
     /// The production implementation is <see cref="MSBuildProjectOptions"/> but tests can provide their own implementation.
@@ -30,9 +48,9 @@ namespace Metalama.Framework.Engine.Options
         bool IsFrameworkEnabled { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the output syntax trees must be formatted.
+        /// Gets a value indicating how the output syntax trees must be formatted.
         /// </summary>
-        bool FormatOutput { get; }
+        CodeFormattingOptions CodeFormattingOptions { get; }
 
         /// <summary>
         /// Gets a value indicating whether HTML files should be written for syntax-highlighted input and transformed

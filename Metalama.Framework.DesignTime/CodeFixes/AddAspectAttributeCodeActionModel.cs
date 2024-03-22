@@ -84,7 +84,7 @@ internal sealed class AddAspectAttributeCodeActionModel : CodeActionModel
         var oldNode =
             await targetSymbol.DeclaringSyntaxReferences.SingleOrDefault( r => r.SyntaxTree == syntaxRoot.SyntaxTree )!.GetSyntaxAsync( cancellationToken );
 
-        var context = executionContext.Compilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, oldNode );
+        var context = executionContext.Compilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, oldNode );
 
         var newSyntaxRoot = await CSharpAttributeHelper.AddAttributeAsync( syntaxRoot, oldNode, attributeDescription, context, cancellationToken );
 

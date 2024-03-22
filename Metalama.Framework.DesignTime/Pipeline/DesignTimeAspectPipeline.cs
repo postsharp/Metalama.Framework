@@ -1200,6 +1200,13 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
         CancellationToken cancellationToken,
         [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
     {
+        var projectOptions = this.ServiceProvider.GetRequiredService<IProjectOptions>();
+
+        if ( projectOptions.CodeFormattingOptions != CodeFormattingOptions.Formatted )
+        {
+            throw new AssertionFailedException( "Code formatting must be enabled in the design-time pipeline." );
+        }
+
         var tryInitialize = base.TryInitialize( diagnosticAdder, compilation, projectLicenseInfo, compileTimeTreesHint, cancellationToken, out configuration );
 
         if ( tryInitialize )

@@ -53,19 +53,16 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
             this.SyntaxGenerator = new ContextualSyntaxGenerator( this, !isNullOblivious );
         }
 
-        internal static SyntaxGenerationContext Contextless { get; } = new( false, false, SyntaxGenerationOptions.Proof, "\r\n" );
+        internal static SyntaxGenerationContext Contextless { get; } = new( false, false, SyntaxGenerationOptions.Formatted, "\r\n" );
 
         [Memo]
         public SyntaxTrivia ElasticEndOfLineTrivia => SyntaxFactory.ElasticEndOfLine( this.EndOfLine );
 
-        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.AddLineFeeds ? this.RequiredElasticEndOfLineTriviaList : default;
-
-        [Memo]
-        public SyntaxTriviaList RequiredElasticEndOfLineTriviaList => new( this.ElasticEndOfLineTrivia );
+        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? new( this.ElasticEndOfLineTrivia ) : default;
 
         [Memo]
         public SyntaxTriviaList TwoElasticEndOfLinesTriviaList
-            => this.Options.AddLineFeeds ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia, this.ElasticEndOfLineTrivia ) : default;
+            => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia, this.ElasticEndOfLineTrivia ) : default;
 
         private SyntaxGenerationContext(
             bool isNullOblivious,

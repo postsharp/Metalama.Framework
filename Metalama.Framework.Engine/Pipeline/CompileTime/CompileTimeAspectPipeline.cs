@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Licensing;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
@@ -154,7 +155,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ReferenceValidators;
 
                 // Format the output.
-                if ( this.ProjectOptions.FormatOutput || this.ProjectOptions.WriteHtml )
+                if ( this.ProjectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted || this.ProjectOptions.WriteHtml )
                 {
                     // ReSharper disable once AccessToModifiedClosure
                     resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );

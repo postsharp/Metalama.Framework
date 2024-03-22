@@ -18,7 +18,7 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual bool IsFrameworkEnabled => true;
 
-    public virtual bool FormatOutput => false;
+    public virtual CodeFormattingOptions CodeFormattingOptions => CodeFormattingOptions.Default;
 
     public virtual bool WriteHtml => false;
 

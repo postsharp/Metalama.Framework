@@ -56,7 +56,7 @@ internal sealed class AddAttributeCodeAction : ICodeAction
         var originalTree = originalNode.SyntaxTree;
         var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
-        var generationContext = context.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof, originalNode );
+        var generationContext = context.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, originalNode );
         var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this._attribute );
 
         var transformedRoot = originalRoot.ReplaceNode( originalNode, transformedNode );

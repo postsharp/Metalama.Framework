@@ -26,7 +26,7 @@ namespace Metalama.Framework.Workspaces
 
         public override string? AssemblyName => this._compilation.AssemblyName;
 
-        public override bool FormatOutput => true;
+        public override CodeFormattingOptions CodeFormattingOptions => CodeFormattingOptions.Formatted;
 
         public override bool FormatCompileTimeCode => true;
 

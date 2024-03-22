@@ -116,7 +116,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
-            var serviceProvider = testContext.ServiceProvider.WithService( SyntaxGenerationOptions.Proof );
+            var serviceProvider = testContext.ServiceProvider.WithService( SyntaxGenerationOptions.Formatted );
             var assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
 
             // Create an empty compilation (just with references) for the compile-time project.
@@ -319,7 +319,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
             var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod );
-            var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
+            var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
 
             var proceedExpression =
                 new SyntaxUserExpression(

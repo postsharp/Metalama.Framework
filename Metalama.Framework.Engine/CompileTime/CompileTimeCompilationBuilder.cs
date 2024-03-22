@@ -99,7 +99,7 @@ internal sealed partial class CompileTimeCompilationBuilder
         CompileTimeDomain domain )
     {
         // Building the compile-time compilation is not considered to be performance-critical, so we can always normalize whitespace and preserve trivia.
-        this._serviceProvider = serviceProvider.WithService( SyntaxGenerationOptions.Proof, true );
+        this._serviceProvider = serviceProvider.WithService( SyntaxGenerationOptions.Formatted, true );
         this._domain = domain;
         this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
         this._rewriter = serviceProvider.Global.GetService<ICompileTimeAssemblyBinaryRewriter>();

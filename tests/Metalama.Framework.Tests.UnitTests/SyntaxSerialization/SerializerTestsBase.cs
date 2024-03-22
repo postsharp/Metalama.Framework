@@ -83,7 +83,7 @@ class Expression
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Proof );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Formatted );
 
                 this.SerializationService = new SyntaxSerializationService();
             }
@@ -95,7 +95,7 @@ class Expression
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Proof  );
+                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, SyntaxGenerationOptions.Formatted  );
 
                 this.SerializationService = new SyntaxSerializationService();
             }

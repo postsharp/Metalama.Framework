@@ -25,7 +25,7 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool IsFrameworkEnabled => this.Wrapped.IsFrameworkEnabled;
 
-    public virtual bool FormatOutput => this.Wrapped.FormatOutput;
+    public virtual CodeFormattingOptions CodeFormattingOptions => this.Wrapped.CodeFormattingOptions;
 
     public virtual bool WriteHtml => this.Wrapped.WriteHtml;
 

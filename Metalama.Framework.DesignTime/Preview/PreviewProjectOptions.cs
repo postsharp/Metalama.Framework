@@ -8,7 +8,7 @@ namespace Metalama.Framework.DesignTime.Preview
     {
         public PreviewProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
 
-        public override bool FormatOutput => true;
+        public override CodeFormattingOptions CodeFormattingOptions => CodeFormattingOptions.Formatted;
 
         public override bool FormatCompileTimeCode => false;
     }

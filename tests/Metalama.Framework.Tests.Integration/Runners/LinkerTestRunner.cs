@@ -55,7 +55,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // the linker tests because they are not cross-assembly.
             var serviceProvider = (ProjectServiceProvider) testContext.ServiceProvider.Global.Underlying
                 .WithProjectScopedServices( new DefaultProjectOptions(), TestCompilationFactory.GetMetadataReferences() )
-                .WithService( SyntaxGenerationOptions.Proof );
+                .WithService( SyntaxGenerationOptions.Formatted );
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
 

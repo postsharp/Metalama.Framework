@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsReadOnlyList( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
-                this._syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Proof );
+                this._syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
                 this._runtimeCompilationContext = compilationContext.CompilationContext;
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.

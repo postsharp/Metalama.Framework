@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class TypedConstantTests : UnitTestClass
     {
-        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Proof );
+        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
         
         [Fact]
         public void Unassigned()
