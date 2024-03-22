@@ -2,8 +2,12 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
-using System;
 using Metalama.Framework.Aspects;
+using System;
+
+#if TESTRUNNER
+using System.Linq;
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Conditional_NotInvoked;
 
@@ -16,7 +20,7 @@ internal class ReturnNumbers : OverrideMethodAspect
 #if TESTRUNNER
         var numbers = new object[] { 42 };
 
-        return numbers?.ToHashSet;
+        return numbers?.ToHashSet();
 #else
         return null;
 #endif
