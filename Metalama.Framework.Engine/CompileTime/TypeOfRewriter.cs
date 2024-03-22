@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -13,10 +14,13 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class TypeOfRewriter
 {
+    private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly NameSyntax _compileTimeTypeName;
 
     public TypeOfRewriter( SyntaxGenerationContext syntaxGenerationContext )
     {
+        this._syntaxGenerationContext = syntaxGenerationContext;
+
         this._compileTimeTypeName = (NameSyntax)
             syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeOfResolver) ) );
     }
@@ -39,11 +43,13 @@ internal sealed class TypeOfRewriter
 
         if ( substitutions == null )
         {
+            var typeOfString = this._syntaxGenerationContext.SyntaxGenerator.TypeOfExpression( typeSymbol ).ToString();
+
             return InvocationExpression( memberAccess )
                 .AddArgumentListArguments(
                     new[]
                         {
-                            typeSymbol.GetSerializableTypeId().Id,
+                            typeOfString,
                             typeSymbol.ContainingNamespace.GetFullName(),
                             typeSymbol.GetReflectionName(),
                             typeSymbol.GetReflectionFullName(),

@@ -95,7 +95,7 @@ public sealed class SerializableTypeIdResolver
         }
     }
 
-    private sealed class Resolver : SafeSyntaxVisitor<ITypeSymbol>
+    private sealed class Resolver : SafeSyntaxVisitor<ITypeSymbol?>
     {
         private readonly Compilation _compilation;
         private readonly IReadOnlyDictionary<string, IType>? _genericArguments;
@@ -125,6 +125,11 @@ public sealed class SerializableTypeIdResolver
 
         private INamespaceOrTypeSymbol? LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
         {
+            if ( name == "dynamic" )
+            {
+                return this._compilation.DynamicType;
+            }
+
             if ( ns == null )
             {
                 if ( this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
@@ -159,11 +164,11 @@ public sealed class SerializableTypeIdResolver
             throw new InvalidOperationException( $"The type or namespace '{ns}' does not contain a member named '{name}' of arity {arity}." );
         }
 
-        private ITypeSymbol LookupName( NameSyntax name )
+        private ITypeSymbol? LookupName( NameSyntax name )
         {
             var result = (ITypeSymbol) this.LookupName( name, null );
 
-            if ( !this._isNullOblivious )
+            if ( !this._isNullOblivious && result != null )
             {
                 result = result.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
             }
@@ -171,12 +176,12 @@ public sealed class SerializableTypeIdResolver
             return result;
         }
 
-        private INamespaceOrTypeSymbol LookupName( NameSyntax name, INamespaceOrTypeSymbol? ns )
+        private INamespaceOrTypeSymbol? LookupName( NameSyntax name, INamespaceOrTypeSymbol? ns )
         {
             switch ( name )
             {
                 case IdentifierNameSyntax identifierName:
-                    return this.LookupName( identifierName.Identifier.Text, 0, ns ).AssertNotNull();
+                    return this.LookupName( identifierName.Identifier.Text, 0, ns );
 
                 case QualifiedNameSyntax qualifiedName:
                     var left = this.LookupName( qualifiedName.Left, ns );
@@ -216,17 +221,17 @@ public sealed class SerializableTypeIdResolver
             }
         }
 
-        public override ITypeSymbol VisitGenericName( GenericNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol? VisitGenericName( GenericNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol VisitAliasQualifiedName( AliasQualifiedNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol? VisitAliasQualifiedName( AliasQualifiedNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol VisitQualifiedName( QualifiedNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol? VisitQualifiedName( QualifiedNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol VisitIdentifierName( IdentifierNameSyntax node ) => this.LookupName( node );
+        public override ITypeSymbol? VisitIdentifierName( IdentifierNameSyntax node ) => this.LookupName( node );
 
-        public override ITypeSymbol DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
+        public override ITypeSymbol? DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
 
-        public override ITypeSymbol VisitPredefinedType( PredefinedTypeSyntax node )
+        public override ITypeSymbol? VisitPredefinedType( PredefinedTypeSyntax node )
         {
             ITypeSymbol result = node.Keyword.Kind() switch
             {
