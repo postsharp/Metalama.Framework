@@ -1,9 +1,12 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Record_PositionalExplicit;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Record_PositionalExplicit_Initialized;
 
 internal class MyAspect : OverrideFieldOrPropertyAspect
 {
@@ -14,19 +17,19 @@ internal class MyAspect : OverrideFieldOrPropertyAspect
     }
 }
 
-#pragma warning disable CS8907 // Parameter is unread. Did you forget to use it to initialize the property with that name?
-
 // <target>
 internal record MyRecord( int A, int B )
 {
-    public int A { get; init; }
+    public int A { get; init; } = A;
     
+    private int _b = B;
+
     public int B 
     { 
         get
         {
             Console.WriteLine("Original.");
-            return 42;
+            return _b;
         } 
         init 
         { 

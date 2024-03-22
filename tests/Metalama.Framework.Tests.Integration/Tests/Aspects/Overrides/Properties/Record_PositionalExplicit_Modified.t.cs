@@ -5,10 +5,12 @@ internal record MyRecord(int A, int B)
     {
         get
         {
+            global::System.Console.WriteLine("MyAspect");
             return this._a;
         }
         init
         {
+            global::System.Console.WriteLine("MyAspect");
             this._a = value;
         }
     }
@@ -16,11 +18,13 @@ internal record MyRecord(int A, int B)
     {
         get
         {
+            global::System.Console.WriteLine("MyAspect");
             Console.WriteLine("Original.");
             return 42;
         }
         init
         {
+            global::System.Console.WriteLine("MyAspect");
             Console.WriteLine("Original.");
         }
     }
