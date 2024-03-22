@@ -23,8 +23,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 this.ReflectionMapper = compileTimeCompilation.ReflectionMapper;
 
+                // We use a null-aware context because this context is used to generate meta code for the run-time code, which may be null-aware.
                 // TODO: We would need one context for each syntax tree if we want to respect EOLs.
-                this.SyntaxGenerationContext = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
+                this.SyntaxGenerationContext = compileTimeCompilation.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: false );
             }
 
             public ReflectionMapper ReflectionMapper { get; }

@@ -1,13 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+using SymbolEqualityComparer = Microsoft.CodeAnalysis.SymbolEqualityComparer;
 
 namespace Metalama.Framework.Tests.UnitTests.Utilities;
 
@@ -36,7 +39,7 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     [InlineData( typeof(List<>) )]
     [InlineData( typeof(Dictionary<,>) )]
     [InlineData( typeof(Dictionary<List<string>, List<int>>) )]
-    public void TestType( Type type )
+    public void TestTypeOf( Type type )
     {
         var symbol = this._reflectionMapper.GetTypeSymbol( type );
         var id = symbol.GetSerializableTypeId();
@@ -44,4 +47,23 @@ public sealed class SerializableTypeIdTests : UnitTestClass
         var roundTripType = this._resolver.ResolveId( id );
         Assert.True( SymbolEqualityComparer.Default.Equals( symbol, roundTripType ) );
     }
+
+    [Theory]
+    [InlineData("object")]
+    [InlineData("object?")]
+    [InlineData("Task<object>")]
+    [InlineData("Task<object?>")]
+    public void TestNullableType( string type )
+    {
+        var testContext = this.CreateTestContext();
+        var code = $"using System.Threading.Tasks;"
+                   + $"class C {{ {type} f; }}";
+        var compilation = testContext.CreateCompilation( code );
+        var typeModel = compilation.Types.Single().Fields.Single().Type;
+        var typeId = typeModel.ToSerializableId();
+        var roundloop = compilation.GetCompilationModel().CompilationContext.SerializableTypeIdResolver.ResolveId( typeId );
+        Assert.Equal( typeModel.GetSymbol(), roundloop, SymbolEqualityComparer.IncludeNullability );
+    }
+    
+    
 }

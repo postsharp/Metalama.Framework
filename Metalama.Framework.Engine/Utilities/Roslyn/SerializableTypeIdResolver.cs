@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,6 +17,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public sealed class SerializableTypeIdResolver
 {
+    public const string LegacyPrefix = "typeof";
+    public const string Prefix = "Y:"; // T: is used for named types.
+
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Compilation _compilation;
 
@@ -57,9 +61,33 @@ public sealed class SerializableTypeIdResolver
 
             var resolver = new Resolver( this._compilation, genericArguments, isNullOblivious: nullOblivious );
 
-            var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( idString );
+            TypeSyntax type;
 
-            return resolver.Visit( expression.Type ) ?? throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
+            if ( idString.StartsWith( LegacyPrefix, StringComparison.Ordinal ) )
+            {
+                // Backward compatibility.
+                var expression = (TypeOfExpressionSyntax) SyntaxFactoryEx.ParseExpressionSafe( idString );
+                type = expression.Type;
+            }
+            else if ( idString.StartsWith( Prefix, StringComparison.Ordinal ) )
+            {
+                var method = (MethodDeclarationSyntax) SyntaxFactory.ParseMemberDeclaration( idString.Substring( Prefix.Length ) + " M();" );
+
+                var diagnostics = method.GetDiagnostics().ToArray();
+
+                if ( diagnostics.HasError() )
+                {
+                    throw new DiagnosticException( $"The string '{idString}' could not be parsed as a type.", diagnostics.ToImmutableArray(), false );
+                }
+
+                type = method.ReturnType;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException( nameof(id) );
+            }
+
+            return resolver.Visit( type ) ?? throw new InvalidOperationException( $"Cannot resolve the type '{id}': the resolver returned null." );
         }
         catch ( Exception e )
         {
@@ -72,6 +100,7 @@ public sealed class SerializableTypeIdResolver
         private readonly Compilation _compilation;
         private readonly IReadOnlyDictionary<string, IType>? _genericArguments;
         private readonly bool _isNullOblivious;
+        private INamedTypeSymbol? _currentGenericType;
 
         public Resolver( Compilation compilation, IReadOnlyDictionary<string, IType>? genericArguments, bool isNullOblivious )
         {
@@ -94,11 +123,23 @@ public sealed class SerializableTypeIdResolver
                 : elementType.WithNullableAnnotation( NullableAnnotation.Annotated );
         }
 
-        private INamespaceOrTypeSymbol LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
+        private INamespaceOrTypeSymbol? LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
         {
-            if ( ns == null && this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
+            if ( ns == null )
             {
-                return type.GetSymbol();
+                if ( this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
+                {
+                    return type.GetSymbol();
+                }
+                else if ( this._currentGenericType != null )
+                {
+                    var typeParameter = this._currentGenericType.TypeParameters.FirstOrDefault( t => t.Name == name );
+
+                    if ( typeParameter != null )
+                    {
+                        return null;
+                    }
+                }
             }
 
             ns ??= this._compilation.GlobalNamespace;
@@ -135,7 +176,7 @@ public sealed class SerializableTypeIdResolver
             switch ( name )
             {
                 case IdentifierNameSyntax identifierName:
-                    return this.LookupName( identifierName.Identifier.Text, 0, ns );
+                    return this.LookupName( identifierName.Identifier.Text, 0, ns ).AssertNotNull();
 
                 case QualifiedNameSyntax qualifiedName:
                     var left = this.LookupName( qualifiedName.Left, ns );
@@ -151,7 +192,18 @@ public sealed class SerializableTypeIdResolver
                     }
                     else
                     {
+                        var previousGenericType = this._currentGenericType;
+                        this._currentGenericType = definition;
+
                         var typeArguments = genericName.TypeArgumentList.Arguments.SelectAsArray( a => this.Visit( a )! );
+
+                        this._currentGenericType = previousGenericType;
+
+                        if ( Array.IndexOf( typeArguments, null ) >= 0 )
+                        {
+                            // One of the type argument is the type parameter.
+                            return definition;
+                        }
 
                         return definition.Construct( typeArguments );
                     }
