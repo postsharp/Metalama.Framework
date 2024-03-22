@@ -55,15 +55,15 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     [InlineData("Task<object?>")]
     public void TestNullableType( string type )
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
+
         var code = $"using System.Threading.Tasks;"
                    + $"class C {{ {type} f; }}";
+
         var compilation = testContext.CreateCompilation( code );
         var typeModel = compilation.Types.Single().Fields.Single().Type;
         var typeId = typeModel.ToSerializableId();
         var roundloop = compilation.GetCompilationModel().CompilationContext.SerializableTypeIdResolver.ResolveId( typeId );
         Assert.Equal( typeModel.GetSymbol(), roundloop, SymbolEqualityComparer.IncludeNullability );
     }
-    
-    
 }
