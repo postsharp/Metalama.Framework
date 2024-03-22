@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public override bool IsAssignable { get; }
 
-        protected override bool IsReferenceable { get; }
+        internal override bool IsReferenceable { get; }
 
         protected ExpressionSyntax Expression { get; }
 

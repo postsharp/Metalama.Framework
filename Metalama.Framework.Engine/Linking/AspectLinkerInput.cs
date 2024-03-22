@@ -51,4 +51,3 @@ internal readonly struct AspectLinkerInput
             this.CompileTimeProject = compileTimeProject;
         }
     }
-}
