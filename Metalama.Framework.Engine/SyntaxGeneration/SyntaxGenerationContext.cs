@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         internal bool RequiresStructFieldInitialization => this.LanguageVersion < (LanguageVersion) 1100;
 
         [Memo]
-        internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof( IsExternalInit ).FullName! ) != null;
+        internal bool SupportsInitAccessors => this.Compilation.GetTypeByMetadataName( typeof(IsExternalInit).FullName! ) != null;
 
         // Should only be called by CompilationContext
         internal SyntaxGenerationContext(
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia ) : default;
 
         [Memo]
-        public SyntaxTriviaList TwoElasticEndOfLinesTriviaList
+        internal SyntaxTriviaList TwoElasticEndOfLinesTriviaList
             => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia, this.ElasticEndOfLineTrivia ) : default;
 
         private SyntaxGenerationContext(

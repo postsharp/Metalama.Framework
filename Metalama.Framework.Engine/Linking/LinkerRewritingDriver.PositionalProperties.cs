@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LinkerRewritingDriver
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
+        private IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
             ParameterSyntax recordParameter,
             IPropertySymbol symbol,
             SyntaxGenerationContext generationContext )
