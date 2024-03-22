@@ -33,6 +33,8 @@ namespace Metalama.Framework.Aspects
     {
         // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects
         // and then request redirection before the build layer.
+        
+        // ReSharper disable once MemberCanBePrivate.Global
         public const string BuildLayer = "Build";
 
         private readonly ContractDirection _direction;
@@ -128,13 +130,17 @@ namespace Metalama.Framework.Aspects
 
             if ( !iter.MoveNext() )
             {
-                return ParameterIsValid( first?.Parameter, targetType ) ? new[] { first.Parameter } : null;
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
+                return ParameterIsValid( first!.Parameter, targetType ) ? new[] { first.Parameter } : null;
             }
 
             var distinctByParameter = new HashSet<IParameter>();
 
-            AddIfValid( distinctByParameter, first?.Parameter, targetType );
-            AddIfValid( distinctByParameter, iter.Current?.Parameter, targetType );
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            AddIfValid( distinctByParameter, first!.Parameter, targetType );
+            
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            AddIfValid( distinctByParameter, iter.Current!.Parameter, targetType );
 
             while ( iter.MoveNext() )
             {
@@ -202,6 +208,7 @@ namespace Metalama.Framework.Aspects
             }
         }
 
+        // ReSharper disable once MemberCanBeProtected.Global
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
             var direction = this.GetEffectiveDirection( builder );
@@ -246,6 +253,7 @@ namespace Metalama.Framework.Aspects
             }
         }
 
+        // ReSharper disable once MemberCanBeProtected.Global
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
             var direction = this.GetEffectiveDirection( builder );

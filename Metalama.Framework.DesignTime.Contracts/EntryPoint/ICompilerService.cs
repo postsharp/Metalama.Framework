@@ -10,5 +10,5 @@ namespace Metalama.Framework.DesignTime.Contracts.EntryPoint
     /// </summary>
     [ComImport]
     [Guid( "D174F35D-ABA7-4CDC-8B47-44E979019B3E" )]
-    public interface ICompilerService { }
+    public interface ICompilerService;
 }

@@ -8,4 +8,4 @@ namespace Metalama.Framework.Services;
 /// Base interface to be inherited by all classes and interfaces that implement project-scoped services.
 /// </summary>
 [CompileTime]
-public interface IProjectService : IService { }
+public interface IProjectService : IService;

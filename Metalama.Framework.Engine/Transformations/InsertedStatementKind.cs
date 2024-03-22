@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.Transformations;
 
-public enum InsertedStatementKind
+internal enum InsertedStatementKind
 {
     /// <summary>
     /// Insert statement into the beginning of the final version of the declaration, in transformation order. 

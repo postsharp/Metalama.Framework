@@ -2,18 +2,17 @@
 
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Linking.Inlining
+namespace Metalama.Framework.Engine.Linking.Inlining;
+
+internal sealed class InliningAnalysisInfo
 {
-    internal sealed class InliningAnalysisInfo
+    public SyntaxNode ReplacedRootNode { get; }
+
+    public string? ReturnVariableIdentifier { get; }
+
+    public InliningAnalysisInfo( SyntaxNode replacedRootNode, string? returnVariableIdentifier )
     {
-        public SyntaxNode ReplacedRootNode { get; }
-
-        public string? ReturnVariableIdentifier { get; }
-
-        public InliningAnalysisInfo( SyntaxNode replacedRootNode, string? returnVariableIdentifier )
-        {
-            this.ReplacedRootNode = replacedRootNode;
-            this.ReturnVariableIdentifier = returnVariableIdentifier;
-        }
+        this.ReplacedRootNode = replacedRootNode;
+        this.ReturnVariableIdentifier = returnVariableIdentifier;
     }
 }

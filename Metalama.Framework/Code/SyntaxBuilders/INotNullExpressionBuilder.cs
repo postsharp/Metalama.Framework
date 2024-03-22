@@ -5,5 +5,5 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// <summary>
     /// An <see cref="IExpressionBuilder"/> that is guaranteed to produce a non-null value.
     /// </summary>
-    public interface INotNullExpressionBuilder : IExpressionBuilder { }
+    public interface INotNullExpressionBuilder : IExpressionBuilder;
 }

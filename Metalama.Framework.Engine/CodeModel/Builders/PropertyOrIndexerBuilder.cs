@@ -40,7 +40,7 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
 
     IMethod? IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
 
-    public PropertyOrIndexerBuilder(
+    protected PropertyOrIndexerBuilder(
         Advice advice,
         INamedType targetType,
         string name,

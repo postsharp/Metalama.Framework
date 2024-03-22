@@ -145,7 +145,10 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
 
             Assert.Equal( value.Count, deserialized.Count );
 
+            // ReSharper disable once NotDisposedResource
             var enumerator1 = value.GetEnumerator();
+            
+            // ReSharper disable once NotDisposedResource
             var enumerator2 = value.GetEnumerator();
 
             while ( enumerator1.MoveNext() )

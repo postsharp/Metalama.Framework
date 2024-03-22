@@ -7,8 +7,7 @@ namespace Metalama.Framework.Engine.Collections;
 
 internal static class ImmutableDictionaryExtensions
 {
-    public static void AddOrCreate<TKey, TValue>(
-        [NotNull] ref ImmutableDictionary<TKey, TValue>? dictionary, TKey key, TValue value )
+    public static void AddOrCreate<TKey, TValue>( [NotNull] ref ImmutableDictionary<TKey, TValue>? dictionary, TKey key, TValue value )
         where TKey : notnull
     {
         dictionary ??= ImmutableDictionary<TKey, TValue>.Empty;

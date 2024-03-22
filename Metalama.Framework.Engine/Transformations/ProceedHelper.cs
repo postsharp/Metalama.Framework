@@ -73,7 +73,7 @@ internal static class ProceedHelper
                     switch ( asyncInfo )
                     {
                         case { } when overriddenMethod.ReturnType.Is( SpecialType.Void ):
-                            return WrapAsyncVoid( invocationExpression, overriddenMethod, true );
+                            return WrapAsyncVoid( invocationExpression, overriddenMethod, true, generationContext );
 
                         case { ResultType: var resultType } when resultType.Is( SpecialType.Void ):
                             return (
@@ -95,7 +95,7 @@ internal static class ProceedHelper
                 }
 
             case TemplateKind.Async when overriddenMethod.ReturnType.Is( SpecialType.Void ):
-                return WrapAsyncVoid( invocationExpression, overriddenMethod, false );
+                return WrapAsyncVoid( invocationExpression, overriddenMethod, false, generationContext );
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
                 { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
@@ -140,33 +140,33 @@ internal static class ProceedHelper
 
             return expression;
         }
+    }
 
-        (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
+    private static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await, SyntaxGenerationContext generationContext )
+    {
+        if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
         {
-            if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
-            {
-                throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
-            }
+            throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
+        }
 
-            var expression =
-                actualInvocationExpression.WithExpression(
-                        InvocationExpression(
-                            LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
-                            ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
-                    .WithSimplifierAnnotationIfNecessary( generationContext );
+        var expression =
+            actualInvocationExpression.WithExpression(
+                    InvocationExpression(
+                        LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
+                        ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
+                .WithSimplifierAnnotationIfNecessary( generationContext );
 
-            if ( await )
-            {
-                return (
-                    AwaitExpression(
-                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                        expression ),
-                    overriddenMethod.ReturnType);
-            }
-            else
-            {
-                return (expression, overriddenMethod.ReturnType);
-            }
+        if ( await )
+        {
+            return (
+                AwaitExpression(
+                    Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                    expression ),
+                overriddenMethod.ReturnType);
+        }
+        else
+        {
+            return (expression, overriddenMethod.ReturnType);
         }
     }
 

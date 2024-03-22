@@ -57,6 +57,6 @@ public sealed class ReflectionHelperTests
 
     public class Outer<T1, T2>
     {
-        public class Inner<T3> { }
+        public class Inner<T3>;
     }
 }

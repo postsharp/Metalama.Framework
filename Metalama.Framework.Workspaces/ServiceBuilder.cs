@@ -5,4 +5,4 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Workspaces;
 
-public sealed class ServiceBuilder : ServiceProviderBuilder<IProjectService> { }
+public sealed class ServiceBuilder : ServiceProviderBuilder<IProjectService>;

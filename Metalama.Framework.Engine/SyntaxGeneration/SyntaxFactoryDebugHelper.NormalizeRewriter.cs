@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Templating;
+namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 public static partial class SyntaxFactoryDebugHelper
 {

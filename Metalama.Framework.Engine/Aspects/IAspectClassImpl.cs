@@ -6,7 +6,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -32,7 +31,5 @@ namespace Metalama.Framework.Engine.Aspects
         /// Gets the eligibility of a an aspect instance of the current aspect class without when knowing whether the aspect instance is inheritable.
         /// </summary>
         EligibleScenarios GetEligibility( IDeclaration obj, bool isInheritable );
-
-        ITemplateReflectionContext GetTemplateReflectionContext( CompilationContext compilationContext );
     }
 }

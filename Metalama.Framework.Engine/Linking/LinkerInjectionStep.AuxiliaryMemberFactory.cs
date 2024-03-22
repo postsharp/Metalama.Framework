@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
 {
-    private class AuxiliaryMemberFactory
+    private sealed class AuxiliaryMemberFactory
     {
         private readonly LinkerInjectionStep _parent;
         private readonly CompilationModel _finalCompilationModel;
@@ -120,10 +120,10 @@ internal sealed partial class LinkerInjectionStep
                     return this.GetAuxiliaryContractMethod( method, compilationModel, advice.AspectLayerId, returnVariableName );
 
                 case IProperty property:
-                    return this.GetAuxiliaryContractProperty( property, compilationModel, advice.AspectLayerId, returnVariableName );
+                    return this.GetAuxiliaryContractProperty( property, advice.AspectLayerId, returnVariableName );
 
                 case IIndexer indexer:
-                    return this.GetAuxiliaryContractIndexer( indexer, compilationModel, advice, returnVariableName.AssertNotNull() );
+                    return this.GetAuxiliaryContractIndexer( indexer, advice, returnVariableName );
 
                 default:
                     throw new AssertionFailedException( $"Unsupported kind: {member.DeclarationKind}" );
@@ -348,7 +348,6 @@ internal sealed partial class LinkerInjectionStep
 
         private MemberDeclarationSyntax GetAuxiliaryContractProperty(
             IProperty property,
-            CompilationModel compilationModel,
             AspectLayerId aspectLayerId,
             string? returnVariableName )
         {
@@ -438,7 +437,7 @@ internal sealed partial class LinkerInjectionStep
                                         List<AttributeListSyntax>(),
                                         TokenList(),
                                         Token( SyntaxKind.GetKeyword ),
-                                        getAccessorBody is BlockSyntax getBlock ? getBlock : default,
+                                        getAccessorBody,
                                         default,
                                         default )
                                     : null,
@@ -450,7 +449,7 @@ internal sealed partial class LinkerInjectionStep
                                         setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration
                                             ? Token( SyntaxKind.SetKeyword )
                                             : Token( SyntaxKind.InitKeyword ),
-                                        setAccessorBody is BlockSyntax setBlock ? setBlock : default,
+                                        setAccessorBody,
                                         default,
                                         default )
                                     : null
@@ -461,9 +460,8 @@ internal sealed partial class LinkerInjectionStep
 
         private MemberDeclarationSyntax GetAuxiliaryContractIndexer(
             IIndexer indexer,
-            CompilationModel compilationModel,
             Advice advice,
-            string returnVariableName )
+            string? returnVariableName )
         {
             var primaryDeclaration = indexer.GetPrimaryDeclarationSyntax();
 
@@ -556,7 +554,7 @@ internal sealed partial class LinkerInjectionStep
                                             List<AttributeListSyntax>(),
                                             TokenList(),
                                             Token( SyntaxKind.GetKeyword ),
-                                            getAccessorBody is BlockSyntax getBlock ? getBlock : default,
+                                            getAccessorBody,
                                             default,
                                             default )
                                         : null,
@@ -568,7 +566,7 @@ internal sealed partial class LinkerInjectionStep
                                             setAccessorDeclarationKind == SyntaxKind.SetAccessorDeclaration
                                                 ? Token( SyntaxKind.SetKeyword )
                                                 : Token( SyntaxKind.InitKeyword ),
-                                            setAccessorBody is BlockSyntax setBlock ? setBlock : default,
+                                            setAccessorBody,
                                             default,
                                             default )
                                         : null

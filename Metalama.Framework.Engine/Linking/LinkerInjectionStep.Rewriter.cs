@@ -383,7 +383,7 @@ internal sealed partial class LinkerInjectionStep
 
         public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+        public override SyntaxNode VisitEnumDeclaration( EnumDeclarationSyntax node )
         {
             var originalNode = node;
             var members = new List<EnumMemberDeclarationSyntax>( node.Members.Count );
@@ -415,7 +415,7 @@ internal sealed partial class LinkerInjectionStep
             return node;
         }
 
-        public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+        public override SyntaxNode VisitDelegateDeclaration( DelegateDeclarationSyntax node )
         {
             var originalNode = node;
             var context = this.GetSyntaxGenerationContext( node );
@@ -441,18 +441,13 @@ internal sealed partial class LinkerInjectionStep
             var syntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
 
             var baseList = node.BaseList;
-
             var parameterList = node.GetParameterList();
 
-            if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
-            {
-                this.ApplyMemberLevelTransformationsToPrimaryConstructor(
-                    node,
-                    memberLevelTransformations,
-                    syntaxGenerationContext,
-                    out baseList,
-                    out parameterList );
-            }
+            this.ApplyMemberLevelTransformationsToPrimaryConstructor(
+                node,
+                syntaxGenerationContext,
+                ref baseList,
+                ref parameterList );
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -509,7 +504,7 @@ internal sealed partial class LinkerInjectionStep
                             BaseList(
                                 baseList.Types.AddRange(
                                     additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )! ) ) );
+                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                     }
                 }
                 else if ( baseList != null )
@@ -610,12 +605,9 @@ internal sealed partial class LinkerInjectionStep
                             }
                     }
 
-                    if ( injectedMember.Declaration != null )
+                    using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
                     {
-                        using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
-                        {
-                            injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions, syntaxGenerationContext );
-                        }
+                        injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions, syntaxGenerationContext );
                     }
 
                     members.Add( injectedNode );
@@ -637,7 +629,7 @@ internal sealed partial class LinkerInjectionStep
             switch ( currentNode )
             {
                 case ConstructorDeclarationSyntax { Body: { } body } constructor:
-                    return constructor.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
+                    return constructor.WithBody( ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) );
 
                 case ConstructorDeclarationSyntax { ExpressionBody: { } expressionBody } constructor:
                     return
@@ -648,7 +640,7 @@ internal sealed partial class LinkerInjectionStep
 
                 // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
-                    return method.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
+                    return method.WithBody( ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     var returnsVoid =
@@ -674,7 +666,7 @@ internal sealed partial class LinkerInjectionStep
                         semicolonToken: default(SyntaxToken) );
 
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
-                    return @operator.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
+                    return @operator.WithBody( ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) );
 
                 case OperatorDeclarationSyntax { ExpressionBody: { } expressionBody } @operator:
                     return
@@ -721,7 +713,8 @@ internal sealed partial class LinkerInjectionStep
                                             IsMatchingAccessor( a, contextDeclaration )
                                                 ? a switch
                                                 {
-                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) ),
+                                                    { Body: { } body } => a.WithBody(
+                                                        ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) ),
                                                     { ExpressionBody: { } expressionBody } =>
                                                         a.PartialUpdate(
                                                             expressionBody: null,
@@ -750,7 +743,11 @@ internal sealed partial class LinkerInjectionStep
                     throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
             }
 
-            BlockSyntax ReplaceBlock( IReadOnlyList<StatementSyntax> entryStatements, IReadOnlyList<StatementSyntax> exitStatements, BlockSyntax targetBlock )
+            static BlockSyntax ReplaceBlock(
+                IDeclaration declaration,
+                IReadOnlyList<StatementSyntax> entryStatements,
+                IReadOnlyList<StatementSyntax> exitStatements,
+                BlockSyntax targetBlock )
             {
                 if ( exitStatements.Count > 0 )
                 {
@@ -827,7 +824,7 @@ internal sealed partial class LinkerInjectionStep
                                     whileStatement );
 
                         default:
-                            throw new AssertionFailedException( $"Unsupported form of body with exit statements for: {contextDeclaration}" );
+                            throw new AssertionFailedException( $"Unsupported form of body with exit statements for: {declaration}" );
                     }
                 }
                 else
@@ -842,7 +839,7 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
-            BlockSyntax ReplaceExpression(
+            static BlockSyntax ReplaceExpression(
                 IReadOnlyList<StatementSyntax> entryStatements,
                 IReadOnlyList<StatementSyntax> exitStatements,
                 ExpressionSyntax targetExpression,
@@ -901,21 +898,23 @@ internal sealed partial class LinkerInjectionStep
 
         private void ApplyMemberLevelTransformationsToPrimaryConstructor(
             TypeDeclarationSyntax typeDeclaration,
-            MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext,
-            out BaseListSyntax? newBaseList,
-            out ParameterListSyntax? newParameterList )
+            ref BaseListSyntax? baseList,
+            ref ParameterListSyntax? parameterList )
         {
-            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
-            Invariant.AssertNotNull( typeDeclaration.GetParameterList() );
+            if ( !this._transformationCollection.TryGetMemberLevelTransformations( typeDeclaration, out var memberLevelTransformations ) )
+            {
+                return;
+            }
 
-            newParameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
-            newBaseList = typeDeclaration.BaseList;
+            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
+            Invariant.AssertNot( typeDeclaration.GetParameterList() == null );
+
+            parameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            baseList = typeDeclaration.BaseList;
 
             if ( memberLevelTransformations.Arguments.Length > 0 )
             {
-                var semanticModel = this._semanticModelProvider.GetSemanticModel( typeDeclaration.SyntaxTree );
-                var baseType = semanticModel.GetDeclaredSymbol( typeDeclaration );
                 var baseTypeSyntax = typeDeclaration.BaseList.AssertNotNull().Types[0];
 
                 BaseTypeSyntax newBaseTypeSyntax;
@@ -943,7 +942,7 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 // TODO: This may be slower than replacing specific index.
-                newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
+                baseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
             }
         }
 
@@ -1231,7 +1230,7 @@ internal sealed partial class LinkerInjectionStep
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalNode );
 
-            if ( symbol != null && symbol.SetMethod != null )
+            if ( symbol is { SetMethod: not null } )
             {
                 var declaration = (IProperty) this._compilation.GetDeclaration( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );

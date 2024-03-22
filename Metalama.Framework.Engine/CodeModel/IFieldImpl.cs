@@ -5,5 +5,5 @@ using Metalama.Framework.CompileTimeContracts;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IFieldImpl : IField, IFieldOrPropertyOrIndexerImpl, IUserExpression { }
+    internal interface IFieldImpl : IField, IFieldOrPropertyOrIndexerImpl, IUserExpression;
 }

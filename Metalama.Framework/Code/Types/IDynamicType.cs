@@ -5,5 +5,5 @@ namespace Metalama.Framework.Code.Types
     /// <summary>
     /// Represent the <c>dynamic</c> type.
     /// </summary>
-    public interface IDynamicType : IType { }
+    public interface IDynamicType : IType;
 }

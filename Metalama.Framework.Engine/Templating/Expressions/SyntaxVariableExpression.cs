@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
-internal class SyntaxVariableExpression( ExpressionSyntax expression, IType type, RefKind refKind )
+internal sealed class SyntaxVariableExpression( ExpressionSyntax expression, IType type, RefKind refKind )
     : SyntaxUserExpression( expression, type, isReferenceable: true, isAssignable: refKind is not (RefKind.In or RefKind.RefReadOnly) )
 {
     public override RefKind RefKind { get; } = refKind;

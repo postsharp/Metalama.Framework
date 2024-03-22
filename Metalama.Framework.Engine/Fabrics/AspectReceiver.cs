@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 if ( !userCodeInvoker.TryInvoke(
                                         () => func( t ),
                                         executionContext,
-                                        out var options ) || options == null )
+                                        out var options ) )
                                 {
                                     return null;
                                 }
@@ -428,7 +428,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             }
 
                             return new AspectInstance(
-                                aspect!,
+                                aspect,
                                 t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
@@ -472,7 +472,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             }
 
                             return new AspectInstance(
-                                aspect!,
+                                aspect,
                                 t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );

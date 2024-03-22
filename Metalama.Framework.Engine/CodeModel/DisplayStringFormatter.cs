@@ -7,14 +7,18 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-public static class DisplayStringFormatter
+internal static class DisplayStringFormatter
 {
+    // Seems that ReSharper does not recognize the interpolation handler.
+    // ReSharper disable EntityNameCapturedOnly.Global
     public static string Format(
         CodeDisplayFormat? format,
         CodeDisplayContext? context,
         [InterpolatedStringHandlerArgument( nameof(format), nameof(context) )]
         ref InterpolatedStringHandler handler )
         => handler.ToString();
+    
+    // ReSharper enable EntityNameCapturedOnly.Global
 
     [InterpolatedStringHandler]
     public readonly ref struct InterpolatedStringHandler

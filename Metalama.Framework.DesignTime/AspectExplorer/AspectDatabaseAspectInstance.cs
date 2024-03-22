@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.AspectExplorer;
 
-public class AspectDatabaseAspectInstance(
+public sealed class AspectDatabaseAspectInstance(
     string targetDeclarationId,
     IEnumerable<AspectDatabaseAspectTransformation> transformations )
 {

@@ -5,5 +5,5 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a managed resource.
     /// </summary>
-    public interface IManagedResource : IDeclaration { }
+    public interface IManagedResource : IDeclaration;
 }

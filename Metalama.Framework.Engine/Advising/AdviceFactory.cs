@@ -1654,8 +1654,6 @@ internal sealed class AdviceFactory : IAdviceFactory
                 Array.Empty<IInterfaceMemberImplementationResult>() );
         }
 
-        AdviceResult<T> result;
-
         this.CheckContractEligibility( targetDeclaration, direction );
 
         direction = ContractAspectHelper.GetEffectiveDirection( direction, targetDeclaration );
@@ -1674,7 +1672,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             this.GetObjectReader( tags ),
             this.GetObjectReader( args ) );
 
-        result = this.ExecuteAdvice<T>( advice );
+        var result = this.ExecuteAdvice<T>( advice );
 
         return result;
     }

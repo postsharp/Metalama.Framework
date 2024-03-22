@@ -71,4 +71,4 @@ public interface IHierarchicalOptions : IIncrementalObject, ICompileTimeSerializ
 /// </remarks>
 /// <seealso cref="IHierarchicalOptions"/>
 public interface IHierarchicalOptions<in T> : IHierarchicalOptions
-    where T : class, IDeclaration { }
+    where T : class, IDeclaration;

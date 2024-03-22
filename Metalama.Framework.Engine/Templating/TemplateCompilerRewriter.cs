@@ -282,7 +282,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    public override SyntaxNode VisitTupleExpression( TupleExpressionSyntax node )
+    public override SyntaxNode? VisitTupleExpression( TupleExpressionSyntax node )
     {
         var qualifiedTuple = this.AddTupleNames( node );
 
@@ -700,7 +700,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
         }
 
-        bool ExpressionTypeIsGenericDynamic() => expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
+        bool ExpressionTypeIsGenericDynamic()
+        {
+            return expressionType is INamedTypeSymbol { TypeArguments: [IDynamicTypeSymbol] };
+        }
 
         // ReSharper disable once ConstantConditionalAccessQualifier
         switch ( expressionType.Name )
@@ -816,7 +819,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    public override SyntaxNode VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+    public override SyntaxNode? VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
     {
         if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
         {
@@ -917,8 +920,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         // In the default implementation, such case would result in an exception.
 
         bool IsSubtemplateCall()
-            => this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression ) is { } symbol
-               && this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
+        {
+            return this._syntaxTreeAnnotationMap.GetInvocableSymbol( node.Expression ) is { } symbol
+                   && this._templateMemberClassifier.SymbolClassifier.GetTemplateInfo( symbol ).CanBeReferencedAsSubtemplate;
+        }
 
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform
              || (this._templateMemberClassifier.IsNodeOfDynamicType( node.Expression ) && !IsSubtemplateCall()) )
@@ -1535,7 +1540,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    public override SyntaxNode VisitVariableDeclarator( VariableDeclaratorSyntax node )
+    public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
     {
         if ( this._syntaxKind == TemplateCompilerSemantics.Initializer )
         {
@@ -1578,7 +1583,10 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
         var templateSymbol = this._rootTemplateSymbol.AssertNotNull();
 
-        void AddModifier( SyntaxKind kind ) => modifiers = modifiers.Add( Token( kind ).WithTrailingTrivia( Space ) );
+        void AddModifier( SyntaxKind kind )
+        {
+            modifiers = modifiers.Add( Token( kind ).WithTrailingTrivia( Space ) );
+        }
 
         if ( templateSymbol.IsStatic )
         {
@@ -2028,7 +2036,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return fixedNode;
     }
 
-    public override SyntaxNode VisitInterpolation( InterpolationSyntax node )
+    public override SyntaxNode? VisitInterpolation( InterpolationSyntax node )
     {
         var transformedNode = base.VisitInterpolation( node );
 
@@ -2273,7 +2281,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.GetUserExpression) ) )
             .AddArgumentListArguments( Argument( expression ) );
 
-    public override SyntaxNode VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
+    public override SyntaxNode? VisitLocalDeclarationStatement( LocalDeclarationStatementSyntax node )
     {
         var declaration = node.Declaration;
 
@@ -2313,7 +2321,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return base.VisitLocalDeclarationStatement( node );
     }
 
-    public override SyntaxNode VisitIdentifierName( IdentifierNameSyntax node )
+    public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
     {
         if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
         {
@@ -2412,7 +2420,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    public override SyntaxNode VisitQualifiedName( QualifiedNameSyntax node )
+    public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
     {
         if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
         {
@@ -2436,7 +2444,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return transformed;
     }
 
-    public override SyntaxNode VisitAliasQualifiedName( AliasQualifiedNameSyntax node )
+    public override SyntaxNode? VisitAliasQualifiedName( AliasQualifiedNameSyntax node )
     {
         if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
         {
@@ -2448,7 +2456,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    public override SyntaxNode VisitGenericName( GenericNameSyntax node )
+    public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
     {
         if ( this.TryVisitNamespaceOrTypeName( node, out var transformedTypeName ) )
         {
@@ -2506,7 +2514,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         }
     }
 
-    public override SyntaxNode VisitTypeOfExpression( TypeOfExpressionSyntax node )
+    public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
     {
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
         {
@@ -2532,7 +2540,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformParenthesizedExpression( node ) );
 
-    public override SyntaxNode VisitCastExpression( CastExpressionSyntax node )
+    public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
     {
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
         {
@@ -2577,7 +2585,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         return base.VisitCastExpression( node );
     }
 
-    public override SyntaxNode VisitAssignmentExpression( AssignmentExpressionSyntax node )
+    public override SyntaxNode? VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
         {

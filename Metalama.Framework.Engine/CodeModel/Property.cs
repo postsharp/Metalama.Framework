@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -78,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public ref object? Value => ref new FieldOrPropertyInvoker( this ).Value;
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
+            => new FieldOrPropertyInvoker( this )
                 .GetTypedExpressionSyntax();
 
         private IExpression? GetInitializerExpressionCore()

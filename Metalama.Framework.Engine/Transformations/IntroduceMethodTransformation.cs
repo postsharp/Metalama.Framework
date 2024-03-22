@@ -88,8 +88,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
             var block = syntaxGenerator.FormattedBlock(
                 !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
                     ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
-                        ?
-                        [
+                        ? [
                             syntaxGenerator.FormattedBlock(
                                 YieldStatement(
                                     SyntaxKind.YieldBreakStatement,
@@ -99,8 +98,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                                     null,
                                     Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList() ) ) )
                         ]
-                        :
-                        [
+                        : [
                             ReturnStatement(
                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                 DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),

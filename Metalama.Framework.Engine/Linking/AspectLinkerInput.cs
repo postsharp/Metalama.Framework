@@ -7,17 +7,17 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+/// <summary>
+/// Input of the aspect linker.
+/// </summary>
+internal readonly struct AspectLinkerInput
 {
     /// <summary>
-    /// Input of the aspect linker.
+    /// Gets the input compilation model, modified by all aspects.
     /// </summary>
-    internal readonly struct AspectLinkerInput
-    {
-        /// <summary>
-        /// Gets the input compilation model, modified by all aspects.
-        /// </summary>
-        public CompilationModel CompilationModel { get; }
+    public CompilationModel CompilationModel { get; }
 
         public CompilationModel SourceCompilationModel { get; }
 
@@ -26,14 +26,14 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public IReadOnlyCollection<ITransformation> Transformations { get; }
 
-        /// <summary>
-        /// Gets a list of ordered aspect layers.
-        /// </summary>
-        public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
+    /// <summary>
+    /// Gets a list of ordered aspect layers.
+    /// </summary>
+    public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
 
-        public IReadOnlyList<ScopedSuppression> DiagnosticSuppressions { get; }
+    public IReadOnlyList<ScopedSuppression> DiagnosticSuppressions { get; }
 
-        public CompileTimeProject CompileTimeProject { get; }
+    public CompileTimeProject CompileTimeProject { get; }
 
         public AspectLinkerInput(
             CompilationModel compilationModel,

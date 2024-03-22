@@ -3,10 +3,9 @@
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+internal interface IInjectInterfaceTransformation : ITransformation
 {
-    internal interface IInjectInterfaceTransformation : ITransformation
-    {
-        BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options );
-    }
+    BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options );
 }

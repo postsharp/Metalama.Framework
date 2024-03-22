@@ -29,10 +29,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
         this._lazyImpl = new Lazy<CacheableContext?>( this.CreateContext );
     }
 
-    public void OnPortableExecutableReferenceDiscovered()
-    {
-        this._mustEnlargeVisibility = true;
-    }
+    public void OnPortableExecutableReferenceDiscovered() => this._mustEnlargeVisibility = true;
 
     private CacheableContext? CreateContext()
     {
@@ -69,7 +66,7 @@ internal sealed class CacheableTemplateDiscoveryContextProvider
                 () => CompilationModel.CreateInitialInstance(
                     new ProjectModel( compilation, parent._serviceProvider ),
                     this.Compilation,
-                    new CompilationModelOptions( ShowExternalPrivateMembers: true ),
+                    new CompilationModelOptions( true ),
                     "CacheableTemplateDiscoveryContextProvider" ) );
         }
 

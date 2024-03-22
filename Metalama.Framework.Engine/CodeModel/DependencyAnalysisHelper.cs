@@ -7,6 +7,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public static partial class DependencyAnalysisHelper
     {
+        // ReSharper disable once UnusedMember.Global
         public static void FindDeclaredAndAttributeTypes(
             SemanticModel semanticModel,
             Action<INamedTypeSymbol> addDeclaredType,

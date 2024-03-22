@@ -7,8 +7,8 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     internal class GenericTestClass<T>
     {
-        public sealed class SecondSubType { }
+        public sealed class SecondSubType;
 
-        public sealed class SecondSubType<T2> { }
+        public sealed class SecondSubType<T2>;
     }
 }

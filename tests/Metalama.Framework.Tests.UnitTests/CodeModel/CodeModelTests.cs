@@ -22,7 +22,6 @@ using Xunit;
 using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
-using DeclarationExtensions = Metalama.Framework.Engine.CodeModel.DeclarationExtensions;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -1345,8 +1344,8 @@ class C {}
 
                 // Note that the code model does not preserve reference identity of attributes.
                 Assert.Same(
-                    DeclarationExtensions.GetDeclaringSyntaxReferences( attribute )[0].SyntaxTree,
-                    DeclarationExtensions.GetDeclaringSyntaxReferences( roundtrip )[0].SyntaxTree );
+                    attribute.GetDeclaringSyntaxReferences()[0].SyntaxTree,
+                    roundtrip.GetDeclaringSyntaxReferences()[0].SyntaxTree );
             }
         }
 
@@ -1703,7 +1702,12 @@ public partial class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = """
+#if !NET5_0_OR_GREATER
+            var code =
+#else
+            const string code =
+#endif
+                """
                 record R(int P);
 
                 """;

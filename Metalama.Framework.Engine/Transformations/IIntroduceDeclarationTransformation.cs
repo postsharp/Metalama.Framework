@@ -2,14 +2,13 @@
 
 using Metalama.Framework.Code.DeclarationBuilders;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents a transformation that introduces a declaration based on a <see cref="IDeclarationBuilder"/>, but does not
+/// represent an override.
+/// </summary>
+internal interface IIntroduceDeclarationTransformation : ITransformation
 {
-    /// <summary>
-    /// Represents a transformation that introduces a declaration based on a <see cref="IDeclarationBuilder"/>, but does not
-    /// represent an override.
-    /// </summary>
-    internal interface IIntroduceDeclarationTransformation : ITransformation
-    {
-        IDeclarationBuilder DeclarationBuilder { get; }
-    }
+    IDeclarationBuilder DeclarationBuilder { get; }
 }

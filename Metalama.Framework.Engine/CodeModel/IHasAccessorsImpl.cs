@@ -4,5 +4,5 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IHasAccessorsImpl : IHasAccessors, IMemberImpl { }
+    internal interface IHasAccessorsImpl : IHasAccessors, IMemberImpl;
 }

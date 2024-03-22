@@ -216,6 +216,7 @@ public static class SerializableDeclarationIdProvider
             if ( kind == nameof(DeclarationRefTargetKind.Return) )
             {
                 isReturnParameter = true;
+
                 return parent;
             }
 

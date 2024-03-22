@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime.Serialization;
 
-internal class SerializerGeneratorHelper
+internal static class SerializerGeneratorHelper
 {
     internal static bool TryGetSerializer(
         CompilationContext compilationContext,

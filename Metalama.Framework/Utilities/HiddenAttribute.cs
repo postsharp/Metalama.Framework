@@ -10,5 +10,5 @@ namespace Metalama.Framework.Utilities
     /// </summary>
     [AttributeUsage( AttributeTargets.Interface )]
     [PublicAPI]
-    public sealed class HiddenAttribute : Attribute { }
+    public sealed class HiddenAttribute : Attribute;
 }

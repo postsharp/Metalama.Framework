@@ -17,5 +17,5 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
         | AttributeTargets.Assembly )]
-    public sealed class RunTimeOrCompileTimeAttribute : ScopeAttribute { }
+    public sealed class RunTimeOrCompileTimeAttribute : ScopeAttribute;
 }

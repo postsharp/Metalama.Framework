@@ -4,24 +4,23 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal static class DeclarationExtensions
 {
-    internal static class DeclarationExtensions
+    public static bool IsEventFieldIntroduction( this IEventSymbol @event )
     {
-        public static bool IsEventFieldIntroduction( this IEventSymbol @event )
+        if ( @event.IsEventField() == true )
         {
-            if ( @event.IsEventField() == true )
-            {
-                return true;
-            }
-
-            if ( @event.GetPrimaryDeclaration() is { } primaryDeclaration
-                 && primaryDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
-            {
-                return true;
-            }
-
-            return false;
+            return true;
         }
+
+        if ( @event.GetPrimaryDeclaration() is { } primaryDeclaration
+             && primaryDeclaration.GetLinkerDeclarationFlags().HasFlagFast( AspectLinkerDeclarationFlags.EventField ) )
+        {
+            return true;
+        }
+
+        return false;
     }
 }

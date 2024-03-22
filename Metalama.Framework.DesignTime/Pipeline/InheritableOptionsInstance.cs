@@ -5,4 +5,4 @@ using Metalama.Framework.Options;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal record InheritableOptionsInstance( HierarchicalOptionsKey Key, IHierarchicalOptions Options );
+internal sealed record InheritableOptionsInstance( HierarchicalOptionsKey Key, IHierarchicalOptions Options );

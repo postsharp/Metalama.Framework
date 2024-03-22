@@ -13,5 +13,5 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Class )]
     [CompileTime]
     [PublicAPI]
-    public sealed class InheritableAttribute : Attribute { }
+    public sealed class InheritableAttribute : Attribute;
 }

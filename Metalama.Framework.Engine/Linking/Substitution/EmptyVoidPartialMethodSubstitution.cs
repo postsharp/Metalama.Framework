@@ -5,30 +5,29 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Linking.Substitution
+namespace Metalama.Framework.Engine.Linking.Substitution;
+
+internal sealed class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitution
 {
-    internal sealed class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitution
+    private readonly MethodDeclarationSyntax _rootNode;
+
+    public EmptyVoidPartialMethodSubstitution( CompilationContext compilationContext, MethodDeclarationSyntax rootNode ) : base( compilationContext )
     {
-        private readonly MethodDeclarationSyntax _rootNode;
+        this._rootNode = rootNode;
+    }
 
-        public EmptyVoidPartialMethodSubstitution( CompilationContext compilationContext, MethodDeclarationSyntax rootNode ) : base( compilationContext )
+    public override SyntaxNode TargetNode => this._rootNode;
+
+    public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    {
+        switch ( currentNode )
         {
-            this._rootNode = rootNode;
-        }
+            case MethodDeclarationSyntax:
+                return substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
-        public override SyntaxNode TargetNode => this._rootNode;
-
-        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
-        {
-            switch ( currentNode )
-            {
-                case MethodDeclarationSyntax:
-                    return substitutionContext.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock()
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-                default:
-                    throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
-            }
+            default:
+                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
         }
     }
 }

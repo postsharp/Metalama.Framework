@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Formatting
                 throw new ArgumentNullException( nameof(tagValue) );
             }
 
-            var newClassification = classification != null && classification.Value > this.Classification ? classification.Value : this.Classification;
+            var newClassification = classification > this.Classification ? classification.Value : this.Classification;
             ImmutableDictionary<string, string> newTags;
 
             if ( tagName == null || (this.Tags.TryGetValue( tagName, out var currentTagValue ) && currentTagValue == tagValue) )
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Formatting
                 throw new ArgumentNullException( nameof(tagValue) );
             }
 
-            if ( classification != null && classification.Value > this.Classification )
+            if ( classification > this.Classification )
             {
                 return false;
             }

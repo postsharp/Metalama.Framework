@@ -25,5 +25,5 @@ namespace Metalama.Framework.Serialization
     /// <para>To serialize an <see cref="IDeclaration"/>, use the <see cref="IDeclaration.ToRef"/> method and store the <see cref="IRef{T}"/>.</para>
     /// </remarks>
     [CompileTime]
-    public interface ICompileTimeSerializable { }
+    public interface ICompileTimeSerializable;
 }

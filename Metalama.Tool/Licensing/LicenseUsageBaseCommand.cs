@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Commands;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing.Consumption;
@@ -12,33 +13,8 @@ using System.Linq;
 
 namespace Metalama.Tool.Licensing;
 
-internal class ResetLicenseUsageCommands : LicenseUsageBaseCommand
-{
-    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
-    {
-        var deleted = 0;
-
-        foreach ( var file in context.Files )
-        {
-            try
-            {
-                if ( file.DataFilePath != null )
-                {
-                    File.Delete( file.DataFilePath );
-                }
-
-                deleted++;
-            }
-            catch ( Exception e )
-            {
-                context.Console.WriteWarning( $"Cannot delete '{file.DataFilePath}': {e.Message}" );
-            }
-        }
-
-        context.Console.WriteSuccess( $"{deleted} files have been deleted." );
-    }
-}
-
+// ReSharper disable once ClassNeverInstantiated.Global
+[UsedImplicitly]
 internal abstract class LicenseUsageBaseCommand : BaseCommand<LicenseUsageCommandSettings>
 {
     protected sealed override void Execute( ExtendedCommandContext context, LicenseUsageCommandSettings settings )
@@ -136,8 +112,8 @@ internal abstract class LicenseUsageBaseCommand : BaseCommand<LicenseUsageComman
         }
 
         // Execute the command.
-        this.Execute( new LicenseUsageCommandContext( context, files, horizon ), settings );
+        this.Execute( new LicenseUsageCommandContext( context, files ) );
     }
 
-    protected abstract void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings );
+    protected abstract void Execute( LicenseUsageCommandContext context );
 }

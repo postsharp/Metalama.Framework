@@ -6,7 +6,7 @@ using Compiler = Metalama.Compiler.Services;
 
 namespace Metalama.Framework.Engine.Services;
 
-internal class LogWriterAdapter : Compiler::ILogWriter
+internal sealed class LogWriterAdapter : Compiler::ILogWriter
 {
     private readonly Func<Backstage::ILogWriter?> _getBackstageWriter;
 

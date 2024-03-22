@@ -171,7 +171,7 @@ internal static partial class SyntaxFactoryEx
 
         if ( diagnostics.HasError() )
         {
-            throw new DiagnosticException( $"Code '{text}' could not be parsed as an expression.", diagnostics.ToImmutableArray(), inSourceCode: false );
+            throw new DiagnosticException( $"Code '{text}' could not be parsed as an expression.", diagnostics.ToImmutableArray(), false );
         }
 
         return expression;
@@ -186,7 +186,7 @@ internal static partial class SyntaxFactoryEx
 
         if ( enumerable.HasError() )
         {
-            throw new DiagnosticException( $"Code could not be parsed as a statement.", enumerable.ToImmutableArray(), inSourceCode: false );
+            throw new DiagnosticException( $"Code could not be parsed as a statement.", enumerable.ToImmutableArray(), false );
         }
 
         return statement;

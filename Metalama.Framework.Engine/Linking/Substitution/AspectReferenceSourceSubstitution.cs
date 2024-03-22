@@ -53,7 +53,7 @@ internal sealed class AspectReferenceSourceSubstitution : AspectReferenceRenamin
                     : SyntaxFactory.ThisExpression();
 
         return currentNode.PartialUpdate(
-            expression: expression
+            expression
                 .WithTriviaFromIfNecessary( currentNode.Expression, substitutionContext.SyntaxGenerationContext.Options ),
             name: RewriteName( currentNode.Name, this.GetTargetMemberName() ) );
     }

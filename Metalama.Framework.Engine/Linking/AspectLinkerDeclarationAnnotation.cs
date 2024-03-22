@@ -2,31 +2,27 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+/// <exclude />
+internal readonly struct AspectLinkerDeclarationAnnotation
 {
-    /// <exclude />
-    internal readonly struct AspectLinkerDeclarationAnnotation
+    public AspectLinkerDeclarationFlags Flags { get; }
+
+    public AspectLinkerDeclarationAnnotation( AspectLinkerDeclarationFlags flags )
     {
-        public AspectLinkerDeclarationFlags Flags { get; }
-
-        public AspectLinkerDeclarationAnnotation( AspectLinkerDeclarationFlags flags )
-        {
-            this.Flags = flags;
-        }
-
-        public static AspectLinkerDeclarationAnnotation FromString( string str )
-        {
-            // ReSharper disable once RedundantAssignment
-            var success = Enum.TryParse<AspectLinkerDeclarationFlags>( str, out var flags );
-
-            Invariant.Assert( success );
-
-            return new AspectLinkerDeclarationAnnotation( flags );
-        }
-
-        public override string ToString()
-        {
-            return $"{this.Flags}";
-        }
+        this.Flags = flags;
     }
+
+    public static AspectLinkerDeclarationAnnotation FromString( string str )
+    {
+        // ReSharper disable once RedundantAssignment
+        var success = Enum.TryParse<AspectLinkerDeclarationFlags>( str, out var flags );
+
+        Invariant.Assert( success );
+
+        return new AspectLinkerDeclarationAnnotation( flags );
+    }
+
+    public override string ToString() => $"{this.Flags}";
 }

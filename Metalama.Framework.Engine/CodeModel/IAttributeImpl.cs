@@ -5,5 +5,5 @@ using Metalama.Framework.Engine.Aspects;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IAttributeImpl : IAttribute, IAspectPredecessorImpl, IDeclarationImpl { }
+    internal interface IAttributeImpl : IAttribute, IAspectPredecessorImpl, IDeclarationImpl;
 }

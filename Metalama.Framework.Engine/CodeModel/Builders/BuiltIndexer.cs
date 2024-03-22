@@ -14,6 +14,7 @@ internal sealed class BuiltIndexer : BuiltPropertyOrIndexer, IIndexerImpl
 {
     public BuiltIndexer( IndexerBuilder builder, CompilationModel compilation ) : base( builder, compilation ) { }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public IndexerBuilder IndexerBuilder => (IndexerBuilder) this.MemberBuilder;
 
     [Memo]

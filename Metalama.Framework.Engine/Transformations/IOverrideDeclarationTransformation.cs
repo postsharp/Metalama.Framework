@@ -2,10 +2,9 @@
 
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+internal interface IOverrideDeclarationTransformation : ITransformation
 {
-    internal interface IOverrideDeclarationTransformation : ITransformation
-    {
-        IDeclaration OverriddenDeclaration { get; }
-    }
+    IDeclaration OverriddenDeclaration { get; }
 }

@@ -7,47 +7,41 @@ using System.Collections.Generic;
 
 // ReSharper disable NotAccessedPositionalProperty.Global
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal sealed class InliningContextIdentifierEqualityComparer : IEqualityComparer<InliningContextIdentifier?>
 {
-    internal sealed class InliningContextIdentifierEqualityComparer : IEqualityComparer<InliningContextIdentifier?>
+    private readonly IEqualityComparer<ISymbol> _symbolComparer;
+
+    private InliningContextIdentifierEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
     {
-        private readonly IEqualityComparer<ISymbol> _symbolComparer;
+        this._symbolComparer = symbolComparer;
+    }
 
-        internal InliningContextIdentifierEqualityComparer( IEqualityComparer<ISymbol> symbolComparer )
+    public static IEqualityComparer<InliningContextIdentifier> ForCompilation( CompilationContext context )
+        => new InliningContextIdentifierEqualityComparer( context.SymbolComparer );
+
+    public bool Equals( InliningContextIdentifier? x, InliningContextIdentifier? y )
+        => (x == null && y == null)
+           || (
+               x != null && y != null &&
+               x.InliningId == y.InliningId
+               && this._symbolComparer.Equals( x.DestinationSemantic.Symbol, y.DestinationSemantic.Symbol )
+               && x.DestinationSemantic.Kind == y.DestinationSemantic.Kind);
+
+    public int GetHashCode( InliningContextIdentifier? x )
+    {
+        if ( x == null )
         {
-            this._symbolComparer = symbolComparer;
+            return 0;
         }
-
-        public static IEqualityComparer<InliningContextIdentifier> ForCompilation( CompilationContext context )
+        else
         {
-            return new InliningContextIdentifierEqualityComparer( context.SymbolComparer );
-        }
-
-        public bool Equals( InliningContextIdentifier? x, InliningContextIdentifier? y )
-        {
-            return
-                ( x == null && y == null )
-                || (
-                    x != null && y != null &&
-                    x.InliningId == y.InliningId
-                    && this._symbolComparer.Equals( x.DestinationSemantic.Symbol, y.DestinationSemantic.Symbol )
-                    && x.DestinationSemantic.Kind == y.DestinationSemantic.Kind );
-        }
-
-        public int GetHashCode( InliningContextIdentifier? x )
-        {
-            if ( x == null )
-            {
-                return 0;
-            }
-            else
-            {
-                // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
-                return HashCode.Combine(
-                    x.InliningId,
-                    this._symbolComparer.GetHashCode( x.DestinationSemantic.Symbol ),
-                    (int) x.DestinationSemantic.Kind );
-            }
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            return HashCode.Combine(
+                x.InliningId,
+                this._symbolComparer.GetHashCode( x.DestinationSemantic.Symbol ),
+                (int) x.DestinationSemantic.Kind );
         }
     }
 }

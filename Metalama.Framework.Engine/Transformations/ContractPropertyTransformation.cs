@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractPropertyTransformation : ContractBaseTransformation
 {
-    public new IProperty TargetMember => (IProperty) base.TargetMember;
+    private new IProperty TargetMember => (IProperty) base.TargetMember;
 
     public ContractPropertyTransformation(
         Advice advice,
@@ -24,7 +24,7 @@ internal sealed class ContractPropertyTransformation : ContractBaseTransformatio
 
     public override IReadOnlyList<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        Invariant.Assert( this.ContractTarget == this.TargetMember );
+        Invariant.Assert( ReferenceEquals( this.ContractTarget, this.TargetMember ) );
         Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
         bool? inputResult, outputResult;

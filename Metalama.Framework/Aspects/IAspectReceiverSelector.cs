@@ -9,4 +9,4 @@ namespace Metalama.Framework.Aspects;
 /// An interface that allows aspects and fabrics to register aspects and validators for current compilation version.
 /// </summary>
 public interface IAspectReceiverSelector<out TTarget> : IValidatorReceiverSelector<TTarget>
-    where TTarget : class, IDeclaration { }
+    where TTarget : class, IDeclaration;

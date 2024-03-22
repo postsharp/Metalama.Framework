@@ -3,10 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+internal interface ITemplateLexicalScopeProvider
 {
-    internal interface ITemplateLexicalScopeProvider
-    {
-        TemplateLexicalScope GetLexicalScope( IDeclaration declaration );
-    }
+    TemplateLexicalScope GetLexicalScope( IDeclaration declaration );
 }

@@ -105,7 +105,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
                     ArgumentList(
                         SeparatedList(
                             this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList(
-                                p => Argument( null, SyntaxFactoryEx.InvocationRefKindToken( p.RefKind ), IdentifierName( p.Name ) ) ) ) ) ),
+                                p => Argument( null, p.RefKind.InvocationRefKindToken(), IdentifierName( p.Name ) ) ) ) ) ),
             MethodKind.Finalizer =>
                 referenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId ),
             MethodKind.Operator =>

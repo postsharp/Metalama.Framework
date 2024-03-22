@@ -14,16 +14,16 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             var isoTime = obj.ToString( "o" );
 
             return InvocationExpression(
-                    MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        serializationContext.GetTypeSyntax( typeof( DateTimeOffset ) ),
-                        IdentifierName( "Parse" ) ),
-                    ArgumentList(
-                        SingletonSeparatedList(
-                            Argument(
-                                LiteralExpression(
-                                    SyntaxKind.StringLiteralExpression,
-                                    Literal( isoTime ) ) ) ) ) );
+                MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    serializationContext.GetTypeSyntax( typeof(DateTimeOffset) ),
+                    IdentifierName( "Parse" ) ),
+                ArgumentList(
+                    SingletonSeparatedList(
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( isoTime ) ) ) ) ) );
         }
 
         public DateTimeOffsetSerializer( SyntaxSerializationService service ) : base( service ) { }

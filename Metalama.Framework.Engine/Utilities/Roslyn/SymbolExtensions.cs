@@ -180,14 +180,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                     SyntaxReference? min = null;
                     int? minLength = null;
+
                     foreach ( var reference in s.DeclaringSyntaxReferences )
                     {
-                        if (filter != null && !filter(reference))
+                        if ( filter != null && !filter( reference ) )
                         {
                             continue;
                         }
 
                         var length = reference.SyntaxTree.FilePath.Length;
+
                         if ( min == null || length < minLength )
                         {
                             min = reference;

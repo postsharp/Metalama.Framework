@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractMethodTransformation : ContractBaseTransformation
 {
-    public new IMethod TargetMember => (IMethod) base.TargetMember;
+    private new IMethod TargetMember => (IMethod) base.TargetMember;
 
     public ContractMethodTransformation(
         Advice advice,
@@ -98,5 +98,5 @@ internal sealed class ContractMethodTransformation : ContractBaseTransformation
         }
     }
 
-    public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetDeclaration}'";
+    public override FormattableString ToDisplayString() => $"Add default contract to method '{this.TargetMember}'";
 }

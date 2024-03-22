@@ -66,7 +66,7 @@ internal sealed class TemplateAttributeFactory : IProjectService, IDisposable
 
         if ( member == null )
         {
-            diagnosticAdder.Report( TemplatingDiagnosticDescriptors.CantResolveDeclaration.CreateRoslynDiagnostic( location: null, memberId.Id ) );
+            diagnosticAdder.Report( TemplatingDiagnosticDescriptors.CantResolveDeclaration.CreateRoslynDiagnostic( null, memberId.Id ) );
 
             adviceAttribute = null;
 

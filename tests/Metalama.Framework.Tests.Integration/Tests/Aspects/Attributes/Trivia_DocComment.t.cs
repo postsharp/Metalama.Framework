@@ -1,4 +1,3 @@
-// Warning CS8618 on `ErrorMessage`: `Non-nullable property 'ErrorMessage' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
 class C
 {
   /// <inheritdoc/>

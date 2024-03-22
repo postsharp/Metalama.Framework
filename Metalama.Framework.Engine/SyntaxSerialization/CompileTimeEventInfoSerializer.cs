@@ -11,38 +11,37 @@ using System.Collections.Immutable;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.SyntaxSerialization
+namespace Metalama.Framework.Engine.SyntaxSerialization;
+
+internal sealed class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo, EventInfo>
 {
-    internal sealed class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo, EventInfo>
+    public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, SyntaxSerializationContext serializationContext )
+        => SerializeEvent( obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull(), serializationContext );
+
+    public static ExpressionSyntax SerializeEvent( IEvent @event, SyntaxSerializationContext serializationContext )
     {
-        public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, SyntaxSerializationContext serializationContext )
-            => SerializeEvent( obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull(), serializationContext );
+        var eventName = @event.Name;
 
-        public static ExpressionSyntax SerializeEvent( IEvent @event, SyntaxSerializationContext serializationContext )
-        {
-            var eventName = @event.Name;
+        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( @event.DeclaringType.GetSymbol(), serializationContext );
 
-            var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( @event.DeclaringType.GetSymbol(), serializationContext );
+        ExpressionSyntax result = InvocationExpression(
+                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetEvent" ) ),
+                ArgumentList(
+                    SeparatedList(
+                        new[]
+                        {
+                            Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ),
+                            Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) )
+                        } ) ) )
+            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 
-            ExpressionSyntax result = InvocationExpression(
-                    MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetEvent" ) ),
-                    ArgumentList(
-                        SeparatedList(
-                            new[]
-                            {
-                                Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ),
-                                Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) )
-                            } ) ) )
-                .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
+        // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
+        result = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, result );
 
-            // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
-            result = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, result );
-
-            return result;
-        }
-
-        public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
-
-        protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
+        return result;
     }
+
+    public CompileTimeEventInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
+
+    protected override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo) );
 }

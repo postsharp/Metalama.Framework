@@ -68,8 +68,10 @@ internal sealed partial class SymbolTranslator
             {
                 case 0:
                     return null;
+
                 case 1:
                     return candidates[0];
+
                 default:
                     if ( this._allowMultipleCandidates )
                     {

@@ -22,10 +22,7 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
         this._impl.Changed += this.OnChanged;
     }
 
-    private void OnChanged()
-    {
-        this.Changed?.Invoke();
-    }
+    private void OnChanged() => this.Changed?.Invoke();
 
     // This constructor is used in the compile-time scenario.
     public ProjectLicenseConsumptionService( in ProjectServiceProvider serviceProvider )

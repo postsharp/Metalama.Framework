@@ -127,7 +127,7 @@ namespace Metalama.Framework.Tests.UnitTests.LamaSerialization
             }
         }
 
-        internal sealed class TypeWoSerializer { }
+        internal sealed class TypeWoSerializer;
 
         [ImportSerializer( typeof(TypeWithManySerializers), typeof(SecondSerializer) )]
         public sealed class TypeWithManySerializers

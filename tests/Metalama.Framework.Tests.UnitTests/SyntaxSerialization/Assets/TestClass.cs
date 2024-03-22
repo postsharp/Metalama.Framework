@@ -2,5 +2,5 @@
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Assets
 {
-    internal sealed class TestClass { }
+    internal sealed class TestClass;
 }

@@ -10,169 +10,165 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.CodeModel.Invokers
+namespace Metalama.Framework.Engine.CodeModel.Invokers;
+
+internal abstract class Invoker<T>
+    where T : IMember
 {
-    internal abstract class Invoker<T>
-        where T : IMember
+    private readonly AspectReferenceOrder _order;
+
+    protected InvokerOptions Options { get; }
+
+    protected object? Target { get; }
+
+    protected static SyntaxGenerationContext CurrentGenerationContext => TemplateExpansionContext.CurrentSyntaxGenerationContext;
+
+    protected static SyntaxSerializationContext CurrentSerializationContext => TemplateExpansionContext.CurrentSyntaxSerializationContext;
+
+    protected Invoker( T member, InvokerOptions? options, object? target )
     {
-        private readonly AspectReferenceOrder _order;
+        options ??= InvokerOptions.Default;
 
-        protected InvokerOptions Options { get; }
+        var isSelfTarget = target is null or ThisInstanceUserReceiver or ThisTypeUserReceiver;
 
-        protected object? Target { get; }
+        var orderOptions = GetOrderOptions( member, options.Value, isSelfTarget );
 
-        protected static SyntaxGenerationContext CurrentGenerationContext => TemplateExpansionContext.CurrentSyntaxGenerationContext;
+        var otherFlags = options.Value & ~InvokerOptions.OrderMask;
 
-        protected static SyntaxSerializationContext CurrentSerializationContext => TemplateExpansionContext.CurrentSyntaxSerializationContext;
+        this.Options = orderOptions | otherFlags;
 
-        protected Invoker( T member, InvokerOptions? options, object? target, SyntaxGenerationContext? syntaxGenerationContext = null )
+        this.Target = target;
+        this.Member = member;
+
+        this._order = orderOptions switch
         {
-            options ??= InvokerOptions.Default;
+            InvokerOptions.Current => AspectReferenceOrder.Current,
+            InvokerOptions.Base => AspectReferenceOrder.Base,
+            InvokerOptions.Final => AspectReferenceOrder.Final,
+            _ => throw new AssertionFailedException( $"Invalid value: {this.Options}." )
+        };
+    }
 
-            var isSelfTarget = target is null or ThisInstanceUserReceiver or ThisTypeUserReceiver;
+    private static InvokerOptions GetOrderOptions( IMember member, InvokerOptions options, bool isSelfTarget )
+    {
+        options &= InvokerOptions.OrderMask;
 
-            var orderOptions = GetOrderOptions( member, options.Value, isSelfTarget );
-
-            var otherFlags = options.Value & ~InvokerOptions.OrderMask;
-
-            this.Options = orderOptions | otherFlags;
-
-            this.Target = target;
-            this.Member = member;
-
-            this._order = orderOptions switch
-            {
-                InvokerOptions.Current => AspectReferenceOrder.Current,
-                InvokerOptions.Base => AspectReferenceOrder.Base,
-                InvokerOptions.Final => AspectReferenceOrder.Final,
-                _ => throw new AssertionFailedException( $"Invalid value: {this.Options}." )
-            };
+        if ( options != InvokerOptions.Default )
+        {
+            return options;
         }
-
-        private static InvokerOptions GetOrderOptions( IMember member, InvokerOptions options, bool isSelfTarget )
+        else if ( isSelfTarget && TemplateExpansionContext.IsTransformingDeclaration( member ) )
         {
-            options &= InvokerOptions.OrderMask;
+            // When we expand a template, the default invoker for the declaration being overridden or introduced is
+            // always the base one.
 
-            if ( options != InvokerOptions.Default )
-            {
-                return options;
-            }
-            else if ( isSelfTarget && TemplateExpansionContext.IsTransformingDeclaration( member ) )
-            {
-                // When we expand a template, the default invoker for the declaration being overridden or introduced is
-                // always the base one.
-
-                return InvokerOptions.Base;
-            }
-            else
-            {
-                return InvokerOptions.Final;
-            }
+            return InvokerOptions.Base;
         }
-
-        protected T Member { get; }
-
-        protected readonly record struct ReceiverTypedExpressionSyntax(
-            TypedExpressionSyntaxImpl TypedExpressionSyntax,
-            bool RequiresConditionalAccess,
-            AspectReferenceSpecification AspectReferenceSpecification )
+        else
         {
-            public ExpressionSyntax Syntax => this.TypedExpressionSyntax.Syntax;
-
-            public ReceiverExpressionSyntax WithSyntax( ExpressionSyntax syntax )
-                => new( syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
-
-            public ReceiverExpressionSyntax ToReceiverExpressionSyntax()
-                => new( this.Syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
+            return InvokerOptions.Final;
         }
+    }
 
-        protected readonly record struct ReceiverExpressionSyntax(
-            ExpressionSyntax Syntax,
-            bool RequiresNullConditionalAccessMember,
-            AspectReferenceSpecification AspectReferenceSpecification );
+    protected T Member { get; }
 
-        private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
+    protected readonly record struct ReceiverTypedExpressionSyntax(
+        TypedExpressionSyntaxImpl TypedExpressionSyntax,
+        bool RequiresConditionalAccess,
+        AspectReferenceSpecification AspectReferenceSpecification )
+    {
+        public ExpressionSyntax Syntax => this.TypedExpressionSyntax.Syntax;
 
-            // CurrentAspectLayerId may be null when we are not executing in a template execution context.
-            => new(
-                TemplateExpansionContext.CurrentAspectLayerId ?? default,
-                this._order,
-                flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );
+        public ReceiverExpressionSyntax WithSyntax( ExpressionSyntax syntax )
+            => new( syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
 
-        protected string GetCleanTargetMemberName()
+        public ReceiverExpressionSyntax ToReceiverExpressionSyntax() => new( this.Syntax, this.RequiresConditionalAccess, this.AspectReferenceSpecification );
+    }
+
+    protected readonly record struct ReceiverExpressionSyntax(
+        ExpressionSyntax Syntax,
+        bool RequiresNullConditionalAccessMember,
+        AspectReferenceSpecification AspectReferenceSpecification );
+
+    private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
+
+        // CurrentAspectLayerId may be null when we are not executing in a template execution context.
+        => new(
+            TemplateExpansionContext.CurrentAspectLayerId ?? default,
+            this._order,
+            flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );
+
+    protected string GetCleanTargetMemberName()
+    {
+        var definition = this.Member.Definition;
+
+        return
+            definition.IsExplicitInterfaceImplementation
+                ? definition.GetExplicitInterfaceImplementation().Name
+                : definition.Name;
+    }
+
+    protected ReceiverTypedExpressionSyntax GetReceiverInfo()
+    {
+        if ( this.Target is UserReceiver receiver )
         {
-            var definition = this.Member.Definition;
+            receiver = receiver.WithAspectReferenceOrder( this._order );
 
-            return
-                definition.IsExplicitInterfaceImplementation
-                    ? definition.GetExplicitInterfaceImplementation().Name
-                    : definition.Name;
+            return new ReceiverTypedExpressionSyntax(
+                receiver.ToTypedExpressionSyntax( CurrentSerializationContext ),
+                false,
+                receiver.AspectReferenceSpecification );
         }
-
-        protected ReceiverTypedExpressionSyntax GetReceiverInfo()
+        else
         {
-            if ( this.Target is UserReceiver receiver )
+            var aspectReferenceSpecification = this.GetDefaultAspectReferenceSpecification();
+
+            if ( this.Target != null )
             {
-                receiver = receiver.WithAspectReferenceOrder( this._order );
+                var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, CurrentSerializationContext );
 
                 return new ReceiverTypedExpressionSyntax(
-                    receiver.ToTypedExpressionSyntax( CurrentSerializationContext ),
+                    typedExpressionSyntax,
+                    (this.Options & InvokerOptions.NullConditional) != 0 && typedExpressionSyntax.CanBeNull,
+                    aspectReferenceSpecification );
+            }
+            else if ( this.Member.IsStatic )
+            {
+                return new ReceiverTypedExpressionSyntax(
+                    new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification )
+                        .ToTypedExpressionSyntax( CurrentSerializationContext ),
                     false,
-                    receiver.AspectReferenceSpecification );
+                    aspectReferenceSpecification );
             }
             else
             {
-                var aspectReferenceSpecification = this.GetDefaultAspectReferenceSpecification();
-
-                if ( this.Target != null )
-                {
-                    var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, CurrentSerializationContext );
-
-                    return new ReceiverTypedExpressionSyntax(
-                        typedExpressionSyntax,
-                        (this.Options & InvokerOptions.NullConditional) != 0 && typedExpressionSyntax.CanBeNull,
-                        aspectReferenceSpecification );
-                }
-                else if ( this.Member.IsStatic )
-                {
-                    return new ReceiverTypedExpressionSyntax(
-                        new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification )
-                            .ToTypedExpressionSyntax( CurrentSerializationContext ),
-                        false,
-                        aspectReferenceSpecification );
-                }
-                else
-                {
-                    return new ReceiverTypedExpressionSyntax(
-                        new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax(
-                            CurrentSerializationContext ),
-                        false,
-                        aspectReferenceSpecification );
-                }
+                return new ReceiverTypedExpressionSyntax(
+                    new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax(
+                        CurrentSerializationContext ),
+                    false,
+                    aspectReferenceSpecification );
             }
         }
+    }
 
-        protected static INamedType? GetTargetType()
+    protected static INamedType? GetTargetType()
+        => TemplateExpansionContext.CurrentTargetDeclaration switch
         {
-            return TemplateExpansionContext.CurrentTargetDeclaration switch
-            {
-                INamedType type => type,
-                IMember member => member.DeclaringType,
-                IParameter parameter => parameter.DeclaringMember.DeclaringType,
-                null => null,
-                _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
-            };
-        }
+            INamedType type => type,
+            IMember member => member.DeclaringType,
+            IParameter parameter => parameter.DeclaringMember.DeclaringType,
+            null => null,
+            _ => throw new AssertionFailedException( $"Unexpected target declaration: '{TemplateExpansionContext.CurrentTargetDeclaration}'." )
+        };
 
-        protected void CheckInvocationOptionsAndTarget()
+    protected void CheckInvocationOptionsAndTarget()
+    {
+        // Specifying Base or Current option with non-default target is only allowed when the method is in the inheritance hierarchy of the template target.
+        if ( this.Target != null && (this.Options & InvokerOptions.OrderMask) is InvokerOptions.Base or InvokerOptions.Current &&
+             !(GetTargetType()?.Is( this.Member.DeclaringType ) ?? false) )
         {
-            // Specifying Base or Current option with non-default target is only allowed when the method is in the inheritance hierarchy of the template target.
-            if ( this.Target != null && (this.Options & InvokerOptions.OrderMask) is InvokerOptions.Base or InvokerOptions.Current &&
-                 !(GetTargetType()?.Is( this.Member.DeclaringType ) ?? false) )
-            {
-                throw GeneralDiagnosticDescriptors.CantInvokeBaseOrCurrentOutsideTargetType.CreateException(
-                    (this.Member, GetTargetType()!, this.Options & InvokerOptions.OrderMask) );
-            }
+            throw GeneralDiagnosticDescriptors.CantInvokeBaseOrCurrentOutsideTargetType.CreateException(
+                (this.Member, GetTargetType()!, this.Options & InvokerOptions.OrderMask) );
         }
     }
 }

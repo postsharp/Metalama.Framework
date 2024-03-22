@@ -102,7 +102,7 @@ internal sealed partial class LinkerRewritingDriver
                         Block(
                             recordDeclaration.ParameterList.Parameters.SelectAsArray(
                                 p =>
-                                    ExpressionStatement(
+                                    (StatementSyntax) ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SimpleAssignmentExpression,
                                             IdentifierName( p.Identifier ),
@@ -125,21 +125,21 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                throw new AssertionFailedException( "Uninlined constructors are not supported." );
+                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                  && this.ShouldGenerateSourceMember( symbol ) )
             {
-                throw new AssertionFailedException( "Uninlined constructors are not supported." );
+                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                throw new AssertionFailedException( "Uninlined constructors are not supported." );
+                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
             }
         }
         else if ( this.InjectionRegistry.IsOverride( symbol ) )
@@ -299,11 +299,9 @@ internal sealed partial class LinkerRewritingDriver
             }
 
             var ret = constructorDeclaration.PartialUpdate(
-                attributeLists:
                 isAuxiliaryForPrimaryConstructor
                     ? GetPrimaryConstructorAttributes( constructorDeclaration )
                     : constructorDeclaration.AttributeLists,
-                modifiers:
                 isAuxiliaryForPrimaryConstructor
                     ? TokenList(
                         constructorDeclaration.Modifiers.SelectAsArray(
@@ -355,8 +353,5 @@ internal sealed partial class LinkerRewritingDriver
                     .Select( al => al.WithTarget( null ) ) );
     }
 
-    private static string GetCleanPrimaryConstructorFieldName( IFieldSymbol field )
-    {
-        return field.Name[1..^2];
-    }
+    private static string GetCleanPrimaryConstructorFieldName( IFieldSymbol field ) => field.Name[1..^2];
 }

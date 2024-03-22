@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Diagnostics;
 /// A simple and early-evaluated implementation of <see cref="IDiagnosticSource"/>, for use in scenarios where performance
 /// is not critical.
 /// </summary>
-internal class AdhocDiagnosticSource : IDiagnosticSource
+internal sealed class AdhocDiagnosticSource : IDiagnosticSource
 {
     public AdhocDiagnosticSource( string diagnosticSourceDescription )
     {

@@ -141,7 +141,7 @@ public sealed class LicenseVerifier : IProjectService
     public bool VerifyCanApplyCodeFix( IAspectClass aspectClass )
         => aspectClass switch
         {
-            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
+            IAspectClassImpl { Project: not null } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,
 
             _ => this.CanConsumeForCurrentProject( LicenseRequirement.Professional )
@@ -158,7 +158,7 @@ public sealed class LicenseVerifier : IProjectService
 
         return aspectClass switch
         {
-            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
+            IAspectClassImpl { Project: not null } aspectClassImpl when this.IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
             _ => manager.CanConsume( LicenseRequirement.Professional, serviceProvider.GetService<IProjectOptions>()?.ProjectName )

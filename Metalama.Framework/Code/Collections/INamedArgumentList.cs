@@ -12,4 +12,4 @@ namespace Metalama.Framework.Code.Collections;
 /// </summary>
 [CompileTime]
 [InternalImplement]
-public interface INamedArgumentList : IReadOnlyList<KeyValuePair<string, TypedConstant>>, IReadOnlyDictionary<string, TypedConstant> { }
+public interface INamedArgumentList : IReadOnlyList<KeyValuePair<string, TypedConstant>>, IReadOnlyDictionary<string, TypedConstant>;

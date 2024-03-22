@@ -6,7 +6,7 @@ using Compiler = Metalama.Compiler.Services;
 
 namespace Metalama.Framework.Engine.Services;
 
-internal class ExceptionReporterAdapter : Compiler::IExceptionReporter
+internal sealed class ExceptionReporterAdapter : Compiler::IExceptionReporter
 {
     private readonly Backstage::IExceptionReporter? _backstageReporter;
 

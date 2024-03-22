@@ -146,12 +146,13 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             return GetCanonicalTargetDeclaration( transformation.TargetDeclaration ) switch
             {
                 INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
-                ICompilation compilation => transformation.TransformedSyntaxTree,
+                ICompilation => transformation.TransformedSyntaxTree,
                 var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" )
             };
 
             static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
-                => declaration switch
+            {
+                return declaration switch
                 {
                     IMember member => member.DeclaringType,
                     INamedType type => type,
@@ -159,6 +160,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     ICompilation compilation => compilation,
                     var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" )
                 };
+            }
         }
 
         await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
@@ -646,13 +648,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             case IPropertyOrIndexer propertyOrIndexer:
                 {
-                    SyntaxNode primaryDeclaration;
                     SyntaxGenerationContext syntaxGenerationContext;
 
                     switch ( propertyOrIndexer )
                     {
                         case PropertyOrIndexer sourcePropertyOrIndexer:
-                            primaryDeclaration = sourcePropertyOrIndexer.GetPrimaryDeclarationSyntax().AssertNotNull();
+                            var primaryDeclaration = sourcePropertyOrIndexer.GetPrimaryDeclarationSyntax().AssertNotNull();
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, primaryDeclaration );
 
                             break;
@@ -674,7 +675,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             break;
                     }
 
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+                    var insertedStatements = GetInsertedStatements( syntaxGenerationContext );
 
                     if ( propertyOrIndexer.GetMethod != null )
                     {
@@ -685,7 +686,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                     s =>
                                         s.ContextDeclaration.IsContainedIn( propertyOrIndexer.GetMethod )
                                         || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter
-                                                                                  && parameter.ContainingDeclaration == indexer) )
+                                                                                  && ReferenceEquals( parameter.ContainingDeclaration, indexer )) )
                                 .ToReadOnlyList() );
                     }
 
@@ -698,7 +699,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                     s =>
                                         s.ContextDeclaration.IsContainedIn( propertyOrIndexer.SetMethod )
                                         || (propertyOrIndexer is IIndexer indexer && s.ContextDeclaration is IParameter parameter
-                                                                                  && parameter.ContainingDeclaration == indexer) )
+                                                                                  && ReferenceEquals( parameter.ContainingDeclaration, indexer )) )
                                 .ToReadOnlyList() );
                     }
 
@@ -707,13 +708,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             case IMethodBase methodBase:
                 {
-                    SyntaxNode primaryDeclaration;
                     SyntaxGenerationContext syntaxGenerationContext;
 
                     switch ( methodBase )
                     {
                         case MethodBase sourceMethodBase:
-                            primaryDeclaration = sourceMethodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
+                            var primaryDeclaration = sourceMethodBase.GetPrimaryDeclarationSyntax().AssertNotNull();
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions, primaryDeclaration );
 
                             break;
@@ -734,7 +734,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             break;
                     }
 
-                    var insertedStatements = GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext );
+                    var insertedStatements = GetInsertedStatements( syntaxGenerationContext );
 
                     transformationCollection.AddInsertedStatements( methodBase, insertedStatements );
 
@@ -751,9 +751,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             transformationCollection.GetOrAddLateTypeLevelTransformations( overriddenConstructor.DeclaringType ).RemovePrimaryConstructor();
         }
 
-        IReadOnlyList<InsertedStatement> GetInsertedStatements(
-            IInsertStatementTransformation insertStatementTransformation,
-            SyntaxGenerationContext syntaxGenerationContext )
+        IReadOnlyList<InsertedStatement> GetInsertedStatements( SyntaxGenerationContext syntaxGenerationContext )
         {
             // Contexts for inserting statements are reused until the next override of the target declaration.
             var context =
@@ -950,14 +948,13 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private static bool RequiresAuxiliaryContractMember( IMember member, InsertStatementTransformationContextImpl insertStatementContext )
-    {
-        // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
-        //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
-        return
+        =>
+
+            // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
+            //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
             insertStatementContext.WasUsedForOutputContracts
             || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
                     or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
                     or IMethod { IsPartial: true, HasImplementation: false }
                 && insertStatementContext.WasUsedForInputContracts);
-    }
 }

@@ -49,7 +49,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     private readonly IFileSystemWatcher? _fileSystemWatcher;
     private readonly ConcurrentQueue<Func<AsyncExecutionContext, ValueTask>> _jobQueue = new();
     private readonly IDesignTimeAspectPipelineObserver? _observer;
-    private readonly SemaphoreSlim _sync = new( initialCount: 1, maxCount: 1 );
+    private readonly SemaphoreSlim _sync = new( 1, 1 );
     private readonly IDesignTimeEntryPointConsumer? _entryPointConsumer;
     private readonly AnalysisProcessEventHub _eventHub;
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
@@ -174,9 +174,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     }
 
     private Task OnOtherPipelineStatusChangedAsync( DesignTimePipelineStatusChangedEventArgs arg )
-    {
-        return this.OnOtherPipelineStatusChangedAsync( AsyncExecutionContext.Get( $"{this.ProjectKey}:PipelineStatusChangedEvent" ), arg );
-    }
+        => this.OnOtherPipelineStatusChangedAsync( AsyncExecutionContext.Get( $"{this.ProjectKey}:PipelineStatusChangedEvent" ), arg );
 
     private async Task OnOtherPipelineStatusChangedAsync( AsyncExecutionContext executionContext, DesignTimePipelineStatusChangedEventArgs args )
     {
