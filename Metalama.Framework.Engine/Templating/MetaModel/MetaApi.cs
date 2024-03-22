@@ -71,7 +71,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
-        public IParameterList Parameters => this.MethodBase.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethodBase) );
+        public IParameterList Parameters
+            => this.MethodBase.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters), nameof(IMethodBase) );
 
         public IParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
@@ -79,7 +80,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type), nameof(INamedType) );
 
-        public ContractDirection ContractDirection => this._contractDirection ?? throw this.CreateInvalidOperationException( nameof(this.ContractDirection), nameof(Framework.Aspects.ContractDirection) );
+        public ContractDirection ContractDirection
+            => this._contractDirection ?? throw this.CreateInvalidOperationException(
+                nameof(this.ContractDirection),
+                nameof(Framework.Aspects.ContractDirection) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
         {

@@ -43,11 +43,11 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
 
         return new SyntaxGenerationOptions( projectOptions.CodeFormattingOptions );
     }
-    
-        private bool VerifyLanguageVersion( Compilation compilation, IDiagnosticAdder diagnosticAdder )
-        {
-            // Note that Roslyn does not properly set the language version at design time, so we don't check the language version
-            // in other pipelines.
+
+    private bool VerifyLanguageVersion( Compilation compilation, IDiagnosticAdder diagnosticAdder )
+    {
+        // Note that Roslyn does not properly set the language version at design time, so we don't check the language version
+        // in other pipelines.
 
         var languageVersion = ((CSharpParseOptions?) compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion.MapSpecifiedToEffectiveVersion()
                               ?? SupportedCSharpVersions.Default;
@@ -162,12 +162,12 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             // Execute validators.
             IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ReferenceValidators;
 
-                // Format the output.
-                if ( this.ProjectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted || this.ProjectOptions.WriteHtml )
-                {
-                    // ReSharper disable once AccessToModifiedClosure
-                    resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
-                }
+            // Format the output.
+            if ( this.ProjectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted || this.ProjectOptions.WriteHtml )
+            {
+                // ReSharper disable once AccessToModifiedClosure
+                resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
+            }
 
             // Write HTML (used only when building projects for documentation).
             if ( this.ProjectOptions.WriteHtml )

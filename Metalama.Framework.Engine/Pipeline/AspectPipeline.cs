@@ -89,17 +89,17 @@ public abstract class AspectPipeline : IDisposable
 
     internal int PipelineInitializationCount { get; private set; }
 
-        protected abstract SyntaxGenerationOptions GetSyntaxGenerationOptions();
+    protected abstract SyntaxGenerationOptions GetSyntaxGenerationOptions();
 
-        protected virtual bool TryInitialize(
-            IDiagnosticAdder diagnosticAdder,
-            Compilation compilation,
-            ProjectLicenseInfo? projectLicenseInfo,
-            IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
-        {
-            this.PipelineInitializationCount++;
+    protected virtual bool TryInitialize(
+        IDiagnosticAdder diagnosticAdder,
+        Compilation compilation,
+        ProjectLicenseInfo? projectLicenseInfo,
+        IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
+        CancellationToken cancellationToken,
+        [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+    {
+        this.PipelineInitializationCount++;
 
         // Check that we have the system library.
         var objectType = compilation.GetSpecialType( SpecialType.System_Object );
@@ -221,10 +221,10 @@ public abstract class AspectPipeline : IDisposable
             projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
         }
 
-            // Set NormalizeWhitespace setting for the compilation.
+        // Set NormalizeWhitespace setting for the compilation.
 
-            projectServiceProviderWithProject =
-                projectServiceProviderWithProject.WithService( this.GetSyntaxGenerationOptions() );
+        projectServiceProviderWithProject =
+            projectServiceProviderWithProject.WithService( this.GetSyntaxGenerationOptions() );
 
         // Add MetricsManager.
         projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( new MetricManager( projectServiceProviderWithProject ) );

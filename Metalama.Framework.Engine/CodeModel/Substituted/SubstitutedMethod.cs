@@ -64,8 +64,7 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
     public IParameter ReturnParameter => new Parameter( this, this.SourceMethod.ReturnParameter );
 
     [Memo]
-    public IParameterList Parameters
-        => new ParameterList( this, this.SourceMethod.Parameters.SelectAsImmutableArray( param => new Parameter( this, param ) ) );
+    public IParameterList Parameters => new ParameterList( this, this.SourceMethod.Parameters.SelectAsImmutableArray( param => new Parameter( this, param ) ) );
 
     public IType ReturnType => this.Substitute( this.SourceMethod.ReturnType );
 
@@ -84,7 +83,7 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
     public OperatorKind OperatorKind => this.SourceMethod.OperatorKind;
 
-    public new IMethod Definition => this.SourceMethod; 
+    public new IMethod Definition => this.SourceMethod;
 
     bool IMethod.IsExtern => ((IMethod) this.SourceMethod).IsExtern;
 
@@ -158,8 +157,8 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         {
             var sourceExpression = (TypedExpressionSyntaxImpl) this._sourceParameter.ToTypedExpressionSyntax( syntaxGenerationContext ).Implementation;
-         
-            return new(
+
+            return new TypedExpressionSyntax(
                 new TypedExpressionSyntaxImpl(
                     sourceExpression.Syntax,
                     this.MapSymbol( sourceExpression.ExpressionType ),
@@ -220,7 +219,7 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
         public IEnumerator<IParameter> GetEnumerator() => this._parameters.AsEnumerable().GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-        
+
         public object ToValueArray() => new ValueArrayExpression( this );
     }
 }

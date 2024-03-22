@@ -88,7 +88,10 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             var constructorArgumentTypes =
                 constructorArguments
                     .Select( x => x?.GetType() )
-                    .Select( x => x == null ? null : typeof(IType).IsAssignableFrom( x ) || x.FullName == "Metalama.Framework.Engine.ReflectionMocks.CompileTimeType" ? typeof(Type) : x )
+                    .Select(
+                        x => x == null ? null :
+                            typeof(IType).IsAssignableFrom( x ) || x.FullName == "Metalama.Framework.Engine.ReflectionMocks.CompileTimeType" ? typeof(Type) :
+                            x )
                     .ToArray();
 
             var constructors = attributeType.Constructors.OfCompatibleSignature( constructorArgumentTypes ).ToList();

@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -72,5 +73,5 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 
     bool IEquatable<IType>.Equals( IType? other ) => throw new NotSupportedException();
 
-    public Microsoft.CodeAnalysis.ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported." );
+    public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported." );
 }

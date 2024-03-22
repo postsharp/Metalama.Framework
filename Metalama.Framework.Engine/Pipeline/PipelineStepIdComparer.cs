@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Pipeline
              *     equivalent to the depth of the aspect target itself.
              *  4. Phase: discover or transform
              *  5. Depth of the advice target
-            */
+             */
 
             var compareAspectTypeDepth = x.AspectTargetTypeDepth.CompareTo( y.AspectTargetTypeDepth );
 

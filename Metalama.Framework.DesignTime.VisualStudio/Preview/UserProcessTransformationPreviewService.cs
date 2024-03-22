@@ -72,7 +72,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             {
                 return null;
             }
-            
+
             var newSyntaxTree = unformattedResult.TransformedSyntaxTree!;
 
             var newDocument = document.WithSyntaxRoot(

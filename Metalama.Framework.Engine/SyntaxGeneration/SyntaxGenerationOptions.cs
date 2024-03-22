@@ -8,10 +8,10 @@ namespace Metalama.Framework.Engine.SyntaxGeneration;
 public record SyntaxGenerationOptions : IProjectService
 {
     private readonly CodeFormattingOptions _codeFormattingOptions;
-    
+
     // We must normalize whitespace even if we later run the formatter because the formatter requires existing whitespace.
     internal bool NormalizeWhitespace => this._codeFormattingOptions != CodeFormattingOptions.None;
-    
+
     internal bool TriviaMatters => this._codeFormattingOptions != CodeFormattingOptions.None;
 
     internal bool AddFormattingAnnotations => this._codeFormattingOptions == CodeFormattingOptions.Formatted;

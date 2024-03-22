@@ -1,16 +1,17 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Compiler.Services;
 using System;
 using Backstage = Metalama.Backstage.Telemetry;
 using Compiler = Metalama.Compiler.Services;
 
 namespace Metalama.Framework.Engine.Services;
 
-internal sealed class ExceptionReporterAdapter : Compiler::IExceptionReporter
+internal sealed class ExceptionReporterAdapter : IExceptionReporter
 {
-    private readonly Backstage::IExceptionReporter? _backstageReporter;
+    private readonly Backstage.Telemetry.IExceptionReporter? _backstageReporter;
 
-    public ExceptionReporterAdapter( Backstage::IExceptionReporter? backstageReporter )
+    public ExceptionReporterAdapter( Backstage.Telemetry.IExceptionReporter? backstageReporter )
     {
         this._backstageReporter = backstageReporter;
     }

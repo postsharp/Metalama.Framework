@@ -66,7 +66,8 @@ internal sealed class ContractAdvice : Advice
                 return AdviceImplementationResult.Success( property );
 
             case IIndexer indexer:
-                addTransformation( new ContractIndexerTransformation( this, indexer, null, this._direction, this._template, this._templateArguments, this._tags ) );
+                addTransformation(
+                    new ContractIndexerTransformation( this, indexer, null, this._direction, this._template, this._templateArguments, this._tags ) );
 
                 return AdviceImplementationResult.Success( indexer );
 
@@ -84,7 +85,14 @@ internal sealed class ContractAdvice : Advice
 
             case IParameter { ContainingDeclaration: IConstructor constructor } parameter:
                 addTransformation(
-                    new ContractConstructorTransformation( this, constructor, parameter, this._direction, this._template, this._templateArguments, this._tags ) );
+                    new ContractConstructorTransformation(
+                        this,
+                        constructor,
+                        parameter,
+                        this._direction,
+                        this._template,
+                        this._templateArguments,
+                        this._tags ) );
 
                 return AdviceImplementationResult.Success( constructor );
 

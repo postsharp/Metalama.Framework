@@ -3,7 +3,7 @@
 #if DEBUG && NETSTANDARD2_0
 using JetBrains.Annotations;
 
- // ReSharper disable once CheckNamespace
+// ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices;
 
 [AttributeUsage( AttributeTargets.Parameter )]

@@ -36,7 +36,7 @@ public sealed class JsonSerializationBinder : DefaultSerializationBinder
         // Add system assemblies.
         configuration.AddSystemLibrary( "System.Private.CoreLib" );
         configuration.AddSystemLibrary( "mscorlib" );
-        
+
         // Add additional assemblies.
         configure?.Invoke( configuration );
     }

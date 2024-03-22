@@ -76,7 +76,7 @@ namespace Metalama.Framework.Code
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestNamedType( containingDeclaration ),
                 _ => null
             };
-        
+
         /// <summary>
         /// Gets the declaring <see cref="IMemberOrNamedType"/> of a given declaration if the declaration if not an <see cref="IMemberOrNamedType"/>, or the <see cref="IMemberOrNamedType"/> itself if the given declaration is itself an <see cref="IMemberOrNamedType"/>. 
         /// </summary>

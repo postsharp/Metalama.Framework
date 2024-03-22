@@ -18,7 +18,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
 
     private ImmutableDictionary<string, MemberRef<T>> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, MemberRef<T>>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
-    
+
     protected abstract IEqualityComparer<MemberRef<T>> MemberRefComparer { get; }
 
     public void Add( MemberRef<T> member )

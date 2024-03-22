@@ -329,7 +329,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
             => this.CompilationContext.GetSyntaxGenerationContext( options, node );
 
-        
         internal CompilationModel WithTransformationsAndAspectInstances(
             IReadOnlyCollection<ITransformation>? introducedDeclarations,
             IEnumerable<AspectInstance>? aspectInstances,

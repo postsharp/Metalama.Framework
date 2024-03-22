@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             continue;
                         }
-                        
+
                         var referencedSymbol = DocumentationCommentId.GetFirstSymbolForReferenceId( cref, compilation );
 
                         stringBuilder.Append( '\'' );

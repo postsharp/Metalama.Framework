@@ -12,6 +12,6 @@ public sealed record ProjectLicenseInfo( string? RedistributionLicenseKey )
 {
     internal static ProjectLicenseInfo Empty { get; } = new( default(string) );
 
-    public static ProjectLicenseInfo Get( ILicenseConsumptionService? licenseConsumptionService ) 
+    public static ProjectLicenseInfo Get( ILicenseConsumptionService? licenseConsumptionService )
         => licenseConsumptionService?.IsRedistributionLicense == true ? new ProjectLicenseInfo( licenseConsumptionService.LicenseString ) : Empty;
 }

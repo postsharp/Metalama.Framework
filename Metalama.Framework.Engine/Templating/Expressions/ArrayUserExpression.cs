@@ -24,8 +24,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
         {
-            var items = this._arrayBuilder.Items.SelectAsImmutableArray(
-                i => TypedExpressionSyntaxImpl.FromValue( i, syntaxSerializationContext ).Syntax );
+            var items = this._arrayBuilder.Items.SelectAsImmutableArray( i => TypedExpressionSyntaxImpl.FromValue( i, syntaxSerializationContext ).Syntax );
 
             var generator = syntaxSerializationContext.SyntaxGenerator;
 

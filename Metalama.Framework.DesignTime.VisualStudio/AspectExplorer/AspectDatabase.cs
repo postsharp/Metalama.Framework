@@ -43,7 +43,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         {
             try
             {
-                return (INamedTypeSymbol) typeIdResolver.ResolveId( new( serializableTypeId ) );
+                return (INamedTypeSymbol) typeIdResolver.ResolveId( new SerializableTypeId( serializableTypeId ) );
             }
             catch ( InvalidOperationException )
             {
@@ -109,9 +109,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
 
                 yield return new AspectExplorerAspectTransformation
                 {
-                    TargetDeclaration = targetDeclaration,
-                    TargetDeclarationKind = targetDeclarationKind,
-                    Description = transformation.Description
+                    TargetDeclaration = targetDeclaration, TargetDeclarationKind = targetDeclarationKind, Description = transformation.Description
                 };
             }
         }

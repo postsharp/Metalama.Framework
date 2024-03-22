@@ -30,9 +30,9 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
     {
         this._sourceMember = sourceMember;
         this.SubstitutedType = substitutedType;
-        this.GenericMap = new( substitutedType.TypeArguments, sourceMember.Compilation.RoslynCompilation );
+        this.GenericMap = new GenericMap( substitutedType.TypeArguments, sourceMember.Compilation.RoslynCompilation );
     }
-    
+
     protected IType Substitute( IType sourceType ) => this._sourceMember.Compilation.Factory.GetIType( this.GenericMap.Map( sourceType.GetSymbol() ) );
 
     public ICompilation Compilation => this._sourceMember.Compilation;

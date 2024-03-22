@@ -101,7 +101,8 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
 
     public override SerializableDeclarationId ToSerializableId()
-        => throw new NotSupportedException( "Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method." );
+        => throw new NotSupportedException(
+            "Getting a serializable identifier is not supported for a parameter that may still be in the process of being added to its method." );
 
     public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 

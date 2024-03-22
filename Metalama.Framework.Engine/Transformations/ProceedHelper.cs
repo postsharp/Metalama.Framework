@@ -142,7 +142,11 @@ internal static class ProceedHelper
         }
     }
 
-    private static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await, SyntaxGenerationContext generationContext )
+    private static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid(
+        ExpressionSyntax invocationExpression,
+        IMethod overriddenMethod,
+        bool await,
+        SyntaxGenerationContext generationContext )
     {
         if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
         {

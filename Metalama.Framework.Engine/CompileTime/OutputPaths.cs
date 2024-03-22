@@ -22,5 +22,5 @@ internal sealed record OutputPaths( string BaseDirectory, string CompileTimeAsse
     [Memo]
     public string Manifest => Path.Combine( this.Directory, "manifest.json" );
 
-    public OutputPaths WithAlternateOrdinal( int? alternateOrdinal ) => new OutputPaths( this.BaseDirectory, this.CompileTimeAssemblyName, alternateOrdinal );
+    public OutputPaths WithAlternateOrdinal( int? alternateOrdinal ) => new( this.BaseDirectory, this.CompileTimeAssemblyName, alternateOrdinal );
 }

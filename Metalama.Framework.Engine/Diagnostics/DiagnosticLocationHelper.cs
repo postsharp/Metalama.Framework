@@ -114,7 +114,6 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         /// <param name="attribute"></param>
         /// <returns></returns>
-        internal static Location? GetDiagnosticLocation( this AttributeData attribute )
-            => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
+        internal static Location? GetDiagnosticLocation( this AttributeData attribute ) => attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
     }
 }

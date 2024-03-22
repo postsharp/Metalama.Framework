@@ -21,9 +21,7 @@ internal partial class AccessorBuilder
         public override TypedConstant? DefaultValue
         {
             get => null;
-            set
-                => throw new NotSupportedException(
-                    "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
+            set => throw new NotSupportedException( "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
         }
 
         public override RefKind RefKind { get; set; }

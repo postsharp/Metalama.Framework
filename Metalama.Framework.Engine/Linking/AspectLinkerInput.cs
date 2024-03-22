@@ -19,12 +19,12 @@ internal readonly struct AspectLinkerInput
     /// </summary>
     public CompilationModel CompilationModel { get; }
 
-        public CompilationModel SourceCompilationModel { get; }
+    public CompilationModel SourceCompilationModel { get; }
 
-        /// <summary>
-        /// Gets a list of non-observable transformations.
-        /// </summary>
-        public IReadOnlyCollection<ITransformation> Transformations { get; }
+    /// <summary>
+    /// Gets a list of non-observable transformations.
+    /// </summary>
+    public IReadOnlyCollection<ITransformation> Transformations { get; }
 
     /// <summary>
     /// Gets a list of ordered aspect layers.
@@ -35,19 +35,19 @@ internal readonly struct AspectLinkerInput
 
     public CompileTimeProject CompileTimeProject { get; }
 
-        public AspectLinkerInput(
-            CompilationModel compilationModel,
-            CompilationModel sourceCompilationModel,
-            IReadOnlyCollection<ITransformation> transformations,
-            IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-            IReadOnlyList<ScopedSuppression> suppressions,
-            CompileTimeProject compileTimeProject )
-        {
-            this.CompilationModel = compilationModel;
-            this.SourceCompilationModel = sourceCompilationModel;
-            this.Transformations = transformations;
-            this.OrderedAspectLayers = orderedAspectLayers;
-            this.DiagnosticSuppressions = suppressions;
-            this.CompileTimeProject = compileTimeProject;
-        }
+    public AspectLinkerInput(
+        CompilationModel compilationModel,
+        CompilationModel sourceCompilationModel,
+        IReadOnlyCollection<ITransformation> transformations,
+        IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
+        IReadOnlyList<ScopedSuppression> suppressions,
+        CompileTimeProject compileTimeProject )
+    {
+        this.CompilationModel = compilationModel;
+        this.SourceCompilationModel = sourceCompilationModel;
+        this.Transformations = transformations;
+        this.OrderedAspectLayers = orderedAspectLayers;
+        this.DiagnosticSuppressions = suppressions;
+        this.CompileTimeProject = compileTimeProject;
     }
+}

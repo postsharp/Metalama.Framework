@@ -11,18 +11,18 @@ namespace Metalama.Framework.Engine.Options
         /// A correct C# file must be generated, but it must not be nicely formatted.
         /// </summary>
         Default,
-        
+
         /// <summary>
         /// No text output is required, only a syntax tree.
         /// </summary>
         None,
-        
+
         /// <summary>
         /// The C# code must be nicely formatted.
         /// </summary>
         Formatted
     }
-    
+
     /// <summary>
     /// Exposes project options (typically defined in MSBuild or .editorconfig) in a strongly-typed manner.
     /// The production implementation is <see cref="MSBuildProjectOptions"/> but tests can provide their own implementation.

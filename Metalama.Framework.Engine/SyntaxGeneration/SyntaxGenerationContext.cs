@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         [Memo]
         public SyntaxTrivia ElasticEndOfLineTrivia => SyntaxFactory.ElasticEndOfLine( this.EndOfLine );
 
-        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? new( this.ElasticEndOfLineTrivia ) : default;
+        public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia ) : default;
 
         [Memo]
         public SyntaxTriviaList TwoElasticEndOfLinesTriviaList

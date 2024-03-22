@@ -48,7 +48,9 @@ internal sealed partial class RemoveAttributeCodeAction : ICodeAction
             var originalTree = syntaxReferenceGroup.Key;
             var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
-            var rewriter = new RemoveAttributeRewriter( context.CompilationContext.SemanticModelProvider.GetSemanticModel( originalTree ), attributeTypeSymbol );
+            var rewriter = new RemoveAttributeRewriter(
+                context.CompilationContext.SemanticModelProvider.GetSemanticModel( originalTree ),
+                attributeTypeSymbol );
 
             var transformedRoot = originalRoot;
             var syntaxNodes = new List<SyntaxNode>();

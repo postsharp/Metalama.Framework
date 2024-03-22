@@ -55,7 +55,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             // as the parent symbol, probably because of some bug or optimisation.
 
             this.Target = this._originalTarget = attributeData;
-            this.AttributeType = Ref.FromSymbol<INamedType>( attributeData.AttributeClass.AssertNotNull().TranslateIfNecessary( compilationContext ), compilationContext );
+
+            this.AttributeType = Ref.FromSymbol<INamedType>(
+                attributeData.AttributeClass.AssertNotNull().TranslateIfNecessary( compilationContext ),
+                compilationContext );
+
             this._declaringDeclaration = declaringDeclaration;
         }
 

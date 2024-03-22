@@ -14,10 +14,10 @@ public static class ServiceProviderLicensingExtensions
         string? projectLicenseKey )
     {
         var service = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>().WithAdditionalLicense( projectLicenseKey );
-        
+
         return serviceProvider.WithService( new ProjectLicenseConsumptionService( service ) );
     }
-    
+
     public static ProjectServiceProvider AddProjectLicenseConsumptionManagerForTest(
         this ServiceProvider<IProjectService> serviceProvider,
         string? projectLicenseKey )
