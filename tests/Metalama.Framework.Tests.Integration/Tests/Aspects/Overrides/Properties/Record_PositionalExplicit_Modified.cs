@@ -1,16 +1,27 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Record_PositionalExplicit;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Record_PositionalExplicit_Modified;
 
 internal class MyAspect : OverrideFieldOrPropertyAspect
 {
     public override dynamic? OverrideProperty
     {
-        get => meta.Proceed();
-        set => meta.Proceed();
+        get
+        {
+            Console.WriteLine("MyAspect");
+            return meta.Proceed();
+        }
+        set
+        {
+            Console.WriteLine("MyAspect");
+            meta.Proceed();
+        }
     }
 }
 

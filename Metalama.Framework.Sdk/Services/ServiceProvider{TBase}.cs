@@ -90,7 +90,9 @@ public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<T
               cursorType != null && typeof(TBase).IsAssignableFrom( cursorType );
               cursorType = cursorType.BaseType )
         {
+#if DEBUG
             CheckService( cursorType );
+#endif
 
             builder[cursorType] = service;
         }
