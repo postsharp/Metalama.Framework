@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -40,7 +39,6 @@ class TargetCode
 
 }";
 
-            
             using var testContext = this.CreateTestContext();
             var serviceProvider = testContext.ServiceProvider;
 
@@ -131,7 +129,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxSerializationContext = new SyntaxSerializationContext( compilation , SyntaxGenerationOptions.Formatted );
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Formatted );
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxSerializationContext,
@@ -324,7 +322,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Formatted  ),
+                       new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Formatted ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -386,7 +384,7 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
-            var syntaxSerializationContext = new SyntaxSerializationContext( compilation , SyntaxGenerationOptions.Formatted);
+            var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Formatted );
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxSerializationContext,

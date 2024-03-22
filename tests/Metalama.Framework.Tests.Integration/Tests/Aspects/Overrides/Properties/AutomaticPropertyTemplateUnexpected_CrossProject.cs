@@ -1,5 +1,3 @@
-using Metalama.Framework.Aspects;
-
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.AutomaticPropertyTemplateUnexpected_CrossProject;
 
 // <target>

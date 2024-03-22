@@ -1,6 +1,4 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Serialization;
-using System;
+﻿using Metalama.Framework.Serialization;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.RecordStruct_Error;
 

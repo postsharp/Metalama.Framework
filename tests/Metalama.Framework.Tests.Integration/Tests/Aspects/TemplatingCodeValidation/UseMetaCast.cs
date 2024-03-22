@@ -1,8 +1,6 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.UseMetaCast;
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-
 
 internal class TestAttribute : TypeAspect
 {

@@ -3,11 +3,8 @@
 #endif
 
 using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Target_Struct;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067

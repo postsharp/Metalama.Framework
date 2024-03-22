@@ -1,8 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 #pragma warning disable CS0169
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.ParameterMapping
 {

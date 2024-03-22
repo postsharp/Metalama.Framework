@@ -4,7 +4,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Nullable.DynamicParameterQuestionMarkTypes;

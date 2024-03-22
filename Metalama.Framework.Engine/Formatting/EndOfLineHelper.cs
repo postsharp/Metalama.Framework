@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    internal class EndOfLineHelper
+    internal static class EndOfLineHelper
     {
         /// <summary>
         /// Returns the first EOL string without allocating memory.

@@ -13,13 +13,10 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class TypeOfRewriter
 {
-    private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly NameSyntax _compileTimeTypeName;
 
     public TypeOfRewriter( SyntaxGenerationContext syntaxGenerationContext )
     {
-        this._syntaxGenerationContext = syntaxGenerationContext;
-
         this._compileTimeTypeName = (NameSyntax)
             syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeOfResolver) ) );
     }

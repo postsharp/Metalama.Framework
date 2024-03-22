@@ -1,7 +1,4 @@
-﻿using System;
-using Metalama.Framework.Aspects;
-
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributes_CrossAssembly
+﻿namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributes_CrossAssembly
 {
     // <target>
     [Introduction]

@@ -1,9 +1,5 @@
-
-using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.ExplicitInterfaceMember;
 

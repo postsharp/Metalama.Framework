@@ -1,7 +1,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.BaseType_Pull;
 

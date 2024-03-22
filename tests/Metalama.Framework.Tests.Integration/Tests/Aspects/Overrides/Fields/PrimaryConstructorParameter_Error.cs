@@ -6,9 +6,7 @@
 
 using Metalama.Framework.Aspects;
 using System;
-using System.Linq;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414

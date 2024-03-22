@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration;
 
 #pragma warning disable CA1822
 
-internal partial class ContextualSyntaxGenerator
+internal sealed partial class ContextualSyntaxGenerator
 {
     private static readonly SyntaxGenerator _roslynSyntaxGenerator;
 
@@ -402,7 +402,7 @@ internal partial class ContextualSyntaxGenerator
         return typeSyntax;
     }
 
-    protected SyntaxGenerationOptions Options => this._context.Options;
+    private SyntaxGenerationOptions Options => this._context.Options;
 
     public AttributeSyntax Attribute( IAttributeData attribute )
     {

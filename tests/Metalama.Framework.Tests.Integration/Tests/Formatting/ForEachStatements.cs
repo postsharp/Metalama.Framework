@@ -1,9 +1,7 @@
 ﻿#pragma warning disable CS0649, CS8618
 
 using System.Collections.Generic;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.ForEachStatements.ForEachStatements
 {

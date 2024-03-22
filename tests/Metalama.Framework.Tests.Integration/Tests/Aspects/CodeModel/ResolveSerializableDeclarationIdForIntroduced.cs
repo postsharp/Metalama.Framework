@@ -1,13 +1,7 @@
-using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.IntegrationTests.Aspects.CodeModel.ResolveSerializableDeclarationIdForIntroduced;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 #pragma warning disable CS0067, CS0169, CS0649

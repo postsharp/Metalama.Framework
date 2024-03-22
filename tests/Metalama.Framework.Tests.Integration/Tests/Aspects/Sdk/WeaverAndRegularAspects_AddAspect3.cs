@@ -1,14 +1,7 @@
 using System;
-using System.Threading.Tasks;
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect3;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 [assembly: AspectOrder(typeof(RegularAspect1), typeof(WeaverAspect), typeof(CombinedAspect), typeof(RegularAspect2))]
 

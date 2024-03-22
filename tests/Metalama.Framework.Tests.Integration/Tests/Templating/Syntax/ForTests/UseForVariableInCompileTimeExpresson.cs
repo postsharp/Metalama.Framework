@@ -1,7 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForTests.UseForVariableInCompileTimeExpresson
 {

@@ -1,9 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067

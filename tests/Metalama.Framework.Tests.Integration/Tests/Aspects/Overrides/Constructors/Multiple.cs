@@ -2,7 +2,6 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Multiple;
 
 [assembly:AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]

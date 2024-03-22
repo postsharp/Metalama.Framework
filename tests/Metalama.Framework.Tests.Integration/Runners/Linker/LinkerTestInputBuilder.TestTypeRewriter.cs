@@ -12,7 +12,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -36,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             private readonly List<ITransformation> _observableTransformations;
             private readonly List<ITransformation> _replacedTransformations;
             private readonly List<ITransformation> _nonObservableTransformations;
-            static SyntaxGenerationContext _testGenerationContext = SyntaxGenerationContext.Contextless;
+            private static readonly SyntaxGenerationContext _testGenerationContext = SyntaxGenerationContext.Contextless;
 
             private readonly TestRewriter _owner;
             private readonly Stack<(TypeDeclarationSyntax Type, List<MemberDeclarationSyntax> Members)> _currentTypeStack;
@@ -689,24 +688,25 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetInjectedMembers( A<MemberInjectionContext>.Ignored ) )
-                    .ReturnsLazily( () =>
-                        new[]
-                        {
-                            new InjectedMember(
-                                transformation,
-                                declarationKind,
-                                overrideSyntax,
-                                new AspectLayerId( aspectName.AssertNotNull(), layerName ),
-                                node switch
-                                {
-                                    MethodDeclarationSyntax _ => InjectedMemberSemantic.Override,
-                                    PropertyDeclarationSyntax _ => InjectedMemberSemantic.Override,
-                                    EventDeclarationSyntax _ => InjectedMemberSemantic.Override,
-                                    EventFieldDeclarationSyntax _ => InjectedMemberSemantic.Override,
-                                    _ => throw new NotSupportedException()
-                                },
-                                (IMemberOrNamedType)((IOverrideDeclarationTransformation)transformation).OverriddenDeclaration )
-                        } );
+                    .ReturnsLazily(
+                        () =>
+                            new[]
+                            {
+                                new InjectedMember(
+                                    transformation,
+                                    declarationKind,
+                                    overrideSyntax,
+                                    new AspectLayerId( aspectName.AssertNotNull(), layerName ),
+                                    node switch
+                                    {
+                                        MethodDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                        PropertyDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                        EventDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                        EventFieldDeclarationSyntax _ => InjectedMemberSemantic.Override,
+                                        _ => throw new NotSupportedException()
+                                    },
+                                    (IMemberOrNamedType) ((IOverrideDeclarationTransformation) transformation).OverriddenDeclaration )
+                            } );
 
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentTypeStack.Peek().Type ) );
 

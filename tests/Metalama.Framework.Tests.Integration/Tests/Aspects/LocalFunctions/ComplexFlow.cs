@@ -1,7 +1,5 @@
 using System;
-using System.Threading;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.ComplexFlow;
 
 [assembly:AspectOrder(typeof(OuterAspect), typeof(InnerAspect))]

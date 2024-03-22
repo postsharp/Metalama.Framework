@@ -1,10 +1,6 @@
 using System;
-using System.Linq;
-using System.Xml.Serialization;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Fabrics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField;
 
 [assembly: AspectOrder(typeof(OverrideEventAttribute), typeof(OverrideAttribute), typeof(IntroductionAttribute))]

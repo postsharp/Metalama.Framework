@@ -2,8 +2,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30972

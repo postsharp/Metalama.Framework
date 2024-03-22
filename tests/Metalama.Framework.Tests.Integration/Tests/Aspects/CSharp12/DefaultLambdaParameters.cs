@@ -4,7 +4,6 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
-using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

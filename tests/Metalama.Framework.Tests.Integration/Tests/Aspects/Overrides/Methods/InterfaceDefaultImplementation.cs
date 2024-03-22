@@ -3,12 +3,7 @@
 #endif
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceDefaultMember
 {

@@ -2,10 +2,7 @@
 // @RequiredConstant(NET5_0_OR_GREATER)
 # endif
 
-using System;
-using System.Linq;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
+
 
 /*
  * Doc sample. Bug #30453.

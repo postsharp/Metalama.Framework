@@ -1,7 +1,5 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using System;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.InvalidFieldModifier;
 

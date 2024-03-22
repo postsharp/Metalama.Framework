@@ -1,10 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples;
 
