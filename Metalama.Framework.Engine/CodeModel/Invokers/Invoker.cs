@@ -98,7 +98,9 @@ internal abstract class Invoker<T>
     private AspectReferenceSpecification GetDefaultAspectReferenceSpecification()
 
         // CurrentAspectLayerId may be null when we are not executing in a template execution context.
+        // TODO: We should solve the 
         => new(
+            null,
             TemplateExpansionContext.CurrentAspectLayerId ?? default,
             this._order,
             flags: this.Target == null ? AspectReferenceFlags.None : AspectReferenceFlags.CustomReceiver );

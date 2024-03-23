@@ -12,8 +12,11 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
@@ -78,13 +81,16 @@ internal sealed class AspectReferenceResolver
     private readonly CompilationModel _finalCompilationModel;
     private readonly SafeSymbolComparer _comparer;
     private readonly ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>> _overrideIndicesCache;
+    private readonly PartialCompilation _intermediateCompilation;
 
     public AspectReferenceResolver(
+        PartialCompilation intermediateCompilation,
         LinkerInjectionRegistry injectionRegistry,
         IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
         CompilationModel finalCompilationModel,
         CompilationContext intermediateCompilationContext )
     {
+        this._intermediateCompilation = intermediateCompilation;
         this._injectionRegistry = injectionRegistry;
 
         var indexedLayers =
@@ -99,14 +105,15 @@ internal sealed class AspectReferenceResolver
         this._overrideIndicesCache = new ConcurrentDictionary<ISymbol, IReadOnlyList<OverrideIndex>>( intermediateCompilationContext.SymbolComparer );
     }
 
-    public ResolvedAspectReference Resolve(
+    public ResolvedAspectReference? Resolve(
         IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
         IMethodSymbol? containingLocalFunction,
-        ISymbol referencedSymbol,
         ExpressionSyntax expression,
         AspectReferenceSpecification referenceSpecification,
         SemanticModel semanticModel )
     {
+        var annotationSymbol = this.GetSymbolFromDeclarationId( referenceSpecification );
+
         // Get the reference root node, the local symbol that is referenced, and the node that was the source for the symbol.
         //   1) Normal reference:
         //     this.Foo()
@@ -127,24 +134,25 @@ internal sealed class AspectReferenceResolver
         //     __LinkerInjectionHelpers__.__AsyncVoidMethod(this.Foo)(<args>)
         //                                                  ^^^^^^^^  - aspect reference
         //                                                  ^^^^^^^^  - symbol source
-        //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node            
+        //     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - resolved root node
 
-        this.ResolveTarget(
-            containingSemantic.Symbol,
-            referencedSymbol,
-            expression,
-            semanticModel,
-            out var resolvedRootNode,
-            out var resolvedReferencedSymbol,
-            out var resolvedReferencedSymbolSourceNode );
+        if ( !this.TryResolveTarget(
+                containingSemantic.Symbol,
+                annotationSymbol,
+                expression,
+                semanticModel,
+                out var resolvedRootNode,
+                out var resolvedReferencedSymbol,
+                out var resolvedReferencedSymbolSourceNode ) )
+        {
+            return null;
+        }
 
         // resolvedRootNode is the node that will be replaced when rewriting the aspect reference.
         // resolvedReferencedSymbol is the real target of the reference.
         // resolvedReferencedSymbolSourceNode is the node that will be rewritten when renaming the aspect reference (e.g. redirecting to a particular override).
 
         var targetKind = referenceSpecification.TargetKind;
-        var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
-        var hasCustomReceiver = (referenceSpecification.Flags & AspectReferenceFlags.CustomReceiver) != 0;
 
         if ( targetKind == AspectReferenceTargetKind.Self && resolvedReferencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
         {
@@ -166,7 +174,7 @@ internal sealed class AspectReferenceResolver
 
         Invariant.Assert(
             targetIntroductionIndex == null || overrideIndices.All( o => targetIntroductionIndex < o.Index )
-                                            || !HasImplicitImplementation( referencedSymbol ) );
+                                            || !HasImplicitImplementation( resolvedReferencedSymbol ) );
 
         this.ResolveLayerIndex(
             referenceSpecification,
@@ -281,8 +289,74 @@ internal sealed class AspectReferenceResolver
                 resolvedRootNode,
                 resolvedReferencedSymbolSourceNode,
                 targetKind,
-                isInlineable,
-                hasCustomReceiver );
+                referenceSpecification.Flags );
+        }
+    }
+
+    private ISymbol? GetSymbolFromDeclarationId( AspectReferenceSpecification referenceSpecification )
+    {
+        if ( referenceSpecification.TargetDeclarationId != null )
+        {
+            var candidateSymbols = DocumentationCommentId.GetSymbolsForDeclarationId(
+                referenceSpecification.TargetDeclarationId.Value.Id,
+                this._intermediateCompilation.Compilation );
+
+            /* TODO: Open generics and possibly other declarations cannot be resolved using this method.
+             *       Uncomment the following too see failing tests.
+             * Invariant.Assert( candidateSymbols.Length == 1 );
+             */
+
+            if ( candidateSymbols.Length == 1 )
+            {
+                return candidateSymbols[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private static ISymbol? GetSymbolFromSemanticModel( SemanticModel semanticModel, SyntaxNode node )
+    {
+        var nodeWithSymbol = node switch
+        {
+            ConditionalAccessExpressionSyntax conditionalAccess => GetConditionalMemberName( conditionalAccess ),
+            _ => node
+        };
+
+        var symbolInfo = semanticModel.GetSymbolInfo( nodeWithSymbol );
+        var referencedSymbol = symbolInfo.Symbol;
+
+        if ( referencedSymbol == null )
+        {
+            // This is a workaround for a problem I don't fully understand.
+            // We can get here at design time, in the preview pipeline. In this case, generating exactly correct code
+            // is not important. At compile time, an invalid symbol would result in a failed compilation, which is ok.
+
+            if ( symbolInfo.CandidateSymbols.Length == 1 )
+            {
+                return symbolInfo.CandidateSymbols[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return referencedSymbol;
+
+        static MemberBindingExpressionSyntax GetConditionalMemberName( ConditionalAccessExpressionSyntax conditionalAccess )
+        {
+            var walker = new ConditionalAccessExpressionWalker();
+
+            walker.Visit( conditionalAccess );
+
+            return walker.FoundName.AssertNotNull();
         }
     }
 
@@ -471,71 +545,99 @@ internal sealed class AspectReferenceResolver
     /// Resolves target symbol of the reference.
     /// </summary>
     /// <param name="containingSymbol">Symbol contains the reference.</param>
-    /// <param name="referencedSymbol">Symbol that is referenced.</param>
+    /// <param name="annotationSymbol">Symbol that is was referenced in the annotation.</param>
     /// <param name="expression">Annotated expression.</param>
     /// <param name="semanticModel">Semantic model.</param>
     /// <param name="rootNode">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
     /// <param name="targetSymbol">Symbol that the reference targets (the target symbol of the reference).</param>
     /// <param name="targetSymbolSource">Expression that identifies the target symbol (usually equal to the annotated expression).</param>
-    private void ResolveTarget(
+    private bool TryResolveTarget(
         ISymbol containingSymbol,
-        ISymbol referencedSymbol,
+        ISymbol? annotationSymbol,
         ExpressionSyntax expression,
         SemanticModel semanticModel,
-        out ExpressionSyntax rootNode,
-        out ISymbol targetSymbol,
-        out ExpressionSyntax targetSymbolSource )
+        [NotNullWhen( true )] out ExpressionSyntax? rootNode,
+        [NotNullWhen( true )] out ISymbol? targetSymbol,
+        [NotNullWhen( true )] out ExpressionSyntax? targetSymbolSource )
     {
+        // TODO: I think this should be removed.
         // Check whether we are referencing explicit interface implementation.
-        if ( (!this._comparer.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
-              && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
-             || referencedSymbol.IsInterfaceMemberImplementation() )
+        if ( annotationSymbol == null )
         {
-            // TODO: For some reason we get here in two ways (see the condition):
-            //          1) The symbol is directly interface symbol (first condition matches).
-            //          2) sometimes it is a "reference", i.e. contained within the current type (second condition matches).
-            //       This may depend on the declaring assembly or on presence of compilation errors.
+            var referencedSymbol = GetSymbolFromSemanticModel( semanticModel, expression ).AssertNotNull();
 
-            // It's not possible to reference the introduced explicit interface implementation directly, so the reference expression
-            // is in form "((<interface_type>)this).<member>", which means that the symbol points to interface member. We will transition
-            // to the real member (explicit implementation) of the type before doing the rest of resolution.
-
-            // Replace the referenced symbol with the overridden interface implementation.    
-            rootNode = expression;
-            targetSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
-            targetSymbolSource = expression;
-
-            return;
-        }
-
-        if ( expression.Parent?.Parent?.Parent?.Parent is InvocationExpressionSyntax { Expression: { } wrappingExpression }
-             && semanticModel.GetSymbolInfo( wrappingExpression ).Symbol is IMethodSymbol
-             {
-                 ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName
-             } wrappingHelperMethod )
-        {
-            // Wrapping helper methods are used in special cases where the generated expression needs to be additionally wrapped.
-
-            switch ( wrappingHelperMethod )
+            if ( (!this._comparer.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
+                  && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
+                 || referencedSymbol.IsInterfaceMemberImplementation() )
             {
-                case { Name: LinkerInjectionHelperProvider.AsyncVoidMethodMemberName }:
-                    // Referencing async-void method.
-                    rootNode = wrappingExpression;
-                    targetSymbolSource = expression;
-                    targetSymbol = referencedSymbol;
+                // TODO: For some reason we get here in two ways (see the condition):
+                //          1) The symbol is directly interface symbol (first condition matches).
+                //          2) sometimes it is a "reference", i.e. contained within the current type (second condition matches).
+                //       This may depend on the declaring assembly or on presence of compilation errors.
 
-                    return;
+                // It's not possible to reference the introduced explicit interface implementation directly, so the reference expression
+                // is in form "((<interface_type>)this).<member>", which means that the symbol points to interface member. We will transition
+                // to the real member (explicit implementation) of the type before doing the rest of resolution.
 
-                default:
-                    throw new AssertionFailedException( $"Unexpected wrapping helper method: '{wrappingHelperMethod}'." );
+                // Replace the referenced symbol with the overridden interface implementation.    
+                rootNode = expression;
+                targetSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
+                targetSymbolSource = expression;
+
+                return true;
             }
         }
 
-        if ( referencedSymbol is IMethodSymbol { ContainingType.Name: LinkerInjectionHelperProvider.HelperTypeName } helperMethod )
+        if ( expression is { Parent.Parent.Parent.Parent: InvocationExpressionSyntax { Expression: { } wrappingExpression } }
+             && wrappingExpression is InvocationExpressionSyntax
+             {
+                 Expression: MemberAccessExpressionSyntax
+                 {
+                     Expression: IdentifierNameSyntax { Identifier.ValueText: LinkerInjectionHelperProvider.HelperTypeName },
+                     Name: NameSyntax { } wrappingHelperName
+                 }
+             } )
         {
-            switch ( helperMethod )
+            // Wrapping helper methods are used in special cases where the generated expression needs to be additionally wrapped.
+            var helperMethodName =
+                wrappingHelperName switch
+                {
+                    IdentifierNameSyntax identifierName => identifierName.Identifier.ValueText,
+                    _ => throw new AssertionFailedException( $"Unknown name: {wrappingHelperName}" )
+                };
+
+            switch ( helperMethodName )
             {
-                case { Name: LinkerInjectionHelperProvider.FinalizeMemberName }:
+                case LinkerInjectionHelperProvider.AsyncVoidMethodMemberName:
+                    // Referencing async-void method.
+                    rootNode = wrappingExpression;
+                    targetSymbolSource = expression;
+                    targetSymbol = GetSymbolFromSemanticModel( semanticModel, expression ).AssertNotNull();
+
+                    return true;
+
+                default:
+                    throw new AssertionFailedException( $"Unexpected wrapping helper method: '{helperMethodName}'." );
+            }
+        }
+
+        if ( expression is MemberAccessExpressionSyntax
+            {
+                Expression: IdentifierNameSyntax { Identifier.ValueText: LinkerInjectionHelperProvider.HelperTypeName },
+                Name: { } name
+            } )
+        {
+            var helperMethodName =
+                name switch
+                {
+                    IdentifierNameSyntax identifierName => identifierName.Identifier.ValueText,
+                    GenericNameSyntax genericName => genericName.Identifier.ValueText,
+                    _ => throw new AssertionFailedException( $"Unknown name: {name}" )
+                };
+
+            switch ( helperMethodName )
+            {
+                case LinkerInjectionHelperProvider.FinalizeMemberName:
                     // Referencing type's finalizer.
                     rootNode = expression;
                     targetSymbolSource = expression;
@@ -544,9 +646,9 @@ internal sealed class AspectReferenceResolver
                         .OfType<IMethodSymbol>()
                         .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
 
-                    return;
+                    return true;
 
-                case { Name: LinkerInjectionHelperProvider.StaticConstructorMemberName }:
+                case LinkerInjectionHelperProvider.StaticConstructorMemberName:
                     // Referencing type's constructor.
                     switch ( expression.Parent )
                     {
@@ -555,13 +657,13 @@ internal sealed class AspectReferenceResolver
                             targetSymbol = containingSymbol.ContainingType.StaticConstructors.FirstOrDefault().AssertNotNull();
                             targetSymbolSource = expression;
 
-                            return;
+                            return true;
 
                         default:
                             throw new AssertionFailedException( $"Unexpected static constructor expression: '{expression.Parent}'." );
                     }
 
-                case { Name: LinkerInjectionHelperProvider.ConstructorMemberName }:
+                case LinkerInjectionHelperProvider.ConstructorMemberName:
                     // Referencing type's constructor.
                     switch ( expression.Parent )
                     {
@@ -583,13 +685,13 @@ internal sealed class AspectReferenceResolver
                             targetSymbol = overrideTarget;
                             targetSymbolSource = objectCreation;
 
-                            return;
+                            return true;
 
                         default:
                             throw new AssertionFailedException( $"Unexpected constructor expression: '{expression.Parent}'." );
                     }
 
-                case { Name: LinkerInjectionHelperProvider.PropertyMemberName }:
+                case LinkerInjectionHelperProvider.PropertyMemberName:
                     // Referencing a property.
                     switch ( expression.Parent )
                     {
@@ -599,52 +701,69 @@ internal sealed class AspectReferenceResolver
                         } invocationExpression:
 
                             rootNode = invocationExpression;
-                            targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
+
+                            targetSymbol =
+                                annotationSymbol
+                                ?? semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
+
                             targetSymbolSource = memberAccess;
 
-                            return;
+                            return true;
 
                         default:
                             throw new AssertionFailedException( $"Unexpected property expression: '{expression.Parent}'." );
                     }
 
-                case not null when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
+                case not null when SymbolHelpers.GetOperatorKindFromName( helperMethodName ) is not OperatorKind.None and var operatorKind:
                     // Referencing an operator.
                     rootNode = expression;
                     targetSymbolSource = expression;
 
-                    if ( operatorKind.GetCategory() == OperatorCategory.Binary )
+                    if ( annotationSymbol == null )
                     {
-                        targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
-                            .OfType<IMethodSymbol>()
-                            .Single(
-                                m =>
-                                    m.Parameters.Length == 2
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        var referencedSymbol = GetSymbolFromSemanticModel( semanticModel, expression ).AssertNotNull();
+                        var helperMethod = (IMethodSymbol) referencedSymbol;
+
+                        if ( operatorKind.GetCategory() == OperatorCategory.Binary )
+                        {
+                            targetSymbol =
+                                containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                    .OfType<IMethodSymbol>()
+                                    .Single(
+                                        m =>
+                                            m.Parameters.Length == 2
+                                            && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                            && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                            && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+                        else
+                        {
+                            targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 1
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
                     }
                     else
                     {
-                        targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
-                            .OfType<IMethodSymbol>()
-                            .Single(
-                                m =>
-                                    m.Parameters.Length == 1
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        targetSymbol = annotationSymbol;
                     }
 
-                    return;
+                    return true;
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected helper method: '{helperMethod}'." );
+                    throw new AssertionFailedException( $"Unexpected helper method: '{helperMethodName}'." );
             }
         }
 
         rootNode = expression;
-        targetSymbol = referencedSymbol;
+        targetSymbol = annotationSymbol ?? GetSymbolFromSemanticModel( semanticModel, expression ).AssertNotNull();
         targetSymbolSource = expression;
+
+        return true;
     }
 
     private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )
@@ -758,4 +877,31 @@ internal sealed class AspectReferenceResolver
     }
 
     private record struct OverrideIndex( MemberLayerIndex Index, InjectedMember Override );
+
+    private sealed class ConditionalAccessExpressionWalker : SafeSyntaxWalker
+    {
+        private ConditionalAccessExpressionSyntax? _context;
+
+        public MemberBindingExpressionSyntax? FoundName { get; private set; }
+
+        public override void VisitConditionalAccessExpression( ConditionalAccessExpressionSyntax node )
+        {
+            if ( this._context == null )
+            {
+                this._context = node;
+
+                this.Visit( node.WhenNotNull );
+
+                this._context = null;
+            }
+        }
+
+        public override void VisitMemberBindingExpression( MemberBindingExpressionSyntax node )
+        {
+            if ( this._context != null )
+            {
+                this.FoundName = node;
+            }
+        }
+    }
 }
