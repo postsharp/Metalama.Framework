@@ -39,10 +39,10 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
         => this.PropertySymbol switch
         {
             // Generate a pseudo-setter for read-only automatic properties.
-            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault()
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() == true
                 => new PseudoSetter( (IFieldOrPropertyOrIndexerImpl) this, Accessibility.Private ),
-            { IsReadOnly: true } => null,
-            _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod! )
+            { SetMethod: null } => null,
+            _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod )
         };
 
     public override MemberInfo ToMemberInfo() => this.ToPropertyInfo();
@@ -55,7 +55,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public Writeability Writeability
         => this.PropertySymbol switch
         {
-            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty().GetValueOrDefault() => Writeability.ConstructorOnly,
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() == true => Writeability.ConstructorOnly,
             { IsReadOnly: true } => Writeability.None,
             { SetMethod: { IsInitOnly: true } _ } => Writeability.InitOnly,
             _ => Writeability.All
