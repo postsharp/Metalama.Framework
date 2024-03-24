@@ -1723,6 +1723,30 @@ public partial class C
             Assert.Null( property.InitializerExpression );
         }
 
+        [Fact]
+        public void HalfOverriddenProperty()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = """
+                class Base
+                {
+                    public virtual int P { get; set; }
+                }
+
+                class Derived : Base
+                {
+                    public override int P { get => 42; }
+                }
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var derived = compilation.Types.OfName( "Derived" ).Single();
+            var property = derived.Properties.OfName( "P" ).Single();
+
+            Assert.Null( property.SetMethod );
+        }
+
         /*
         [Fact]
         public void ExternalInternalAutomaticProperty()
