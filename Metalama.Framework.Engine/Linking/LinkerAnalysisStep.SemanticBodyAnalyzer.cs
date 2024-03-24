@@ -5,13 +5,16 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 using CSharpExtensions = Microsoft.CodeAnalysis.CSharp.CSharpExtensions;
 
 namespace Metalama.Framework.Engine.Linking;
@@ -125,17 +128,18 @@ internal sealed partial class LinkerAnalysisStep
             switch ( body )
             {
                 case BlockSyntax rootBlock:
-                    var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock );
+                    var (returnStatements, isEndPointReachable) = this.AnalyzeControlFlow( semanticModel, rootBlock );
+
                     var exitFlowingStatements = new HashSet<StatementSyntax>();
                     var returnStatementProperties = new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>();
 
-                    var blocksWithReturnBeforeUsingLocal = GetBlocksWithReturnBeforeUsingLocal( rootBlock, rootBlockCfa.ReturnStatements );
+                    var blocksWithReturnBeforeUsingLocal = GetBlocksWithReturnBeforeUsingLocal( rootBlock, returnStatements );
 
                     // Get all statements that flow to exit (blocks, ifs, trys, etc.).
                     DiscoverExitFlowingStatements( rootBlock, exitFlowingStatements );
 
                     // Go through all return statements.
-                    foreach ( var returnStatement in rootBlockCfa.ReturnStatements.OfType<ReturnStatementSyntax>() )
+                    foreach ( var returnStatement in returnStatements.OfType<ReturnStatementSyntax>() )
                     {
                         switch ( returnStatement )
                         {
@@ -198,7 +202,7 @@ internal sealed partial class LinkerAnalysisStep
                         }
                     }
 
-                    return new SemanticBodyAnalysisResult( returnStatementProperties, rootBlockCfa.EndPointIsReachable, blocksWithReturnBeforeUsingLocal );
+                    return new SemanticBodyAnalysisResult( returnStatementProperties, isEndPointReachable, blocksWithReturnBeforeUsingLocal );
 
                 case ArrowExpressionClauseSyntax:
                     return new SemanticBodyAnalysisResult(
@@ -392,6 +396,203 @@ internal sealed partial class LinkerAnalysisStep
             }
         }
 
+        private (IReadOnlyList<SyntaxNode> returnStatements, bool isEndPointReachable) AnalyzeControlFlow( SemanticModel semanticModel, BlockSyntax rootBlock )
+        {
+            if ( this.TryAnalyzeControlFlowNoSemanticModel(rootBlock, out var returnStatements, out var isEndPointReachable) )
+            {
+#if DEBUG
+                var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock );
+                Invariant.Assert( rootBlockCfa.ReturnStatements.SequenceEqual( returnStatements ) );
+                Invariant.Assert( rootBlockCfa.EndPointIsReachable == isEndPointReachable );
+#endif
+
+                return (returnStatements, isEndPointReachable);
+            }
+            else
+            {
+                // Use Roslyn for analysis (may be quite slow).
+                var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock );
+                return (rootBlockCfa.ReturnStatements, rootBlockCfa.EndPointIsReachable);
+            }
+        }
+
+        private bool TryAnalyzeControlFlowNoSemanticModel( 
+            BlockSyntax rootBlock, 
+            [NotNullWhen(true)] out IReadOnlyList<SyntaxNode>? returnStatements, 
+            [NotNullWhen( true )] out bool isEndPointReachable )
+        {
+            // This is a fast path that does not use SemanticModel, so that for most normal method bodies, we don't have to run the costly
+            // creation of method body semantic model which is used by CFA.
+
+            // There are several assertions we have to make:
+            //  1) No labels.
+            //  2) No cycles.
+
+            var result = IsEndPointReachable( rootBlock );
+
+            if (result == null)
+            {
+                returnStatements = null;
+                isEndPointReachable = false;
+                return false;
+            }
+
+            var walker = new ReturnStatementWalker();
+
+            walker.Visit( rootBlock );
+
+            returnStatements = walker.ReturnStatements;
+            isEndPointReachable = result == true;
+            return true;
+
+            static bool? IsEndPointReachable(StatementSyntax statement)
+            {
+                switch ( statement )
+                {
+                    case ReturnStatementSyntax:
+                    case ThrowStatementSyntax:
+                        return false;
+
+                    case LocalFunctionStatementSyntax:
+                    case LocalDeclarationStatementSyntax:
+                    case BreakStatementSyntax:
+                    case ExpressionStatementSyntax:
+                        return true;
+
+                    // Unsupported statements.
+                    case WhileStatementSyntax:
+                    case DoStatementSyntax:
+                    case ForEachStatementSyntax:
+                    case ForEachVariableStatementSyntax:
+                    case ForStatementSyntax:
+                    case LabeledStatementSyntax:
+                    case GotoStatementSyntax:
+                    case ContinueStatementSyntax:
+                        return null;
+
+                    case IfStatementSyntax ifStatement:
+                        if (ifStatement.Else == null)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            var trueResult = IsEndPointReachable( ifStatement.Statement );
+                            var falseResult = IsEndPointReachable( ifStatement.Else.Statement );
+
+                            if ( trueResult == null || falseResult == null )
+                            {
+                                return null;
+                            }
+                            else
+                            {
+                                return trueResult == true || falseResult == true;
+                            }
+                        }
+
+                    case YieldStatementSyntax yieldStatement:
+                        return yieldStatement.ReturnOrBreakKeyword.IsKind( SyntaxKind.ReturnKeyword ) ? true : false;
+
+                    case SwitchStatementSyntax switchStatement:
+                        var switchResult = (bool?)false;
+
+                        foreach(var section in switchStatement.Sections)
+                        {
+                            var sectionResult = (bool?)true;
+
+                            foreach ( var sectionStatement in section.Statements)
+                            {
+                                var result = IsEndPointReachable( sectionStatement );
+
+                                if (result == null)
+                                {
+                                    sectionResult = null;
+                                    break;
+                                }
+                                else if (result == false)
+                                {
+                                    sectionResult = false;
+                                    break;
+                                }
+                            }
+
+                            if ( sectionResult == null)
+                            {
+                                switchResult = null;
+                                break;
+                            }
+                            else if (sectionResult == true)
+                            {
+                                switchResult = true;
+                                break;
+                            }
+                        }
+
+                        return switchResult;
+
+                    case UsingStatementSyntax usingStatement:
+                        return IsEndPointReachable( usingStatement.Statement );
+
+                    case FixedStatementSyntax fixedStatement:
+                        return IsEndPointReachable( fixedStatement.Statement );
+
+                    case CheckedStatementSyntax checkedStatement:
+                        return IsEndPointReachable( checkedStatement.Block );
+
+                    case LockStatementSyntax lockStatement:
+                        return IsEndPointReachable( lockStatement.Statement );
+
+                    case BlockSyntax block:
+                        var blockResult = (bool?) true;
+
+                        foreach ( var blockStatement in block.Statements )
+                        {
+                            var result = IsEndPointReachable( blockStatement );
+
+                            if ( result == null )
+                            {
+                                blockResult = null;
+                                break;
+                            }
+                            else if ( result == false )
+                            {
+                                blockResult = false;
+                                break;
+                            }
+                        }
+
+                        return blockResult;
+
+                    case TryStatementSyntax tryStatement:
+                        var tryResult = IsEndPointReachable( tryStatement.Block );
+
+                        if ( tryResult == false )
+                        {
+                            foreach ( var clause in tryStatement.Catches )
+                            {
+                                var clauseResult = IsEndPointReachable( clause.Block );
+
+                                if ( clauseResult == null )
+                                {
+                                    tryResult = null;
+                                    break;
+                                }
+                                else if ( clauseResult == true )
+                                {
+                                    tryResult = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        return tryResult;
+
+                    default:
+                        throw new AssertionFailedException( $"Unknown statement kind: {statement.Kind()}" );
+                }
+            }
+        }
+
         private static StatementSyntax? GetLastFlowStatement( SyntaxList<StatementSyntax> statements )
         {
             for ( var i = statements.Count - 1; i >= 0; i-- )
@@ -474,6 +675,31 @@ internal sealed partial class LinkerAnalysisStep
             }
 
             return blocksWithUsingLocalAfterReturn;
+        }
+    }
+
+    private class ReturnStatementWalker : CSharpSyntaxWalker
+    {
+        public List<SyntaxNode?> ReturnStatements { get; }
+
+        public ReturnStatementWalker()
+        {
+            this.ReturnStatements = new List<SyntaxNode?>();
+        }
+
+        public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+        {
+            // Skip local functions.
+        }
+
+        public override void VisitReturnStatement( ReturnStatementSyntax node )
+        {
+            this.ReturnStatements.Add( node );
+        }
+
+        public override void VisitYieldStatement( YieldStatementSyntax node )
+        {
+            this.ReturnStatements.Add( node );
         }
     }
 }

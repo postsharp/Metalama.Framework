@@ -560,6 +560,27 @@ internal sealed class AspectReferenceResolver
         [NotNullWhen( true )] out ISymbol? targetSymbol,
         [NotNullWhen( true )] out ExpressionSyntax? targetSymbolSource )
     {
+        var result = this.TryResolveTargetCore( containingSymbol, annotationSymbol, expression, semanticModel, out rootNode, out targetSymbol, out targetSymbolSource );
+
+#if DEBUG
+        if (annotationSymbol != null)
+        {
+            Invariant.Assert( this._intermediateCompilation.CompilationContext.SymbolComparer.Equals( annotationSymbol, targetSymbol ) );
+        }
+#endif
+
+        return result;
+    }
+
+    private bool TryResolveTargetCore(
+        ISymbol containingSymbol,
+        ISymbol? annotationSymbol,
+        ExpressionSyntax expression,
+        SemanticModel semanticModel,
+        [NotNullWhen( true )] out ExpressionSyntax? rootNode,
+        [NotNullWhen( true )] out ISymbol? targetSymbol,
+        [NotNullWhen( true )] out ExpressionSyntax? targetSymbolSource )
+    {
         // TODO: I think this should be removed.
         // Check whether we are referencing explicit interface implementation.
         if ( annotationSymbol == null )
