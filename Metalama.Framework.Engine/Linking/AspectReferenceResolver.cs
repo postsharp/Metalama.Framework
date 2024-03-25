@@ -581,12 +581,12 @@ internal sealed class AspectReferenceResolver
         [NotNullWhen( true )] out ISymbol? targetSymbol,
         [NotNullWhen( true )] out ExpressionSyntax? targetSymbolSource )
     {
-        // TODO: I think this should be removed.
-        // Check whether we are referencing explicit interface implementation.
         if ( annotationSymbol == null )
         {
             var referencedSymbol = GetSymbolFromSemanticModel( semanticModel, expression ).AssertNotNull();
 
+            // TODO: I think this should be removed.
+            // Check whether we are referencing explicit interface implementation.
             if ( (!this._comparer.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
                   && referencedSymbol.ContainingType.TypeKind == TypeKind.Interface)
                  || referencedSymbol.IsInterfaceMemberImplementation() )
