@@ -359,8 +359,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
         => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ISdkType) pointedType).TypeSymbol.AssertNotNull() ) );
 
-    public T ConstructNullable<T>( T type, bool isNullable )
-        where T : IType
+    public IType ConstructNullable( IType type, bool isNullable )
     {
         if ( type.IsNullable == isNullable )
         {
@@ -384,11 +383,11 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             }
             else
             {
-                return (T) ((INamedType) type).TypeArguments[0];
+                return ((INamedType) type).TypeArguments[0];
             }
         }
 
-        return (T) this.GetIType( newTypeSymbol );
+        return this.GetIType( newTypeSymbol );
     }
 
     public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );

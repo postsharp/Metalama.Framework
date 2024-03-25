@@ -80,19 +80,19 @@ public static class TypeFactory
     /// If the type is a value type, returns a <see cref="Nullable{T}"/> of this type.
     /// </summary>
     public static INamedType ToNullableType( this INamedType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
+        => (INamedType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
     
     /// <summary>
     /// Creates a nullable type from the current <see cref="IArrayType"/>. If the current type is already nullable, returns the current type.
     /// </summary>
     public static IArrayType ToNullableType( this IArrayType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
+        => (IArrayType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
 
     /// <summary>
     /// Creates a nullable type from the current <see cref="IDynamicType"/>. If the current type is already nullable, returns the current type.
     /// </summary>
     public static IDynamicType ToNullableType( this IDynamicType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
+        => (IDynamicType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, true );
 
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="IType"/>. If the current type is a non-nullable reference type, returns the current type.
@@ -105,19 +105,19 @@ public static class TypeFactory
     /// Returns the non-nullable type from the current <see cref="ITypeParameter"/>. If the current type is a non-nullable reference type, returns the current type.
     /// </summary>
     public static ITypeParameter ToNonNullableType( this ITypeParameter type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
+        => (ITypeParameter) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
     
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="IArrayType"/>. If the current type is non-nullable, returns the current type.
     /// </summary>
     public static IArrayType ToNonNullableType( this IArrayType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
+        => (IArrayType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
     
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="IDynamicType"/>. If the current type is non-nullable, returns the current type.
     /// </summary>
     public static IDynamicType ToNonNullableType( this IDynamicType type )
-        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
+        => (IDynamicType) ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type, false );
     
     /// <summary>
     /// Returns the non-nullable type from the current <see cref="IDynamicType"/>. If the current type is a non-nullable reference type, returns the current type.

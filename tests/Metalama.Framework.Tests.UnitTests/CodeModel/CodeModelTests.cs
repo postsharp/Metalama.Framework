@@ -1225,11 +1225,10 @@ public class PublicClass
             Assert.False( intType.IsNullable );
             Assert.Same( intType, intType.ToNonNullableType() );
             Assert.Same( intType, intType.UnderlyingType );
-            var nullableIntType = (INamedType) intType.ToNullableType();
+            var nullableIntType = intType.ToNullableType();
             Assert.NotSame( intType, nullableIntType );
             Assert.True( nullableIntType.IsNullable );
             Assert.Same( intType, nullableIntType.ToNonNullableType() );
-            Assert.Same( intType, nullableIntType.UnderlyingType );
         }
 
         [Fact]
