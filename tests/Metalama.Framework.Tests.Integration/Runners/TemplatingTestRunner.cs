@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -109,15 +110,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var templateDocument = testSyntaxTree.InputDocument;
             var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
             var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
-
-            CompilationContext.SetTriviaHandling( templateSemanticModel.Compilation, normalizeWhitespace: true, preserveTrivia: true );
-
+            
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
                 testAnalyzer.Visit( templateSyntaxRoot );
             }
 
-            var serviceProvider = testContext.ServiceProvider;
+            var serviceProvider = testContext.ServiceProvider.WithService( SyntaxGenerationOptions.Formatted );
             var assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
 
             // Create an empty compilation (just with references) for the compile-time project.
@@ -127,10 +126,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     assemblyLocator.StandardCompileTimeMetadataReferences,
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
-
-            CompilationContext.SetTriviaHandling( compileTimeCompilation, normalizeWhitespace: true, preserveTrivia: true );
-
-            var templateCompiler = new TestTemplateCompiler( templateSemanticModel!, testResult.PipelineDiagnostics, serviceProvider );
+            
+            var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, serviceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(
                 compileTimeCompilation,
@@ -322,7 +319,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScopeFactory = new LexicalScopeFactory( compilation );
             var lexicalScope = lexicalScopeFactory.GetLexicalScope( targetMethod );
-            var syntaxGenerationContext = compilationServices.DefaultSyntaxGenerationContext;
+            var syntaxGenerationContext = compilationServices.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
 
             var proceedExpression =
                 new SyntaxUserExpression(

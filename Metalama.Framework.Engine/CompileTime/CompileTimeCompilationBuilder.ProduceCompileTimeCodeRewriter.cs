@@ -5,11 +5,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.CompileTime.Serialization;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     serializableTypes.SelectMany( x => x.SerializedMembers.SelectAsReadOnlyList( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, this._symbolEqualityComparer );
 
-                this._syntaxGenerationContext = SyntaxGenerationContext.Create( compileTimeCompilationContext );
+                this._syntaxGenerationContext = compileTimeCompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted );
                 this._runtimeCompilationContext = compilationContext.CompilationContext;
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
@@ -575,10 +575,12 @@ namespace Metalama.Framework.Engine.CompileTime
                                                         Identifier( p.Name ),
                                                         default ) ) ) ),
                                         default,
-                                        method.ReturnType.SpecialType == SpecialType.System_Void ? SyntaxFactoryEx.FormattedBlock() : null,
+                                        method.ReturnType.SpecialType == SpecialType.System_Void
+                                            ? this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock()
+                                            : null,
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? null : ArrowExpressionClause( SyntaxFactoryEx.Default ),
                                         method.ReturnType.SpecialType == SpecialType.System_Void ? default : Token( SyntaxKind.SemicolonToken ) )
-                                    .NormalizeWhitespace();
+                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine );
 
                                 members.Add( newMethod );
                             }
@@ -615,9 +617,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                         constructorName,
                                         ParameterList(),
                                         null,
-                                        SyntaxFactoryEx.FormattedBlock(),
+                                        this._syntaxGenerationContext.SyntaxGenerator.FormattedBlock(),
                                         null )
-                                    .NormalizeWhitespace() );
+                                    .NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                         }
 
                         var deserializingConstructor = this._serializerGenerator.CreateDeserializingConstructor( serializableType, constructorName );
@@ -625,8 +627,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         if ( deserializingConstructor != null && serializerType != null )
                         {
-                            members.Add( deserializingConstructor.NormalizeWhitespace() );
-                            members.Add( serializerType.NormalizeWhitespace() );
+                            members.Add( deserializingConstructor.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
+                            members.Add( serializerType.NormalizeWhitespace( eol: this._syntaxGenerationContext.EndOfLine ) );
                         }
                         else
                         {
@@ -782,7 +784,10 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                     else if ( methodSymbol.IsOverride && methodSymbol.OverriddenMethod!.IsAbstract )
                     {
-                        yield return this._helper.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                        yield return this._helper.WithThrowNotSupportedExceptionBody(
+                            node,
+                            "Template code cannot be directly executed.",
+                            this._syntaxGenerationContext );
                     }
                     else
                     {
@@ -1513,7 +1518,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private TypeSyntax CreateTypeSyntax( INamespaceOrTypeSymbol symbol )
             {
                 var unnestedType = this._currentContext.NestedType;
-                var type = OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
+                var type = this._syntaxGenerationContext.SyntaxGenerator.TypeOrNamespace( symbol );
 
                 static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
                     => syntax switch

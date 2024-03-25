@@ -17,7 +17,7 @@ internal abstract class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 {
     private readonly ReferenceAssemblyLocator _assemblyLocator;
 
-    protected CurrentAppDomainTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    protected CurrentAppDomainTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._assemblyLocator = serviceProvider.GetReferenceAssemblyLocator();
     }
@@ -29,9 +29,7 @@ internal abstract class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
     protected virtual bool CanLoadTypeFromAssembly( AssemblyName assemblyName ) => true;
 
     protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
-    {
-        return this.Cache.GetOrAdd( typeSymbol, ( t ) => this.GetCompileTimeNamedTypeCore( (INamedTypeSymbol) t, CancellationToken.None ) );
-    }
+        => this.Cache.GetOrAdd( typeSymbol, ( t ) => this.GetCompileTimeNamedTypeCore( (INamedTypeSymbol) t, CancellationToken.None ) );
 
     private Type? GetCompileTimeNamedTypeCore( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken )
     {

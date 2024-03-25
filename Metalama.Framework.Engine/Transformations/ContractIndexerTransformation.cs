@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal sealed class ContractIndexerTransformation : ContractBaseTransformation
 {
-    public new IIndexer TargetMember => (IIndexer) base.TargetMember;
+    private new IIndexer TargetMember => (IIndexer) base.TargetMember;
 
     public ContractIndexerTransformation(
         Advice advice,
@@ -36,7 +36,7 @@ internal sealed class ContractIndexerTransformation : ContractBaseTransformation
         {
             case IIndexer:
                 {
-                    Invariant.Assert( this.ContractTarget == this.TargetMember );
+                    Invariant.Assert( ReferenceEquals( this.ContractTarget, this.TargetMember ) );
                     Invariant.Assert( this.ContractDirection is ContractDirection.Output or ContractDirection.Input or ContractDirection.Both );
 
                     bool? inputResult, outputResult;

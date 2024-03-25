@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -14,7 +15,7 @@ internal abstract class TransformationContext
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-    public SyntaxGeneratorWithContext SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+    public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     /// <summary>
     /// Gets the last compilation model of the linker input.

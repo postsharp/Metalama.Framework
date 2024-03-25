@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -45,7 +45,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             PropertyDeclaration(
                 propertyBuilder.GetAttributeLists( context, Ref.FromBuilder( this.IntroducedDeclaration ) ).AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
                         (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
@@ -57,7 +57,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     ? EqualsValueClause( initializerExpression )
                     : null,
                 initializerExpression != null
-                    ? Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) )
+                    ? Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList )
                     : default );
 
         var introducedProperty = new InjectedMember(
@@ -134,11 +134,11 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     Token( SyntaxKind.GetKeyword ),
                     propertyBuilder.IsAutoPropertyOrField
                         ? null
-                        : SyntaxFactoryEx.FormattedBlock(
+                        : context.SyntaxGenerator.FormattedBlock(
                             ReturnStatement(
                                 Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
                                 DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
-                                Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) ),
+                                Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) ),
                     null,
                     propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }
@@ -162,7 +162,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                         : Token( TriviaList(), SyntaxKind.SetKeyword, TriviaList( ElasticSpace ) ),
                     propertyBuilder.IsAutoPropertyOrField
                         ? null
-                        : SyntaxFactoryEx.FormattedBlock(),
+                        : context.SyntaxGenerator.FormattedBlock(),
                     null,
                     propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }

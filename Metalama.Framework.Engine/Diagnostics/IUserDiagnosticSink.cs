@@ -4,4 +4,4 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Engine.Diagnostics;
 
-internal interface IUserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder { }
+internal interface IUserDiagnosticSink : IDiagnosticSink, IDiagnosticAdder;

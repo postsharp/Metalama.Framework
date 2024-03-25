@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace Metalama.Tool.Divorce;
 
-internal class DivorceService
+internal sealed class DivorceService
 {
     private readonly ILogger _logger;
     private readonly string _path;
@@ -79,10 +79,10 @@ internal class DivorceService
         {
             throw new CommandException(
                 $"""
-                Did not find any Metalama directories in '{this._path}'.
-                To perform divorce, first build the relevant projects while setting the MetalamaEmitCompilerTransformedFiles and MetalamaFormatOutput properties to True.
-                For example using the command: dotnet build -p:MetalamaEmitCompilerTransformedFiles=True -p:MetalamaFormatOutput=True YourSolution.sln
-                """ );
+                 Did not find any Metalama directories in '{this._path}'.
+                 To perform divorce, first build the relevant projects while setting the MetalamaEmitCompilerTransformedFiles and MetalamaFormatOutput properties to True.
+                 For example using the command: dotnet build -p:MetalamaEmitCompilerTransformedFiles=True -p:MetalamaFormatOutput=True YourSolution.sln
+                 """ );
         }
 
         foreach ( var fileMapPath in fileMapPaths )

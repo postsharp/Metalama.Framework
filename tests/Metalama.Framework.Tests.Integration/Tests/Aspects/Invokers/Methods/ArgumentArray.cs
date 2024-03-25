@@ -3,7 +3,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.ArgumentArray;
 

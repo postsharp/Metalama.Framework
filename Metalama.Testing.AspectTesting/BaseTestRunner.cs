@@ -543,7 +543,7 @@ internal abstract partial class BaseTestRunner
             return;
         }
 
-        var preserveWhitespace = testInput.Options.PreserveWhitespace ?? false;
+        var compareWhitespace = testInput.Options.CompareWhitespace ?? false;
 
         // Compare the "Target" region of the transformed code to the expected output.
         // If the region is not found then compare the complete transformed code.
@@ -555,8 +555,8 @@ internal abstract partial class BaseTestRunner
 
         var testOutputs = testResult.GetTestOutputsWithDiagnostics();
         var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-        var actualTransformedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, true );
-        var actualTransformedSourceTextForStorage = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, preserveWhitespace, false );
+        var actualTransformedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, true );
+        var actualTransformedSourceTextForStorage = TestOutputNormalizer.NormalizeTestOutput( actualTransformedNonNormalizedText, compareWhitespace, false );
 
         // If the expectation file does not exist, create it with some placeholder content.
         if ( !this._fileSystem.FileExists( expectedTransformedPath ) )
@@ -570,7 +570,7 @@ internal abstract partial class BaseTestRunner
 
         // Read expectations from the file.
         var expectedSourceText = this._fileSystem.ReadAllText( expectedTransformedPath );
-        var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, preserveWhitespace, true );
+        var expectedSourceTextForComparison = TestOutputNormalizer.NormalizeTestOutput( expectedSourceText, compareWhitespace, true );
 
         // Update the file in obj/transformed if it is different.
         var actualTransformedPath = Path.Combine(
@@ -745,7 +745,7 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    private HtmlCodeWriter CreateHtmlCodeWriter( ProjectServiceProvider serviceProvider, TestOptions options )
+    private HtmlCodeWriter CreateHtmlCodeWriter( in ProjectServiceProvider serviceProvider, TestOptions options )
         => new( serviceProvider, this.GetHtmlCodeWriterOptions( options ) );
 
     protected virtual HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options ) => new( options.AddHtmlTitles.GetValueOrDefault() );

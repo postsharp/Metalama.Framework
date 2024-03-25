@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -89,13 +89,16 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     return null;
                 }
-                else if ( this._projectOptions?.FormatOutput == true )
+                else if ( this._projectOptions?.CodeFormattingOptions == CodeFormattingOptions.Formatted )
                 {
                     var countLabelUsesWalker = new CountLabelUsesWalker();
                     countLabelUsesWalker.Visit( block );
 
                     var withFlattenedBlocks = new CleanupBodyRewriter( this._generationContext ).Visit( block );
-                    var withoutTrivialLabels = new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters, this._generationContext ).Visit( withFlattenedBlocks );
+
+                    var withoutTrivialLabels =
+                        new RemoveTrivialLabelRewriter( countLabelUsesWalker.ObservedLabelCounters, this._generationContext ).Visit( withFlattenedBlocks );
+
                     var withoutTrailingReturns = new RemoveTrailingReturnRewriter( this._generationContext ).Visit( withoutTrivialLabels );
 
                     return (BlockSyntax?) withoutTrailingReturns;

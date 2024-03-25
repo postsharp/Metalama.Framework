@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly;
 
 [assembly: AspectOrder( typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]

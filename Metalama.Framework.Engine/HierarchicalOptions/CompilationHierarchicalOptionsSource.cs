@@ -21,7 +21,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
     private readonly IUserCodeAttributeDeserializer _attributeDeserializer;
     private readonly UserCodeInvoker _invoker;
 
-    public CompilationHierarchicalOptionsSource( ProjectServiceProvider serviceProvider )
+    public CompilationHierarchicalOptionsSource( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();

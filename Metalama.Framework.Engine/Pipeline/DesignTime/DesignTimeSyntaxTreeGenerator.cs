@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -14,11 +15,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using RefKind = Metalama.Framework.Code.RefKind;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
@@ -41,7 +42,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             var lexicalScopeFactory = new LexicalScopeFactory( finalCompilationModel );
             var injectionHelperProvider = new LinkerInjectionHelperProvider( finalCompilationModel, useNullability );
-            var injectionNameProvider = new LinkerInjectionNameProvider( finalCompilationModel, injectionHelperProvider, OurSyntaxGenerator.Default );
+            var injectionNameProvider = new LinkerInjectionNameProvider( finalCompilationModel, injectionHelperProvider );
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
@@ -50,13 +51,14 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     .Where(
                         t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
                                                                                    && t.TargetDeclaration is INamedType or IConstructor )
-                    .GroupBy( t =>
-                        t.TargetDeclaration switch
-                        {
-                            INamedType namedType => namedType,
-                            IConstructor constructor => constructor.DeclaringType,
-                            _ => throw new AssertionFailedException($"Unsupported: {t.TargetDeclaration.DeclarationKind}")
-                        } );
+                    .GroupBy(
+                        t =>
+                            t.TargetDeclaration switch
+                            {
+                                INamedType namedType => namedType,
+                                IConstructor constructor => constructor.DeclaringType,
+                                _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
+                            } );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
@@ -82,7 +84,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( true );
+                var syntaxGenerationContext = finalCompilationModel.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, true );
 
                 foreach ( var transformation in orderedTransformations )
                 {
@@ -110,11 +112,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
                     {
                         baseList ??= BaseList();
-                        baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax() );
+                        baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
                     }
                 }
 
-                members = members.AddRange( CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key ) );
+                members = members.AddRange(
+                    CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key ) );
 
                 // Create a class.
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
@@ -169,13 +172,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext,
-            INamedType type)
+            INamedType type )
         {
             // TODO: This will not work properly with universal constructor builders.
             var initialType = type.Translate( initialCompilationModel );
 
             var constructors = new List<ConstructorDeclarationSyntax>();
-            var existingSignatures = new HashSet<(ISymbol Type, Code.RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
+            var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );
 
             // Go through all types that will get generated constructors and index existing constructors.
             foreach ( var constructor in initialType.Constructors )
@@ -205,19 +208,19 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                         Identifier( finalConstructor.DeclaringType.Name ),
                         syntaxGenerationContext.SyntaxGenerator.ParameterList( finalParameters, initialCompilationModel ),
                         initialConstructor.IsImplicitlyDeclared
-                        ? default
-                        : ConstructorInitializer(
-                            SyntaxKind.ThisConstructorInitializer,
-                            ArgumentList(
-                                SeparatedList( 
-                                    initialParameters.SelectAsArray( 
-                                        p => 
-                                            Argument( 
-                                                p.DefaultValue != null
-                                                    ? NameColon( p.Name )
-                                                    : null, 
-                                                GetArgumentRefToken( p ), 
-                                                IdentifierName( p.Name ) ) ) ) ) ),
+                            ? default
+                            : ConstructorInitializer(
+                                SyntaxKind.ThisConstructorInitializer,
+                                ArgumentList(
+                                    SeparatedList(
+                                        initialParameters.SelectAsArray(
+                                            p =>
+                                                Argument(
+                                                    p.DefaultValue != null
+                                                        ? NameColon( p.Name )
+                                                        : null,
+                                                    GetArgumentRefToken( p ),
+                                                    IdentifierName( p.Name ) ) ) ) ) ),
                         Block() ) );
 
                 if ( initialConstructor.Parameters.Any( p => p.DefaultValue != null ) )
@@ -225,8 +228,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     // Target constructor has optional parameters.
                     // If there is no constructor without optional parameters, we need to generate it to avoid ambiguous match.
 
-                    var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null).ToArray();
-                    var optionalParameters = initialParameters.Where( p => p.DefaultValue != null).ToArray();
+                    var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
+                    var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
 
                     if ( existingSignatures.Add( nonOptionalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
                     {
@@ -239,17 +242,18 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                 ConstructorInitializer(
                                     SyntaxKind.ThisConstructorInitializer,
                                     ArgumentList(
-                                        SeparatedList( 
-                                            nonOptionalParameters.SelectAsArray( p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
-                                        .AddRange(
-                                            optionalParameters.SelectAsArray(
-                                                p =>
-                                                    Argument(
-                                                        NameColon( p.Name ),
-                                                        GetArgumentRefToken(p),
-                                                        LiteralExpression(
-                                                            SyntaxKind.DefaultLiteralExpression,
-                                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) ),
+                                        SeparatedList(
+                                                nonOptionalParameters.SelectAsArray(
+                                                    p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
+                                            .AddRange(
+                                                optionalParameters.SelectAsArray(
+                                                    p =>
+                                                        Argument(
+                                                            NameColon( p.Name ),
+                                                            GetArgumentRefToken( p ),
+                                                            LiteralExpression(
+                                                                SyntaxKind.DefaultLiteralExpression,
+                                                                Token( SyntaxKind.DefaultKeyword ) ) ) ) ) ) ),
                                 Block() ) );
                     }
                 }
@@ -257,13 +261,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             return constructors;
 
-            static SyntaxToken GetArgumentRefToken( IParameter p ) =>
-                p.RefKind switch
+            static SyntaxToken GetArgumentRefToken( IParameter p )
+                => p.RefKind switch
                 {
-                    Code.RefKind.None or Code.RefKind.In => default,
-                    Code.RefKind.Ref or Code.RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
-                    Code.RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                    _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" ),
+                    RefKind.None or RefKind.In => default,
+                    RefKind.Ref or RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
+                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
+                    _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" )
                 };
         }
 
@@ -413,16 +417,11 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 LineFeed );
         }
 
-        private class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, Code.RefKind RefKind)[]>
+        private sealed class ConstructorSignatureEqualityComparer : IEqualityComparer<(ISymbol Type, RefKind RefKind)[]>
         {
-            private readonly StructuralSymbolComparer _symbolComparer;
+            private readonly StructuralSymbolComparer _symbolComparer = StructuralSymbolComparer.Default;
 
-            public ConstructorSignatureEqualityComparer()
-            {
-                this._symbolComparer = StructuralSymbolComparer.Default;
-            }
-
-            public bool Equals( (ISymbol Type, Code.RefKind RefKind)[]? x, (ISymbol Type, Code.RefKind RefKind)[]? y )
+            public bool Equals( (ISymbol Type, RefKind RefKind)[]? x, (ISymbol Type, RefKind RefKind)[]? y )
             {
                 if ( x == null || y == null )
                 {
@@ -440,6 +439,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     {
                         return false;
                     }
+
                     if ( !this._symbolComparer.Equals( x[i].Type, y[i].Type ) )
                     {
                         return false;
@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 return true;
             }
 
-            public int GetHashCode( [DisallowNull] (ISymbol Type, Code.RefKind RefKind)[] obj )
+            public int GetHashCode( (ISymbol Type, RefKind RefKind)[] obj )
             {
                 var hashCode = obj.Length;
 

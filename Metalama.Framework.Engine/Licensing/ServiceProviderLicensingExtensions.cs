@@ -10,15 +10,17 @@ namespace Metalama.Framework.Engine.Licensing;
 public static class ServiceProviderLicensingExtensions
 {
     public static ProjectServiceProvider AddProjectLicenseConsumptionManager(
-        this ServiceProvider<IProjectService> serviceProvider, string? projectLicenseKey )
+        this ServiceProvider<IProjectService> serviceProvider,
+        string? projectLicenseKey )
     {
         var service = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>().WithAdditionalLicense( projectLicenseKey );
-        
+
         return serviceProvider.WithService( new ProjectLicenseConsumptionService( service ) );
     }
-    
+
     public static ProjectServiceProvider AddProjectLicenseConsumptionManagerForTest(
-        this ServiceProvider<IProjectService> serviceProvider, string? projectLicenseKey )
+        this ServiceProvider<IProjectService> serviceProvider,
+        string? projectLicenseKey )
         => serviceProvider.WithService(
             new ProjectLicenseConsumptionService( BackstageServiceFactory.CreateTestLicenseConsumptionService( serviceProvider, projectLicenseKey ) ) );
 }

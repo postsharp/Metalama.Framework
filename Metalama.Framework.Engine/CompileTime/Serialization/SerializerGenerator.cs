@@ -1,13 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
@@ -271,7 +270,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             return null;
         }
 
-        members.Add( CreateSerializerConstructor() );
+        members.Add( this.CreateSerializerConstructor() );
 
         if ( serializableType.Type.IsValueType )
         {
@@ -381,7 +380,8 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                     var baseReflectionType = referencedProject.GetType( targetType.BaseType.GetFullName().AssertNotNull() );
                     var baseTypeSymbol = (INamedTypeSymbol) this._compileTimeCompilationContext.ReflectionMapper.GetTypeSymbol( baseReflectionType );
 
-                    if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, baseTypeSymbol, out baseSerializer, out ambiguous ) && ambiguous )
+                    if ( !SerializerGeneratorHelper.TryGetSerializer( this._compileTimeCompilationContext, baseTypeSymbol, out baseSerializer, out ambiguous )
+                         && ambiguous )
                     {
                         this._diagnosticAdder.Report(
                             SerializationDiagnosticDescriptors.AmbiguousBaseSerializer.CreateRoslynDiagnostic(
@@ -421,7 +421,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         }
     }
 
-    private static ConstructorDeclarationSyntax CreateSerializerConstructor()
+    private ConstructorDeclarationSyntax CreateSerializerConstructor()
         =>
 
             // TODO: We probably don't need the constructor for anything, the base should have parameterless constructor.
@@ -431,7 +431,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                 Identifier( _serializerTypeName ),
                 ParameterList(),
                 null,
-                SyntaxFactoryEx.FormattedBlock(),
+                this._context.SyntaxGenerator.FormattedBlock(),
                 null );
 
     private MethodDeclarationSyntax CreateCreateInstanceMethod(
@@ -452,7 +452,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         if ( serializedType.Type.IsAbstract )
         {
             body =
-                SyntaxFactoryEx.FormattedBlock(
+                this._context.SyntaxGenerator.FormattedBlock(
                     ThrowStatement(
                         ObjectCreationExpression(
                             this._context.SyntaxGenerator.Type( this._context.ReflectionMapper.GetTypeSymbol( typeof(InvalidOperationException) ) ),
@@ -467,7 +467,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         else
         {
             body =
-                SyntaxFactoryEx.FormattedBlock(
+                this._context.SyntaxGenerator.FormattedBlock(
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
                         ObjectCreationExpression(
@@ -482,7 +482,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
             body );
     }
 
-    private static LocalDeclarationStatementSyntax CreateTypedLocalVariable(
+    private LocalDeclarationStatementSyntax CreateTypedLocalVariable(
         TypeSyntax serializedTypeSyntax,
         ExpressionSyntax untypedExpression,
         out string name )
@@ -500,7 +500,7 @@ internal sealed class SerializerGenerator : ISerializerGenerator
                             Identifier( typedVariableName ),
                             null,
                             EqualsValueClause(
-                                SyntaxFactoryEx.SafeCastExpression(
+                                this._context.SyntaxGenerator.SafeCastExpression(
                                     serializedTypeSyntax,
                                     untypedExpression ) ) ) ) ) );
     }
@@ -520,8 +520,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
         if ( serializedType.SerializedMembers.Count > 0 )
         {
-            var localVariableDeclaration =
-                CreateTypedLocalVariable( serializedTypeSyntax, IdentifierName( baseSerializeMethod.Parameters[0].Name ), out var localVariableName );
+            var localVariableDeclaration = this.CreateTypedLocalVariable(
+                serializedTypeSyntax,
+                IdentifierName( baseSerializeMethod.Parameters[0].Name ),
+                out var localVariableName );
 
             var statements = new[]
             {
@@ -540,7 +542,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             var baseCallStatement = CreateBaseCallStatement();
 
-            body = baseCallStatement != null ? SyntaxFactoryEx.FormattedBlock( baseCallStatement ) : SyntaxFactoryEx.FormattedBlock();
+            body = baseCallStatement != null
+                ? this._context.SyntaxGenerator.FormattedBlock( baseCallStatement )
+                : this._context.SyntaxGenerator.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(
@@ -577,8 +581,10 @@ internal sealed class SerializerGenerator : ISerializerGenerator
 
         if ( serializedType.SerializedMembers.Count > 0 )
         {
-            var localVariableDeclaration =
-                CreateTypedLocalVariable( serializedTypeSyntax, IdentifierName( baseDeserializeMethod.Parameters[0].Name ), out var localVariableName );
+            var localVariableDeclaration = this.CreateTypedLocalVariable(
+                serializedTypeSyntax,
+                IdentifierName( baseDeserializeMethod.Parameters[0].Name ),
+                out var localVariableName );
 
             var statements = new[]
             {
@@ -598,7 +604,9 @@ internal sealed class SerializerGenerator : ISerializerGenerator
         {
             var baseCallStatement = CreateBaseCallStatement();
 
-            body = baseCallStatement != null ? SyntaxFactoryEx.FormattedBlock( baseCallStatement ) : SyntaxFactoryEx.FormattedBlock();
+            body = baseCallStatement != null
+                ? this._context.SyntaxGenerator.FormattedBlock( baseCallStatement )
+                : this._context.SyntaxGenerator.FormattedBlock();
         }
 
         return this.CreateOverrideMethod(

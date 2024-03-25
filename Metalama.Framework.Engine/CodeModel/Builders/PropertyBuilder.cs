@@ -8,7 +8,6 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
-using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -86,7 +85,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-        => new FieldOrPropertyInvoker( this, syntaxGenerationContext: ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext )
+        => new FieldOrPropertyInvoker( this )
             .GetTypedExpressionSyntax();
 
     public TemplateMember<IProperty>? InitializerTemplate

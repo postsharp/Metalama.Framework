@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; }
 
         public bool HasDeclarationValidator { get; }
-        
+
         public ImmutableArray<ReferenceValidatorInstance> ReferenceValidators { get; }
 
         public CompilationModel? FirstCompilationModel { get; }

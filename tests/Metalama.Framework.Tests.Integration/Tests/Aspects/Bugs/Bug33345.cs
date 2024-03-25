@@ -2,13 +2,10 @@
 // @RemoveOutputCode(true)
 #endif
 
-using System;
-using System.IO;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33345

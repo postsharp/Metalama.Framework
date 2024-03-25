@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal class DeclarationCache : IDeclarationCache
+internal sealed class DeclarationCache : IDeclarationCache
 {
     private readonly ConcurrentDictionary<MethodInfo, object> _cache = new();
     private readonly CompilationModel _compilation;
@@ -33,7 +33,7 @@ internal class DeclarationCache : IDeclarationCache
         return (T) value;
     }
 
-    public T GetOrAdd<T>( Func<CompilationModel, T> func )
+    private T GetOrAdd<T>( Func<CompilationModel, T> func )
         where T : notnull
     {
         if ( !this._cache.TryGetValue( func.Method, out var value ) )

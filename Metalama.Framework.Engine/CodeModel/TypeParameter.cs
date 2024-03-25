@@ -79,8 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => VarianceKind.None
             };
 
-        public bool? IsConstraintNullable 
-            => this._typeSymbol.ReferenceTypeConstraintNullableAnnotation.ToIsAnnotated();
+        public bool? IsConstraintNullable => this._typeSymbol.ReferenceTypeConstraintNullableAnnotation.ToIsAnnotated();
 
         public bool HasDefaultConstructorConstraint => this._typeSymbol.HasConstructorConstraint;
 

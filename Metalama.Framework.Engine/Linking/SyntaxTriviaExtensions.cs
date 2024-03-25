@@ -5,33 +5,29 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal static class SyntaxTriviaExtensions
 {
-    internal static class SyntaxTriviaExtensions
+    public static SyntaxTriviaList StripFirstTrailingNewLine( this SyntaxTriviaList list )
     {
-        public static SyntaxTriviaList StripFirstTrailingNewLine( this SyntaxTriviaList list )
-        {
-            var newTrivias = new List<SyntaxTrivia>();
-            var firstNewLine = true;
+        var newTrivias = new List<SyntaxTrivia>();
+        var firstNewLine = true;
 
-            for ( var i = 0; i < list.Count; i++ )
+        for ( var i = 0; i < list.Count; i++ )
+        {
+            if ( list[i].IsKind( SyntaxKind.EndOfLineTrivia ) && firstNewLine )
             {
-                if ( list[i].IsKind( SyntaxKind.EndOfLineTrivia ) && firstNewLine )
-                {
-                    firstNewLine = false;
-                }
-                else
-                {
-                    newTrivias.Add( list[i] );
-                }
+                firstNewLine = false;
             }
-
-            return SyntaxFactory.TriviaList( newTrivias );
+            else
+            {
+                newTrivias.Add( list[i] );
+            }
         }
 
-        public static bool HasAnyNewLine( this SyntaxTriviaList list )
-        {
-            return list.Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) );
-        }
+        return SyntaxFactory.TriviaList( newTrivias );
     }
+
+    public static bool HasAnyNewLine( this SyntaxTriviaList list ) => list.Any( x => x.IsKind( SyntaxKind.EndOfLineTrivia ) );
 }

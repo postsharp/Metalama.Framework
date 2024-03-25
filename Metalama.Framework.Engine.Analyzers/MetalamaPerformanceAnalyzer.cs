@@ -34,6 +34,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         DiagnosticSeverity.Warning,
         true );
 
+    // ReSharper disable once MemberCanBePrivate.Global
     internal static readonly DiagnosticDescriptor WithTrivia = new(
         "LAMA0832",
         "Avoid WithLeadingTrivia and WithTrailingTrivia calls.",
@@ -48,16 +49,18 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis( GeneratedCodeAnalysisFlags.ReportDiagnostics );
         context.EnableConcurrentExecution();
-        
-        context.RegisterCompilationStartAction( this.InitializeCompilation );
+
+        context.RegisterCompilationStartAction( InitializeCompilation );
     }
 
-    private void InitializeCompilation( CompilationStartAnalysisContext context )
+    private static void InitializeCompilation( CompilationStartAnalysisContext context )
     {
         context.RegisterOperationAction( AnalyzeNormalizeWhitespace, OperationKind.Invocation, OperationKind.MethodReference );
 
         var syntaxNodeTypeSymbol = context.Compilation.GetTypeByMetadataName( typeof(SyntaxNode).FullName! )!;
-        var syntaxNodePartialUpdateExtensionsSymbol = context.Compilation.GetTypeByMetadataName( "Metalama.Framework.Engine.Utilities.Roslyn.SyntaxNodePartialUpdateExtensions" )!;
+
+        var syntaxNodePartialUpdateExtensionsSymbol =
+            context.Compilation.GetTypeByMetadataName( "Metalama.Framework.Engine.Utilities.Roslyn.SyntaxNodePartialUpdateExtensions" )!;
 
         context.RegisterOperationAction(
             operationContext => AnalyzeSyntaxNodeWithChains( operationContext, syntaxNodeTypeSymbol, syntaxNodePartialUpdateExtensionsSymbol ),
@@ -72,7 +75,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         {
             IInvocationOperation invocation => invocation.TargetMethod,
             IMethodReferenceOperation methodReference => methodReference.Method,
-            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation?.GetType()}'." ),
+            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation.GetType()}'." )
         };
 
         if ( method.Name == nameof(SyntaxExtensions.NormalizeWhitespace) )
@@ -88,7 +91,7 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic( Diagnostic.Create( NormalizeWhitespace, location ) );
         }
     }
-    
+
     private static void AnalyzeSyntaxNodeWithChains(
         OperationAnalysisContext context,
         INamedTypeSymbol syntaxNodeSymbol,
@@ -100,11 +103,12 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
                  method.Name.StartsWith( "With", StringComparison.Ordinal ) &&
                  method.ContainingType != null &&
                  context.Compilation.ClassifyConversion( method.ContainingType, syntaxNodeSymbol ) is
-                    { IsIdentity: true } or { IsImplicit: true, IsReference: true } &&
+                     { IsIdentity: true } or { IsImplicit: true, IsReference: true } &&
                  syntaxNodePartialUpdateExtensionsSymbol.GetMembers( "PartialUpdate" )
-                    .OfType<IMethodSymbol>()
-                    .SingleOrDefault( m => SymbolEqualityComparer.Default.Equals( m.Parameters[0].Type, method.ContainingType ) ) is { } partialUdateMethod &&
-                 partialUdateMethod.Parameters.Any( p => method.Name.AsSpan( "With".Length ).Equals( p.Name.AsSpan(), StringComparison.InvariantCultureIgnoreCase ) ) )
+                     .OfType<IMethodSymbol>()
+                     .SingleOrDefault( m => SymbolEqualityComparer.Default.Equals( m.Parameters[0].Type, method.ContainingType ) ) is { } partialUpdateMethod &&
+                 partialUpdateMethod.Parameters.Any(
+                     p => method.Name.AsSpan( "With".Length ).Equals( p.Name.AsSpan(), StringComparison.InvariantCultureIgnoreCase ) ) )
             {
                 invocation = invocationOperation;
 
@@ -148,10 +152,11 @@ public class MetalamaPerformanceAnalyzer : DiagnosticAnalyzer
         {
             IInvocationOperation invocation => invocation.TargetMethod,
             IMethodReferenceOperation methodReference => methodReference.Method,
-            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation?.GetType()}'." ),
+            _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation.GetType()}'." )
         };
 
-        if ( method.Name is nameof(SyntaxNodeExtensions.WithLeadingTrivia) or nameof(SyntaxNodeExtensions.WithTrailingTrivia) or nameof(SyntaxNodeExtensions.WithTriviaFrom) )
+        if ( method.Name is nameof(SyntaxNodeExtensions.WithLeadingTrivia) or nameof(SyntaxNodeExtensions.WithTrailingTrivia)
+            or nameof(SyntaxNodeExtensions.WithTriviaFrom) )
         {
             var syntax = context.Operation.Syntax;
             var location = syntax.GetLocation();

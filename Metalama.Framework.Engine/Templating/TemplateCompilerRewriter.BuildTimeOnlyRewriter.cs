@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,17 +16,19 @@ namespace Metalama.Framework.Engine.Templating
         private sealed class CompileTimeOnlyRewriter : SafeSyntaxRewriter
         {
             private readonly TemplateCompilerRewriter _parent;
+            private readonly ContextualSyntaxGenerator _syntaxGenerator;
 
             public CompileTimeOnlyRewriter( TemplateCompilerRewriter parent )
             {
                 this._parent = parent;
+                this._syntaxGenerator = this._parent.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator;
             }
 
             public override SyntaxNode VisitTypeOfExpression( TypeOfExpressionSyntax node )
             {
                 if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
                 {
-                    var typeOfString = OurSyntaxGenerator.CompileTime.TypeOfExpression( typeSymbol ).ToString();
+                    var typeOfString = this._syntaxGenerator.TypeOfExpression( typeSymbol ).ToString();
 
                     return this._parent._typeOfRewriter.RewriteTypeOf(
                             typeSymbol,
@@ -137,7 +139,7 @@ namespace Metalama.Framework.Engine.Templating
                     // Fully qualifies simple identifiers.
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return node.CopyAnnotationsTo( OurSyntaxGenerator.CompileTime.TypeOrNamespace( namespaceOrType ).WithTriviaFrom( node ) );
+                        return node.CopyAnnotationsTo( this._syntaxGenerator.TypeOrNamespace( namespaceOrType ).WithTriviaFrom( node ) );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -152,7 +154,7 @@ namespace Metalama.Framework.Engine.Templating
                                     node.CopyAnnotationsTo(
                                         MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
-                                                OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol.ContainingType ),
+                                                this._syntaxGenerator.TypeOrNamespace( symbol.ContainingType ),
                                                 IdentifierName( node.Identifier.Text ) )
                                             .WithTriviaFrom( node ) );
                         }

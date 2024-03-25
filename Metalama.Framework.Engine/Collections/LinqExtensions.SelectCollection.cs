@@ -17,7 +17,7 @@ public static partial class LinqExtensions
 #if DEBUG
         private bool _isAlreadyEvaluated;
 #endif
-        
+
         public SelectCollection( IReadOnlyCollection<TIn> input, Func<TIn, TOut> func )
         {
             this._input = input;
@@ -40,7 +40,7 @@ public static partial class LinqExtensions
             {
                 this._isAlreadyEvaluated = true;
             }
-#endif            
+#endif
             foreach ( var item in this._input )
             {
                 yield return this._func( item );

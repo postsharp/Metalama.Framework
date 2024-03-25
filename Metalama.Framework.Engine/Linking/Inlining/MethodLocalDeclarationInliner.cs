@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -98,17 +98,17 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 throw new AssertionFailedException( $"The node is not expected to be a statement." );
             }
 
-            return SyntaxFactoryEx.FormattedBlock(
+            return syntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                     LocalDeclarationStatement(
                             VariableDeclaration(
                                 syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
                                 SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
-                        .NormalizeWhitespaceIfNecessary( syntaxGenerationContext.NormalizeWhitespace )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, syntaxGenerationContext.NormalizeWhitespace ),
+                        .NormalizeWhitespaceIfNecessary( syntaxGenerationContext )
+                        .WithOptionalTrailingLineFeed( syntaxGenerationContext ),
                     linkedTargetBody )
                 .WithFormattingAnnotationsFrom( currentStatement )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                .AddTriviaFromIfNecessay( currentNode, syntaxGenerationContext.PreserveTrivia );
+                .AddTriviaFromIfNecessary( currentNode, syntaxGenerationContext.Options );
         }
     }
 }

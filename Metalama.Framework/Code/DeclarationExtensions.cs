@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -106,7 +107,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a representation of the current declaration in a different version of the compilation.
         /// </summary>
-        [return: NotNullIfNotNull( "compilationElement" )]
+        [return: NotNullIfNotNull( nameof(compilationElement) )]
         public static T? ForCompilation<T>( this T? compilationElement, ICompilation compilation, ReferenceResolutionOptions options = default )
             where T : class, ICompilationElement
         {
@@ -116,7 +117,35 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                return (T) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )!;
+                return
+                    (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
+                    ?? throw new InvalidOperationException(
+                        $"The declaration '{compilationElement}' does not exist in the requested compilation. "
+                        + $"Use TryForCompilation to avoid this exception." );
+            }
+        }
+
+        /// <summary>
+        /// Tries to get a representation of the current declaration in a different version of the compilation.
+        /// </summary>
+        public static bool TryForCompilation<T>(
+            this T? compilationElement,
+            ICompilation compilation,
+            [NotNullWhen( true )] out T? translated,
+            ReferenceResolutionOptions options = default )
+            where T : class, ICompilationElement
+        {
+            if ( compilationElement == null )
+            {
+                translated = null;
+
+                return false;
+            }
+            else
+            {
+                translated = (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+
+                return translated != null;
             }
         }
 

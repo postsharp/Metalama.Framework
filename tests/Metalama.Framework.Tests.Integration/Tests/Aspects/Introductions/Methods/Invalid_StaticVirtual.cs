@@ -1,7 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using System.Linq;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Invalid_StaticVirtual
 {

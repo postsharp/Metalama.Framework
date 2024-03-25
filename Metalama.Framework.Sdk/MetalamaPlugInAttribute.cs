@@ -14,4 +14,4 @@ namespace Metalama.Framework.Engine;
 [AttributeUsage( AttributeTargets.Class )]
 [CompileTime]
 [PublicAPI]
-public sealed class MetalamaPlugInAttribute : Attribute { }
+public sealed class MetalamaPlugInAttribute : Attribute;

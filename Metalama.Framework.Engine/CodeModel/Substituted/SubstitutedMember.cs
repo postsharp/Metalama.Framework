@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Substituted;
 
 internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 {
-    protected BuiltMember SourceMember { get; }
+    private readonly BuiltMember _sourceMember;
 
     public INamedTypeSymbol SubstitutedType { get; }
 
@@ -28,82 +28,82 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 
     protected SubstitutedMember( BuiltMember sourceMember, INamedTypeSymbol substitutedType )
     {
-        this.SourceMember = sourceMember;
+        this._sourceMember = sourceMember;
         this.SubstitutedType = substitutedType;
-        this.GenericMap = new( substitutedType.TypeArguments, sourceMember.Compilation.RoslynCompilation );
+        this.GenericMap = new GenericMap( substitutedType.TypeArguments, sourceMember.Compilation.RoslynCompilation );
     }
-    
-    protected IType Substitute( IType sourceType ) => this.SourceMember.Compilation.Factory.GetIType( this.GenericMap.Map( sourceType.GetSymbol() ) );
 
-    public ICompilation Compilation => this.SourceMember.Compilation;
+    protected IType Substitute( IType sourceType ) => this._sourceMember.Compilation.Factory.GetIType( this.GenericMap.Map( sourceType.GetSymbol() ) );
+
+    public ICompilation Compilation => this._sourceMember.Compilation;
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
-    public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this.SourceMember.DeclaringSyntaxReferences;
+    public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this._sourceMember.DeclaringSyntaxReferences;
 
-    public bool CanBeInherited => this.SourceMember.CanBeInherited;
+    public bool CanBeInherited => this._sourceMember.CanBeInherited;
 
-    public SyntaxTree? PrimarySyntaxTree => this.SourceMember.PrimarySyntaxTree;
+    public SyntaxTree? PrimarySyntaxTree => this._sourceMember.PrimarySyntaxTree;
 
-    public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new System.NotImplementedException();
+    public IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => throw new NotImplementedException();
 
     public Ref<IDeclaration> ToRef() => Ref.FromSubstitutedDeclaration( this );
 
     // TODO: test
     public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
-    public IAssembly DeclaringAssembly => this.SourceMember.DeclaringAssembly;
+    public IAssembly DeclaringAssembly => this._sourceMember.DeclaringAssembly;
 
-    public IDeclarationOrigin Origin => this.SourceMember.Origin;
+    public IDeclarationOrigin Origin => this._sourceMember.Origin;
 
-    public DeclarationKind DeclarationKind => this.SourceMember.DeclarationKind;
+    public DeclarationKind DeclarationKind => this._sourceMember.DeclarationKind;
 
-    public bool IsImplicitlyDeclared => this.SourceMember.IsImplicitlyDeclared;
+    public bool IsImplicitlyDeclared => this._sourceMember.IsImplicitlyDeclared;
 
-    public int Depth => this.SourceMember.Depth;
+    public int Depth => this._sourceMember.Depth;
 
-    public bool BelongsToCurrentProject => this.SourceMember.BelongsToCurrentProject;
+    public bool BelongsToCurrentProject => this._sourceMember.BelongsToCurrentProject;
 
-    public ImmutableArray<SourceReference> Sources => this.SourceMember.Sources;
+    public ImmutableArray<SourceReference> Sources => this._sourceMember.Sources;
 
-    public string Name => this.SourceMember.Name;
+    public string Name => this._sourceMember.Name;
 
-    public Accessibility Accessibility => this.SourceMember.Accessibility;
+    public Accessibility Accessibility => this._sourceMember.Accessibility;
 
-    public bool IsAbstract => this.SourceMember.IsAbstract;
+    public bool IsAbstract => this._sourceMember.IsAbstract;
 
-    public bool IsStatic => this.SourceMember.IsStatic;
+    public bool IsStatic => this._sourceMember.IsStatic;
 
-    public bool IsSealed => this.SourceMember.IsSealed;
+    public bool IsSealed => this._sourceMember.IsSealed;
 
-    public bool IsNew => this.SourceMember.IsNew;
+    public bool IsNew => this._sourceMember.IsNew;
 
-    public bool IsVirtual => this.SourceMember.IsVirtual;
+    public bool IsVirtual => this._sourceMember.IsVirtual;
 
-    public bool IsAsync => this.SourceMember.IsAsync;
+    public bool IsAsync => this._sourceMember.IsAsync;
 
-    public bool IsOverride => this.SourceMember.IsOverride;
+    public bool IsOverride => this._sourceMember.IsOverride;
 
-    public bool IsExplicitInterfaceImplementation => this.SourceMember.IsExplicitInterfaceImplementation;
+    public bool IsExplicitInterfaceImplementation => this._sourceMember.IsExplicitInterfaceImplementation;
 
-    public bool HasImplementation => this.SourceMember.HasImplementation;
+    public bool HasImplementation => this._sourceMember.HasImplementation;
 
-    public IMember Definition => this.SourceMember;
+    public IMember Definition => this._sourceMember;
 
     IMemberOrNamedType IMemberOrNamedType.Definition => this.Definition;
 
-    public Location? DiagnosticLocation => this.SourceMember.DiagnosticLocation;
+    public Location? DiagnosticLocation => this._sourceMember.DiagnosticLocation;
 
-    public bool? HasNewKeyword => this.SourceMember.HasNewKeyword;
+    public bool? HasNewKeyword => this._sourceMember.HasNewKeyword;
 
     [Memo]
-    public INamedType DeclaringType => this.SourceMember.Compilation.Factory.GetNamedType( this.SubstitutedType );
+    public INamedType DeclaringType => this._sourceMember.Compilation.Factory.GetNamedType( this.SubstitutedType );
 
     public IDeclaration ContainingDeclaration => this.DeclaringType;
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-    public ExecutionScope ExecutionScope => ((IMemberOrNamedType) this.SourceMember).ExecutionScope;
+    public ExecutionScope ExecutionScope => ((IMemberOrNamedType) this._sourceMember).ExecutionScope;
 
     ISymbol? ISdkDeclaration.Symbol => null;
 
@@ -116,7 +116,7 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
     {
         get
         {
-            var sourceOverriddenMember = this.SourceMember.OverriddenMember;
+            var sourceOverriddenMember = this._sourceMember.OverriddenMember;
 
             if ( sourceOverriddenMember == null )
             {
@@ -144,7 +144,7 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
     }
 
     [Memo]
-    public IAttributeCollection Attributes => CreateSubstitutedAttributeCollection( this, this.SourceMember.Attributes );
+    public IAttributeCollection Attributes => CreateSubstitutedAttributeCollection( this, this._sourceMember.Attributes );
 
     // TODO: do this right?
     internal static AttributeCollection CreateSubstitutedAttributeCollection( ISubstitutedDeclaration targetDeclaration, IAttributeCollection sourceAttributes )
@@ -157,7 +157,7 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
                             builtAttribute.Builder.ParentAdvice,
                             targetDeclaration,
                             ((AttributeBuilder) builtAttribute.Builder).AttributeConstruction ) )
-                    : throw new AssertionFailedException( $"Unexpected attribute type '{a?.GetType()}'." ) ) );
+                    : throw new AssertionFailedException( $"Unexpected attribute type '{a.GetType()}'." ) ) );
 
     public bool Equals( IDeclaration? other ) => ReferenceEquals( this, other );
 

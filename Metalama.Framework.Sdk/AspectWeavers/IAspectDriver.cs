@@ -9,5 +9,5 @@ namespace Metalama.Framework.Engine.AspectWeavers
     /// There are low-level aspect drivers, which should implement <see cref="IAspectWeaver"/>, and a high-level aspect driver implemented
     /// by Metalama. These two families of drivers don't share any semantic. This interface exists for clarity and type safety only.
     /// </remarks>
-    public interface IAspectDriver { }
+    public interface IAspectDriver;
 }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Commands;
 using Spectre.Console.Cli;
 using System;
@@ -9,29 +10,36 @@ using System.Text.RegularExpressions;
 
 namespace Metalama.Tool.Licensing;
 
+[UsedImplicitly]
 internal sealed class LicenseUsageCommandSettings : BaseCommandSettings
 {
+    [UsedImplicitly]
     [CommandOption( "-d|--days" )]
     [Description( "Includes only projects built in the specified number of days." )]
     public double? LastDays { get; init; }
 
+    [UsedImplicitly]
     [CommandOption( "-w|--weeks" )]
     [Description( "Includes only projects built in the specified number of weeks. The default is 1 week." )]
     public double? LastWeeks { get; init; }
 
+    [UsedImplicitly]
     [CommandOption( "-h|--hours" )]
     [Description( "Includes only projects built in the specified number of hours." )]
     public double? LastHours { get; init; }
 
+    [UsedImplicitly]
     [CommandOption( "-p|--project" )]
     [Description(
         "Includes only the specified projects, specified by file name without extension. You can use `*` to match any substring. May be a comma-separated list." )]
     public string? Projects { get; init; }
 
+    [UsedImplicitly]
     [CommandOption( "-c|--configuration" )]
     [Description( "Includes only the specified build configurations (typically Debug or Release).  May be a comma-separated list." )]
     public string? Configurations { get; init; }
 
+    [UsedImplicitly]
     [CommandOption( "-f|--framework" )]
     [Description( "Includes only the specified target frameworks. May be a comma-separated list. To match an empty string, use 'empty'." )]
     public string? TargetFrameworks { get; init; }

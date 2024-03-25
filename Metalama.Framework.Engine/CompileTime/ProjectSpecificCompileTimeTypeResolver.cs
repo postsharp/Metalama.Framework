@@ -14,7 +14,7 @@ internal sealed class ProjectSpecificCompileTimeTypeResolver : CompileTimeTypeRe
     private readonly SystemTypeResolver _systemTypeResolver;
     private readonly CompileTimeProjectRepository _projectRepository;
 
-    public ProjectSpecificCompileTimeTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider )
+    public ProjectSpecificCompileTimeTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider )
     {
         this._projectRepository = serviceProvider.GetRequiredService<CompileTimeProjectRepository>();
         this._systemTypeResolver = serviceProvider.GetRequiredService<SystemTypeResolver>();

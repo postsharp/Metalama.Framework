@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly SemanticModel _semanticModel;
             private readonly CancellationToken _cancellationToken;
             private readonly Action<SerializableTypeInfo> _onSerializableTypeDiscovered;
-            
+
             public CollectSerializableTypesVisitor(
                 ClassifyingCompilationContext compilationContext,
                 SemanticModel semanticModel,

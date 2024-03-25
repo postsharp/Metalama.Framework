@@ -12,7 +12,7 @@ internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexer
 {
     private readonly PropertyOrIndexerBuilder _propertyOrIndexerBuilder;
 
-    public BuiltPropertyOrIndexer( PropertyOrIndexerBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    protected BuiltPropertyOrIndexer( PropertyOrIndexerBuilder builder, CompilationModel compilation ) : base( compilation, builder )
     {
         this._propertyOrIndexerBuilder = builder;
     }

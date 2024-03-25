@@ -1,10 +1,7 @@
 // @Skipped(#33490 - serialization of nullability and tuple element names)
 
-using System;
-using System.IO;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33490;
 

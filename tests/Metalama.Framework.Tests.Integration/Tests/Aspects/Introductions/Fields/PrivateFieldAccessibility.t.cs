@@ -1,6 +1,4 @@
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using System;
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.PrivateFieldAccessibility;
 #pragma warning disable CS0414 // The field 'IntroducePrivateFieldAttribute._field' is assigned but its value is never used
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823, IDE0051, IDE0052

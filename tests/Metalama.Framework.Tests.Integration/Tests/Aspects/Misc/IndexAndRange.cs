@@ -4,10 +4,8 @@
 
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Templating;
 
 #pragma warning disable CS0618 // Type or member is obsolete
 

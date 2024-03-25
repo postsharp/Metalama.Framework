@@ -1,27 +1,27 @@
 internal record MyRecord(int A, int B)
 {
-  private readonly int _a = A;
-  public int A
-  {
-    get
+    private readonly int _a;
+    public int A
     {
-      return this._a;
+        get
+        {
+            return this._a;
+        }
+        init
+        {
+            this._a = value;
+        }
     }
-    init
+    public int B
     {
-      this._a = value;
+        get
+        {
+            Console.WriteLine("Original.");
+            return 42;
+        }
+        init
+        {
+            Console.WriteLine("Original.");
+        }
     }
-  }
-  private readonly int _b = B;
-  public int B
-  {
-    get
-    {
-      return this._b;
-    }
-    init
-    {
-      this._b = value;
-    }
-  }
 }

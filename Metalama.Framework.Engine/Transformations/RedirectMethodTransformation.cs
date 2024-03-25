@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
         public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
         {
             var body =
-                SyntaxFactoryEx.FormattedBlock(
+                context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock(
                     this.OverriddenDeclaration.ReturnType
                     != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
                         ? ReturnStatement(
@@ -48,7 +48,8 @@ namespace Metalama.Framework.Engine.Transformations
                     MethodDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTriviaIfNecessary( ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration )
+                            .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         null,
                         Identifier(
                             context.InjectionNameProvider.GetOverrideName(

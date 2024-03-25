@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Aspects
         public string? LayerName { get; }
 
         public string FullName => this.AspectName == null! ? "(null)" : this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
-        
+
         public override string ToString() => this.FullName;
 
         public bool Equals( AspectLayerId other )

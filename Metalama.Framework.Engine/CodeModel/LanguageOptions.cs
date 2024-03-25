@@ -16,7 +16,7 @@ internal sealed class LanguageOptions : IEquatable<LanguageOptions>
 {
     private static readonly StructuralDictionaryComparer<string, string> _featureComparer = new( EqualityComparer<string>.Default );
     private readonly ImmutableDictionary<string, string> _features;
-    
+
     public LanguageVersion Version { get; }
 
     private LanguageOptions( LanguageVersion version, ImmutableDictionary<string, string> features )

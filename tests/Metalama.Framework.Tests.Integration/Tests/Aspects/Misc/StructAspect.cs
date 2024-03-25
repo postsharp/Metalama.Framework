@@ -2,7 +2,6 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.StructAspect;
 

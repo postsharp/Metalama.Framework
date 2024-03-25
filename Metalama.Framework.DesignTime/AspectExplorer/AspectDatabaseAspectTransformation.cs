@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.AspectExplorer;
 
-public class AspectDatabaseAspectTransformation( string targetDeclarationId, string description )
+public sealed class AspectDatabaseAspectTransformation( string targetDeclarationId, string description )
 {
     public string TargetDeclarationId { get; } = targetDeclarationId;
 

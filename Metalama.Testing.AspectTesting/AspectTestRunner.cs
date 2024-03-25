@@ -26,504 +26,504 @@ using System.Runtime.Loader;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 #endif
 
-namespace Metalama.Testing.AspectTesting
+namespace Metalama.Testing.AspectTesting;
+
+/// <summary>
+/// Executes aspect integration tests by running the full aspect pipeline on the input source file.
+/// </summary>
+internal class AspectTestRunner : BaseTestRunner
 {
-    /// <summary>
-    /// Executes aspect integration tests by running the full aspect pipeline on the input source file.
-    /// </summary>
-    internal class AspectTestRunner : BaseTestRunner
-    {
-        private int _runCount;
+    private int _runCount;
 
 #if NET5_0_OR_GREATER
-        private static readonly SemaphoreSlim _consoleLock = new( 1 );
+    private static readonly SemaphoreSlim _consoleLock = new( 1 );
 #endif
 
-        public AspectTestRunner(
-            GlobalServiceProvider serviceProvider,
-            string? projectDirectory,
-            TestProjectReferences references,
-            ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, references, logger ) { }
+    public AspectTestRunner(
+        GlobalServiceProvider serviceProvider,
+        string? projectDirectory,
+        TestProjectReferences references,
+        ITestOutputHelper? logger )
+        : base( serviceProvider, projectDirectory, references, logger ) { }
 
-        // We don't want the base class to report errors in the input compilation because the pipeline does.
+    // We don't want the base class to report errors in the input compilation because the pipeline does.
 
-        private protected override bool ShouldStopOnInvalidInput( TestOptions testOptions ) => false;
+    private protected override bool ShouldStopOnInvalidInput( TestOptions testOptions ) => false;
 
-        /// <summary>
-        /// Runs the aspect test with the given name and source.
-        /// </summary>
-        /// <returns>The result of the test execution.</returns>
-        protected override async Task RunAsync(
-            TestInput testInput,
-            TestResult testResult,
-            TestContext testContext,
-            Dictionary<string, object?> state )
+    /// <summary>
+    /// Runs the aspect test with the given name and source.
+    /// </summary>
+    /// <returns>The result of the test execution.</returns>
+    protected override async Task RunAsync(
+        TestInput testInput,
+        TestResult testResult,
+        TestContext testContext,
+        Dictionary<string, object?> state )
+    {
+        if ( this._runCount > 0 )
         {
-            if ( this._runCount > 0 )
-            {
-                // We are reusing the TestProjectOptions from the service provider, so we cannot run a test twice with the same service provider.
-                throw new InvalidOperationException( "The Run method can be called only once." );
-            }
-            else
-            {
-                this._runCount++;
-            }
-
-            await base.RunAsync( testInput, testResult, testContext, state );
-
-            if ( testResult.InputCompilation == null )
-            {
-                // The test was skipped.
-
-                return;
-            }
-
-            var serviceProviderForThisTestWithoutLicensing = testContext.ServiceProvider
-                .WithService( new Observer( testContext.ServiceProvider, testResult ) );
-
-            var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
-                .AddLicenseConsumptionManagerForTest( testInput );
-
-            var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
-            var isLicensingRequiredForCompilation = testScenario switch
-            {
-                TestScenario.ApplyCodeFix => false,
-                TestScenario.PreviewCodeFix => false,
-                TestScenario.Default => true,
-                _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
-            };
-
-            var pipeline = new CompileTimeAspectPipeline( 
-                isLicensingRequiredForCompilation ? serviceProviderForThisTestWithLicensing : serviceProviderForThisTestWithoutLicensing,
-                testContext.Domain );
-
-            var pipelineResult = await pipeline.ExecuteAsync(
-                testResult.PipelineDiagnostics,
-                testResult.InputCompilation!,
-                default );
-
-            if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
-            {
-                switch ( testScenario )
-                {
-                    case TestScenario.ApplyCodeFix:
-                    case TestScenario.PreviewCodeFix:
-                        {
-                            // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                            if ( !await ApplyCodeFixAsync(
-                                    testInput,
-                                    testResult,
-                                    testContext.Domain,
-                                    serviceProviderForThisTestWithLicensing,
-                                    testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
-                            {
-                                return;
-                            }
-
-                            break;
-                        }
-
-                    case TestScenario.Default:
-                        {
-                            if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
-                            {
-                                return;
-                            }
-
-                            break;
-                        }
-
-                    default:
-                        throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" );
-                }
-            }
-            else
-            {
-                testResult.SetFailed( "CompileTimeAspectPipeline.ExecuteAsync failed." );
-            }
-
-            if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
-            {
-                await this.WriteHtmlAsync( testInput, testResult );
-            }
+            // We are reusing the TestProjectOptions from the service provider, so we cannot run a test twice with the same service provider.
+            throw new InvalidOperationException( "The Run method can be called only once." );
+        }
+        else
+        {
+            this._runCount++;
         }
 
-        private static async Task<bool> ApplyCodeFixAsync(
-            TestInput testInput,
-            TestResult testResult,
-            CompileTimeDomain domain,
-            ProjectServiceProvider serviceProvider,
-            bool isComputingPreview )
+        await base.RunAsync( testInput, testResult, testContext, state );
+
+        if ( testResult.InputCompilation == null )
         {
-            var codeFixes = testResult.PipelineDiagnostics.SelectMany(
-                d => CodeFixTitles.GetCodeFixTitles( d ).SelectAsReadOnlyList( t => (Diagnostic: d, Title: t) ) );
+            // The test was skipped.
 
-            var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
-            var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
+            return;
+        }
 
-            var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
-                testResult.InputCompilation.AssertNotNull(),
-                codeFix.Diagnostic.Location.SourceTree.AssertNotNull(),
-                codeFix.Diagnostic.Id,
-                codeFix.Diagnostic.Location.SourceSpan,
-                codeFix.Title,
-                isComputingPreview,
-                default );
+        var serviceProviderForThisTestWithoutLicensing = testContext.ServiceProvider
+            .WithService( new Observer( testContext.ServiceProvider, testResult ) );
 
-            Assert.NotNull( codeActionResult );
+        var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
+            .AddLicenseConsumptionManagerForTest( testInput );
 
-            if ( !codeActionResult.IsSuccessful )
+        var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
+
+        var isLicensingRequiredForCompilation = testScenario switch
+        {
+            TestScenario.ApplyCodeFix => false,
+            TestScenario.PreviewCodeFix => false,
+            TestScenario.Default => true,
+            _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
+        };
+
+        var pipeline = new CompileTimeAspectPipeline(
+            isLicensingRequiredForCompilation ? serviceProviderForThisTestWithLicensing : serviceProviderForThisTestWithoutLicensing,
+            testContext.Domain );
+
+        var pipelineResult = await pipeline.ExecuteAsync(
+            testResult.PipelineDiagnostics,
+            testResult.InputCompilation!,
+            default );
+
+        if ( pipelineResult.IsSuccessful && !testResult.PipelineDiagnostics.HasError )
+        {
+            switch ( testScenario )
             {
-                Assert.NotNull( codeActionResult.ErrorMessages );
+                case TestScenario.ApplyCodeFix:
+                case TestScenario.PreviewCodeFix:
+                    {
+                        // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
+                        if ( !await ApplyCodeFixAsync(
+                                testInput,
+                                testResult,
+                                testContext.Domain,
+                                serviceProviderForThisTestWithLicensing,
+                                testInput.Options.TestScenario == TestScenario.PreviewCodeFix ) )
+                        {
+                            return;
+                        }
 
-                testResult.SetFailed( $"Code fix runner execution failed: {string.Join( "; ", codeActionResult.ErrorMessages! )}" );
+                        break;
+                    }
 
+                case TestScenario.Default:
+                    {
+                        if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
+                        {
+                            return;
+                        }
+
+                        break;
+                    }
+
+                default:
+                    throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" );
+            }
+        }
+        else
+        {
+            testResult.SetFailed( "CompileTimeAspectPipeline.ExecuteAsync failed." );
+        }
+
+        if ( testInput.Options.WriteInputHtml.GetValueOrDefault() || testInput.Options.WriteOutputHtml.GetValueOrDefault() )
+        {
+            await this.WriteHtmlAsync( testInput, testResult );
+        }
+    }
+
+    private static async Task<bool> ApplyCodeFixAsync(
+        TestInput testInput,
+        TestResult testResult,
+        CompileTimeDomain domain,
+        ProjectServiceProvider serviceProvider,
+        bool isComputingPreview )
+    {
+        var codeFixes = testResult.PipelineDiagnostics.SelectMany(
+            d => CodeFixTitles.GetCodeFixTitles( d ).SelectAsReadOnlyList( t => (Diagnostic: d, Title: t) ) );
+
+        var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
+        var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
+
+        var codeActionResult = await codeFixRunner.ExecuteCodeFixAsync(
+            testResult.InputCompilation.AssertNotNull(),
+            codeFix.Diagnostic.Location.SourceTree.AssertNotNull(),
+            codeFix.Diagnostic.Id,
+            codeFix.Diagnostic.Location.SourceSpan,
+            codeFix.Title,
+            isComputingPreview,
+            default );
+
+        Assert.NotNull( codeActionResult );
+
+        if ( !codeActionResult.IsSuccessful )
+        {
+            Assert.NotNull( codeActionResult.ErrorMessages );
+
+            testResult.SetFailed( $"Code fix runner execution failed: {string.Join( "; ", codeActionResult.ErrorMessages! )}" );
+
+            return false;
+        }
+
+        Assert.Null( codeActionResult.ErrorMessages );
+        Assert.NotNull( testResult.InputProject );
+
+        var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
+        var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject!.Id )!.GetCompilationAsync();
+
+        await testResult.SetOutputCompilationAsync( transformedCompilation! );
+        testResult.HasOutputCode = true;
+
+        return true;
+    }
+
+    private async Task<bool> ProcessCompileTimePipelineOutputAsync(
+        TestInput testInput,
+        TestResult testResult,
+        CompileTimeAspectPipelineResult pipelineResult )
+    {
+        var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
+        testResult.OutputCompilation = resultCompilation;
+        testResult.HasOutputCode = true;
+
+        var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+
+        await testResult.SetOutputCompilationAsync( resultCompilation );
+
+        // Emit binary and report diagnostics.
+        bool MustBeReported( Diagnostic d )
+        {
+            if ( d.Id == "CS1701" )
+            {
+                // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
+                // This warning is ignored by MSBuild anyway.
                 return false;
             }
 
-            Assert.Null( codeActionResult.ErrorMessages );
-            Assert.NotNull( testResult.InputProject );
-
-            var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
-            var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject!.Id )!.GetCompilationAsync();
-
-            await testResult.SetOutputCompilationAsync( transformedCompilation! );
-            testResult.HasOutputCode = true;
-
-            return true;
+            return d.Severity >= minimalVerbosity
+                   && !testInput.ShouldIgnoreDiagnostic( d.Id );
         }
 
-        private async Task<bool> ProcessCompileTimePipelineOutputAsync(
-            TestInput testInput,
-            TestResult testResult,
-            CompileTimeAspectPipelineResult pipelineResult )
+        if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
         {
-            var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
-            testResult.OutputCompilation = resultCompilation;
-            testResult.HasOutputCode = true;
+            testResult.SetFailed( "Syntax tree verification failed." );
+            testResult.OutputCompilationDiagnostics.Report( diagnostics );
 
-            var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+            return false;
+        }
 
-            await testResult.SetOutputCompilationAsync( resultCompilation );
+        if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
+        {
+            // We don't build the PDB because the syntax trees were not written to disk anyway.
+            var peStream = new MemoryStream();
+            var emitResult = resultCompilation.Emit( peStream );
 
-            // Emit binary and report diagnostics.
-            bool MustBeReported( Diagnostic d )
+            testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+
+            if ( !emitResult.Success )
             {
-                if ( d.Id == "CS1701" )
+                testResult.SetFailed( "Final Compilation.Emit failed." );
+            }
+            else
+            {
+                if ( !this.VerifyBinaryStream( testInput, testResult, peStream ) )
                 {
-                    // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
-                    // This warning is ignored by MSBuild anyway.
                     return false;
                 }
 
-                return d.Severity >= minimalVerbosity
-                       && !testInput.ShouldIgnoreDiagnostic( d.Id );
-            }
-
-            if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
-            {
-                testResult.SetFailed( "Syntax tree verification failed." );
-                testResult.OutputCompilationDiagnostics.Report( diagnostics );
-
-                return false;
-            }
-
-            if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
-            {
-                // We don't build the PDB because the syntax trees were not written to disk anyway.
-                var peStream = new MemoryStream();
-                var emitResult = resultCompilation.Emit( peStream );
-
-                testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
-
-                if ( !emitResult.Success )
-                {
-                    testResult.SetFailed( "Final Compilation.Emit failed." );
-                }
-                else
-                {
-                    if ( !this.VerifyBinaryStream( testInput, testResult, peStream ) )
-                    {
-                        return false;
-                    }
-
 #if NET5_0_OR_GREATER
-                    await ExecuteTestProgramAsync( testInput, testResult, peStream );
+                await ExecuteTestProgramAsync( testInput, testResult, peStream );
 #endif
-                }
             }
-            else
-            {
-                testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
-            }
-
-            return true;
+        }
+        else
+        {
+            testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
         }
 
+        return true;
+    }
+
 #if NET5_0_OR_GREATER
-        private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )
+    private static async Task ExecuteTestProgramAsync( TestInput testInput, TestResult testResult, MemoryStream peStream, MemoryStream? pdbStream = null )
+    {
+        if ( !testInput.Options.ExecuteProgram.GetValueOrDefault( true ) )
         {
-            if ( !testInput.Options.ExecuteProgram.GetValueOrDefault( true ) )
+            return;
+        }
+
+        var mainMethod = FindProgramMain( testInput.Options, testResult );
+
+        if ( mainMethod == null )
+        {
+            return;
+        }
+
+        var loadContext = new AssemblyLoadContext( testInput.TestName, true );
+
+        try
+        {
+            foreach ( var reference in testResult.OutputCompilation.AssertNotNull().References.OfType<PortableExecutableReference>() )
             {
-                return;
+                if ( Path.GetFileName( reference.FilePath.AssertNotNull() ).StartsWith( "dependency_", StringComparison.Ordinal ) )
+                {
+                    loadContext.LoadFromAssemblyPath( reference.FilePath! );
+                }
             }
 
-            var mainMethod = FindProgramMain( testInput.Options, testResult );
+            peStream.Seek( 0, SeekOrigin.Begin );
+            var assembly = loadContext.LoadFromStream( peStream, pdbStream );
+            var type = assembly.GetType( mainMethod.DeclaringType.FullName )!;
+            var method = type.GetMethod( mainMethod.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static )!;
 
-            if ( mainMethod == null )
-            {
-                return;
-            }
-
-            var loadContext = new AssemblyLoadContext( testInput.TestName, true );
+            await _consoleLock.WaitAsync();
 
             try
             {
-                foreach ( var reference in testResult.OutputCompilation.AssertNotNull().References.OfType<PortableExecutableReference>() )
-                {
-                    if ( Path.GetFileName( reference.FilePath.AssertNotNull() ).StartsWith( "dependency_", StringComparison.Ordinal ) )
-                    {
-                        loadContext.LoadFromAssemblyPath( reference.FilePath! );
-                    }
-                }
-
-                peStream.Seek( 0, SeekOrigin.Begin );
-                var assembly = loadContext.LoadFromStream( peStream, pdbStream );
-                var type = assembly.GetType( mainMethod.DeclaringType.FullName )!;
-                var method = type.GetMethod( mainMethod.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static )!;
-
-                await _consoleLock.WaitAsync();
+                var oldConsoleOutput = Console.Out;
+                var oldConsoleError = Console.Error;
+                StringWriter outputWriter = new();
+                Console.SetOut( outputWriter );
+                Console.SetError( outputWriter );
 
                 try
                 {
-                    var oldConsoleOutput = Console.Out;
-                    var oldConsoleError = Console.Error;
-                    StringWriter outputWriter = new();
-                    Console.SetOut( outputWriter );
-                    Console.SetError( outputWriter );
+                    var parameters = method.GetParameters();
 
-                    try
+                    var result = parameters switch
                     {
-                        var parameters = method.GetParameters();
+                        [] => method.Invoke( null, null ),
+                        [not null] => method.Invoke( null, new object[] { Array.Empty<string>() } ),
+                        _ => throw new InvalidOperationException( "Program.Main has unsupported signature." )
+                    };
 
-                        var result = parameters switch
+                    if ( mainMethod.GetAsyncInfo() is { IsAwaitable: true } )
+                    {
+                        switch ( result )
                         {
-                            [] => method.Invoke( null, null ),
-                            [{ }] => method.Invoke( null, new object[] { Array.Empty<string>() } ),
-                            _ => throw new InvalidOperationException( "Program.Main has unsupported signature." )
-                        };
+                            case Task task:
+                                // Await normal task.
+                                await task;
 
-                        if ( mainMethod.GetAsyncInfo() is { IsAwaitable: true } )
-                        {
-                            switch ( result )
-                            {
-                                case Task task:
-                                    // Await normal task.
-                                    await task;
+                                break;
 
-                                    break;
-
-                                default:
-                                    throw new InvalidOperationException( "Program.Main did not return Task." );
-                            }
+                            default:
+                                throw new InvalidOperationException( "Program.Main did not return Task." );
                         }
                     }
-                    finally
-                    {
-                        Console.SetOut( oldConsoleOutput );
-                        Console.SetError( oldConsoleError );
-                    }
-
-                    testResult.ProgramOutput = outputWriter.ToString();
                 }
                 finally
                 {
-                    _consoleLock.Release();
+                    Console.SetOut( oldConsoleOutput );
+                    Console.SetError( oldConsoleError );
                 }
-            }
-            catch ( Exception e )
-            {
-                testResult.SetFailed( "Program execution failed", e );
+
+                testResult.ProgramOutput = outputWriter.ToString();
             }
             finally
             {
-                loadContext.Unload();
+                _consoleLock.Release();
             }
         }
-
-        private static IMethod? FindProgramMain( TestOptions testOptions, TestResult testResult )
+        catch ( Exception e )
         {
-            if ( testResult.InitialCompilationModel == null )
-            {
-                return null;
-            }
-
-            var mainMethodName = testOptions.MainMethod ?? "Main";
-
-            var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == "Program" ).ToReadOnlyList();
-
-            switch ( programTypes.Count )
-            {
-                case 0:
-                    return null;
-
-                case 1:
-                    break;
-
-                default:
-                    testResult.SetFailed( "The test cannot contain more classes named 'Program'." );
-
-                    return null;
-            }
-
-            var programType = programTypes.Single();
-
-            var mainMethods = programType.Methods.OfName( mainMethodName ).ToReadOnlyList();
-
-            switch ( mainMethods.Count )
-            {
-                case 0:
-                    return null;
-
-                case 1:
-                    break;
-
-                default:
-                    testResult.SetFailed( $"The 'Program' class can contain a single method called '{mainMethodName}'." );
-
-                    return null;
-            }
-
-            var mainMethod = mainMethods.Single();
-
-            if ( !mainMethod.IsStatic )
-            {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must be static." );
-
-                return null;
-            }
-
-            if ( !(mainMethod is 
-                    { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } } 
-                    or { ReturnType: INamedType { Definition.SpecialType: SpecialType.Task_T, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } }) )
-            {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must return void, int, Task or Task<int>." );
-
-                return null;
-            }
-
-            if ( !(mainMethod.Parameters is [] or [{ Type: IArrayType { ElementType.SpecialType: SpecialType.String } }]) )
-            {
-                testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters or have a single 'string[]' parameter." );
-
-                return null;
-            }
-
-            return mainMethod;
+            testResult.SetFailed( "Program execution failed", e );
         }
+        finally
+        {
+            loadContext.Unload();
+        }
+    }
+
+    private static IMethod? FindProgramMain( TestOptions testOptions, TestResult testResult )
+    {
+        if ( testResult.InitialCompilationModel == null )
+        {
+            return null;
+        }
+
+        var mainMethodName = testOptions.MainMethod ?? "Main";
+
+        var programTypes = testResult.InitialCompilationModel!.Types.Where( t => t.Name == "Program" ).ToReadOnlyList();
+
+        switch ( programTypes.Count )
+        {
+            case 0:
+                return null;
+
+            case 1:
+                break;
+
+            default:
+                testResult.SetFailed( "The test cannot contain more classes named 'Program'." );
+
+                return null;
+        }
+
+        var programType = programTypes.Single();
+
+        var mainMethods = programType.Methods.OfName( mainMethodName ).ToReadOnlyList();
+
+        switch ( mainMethods.Count )
+        {
+            case 0:
+                return null;
+
+            case 1:
+                break;
+
+            default:
+                testResult.SetFailed( $"The 'Program' class can contain a single method called '{mainMethodName}'." );
+
+                return null;
+        }
+
+        var mainMethod = mainMethods.Single();
+
+        if ( !mainMethod.IsStatic )
+        {
+            testResult.SetFailed( $"The 'Program.{mainMethodName}' method must be static." );
+
+            return null;
+        }
+
+        if ( !(mainMethod is
+                { ReturnType: INamedType { SpecialType: SpecialType.Void or SpecialType.Int32 or SpecialType.Task } }
+                or { ReturnType: INamedType { Definition.SpecialType: SpecialType.Task_T, TypeArguments: [{ SpecialType: SpecialType.Int32 }] } }) )
+        {
+            testResult.SetFailed( $"The 'Program.{mainMethodName}' method must return void, int, Task or Task<int>." );
+
+            return null;
+        }
+
+        if ( !(mainMethod.Parameters is [] or [{ Type: IArrayType { ElementType.SpecialType: SpecialType.String } }]) )
+        {
+            testResult.SetFailed( $"The 'Program.{mainMethodName}' method must not have parameters or have a single 'string[]' parameter." );
+
+            return null;
+        }
+
+        return mainMethod;
+    }
 #endif
 
-        private protected override void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    private protected override void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    {
+        base.SaveResults( testInput, testResult, state );
+
+        var expectedProgramOutputPath = Path.Combine(
+            Path.GetDirectoryName( testInput.FullPath )!,
+            Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );
+
+        // Compare with expected program outputs.
+        string? expectedProgramOutput;
+
+        var actualProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( testResult.ProgramOutput );
+
+        // Update the file in obj/transformed if it is different.
+        var actualProgramOutputPath = Path.Combine(
+            this.ProjectDirectory!,
+            "obj",
+            "transformed",
+            testInput.ProjectProperties.TargetFramework,
+            Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+            Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.ProgramOutput );
+
+        if ( !string.IsNullOrWhiteSpace( actualProgramOutput ) )
         {
-            base.SaveResults( testInput, testResult, state );
-
-            var expectedProgramOutputPath = Path.Combine(
-                Path.GetDirectoryName( testInput.FullPath )!,
-                Path.GetFileNameWithoutExtension( testInput.FullPath ) + FileExtensions.ProgramOutput );
-
-            // Compare with expected program outputs.
-            string? expectedProgramOutput;
-
-            var actualProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( testResult.ProgramOutput );
-
-            // Update the file in obj/transformed if it is different.
-            var actualProgramOutputPath = Path.Combine(
-                this.ProjectDirectory!,
-                "obj",
-                "transformed",
-                testInput.ProjectProperties.TargetFramework,
-                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-                Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.ProgramOutput );
-
-            if ( !string.IsNullOrWhiteSpace( actualProgramOutput ) )
+            // If the expectation file does not exist, create it with some placeholder content.
+            if ( !File.Exists( expectedProgramOutputPath ) )
             {
-                // If the expectation file does not exist, create it with some placeholder content.
-                if ( !File.Exists( expectedProgramOutputPath ) )
-                {
-                    // Coverage: Ignore
+                // Coverage: Ignore
 
-                    File.WriteAllText(
-                        expectedProgramOutputPath,
-                        "TODO: Replace this file with the correct program output. See the test output for the actual transformed code." );
-                }
-
-                expectedProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
-
-                if ( actualProgramOutput != expectedProgramOutput )
-                {
-                    File.WriteAllText( actualProgramOutputPath, actualProgramOutput );
-                }
-
-                this.Logger?.WriteLine( "=== ACTUAL PROGRAM OUTPUT ===" );
-                this.Logger?.WriteLine( actualProgramOutput );
-                this.Logger?.WriteLine( "=====================" );
-            }
-            else
-            {
-                expectedProgramOutput = "";
-
-                if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
-                {
-                    // Coverage: Ignore
-
-                    File.Delete( expectedProgramOutputPath );
-                }
-
-                if ( File.Exists( actualProgramOutputPath ) )
-                {
-                    // Coverage: Ignore
-
-                    File.Delete( actualProgramOutputPath );
-                }
+                File.WriteAllText(
+                    expectedProgramOutputPath,
+                    "TODO: Replace this file with the correct program output. See the test output for the actual transformed code." );
             }
 
-            state["actualProgramOutput"] = actualProgramOutput;
-            state["expectedProgramOutput"] = expectedProgramOutput;
+            expectedProgramOutput = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( expectedProgramOutputPath ) );
+
+            if ( actualProgramOutput != expectedProgramOutput )
+            {
+                File.WriteAllText( actualProgramOutputPath, actualProgramOutput );
+            }
+
+            this.Logger?.WriteLine( "=== ACTUAL PROGRAM OUTPUT ===" );
+            this.Logger?.WriteLine( actualProgramOutput );
+            this.Logger?.WriteLine( "=====================" );
+        }
+        else
+        {
+            expectedProgramOutput = "";
+
+            if ( File.Exists( expectedProgramOutputPath ) && string.IsNullOrWhiteSpace( File.ReadAllText( expectedProgramOutputPath ) ) )
+            {
+                // Coverage: Ignore
+
+                File.Delete( expectedProgramOutputPath );
+            }
+
+            if ( File.Exists( actualProgramOutputPath ) )
+            {
+                // Coverage: Ignore
+
+                File.Delete( actualProgramOutputPath );
+            }
         }
 
-        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
-        {
-            base.ExecuteAssertions( testInput, testResult, state );
+        state["actualProgramOutput"] = actualProgramOutput;
+        state["expectedProgramOutput"] = expectedProgramOutput;
+    }
 
-            if ( testInput.Options.CompareProgramOutput ?? true )
-            {
-                var expectedOutput = (string) state["expectedProgramOutput"]!;
-                var actualOutput = (string) state["actualProgramOutput"]!;
-                Assert.Equal( expectedOutput, actualOutput );
-            }
+    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    {
+        base.ExecuteAssertions( testInput, testResult, state );
+
+        if ( testInput.Options.CompareProgramOutput ?? true )
+        {
+            var expectedOutput = (string) state["expectedProgramOutput"]!;
+            var actualOutput = (string) state["actualProgramOutput"]!;
+            Assert.Equal( expectedOutput, actualOutput );
+        }
 
 #if DEBUG
-            if ( testInput.Options.AcceptInvalidInput != true && testResult.IntermediateLinkerCompilation != null )
+        if ( testInput.Options.AcceptInvalidInput != true && testResult.IntermediateLinkerCompilation != null )
+        {
+            // The following is useful when debugging weird linker problems.
+            // Linker should never produce invalid compilation by itself, but usually recovers quite well.
+
+            // TODO: Commented out because we have some tests that generate invalid syntax either into the intermediate compilation or even to the final one.
+
+            /*
+            var intermediateDiagnostics = testResult.IntermediateLinkerCompilation.Compilation.GetDiagnostics();
+
+            var intermediateLinkerError =
+                intermediateDiagnostics.FirstOrDefault( d => d is { Severity: DiagnosticSeverity.Error } or { Severity: DiagnosticSeverity.Warning, IsWarningAsError: true } );
+
+            if ( intermediateLinkerError != null )
             {
-                // The following is useful when debugging weird linker problems.
-                // Linker should never produce invalid compilation by itself, but usually recovers quite well.
-
-                // TODO: Commented out because we have some tests that generate invalid syntax either into the intermediate compilation or even to the final one.
-
-                /*
-                var intermediateDiagnostics = testResult.IntermediateLinkerCompilation.Compilation.GetDiagnostics();
-
-                var intermediateLinkerError =
-                    intermediateDiagnostics.FirstOrDefault( d => d is { Severity: DiagnosticSeverity.Error } or { Severity: DiagnosticSeverity.Warning, IsWarningAsError: true } );
-
-                if ( intermediateLinkerError != null )
-                {
-                    throw new InvalidOperationException( $"Invalid intermediate compilation: {intermediateLinkerError}" );
-                }
-                */
+                throw new InvalidOperationException( $"Invalid intermediate compilation: {intermediateLinkerError}" );
             }
-#endif
+            */
         }
+#endif
     }
 }

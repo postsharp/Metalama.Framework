@@ -45,13 +45,13 @@ public static class CompilationExtensions
 
     public static SemanticModelProvider GetSemanticModelProvider( this Compilation compilation ) => SemanticModelProvider.GetInstance( compilation );
 
-    public static LanguageVersion GetLanguageVersion( this Compilation compilation )
+    internal static LanguageVersion GetLanguageVersion( this Compilation compilation )
     {
         var tree = compilation.SyntaxTrees.FirstOrDefault();
 
         if ( tree == null )
         {
-            return LanguageVersionFacts.MapSpecifiedToEffectiveVersion( LanguageVersion.Default );
+            return LanguageVersion.Default.MapSpecifiedToEffectiveVersion();
         }
 
         return ((CSharpParseOptions) tree.Options).LanguageVersion;

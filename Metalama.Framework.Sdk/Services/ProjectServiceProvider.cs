@@ -37,9 +37,9 @@ public readonly struct ProjectServiceProvider
 
     public static implicit operator ProjectServiceProvider( ServiceProvider<IProjectService> serviceProvider ) => new( serviceProvider );
 
-    public static implicit operator ServiceProvider<IProjectService>( ProjectServiceProvider serviceProvider ) => serviceProvider.Underlying;
+    public static implicit operator ServiceProvider<IProjectService>( in ProjectServiceProvider serviceProvider ) => serviceProvider.Underlying;
 
-    public static implicit operator GlobalServiceProvider( ProjectServiceProvider serviceProvider ) => serviceProvider.Global;
+    public static implicit operator GlobalServiceProvider( in ProjectServiceProvider serviceProvider ) => serviceProvider.Global;
 
     public ProjectServiceProvider WithService( IProjectService service, bool allowOverride = false ) => this.Underlying.WithService( service, allowOverride );
 

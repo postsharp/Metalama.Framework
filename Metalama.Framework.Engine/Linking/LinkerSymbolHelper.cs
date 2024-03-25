@@ -3,24 +3,23 @@
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Linking
+namespace Metalama.Framework.Engine.Linking;
+
+internal static class LinkerSymbolHelper
 {
-    internal static class LinkerSymbolHelper
+    [return: NotNullIfNotNull( nameof(symbol) )]
+    public static ISymbol? GetCanonicalDefinition( this ISymbol? symbol )
     {
-        [return: NotNullIfNotNull( nameof( symbol ) )]
-        public static ISymbol? GetCanonicalDefinition( this ISymbol? symbol )
+        if ( symbol is IMethodSymbol { IsGenericMethod: true, ConstructedFrom: { } genericDefinition } )
         {
-            if ( symbol is IMethodSymbol { IsGenericMethod: true, ConstructedFrom: { } genericDefinition } )
-            {
-                symbol = genericDefinition;
-            }
-
-            if ( symbol is IMethodSymbol { PartialDefinitionPart: { } partialDefinition } )
-            {
-                symbol = partialDefinition;
-            }
-
-            return symbol;
+            symbol = genericDefinition;
         }
+
+        if ( symbol is IMethodSymbol { PartialDefinitionPart: { } partialDefinition } )
+        {
+            symbol = partialDefinition;
+        }
+
+        return symbol;
     }
 }

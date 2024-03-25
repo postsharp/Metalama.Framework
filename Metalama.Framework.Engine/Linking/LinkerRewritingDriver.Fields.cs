@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +16,8 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteField(
             FieldDeclarationSyntax fieldDeclaration,
-            IFieldSymbol symbol )
+            IFieldSymbol symbol,
+            SyntaxGenerationContext context )
         {
             Invariant.Assert( !this.InjectionRegistry.IsOverrideTarget( symbol ) );
 
@@ -27,19 +28,19 @@ namespace Metalama.Framework.Engine.Linking
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
                 members.Add(
-                    this.GetEmptyImplField(
+                    GetEmptyImplField(
                         symbol,
                         List<AttributeListSyntax>(),
-                        fieldDeclaration.Declaration.Type ) );
+                        fieldDeclaration.Declaration.Type,
+                        context ) );
             }
 
-            if (this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
+            if ( this.LateTransformationRegistry.IsPrimaryConstructorInitializedMember( symbol ) )
             {
                 fieldDeclaration =
                     fieldDeclaration.WithDeclaration(
                         fieldDeclaration.Declaration.WithVariables(
-                            SeparatedList(
-                                fieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
+                            SeparatedList( fieldDeclaration.Declaration.Variables.SelectAsArray( v => v.WithInitializer( default ) ) ) ) );
             }
 
             members.Add( fieldDeclaration );
@@ -47,35 +48,36 @@ namespace Metalama.Framework.Engine.Linking
             return members;
         }
 
-        private MemberDeclarationSyntax GetEmptyImplField(
+        private static MemberDeclarationSyntax GetEmptyImplField(
             IFieldSymbol symbol,
             SyntaxList<AttributeListSyntax> attributes,
-            TypeSyntax type )
+            TypeSyntax type,
+            SyntaxGenerationContext context )
         {
             var setAccessorKind =
                 symbol switch
                 {
                     { IsReadOnly: false } => SyntaxKind.SetAccessorDeclaration,
-                    { IsReadOnly: true } => SyntaxKind.InitAccessorDeclaration,
+                    { IsReadOnly: true } => SyntaxKind.InitAccessorDeclaration
                 };
 
             var accessorList =
                 AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration(
-                                    SyntaxKind.GetAccessorDeclaration,
-                                    List<AttributeListSyntax>(),
-                                    TokenList(),
-                                    Token( SyntaxKind.GetKeyword ),
-                                    null,
-                                    ArrowExpressionClause( DefaultExpression( type ) ),
-                                    Token( SyntaxKind.SemicolonToken ) ),
-                                AccessorDeclaration(
-                                    setAccessorKind,
-                                    SyntaxFactoryEx.FormattedBlock() )
-                            } ) );
+                    List(
+                        new[]
+                        {
+                            AccessorDeclaration(
+                                SyntaxKind.GetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                TokenList(),
+                                Token( SyntaxKind.GetKeyword ),
+                                null,
+                                ArrowExpressionClause( DefaultExpression( type ) ),
+                                Token( SyntaxKind.SemicolonToken ) ),
+                            AccessorDeclaration(
+                                setAccessorKind,
+                                context.SyntaxGenerator.FormattedBlock() )
+                        } ) );
 
             return
                 PropertyDeclaration(
@@ -88,10 +90,10 @@ namespace Metalama.Framework.Engine.Linking
                         type,
                         null,
                         Identifier( GetEmptyImplMemberName( symbol ) ),
-                        accessorList.WithTrailingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace ),
+                        accessorList.WithOptionalTrailingLineFeed( context ),
                         null,
                         null )
-                    .WithLeadingTriviaIfNecessary( ElasticLineFeed, this.IntermediateCompilationContext.NormalizeWhitespace )
+                    .WithOptionalLeadingLineFeed( context )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

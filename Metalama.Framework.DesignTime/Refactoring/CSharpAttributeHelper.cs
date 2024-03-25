@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,6 +15,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
             SyntaxNode oldRoot,
             SyntaxNode? oldNode,
             AttributeDescription attribute,
+            SyntaxGenerationContext context,
             CancellationToken cancellationToken )
         {
             // target syntax node doesn't exist anymore, nothing to be done here
@@ -64,7 +66,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
                         newRoot =
                             newUnit.AddUsings(
                                 SyntaxFactory.UsingDirective( SyntaxFactory.IdentifierName( ns ).WithLeadingTrivia( SyntaxFactory.ElasticSpace ) )
-                                    .WithTrailingTrivia( SyntaxFactory.ElasticCarriageReturnLineFeed )
+                                    .WithTrailingTrivia( context.ElasticEndOfLineTriviaList )
                                     .WithAdditionalAnnotations( Formatter.Annotation ) );
                     }
                 }
@@ -230,6 +232,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
             Document document,
             ISymbol symbol,
             AttributeDescription attribute,
+            SyntaxGenerationContext context,
             CancellationToken cancellationToken )
         {
             var currentSolution = document.Project.Solution;
@@ -243,7 +246,7 @@ namespace Metalama.Framework.DesignTime.Refactoring
 
             var oldNode = await symbol.DeclaringSyntaxReferences.Single( r => r.SyntaxTree == oldRoot.SyntaxTree ).GetSyntaxAsync( cancellationToken );
 
-            var newRoot = await AddAttributeAsync( oldRoot, oldNode, attribute, cancellationToken );
+            var newRoot = await AddAttributeAsync( oldRoot, oldNode, attribute, context, cancellationToken );
 
             if ( newRoot == null )
             {

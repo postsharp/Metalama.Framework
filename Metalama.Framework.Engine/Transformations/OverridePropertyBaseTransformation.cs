@@ -4,10 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -58,7 +57,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
                     SyntaxFactory.List<AttributeListSyntax>(),
                     modifiers,
                     context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration )
-                        .WithTrailingTriviaIfNecessary( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.NormalizeWhitespace ),
+                        .WithOptionalTrailingTrivia( SyntaxFactory.ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
                     SyntaxFactory.AccessorList(

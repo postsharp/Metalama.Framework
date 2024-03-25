@@ -2,7 +2,6 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.ParameterMapping
 {

@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.CompileTime.Manifest
             return manifest;
         }
 
-        private static readonly JsonConverter[] _converters = new[] { new StringEnumConverter() };
+        private static readonly JsonConverter[] _converters = [new StringEnumConverter()];
 
         public static CompileTimeProjectManifest FromJson( string json )
             => JsonConvert.DeserializeObject<CompileTimeProjectManifest>( json, _converters ).AssertNotNull();

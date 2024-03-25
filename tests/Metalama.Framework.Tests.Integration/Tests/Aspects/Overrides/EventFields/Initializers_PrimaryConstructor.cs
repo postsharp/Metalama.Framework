@@ -7,10 +7,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Fabrics;
-using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers_PrimaryConstructor;
 
 #pragma warning disable CS0067

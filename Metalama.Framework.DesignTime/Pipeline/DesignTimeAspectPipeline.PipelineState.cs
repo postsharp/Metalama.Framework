@@ -56,7 +56,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
         public AspectPipelineResult PipelineResult { get; }
 
-        public long SnapshotId { get; }
+        private long SnapshotId { get; }
 
         internal PipelineState( DesignTimeAspectPipeline pipeline )
         {

@@ -8,5 +8,5 @@ namespace Metalama.Framework.Serialization
     /// An attribute that marks a field of a type that implements <see cref="ICompileTimeSerializable"/> as non-serialized.
     /// </summary>
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
-    public sealed class NonCompileTimeSerializedAttribute : Attribute { }
+    public sealed class NonCompileTimeSerializedAttribute : Attribute;
 }

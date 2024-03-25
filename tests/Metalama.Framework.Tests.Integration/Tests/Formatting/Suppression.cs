@@ -1,7 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Fabrics;
+
 #if !TESTRUNNER // Disable the warning in the main build, not during tests.
 #pragma warning disable CS0414
 #endif

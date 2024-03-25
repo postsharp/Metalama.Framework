@@ -5,4 +5,4 @@ namespace Metalama.Framework.DesignTime.Rpc;
 /// <summary>
 /// Base interface for RPC services.
 /// </summary>
-public interface IRpcApi { }
+public interface IRpcApi;

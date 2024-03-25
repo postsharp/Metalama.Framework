@@ -6,13 +6,12 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System.Linq;
 using System.Threading;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -51,7 +50,7 @@ internal static class ProceedHelper
                                         runtimeAspectHelperType,
                                         IdentifierName( nameof(RunTimeAspectHelper.Buffer) ) ) )
                                 .WithArgumentList( ArgumentList( SingletonSeparatedList( Argument( invocationExpression ) ) ) )
-                                .WithAdditionalAnnotations( Simplifier.Annotation );
+                                .WithSimplifierAnnotationIfNecessary( generationContext );
                     }
                     else
                     {
@@ -74,14 +73,14 @@ internal static class ProceedHelper
                     switch ( asyncInfo )
                     {
                         case { } when overriddenMethod.ReturnType.Is( SpecialType.Void ):
-                            return WrapAsyncVoid( invocationExpression, overriddenMethod, true );
+                            return WrapAsyncVoid( invocationExpression, overriddenMethod, true, generationContext );
 
                         case { ResultType: var resultType } when resultType.Is( SpecialType.Void ):
                             return (
                                 AwaitExpression(
                                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                         invocationExpression )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    .WithSimplifierAnnotationIfNecessary( generationContext ),
                                 resultType);
 
                         default:
@@ -90,13 +89,13 @@ internal static class ProceedHelper
                                         AwaitExpression(
                                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                                             invocationExpression ) )
-                                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                                    .WithSimplifierAnnotationIfNecessary( generationContext ),
                                 asyncInfo.ResultType);
                     }
                 }
 
             case TemplateKind.Async when overriddenMethod.ReturnType.Is( SpecialType.Void ):
-                return WrapAsyncVoid( invocationExpression, overriddenMethod, false );
+                return WrapAsyncVoid( invocationExpression, overriddenMethod, false, generationContext );
 
             case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
                 { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator }:
@@ -131,43 +130,47 @@ internal static class ProceedHelper
                             runtimeAspectHelperType,
                             IdentifierName( nameof(RunTimeAspectHelper.Buffer) + "Async" ) ) )
                     .WithArgumentList( arguments )
-                    .WithAdditionalAnnotations( Simplifier.Annotation );
+                    .WithSimplifierAnnotationIfNecessary( generationContext );
 
             var expression = ParenthesizedExpression(
                     AwaitExpression(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.AwaitKeyword ),
                         bufferExpression ) )
-                .WithAdditionalAnnotations( Simplifier.Annotation );
+                .WithSimplifierAnnotationIfNecessary( generationContext );
 
             return expression;
         }
+    }
 
-        static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid( ExpressionSyntax invocationExpression, IMethod overriddenMethod, bool await )
+    private static (ExpressionSyntax Syntax, IType Result) WrapAsyncVoid(
+        ExpressionSyntax invocationExpression,
+        IMethod overriddenMethod,
+        bool await,
+        SyntaxGenerationContext generationContext )
+    {
+        if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
         {
-            if ( invocationExpression is not InvocationExpressionSyntax { Expression: { } invocationTarget } actualInvocationExpression )
-            {
-                throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
-            }
+            throw new AssertionFailedException( $"Expected invocation expression, got {invocationExpression.Kind()}" );
+        }
 
-            var expression =
-                actualInvocationExpression.WithExpression(
-                        InvocationExpression(
-                            LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
-                            ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
-                    .WithAdditionalAnnotations( Simplifier.Annotation );
+        var expression =
+            actualInvocationExpression.WithExpression(
+                    InvocationExpression(
+                        LinkerInjectionHelperProvider.GetAsyncVoidMethodMemberExpression(),
+                        ArgumentList( SingletonSeparatedList( Argument( invocationTarget ) ) ) ) )
+                .WithSimplifierAnnotationIfNecessary( generationContext );
 
-            if ( await )
-            {
-                return (
-                    AwaitExpression(
-                        Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
-                        expression ),
-                    overriddenMethod.ReturnType);
-            }
-            else
-            {
-                return (expression, overriddenMethod.ReturnType);
-            }
+        if ( await )
+        {
+            return (
+                AwaitExpression(
+                    Token( TriviaList(), SyntaxKind.AwaitKeyword, TriviaList( ElasticSpace ) ),
+                    expression ),
+                overriddenMethod.ReturnType);
+        }
+        else
+        {
+            return (expression, overriddenMethod.ReturnType);
         }
     }
 
@@ -219,7 +222,7 @@ internal static class ProceedHelper
                 expression = MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
                     ParenthesizedExpression(
-                        SyntaxFactoryEx.SafeCastExpression(
+                        generationContext.SyntaxGenerator.SafeCastExpression(
                             generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
                             ThisExpression() ) ),
                     memberName );

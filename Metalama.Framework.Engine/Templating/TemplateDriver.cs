@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
@@ -25,6 +27,18 @@ namespace Metalama.Framework.Engine.Templating
             this._templateMethod = compiledTemplateMethodInfo ?? throw new ArgumentNullException( nameof(compiledTemplateMethodInfo) );
         }
 
+        internal static void CopyTemplateArguments( object?[] source, object?[] target, int index, SyntaxGenerationContext context )
+        {
+            for ( var i = 0; i < source.Length; i++ )
+            {
+                target[i + index] = source[i] switch
+                {
+                    TemplateTypeArgumentFactory factory => factory.Create( context ),
+                    _ => source[i]
+                };
+            }
+        }
+
         public bool TryExpandDeclaration(
             TemplateExpansionContext templateExpansionContext,
             object?[] templateArguments,
@@ -37,7 +51,9 @@ namespace Metalama.Framework.Engine.Templating
             // Add the first template argument.
             var allArguments = new object?[templateArguments.Length + 1];
             allArguments[0] = templateExpansionContext.SyntaxFactory;
-            templateArguments.CopyTo( allArguments, 1 );
+
+            // Add other arguments.
+            CopyTemplateArguments( templateArguments, allArguments, 1, templateExpansionContext.SyntaxGenerationContext );
 
             if ( !this._userCodeInvoker.TryInvoke(
                     () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateProvider.Object, allArguments ).AssertNotNull(),
@@ -51,13 +67,13 @@ namespace Metalama.Framework.Engine.Templating
 
             var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
 
-            block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! )!;
+            block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output )!;
 
             // If we're generating an async iterator method, but there is no yield statement, we would get an error.
             // Prevent that by adding `yield break;` at the end of the method body.
             block = templateExpansionContext.AddYieldBreakIfNecessary( block );
 
-            block = block.NormalizeWhitespaceIfNecessary( templateExpansionContext.SyntaxGenerationContext.NormalizeWhitespace );
+            block = block.NormalizeWhitespaceIfNecessary( templateExpansionContext.SyntaxGenerationContext );
 
             // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
             var aspectClass = templateExpansionContext.MetaApi.AspectInstance?.AspectClass;

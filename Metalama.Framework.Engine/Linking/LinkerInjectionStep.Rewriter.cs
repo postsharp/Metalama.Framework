@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -19,6 +20,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -28,7 +31,8 @@ internal sealed partial class LinkerInjectionStep
     {
         private readonly CompilationModel _compilation;
         private readonly SemanticModelProvider _semanticModelProvider;
-        private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
+
+        private readonly LinkerInjectionStep _parent;
         private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly TransformationCollection _transformationCollection;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
@@ -37,13 +41,13 @@ internal sealed partial class LinkerInjectionStep
         private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
         public Rewriter(
-            CompilationContext compilationContext,
+            LinkerInjectionStep parent,
             TransformationCollection syntaxTransformationCollection,
             ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             SyntaxTree syntaxTreeForGlobalAttributes )
         {
-            this._syntaxGenerationContextFactory = compilationContext.SyntaxGenerationContextFactory;
+            this._parent = parent;
             this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
             this._transformationCollection = syntaxTransformationCollection;
@@ -51,7 +55,12 @@ internal sealed partial class LinkerInjectionStep
             this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
         }
 
-        private bool PreserveTrivia => this._syntaxGenerationContextFactory.Default.PreserveTrivia;
+        private CompilationContext CompilationContext => this._parent._compilationContext;
+
+        private SyntaxGenerationOptions SyntaxGenerationOptions => this._parent._syntaxGenerationOptions;
+
+        private SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
+            => this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
 
         public override bool VisitIntoStructuredTrivia => true;
 
@@ -99,7 +108,7 @@ internal sealed partial class LinkerInjectionStep
         /// around the node and by updating (or even suppressing) the <c>#pragma warning</c>
         /// inside the node.
         /// </summary>
-        private T AddSuppression<T>( T node, IReadOnlyList<string> suppressionsOnThisElement )
+        private T AddSuppression<T>( T node, IReadOnlyList<string> suppressionsOnThisElement, SyntaxGenerationContext context )
             where T : SyntaxNode
         {
             var transformedNode = node;
@@ -117,16 +126,18 @@ internal sealed partial class LinkerInjectionStep
                 // Add `#pragma warning` trivia around the node.
                 var errorCodes = SeparatedList<ExpressionSyntax>( suppressionsOnThisElement.Distinct().OrderBy( e => e ).Select( IdentifierName ) );
 
-                var disable = Trivia( SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, errorCodes ) )
+                var disable = Trivia( context.SyntaxGenerator.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, errorCodes ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
-                var restore = Trivia( SyntaxFactoryEx.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes ) )
+                var restore = Trivia( context.SyntaxGenerator.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 transformedNode = transformedNode
-                    .WithLeadingTrivia( transformedNode.GetLeadingTrivia().InsertRange( 0, new[] { ElasticLineFeed, disable, ElasticLineFeed } ) )
-                    .WithTrailingTrivia( transformedNode.GetTrailingTrivia().AddRange( new[] { ElasticLineFeed, restore, ElasticLineFeed } ) );
+                    .WithLeadingTrivia(
+                        transformedNode.GetLeadingTrivia().InsertRange( 0, new[] { context.ElasticEndOfLineTrivia, disable, context.ElasticEndOfLineTrivia } ) )
+                    .WithTrailingTrivia(
+                        transformedNode.GetTrailingTrivia().AddRange( new[] { context.ElasticEndOfLineTrivia, restore, context.ElasticEndOfLineTrivia } ) );
 #pragma warning restore LAMA0832
             }
 
@@ -260,9 +271,9 @@ internal sealed partial class LinkerInjectionStep
                     foreach ( var trivia in list.GetLeadingTrivia() )
                     {
                         if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia
-                                or SyntaxKind.MultiLineCommentTrivia
-                                or SyntaxKind.SingleLineDocumentationCommentTrivia
-                                or SyntaxKind.MultiLineDocumentationCommentTrivia )
+                            or SyntaxKind.MultiLineCommentTrivia
+                            or SyntaxKind.SingleLineDocumentationCommentTrivia
+                            or SyntaxKind.MultiLineDocumentationCommentTrivia )
                         {
                             List<SyntaxTrivia> targetList;
 
@@ -280,7 +291,8 @@ internal sealed partial class LinkerInjectionStep
 
                             if ( trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia )
                             {
-                                targetList.Add( ElasticLineFeed );
+                                syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
+                                targetList.Add( syntaxGenerationContext.ElasticEndOfLineTrivia );
                             }
 
                             break;
@@ -294,13 +306,13 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
                 {
-                    syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+                    syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
                     var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
                         .AssertNotNull();
 
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, syntaxGenerationContext.NormalizeWhitespace )
+                        .WithOptionalTrailingLineFeed( syntaxGenerationContext )
                         .WithAdditionalAnnotations(
                             attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
@@ -311,9 +323,9 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( outputTrivia.Any() && !outputAttributeLists.Any() )
                     {
-                        newList = newList.WithLeadingTriviaIfNecessary(
+                        newList = newList.WithOptionalLeadingTrivia(
                             newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ),
-                            syntaxGenerationContext.PreserveTrivia );
+                            syntaxGenerationContext.Options );
 
                         outputTrivia.Clear();
                     }
@@ -326,12 +338,13 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( outputAttributeLists.Count > 0 )
                 {
-                    syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+                    syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
                     outputAttributeLists[0] =
-                        outputAttributeLists[0].WithLeadingTriviaIfNecessary(
-                            outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
-                            syntaxGenerationContext.PreserveTrivia );
+                        outputAttributeLists[0]
+                            .WithOptionalLeadingTrivia(
+                                outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
+                                syntaxGenerationContext.Options );
                 }
                 else
                 {
@@ -345,7 +358,7 @@ internal sealed partial class LinkerInjectionStep
         {
             if ( attributesTuple is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     return (T) node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -370,10 +383,11 @@ internal sealed partial class LinkerInjectionStep
 
         public override SyntaxNode VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-        public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
+        public override SyntaxNode VisitEnumDeclaration( EnumDeclarationSyntax node )
         {
             var originalNode = node;
             var members = new List<EnumMemberDeclarationSyntax>( node.Members.Count );
+            var context = this.GetSyntaxGenerationContext( node );
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -384,12 +398,12 @@ internal sealed partial class LinkerInjectionStep
 
                     using ( var memberSuppressions = this.WithSuppressions( member ) )
                     {
-                        var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions );
+                        var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions, context );
                         members.Add( memberWithSuppressions );
                     }
                 }
 
-                node = this.AddSuppression( node, suppressionContext.NewSuppressions );
+                node = this.AddSuppression( node, suppressionContext.NewSuppressions, context );
             }
 
             node = node.WithMembers( SeparatedList( members ) );
@@ -401,13 +415,14 @@ internal sealed partial class LinkerInjectionStep
             return node;
         }
 
-        public override SyntaxNode? VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+        public override SyntaxNode VisitDelegateDeclaration( DelegateDeclarationSyntax node )
         {
             var originalNode = node;
+            var context = this.GetSyntaxGenerationContext( node );
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
-                node = this.AddSuppression( node, suppressionContext.NewSuppressions );
+                node = this.AddSuppression( node, suppressionContext.NewSuppressions, context );
             }
 
             // Rewrite attributes.
@@ -423,21 +438,16 @@ internal sealed partial class LinkerInjectionStep
             var originalNode = node;
             var members = new List<MemberDeclarationSyntax>( node.Members.Count );
             var additionalBaseList = this._transformationCollection.GetIntroducedInterfacesForTypeDeclaration( node );
-            var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+            var syntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
 
             var baseList = node.BaseList;
-
             var parameterList = node.GetParameterList();
 
-            if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
-            {
-                this.ApplyMemberLevelTransformationsToPrimaryConstructor(
-                    node,
-                    memberLevelTransformations,
-                    syntaxGenerationContext,
-                    out baseList,
-                    out parameterList );
-            }
+            this.ApplyMemberLevelTransformationsToPrimaryConstructor(
+                node,
+                syntaxGenerationContext,
+                ref baseList,
+                ref parameterList );
 
             using ( var suppressionContext = this.WithSuppressions( node ) )
             {
@@ -448,7 +458,7 @@ internal sealed partial class LinkerInjectionStep
                     {
                         using ( var memberSuppressions = this.WithSuppressions( member ) )
                         {
-                            var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions );
+                            var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions, syntaxGenerationContext );
                             members.Add( memberWithSuppressions );
                         }
                     }
@@ -459,7 +469,7 @@ internal sealed partial class LinkerInjectionStep
 
                 AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
-                node = this.AddSuppression( node, suppressionContext.NewSuppressions );
+                node = this.AddSuppression( node, suppressionContext.NewSuppressions, syntaxGenerationContext );
 
                 // If the type has no braces, add them.
                 if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
@@ -480,13 +490,13 @@ internal sealed partial class LinkerInjectionStep
                     {
                         node = (T) node
                             .WithIdentifier(
-                                node.Identifier.WithTrailingTriviaIfNecessary(
+                                node.Identifier.WithOptionalTrailingTrivia(
                                     default,
-                                    syntaxGenerationContext.PreserveTrivia || node.Identifier.ContainsDirectives ) )
+                                    syntaxGenerationContext.Options.TriviaMatters || node.Identifier.ContainsDirectives ) )
                             .WithBaseList(
                                 BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
                                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                            .WithTrailingTriviaIfNecessary( node.Identifier.TrailingTrivia, syntaxGenerationContext.PreserveTrivia );
+                            .WithOptionalTrailingTrivia( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
                     }
                     else
                     {
@@ -494,7 +504,7 @@ internal sealed partial class LinkerInjectionStep
                             BaseList(
                                 baseList.Types.AddRange(
                                     additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )! ) ) );
+                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                     }
                 }
                 else if ( baseList != null )
@@ -571,7 +581,7 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                     injectedNode = injectedNode
-                        .WithLeadingTriviaIfNecessary( new SyntaxTriviaList( ElasticLineFeed, ElasticLineFeed ), syntaxGenerationContext.NormalizeWhitespace )
+                        .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
                         .WithGeneratedCodeAnnotation(
                             injectedMember.Transformation?.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
@@ -595,12 +605,9 @@ internal sealed partial class LinkerInjectionStep
                             }
                     }
 
-                    if ( injectedMember.Declaration != null )
+                    using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
                     {
-                        using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
-                        {
-                            injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions );
-                        }
+                        injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions, syntaxGenerationContext );
                     }
 
                     members.Add( injectedNode );
@@ -622,7 +629,7 @@ internal sealed partial class LinkerInjectionStep
             switch ( currentNode )
             {
                 case ConstructorDeclarationSyntax { Body: { } body } constructor:
-                    return constructor.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
+                    return constructor.WithBody( ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) );
 
                 case ConstructorDeclarationSyntax { ExpressionBody: { } expressionBody } constructor:
                     return
@@ -633,15 +640,15 @@ internal sealed partial class LinkerInjectionStep
 
                 // Static constructor overrides also go here.
                 case MethodDeclarationSyntax { Body: { } body } method:
-                    return method.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
+                    return method.WithBody( ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } expressionBody } method:
                     var returnsVoid =
                         contextDeclaration switch
                         {
                             IConstructor => true,
-                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( Code.SpecialType.Void ),
-                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( Code.SpecialType.Void ),
+                            IMethod { IsAsync: false } contextMethod => contextMethod.ReturnType.Is( SpecialType.Void ),
+                            IMethod { IsAsync: true } contextMethod => contextMethod.GetAsyncInfo().ResultType.Is( SpecialType.Void ),
                             _ => throw new InvalidOperationException( $"Not supported: {contextDeclaration}" )
                         };
 
@@ -659,7 +666,7 @@ internal sealed partial class LinkerInjectionStep
                         semicolonToken: default(SyntaxToken) );
 
                 case OperatorDeclarationSyntax { Body: { } body } @operator:
-                    return @operator.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) );
+                    return @operator.WithBody( ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) );
 
                 case OperatorDeclarationSyntax { ExpressionBody: { } expressionBody } @operator:
                     return
@@ -669,7 +676,7 @@ internal sealed partial class LinkerInjectionStep
                             body: ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) );
 
                 case PropertyDeclarationSyntax { ExpressionBody: { } expressionBody } property:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
 
                     return
                         property.PartialUpdate(
@@ -682,7 +689,7 @@ internal sealed partial class LinkerInjectionStep
                                         ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
                 case IndexerDeclarationSyntax { ExpressionBody: { } expressionBody } indexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet } );
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet } );
 
                     return
                         indexer.PartialUpdate(
@@ -695,7 +702,7 @@ internal sealed partial class LinkerInjectionStep
                                         ReplaceExpression( entryStatements, exitStatements, expressionBody.Expression, false ) ) ) ) );
 
                 case BasePropertyDeclarationSyntax { AccessorList: { } accessorList } propertyOrIndexer:
-                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: Code.MethodKind.PropertyGet or Code.MethodKind.PropertySet } );
+                    Invariant.Assert( contextDeclaration is IMethod { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } );
 
                     return
                         propertyOrIndexer.WithAccessorList(
@@ -706,7 +713,8 @@ internal sealed partial class LinkerInjectionStep
                                             IsMatchingAccessor( a, contextDeclaration )
                                                 ? a switch
                                                 {
-                                                    { Body: { } body } => a.WithBody( ReplaceBlock( entryStatements, exitStatements, body ) ),
+                                                    { Body: { } body } => a.WithBody(
+                                                        ReplaceBlock( contextDeclaration, entryStatements, exitStatements, body ) ),
                                                     { ExpressionBody: { } expressionBody } =>
                                                         a.PartialUpdate(
                                                             expressionBody: null,
@@ -724,9 +732,9 @@ internal sealed partial class LinkerInjectionStep
                     {
                         return (accessorDeclaration.Kind(), contextDeclaration) switch
                         {
-                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertyGet }) => true,
-                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
-                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: Code.MethodKind.PropertySet }) => true,
+                            (SyntaxKind.GetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertyGet }) => true,
+                            (SyntaxKind.SetAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
+                            (SyntaxKind.InitAccessorDeclaration, IMethod { MethodKind: MethodKind.PropertySet }) => true,
                             _ => false
                         };
                     }
@@ -735,7 +743,11 @@ internal sealed partial class LinkerInjectionStep
                     throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
             }
 
-            BlockSyntax ReplaceBlock( IReadOnlyList<StatementSyntax> entryStatements, IReadOnlyList<StatementSyntax> exitStatements, BlockSyntax targetBlock )
+            static BlockSyntax ReplaceBlock(
+                IDeclaration declaration,
+                IReadOnlyList<StatementSyntax> entryStatements,
+                IReadOnlyList<StatementSyntax> exitStatements,
+                BlockSyntax targetBlock )
             {
                 if ( exitStatements.Count > 0 )
                 {
@@ -812,7 +824,7 @@ internal sealed partial class LinkerInjectionStep
                                     whileStatement );
 
                         default:
-                            throw new AssertionFailedException( $"Unsupported form of body with exit statements for: {contextDeclaration}" );
+                            throw new AssertionFailedException( $"Unsupported form of body with exit statements for: {declaration}" );
                     }
                 }
                 else
@@ -827,7 +839,7 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
-            BlockSyntax ReplaceExpression(
+            static BlockSyntax ReplaceExpression(
                 IReadOnlyList<StatementSyntax> entryStatements,
                 IReadOnlyList<StatementSyntax> exitStatements,
                 ExpressionSyntax targetExpression,
@@ -886,21 +898,23 @@ internal sealed partial class LinkerInjectionStep
 
         private void ApplyMemberLevelTransformationsToPrimaryConstructor(
             TypeDeclarationSyntax typeDeclaration,
-            MemberLevelTransformations memberLevelTransformations,
             SyntaxGenerationContext syntaxGenerationContext,
-            out BaseListSyntax? newBaseList,
-            out ParameterListSyntax? newParameterList )
+            ref BaseListSyntax? baseList,
+            ref ParameterListSyntax? parameterList )
         {
-            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
-            Invariant.AssertNotNull( typeDeclaration.GetParameterList() );
+            if ( !this._transformationCollection.TryGetMemberLevelTransformations( typeDeclaration, out var memberLevelTransformations ) )
+            {
+                return;
+            }
 
-            newParameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
-            newBaseList = typeDeclaration.BaseList;
+            Invariant.AssertNot( typeDeclaration.BaseList == null && memberLevelTransformations.Arguments.Length > 0 );
+            Invariant.AssertNot( typeDeclaration.GetParameterList() == null );
+
+            parameterList = AppendParameters( typeDeclaration.GetParameterList()!, memberLevelTransformations.Parameters, syntaxGenerationContext );
+            baseList = typeDeclaration.BaseList;
 
             if ( memberLevelTransformations.Arguments.Length > 0 )
             {
-                var semanticModel = this._semanticModelProvider.GetSemanticModel( typeDeclaration.SyntaxTree );
-                var baseType = semanticModel.GetDeclaredSymbol( typeDeclaration );
                 var baseTypeSyntax = typeDeclaration.BaseList.AssertNotNull().Types[0];
 
                 BaseTypeSyntax newBaseTypeSyntax;
@@ -928,7 +942,7 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 // TODO: This may be slower than replacing specific index.
-                newBaseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
+                baseList = typeDeclaration.BaseList.ReplaceNode( baseTypeSyntax, newBaseTypeSyntax );
             }
         }
 
@@ -950,7 +964,7 @@ internal sealed partial class LinkerInjectionStep
                             existingParameters.Parameters.Count - 1,
                             newParameters.Select(
                                 x => x.ToSyntax( syntaxGenerationContext )
-                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                                    .WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
                 else
                 {
@@ -958,7 +972,7 @@ internal sealed partial class LinkerInjectionStep
                         existingParameters.Parameters.AddRange(
                             newParameters.Select(
                                 x => x.ToSyntax( syntaxGenerationContext )
-                                    .WithTrailingTriviaIfNecessary( ElasticSpace, syntaxGenerationContext.NormalizeWhitespace ) ) ) );
+                                    .WithOptionalTrailingTrivia( ElasticSpace, syntaxGenerationContext.Options ) ) ) );
                 }
             }
         }
@@ -972,8 +986,7 @@ internal sealed partial class LinkerInjectionStep
                 return initializerSyntax;
             }
 
-            var newArgumentsSyntax = newArguments.Select(
-                a => a.ToSyntax().WithTrailingTriviaIfNecessary( ElasticSpace, this._syntaxGenerationContextFactory.Default.NormalizeWhitespace ) );
+            var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ) );
 
             if ( initializerSyntax == null )
             {
@@ -990,6 +1003,7 @@ internal sealed partial class LinkerInjectionStep
         private IReadOnlyList<FieldDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
         {
             var originalNode = node;
+            var context = this.GetSyntaxGenerationContext( node );
 
             // Rewrite attributes.
             if ( originalNode.Declaration.Variables.Count > 1
@@ -1013,7 +1027,7 @@ internal sealed partial class LinkerInjectionStep
                         default,
                         node.Modifiers,
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, context.ElasticEndOfLineTriviaList ) );
 
                     fieldDeclaration = this.ReplaceAttributes( fieldDeclaration, attributes );
 
@@ -1083,7 +1097,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._transformationCollection.TryGetMemberLevelTransformations( node, out var memberLevelTransformations ) )
             {
-                var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+                var syntaxGenerationContext = this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
                 node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
             }
 
@@ -1167,7 +1181,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -1192,7 +1206,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -1216,7 +1230,7 @@ internal sealed partial class LinkerInjectionStep
             var semanticModel = this._semanticModelProvider.GetSemanticModel( originalNode.SyntaxTree );
             var symbol = semanticModel.GetDeclaredSymbol( originalNode );
 
-            if ( symbol != null && symbol.SetMethod != null )
+            if ( symbol is { SetMethod: not null } )
             {
                 var declaration = (IProperty) this._compilation.GetDeclaration( symbol );
                 var entryStatements = this._transformationCollection.GetInjectedEntryStatements( declaration.SetMethod.AssertNotNull() );
@@ -1230,7 +1244,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
             {
-                node = node.WithSynthesizedSetter( this._syntaxGenerationContextFactory.Default );
+                node = node.WithSynthesizedSetter( this.GetSyntaxGenerationContext( originalNode ) );
             }
 
             if ( this._transformationCollection.GetAdditionalDeclarationFlags( originalNode ) is not AspectLinkerDeclarationFlags.None and var flags )
@@ -1299,7 +1313,7 @@ internal sealed partial class LinkerInjectionStep
 
             if ( rewrittenAttributes is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.PreserveTrivia ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
@@ -1328,6 +1342,7 @@ internal sealed partial class LinkerInjectionStep
 
         private IReadOnlyList<MemberDeclarationSyntax> VisitEventFieldDeclarationCore( EventFieldDeclarationSyntax node )
         {
+            var context = this.GetSyntaxGenerationContext( node );
             var originalNode = node;
 
             // Rewrite attributes.
@@ -1348,7 +1363,7 @@ internal sealed partial class LinkerInjectionStep
                         node.Modifiers,
                         Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( Space ) ),
                         declaration,
-                        Token( default, SyntaxKind.SemicolonToken, new SyntaxTriviaList( ElasticLineFeed ) ) );
+                        Token( default, SyntaxKind.SemicolonToken, context.TwoElasticEndOfLinesTriviaList ) );
 
                     eventDeclaration = this.ReplaceAttributes( eventDeclaration, attributes );
 

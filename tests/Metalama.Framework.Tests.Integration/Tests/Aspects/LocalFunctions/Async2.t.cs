@@ -14,7 +14,7 @@ internal class C
     {
       await this.FooAsync_Source();
       object result = null;
-      return (global::System.Object)result;
+      return (global::System.Object? )result;
     }
     await global::System.Threading.Tasks.Task.Run(ExecuteCoreAsync);
     return;

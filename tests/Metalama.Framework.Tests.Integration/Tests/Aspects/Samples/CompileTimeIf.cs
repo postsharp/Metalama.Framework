@@ -1,10 +1,5 @@
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.CompileTimeIf
 {

@@ -7,5 +7,5 @@ namespace Metalama.Framework.Fabrics
     /// <summary>
     /// Argument of <see cref="ProjectFabric.AmendProject"/>. Allows reporting diagnostics and adding aspects to the target project. 
     /// </summary>
-    public interface IProjectAmender : IAmender<ICompilation> { }
+    public interface IProjectAmender : IAmender<ICompilation>;
 }

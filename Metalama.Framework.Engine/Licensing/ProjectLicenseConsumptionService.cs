@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Engine.Services;
@@ -23,13 +22,10 @@ internal sealed class ProjectLicenseConsumptionService : IProjectLicenseConsumpt
         this._impl.Changed += this.OnChanged;
     }
 
-    private void OnChanged()
-    {
-        this.Changed?.Invoke();
-    }
+    private void OnChanged() => this.Changed?.Invoke();
 
     // This constructor is used in the compile-time scenario.
-    public ProjectLicenseConsumptionService( ProjectServiceProvider serviceProvider )
+    public ProjectLicenseConsumptionService( in ProjectServiceProvider serviceProvider )
     {
         this._impl = serviceProvider.Global.GetRequiredBackstageService<ILicenseConsumptionService>();
     }

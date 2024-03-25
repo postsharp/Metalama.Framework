@@ -9,5 +9,5 @@ namespace Metalama.Framework.Code.Comparers
     /// An umbrella interface for an equality comparer of <see cref="IDeclaration"/> and <see cref="IType"/>.
     /// </summary>
     [CompileTime]
-    public interface IDeclarationComparer : IEqualityComparer<IDeclaration>, ITypeComparer { }
+    public interface IDeclarationComparer : IEqualityComparer<IDeclaration>, ITypeComparer;
 }

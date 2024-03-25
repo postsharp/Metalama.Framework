@@ -89,7 +89,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         internal static readonly DiagnosticDefinition<INamedTypeSymbol> RecordSerializersNotSupported = new(
             "LAMA0210",
             _category,
-            "Cannot generate a compile-time serializer for '{0}' because generated serializers are not currently supported for a positional record class or struct. " +
+            "Cannot generate a compile-time serializer for '{0}' because generated serializers are not currently supported for a positional record class or struct. "
+            +
             "You can provide a manual serializer (public nested class) derived from ReferenceTypeSerializer (record classes) or ValueTypeSerializer (record structs) instead.",
             Error,
             "Generated serializers are not currently supported for records." );

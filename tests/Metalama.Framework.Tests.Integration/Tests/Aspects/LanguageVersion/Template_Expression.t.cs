@@ -1,11 +1,11 @@
 [TheAspect]
 class Target
 {
-    public global::System.String Property
+  public global::System.String Property
+  {
+    get
     {
-        get
-        {
-            return (global::System.String)"""
+      return (global::System.String)"""
         This is a long message.
         It has several lines.
             Some are indented
@@ -13,6 +13,6 @@ class Target
         Some should start at the first column.
         Some have "quoted text" in them.
         """;
-        }
     }
+  }
 }

@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -87,6 +88,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public HierarchicalOptionsManager HierarchicalOptionsManager { get; }
 
+        internal IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
+
         public IEnumerable<T> GetAnnotations<T>( IDeclaration declaration )
             where T : class, IAnnotation
         {
@@ -104,7 +107,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> GetExportedAnnotations()
+        internal ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation> GetExportedAnnotations()
         {
             var builder = new ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder();
 
@@ -323,13 +326,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this.AspectRepository = aspectRepository;
         }
 
-        private CompilationModel( CompilationModel prototype, IExternalAnnotationProvider? annotationProvider, string? debugLabel ) : this(
-            prototype,
-            false,
-            debugLabel )
-        {
-            this.ExternalAnnotationProvider = annotationProvider;
-        }
+        public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
+            => this.CompilationContext.GetSyntaxGenerationContext( options, node );
 
         internal CompilationModel WithTransformationsAndAspectInstances(
             IReadOnlyCollection<ITransformation>? introducedDeclarations,
@@ -346,9 +344,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel WithAspectRepository( AspectRepository aspectRepository, string? debugLabel )
             => this.AspectRepository == aspectRepository ? this : new CompilationModel( this, aspectRepository, debugLabel );
-
-        internal CompilationModel WithExternalAnnotationProvider( IExternalAnnotationProvider? annotationProvider, string? debugLabel )
-            => this.ExternalAnnotationProvider == annotationProvider ? this : new CompilationModel( this, annotationProvider, debugLabel );
 
         [Memo]
         public INamedTypeCollection Types
@@ -611,7 +606,5 @@ namespace Metalama.Framework.Engine.CodeModel
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
 
         public override bool BelongsToCurrentProject => true;
-
-        public IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
     }
 }

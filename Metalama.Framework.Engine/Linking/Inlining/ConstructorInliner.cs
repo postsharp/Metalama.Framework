@@ -19,19 +19,19 @@ internal sealed class ConstructorInliner : Inliner
     {
         var expectedNumberOfParameters =
             contextConstructor.Parameters.LastOrDefault()?.Name == AspectReferenceSyntaxProvider.LinkerOverrideParamName
-            ? contextConstructor.Parameters.Length - 1
-            : contextConstructor.Parameters.Length;
+                ? contextConstructor.Parameters.Length - 1
+                : contextConstructor.Parameters.Length;
 
         return
             expectedNumberOfParameters == (objectCreationExpression.ArgumentList?.Arguments.Count ?? 0)
             && (objectCreationExpression.ArgumentList?.Arguments
-               .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
-               ?.All( a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextConstructor.Parameters[a.Index] ) )
-              ?? false);
+                    .Select( ( x, i ) => (Argument: x.Expression, Index: i) )
+                    .All(
+                        a => SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( a.Argument ).Symbol, contextConstructor.Parameters[a.Index] ) )
+                ?? false);
     }
 
-    public override bool IsValidForTargetSymbol( ISymbol symbol )
-        => symbol is IMethodSymbol { MethodKind: MethodKind.Constructor };
+    public override bool IsValidForTargetSymbol( ISymbol symbol ) => symbol is IMethodSymbol { MethodKind: MethodKind.Constructor };
 
     public override bool IsValidForContainingSymbol( ISymbol symbol ) => symbol is IMethodSymbol { MethodKind: MethodKind.Constructor };
 
@@ -59,7 +59,7 @@ internal sealed class ConstructorInliner : Inliner
             return false;
         }
 
-        if ( invocationExpression.ArgumentList is not { Arguments: [{ Expression: ObjectCreationExpressionSyntax { } objectCreationExpression }] } )
+        if ( invocationExpression.ArgumentList is not { Arguments: [{ Expression: ObjectCreationExpressionSyntax objectCreationExpression }] } )
         {
             return false;
         }
@@ -74,7 +74,5 @@ internal sealed class ConstructorInliner : Inliner
     }
 
     public override InliningAnalysisInfo GetInliningAnalysisInfo( ResolvedAspectReference aspectReference )
-    {
-        return new InliningAnalysisInfo( aspectReference.RootExpression.Parent.AssertNotNull(), null );
-    }
+        => new( aspectReference.RootExpression.Parent.AssertNotNull(), null );
 }

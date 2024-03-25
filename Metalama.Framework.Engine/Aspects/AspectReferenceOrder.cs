@@ -24,6 +24,6 @@ namespace Metalama.Framework.Engine.Aspects
         /// Gets the final state of the semantic with all transformations. If the semantic is virtual, this results in a virtual call.
         /// Otherwise, this results in a call to the semantic with all transformations of the current class (but not of derived classes).
         /// </summary>
-        Final,
+        Final
     }
 }

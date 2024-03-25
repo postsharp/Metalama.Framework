@@ -28,13 +28,9 @@ namespace Metalama.Framework.Engine.Formatting
                 document = document.WithSyntaxRoot(
                     FormattedCodeWriter.AddDiagnosticAnnotations( (await document.GetSyntaxRootAsync( cancellationToken ))!, document.FilePath, diagnostics ) );
             }
-            
-            // Normalize EOLs.
-            var normalizedSyntax = EndOfLineHelper.NormalizeEndOfLineStyle( (CompilationUnitSyntax) (await document.GetSyntaxRootAsync( cancellationToken ))! );
-            var normalizedDocument = document.WithSyntaxRoot( normalizedSyntax );
 
             // Add imports and simplify.
-            var documentWithImports = await ImportAdder.AddImportsAsync( normalizedDocument, Simplifier.Annotation, cancellationToken: cancellationToken );
+            var documentWithImports = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
             var simplifiedDocument = await Simplifier.ReduceAsync( documentWithImports, cancellationToken: cancellationToken );
 
             Document formattedDocument;

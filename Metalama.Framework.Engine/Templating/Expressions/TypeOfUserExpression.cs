@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -21,6 +22,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         protected override bool CanBeNull => false;
 
-        public override IType Type => ((ICompilationInternal) this._type.Compilation).Factory.GetTypeByReflectionType( typeof(System.Type) );
+        public override IType Type => ((ICompilationInternal) this._type.Compilation).Factory.GetTypeByReflectionType( typeof(Type) );
     }
 }

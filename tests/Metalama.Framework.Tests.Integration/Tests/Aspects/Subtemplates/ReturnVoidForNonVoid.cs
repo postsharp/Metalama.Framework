@@ -2,7 +2,6 @@
 // @AcceptInvalidInput
 #endif
 
-using System;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.ReturnVoidForNonVoid;

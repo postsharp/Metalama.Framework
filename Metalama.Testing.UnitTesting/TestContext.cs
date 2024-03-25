@@ -79,6 +79,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
     }
 
+    // ReSharper disable once RedundantOverload.Global
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TestContext"/> class. Tests typically
     /// do not call this constructor directly, but instead the <see cref="UnitTestClass.CreateTestContext(IAdditionalServiceCollection)"/>
@@ -138,7 +140,9 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         var serviceProvider = ServiceProviderFactory.GetServiceProvider( backstageServices, typedAdditionalServices );
 
-        serviceProvider = serviceProvider.WithService( new TestProjectOptionsFactory( this.ProjectOptions ) ).WithService( this.ProjectOptions.DomainObserver );
+        serviceProvider = serviceProvider
+            .WithService( new TestProjectOptionsFactory( this.ProjectOptions ) )
+            .WithService( this.ProjectOptions.DomainObserver );
 
         this.ServiceProvider = serviceProvider
             .WithProjectScopedServices( this.ProjectOptions, contextOptions.References );

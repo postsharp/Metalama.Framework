@@ -5,10 +5,8 @@
 #if ROSLYN_4_8_0_OR_GREATER
 
 using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.IntroducedParameter_Multiple;
 
 [assembly:AspectOrder(typeof(Override2Attribute), typeof(Override1Attribute))]

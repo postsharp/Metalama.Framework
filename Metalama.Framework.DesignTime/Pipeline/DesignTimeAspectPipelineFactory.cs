@@ -139,46 +139,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         var referencesArray = references.ToImmutableArray();
 
-        bool TryGetPipeline( out DesignTimeAspectPipeline? pipeline )
-        {
-            if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
-            {
-                var pipelineOptions = pipeline.ServiceProvider.GetRequiredService<IProjectOptions>();
-
-                static bool ReferencesAreEqual( ImmutableArray<PortableExecutableReference> x, ImmutableArray<PortableExecutableReference> y )
-                {
-                    if ( x.Equals( y ) )
-                    {
-                        return true;
-                    }
-
-                    if ( x.Length != y.Length )
-                    {
-                        return false;
-                    }
-
-                    // Also ensure none of the paths are null, because we cannot reliably compare those.
-                    return x.Zip( y, ( x, y ) => (x, y) ).All( pair => pair.x.FilePath == pair.y.FilePath && pair.x.FilePath != null );
-                }
-
-                if ( ProjectOptionsEqualityComparer.Equals( x: projectOptions, y: pipelineOptions )
-                     && ReferencesAreEqual( referencesArray, pipeline.MetadataReferences ) )
-                {
-                    return true;
-                }
-                else
-                {
-                    this._pipelinesByProjectKey.TryRemove( projectKey, out _ );
-                    pipeline = null;
-
-                    return false;
-                }
-            }
-
-            return false;
-        }
-
-        if ( TryGetPipeline( out var pipeline ) )
+        if ( this.TryGetPipeline( projectKey, projectOptions, referencesArray, out var pipeline ) )
         {
             return pipeline;
         }
@@ -187,7 +148,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         // is called only once, and we prefer a single instance for the simplicity of debugging.
         lock ( this._pipelinesByProjectKey )
         {
-            if ( TryGetPipeline( out pipeline ) )
+            if ( this.TryGetPipeline( projectKey, projectOptions, referencesArray, out pipeline ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -210,6 +171,49 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         }
     }
 
+    private bool TryGetPipeline(
+        ProjectKey projectKey,
+        IProjectOptions projectOptions,
+        ImmutableArray<PortableExecutableReference> referencesArray,
+        out DesignTimeAspectPipeline? pipeline )
+    {
+        if ( this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
+        {
+            var pipelineOptions = pipeline.ServiceProvider.GetRequiredService<IProjectOptions>();
+
+            static bool ReferencesAreEqual( ImmutableArray<PortableExecutableReference> x, ImmutableArray<PortableExecutableReference> y )
+            {
+                if ( x.Equals( y ) )
+                {
+                    return true;
+                }
+
+                if ( x.Length != y.Length )
+                {
+                    return false;
+                }
+
+                // Also ensure none of the paths are null, because we cannot reliably compare those.
+                return x.Zip( y, ( x, y ) => (x, y) ).All( pair => pair.x.FilePath == pair.y.FilePath && pair.x.FilePath != null );
+            }
+
+            if ( ProjectOptionsEqualityComparer.Equals( projectOptions, pipelineOptions )
+                 && ReferencesAreEqual( referencesArray, pipeline.MetadataReferences ) )
+            {
+                return true;
+            }
+            else
+            {
+                this._pipelinesByProjectKey.TryRemove( projectKey, out _ );
+                pipeline = null;
+
+                return false;
+            }
+        }
+
+        return false;
+    }
+
     public virtual async ValueTask<FallibleResultWithDiagnostics<DesignTimeAspectPipeline>> GetOrCreatePipelineAsync(
         IProjectVersion projectVersion,
         TestableCancellationToken cancellationToken )
@@ -221,8 +225,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
 
         if ( referencedProject == null )
         {
-            this._logger.Warning?.Log(
-                $"Failed to process the reference to '{projectKey}': cannot get the project from the workspace." );
+            this._logger.Warning?.Log( $"Failed to process the reference to '{projectKey}': cannot get the project from the workspace." );
 
             return FallibleResultWithDiagnostics<DesignTimeAspectPipeline>.Failed(
                 ImmutableArray<Diagnostic>.Empty,
@@ -334,7 +337,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         TestableCancellationToken cancellationToken = default )
         => this.ExecuteAsync( compilation, false, executionContext, cancellationToken );
 
-    internal async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
+    private async Task<FallibleResultWithDiagnostics<AspectPipelineResultAndState>> ExecuteAsync(
         Compilation compilation,
         bool autoResumePipeline,
         AsyncExecutionContext executionContext,
@@ -426,7 +429,7 @@ internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineCon
         {
             var transitiveAspectManifestProvider = await pipeline.GetDesignTimeProjectVersionAsync(
                 compilation.Compilation,
-                autoResumePipeline: false,
+                false,
                 executionContext,
                 cancellationToken );
 

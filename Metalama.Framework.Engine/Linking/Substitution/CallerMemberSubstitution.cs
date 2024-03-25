@@ -7,74 +7,72 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Linking.Substitution
+namespace Metalama.Framework.Engine.Linking.Substitution;
+
+/// <summary>
+/// Substitutes accesses to event field delegate, i.e. the backing field.
+/// </summary>
+internal sealed class CallerMemberSubstitution : SyntaxNodeSubstitution
 {
-    /// <summary>
-    /// Substitutes accesses to event field delegate, i.e. the backing field.
-    /// </summary>
-    internal sealed class CallerMemberSubstitution : SyntaxNodeSubstitution
+    private readonly SyntaxNode _rootNode;
+    private readonly IMethodSymbol _referencingOverrideTarget;
+    private readonly IMethodSymbol _targetMethod;
+    private readonly IReadOnlyList<int> _parametersToFix;
+
+    public CallerMemberSubstitution(
+        CompilationContext compilationContext,
+        SyntaxNode rootNode,
+        IMethodSymbol referencingOverrideTarget,
+        IMethodSymbol targetMethod,
+        IReadOnlyList<int> parametersToFix )
+        : base( compilationContext )
     {
-        private readonly SyntaxNode _rootNode;
-        private readonly IMethodSymbol _referencingOverrideTarget;
-        private readonly IMethodSymbol _targetMethod;
-        private readonly IReadOnlyList<int> _parametersToFix;
+        this._rootNode = rootNode;
+        this._referencingOverrideTarget = referencingOverrideTarget;
+        this._targetMethod = targetMethod;
+        this._parametersToFix = parametersToFix;
+    }
 
-        public CallerMemberSubstitution(
-            CompilationContext compilationContext,
-            SyntaxNode rootNode,
-            IMethodSymbol referencingOverrideTarget,
-            IMethodSymbol targetMethod,
-            IReadOnlyList<int> parametersToFix )
-            : base( compilationContext )
+    public override SyntaxNode TargetNode => this._rootNode;
+
+    public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    {
+        switch ( currentNode )
         {
-            this._rootNode = rootNode;
-            this._referencingOverrideTarget = referencingOverrideTarget;
-            this._targetMethod = targetMethod;
-            this._parametersToFix = parametersToFix;
+            case InvocationExpressionSyntax invocationExpression:
+                var additionalArguments = new List<ArgumentSyntax>();
+
+                foreach ( var parameterToFix in this._parametersToFix )
+                {
+                    var parameter = this._targetMethod.Parameters[parameterToFix];
+
+                    additionalArguments.Add(
+                        Argument(
+                            NameColon( parameter.Name ),
+                            default,
+                            LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( this.GetTargetName() ) ) ) );
+                }
+
+                return
+                    invocationExpression
+                        .WithArgumentList(
+                            invocationExpression.ArgumentList.WithArguments( invocationExpression.ArgumentList.Arguments.AddRange( additionalArguments ) ) );
+
+            default:
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
         }
+    }
 
-        public override SyntaxNode TargetNode => this._rootNode;
-
-        public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext substitutionContext )
+    private string GetTargetName()
+    {
+        switch ( this._referencingOverrideTarget )
         {
-            switch ( currentNode )
-            {
-                case InvocationExpressionSyntax invocationExpression:
-                    var additionalArguments = new List<ArgumentSyntax>();
+            case { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet }:
+            case { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove }:
+                return this._referencingOverrideTarget.AssociatedSymbol.AssertNotNull().Name;
 
-                    foreach ( var parameterToFix in this._parametersToFix )
-                    {
-                        var parameter = this._targetMethod.Parameters[parameterToFix];
-
-                        additionalArguments.Add(
-                            Argument(
-                                NameColon( parameter.Name ),
-                                default,
-                                LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( this.GetTargetName() ) ) ) );
-                    }
-
-                    return
-                        invocationExpression
-                            .WithArgumentList(
-                                invocationExpression.ArgumentList.WithArguments(
-                                    invocationExpression.ArgumentList.Arguments.AddRange( additionalArguments ) ) );
-
-                default:
-                    throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
-            }
-        }
-
-        private string GetTargetName()
-        {
-            switch ( this._referencingOverrideTarget )
-            {
-                case { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet }:
-                case { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove }:
-                    return this._referencingOverrideTarget.AssociatedSymbol.AssertNotNull().Name;
-
-                default:
-                    return this._referencingOverrideTarget.Name;
-            }
+            default:
+                return this._referencingOverrideTarget.Name;
         }
     }
 }

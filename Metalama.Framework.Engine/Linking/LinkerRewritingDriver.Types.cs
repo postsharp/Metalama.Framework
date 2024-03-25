@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,21 +23,20 @@ internal sealed partial class LinkerRewritingDriver
 #if ROSLYN_4_8_0_OR_GREATER
             classDeclaration =
                 classDeclaration.PartialUpdate(
-                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ),
+                    RewritePrimaryConstructorTypeAttributeLists( classDeclaration.AttributeLists ),
+                    parameterList: default(ParameterListSyntax),
                     baseList:
-                        classDeclaration.BaseList != null
-                        ? classDeclaration.BaseList.WithTypes(
-                            SeparatedList(
-                            classDeclaration.BaseList.Types.SelectAsArray( b =>
-                                b switch
-                                {
-                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                    _ => b
-                                } ) ) )
-                        : default );
+                    classDeclaration.BaseList?.WithTypes(
+                        SeparatedList(
+                            classDeclaration.BaseList.Types.SelectAsArray(
+                                b =>
+                                    b switch
+                                    {
+                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                        _ => b
+                                    } ) ) ) );
 #else
-        throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+            throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
         }
 
@@ -56,10 +55,10 @@ internal sealed partial class LinkerRewritingDriver
 #if ROSLYN_4_8_0_OR_GREATER
             structDeclaration =
                 structDeclaration.PartialUpdate(
-                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ) );
+                    RewritePrimaryConstructorTypeAttributeLists( structDeclaration.AttributeLists ),
+                    parameterList: default(ParameterListSyntax) );
 #else
-        throw new AssertionFailedException( "This code should not run in this Roslyn version." );
+            throw new AssertionFailedException( "This code should not run in this Roslyn version." );
 #endif
         }
 
@@ -77,19 +76,18 @@ internal sealed partial class LinkerRewritingDriver
         {
             recordDeclaration =
                 recordDeclaration.PartialUpdate(
-                    attributeLists: RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
-                    parameterList: default( ParameterListSyntax ),
+                    RewritePrimaryConstructorTypeAttributeLists( recordDeclaration.AttributeLists ),
+                    parameterList: default(ParameterListSyntax),
                     baseList:
-                        recordDeclaration.BaseList != null
-                        ? recordDeclaration.BaseList.WithTypes(
-                            SeparatedList(
-                            recordDeclaration.BaseList.Types.SelectAsArray( b =>
-                                b switch
-                                {
-                                    PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
-                                    _ => b
-                                } ) ) )
-                        : default );
+                    recordDeclaration.BaseList?.WithTypes(
+                        SeparatedList(
+                            recordDeclaration.BaseList.Types.SelectAsArray(
+                                b =>
+                                    b switch
+                                    {
+                                        PrimaryConstructorBaseTypeSyntax pc => SimpleBaseType( pc.Type ),
+                                        _ => b
+                                    } ) ) ) );
         }
         else if ( recordDeclaration.ParameterList != null )
         {
@@ -108,12 +106,15 @@ internal sealed partial class LinkerRewritingDriver
                 var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter ).AssertNotNull();
                 var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
 
-                if ( propertySymbol != null && this.IsRewriteTarget( propertySymbol ) )
+                if ( propertySymbol?.GetPrimaryDeclaration() is ParameterSyntax && this.IsRewriteTarget( propertySymbol ) )
                 {
                     SyntaxGenerationContext GetSyntaxGenerationContext()
-                        => generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                    {
+                        return generationContext ??= this.IntermediateCompilationContext.GetSyntaxGenerationContext(
+                            this.SyntaxGenerationOptions,
                             recordDeclaration.SyntaxTree,
                             recordDeclaration.SpanStart );
+                    }
 
                     // Add new members that take place of synthesized positional property.
                     newMembers.AddRange(
@@ -147,7 +148,8 @@ internal sealed partial class LinkerRewritingDriver
                 }
             }
 
-            recordDeclaration = recordDeclaration.WithParameterList( recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+            recordDeclaration = recordDeclaration.WithParameterList(
+                recordDeclaration.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
             if ( newMembers is { Count: > 0 } )
             {
@@ -161,9 +163,6 @@ internal sealed partial class LinkerRewritingDriver
         return recordDeclaration;
     }
 
-    public static SyntaxList<AttributeListSyntax> RewritePrimaryConstructorTypeAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
-    {
-        return
-            List( attributeLists.Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) != true ) );
-    }
+    private static SyntaxList<AttributeListSyntax> RewritePrimaryConstructorTypeAttributeLists( SyntaxList<AttributeListSyntax> attributeLists )
+        => List( attributeLists.Where( al => al.Target?.Identifier.IsKind( SyntaxKind.MethodKeyword ) != true ) );
 }

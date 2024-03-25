@@ -11,140 +11,139 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.CodeModel
-{
-    internal sealed class CompilationHelpers : ICompilationHelpers
-    {
-        private readonly ProjectServiceProvider _serviceProvider;
-        private UserCodeAttributeDeserializer? _attributeDeserializer;
+namespace Metalama.Framework.Engine.CodeModel;
 
-        public CompilationHelpers( ProjectServiceProvider serviceProvider )
+internal sealed class CompilationHelpers : ICompilationHelpers
+{
+    private readonly ProjectServiceProvider _serviceProvider;
+    private UserCodeAttributeDeserializer? _attributeDeserializer;
+
+    public CompilationHelpers( in ProjectServiceProvider serviceProvider )
+    {
+        this._serviceProvider = serviceProvider;
+    }
+
+    public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
+
+    public AsyncInfo GetAsyncInfo( IMethod method ) => method.GetAsyncInfoImpl();
+
+    public AsyncInfo GetAsyncInfo( IType type ) => type.GetAsyncInfoImpl();
+
+    public string GetMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionName();
+
+    public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionFullName();
+
+    public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
+
+    public IExpression ToTypeOfExpression( IType type ) => new TypeOfUserExpression( type );
+
+    public bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default )
+    {
+        if ( right.Definition != right )
         {
-            this._serviceProvider = serviceProvider;
+            throw new ArgumentOutOfRangeException( nameof(right), "The type must not be a generic type instance." );
         }
 
-        public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
-
-        public AsyncInfo GetAsyncInfo( IMethod method ) => method.GetAsyncInfoImpl();
-
-        public AsyncInfo GetAsyncInfo( IType type ) => type.GetAsyncInfoImpl();
-
-        public string GetMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionName();
-
-        public string GetFullMetadataName( INamedType type ) => ((INamedTypeSymbol) ((INamedTypeImpl) type).TypeSymbol).GetReflectionFullName();
-
-        public SerializableTypeId GetSerializableId( IType type ) => type.GetSymbol().GetSerializableTypeId();
-
-        public IExpression ToTypeOfExpression( IType type ) => new TypeOfUserExpression( type );
-
-        public bool DerivesFrom( INamedType left, INamedType right, DerivedTypesOptions options = DerivedTypesOptions.Default )
+        // We do not include the right type itself.
+        if ( left.Definition.Equals( right ) )
         {
-            if ( right.Definition != right )
+            return false;
+        }
+
+        switch ( options )
+        {
+            case DerivedTypesOptions.All:
+                return IsEqualOrDerivesFromWithAnyDegree( left );
+
+            case DerivedTypesOptions.DirectOnly:
+                return DerivesFromDirectly( left );
+
+            case DerivedTypesOptions.FirstLevelWithinCompilationOnly:
+                return DerivesFromWithFirstLevel( left );
+
+            default:
+                throw new ArgumentOutOfRangeException( nameof(options) );
+        }
+
+        bool IsEqualOrDerivesFromWithAnyDegree( INamedType type )
+        {
+            if ( type.Equals( right ) )
             {
-                throw new ArgumentOutOfRangeException( nameof(right), "The type must not be a generic type instance." );
+                return true;
             }
 
-            // We do not include the right type itself.
-            if ( left.Definition.Equals( right ) )
+            if ( type.BaseType != null )
             {
-                return false;
-            }
-
-            switch ( options )
-            {
-                case DerivedTypesOptions.All:
-                    return IsEqualOrDerivesFromWithAnyDegree( left );
-
-                case DerivedTypesOptions.DirectOnly:
-                    return DerivesFromDirectly( left );
-
-                case DerivedTypesOptions.FirstLevelWithinCompilationOnly:
-                    return DerivesFromWithFirstLevel( left );
-
-                default:
-                    throw new ArgumentOutOfRangeException( nameof(options) );
-            }
-
-            bool IsEqualOrDerivesFromWithAnyDegree( INamedType type )
-            {
-                if ( type.Equals( right ) )
+                if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.Definition ) )
                 {
                     return true;
                 }
-
-                if ( type.BaseType != null )
-                {
-                    if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.Definition ) )
-                    {
-                        return true;
-                    }
-                }
-
-                foreach ( var i in type.ImplementedInterfaces )
-                {
-                    if ( IsEqualOrDerivesFromWithAnyDegree( i.Definition ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
             }
 
-            bool DerivesFromDirectly( INamedType type )
+            foreach ( var i in type.ImplementedInterfaces )
             {
-                if ( type.BaseType != null )
+                if ( IsEqualOrDerivesFromWithAnyDegree( i.Definition ) )
                 {
-                    var baseType = type.BaseType.Definition;
-
-                    if ( baseType.Equals( right ) )
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-
-                foreach ( var i in type.ImplementedInterfaces )
-                {
-                    if ( i.Definition.Equals( right ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
             }
 
-            bool DerivesFromWithFirstLevel( INamedType type )
-            {
-                if ( type.BaseType != null && !type.BaseType.DeclaringAssembly.Equals( type.DeclaringAssembly ) )
-                {
-                    if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.Definition ) )
-                    {
-                        return true;
-                    }
-                }
-
-                foreach ( var i in type.ImplementedInterfaces )
-                {
-                    if ( !i.DeclaringAssembly.Equals( type.DeclaringAssembly ) && IsEqualOrDerivesFromWithAnyDegree( i.Definition ) )
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
+            return false;
         }
 
-        public bool TryConstructAttribute(
-            IAttribute attribute,
-            ScopedDiagnosticSink diagnosticSink,
-            [NotNullWhen( true )] out System.Attribute? constructedAttribute )
+        bool DerivesFromDirectly( INamedType type )
         {
-            // The service is not always available in tests, so we get it lazily.
-            this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
-            
-            return this._attributeDeserializer.TryCreateAttribute( attribute, (IDiagnosticAdder) diagnosticSink.Sink, out constructedAttribute );
+            if ( type.BaseType != null )
+            {
+                var baseType = type.BaseType.Definition;
+
+                if ( baseType.Equals( right ) )
+                {
+                    return true;
+                }
+            }
+
+            foreach ( var i in type.ImplementedInterfaces )
+            {
+                if ( i.Definition.Equals( right ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
+
+        bool DerivesFromWithFirstLevel( INamedType type )
+        {
+            if ( type.BaseType != null && !type.BaseType.DeclaringAssembly.Equals( type.DeclaringAssembly ) )
+            {
+                if ( IsEqualOrDerivesFromWithAnyDegree( type.BaseType.Definition ) )
+                {
+                    return true;
+                }
+            }
+
+            foreach ( var i in type.ImplementedInterfaces )
+            {
+                if ( !i.DeclaringAssembly.Equals( type.DeclaringAssembly ) && IsEqualOrDerivesFromWithAnyDegree( i.Definition ) )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    public bool TryConstructAttribute(
+        IAttribute attribute,
+        ScopedDiagnosticSink diagnosticSink,
+        [NotNullWhen( true )] out System.Attribute? constructedAttribute )
+    {
+        // The service is not always available in tests, so we get it lazily.
+        this._attributeDeserializer ??= this._serviceProvider.GetRequiredService<UserCodeAttributeDeserializer>();
+
+        return this._attributeDeserializer.TryCreateAttribute( attribute, (IDiagnosticAdder) diagnosticSink.Sink, out constructedAttribute );
     }
 }

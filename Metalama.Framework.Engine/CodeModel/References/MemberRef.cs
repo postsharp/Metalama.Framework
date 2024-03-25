@@ -40,7 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 
-        public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTargetOrNull( compilation, options );
+        public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default )
+            => this._underlying.GetTargetOrNull( compilation, options );
 
         public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation ).AssertNotNull();
 
@@ -70,6 +71,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
 #pragma warning disable CS0809
         [Obsolete( "Use comparer.", true )]
         public override int GetHashCode() => throw new NotSupportedException( $"Must use {nameof(MemberRefEqualityComparer<T>)}." );
-#pragma warning restore CS0809        
+#pragma warning restore CS0809
     }
 }

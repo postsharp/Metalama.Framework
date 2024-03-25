@@ -2,8 +2,6 @@
 // @RemoveOutputCode
 #endif
 
-using System;
-using System.Collections.Generic;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;

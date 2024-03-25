@@ -552,7 +552,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             public int InitOnlyProperty { get; init; }
         }
 
-        public class DerivedAttribute : TestAttribute { }
+        public class DerivedAttribute : TestAttribute;
 
         public class TestParamsAttribute : Attribute
         {
@@ -633,7 +633,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
             // We provide a non-standard CompileTimeTypeFactory to break a conflict in the initialization of dependencies.
             // Another CompileTimeTypeFactory instance is created by the ServiceProviderFactory. It should not matter for this test.
 
-            public HackedSystemTypeResolver( ProjectServiceProvider serviceProvider ) : base( serviceProvider.WithService( new CompileTimeTypeFactory() ) ) { }
+            public HackedSystemTypeResolver( in ProjectServiceProvider serviceProvider ) : base( serviceProvider.WithService( new CompileTimeTypeFactory() ) ) { }
 
             protected override bool IsSupportedAssembly( string assemblyName )
                 => base.IsSupportedAssembly( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;

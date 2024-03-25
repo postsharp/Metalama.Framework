@@ -23,7 +23,7 @@ public static class AttributeHelper
     public static void Parse( string fullName, out string ns, out string shortName )
     {
         string typeName;
-        
+
         var lastDot = fullName.LastIndexOf( '.' );
 
         if ( lastDot >= 0 )

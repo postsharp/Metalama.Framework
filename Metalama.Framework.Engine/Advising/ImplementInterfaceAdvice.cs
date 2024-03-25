@@ -47,7 +47,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
     public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
 
-    public override void Initialize( ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+    public override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
     {
         base.Initialize( serviceProvider, diagnosticAdder );
 
@@ -91,7 +91,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
         // should be reported.            
 
-        var templateReflectionContext = this.TemplateInstance.TemplateClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
+        var templateReflectionContext =
+            this.TemplateInstance.TemplateClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
 
         var templateClassType = templateReflectionContext.GetCompilationModel( this.SourceCompilation )
             .Factory.GetTypeByReflectionName( this.TemplateInstance.TemplateClass.FullName );

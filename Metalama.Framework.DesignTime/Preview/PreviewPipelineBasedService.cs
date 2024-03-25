@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
@@ -102,6 +103,7 @@ public abstract class PreviewPipelineBasedService
         // in the project service provider, i.e. it will affect only services created from now.
         var previewServiceProvider = designTimeConfiguration.ServiceProvider
             .WithService( new PreviewProjectOptions( designTimeConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>() ), true )
+            .WithService( SyntaxGenerationOptions.Formatted, true )
             .WithService( transitiveAspectManifest.Value );
 
         var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );

@@ -218,6 +218,6 @@ namespace Metalama.AspectWorkbench.ViewModels
             //    new Binding( "ActualWidth" ) { Source = richTextBox } );
         }
 
-        public SyntaxColorizer( ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
+        public SyntaxColorizer( in ProjectServiceProvider serviceProvider ) : base( serviceProvider ) { }
     }
 }

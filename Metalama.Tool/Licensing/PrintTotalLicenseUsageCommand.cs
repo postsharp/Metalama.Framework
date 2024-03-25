@@ -10,7 +10,7 @@ namespace Metalama.Tool.Licensing;
 [UsedImplicitly]
 internal class PrintTotalLicenseUsageCommand : LicenseUsageBaseCommand
 {
-    protected override void Execute( LicenseUsageCommandContext context, LicenseUsageCommandSettings settings )
+    protected override void Execute( LicenseUsageCommandContext context )
     {
         var requiredAspectClassesCount = context.Files.Max( f => f.TotalAspectClasses );
 

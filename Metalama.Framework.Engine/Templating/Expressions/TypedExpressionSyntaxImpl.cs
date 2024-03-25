@@ -3,12 +3,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             ITypeSymbol? expressionType,
             SyntaxGenerationContext generationContext,
             bool? isReferenceable = null,
-            bool canBeNull = true )
+            bool? canBeNull = null )
         {
             if ( expressionType == null )
             {
@@ -70,8 +70,17 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
             // If IsReferenceable is not specified explicitly, attempt to infer it.
             // The inference is currently very simple: it's referenceable only of it's just an identifier.
+            // TODO: We could support ReturnsByRef but this information is not on the expression type but on the expression itself,
+            // so it must be sent from upstream.
             this.IsReferenceable = isReferenceable ?? syntax is IdentifierNameSyntax;
-            this.CanBeNull = canBeNull;
+
+            // Infer nullability from the expression type if we have it.
+            if ( canBeNull == null && expressionType != null && expressionType.NullableAnnotation != NullableAnnotation.None )
+            {
+                canBeNull = expressionType.NullableAnnotation == NullableAnnotation.Annotated;
+            }
+            
+            this.CanBeNull = canBeNull ?? true;
         }
 
         internal TypedExpressionSyntaxImpl(
@@ -79,7 +88,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             IType type,
             SyntaxGenerationContext generationContext,
             bool? isReferenceable = null,
-            bool canBeNull = true )
+            bool? canBeNull = null )
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable, canBeNull ) { }
 
         internal TypedExpressionSyntaxImpl(
@@ -179,7 +188,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
             var cast = (ExpressionSyntax) generationContext.SyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
 
-            var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithAdditionalAnnotations( Simplifier.Annotation );
+            var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithSimplifierAnnotationIfNecessary( generationContext );
 
             return new TypedExpressionSyntaxImpl( expression, targetType, generationContext, this.IsReferenceable, this.CanBeNull );
         }

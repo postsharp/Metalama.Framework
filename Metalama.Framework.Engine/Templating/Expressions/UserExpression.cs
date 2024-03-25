@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
         public virtual bool IsAssignable => false;
 
-        internal virtual bool IsReferenceable => false;
+        private protected virtual bool IsReferenceable => false;
 
         public ref object? Value => ref RefHelper.Wrap( this );
 
@@ -52,7 +53,10 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             var compilation = this.Type.GetCompilationModel();
 
             return
-                this.ToSyntax( new( compilation, SyntaxGenerationContext.Create( compilation.CompilationContext, isNullOblivious: false ) ) )
+                this.ToSyntax(
+                        new SyntaxSerializationContext(
+                            compilation,
+                            compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: false ) ) )
                     .NormalizeWhitespace()
                     .ToString();
         }

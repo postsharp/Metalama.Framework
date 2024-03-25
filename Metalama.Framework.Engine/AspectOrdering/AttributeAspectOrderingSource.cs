@@ -10,49 +10,48 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.AspectOrdering
+namespace Metalama.Framework.Engine.AspectOrdering;
+
+internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
 {
-    internal sealed class AttributeAspectOrderingSource : IAspectOrderingSource
+    private readonly Compilation _compilation;
+    private readonly IAttributeDeserializer _attributeDeserializer;
+
+    public AttributeAspectOrderingSource( in ProjectServiceProvider serviceProvider, Compilation compilation )
     {
-        private readonly Compilation _compilation;
-        private readonly IAttributeDeserializer _attributeDeserializer;
+        this._compilation = compilation;
+        this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
+    }
 
-        public AttributeAspectOrderingSource( ProjectServiceProvider serviceProvider, Compilation compilation )
-        {
-            this._compilation = compilation;
-            this._attributeDeserializer = serviceProvider.GetRequiredService<ISystemAttributeDeserializer>();
-        }
+    public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
+    {
+        var roslynCompilation = this._compilation;
 
-        public IEnumerable<AspectOrderSpecification> GetAspectOrderSpecification( IDiagnosticAdder diagnosticAdder )
-        {
-            var roslynCompilation = this._compilation;
+        // Get compile-time level attributes of the current assembly and all referenced assemblies.
+        var orderAttributeName = typeof(AspectOrderAttribute).FullName;
 
-            // Get compile-time level attributes of the current assembly and all referenced assemblies.
-            var orderAttributeName = typeof(AspectOrderAttribute).FullName;
+        var attributes =
+            roslynCompilation.Assembly.Modules
+                .SelectMany( m => m.ReferencedAssemblySymbols )
+                .Concat( new[] { roslynCompilation.Assembly } )
+                .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
+                .Where( a => a.attribute.AttributeClass?.GetReflectionFullName() == orderAttributeName );
 
-            var attributes =
-                roslynCompilation.Assembly.Modules
-                    .SelectMany( m => m.ReferencedAssemblySymbols )
-                    .Concat( new[] { roslynCompilation.Assembly } )
-                    .SelectMany( assembly => assembly.GetAttributes().Select( attribute => (attribute, assembly) ) )
-                    .Where( a => a.attribute.AttributeClass?.GetReflectionFullName() == orderAttributeName );
-
-            return attributes.Select(
-                    attribute =>
+        return attributes.Select(
+                attribute =>
+                {
+                    if ( this._attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
+                            attribute.attribute,
+                            diagnosticAdder,
+                            out var attributeInstance ) )
                     {
-                        if ( this._attributeDeserializer.TryCreateAttribute<AspectOrderAttribute>(
-                                attribute.attribute,
-                                diagnosticAdder,
-                                out var attributeInstance ) )
-                        {
-                            return new AspectOrderSpecification( attributeInstance, attribute.attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() );
-                        }
-                        else
-                        {
-                            return null;
-                        }
-                    } )
-                .WhereNotNull();
-        }
+                        return new AspectOrderSpecification( attributeInstance, attribute.attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation() );
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                } )
+            .WhereNotNull();
     }
 }

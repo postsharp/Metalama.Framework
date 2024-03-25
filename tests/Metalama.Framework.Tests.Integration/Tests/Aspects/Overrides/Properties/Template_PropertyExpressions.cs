@@ -1,9 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Template_PropertyExpressions
 {

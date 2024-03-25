@@ -7,7 +7,7 @@ namespace Metalama.Framework.Code;
 /// <summary>
 /// A non-generic base interface for the generic <see cref="IAnnotation{T}"/>. You should always implement the generic interface.
 /// </summary>
-public interface IAnnotation : ICompileTimeSerializable { }
+public interface IAnnotation : ICompileTimeSerializable;
 
 // ReSharper disable once UnusedTypeParameter
 /// <summary>
@@ -17,4 +17,4 @@ public interface IAnnotation : ICompileTimeSerializable { }
 /// </summary>
 /// <typeparam name="T">The type of declarations to which the annotation can be added.</typeparam>
 public interface IAnnotation<in T> : IAnnotation
-    where T : class, IDeclaration { }
+    where T : class, IDeclaration;

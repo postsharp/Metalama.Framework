@@ -18,14 +18,14 @@ internal sealed class ReferenceAssemblyLocatorProvider : IGlobalService
     private volatile ImmutableDictionary<string, ReferenceAssemblyLocator> _referenceAssemblyLocators =
         ImmutableDictionary<string, ReferenceAssemblyLocator>.Empty;
 
-    public ReferenceAssemblyLocator GetInstance( ProjectServiceProvider serviceProvider )
+    public ReferenceAssemblyLocator GetInstance( in ProjectServiceProvider serviceProvider )
     {
         var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
         var additionalPackageReferences = projectOptions.CompileTimePackages.IsDefaultOrEmpty
             ? string.Empty
             : ReferenceAssemblyLocator.GetAdditionalPackageReferences( projectOptions );
-        
+
         if ( !this._referenceAssemblyLocators.TryGetValue( additionalPackageReferences, out var referenceAssemblyLocator ) )
         {
             // We lock instead of using ConcurrentDictionary because instantiating the class is expensive.

@@ -6,13 +6,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.SyntaxSerialization
+namespace Metalama.Framework.Engine.SyntaxSerialization;
+
+internal sealed class TimeSpanSerializer : ObjectSerializer<TimeSpan>
 {
-    internal sealed class TimeSpanSerializer : ObjectSerializer<TimeSpan>
-    {
-        public override ExpressionSyntax Serialize( TimeSpan obj, SyntaxSerializationContext serializationContext )
-        {
-            return ObjectCreationExpression(
+    public override ExpressionSyntax Serialize( TimeSpan obj, SyntaxSerializationContext serializationContext )
+        => ObjectCreationExpression(
                 serializationContext.GetTypeSyntax( typeof(TimeSpan) ),
                 ArgumentList(
                     SingletonSeparatedList(
@@ -21,9 +20,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 SyntaxKind.NumericLiteralExpression,
                                 Literal( obj.Ticks ) ) ) ) ),
                 null )
-                .NormalizeWhitespaceIfNecessary( serializationContext.CompilationContext.NormalizeWhitespace );
-        }
+            .NormalizeWhitespaceIfNecessary( serializationContext.SyntaxGenerationContext );
 
-        public TimeSpanSerializer( SyntaxSerializationService service ) : base( service ) { }
-    }
+    public TimeSpanSerializer( SyntaxSerializationService service ) : base( service ) { }
 }

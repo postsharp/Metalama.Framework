@@ -34,7 +34,8 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
     public bool IsParams => this._parameterBuilder.IsParams;
 
     [Memo]
-    public IHasParameters DeclaringMember => this.Compilation.Factory.GetDeclaration( this._parameterBuilder.DeclaringMember, ReferenceResolutionOptions.CanBeMissing );
+    public IHasParameters DeclaringMember
+        => this.Compilation.Factory.GetDeclaration( this._parameterBuilder.DeclaringMember, ReferenceResolutionOptions.CanBeMissing );
 
     public ParameterInfo ToParameterInfo() => this._parameterBuilder.ToParameterInfo();
 

@@ -188,10 +188,10 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                 foreach ( var diagnostic in orderedDiagnostics )
                 {
-                    if ( diagnostic.Properties?.TryGetValue( DeduplicationPropertyKey, out var deduplicationKey ) == true
+                    if ( diagnostic.Properties.TryGetValue( DeduplicationPropertyKey, out var deduplicationKey )
                          && deduplicationKey != null )
                     {
-                        deduplicatedDiagnostics ??= new();
+                        deduplicatedDiagnostics ??= new HashSet<(string DiagnosticId, string DeduplicationKey)>();
 
                         if ( !deduplicatedDiagnostics.Add( (diagnostic.Id, deduplicationKey) ) )
                         {
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 immutableDiagnostics = arrayBuilder.ToImmutable();
             }
 
-            return new( immutableDiagnostics, this._suppressions?.ToImmutableArray(), this._codeFixes?.ToImmutableArray() );
+            return new ImmutableUserDiagnosticList( immutableDiagnostics, this._suppressions?.ToImmutableArray(), this._codeFixes?.ToImmutableArray() );
         }
 
         public override string ToString()

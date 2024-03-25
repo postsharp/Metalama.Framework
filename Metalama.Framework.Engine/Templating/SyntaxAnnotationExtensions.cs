@@ -364,8 +364,7 @@ namespace Metalama.Framework.Engine.Templating
             where T : SyntaxNode
             => node.WithAdditionalAnnotations( _noDeepIndentAnnotation );
 
-        public static SyntaxToken AddMetaVariableAnnotation( this SyntaxToken token )
-            => token.WithAdditionalAnnotations( _metaVariableAnnotation );
+        public static SyntaxToken AddMetaVariableAnnotation( this SyntaxToken token ) => token.WithAdditionalAnnotations( _metaVariableAnnotation );
 
         public static bool HasNoDeepIndentAnnotation( this SyntaxNode node ) => node.HasAnnotation( _noDeepIndentAnnotation );
 

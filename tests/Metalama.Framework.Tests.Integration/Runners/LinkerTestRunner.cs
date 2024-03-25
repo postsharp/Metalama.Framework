@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
@@ -52,9 +53,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
             // the linker tests because they are not cross-assembly.
-            var serviceProvider = (ProjectServiceProvider) testContext.ServiceProvider.Global.Underlying.WithProjectScopedServices(
-                new DefaultProjectOptions(),
-                TestCompilationFactory.GetMetadataReferences() );
+            var serviceProvider = (ProjectServiceProvider) testContext.ServiceProvider.Global.Underlying
+                .WithProjectScopedServices( new DefaultProjectOptions(), TestCompilationFactory.GetMetadataReferences() )
+                .WithService( SyntaxGenerationOptions.Formatted );
 
             serviceProvider = serviceProvider.WithCompileTimeProjectServices( CompileTimeProjectRepository.CreateTestInstance() );
 
@@ -77,8 +78,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-
-            CompilationContext.SetTriviaHandling( linkerInput.CompilationModel.RoslynCompilation, true, true );
 
             var linker = new AspectLinker( serviceProvider, linkerInput );
 

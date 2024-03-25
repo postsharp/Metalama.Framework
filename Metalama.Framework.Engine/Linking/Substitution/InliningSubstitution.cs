@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,15 +28,16 @@ namespace Metalama.Framework.Engine.Linking.Substitution
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {
             var statements = new List<StatementSyntax>();
+            var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
             if ( this._specification.DeclareReturnVariable )
             {
                 statements.Add(
                     LocalDeclarationStatement(
                             VariableDeclaration(
-                                context.SyntaxGenerationContext.SyntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
+                                syntaxGenerator.Type( GetReturnType( this._specification.AspectReference.OriginalSymbol ) ),
                                 SingletonSeparatedList( VariableDeclarator( this._specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
+                        .WithOptionalTrailingLineFeed( context.SyntaxGenerationContext )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) );
             }
 
@@ -57,12 +57,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     LabeledStatement(
                             Identifier( this._specification.ReturnLabelIdentifier.AssertNotNull() ),
                             EmptyStatement() )
-                        .WithTrailingTriviaIfNecessary( ElasticLineFeed, context.SyntaxGenerationContext.NormalizeWhitespace )
+                        .WithOptionalTrailingLineFeed( context.SyntaxGenerationContext )
                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyLabeledStatement ) );
             }
 
-            return SyntaxFactoryEx.FormattedBlock( statements )
+            return syntaxGenerator.FormattedBlock( statements )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
 

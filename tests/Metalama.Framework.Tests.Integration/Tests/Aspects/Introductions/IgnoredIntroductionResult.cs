@@ -2,9 +2,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 using System;
-using System.IO;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.IgnoredIntroductionResult;
 

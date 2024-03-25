@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,26 +16,26 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class RewriterHelper
 {
+    private readonly ClassifyingCompilationContext _runTimeCompilationContext;
     private readonly Func<SyntaxNode, SyntaxNode> _rewriteThrowNotSupported;
-
-    public ISymbolClassifier SymbolClassifier { get; }
 
     public RewriterHelper(
         ClassifyingCompilationContext runTimeCompilationContext,
         Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
     {
+        this._runTimeCompilationContext = runTimeCompilationContext;
         this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
-        this.SymbolClassifier = runTimeCompilationContext.SymbolClassifier;
-        this.SemanticModelProvider = runTimeCompilationContext.SemanticModelProvider;
     }
 
-    public SemanticModelProvider SemanticModelProvider { get; }
+    public SemanticModelProvider SemanticModelProvider => this._runTimeCompilationContext.SemanticModelProvider;
+
+    public ISymbolClassifier SymbolClassifier => this._runTimeCompilationContext.SymbolClassifier;
 
     private T RewriteThrowNotSupported<T>( T node )
         where T : SyntaxNode
         => (T) this._rewriteThrowNotSupported( node );
 
-    private static T WithSuppressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
+    private static T WithSuppressedDiagnostics<T>( T member, SyntaxGenerationContext context, params string[] suppressedDiagnostics )
         where T : MemberDeclarationSyntax
     {
         if ( suppressedDiagnostics.Length == 0 )
@@ -81,19 +82,19 @@ internal sealed class RewriterHelper
         StructuredTriviaSyntax GetPragmaTrivia( bool disable )
         {
             return PragmaWarningDirectiveTrivia(
-                Token( SyntaxKind.HashToken ).WithLeadingTrivia( ElasticLineFeed ),
-                Token( SyntaxKind.PragmaKeyword ).WithTrailingTrivia( ElasticSpace ),
-                Token( SyntaxKind.WarningKeyword ).WithTrailingTrivia( ElasticSpace ),
+                Token( SyntaxKind.HashToken ).WithRequiredLeadingLineFeed( context ),
+                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
+                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
                 disable
-                    ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
-                    : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
+                    ? SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.DisableKeyword )
+                    : SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.RestoreKeyword ),
                 SeparatedList<ExpressionSyntax>( suppressedDiagnostics.SelectAsReadOnlyList( IdentifierName ) ),
-                Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
+                Token( SyntaxKind.EndOfDirectiveToken ).WithRequiredTrailingLineFeed( context ),
                 true );
         }
     }
 
-    public MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
+    public MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message, SyntaxGenerationContext context )
     {
         // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
         if ( method.Body == null && method.ExpressionBody == null )
@@ -126,7 +127,7 @@ internal sealed class RewriterHelper
                     method
                         .WithBody(
                             isIterator
-                                ? SyntaxFactoryEx.FormattedBlock(
+                                ? context.SyntaxGenerator.FormattedBlock(
                                     ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
                                     YieldStatement( SyntaxKind.YieldBreakStatement ) )
                                 : null )
@@ -135,9 +136,10 @@ internal sealed class RewriterHelper
                                 ? null
                                 : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                         .WithSemicolonToken( isIterator ? default : Token( SyntaxKind.SemicolonToken ) )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( method.SyntaxTree ) )
                         .WithLeadingTrivia( method.GetLeadingTrivia() )
-                        .WithTrailingTrivia( LineFeed, LineFeed ),
+                        .WithTrailingTrivia( context.TwoElasticEndOfLinesTriviaList ),
+                    context,
                     suppressedWarnings.ToArray() ) );
     }
 
@@ -156,7 +158,7 @@ internal sealed class RewriterHelper
                 return this.RewriteThrowNotSupported(
                     property
                         .WithExpressionBody( property.ExpressionBody?.WithExpression( GetNotSupportedExceptionExpression( message ) ) )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( property.SyntaxTree ) )
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -174,7 +176,7 @@ internal sealed class RewriterHelper
                                             .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                             .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
                         .WithInitializer( null )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( property.SyntaxTree ) )
                         .WithLeadingTrivia( property.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 
@@ -192,7 +194,7 @@ internal sealed class RewriterHelper
                                     .WithBody( null )
                                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                     .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                .NormalizeWhitespace()
+                .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( property.SyntaxTree ) )
                 .WithLeadingTrivia( indexer.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
                 */
@@ -212,7 +214,7 @@ internal sealed class RewriterHelper
                                                     .WithBody( null )
                                                     .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                                                     .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ) ) ) ) )
-                        .NormalizeWhitespace()
+                        .NormalizeWhitespace( eol: EndOfLineHelper.DetermineEndOfLineStyleFast( @event.SyntaxTree ) )
                         .WithLeadingTrivia( @event.GetLeadingTrivia() )
                         .WithTrailingTrivia( LineFeed, LineFeed ) );
 

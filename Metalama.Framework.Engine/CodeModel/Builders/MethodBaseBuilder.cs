@@ -50,7 +50,7 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
 
     public abstract System.Reflection.MethodBase ToMethodBase();
 
-    public MethodBaseBuilder(
+    protected MethodBaseBuilder(
         Advice advice,
         INamedType targetType,
         string name )

@@ -51,7 +51,7 @@ public sealed class LicenseVerifier : IProjectService
     public static IEnumerable<string> GetConsumptionDataFiles( ITempFileManager tempFileManager )
         => Directory.GetFiles( GetConsumptionDataDirectory( tempFileManager ), $"{LicenseUsageFilePrefix}*.json" );
 
-    internal LicenseVerifier( ProjectServiceProvider serviceProvider )
+    internal LicenseVerifier( in ProjectServiceProvider serviceProvider )
     {
         this._licenseConsumptionService = serviceProvider.GetRequiredService<IProjectLicenseConsumptionService>();
         this._tempFileManager = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
@@ -141,13 +141,13 @@ public sealed class LicenseVerifier : IProjectService
     public bool VerifyCanApplyCodeFix( IAspectClass aspectClass )
         => aspectClass switch
         {
-            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
+            IAspectClassImpl { Project: not null } aspectClassImpl when this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,
 
             _ => this.CanConsumeForCurrentProject( LicenseRequirement.Professional )
         };
 
-    internal bool VerifyCanApplyLiveTemplate( ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
+    internal bool VerifyCanApplyLiveTemplate( in ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
         var manager = serviceProvider.GetService<IProjectLicenseConsumptionService>();
 
@@ -158,7 +158,7 @@ public sealed class LicenseVerifier : IProjectService
 
         return aspectClass switch
         {
-            IAspectClassImpl { Project: { } } aspectClassImpl when this.IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
+            IAspectClassImpl { Project: not null } aspectClassImpl when this.IsValidRedistributionProject( aspectClassImpl.Project, diagnostics, manager )
                 => true,
 
             _ => manager.CanConsume( LicenseRequirement.Professional, serviceProvider.GetService<IProjectOptions>()?.ProjectName )
@@ -172,7 +172,7 @@ public sealed class LicenseVerifier : IProjectService
         UserDiagnosticSink diagnostics )
     {
         var aspectInstanceResultsArray = aspectInstanceResults.ToImmutableArray();
-        
+
         // List all aspect classed, that are used.
         var aspectClasses = aspectInstanceResultsArray
 
@@ -206,7 +206,7 @@ public sealed class LicenseVerifier : IProjectService
                 .SelectAsArray( x => x.FullName )
                 .OrderBy( x => x )
                 .ToReadOnlyList();
-        
+
         var hasLicenseError = false;
 
         // Check the use of Metalama.Framework.Sdk.
@@ -223,7 +223,7 @@ public sealed class LicenseVerifier : IProjectService
                 hasLicenseError = true;
             }
         }
-        
+
         // Check availability of a license and enforce maximal number of classes.
         var maxAspectClasses = this switch
         {
@@ -236,7 +236,7 @@ public sealed class LicenseVerifier : IProjectService
 
         // We need to check for reported license errors here,
         // because aspect or validator instances might not be created when not allowed by the registered license.
-        var areLicensedFeaturesUsed = aspectInstanceResultsArray.Length > 0 || compilationHasValidator || this._reportedErrorCount > 0 || hasLicenseError; 
+        var areLicensedFeaturesUsed = aspectInstanceResultsArray.Length > 0 || compilationHasValidator || this._reportedErrorCount > 0 || hasLicenseError;
 
         if ( maxAspectClasses == 0 )
         {
@@ -278,7 +278,7 @@ public sealed class LicenseVerifier : IProjectService
                 }
             }
         }
-        
+
         // Show toast notifications if needed and if Metalama is used in the project.
         if ( areLicensedFeaturesUsed )
         {

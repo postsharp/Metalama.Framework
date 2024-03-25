@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
@@ -16,7 +17,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,19 +56,19 @@ namespace Metalama.Framework.Engine.Templating
 
         public void AddComments( List<StatementOrTrivia> list, params string?[]? comments )
         {
-            static IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
+            IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
             {
                 if ( comment.ContainsOrdinal( '\n' ) || comment.ContainsOrdinal( '\r' ) )
                 {
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                     yield return SyntaxFactory.Comment( "/* " + comment + " */" );
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                 }
                 else
                 {
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                     yield return SyntaxFactory.Comment( "// " + comment );
-                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
+                    yield return this._templateExpansionContext.SyntaxGenerationContext.ElasticEndOfLineTrivia;
                 }
             }
 
@@ -318,7 +318,7 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxKind.SimpleMemberAccessExpression,
                         expression,
                         SyntaxFactory.IdentifierName( member ) )
-                    .WithAdditionalAnnotations( Simplifier.Annotation ),
+                    .WithSimplifierAnnotationIfNecessary( this._syntaxSerializationContext.SyntaxGenerationContext ),
                 this._syntaxSerializationContext.SyntaxGenerationContext );
         }
 
@@ -413,7 +413,7 @@ namespace Metalama.Framework.Engine.Templating
                         suppressNullableWarning = false;
                     }
 
-                    if ( typeSymbol?.IsNullable() == false )
+                    if ( typeSymbol.IsNullable() == false )
                     {
                         suppressNullableWarning = false;
                     }
@@ -468,7 +468,7 @@ namespace Metalama.Framework.Engine.Templating
             // Add ITemplateSyntaxFactory as the first template argument.
             var allArguments = new object?[templateArguments.Length + 1];
             allArguments[0] = this.ForTemplate( templateName, templateProvider );
-            templateArguments.CopyTo( allArguments, 1 );
+            TemplateDriver.CopyTemplateArguments( templateArguments, allArguments, 1, this._templateExpansionContext.SyntaxGenerationContext );
 
             var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
 
@@ -539,6 +539,9 @@ namespace Metalama.Framework.Engine.Templating
             };
 
         public TemplateTypeArgument TemplateTypeArgument( string name, Type type )
-            => TemplateBindingHelper.CreateTemplateTypeArgument( name, TypeFactory.Implementation.GetTypeByReflectionType( type ) );
+            => TemplateTypeArgumentFactory.Create(
+                TypeFactory.Implementation.GetTypeByReflectionType( type ),
+                name,
+                this._templateExpansionContext.SyntaxGenerationContext );
     }
 }

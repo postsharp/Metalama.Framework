@@ -9,11 +9,11 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// An <see cref="AttributeDeserializer"/> that can deserialize only system attributes like the ones defined in <c>Metalama.Framework</c> but
 /// not the ones defined in the user code.
 /// </summary>
-internal interface ISystemAttributeDeserializer : IAttributeDeserializer, IProjectService { }
+internal interface ISystemAttributeDeserializer : IAttributeDeserializer, IProjectService;
 
 internal sealed class SystemAttributeDeserializer : AttributeDeserializer, ISystemAttributeDeserializer
 {
-    public SystemAttributeDeserializer( ProjectServiceProvider serviceProvider ) : base(
+    public SystemAttributeDeserializer( in ProjectServiceProvider serviceProvider ) : base(
         serviceProvider,
         serviceProvider.GetRequiredService<SystemTypeResolver>() ) { }
 }

@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Testing.AspectTesting;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.TemplateReturnType_Errors;
 

@@ -27,5 +27,5 @@ namespace Metalama.Framework.Engine.CodeModel.References
     }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl
-        where T : class, ICompilationElement { }
+        where T : class, ICompilationElement;
 }

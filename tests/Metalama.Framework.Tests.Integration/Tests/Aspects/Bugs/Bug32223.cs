@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32223;
 

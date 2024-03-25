@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -20,7 +21,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -43,7 +43,8 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
            _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
 
     /// <summary>
-    /// Gets the current <see cref="SyntaxGenerationContext"/>.
+    /// Gets the current <see cref="SyntaxGenerationContext"/> or throws <see cref="InvalidOperationException"/>
+    /// if the context is not available.
     /// </summary>
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
         => CurrentSyntaxGenerationContextOrNull
@@ -51,12 +52,16 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
 
+    internal static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
+           ?? _currentSyntaxSerializationContext.Value;
+
     /// <summary>
-    /// Gets the current <see cref="SyntaxSerializationContext"/>.
+    /// Gets the current <see cref="SyntaxSerializationContext"/>  or throws <see cref="InvalidOperationException"/>
+    /// if the context is not available.
     /// </summary>
     internal static SyntaxSerializationContext CurrentSyntaxSerializationContext
-        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
-           ?? _currentSyntaxSerializationContext.Value
+        => CurrentSyntaxSerializationContextOrNull
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxSerializationContext has not been set." );
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;
@@ -96,7 +101,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     /// This method is used in tests, when the <see cref="CurrentSyntaxSerializationContext"/> property is needed but not the <see cref="UserCodeExecutionContext.Current"/>
     /// one.
     /// </summary>
-    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, ProjectServiceProvider serviceProvider )
+    internal static IDisposable WithTestingContext( SyntaxSerializationContext serializationContext, in ProjectServiceProvider serviceProvider )
     {
         var handle = WithContext( new UserCodeExecutionContext( serviceProvider, NullDiagnosticAdder.Instance, default, new AspectLayerId( "(test)" ) ) );
         _currentSyntaxSerializationContext.Value = serializationContext;
@@ -163,7 +168,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         if ( template != null )
         {
             templateTypeArguments.AddRange(
-                template.TemplateArguments.OfType<TemplateTypeArgument>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
+                template.TemplateArguments.OfType<TemplateTypeArgumentFactory>().Select( x => new KeyValuePair<string, IType>( x.Name, x.Type ) ) );
         }
 
         if ( metaApi.Target.Declaration is IMethod { TypeParameters.Count: > 0 } targetMethod )
@@ -226,7 +231,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
 
     public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-    public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+    public ContextualSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
     public new MetaApi MetaApi => base.MetaApi!;
 
@@ -368,7 +373,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                                 awaitResult
                                     ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
                                     : returnExpression )
-                            .WithAdditionalAnnotations( Simplifier.Annotation ),
+                            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ),
                         Token( SyntaxKind.SemicolonToken ) );
             }
         }
@@ -520,7 +525,9 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 return
                     Block(
                             SyntaxFactoryEx.DiscardStatement(
-                                SyntaxFactoryEx.SafeCastExpression( PredefinedType( Token( SyntaxKind.ObjectKeyword ) ), returnExpression ) ),
+                                CurrentSyntaxSerializationContext.SyntaxGenerator.SafeCastExpression(
+                                    PredefinedType( Token( SyntaxKind.ObjectKeyword ) ),
+                                    returnExpression ) ),
                             ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
@@ -688,7 +695,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                 TemplatingDiagnosticDescriptors.AspectUsesHigherCSharpVersion.CreateRoslynDiagnostic(
                     this.TargetDeclaration?.GetDiagnosticLocation(),
                     (aspectClass?.ShortName, requiredLanguageVersion.Value.ToDisplayString(),
-                    targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
+                     targetLanguageVersion.Value.ToDisplayString(), templateMember.Declaration),
                     deduplicationKey: aspectClass?.FullName ) );
         }
     }

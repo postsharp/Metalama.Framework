@@ -1,10 +1,8 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
 {

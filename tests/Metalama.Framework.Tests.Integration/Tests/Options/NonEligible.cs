@@ -1,9 +1,7 @@
 using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Options;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.NonEligible;
 

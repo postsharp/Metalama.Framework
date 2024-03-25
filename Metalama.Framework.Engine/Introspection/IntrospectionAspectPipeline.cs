@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
@@ -18,20 +19,20 @@ public sealed class IntrospectionAspectPipeline : AspectPipeline
 {
     private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionAspectPipeline( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
+    public IntrospectionAspectPipeline( in ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options ) :
         base( serviceProvider, ExecutionScenario.Introspection, domain )
     {
         this._options = options;
     }
 
+    protected override SyntaxGenerationOptions GetSyntaxGenerationOptions() => SyntaxGenerationOptions.Formatted;
+
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new LinkerPipelineStage( compileTimeProject, configuration.AspectLayers );
 
     private static ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics( DiagnosticBag diagnostics, CompilationModel compilation )
-    {
-        return diagnostics
+        => diagnostics
             .SelectAsImmutableArray( x => (IIntrospectionDiagnostic) new IntrospectionDiagnostic( x, compilation, DiagnosticSource.Metalama ) );
-    }
 
     internal Task<IIntrospectionCompilationResult> ExecuteAsync( CompilationModel compilation, TestableCancellationToken cancellationToken )
     {

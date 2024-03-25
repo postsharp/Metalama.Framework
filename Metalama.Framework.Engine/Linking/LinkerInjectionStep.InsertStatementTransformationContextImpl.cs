@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
 
 namespace Metalama.Framework.Engine.Linking;
@@ -12,6 +13,8 @@ internal sealed partial class LinkerInjectionStep
 {
     private sealed class InsertStatementTransformationContextImpl : InsertStatementTransformationContext
     {
+        // ReSharper disable once MemberCanBePrivate.Local
+
         /// <summary>
         /// Gets the member for which this context exists.
         /// </summary>

@@ -8,7 +8,7 @@ namespace Metalama.Framework.Metrics
     /// A weakly-typed base interface for <see cref="IMetric{T}"/>. Never implement directly. Always implement <see cref="IMetric{T}"/>.
     /// </summary>
     [CompileTime]
-    public interface IMetric { }
+    public interface IMetric;
 
     // ReSharper disable once UnusedTypeParameter
 
@@ -21,5 +21,5 @@ namespace Metalama.Framework.Metrics
     /// </remarks>
     /// <typeparam name="T">The type of objects for which the metric applies.</typeparam>
     public interface IMetric<in T> : IMetric
-        where T : IMeasurable { }
+        where T : IMeasurable;
 }

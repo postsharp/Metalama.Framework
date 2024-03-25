@@ -5,4 +5,4 @@ namespace Metalama.Framework.Code.Types;
 /// <summary>
 /// Represents a function pointer type.
 /// </summary>
-public interface IFunctionPointerType : IType { }
+public interface IFunctionPointerType : IType;

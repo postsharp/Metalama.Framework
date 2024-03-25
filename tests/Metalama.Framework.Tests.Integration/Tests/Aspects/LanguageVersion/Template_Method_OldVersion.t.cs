@@ -4,8 +4,8 @@
 [TheAspect]
 class Target
 {
-    public void Method()
-    {
-        global::System.Console.WriteLine("""method""");
-    }
+  public void Method()
+  {
+    global::System.Console.WriteLine("""method""");
+  }
 }

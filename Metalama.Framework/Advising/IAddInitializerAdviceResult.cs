@@ -6,4 +6,4 @@ namespace Metalama.Framework.Advising;
 /// Represents the result of the <see cref="IAdviceFactory.AddInitializer(Metalama.Framework.Code.INamedType,string,InitializerKind,object?,object?)"/>
 /// method.
 /// </summary>
-public interface IAddInitializerAdviceResult : IAdviceResult { }
+public interface IAddInitializerAdviceResult : IAdviceResult;

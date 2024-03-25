@@ -1,5 +1,4 @@
-﻿using System;
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.ExistingConflictIgnore
 { 

@@ -1,9 +1,5 @@
 ﻿using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Options;
-using Metalama.Framework.Project;
-using System;
-using System.Diagnostics;
 
 namespace Doc.AspectConfiguration
 {

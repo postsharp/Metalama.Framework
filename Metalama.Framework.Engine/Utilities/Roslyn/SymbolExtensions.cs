@@ -180,14 +180,16 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
                     SyntaxReference? min = null;
                     int? minLength = null;
+
                     foreach ( var reference in s.DeclaringSyntaxReferences )
                     {
-                        if (filter != null && !filter(reference))
+                        if ( filter != null && !filter( reference ) )
                         {
                             continue;
                         }
 
                         var length = reference.SyntaxTree.FilePath.Length;
+
                         if ( min == null || length < minLength )
                         {
                             min = reference;
@@ -259,8 +261,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
 #if ROSLYN_4_8_0_OR_GREATER
 
-            return 
-                constructorSymbol is { MethodKind: MethodKind.Constructor } 
+            return
+                constructorSymbol is { MethodKind: MethodKind.Constructor }
                 && declarationSyntax is TypeDeclarationSyntax { ParameterList: not null };
 #else
             return
@@ -330,7 +332,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Translate a symbol to a different <see cref="CompilationContext"/> if necessary, but only in
         /// the debug build. This is to make a symbol compatible with the <see cref="SafeSymbolComparer"/>.
         /// </summary>
-        internal static T TranslateIfNecessary<T>( this T symbol, CompilationContext compilation ) 
+        internal static T TranslateIfNecessary<T>( this T symbol, CompilationContext compilation )
             where T : ISymbol
         {
 #if DEBUG

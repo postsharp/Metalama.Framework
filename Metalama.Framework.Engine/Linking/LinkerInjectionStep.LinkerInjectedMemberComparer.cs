@@ -129,7 +129,7 @@ internal sealed partial class LinkerInjectionStep
                 return typeComparison;
             }
 
-            switch ( (x.Transformation, y.Transformation) )
+            switch (x.Transformation, y.Transformation)
             {
                 case (null, null):
                     return 0;
@@ -208,9 +208,9 @@ internal sealed partial class LinkerInjectionStep
 
         private static IMemberOrNamedType GetDeclaration( InjectedMember injectedMember )
         {
-            var declaration = injectedMember.Declaration ?? injectedMember.DeclarationBuilder as IMember;
+            var declaration = injectedMember.Declaration;
 
-            if ( declaration == null && injectedMember.Transformation is IOverrideDeclarationTransformation overridden )
+            if ( injectedMember.Transformation is IOverrideDeclarationTransformation overridden )
             {
                 declaration = (IMemberOrNamedType) overridden.OverriddenDeclaration;
             }

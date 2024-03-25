@@ -3,9 +3,9 @@
 # endif 
 
 using Metalama.Framework.Aspects;
-using System.Reflection;
 
 #if TESTRUNNER
+using System.Reflection;
 [assembly: AssemblyVersion("0.0.*")]
 #endif
 

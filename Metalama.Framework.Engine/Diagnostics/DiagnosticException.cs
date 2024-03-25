@@ -22,7 +22,8 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         public bool InSourceCode { get; }
 
-        internal DiagnosticException( string message, ImmutableArray<Diagnostic> diagnostics, bool inSourceCode = true ) : base( GetMessage( message, diagnostics ) )
+        internal DiagnosticException( string message, ImmutableArray<Diagnostic> diagnostics, bool inSourceCode = true ) : base(
+            GetMessage( message, diagnostics ) )
         {
             this.Diagnostics = diagnostics;
             this.InSourceCode = inSourceCode;

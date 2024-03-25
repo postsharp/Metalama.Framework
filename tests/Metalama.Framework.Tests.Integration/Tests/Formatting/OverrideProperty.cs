@@ -1,4 +1,3 @@
-using System.Net.NetworkInformation;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.OverrideProperty

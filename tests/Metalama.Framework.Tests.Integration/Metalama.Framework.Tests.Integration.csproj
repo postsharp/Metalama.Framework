@@ -21,7 +21,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-        <NoWarn>1591,1572,1573,CS8892</NoWarn>
+        <NoWarn>1591,1572,1573,CS8892,VSTHRD100,VSTHRD200,CA1018,CA1305,CA1307,CA1725,CA1822,CA2201</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

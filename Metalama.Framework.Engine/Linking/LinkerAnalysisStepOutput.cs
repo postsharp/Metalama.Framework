@@ -13,6 +13,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public LinkerAnalysisStepOutput(
             UserDiagnosticSink diagnosticSink,
+            CompilationModel sourceCompilationModel,
             PartialCompilation intermediateCompilation,
             LinkerInjectionRegistry injectionRegistry,
             LinkerLateTransformationRegistry linkerLateTransformationRegistry,
@@ -20,6 +21,7 @@ namespace Metalama.Framework.Engine.Linking
             IProjectOptions? projectOptions )
         {
             this.DiagnosticSink = diagnosticSink;
+            this.SourceCompilationModel = sourceCompilationModel;
             this.IntermediateCompilation = intermediateCompilation;
             this.InjectionRegistry = injectionRegistry;
             this.AnalysisRegistry = analysisRegistry;
@@ -32,6 +34,8 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public UserDiagnosticSink DiagnosticSink { get; }
 
+        public CompilationModel SourceCompilationModel { get; }
+        
         /// <summary>
         /// Gets the intermediate compilation (produced in injection step).
         /// </summary>

@@ -76,7 +76,11 @@ public class MetalamaPerformanceCodeFixProvider : CodeFixProvider
         var currentNode = node;
         MemberAccessExpressionSyntax? firstMemberAccess = null;
 
-        while ( currentNode.Span.OverlapsWith( diagnosticSpan ) && currentNode is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Expression: var expression, Name: IdentifierNameSyntax name } memberAccess, ArgumentList.Arguments: [var argument] } )
+        while ( currentNode.Span.OverlapsWith( diagnosticSpan ) && currentNode is InvocationExpressionSyntax
+               {
+                   Expression: MemberAccessExpressionSyntax { Expression: var expression, Name: IdentifierNameSyntax name } memberAccess,
+                   ArgumentList.Arguments: [var argument]
+               } )
         {
             firstMemberAccess ??= memberAccess;
 

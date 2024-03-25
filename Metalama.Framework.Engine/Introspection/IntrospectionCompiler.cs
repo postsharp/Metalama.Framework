@@ -18,7 +18,7 @@ public sealed class IntrospectionCompiler
     private readonly CompileTimeDomain _domain;
     private readonly IIntrospectionOptionsProvider? _options;
 
-    public IntrospectionCompiler( ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options = null )
+    public IntrospectionCompiler( in ProjectServiceProvider serviceProvider, CompileTimeDomain domain, IIntrospectionOptionsProvider? options = null )
     {
         this._serviceProvider = serviceProvider;
         this._domain = domain;

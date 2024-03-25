@@ -27,7 +27,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext( mocks );
 
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
-        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(DifferentCompilationWithNoChangeAsync) );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(this.DifferentCompilationWithNoChangeAsync) );
         var compilationChanges1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         Assert.Same( compilation1, compilationChanges1.NewProjectVersion.CompilationToAnalyze );
         Assert.False( compilationChanges1.IsIncremental );
@@ -39,7 +39,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
 
         // Create a second compilation. We explicitly copy the references from the first compilation because references
         // may not be equal due to a change in the loaded assemblies in the AppDomain during the execution of the test.
-        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(DifferentCompilationWithNoChangeAsync) ).WithReferences( compilation1.References );
+        var compilation2 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(this.DifferentCompilationWithNoChangeAsync) ).WithReferences( compilation1.References );
         var compilationChanges2 = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation2 );
         Assert.True( compilationChanges2.IsIncremental );
         Assert.False( compilationChanges2.HasChange );
@@ -55,7 +55,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
         Assert.Equal( 1, observer.ComputeIncrementalChangesEventCount );
 
         // Create a third compilation with no change.
-        var compilation3 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(DifferentCompilationWithNoChangeAsync) ).WithReferences( compilation1.References );
+        var compilation3 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(this.DifferentCompilationWithNoChangeAsync) ).WithReferences( compilation1.References );
         var compilationChanges3 = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation3 );
         Assert.True( compilationChanges3.IsIncremental );
         Assert.False( compilationChanges3.HasChange );
@@ -236,7 +236,7 @@ public sealed class ProjectVersionProviderTests : DesignTimeTestBase
 
         // Create the first compilation.
         var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider, true );
-        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(IntermediateCompilationCanBeCollected) );
+        var compilation1 = TestCompilationFactory.CreateCSharpCompilation( code, name: nameof(this.IntermediateCompilationCanBeCollected) );
         var compilationChanges1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         Assert.Same( compilation1, compilationChanges1.NewProjectVersion.CompilationToAnalyze );
         Assert.False( compilationChanges1.IsIncremental );

@@ -1,8 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,10 +13,13 @@ namespace Metalama.Framework.Engine.CompileTime;
 
 internal sealed class TypeOfRewriter
 {
+    private readonly SyntaxGenerationContext _syntaxGenerationContext;
     private readonly NameSyntax _compileTimeTypeName;
 
     public TypeOfRewriter( SyntaxGenerationContext syntaxGenerationContext )
     {
+        this._syntaxGenerationContext = syntaxGenerationContext;
+
         this._compileTimeTypeName = (NameSyntax)
             syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(TypeOfResolver) ) );
     }
@@ -40,11 +42,13 @@ internal sealed class TypeOfRewriter
 
         if ( substitutions == null )
         {
+            var typeOfString = this._syntaxGenerationContext.SyntaxGenerator.TypeOfExpression( typeSymbol ).ToString();
+
             return InvocationExpression( memberAccess )
                 .AddArgumentListArguments(
                     new[]
                         {
-                            typeSymbol.GetSerializableTypeId().Id,
+                            typeOfString,
                             typeSymbol.ContainingNamespace.GetFullName(),
                             typeSymbol.GetReflectionName(),
                             typeSymbol.GetReflectionFullName(),

@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel
     [UsedImplicitly] // Reference not detected.
     public static class CodeModelFactory
     {
-        [UsedImplicitly] 
+        [UsedImplicitly]
         public static ICompilation CreateCompilation(
             Compilation compilation,
             ProjectServiceProvider serviceProvider,

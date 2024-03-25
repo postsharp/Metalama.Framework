@@ -16,7 +16,7 @@ internal abstract class PropertyGetInliner : PropertyInliner
                     ? associatedProperty
                     : null;
 
-        return property is { GetMethod: { } }
+        return property is { GetMethod: not null }
                && !IteratorHelper.IsIteratorMethod( property.GetMethod );
     }
 }

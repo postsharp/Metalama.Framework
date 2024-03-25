@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -53,9 +52,6 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         }
 
         var projectServiceProvider = pipelineConfiguration.ServiceProvider;
-
-        // We don't use input.Project.Name, because it can return the assembly name or an empty string when the project path is unknown. 
-        var projectName = Path.GetFileNameWithoutExtension( input.Project.Path );
 
         var sdkOptionsManager = new SdkHierarchicalOptionsManager( compilationModel );
 

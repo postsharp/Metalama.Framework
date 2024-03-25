@@ -57,7 +57,8 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
             if ( right is not INamedTypeSymbol rightNamedType || !SymbolEqualityComparer.Default.Equals( rightNamedType, rightNamedType.ConstructedFrom ) )
             {
-                throw new ArgumentException( $"{nameof(ConversionKind)}.{nameof(ConversionKind.TypeDefinition)} can only be used with unbound generic type on the right side." );
+                throw new ArgumentException(
+                    $"{nameof(ConversionKind)}.{nameof(ConversionKind.TypeDefinition)} can only be used with unbound generic type on the right side." );
             }
 
             switch ( left )

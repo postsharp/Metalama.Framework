@@ -6,4 +6,4 @@ namespace Metalama.Framework.Aspects;
 /// An interface that specifies that the type contains templates. Templates must be annotated with <see cref="TemplateAttribute"/>.
 /// </summary>
 [RunTimeOrCompileTime]
-public interface ITemplateProvider { }
+public interface ITemplateProvider;

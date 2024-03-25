@@ -1,22 +1,22 @@
 [TheAspect]
 class Target
 {
-    public global::System.String Property1
+  public global::System.String Property1
+  {
+    get
     {
-        get
-        {
-            return (global::System.String)"""get""";
-        }
+      return (global::System.String)"""get""";
     }
-    public global::System.String Property2
+  }
+  public global::System.String Property2
+  {
+    get
     {
-        get
-        {
-            return (global::System.String)"";
-        }
-        set
-        {
-            global::System.Console.WriteLine("""set""");
-        }
+      return (global::System.String)"";
     }
+    set
+    {
+      global::System.Console.WriteLine("""set""");
+    }
+  }
 }

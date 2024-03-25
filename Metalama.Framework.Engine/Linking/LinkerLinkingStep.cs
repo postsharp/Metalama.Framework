@@ -2,6 +2,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Concurrent;
@@ -38,11 +39,13 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly ProjectServiceProvider _serviceProvider;
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+        private readonly SyntaxGenerationOptions _syntaxGenerationOptions;
 
-        public LinkerLinkingStep( ProjectServiceProvider serviceProvider )
+        public LinkerLinkingStep( in ProjectServiceProvider serviceProvider )
         {
             this._serviceProvider = serviceProvider;
             this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+            this._syntaxGenerationOptions = serviceProvider.GetRequiredService<SyntaxGenerationOptions>();
         }
 
         public override async Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
@@ -72,11 +75,18 @@ namespace Metalama.Framework.Engine.Linking
                         new LinkingRewriter( input.IntermediateCompilation.CompilationContext, rewritingDriver )
                             .Visit( await syntaxTree.GetRootAsync( cancellationToken ) )!;
 
+                    var syntaxGenerationContext = input.SourceCompilationModel.CompilationContext.GetSyntaxGenerationContext(
+                        this._syntaxGenerationOptions,
+                        modifiedSyntaxTree.OldTree!,
+                        0 );
+
                     var cleanRoot =
-                        new CleanupRewriter( input.ProjectOptions, input.IntermediateCompilation.CompilationContext.DefaultSyntaxGenerationContext )
+                        new CleanupRewriter(
+                                input.ProjectOptions,
+                                syntaxGenerationContext )
                             .Visit( linkedRoot )!;
 
-                    var fixedRoot = PreprocessorFixer.Fix( cleanRoot );
+                    var fixedRoot = PreprocessorFixer.Fix( cleanRoot, syntaxGenerationContext );
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( fixedRoot, syntaxTree.Options );
 

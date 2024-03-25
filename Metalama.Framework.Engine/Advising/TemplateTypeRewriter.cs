@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
 using System.Linq;
 
@@ -26,9 +25,9 @@ namespace Metalama.Framework.Engine.Advising
                  && templateParameter.IsCompileTime )
             {
                 var index = templateParameter.TemplateIndex!.Value - this._template.TemplateMember.TemplateClassMember.Parameters.Length;
-                var value = (TemplateTypeArgument) this._template.TypeArguments[index]!;
+                var factory = (TemplateTypeArgumentFactory) this._template.TypeArguments[index]!;
 
-                return (ITypeImpl) value.Type;
+                return (ITypeImpl) factory.Type;
             }
             else
             {

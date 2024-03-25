@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( node?.GetLocation(), (exception.Message, reportFile) ) );
 
-            this._exceptionReporter?.ReportException( exception,  localReportPath: reportFile );
+            this._exceptionReporter?.ReportException( exception, localReportPath: reportFile );
 
             isHandled = true;
         }

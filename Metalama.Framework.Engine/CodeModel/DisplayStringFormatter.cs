@@ -7,14 +7,18 @@ using System.Text;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-public static class DisplayStringFormatter
+internal static class DisplayStringFormatter
 {
+    // Seems that ReSharper does not recognize the interpolation handler.
+    // ReSharper disable EntityNameCapturedOnly.Global
     public static string Format(
         CodeDisplayFormat? format,
         CodeDisplayContext? context,
         [InterpolatedStringHandlerArgument( nameof(format), nameof(context) )]
         ref InterpolatedStringHandler handler )
         => handler.ToString();
+
+    // ReSharper enable EntityNameCapturedOnly.Global
 
     [InterpolatedStringHandler]
     public readonly ref struct InterpolatedStringHandler
@@ -28,7 +32,7 @@ public static class DisplayStringFormatter
         {
             this._format = format;
             this._context = context;
-            this._stringBuilder = new();
+            this._stringBuilder = new StringBuilder();
         }
 
         public void AppendLiteral( string s ) => this._stringBuilder.Append( s );
@@ -38,7 +42,7 @@ public static class DisplayStringFormatter
         public void AppendFormatted( IEnumerable<IDisplayable> collection )
         {
             var first = true;
-            
+
             foreach ( var item in collection )
             {
                 if ( !first )
@@ -53,7 +57,7 @@ public static class DisplayStringFormatter
         }
 
         public void AppendFormatted( string s ) => this._stringBuilder.Append( s );
-        
+
         public override string ToString() => this._stringBuilder.ToString();
     }
 }

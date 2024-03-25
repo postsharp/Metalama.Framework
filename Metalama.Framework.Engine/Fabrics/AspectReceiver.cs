@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 if ( !userCodeInvoker.TryInvoke(
                                         () => func( t ),
                                         executionContext,
-                                        out var options ) || options == null )
+                                        out var options ) )
                                 {
                                     return null;
                                 }
@@ -338,7 +338,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             } ) ) );
         }
 
-        public void SetOptions<TOptions>( TOptions options ) 
+        public void SetOptions<TOptions>( TOptions options )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
@@ -428,7 +428,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             }
 
                             return new AspectInstance(
-                                aspect!,
+                                aspect,
                                 t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
@@ -472,7 +472,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             }
 
                             return new AspectInstance(
-                                aspect!,
+                                aspect,
                                 t,
                                 aspectClass,
                                 this._parent.AspectPredecessor );
@@ -512,7 +512,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 {
                     continue;
                 }
-                
+
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
                 // Verify containment.
@@ -605,7 +605,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 {
                     continue;
                 }
-                
+
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
                 var containingTypeOrCompilation = (IDeclaration?) this._containingDeclaration.GetTarget( compilation ).AssertNotNull().GetTopmostNamedType()

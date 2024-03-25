@@ -1,7 +1,4 @@
 using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.NestedAspect;
 

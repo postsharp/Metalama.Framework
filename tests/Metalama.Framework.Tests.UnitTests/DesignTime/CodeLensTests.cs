@@ -176,10 +176,10 @@ public sealed class CodeLensTests : DesignTimeTestBase
 
         Assert.Equal(
             [
-                [ "MyAspect", "C1", "Custom attribute", "Introduce field 'C1.i'."],
-                [ "", "", "", "Introduce method 'C1.Template()'." ],
-                [ "", "", "", "(The aspect also transforms 1 child declaration.)" ],
-                [ "MyChildAspect", "C1", "Child of 'MyAspect' on 'C1'", "Introduce field 'C1.child'."]
+                ["MyAspect", "C1", "Custom attribute", "Introduce field 'C1.i'."],
+                ["", "", "", "Introduce method 'C1.Template()'."],
+                ["", "", "", "(The aspect also transforms 1 child declaration.)"],
+                ["MyChildAspect", "C1", "Child of 'MyAspect' on 'C1'", "Introduce field 'C1.child'."]
             ],
             details1.Entries.SelectAsReadOnlyList( e => e.Fields.SelectAsReadOnlyList( f => f.Text ) ) );
 

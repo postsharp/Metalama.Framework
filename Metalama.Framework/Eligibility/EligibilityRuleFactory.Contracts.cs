@@ -81,12 +81,13 @@ public static partial class EligibilityRuleFactory
                 parameter.DeclaringMember().MustBeExplicitlyDeclared();
                 parameter.ExceptForInheritance().DeclaringMember().MustNotBeAbstract();
 
-                parameter.DeclaringMember().Convert()
+                parameter.DeclaringMember()
+                    .Convert()
                     .When<IMethod>()
                     .AddRules(
-                        method => 
+                        method =>
                             method.MustSatisfy(
-                                m => !(m.IsPartial && !m.HasImplementation),
+                                m => !(m is { IsPartial: true, HasImplementation: false }),
                                 m => $"'{m}' must not be partial without an implementation" ) );
             }
 
@@ -94,6 +95,7 @@ public static partial class EligibilityRuleFactory
             static void AddCommonReturnParameterRules( IEligibilityBuilder<IParameter> parameter )
             {
                 parameter.MustNotBeVoid();
+
                 parameter.MustSatisfy(
                     p => !(p is { IsReturnParameter: true, DeclaringMember: IMethod method } && method.GetAsyncInfo().ResultType.Is( SpecialType.Void )),
                     member => $"{member} must not have void awaitable result" );

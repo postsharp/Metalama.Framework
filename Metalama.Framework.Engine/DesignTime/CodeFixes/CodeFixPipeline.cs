@@ -3,8 +3,10 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis.Text;
@@ -35,6 +37,8 @@ namespace Metalama.Framework.Engine.DesignTime.CodeFixes
             this._diagnosticFilePath = diagnosticFilePath;
             this._diagnosticSpan = diagnosticSpan;
         }
+
+        protected override SyntaxGenerationOptions GetSyntaxGenerationOptions() => new( CodeFormattingOptions.Formatted );
 
         private protected override CodeFixFilter CodeFixFilter
             => ( diagnosticDefinition, location )

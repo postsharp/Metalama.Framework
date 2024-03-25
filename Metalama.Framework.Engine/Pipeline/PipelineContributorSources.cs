@@ -20,15 +20,6 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IValidatorSource>.Empty,
             ImmutableArray<IHierarchicalOptionsSource>.Empty );
 
-        public PipelineContributorSources(
-            IExternalHierarchicalOptionsProvider externalOptionsProvider,
-            IExternalAnnotationProvider externalAnnotationProvider ) : this(
-            ImmutableArray<IAspectSource>.Empty,
-            ImmutableArray<IValidatorSource>.Empty,
-            ImmutableArray<IHierarchicalOptionsSource>.Empty,
-            externalOptionsProvider,
-            externalAnnotationProvider ) { }
-
         public PipelineContributorSources Add( PipelineContributorSources other )
         {
             return new PipelineContributorSources(

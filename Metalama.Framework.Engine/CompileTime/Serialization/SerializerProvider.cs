@@ -39,7 +39,8 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         {
             if ( !this.TryGetSerializer( objectType, out var serializer ) )
             {
-                throw new CompileTimeSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
+                throw new CompileTimeSerializationException(
+                    string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
             }
 
             return serializer.AssertNotNull();

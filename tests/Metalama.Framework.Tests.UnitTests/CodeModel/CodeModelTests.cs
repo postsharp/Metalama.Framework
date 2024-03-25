@@ -5,8 +5,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
@@ -20,7 +22,6 @@ using Xunit;
 using static Metalama.Framework.Code.MethodKind;
 using static Metalama.Framework.Code.RefKind;
 using static Metalama.Framework.Code.TypeKind;
-using DeclarationExtensions = Metalama.Framework.Engine.CodeModel.DeclarationExtensions;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -31,6 +32,8 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 {
     public sealed class CodeModelTests : UnitTestClass
     {
+        protected override void ConfigureServices( IAdditionalServiceCollection services ) => services.AddProjectService( SyntaxGenerationOptions.Formatted );
+        
         [Fact]
         public void ObjectIdentity()
         {
@@ -579,7 +582,7 @@ class C<T>
 
             var type = Assert.Single( compilation.Types );
 
-            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeKind.TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.SelectAsImmutableArray( p => p.Type.TypeKind ) );
         }
@@ -1341,8 +1344,8 @@ class C {}
 
                 // Note that the code model does not preserve reference identity of attributes.
                 Assert.Same(
-                    DeclarationExtensions.GetDeclaringSyntaxReferences( attribute )[0].SyntaxTree,
-                    DeclarationExtensions.GetDeclaringSyntaxReferences( roundtrip )[0].SyntaxTree );
+                    attribute.GetDeclaringSyntaxReferences()[0].SyntaxTree,
+                    roundtrip.GetDeclaringSyntaxReferences()[0].SyntaxTree );
             }
         }
 
@@ -1699,7 +1702,12 @@ public partial class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = """
+#if !NET5_0_OR_GREATER
+            var code =
+#else
+            const string code =
+#endif
+                """
                 record R(int P);
                 """;
 
@@ -1756,6 +1764,30 @@ public partial class C
             Assert.False( parameterType4.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType4 );
             Assert.Equal( SpecialType.None, parameterType4.SpecialType );
+        }
+
+        [Fact]
+        public void HalfOverriddenProperty()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = """
+                class Base
+                {
+                    public virtual int P { get; set; }
+                }
+
+                class Derived : Base
+                {
+                    public override int P { get => 42; }
+                }
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var derived = compilation.Types.OfName( "Derived" ).Single();
+            var property = derived.Properties.OfName( "P" ).Single();
+
+            Assert.Null( property.SetMethod );
         }
 
         /*

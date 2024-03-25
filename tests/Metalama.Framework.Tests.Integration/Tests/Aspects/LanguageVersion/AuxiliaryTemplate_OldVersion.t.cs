@@ -5,9 +5,9 @@
 [TheAspect]
 class Target
 {
-    private void M()
-    {
-        global::System.Console.WriteLine("""aux""");
-        global::System.Console.WriteLine("""aux""");
-    }
+  private void M()
+  {
+    global::System.Console.WriteLine("""aux""");
+    global::System.Console.WriteLine("""aux""");
+  }
 }

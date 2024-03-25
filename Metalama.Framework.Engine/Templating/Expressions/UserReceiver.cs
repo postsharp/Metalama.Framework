@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             {
                 return this;
             }
-            
+
             return this.WithAspectReferenceSpecification( this.AspectReferenceSpecification.WithOrder( order ) );
         }
     }

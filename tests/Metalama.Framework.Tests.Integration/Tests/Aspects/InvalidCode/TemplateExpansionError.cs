@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.TemplateExpansionError
 {
@@ -18,7 +15,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.InvalidCode.TemplateEx
         private int CompileTimeExceptionMethod()
         {
             throw new Exception();
-        }    
+        }
     }
 
     class TargetCode

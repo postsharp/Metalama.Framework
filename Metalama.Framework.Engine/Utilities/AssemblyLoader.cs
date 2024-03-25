@@ -98,7 +98,7 @@ internal sealed class AssemblyLoader : IDisposable
 
         var resolveAssemblyType = typeof(Func<string, Assembly?>);
 
-        var assembly = AssemblyBuilder.DefineDynamicAssembly( new( "Metalama.Loader" ), AssemblyBuilderAccess.RunAndCollect );
+        var assembly = AssemblyBuilder.DefineDynamicAssembly( new AssemblyName( "Metalama.Loader" ), AssemblyBuilderAccess.RunAndCollect );
         var module = assembly.DefineDynamicModule( "Metalama.Loader" );
         var type = module.DefineType( "MetalamaAssemblyLoadContext", TypeAttributes.Sealed, alcType );
 

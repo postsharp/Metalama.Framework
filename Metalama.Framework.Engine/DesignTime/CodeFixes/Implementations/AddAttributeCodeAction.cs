@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -43,7 +44,8 @@ internal sealed class AddAttributeCodeAction : ICodeAction
             case null:
                 // TODO: This happens with property-backing fields, but we can actually add attributes to property-backing fields, it is just not implemented.
                 throw new InvalidOperationException(
-                    MetalamaStringFormatter.Format( $"Cannot add an attribute to the {this.TargetDeclaration.DeclarationKind} '{targetSymbol}' because it is implicitly defined." ) );
+                    MetalamaStringFormatter.Format(
+                        $"Cannot add an attribute to the {this.TargetDeclaration.DeclarationKind} '{targetSymbol}' because it is implicitly defined." ) );
 
             case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration }:
                 originalNode = variableDeclaration.Parent!;
@@ -54,7 +56,7 @@ internal sealed class AddAttributeCodeAction : ICodeAction
         var originalTree = originalNode.SyntaxTree;
         var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
-        var generationContext = SyntaxGenerationContext.Create( context.CompilationContext, originalNode );
+        var generationContext = context.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, originalNode );
         var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this._attribute );
 
         var transformedRoot = originalRoot.ReplaceNode( originalNode, transformedNode );

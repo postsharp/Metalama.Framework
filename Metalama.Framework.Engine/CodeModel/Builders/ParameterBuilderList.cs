@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,8 +11,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class ParameterBuilderList : List<BaseParameterBuilder>, IParameterBuilderList, IParameterList
 {
-    public static readonly ParameterBuilderList Empty = new( Array.Empty<BaseParameterBuilder>() );
-
     public ParameterBuilderList() { }
 
     public ParameterBuilderList( IEnumerable<BaseParameterBuilder> parameterBuilders ) : base( parameterBuilders ) { }

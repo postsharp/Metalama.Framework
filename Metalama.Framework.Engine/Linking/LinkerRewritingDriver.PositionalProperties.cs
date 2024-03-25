@@ -1,9 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LinkerRewritingDriver
     {
-        public IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
+        private IReadOnlyList<MemberDeclarationSyntax> RewritePositionalProperty(
             ParameterSyntax recordParameter,
             IPropertySymbol symbol,
             SyntaxGenerationContext generationContext )
@@ -42,7 +41,8 @@ namespace Metalama.Framework.Engine.Linking
                             recordParameter.Type.AssertNotNull(),
                             EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
-                            symbol ) );
+                            symbol,
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
@@ -51,7 +51,12 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( this.GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
+                    members.Add(
+                        this.GetTrampolineForPositionalProperty(
+                            recordParameter.Identifier,
+                            recordParameter.Type.AssertNotNull(),
+                            lastOverride,
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
@@ -62,7 +67,8 @@ namespace Metalama.Framework.Engine.Linking
                         this.GetEmptyImplProperty(
                             symbol,
                             List<AttributeListSyntax>(),
-                            recordParameter.Type.AssertNotNull() ) );
+                            recordParameter.Type.AssertNotNull(),
+                            generationContext ) );
                 }
 
                 return members;
@@ -100,15 +106,15 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     PropertyDeclaration(
-                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                            TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                            recordParameter.Type.AssertNotNull().WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
-                            null,
-                            recordParameter.Identifier,
-                            AccessorList( List( generatedAccessors ) ),
-                            null,
-                            null,
-                            default );
+                        FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
+                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                        recordParameter.Type.AssertNotNull().WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
+                        null,
+                        recordParameter.Identifier,
+                        AccessorList( List( generatedAccessors ) ),
+                        null,
+                        null,
+                        default );
             }
 
             AccessorDeclarationSyntax GetLinkedAccessor(
@@ -148,12 +154,16 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty( SyntaxToken identifier, TypeSyntax type, IPropertySymbol targetSymbol )
+        private PropertyDeclarationSyntax GetTrampolineForPositionalProperty(
+            SyntaxToken identifier,
+            TypeSyntax type,
+            IPropertySymbol targetSymbol,
+            SyntaxGenerationContext context )
         {
             var getAccessor =
                 AccessorDeclaration(
                     SyntaxKind.GetAccessorDeclaration,
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerator.FormattedBlock(
                         ReturnStatement(
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                             GetInvocationTarget(),
@@ -162,7 +172,7 @@ namespace Metalama.Framework.Engine.Linking
             var setAccessor =
                 AccessorDeclaration(
                     targetSymbol.GetMethod.AssertNotNull().IsInitOnly ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                    SyntaxFactoryEx.FormattedBlock(
+                    context.SyntaxGenerator.FormattedBlock(
                         ExpressionStatement(
                             AssignmentExpression(
                                 SyntaxKind.SimpleAssignmentExpression,
@@ -171,15 +181,15 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 PropertyDeclaration(
-                        List<AttributeListSyntax>(),
-                        TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
-                        type.WithTrailingTriviaIfNecessary( ElasticSpace, this.IntermediateCompilationContext.NormalizeWhitespace ),
-                        null,
-                        identifier,
-                        AccessorList( List( new[] { getAccessor, setAccessor } ) ),
-                        null,
-                        null,
-                        default );
+                    List<AttributeListSyntax>(),
+                    TokenList( SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ) ),
+                    type.WithOptionalTrailingTrivia( ElasticSpace, this.SyntaxGenerationOptions ),
+                    null,
+                    identifier,
+                    AccessorList( List( new[] { getAccessor, setAccessor } ) ),
+                    null,
+                    null,
+                    default );
 
             ExpressionSyntax GetInvocationTarget()
             {

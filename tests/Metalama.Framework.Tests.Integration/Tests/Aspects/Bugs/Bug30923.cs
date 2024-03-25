@@ -1,8 +1,6 @@
-using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Newtonsoft.Json.Linq;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30923
 {

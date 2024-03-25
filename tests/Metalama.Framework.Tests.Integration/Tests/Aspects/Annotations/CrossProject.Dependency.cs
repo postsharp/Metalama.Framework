@@ -2,7 +2,6 @@
 // @Include(_Common.cs)
 #endif
 
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
