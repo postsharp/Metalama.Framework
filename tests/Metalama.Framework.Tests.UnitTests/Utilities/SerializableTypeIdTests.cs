@@ -4,7 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Testing.UnitTesting;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,10 +48,10 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     }
 
     [Theory]
-    [InlineData("object")]
-    [InlineData("object?")]
-    [InlineData("Task<object>")]
-    [InlineData("Task<object?>")]
+    [InlineData( "object" )]
+    [InlineData( "object?" )]
+    [InlineData( "Task<object>" )]
+    [InlineData( "Task<object?>" )]
     public void TestNullableType( string type )
     {
         using var testContext = this.CreateTestContext();
