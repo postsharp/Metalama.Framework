@@ -690,7 +690,22 @@ internal sealed partial class LinkerAnalysisStep
 
         public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
         {
-            // Skip local functions.
+            // Skip.
+        }
+
+        public override void VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+        {
+            // Skip.
+        }
+
+        public override void VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        {
+            // Skip.
+        }
+
+        public override void VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+        {
+            // Skip.
         }
 
         public override void VisitReturnStatement( ReturnStatementSyntax node )
