@@ -524,9 +524,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     protected override IMemberOrNamedType GetDefinition() => throw new NotSupportedException();
 
     [Memo]
-    public IType UnderlyingType => this.GetUnderlyingTypeCore();
+    public INamedType UnderlyingType => this.GetUnderlyingTypeCore();
 
-    private IType GetUnderlyingTypeCore()
+    private INamedType GetUnderlyingTypeCore()
     {
         var enumUnderlyingType = this.TypeSymbol.EnumUnderlyingType;
 
@@ -543,11 +543,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
             {
                 // We have an annotated reference type, return the non-annotated type.
                 return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.WithNullableAnnotation( NullableAnnotation.None ) );
-            }
-            else if ( isNullable == true )
-            {
-                // We have a Nullable<T>, we return T.
-                return this.Compilation.Factory.GetIType( this.TypeSymbol.TypeArguments[0] );
             }
         }
 

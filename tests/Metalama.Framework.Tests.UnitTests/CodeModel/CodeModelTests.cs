@@ -1720,25 +1720,38 @@ public partial class C
             using var testContext = this.CreateTestContext();
 
             var code = """
-                class C<T> where T : struct
+                public partial class C<T1,T2,T3,T4>
+                  where T2 : struct
+                  where T3 : class
+                  where T4 : notnull
                 {
-                    T? _f;
+                    public void M(T1? p1, T2? p2, T3? p3, T4 p4) {}
                 }
                 """;
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.Single();
-            var field = type.Fields.Single();
+            var method = type.Methods.Single();
 
-            var underlyingType = ((INamedType) field.Type).UnderlyingType;
-            var typeParameter = Assert.IsAssignableFrom<ITypeParameter>( underlyingType );
-            Assert.Equal( "C<T>/T", underlyingType.ToString() );
-
-            var nullable = (INamedType) typeParameter.ToNullableType();
-            Assert.Equal( "T?", nullable.ToString() );
-
-            var nonNullable = nullable.ToNonNullableType();
-            Assert.Same( typeParameter, nonNullable );
+            var parameterType1 = method.Parameters[0].Type;
+            Assert.True( parameterType1.IsNullable );
+            Assert.IsAssignableFrom<ITypeParameter>( parameterType1 );
+            Assert.Equal( parameterType1, parameterType1.ToNonNullableType().ToNullableType() );
+            
+            var parameterType2 = method.Parameters[1].Type;
+            Assert.True( parameterType2.IsNullable );
+            var parameterType2AsNamedType = Assert.IsAssignableFrom<INamedType>( parameterType2 );
+            Assert.Same( parameterType2AsNamedType.UnderlyingType, parameterType2AsNamedType );
+            Assert.Equal( parameterType2, parameterType2.ToNonNullableType().ToNullableType() );
+            
+            var parameterType3 = method.Parameters[2].Type;
+            Assert.True( parameterType3.IsNullable );
+            Assert.IsAssignableFrom<ITypeParameter>( parameterType3 );
+            Assert.Equal( parameterType3, parameterType3.ToNonNullableType().ToNullableType() );
+            
+            var parameterType4 = method.Parameters[3].Type;
+            Assert.False( parameterType4.IsNullable );
+            Assert.IsAssignableFrom<ITypeParameter>( parameterType4 );
         }
 
         /*

@@ -384,7 +384,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             }
             else
             {
-                return (T) ((INamedType) type).UnderlyingType;
+                return (T) ((INamedType) type).TypeArguments[0];
             }
         }
 

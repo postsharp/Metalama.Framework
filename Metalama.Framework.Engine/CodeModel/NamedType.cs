@@ -461,7 +461,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         INamedType INamedType.TypeDefinition => this.Definition;
 
-        public IType UnderlyingType => this.Implementation.UnderlyingType;
+        public INamedType UnderlyingType => this.Implementation.UnderlyingType;
 
         public ITypeImpl Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
