@@ -29,7 +29,7 @@ public static class BackstageServiceFactoryInitializer
 
     internal static IServiceProvider CreateInitialized( BackstageInitializationOptions options )
     {
-        var serviceProvider = BackstageServiceFactory.CreateServiceProvider( options );
+        var serviceProvider = BackstageServiceFactory.CreateServiceProvider( WithTools( options ) );
         InitializeMetalamaServices();
 
         return serviceProvider;
