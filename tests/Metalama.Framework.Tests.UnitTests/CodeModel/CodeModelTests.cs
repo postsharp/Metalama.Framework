@@ -1737,21 +1737,25 @@ public partial class C
             Assert.True( parameterType1.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType1 );
             Assert.Equal( parameterType1, parameterType1.ToNonNullableType().ToNullableType() );
+            Assert.Equal( SpecialType.None, parameterType1.SpecialType );
             
             var parameterType2 = method.Parameters[1].Type;
             Assert.True( parameterType2.IsNullable );
             var parameterType2AsNamedType = Assert.IsAssignableFrom<INamedType>( parameterType2 );
             Assert.Same( parameterType2AsNamedType.UnderlyingType, parameterType2AsNamedType );
             Assert.Equal( parameterType2, parameterType2.ToNonNullableType().ToNullableType() );
+            Assert.Equal( SpecialType.None, parameterType2.SpecialType );
             
             var parameterType3 = method.Parameters[2].Type;
             Assert.True( parameterType3.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType3 );
             Assert.Equal( parameterType3, parameterType3.ToNonNullableType().ToNullableType() );
+            Assert.Equal( SpecialType.None, parameterType3.SpecialType );
             
             var parameterType4 = method.Parameters[3].Type;
             Assert.False( parameterType4.IsNullable );
             Assert.IsAssignableFrom<ITypeParameter>( parameterType4 );
+            Assert.Equal( SpecialType.None, parameterType4.SpecialType );
         }
 
         /*
