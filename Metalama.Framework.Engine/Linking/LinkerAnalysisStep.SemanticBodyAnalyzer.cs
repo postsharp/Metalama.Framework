@@ -401,8 +401,9 @@ internal sealed partial class LinkerAnalysisStep
             if ( this.TryAnalyzeControlFlowNoSemanticModel(rootBlock, out var returnStatements, out var isEndPointReachable) )
             {
 #if DEBUG
-                var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock );
-                Invariant.Assert( rootBlockCfa.ReturnStatements.SequenceEqual( returnStatements ) );
+                var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock ).AssertNotNull();
+                Invariant.Assert( !rootBlockCfa.ReturnStatements.Except( returnStatements ).Any() );
+                Invariant.Assert( !returnStatements.Except( rootBlockCfa.ReturnStatements ).Any() );
                 Invariant.Assert( rootBlockCfa.EndPointIsReachable == isEndPointReachable );
 #endif
 
@@ -411,7 +412,7 @@ internal sealed partial class LinkerAnalysisStep
             else
             {
                 // Use Roslyn for analysis (may be quite slow).
-                var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock );
+                var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock ).AssertNotNull();
                 return (rootBlockCfa.ReturnStatements, rootBlockCfa.EndPointIsReachable);
             }
         }
@@ -699,7 +700,10 @@ internal sealed partial class LinkerAnalysisStep
 
         public override void VisitYieldStatement( YieldStatementSyntax node )
         {
-            this.ReturnStatements.Add( node );
+            if ( node.ReturnOrBreakKeyword.IsKind( SyntaxKind.BreakKeyword ) )
+            {
+                this.ReturnStatements.Add( node );
+            }
         }
     }
 }
