@@ -1229,7 +1229,6 @@ public class PublicClass
             Assert.NotSame( intType, nullableIntType );
             Assert.True( nullableIntType.IsNullable );
             Assert.Same( intType, nullableIntType.ToNonNullableType() );
-            Assert.Same( intType, nullableIntType.UnderlyingType );
         }
 
         [Fact]
@@ -1241,10 +1240,10 @@ public class PublicClass
             var objectType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(object) );
             Assert.Null( objectType.IsNullable );
             Assert.Same( objectType, objectType.UnderlyingType );
-            var nonNullableObjectType = objectType.ToNonNullableType();
+            var nonNullableObjectType = (INamedType) objectType.ToNonNullableType();
             Assert.False( nonNullableObjectType.IsNullable );
             Assert.Same( objectType, nonNullableObjectType.UnderlyingType );
-            var nullableObjectType = objectType.ToNullableType();
+            var nullableObjectType = (INamedType) objectType.ToNullableType();
             Assert.NotSame( objectType, nullableObjectType );
             Assert.True( nullableObjectType.IsNullable );
             Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullableType() );
@@ -1709,7 +1708,6 @@ public partial class C
 #endif
                 """
                 record R(int P);
-
                 """;
 
 #if !NET5_0_OR_GREATER
@@ -1721,6 +1719,50 @@ public partial class C
             var property = record.Properties.OfName( "P" ).Single();
 
             Assert.Null( property.InitializerExpression );
+        }
+
+        [Fact]
+        public void NullableGeneric()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = """
+                public partial class C<T1,T2,T3,T4>
+                  where T2 : struct
+                  where T3 : class
+                  where T4 : notnull
+                {
+                    public void M(T1? p1, T2? p2, T3? p3, T4 p4) {}
+                }
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var method = type.Methods.Single();
+
+            var parameterType1 = method.Parameters[0].Type;
+            Assert.True( parameterType1.IsNullable );
+            Assert.IsAssignableFrom<ITypeParameter>( parameterType1 );
+            Assert.Equal( parameterType1, parameterType1.ToNonNullableType().ToNullableType() );
+            Assert.Equal( SpecialType.None, parameterType1.SpecialType );
+            
+            var parameterType2 = method.Parameters[1].Type;
+            Assert.True( parameterType2.IsNullable );
+            var parameterType2AsNamedType = Assert.IsAssignableFrom<INamedType>( parameterType2 );
+            Assert.Same( parameterType2AsNamedType.UnderlyingType, parameterType2AsNamedType );
+            Assert.Equal( parameterType2, parameterType2.ToNonNullableType().ToNullableType() );
+            Assert.Equal( SpecialType.None, parameterType2.SpecialType );
+            
+            var parameterType3 = method.Parameters[2].Type;
+            Assert.True( parameterType3.IsNullable );
+            Assert.IsAssignableFrom<ITypeParameter>( parameterType3 );
+            Assert.Equal( parameterType3, parameterType3.ToNonNullableType().ToNullableType() );
+            Assert.Equal( SpecialType.None, parameterType3.SpecialType );
+            
+            var parameterType4 = method.Parameters[3].Type;
+            Assert.False( parameterType4.IsNullable );
+            Assert.IsAssignableFrom<ITypeParameter>( parameterType4 );
+            Assert.Equal( SpecialType.None, parameterType4.SpecialType );
         }
 
         [Fact]

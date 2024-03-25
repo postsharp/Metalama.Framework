@@ -544,11 +544,6 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 // We have an annotated reference type, return the non-annotated type.
                 return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.WithNullableAnnotation( NullableAnnotation.None ) );
             }
-            else if ( isNullable == true )
-            {
-                // We have a Nullable<T>, we return T.
-                return this.Compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TypeSymbol.TypeArguments[0] );
-            }
         }
 
         // Fall back to self.

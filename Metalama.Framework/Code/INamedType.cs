@@ -182,7 +182,7 @@ namespace Metalama.Framework.Code
         new INamedType Definition { get; }
 
         /// <summary>
-        /// Gets the underlying type of an enum, the non-nullable type of a nullable type, or the current type.
+        /// Gets the underlying type of an enum, the non-nullable type of a nullable reference type, or the current type.
         /// </summary>
         INamedType UnderlyingType { get; }
     }
