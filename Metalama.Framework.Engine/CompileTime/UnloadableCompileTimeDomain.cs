@@ -176,7 +176,6 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._assemblyLoadContext?.Unload();
                 this._assemblyLoadContext = null;
-                _ = Task.Run( this.WaitForDisposalCoreAsync );
             }
 
             // We cannot wait for complete disposal synchronously because the TestResult object, lower in the stack, typically contains

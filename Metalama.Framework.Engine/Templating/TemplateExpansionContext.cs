@@ -38,22 +38,30 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
     private readonly LocalFunctionInfo? _localFunctionInfo;
 
+    internal static SyntaxGenerationContext? CurrentSyntaxGenerationContextOrNull
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
+           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext;
+
     /// <summary>
-    /// Gets the current <see cref="SyntaxGenerationContext"/>.
+    /// Gets the current <see cref="SyntaxGenerationContext"/> or throws <see cref="InvalidOperationException"/>
+    /// if the context is not available.
     /// </summary>
     internal static SyntaxGenerationContext CurrentSyntaxGenerationContext
-        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxGenerationContext ??
-           _currentSyntaxSerializationContext.Value?.SyntaxGenerationContext
+        => CurrentSyntaxGenerationContextOrNull
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxGenerationContext has not be set." );
 
     private static readonly AsyncLocal<SyntaxSerializationContext?> _currentSyntaxSerializationContext = new();
 
+    internal static SyntaxSerializationContext? CurrentSyntaxSerializationContextOrNull
+        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
+           ?? _currentSyntaxSerializationContext.Value;
+
     /// <summary>
-    /// Gets the current <see cref="SyntaxSerializationContext"/>.
+    /// Gets the current <see cref="SyntaxSerializationContext"/>  or throws <see cref="InvalidOperationException"/>
+    /// if the context is not available.
     /// </summary>
     internal static SyntaxSerializationContext CurrentSyntaxSerializationContext
-        => (CurrentOrNull as TemplateExpansionContext)?.SyntaxSerializationContext
-           ?? _currentSyntaxSerializationContext.Value
+        => CurrentSyntaxSerializationContextOrNull
            ?? throw new InvalidOperationException( "TemplateExpansionContext.CurrentSyntaxSerializationContext has not been set." );
 
     internal static IDeclaration? CurrentTargetDeclaration => (CurrentOrNull as TemplateExpansionContext)?.TargetDeclaration;

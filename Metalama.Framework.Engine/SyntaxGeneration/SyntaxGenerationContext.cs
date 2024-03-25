@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -53,7 +54,8 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
             this.SyntaxGenerator = new ContextualSyntaxGenerator( this, !isNullOblivious );
         }
 
-        internal static SyntaxGenerationContext Contextless { get; } = new( false, false, SyntaxGenerationOptions.Formatted, "\r\n" );
+        internal static SyntaxGenerationContext Contextless { get; } =
+            new( false, false, new SyntaxGenerationOptions( CodeFormattingOptions.Default ), "\r\n" );
 
         [Memo]
         internal SyntaxTrivia ElasticEndOfLineTrivia => SyntaxFactory.ElasticEndOfLine( this.EndOfLine );

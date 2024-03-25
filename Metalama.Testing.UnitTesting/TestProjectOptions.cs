@@ -112,6 +112,7 @@ namespace Metalama.Testing.UnitTesting
                         RetryHelper.Retry( () => Directory.Delete( this.BaseDirectory, true ) );
                     }
                     catch ( DirectoryNotFoundException ) { }
+                    catch ( UnauthorizedAccessException ) { }
                 }
             }
         }

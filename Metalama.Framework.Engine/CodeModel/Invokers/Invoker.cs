@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers;
 
@@ -21,9 +22,13 @@ internal abstract class Invoker<T>
 
     protected object? Target { get; }
 
-    protected static SyntaxGenerationContext CurrentGenerationContext => TemplateExpansionContext.CurrentSyntaxGenerationContext;
+    protected static SyntaxGenerationContext CurrentGenerationContext
+        => TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull
+           ?? throw new InvalidOperationException( "This operation can only be executed in the context of a template." );
 
-    protected static SyntaxSerializationContext CurrentSerializationContext => TemplateExpansionContext.CurrentSyntaxSerializationContext;
+    protected static SyntaxSerializationContext CurrentSerializationContext
+        => TemplateExpansionContext.CurrentSyntaxSerializationContextOrNull
+           ?? throw new InvalidOperationException( "This operation can only be executed in the context of a template." );
 
     protected Invoker( T member, InvokerOptions? options, object? target )
     {
