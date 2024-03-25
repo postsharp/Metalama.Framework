@@ -54,7 +54,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
     public override async Task<LinkerInjectionStepOutput> ExecuteAsync( AspectLinkerInput input, CancellationToken cancellationToken )
     {
-        // TODO: Consider parallelizing based on containing type and not syntax tree. This would remove non-determinism in name selection.
+        // TODO: Consider parallelization based on containing type and not syntax tree. This would remove non-determinism in name selection.
 
         // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
         var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
@@ -203,7 +203,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 lexicalScopeFactory,
                 aspectReferenceSyntaxProvider,
                 injectionNameProvider,
-                injectionHelperProvider,
                 member,
                 transformations );
         }
@@ -325,19 +324,27 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // Note: Compilation-level attributes will not be indexed because the containing declaration has no
         // syntax reference.
 
-        if ( transformation is IntroduceAttributeTransformation introduceAttributeTransformation )
+        switch ( transformation )
         {
-            foreach ( var declaringSyntax in introduceAttributeTransformation.TargetDeclaration.GetDeclaringSyntaxReferences() )
-            {
-                transformationCollection.AddNodeWithModifiedAttributes( declaringSyntax.GetSyntax() );
-            }
-        }
-        else if ( transformation is RemoveAttributesTransformation removeAttributesTransformation )
-        {
-            foreach ( var declaringSyntax in removeAttributesTransformation.ContainingDeclaration.GetDeclaringSyntaxReferences() )
-            {
-                transformationCollection.AddNodeWithModifiedAttributes( declaringSyntax.GetSyntax() );
-            }
+            case IntroduceAttributeTransformation introduceAttributeTransformation:
+                {
+                    foreach ( var declaringSyntax in introduceAttributeTransformation.TargetDeclaration.GetDeclaringSyntaxReferences() )
+                    {
+                        transformationCollection.AddNodeWithModifiedAttributes( declaringSyntax.GetSyntax() );
+                    }
+
+                    break;
+                }
+
+            case RemoveAttributesTransformation removeAttributesTransformation:
+                {
+                    foreach ( var declaringSyntax in removeAttributesTransformation.ContainingDeclaration.GetDeclaringSyntaxReferences() )
+                    {
+                        transformationCollection.AddNodeWithModifiedAttributes( declaringSyntax.GetSyntax() );
+                    }
+
+                    break;
+                }
         }
     }
 
@@ -876,7 +883,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         LexicalScopeFactory lexicalScopeFactory,
         AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
         LinkerInjectionNameProvider injectionNameProvider,
-        LinkerInjectionHelperProvider injectionHelperProvider,
         IMember member,
         AuxiliaryMemberTransformations transformations )
     {
@@ -887,7 +893,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 lexicalScopeFactory,
                 aspectReferenceSyntaxProvider,
                 injectionNameProvider,
-                injectionHelperProvider,
                 transformationCollection );
 
         if ( transformations.ShouldInjectAuxiliarySourceMember )

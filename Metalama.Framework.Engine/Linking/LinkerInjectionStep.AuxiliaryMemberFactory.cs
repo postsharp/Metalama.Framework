@@ -30,7 +30,6 @@ internal sealed partial class LinkerInjectionStep
         private readonly LexicalScopeFactory _lexicalScopeFactory;
         private readonly AspectReferenceSyntaxProvider _aspectReferenceSyntaxProvider;
         private readonly LinkerInjectionNameProvider _injectionNameProvider;
-        private readonly LinkerInjectionHelperProvider _injectionHelperProvider;
         private readonly TransformationCollection _transformationCollection;
 
         public AuxiliaryMemberFactory(
@@ -39,7 +38,6 @@ internal sealed partial class LinkerInjectionStep
             LexicalScopeFactory lexicalScopeFactory,
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             LinkerInjectionNameProvider linkerInjectionNameProvider,
-            LinkerInjectionHelperProvider injectionHelperProvider,
             TransformationCollection transformationCollection )
         {
             this._parent = parent;
@@ -47,7 +45,6 @@ internal sealed partial class LinkerInjectionStep
             this._lexicalScopeFactory = lexicalScopeFactory;
             this._aspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this._injectionNameProvider = linkerInjectionNameProvider;
-            this._injectionHelperProvider = injectionHelperProvider;
             this._transformationCollection = transformationCollection;
         }
 
@@ -79,7 +76,7 @@ internal sealed partial class LinkerInjectionStep
                     Parameter(
                         List<AttributeListSyntax>(),
                         TokenList(),
-                        this._injectionHelperProvider.GetSourceType(),
+                        this._injectionNameProvider.GetSourceType(),
                         Identifier( AspectReferenceSyntaxProvider.LinkerOverrideParamName ),
                         EqualsValueClause(
                             LiteralExpression(

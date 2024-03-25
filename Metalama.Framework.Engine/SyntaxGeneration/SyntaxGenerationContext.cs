@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
         public SyntaxTriviaList ElasticEndOfLineTriviaList => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia ) : default;
 
         [Memo]
-        public SyntaxTriviaList TwoElasticEndOfLinesTriviaList
+        internal SyntaxTriviaList TwoElasticEndOfLinesTriviaList
             => this.Options.TriviaMatters ? new SyntaxTriviaList( this.ElasticEndOfLineTrivia, this.ElasticEndOfLineTrivia ) : default;
 
         private SyntaxGenerationContext(

@@ -17,8 +17,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public sealed class SerializableTypeIdResolver
 {
-    public const string LegacyPrefix = "typeof";
-    public const string Prefix = "Y:"; // T: is used for named types.
+    internal const string LegacyPrefix = "typeof";
+    internal const string Prefix = "Y:"; // T: is used for named types.
 
     private readonly ConcurrentDictionary<SerializableTypeId, ITypeSymbol> _cache = new();
     private readonly Compilation _compilation;

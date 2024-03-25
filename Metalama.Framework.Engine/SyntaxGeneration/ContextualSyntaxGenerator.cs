@@ -163,8 +163,10 @@ internal sealed partial class ContextualSyntaxGenerator
         return expression.WithSimplifierAnnotationIfNecessary( this._context );
     }
 
+    // ReSharper disable once MemberCanBeMadeStatic.Global
     public ThisExpressionSyntax ThisExpression() => (ThisExpressionSyntax) _roslynSyntaxGenerator.ThisExpression();
 
+    // ReSharper disable once MemberCanBeMadeStatic.Global
     public IdentifierNameSyntax IdentifierName( string identifier ) => (IdentifierNameSyntax) _roslynSyntaxGenerator.IdentifierName( identifier );
 
     public TypeSyntax ArrayTypeExpression( TypeSyntax type )
