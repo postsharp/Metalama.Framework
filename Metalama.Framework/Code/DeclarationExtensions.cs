@@ -83,7 +83,8 @@ namespace Metalama.Framework.Code
         public static IMemberOrNamedType? GetClosestMemberOrNamedType( this IDeclaration declaration )
             => declaration switch
             {
-                INamedType namedType => namedType.ToNonNullableType() as INamedType ?? namedType,
+                // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
+                INamedType namedType => namedType.ToNonNullableType() as INamedType,
                 IMember member => member,
                 { ContainingDeclaration: { } containingDeclaration } => GetClosestMemberOrNamedType( containingDeclaration ),
                 _ => null
@@ -96,7 +97,8 @@ namespace Metalama.Framework.Code
         public static INamedType? GetTopmostNamedType( this IDeclaration declaration )
             => declaration switch
             {
-                INamedType { DeclaringType: null } namedType => namedType.ToNonNullableType() as INamedType ?? namedType,
+                // ToNonNullableType() can either return an INamedType or an ITypeParameter. In the second case, we don't have a meaningful "closest named type".
+                INamedType { DeclaringType: null } namedType => namedType.ToNonNullableType() as INamedType,
                 INamedType { DeclaringType: not null } namedType => namedType.DeclaringType.GetTopmostNamedType(),
                 _ => declaration.GetClosestNamedType()?.GetTopmostNamedType()
             };
