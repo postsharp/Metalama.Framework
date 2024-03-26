@@ -8,5 +8,5 @@ internal sealed class TestToastNotificationDetectionService : IToastNotification
 {
     public bool WasDetectionTriggered { get; private set; }
 
-    public void Detect() => this.WasDetectionTriggered = true;
+    public void Detect( ToastNotificationDetectionOptions? options = null ) => this.WasDetectionTriggered = true;
 }
