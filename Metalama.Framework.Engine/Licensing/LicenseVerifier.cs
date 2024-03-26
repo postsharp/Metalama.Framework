@@ -282,7 +282,8 @@ public sealed class LicenseVerifier : IProjectService
         // Show toast notifications if needed and if Metalama is used in the project.
         if ( areLicensedFeaturesUsed )
         {
-            this._toastNotificationDetectionService?.Detect();
+            this._toastNotificationDetectionService?.Detect(
+                new ToastNotificationDetectionOptions { HasValidLicense = !string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) } );
         }
 
         // Write consumption data to disk if required.
