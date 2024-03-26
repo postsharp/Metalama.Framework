@@ -65,4 +65,15 @@ public sealed class SerializableTypeIdTests : UnitTestClass
         var roundloop = compilation.GetCompilationModel().CompilationContext.SerializableTypeIdResolver.ResolveId( typeId );
         Assert.Equal( typeModel.GetSymbol(), roundloop, SymbolEqualityComparer.IncludeNullability );
     }
+    
+    [Theory]
+    [InlineData( "X:x" )]
+    [InlineData( "Y:x" )]
+    [InlineData( "Y:+" )]
+    [InlineData( "Y:List<x>" )]
+    public void TestInvalidString( string s )
+    {
+        // We are testing that the method gracefully fails.
+        Assert.False( this._resolver.TryResolveId( new SerializableTypeId( s ), out _ ) );
+    }
 }

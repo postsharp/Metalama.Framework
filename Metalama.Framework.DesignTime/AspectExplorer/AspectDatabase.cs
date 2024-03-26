@@ -150,7 +150,12 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         var compilationContext = CompilationContextFactory.GetInstance( compilation );
         var typeIdResolver = compilationContext.SerializableTypeIdResolver;
 
-        var aspectClassFullName = typeIdResolver.ResolveId( aspectClass ).GetReflectionFullName();
+        if ( !typeIdResolver.TryResolveId( aspectClass, out var aspectTypeSymbol ) )
+        {
+            this._logger.Warning?.Log( $"Could not resolve '{aspectClass}'." );
+            return [];
+        }
+        var aspectClassFullName = aspectTypeSymbol.GetReflectionFullName();
 
         var transformationAspectInstances = aspectInstances
             .Where( aspectInstance => aspectInstance.AspectClass.FullName == aspectClassFullName )

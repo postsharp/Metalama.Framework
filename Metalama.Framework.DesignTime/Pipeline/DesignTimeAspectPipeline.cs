@@ -942,9 +942,24 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             // Check if the aspect class is accessible from the symbol.
 
-            var aspectClassSymbol = compilationContext.SerializableTypeIdResolver.ResolveId( aspectClass.TypeId );
+            if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( aspectClass.TypeId, null, out var aspectClassSymbol ) )
+            {
+                // This situation may happen during edits (see #34704).
+                this.Logger.Trace?.Log( $"The aspect is not eligible because '{aspectClass.TypeId}' cannot be resolved." );
 
-            if ( !compilation.IsSymbolAccessibleWithin( aspectClassSymbol, (ISymbol?) symbol.GetClosestContainingType() ?? symbol.ContainingAssembly ) )
+                continue;
+            }
+
+            var enclosingSymbol = (ISymbol?) symbol.GetClosestContainingType() ?? symbol.ContainingAssembly;
+
+            if ( enclosingSymbol == null )
+            {
+                this.Logger.Trace?.Log( $"The aspect is not eligible because we cannot get the enclosing type or assembly of '{symbol}'." );
+
+                continue;
+            }
+
+            if ( !compilation.IsSymbolAccessibleWithin( aspectClassSymbol, enclosingSymbol ) )
             {
                 this.Logger.Trace?.Log( "The aspect is not eligible because it is not accessible from the symbol." );
 
