@@ -49,8 +49,9 @@ public sealed class SerializableTypeIdResolver
         }
     }
 
-    public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen(true)] out ITypeSymbol? type ) => this.TryResolveId( typeId, null, out type );
-    public bool TryResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments, [NotNullWhen(true)]  out ITypeSymbol? type )
+    public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen( true )] out ITypeSymbol? type ) => this.TryResolveId( typeId, null, out type );
+
+    public bool TryResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments, [NotNullWhen( true )] out ITypeSymbol? type )
     {
         var result = this.ResolveAndCache( typeId, genericArguments );
 
@@ -129,22 +130,26 @@ public sealed class SerializableTypeIdResolver
 
     private readonly struct ResolverResult
     {
+        public static ResolverResult TypeParameterOfDeclaration { get; } = new( null );
+
         private readonly object? _value;
 
-        public ITypeSymbol? TypeSymbol => (ITypeSymbol?) this._value;
+        public ITypeSymbol TypeSymbol => (ITypeSymbol?) this._value ?? throw new InvalidOperationException();
 
-        public INamespaceOrTypeSymbol? TypeOrNamespaceSymbol => (INamespaceOrTypeSymbol?) this._value;
+        public INamespaceOrTypeSymbol TypeOrNamespaceSymbol => (INamespaceOrTypeSymbol?) this._value ?? throw new InvalidOperationException();
 
         public string? ErrorMessage => (string?) this._value;
 
         public bool IsSuccess => this._value is null or INamespaceOrTypeSymbol;
+
+        public bool IsTypeParameterOfDeclaration => this._value == null;
 
         private ResolverResult( object? value )
         {
             this._value = value;
         }
 
-        public static ResolverResult Success( INamespaceOrTypeSymbol? symbol ) => new( symbol );
+        public static ResolverResult Success( INamespaceOrTypeSymbol symbol ) => new( symbol );
 
         public static ResolverResult Error( string errorMessage ) => new( errorMessage );
     }
@@ -172,7 +177,7 @@ public sealed class SerializableTypeIdResolver
                 return elementTypeResult;
             }
 
-            return ResolverResult.Success( this._compilation.CreateArrayTypeSymbol( elementTypeResult.TypeSymbol!, node.RankSpecifiers.Count ) );
+            return ResolverResult.Success( this._compilation.CreateArrayTypeSymbol( elementTypeResult.TypeSymbol, node.RankSpecifiers.Count ) );
         }
 
         public override ResolverResult VisitPointerType( PointerTypeSyntax node )
@@ -184,7 +189,7 @@ public sealed class SerializableTypeIdResolver
                 return elementTypeResult;
             }
 
-            return ResolverResult.Success( this._compilation.CreatePointerTypeSymbol( elementTypeResult.TypeSymbol! ) );
+            return ResolverResult.Success( this._compilation.CreatePointerTypeSymbol( elementTypeResult.TypeSymbol ) );
         }
 
         public override ResolverResult VisitNullableType( NullableTypeSyntax node )
@@ -223,7 +228,8 @@ public sealed class SerializableTypeIdResolver
 
                     if ( typeParameter != null )
                     {
-                        return ResolverResult.Success( null );
+                        // We matched the name of a type parameter of the type declaration.
+                        return ResolverResult.TypeParameterOfDeclaration;
                     }
                 }
             }
@@ -253,7 +259,11 @@ public sealed class SerializableTypeIdResolver
             {
                 return result;
             }
-            else if ( !this._isNullOblivious && result.TypeSymbol != null )
+            else if ( result.IsTypeParameterOfDeclaration )
+            {
+                return result;
+            }
+            else if ( !this._isNullOblivious )
             {
                 return ResolverResult.Success( result.TypeSymbol.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
             }
@@ -290,13 +300,9 @@ public sealed class SerializableTypeIdResolver
                         return definitionResult;
                     }
 
-                    var definition = (INamedTypeSymbol?) definitionResult.TypeSymbol;
+                    var definition = (INamedTypeSymbol) definitionResult.TypeSymbol;
 
-                    if ( definition == null )
-                    {
-                        return ResolverResult.Success( null );
-                    }
-                    else if ( genericName.IsUnboundGenericName )
+                    if ( genericName.IsUnboundGenericName )
                     {
                         return definitionResult;
                     }
@@ -315,7 +321,7 @@ public sealed class SerializableTypeIdResolver
                             {
                                 return typeArgumentResult;
                             }
-                            else if ( typeArgumentResult.TypeSymbol == null )
+                            else if ( typeArgumentResult.IsTypeParameterOfDeclaration )
                             {
                                 return definitionResult;
                             }

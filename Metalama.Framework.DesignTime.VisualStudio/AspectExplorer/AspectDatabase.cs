@@ -41,14 +41,9 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
 
         INamedTypeSymbol? ResolveOrNull( string serializableTypeId )
         {
-            try
-            {
-                return (INamedTypeSymbol) typeIdResolver.TryResolveId( new SerializableTypeId( serializableTypeId ) );
-            }
-            catch ( InvalidOperationException )
-            {
-                return null;
-            }
+            typeIdResolver.TryResolveId( new SerializableTypeId( serializableTypeId ), out var symbol );
+
+            return (INamedTypeSymbol?) symbol;
         }
 
         // Resolving can fail when the pipeline is paused and the aspect class does not exist in the modified compilation.

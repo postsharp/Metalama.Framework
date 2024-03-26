@@ -67,10 +67,10 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     }
     
     [Theory]
-    [InlineData("X:x")]
-    [InlineData("Y:x")]
-    [InlineData("Y:+")]
-    [InlineData("Y:List<x>")]
+    [InlineData( "X:x" )]
+    [InlineData( "Y:x" )]
+    [InlineData( "Y:+" )]
+    [InlineData( "Y:List<x>" )]
     public void TestInvalidString( string s )
     {
         // We are testing that the method gracefully fails.
