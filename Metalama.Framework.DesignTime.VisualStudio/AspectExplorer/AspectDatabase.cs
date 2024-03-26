@@ -43,7 +43,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         {
             try
             {
-                return (INamedTypeSymbol) typeIdResolver.ResolveId( new SerializableTypeId( serializableTypeId ) );
+                return (INamedTypeSymbol) typeIdResolver.TryResolveId( new SerializableTypeId( serializableTypeId ) );
             }
             catch ( InvalidOperationException )
             {
