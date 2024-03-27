@@ -103,7 +103,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         TestContextOptions contextOptions,
         IAdditionalServiceCollection? additionalServices = null )
     {
-        this._throttlingHandle = TestThrottlingHelper.MonitorTest( contextOptions.RequiresExclusivity );
+        this._throttlingHandle = TestThrottlingHelper.StartTest( contextOptions.RequiresExclusivity );
 
         // Start the Stopwatch only after we get after the throttle wall.
         this._stopwatch = Stopwatch.StartNew();

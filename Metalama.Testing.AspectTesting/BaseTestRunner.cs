@@ -123,7 +123,7 @@ internal abstract partial class BaseTestRunner
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
         // Avoid run too many tests in parallel regardless of the way the runners are scheduled.
-        using ( await TestThrottlingHelper.MonitorTestAsync() )
+        using ( await TestThrottlingHelper.StartTestAsync() )
         {
             var originalCulture = CultureInfo.CurrentCulture;
 
