@@ -67,7 +67,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
 
         var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.GetAspectInstancesAsync), cancellationToken );
 
-        var aspectInstances = await analysisProcessApi.GetAspectInstancesAsync( projectKey, aspectClass.GetSerializableTypeId().Id, cancellationToken );
+        var aspectInstances = await analysisProcessApi.GetAspectInstancesAsync( projectKey, aspectClass.ContainingAssembly.Name, aspectClass.GetSerializableTypeId().Id, cancellationToken );
 
         result[0] = GetAspectInstances().ToArray();
 
