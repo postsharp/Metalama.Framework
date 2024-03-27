@@ -14,24 +14,24 @@ internal static class TestThrottlingHelper
 
     public static async Task<IDisposable> MonitorTestAsync( bool requiresExclusivity = false )
     {
-        var runningTests = Interlocked.Increment( ref _runningTests );
-
-        if ( requiresExclusivity || runningTests == 1 )
+        if ( requiresExclusivity || _exclusiveSemaphore.CurrentCount > 0 )
         {
             await _exclusiveSemaphore.WaitAsync();
         }
+
+        Interlocked.Increment( ref _runningTests );
 
         return new DisposeAction( () => OnTestStopped( requiresExclusivity ) );
     }
 
     public static IDisposable MonitorTest( bool requiresExclusivity = false )
     {
-        var runningTests = Interlocked.Increment( ref _runningTests ) == 1;
-
-        if ( requiresExclusivity || runningTests )
+        if ( requiresExclusivity || _exclusiveSemaphore.CurrentCount > 0 )
         {
             _exclusiveSemaphore.Wait();
         }
+
+        Interlocked.Increment( ref _runningTests );
 
         return new DisposeAction( () => OnTestStopped( requiresExclusivity ) );
     }
