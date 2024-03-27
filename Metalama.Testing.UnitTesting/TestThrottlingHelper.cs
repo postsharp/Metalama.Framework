@@ -12,37 +12,37 @@ internal static class TestThrottlingHelper
     private static readonly SemaphoreSlim _exclusiveSemaphore = new( 1 );
     private static int _runningTests;
 
-    public static async Task<IDisposable> StartTestAsync( bool requiresExclusivity = false )
+    public static async Task<IDisposable> MonitorTestAsync( bool requiresExclusivity = false )
     {
-        if ( requiresExclusivity || Interlocked.Increment( ref _runningTests ) == 1 )
+        var runningTests = Interlocked.Increment( ref _runningTests );
+
+        if ( requiresExclusivity || runningTests == 1 )
         {
             await _exclusiveSemaphore.WaitAsync();
         }
 
-        return new DisposeAction(
-            () =>
-            {
-                if ( requiresExclusivity || Interlocked.Decrement( ref _runningTests ) == 0 )
-                {
-                    _exclusiveSemaphore.Release();
-                }
-            } );
+        return new DisposeAction( () => OnTestStopped( requiresExclusivity ) );
     }
 
-    public static IDisposable StartTest( bool requiresExclusivity = false )
+    public static IDisposable MonitorTest( bool requiresExclusivity = false )
     {
-        if ( requiresExclusivity || Interlocked.Increment( ref _runningTests ) == 1 )
+        var runningTests = Interlocked.Increment( ref _runningTests ) == 1;
+
+        if ( requiresExclusivity || runningTests )
         {
             _exclusiveSemaphore.Wait();
         }
 
-        return new DisposeAction(
-            () =>
-            {
-                if ( requiresExclusivity || Interlocked.Decrement( ref _runningTests ) == 0 )
-                {
-                    _exclusiveSemaphore.Release();
-                }
-            } );
+        return new DisposeAction( () => OnTestStopped( requiresExclusivity ) );
+    }
+
+    private static void OnTestStopped( bool requiresExclusivity )
+    {
+        var runningTests = Interlocked.Decrement( ref _runningTests );
+
+        if ( requiresExclusivity || runningTests == 0 )
+        {
+            _exclusiveSemaphore.Release();
+        }
     }
 }
