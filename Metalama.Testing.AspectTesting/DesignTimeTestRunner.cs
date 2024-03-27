@@ -3,15 +3,13 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Runners
+namespace Metalama.Testing.AspectTesting
 {
     internal sealed class DesignTimeTestRunner : BaseTestRunner
     {
