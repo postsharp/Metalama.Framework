@@ -12,7 +12,7 @@ namespace Metalama.Framework.Project
     /// <remarks>
     /// The implementation must not allow modifications of the state after the object has been made read only.
     /// </remarks>
-    /// <seealso href="@exposing-configuration"/>
+    /// <seealso href="@aspect-configuration"/>
     [CompileTime]
     [Obsolete( "Use IHierarchicalOptions." )]
     public abstract class ProjectExtension

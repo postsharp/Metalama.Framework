@@ -6,7 +6,9 @@ namespace Metalama.Framework.Fabrics
     /// A class that, when inherited by a type in a given namespace, allows that type to analyze and
     /// add aspects to that namespace.
     /// </summary>
-    /// <seealso href="@applying-aspects"/>
+    /// <seealso href="@fabrics"/> 
+    /// <seealso href="@aspect-configuration"/>
+    /// <seealso href="@fabrics-adding-aspects"/>
     public abstract class NamespaceFabric : Fabric
     {
         /// <summary>
