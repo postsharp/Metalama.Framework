@@ -187,8 +187,12 @@ internal sealed partial class UserProcessServiceHubEndpoint : ServerEndpoint, IC
 
     private void OnAspectInstancesChanged( ProjectKey projectKey ) => this.AspectInstancesChanged?.Invoke( projectKey );
 
+    public event Action<CompilationResultChangedEventArgs>? CompilationResultChanged;
+
     private Task NotifyCompilationResultChangeAsync( CompilationResultChangedEventArgs notification, CancellationToken cancellationToken )
     {
+        this.CompilationResultChanged?.Invoke( notification );
+
         var tasks = new List<Task>();
 
         var hasClient = false;

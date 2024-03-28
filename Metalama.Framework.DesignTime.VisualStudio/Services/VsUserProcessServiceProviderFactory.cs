@@ -17,12 +17,17 @@ internal sealed class VsUserProcessServiceProviderFactory : DesignTimeUserProces
 
     protected override CompilerServiceProvider CreateCompilerServiceProvider() => new VsUserProcessCompilerServiceProvider();
 
-    protected override ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
+    protected override ServiceProvider<IGlobalService>
+        AddServices( ServiceProvider<IGlobalService> serviceProvider )
     {
         serviceProvider = base.AddServices( serviceProvider );
 
         var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( serviceProvider );
 
-        return serviceProvider.WithService( userProcessRegistrationService );
+        serviceProvider = serviceProvider.WithService( userProcessRegistrationService );
+        serviceProvider = serviceProvider.WithService( new LocalWorkspaceProvider( serviceProvider ) );
+        serviceProvider = serviceProvider.WithService( sp => new VsUserProcessInvalidationService( sp ) );
+
+        return serviceProvider;
     }
 }
