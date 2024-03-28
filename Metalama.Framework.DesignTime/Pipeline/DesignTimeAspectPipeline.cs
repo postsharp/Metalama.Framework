@@ -329,29 +329,17 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     private async ValueTask ResumeCoreAsync( AsyncExecutionContext executionContext )
     {
-        // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
-        // is removed.
+        // Notify the IDE that errors have been removed on compile-time syntax trees.
         if ( this.MustReportPausedPipelineAsErrors )
         {
             if ( this._currentState.CompileTimeSyntaxTrees != null )
             {
-                foreach ( var file in this._currentState.CompileTimeSyntaxTrees )
-                {
-                    if ( file.Value == null )
-                    {
-                        this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+                var notification = new CompilationResultChangedEventArgs(
+                    this.ProjectKey,
+                    true,
+                    this._currentState.CompileTimeSyntaxTrees.SelectAsImmutableArray( x => x.Key ) );
 
-                        RetryHelper.Retry(
-                            () =>
-                            {
-                                if ( File.Exists( file.Key ) )
-                                {
-                                    File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
-                                }
-                            },
-                            logger: this.Logger );
-                    }
-                }
+                this._eventHub.PublishCompilationResultChangedNotification( notification );
             }
         }
 

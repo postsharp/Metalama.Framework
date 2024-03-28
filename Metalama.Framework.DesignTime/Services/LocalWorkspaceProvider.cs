@@ -9,7 +9,7 @@ namespace Metalama.Framework.DesignTime.Services;
 /// <summary>
 /// An implementation of <see cref="WorkspaceProvider"/> that expects the UI services to be in the same process and to call <see cref="TrySetWorkspace"/>.
 /// </summary>
-internal sealed class LocalWorkspaceProvider : WorkspaceProvider
+public sealed class LocalWorkspaceProvider : WorkspaceProvider
 {
     private readonly TaskCompletionSource<Workspace> _workspace = new();
 

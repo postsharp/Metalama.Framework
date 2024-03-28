@@ -16,6 +16,7 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable UnusedType.Global
@@ -34,6 +35,10 @@ namespace Metalama.Framework.DesignTime
     {
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
         private readonly ILogger _logger;
+
+#if DEBUG
+        private readonly ConcurrentDictionary<string, object> _locks = new();
+#endif
 
         [UsedImplicitly]
         public TheDiagnosticAnalyzer() : this(
@@ -67,11 +72,18 @@ namespace Metalama.Framework.DesignTime
 
         internal void AnalyzeSemanticModel( ISemanticModelAnalysisContext context )
         {
+            var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
+#if DEBUG
+
+            // In the debug build we prevent concurrent analysis of the same tree because it makes it difficult to debug.
+            var @lock = this._locks.GetOrAdd( syntaxTreeFilePath, _ => new object() );
+            var lockTaken = false;
+            Monitor.Enter( @lock, ref lockTaken );
+#endif
+
             try
             {
                 var compilation = context.SemanticModel.Compilation;
-
-                var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
 
                 this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
@@ -196,6 +208,16 @@ namespace Metalama.Framework.DesignTime
             catch ( Exception e )
             {
                 DesignTimeExceptionHandler.ReportException( e );
+            }
+            finally
+            {
+#if DEBUG
+                if ( lockTaken )
+                {
+                    Monitor.Exit( @lock );
+                }
+
+#endif
             }
         }
 
