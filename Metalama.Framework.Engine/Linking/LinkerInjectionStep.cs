@@ -362,7 +362,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 case IInjectMemberOrNamedTypeTransformation injectMemberTransformation:
                     // Transformed syntax tree must match insert position.
-                    Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
+                    Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxTree );
 
                     // Create the SyntaxGenerationContext for the insertion point.
                     var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
@@ -458,10 +458,12 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static int GetSyntaxTreePosition( InsertPosition insertPosition )
-            => insertPosition.Relation switch
+            => insertPosition switch
             {
-                InsertPositionRelation.After => insertPosition.SyntaxNode.Span.End + 1,
-                InsertPositionRelation.Within => ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start - 1,
+                { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
+                { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
+                { Relation: InsertPositionRelation.Within, TypeBuilder.ContainingDeclaration: INamedType { } containingType } 
+                    => ((BaseTypeDeclarationSyntax) containingType.GetPrimaryDeclarationSyntax().AssertNotNull()).CloseBraceToken.Span.Start - 1,
                 _ => 0
             };
 

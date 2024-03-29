@@ -55,7 +55,23 @@ namespace Metalama.Framework.Engine.CodeModel
                 case PromotedField promotedField:
                     return promotedField.Field.ToInsertPosition();
 
-                case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
+                case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within, declaringBuilder );
+
+                case NamedTypeBuilder { DeclaringType: { } declaringType }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within, (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+                case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within, declaringBuilder );
+
+                case IMemberBuilder { DeclaringType: BuiltNamedType builtNamedType }:
+                    return new InsertPosition(
+                        InsertPositionRelation.Within, builtNamedType.TypeBuilder );
+
+                case IMemberBuilder { DeclaringType: { } declaringType }:
                     return new InsertPosition(
                         InsertPositionRelation.Within,
                         (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );

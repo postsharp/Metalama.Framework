@@ -49,7 +49,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         INamespace INamedType.Namespace => this.Namespace;
 
-        public string FullName => $"{this.Namespace.FullName}.{this.Name}";
+        public string FullName => 
+            this.DeclaringType != null
+            ? $"{this.DeclaringType.FullName}.{this.Name}"
+            : $"{this.Namespace.FullName}.{this.Name}";
 
         [Memo]
         public INamedTypeCollection NestedTypes => new EmptyNamedTypeCollection();
@@ -279,7 +282,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public string Name => this._builder.Name;
 
-            public string MetadataName => this._builder.Name;
+            public string MetadataName =>
+                this._builder.DeclaringType != null
+                ? $"{this._builder.DeclaringType.GetSymbol().AssertNotNull().MetadataName}+{this._builder.Name}"
+                : this._builder.Name;
 
             public int MetadataToken => 0;
 
@@ -390,7 +396,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public ImmutableArray<ISymbol> GetMembers( string name )
             {
-                throw new NotImplementedException();
+                return ImmutableArray<ISymbol>.Empty;
             }
 
             public ImmutableArray<CustomModifier> GetTypeArgumentCustomModifiers( int ordinal )

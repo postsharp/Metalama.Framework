@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Substituted;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -13,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Xml.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
@@ -339,7 +337,7 @@ public sealed partial class CompilationModel
         {
             this.RemoveAttributes( removeAttributes );
         }
-
+        
         // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {

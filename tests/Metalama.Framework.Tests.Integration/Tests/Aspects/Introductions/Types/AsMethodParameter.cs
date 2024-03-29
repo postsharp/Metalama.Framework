@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,9 +9,25 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "TestNestedType");
+        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType");
 
-        builder.Advice.IntroduceMethod(builder.Target.ForCompilation(builder.Advice.MutableCompilation), nameof(MethodTemplate), buildMethod: b => b.AddParameter("p", result.Declaration));
+        builder.Advice.IntroduceMethod(
+            builder.Target.ForCompilation(builder.Advice.MutableCompilation), 
+            nameof(MethodTemplate), 
+            buildMethod: b => 
+            {
+                b.Name = "MethodWithIntroduced";
+                b.AddParameter("p", result.Declaration);
+            });
+
+        builder.Advice.IntroduceMethod(
+            builder.Target.ForCompilation(builder.Advice.MutableCompilation),
+            nameof(MethodTemplate),
+            buildMethod: b =>
+            {
+                b.Name = "MethodWithExisting";
+                b.AddParameter("p", builder.Target.NestedTypes.Single());
+            });
     }
 
     [Template]
@@ -23,4 +40,7 @@ public class IntroductionAttribute : TypeAspect
 [IntroductionAttribute]
 public class TargetType
 {
+    public class ExistingNestedType
+    {
+    }
 }
