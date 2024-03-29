@@ -2,23 +2,22 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents any transformation that injects a member, including introducing or overriding members, which work by introducing a new member.
+/// </summary>
+internal interface IInjectMemberOrNamedTypeTransformation : ITransformation
 {
     /// <summary>
-    /// Represents any transformation that injects a member, including introducing or overriding members, which work by introducing a new member.
+    /// Gets the full syntax of introduced members including the body.
     /// </summary>
-    internal interface IInjectMemberOrNamedTypeTransformation : ITransformation
-    {
-        /// <summary>
-        /// Gets the full syntax of introduced members including the body.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
+    /// <param name="context"></param>
+    /// <returns></returns>
+    IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
 
-        /// <summary>
-        /// Gets the node after which the new members should be inserted.
-        /// </summary>
-        InsertPosition InsertPosition { get; }
-    }
+    /// <summary>
+    /// Gets the node after which the new members should be inserted.
+    /// </summary>
+    InsertPosition InsertPosition { get; }
 }

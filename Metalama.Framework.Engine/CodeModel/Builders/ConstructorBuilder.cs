@@ -45,14 +45,10 @@ internal sealed class ConstructorBuilder : MemberBuilder, IConstructorBuilder, I
         : base( targetType, null!, advice ) { }
 
     public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-    {
-        throw new NotImplementedException();
-    }
+        => throw new NotImplementedException();
 
     public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-    {
-        throw new NotImplementedException();
-    }
+        => throw new NotImplementedException();
 
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 

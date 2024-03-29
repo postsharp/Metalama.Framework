@@ -14,15 +14,12 @@ internal class EmptyConstructorCollection : IConstructorCollection
 
     public INamedType DeclaringType { get; }
 
-    public EmptyConstructorCollection( INamedType declaringType)
+    public EmptyConstructorCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IConstructor> OfName( string name )
-    {
-        return Array.Empty<IConstructor>();
-    }
+    public IEnumerable<IConstructor> OfName( string name ) => Array.Empty<IConstructor>();
 
     public IEnumerator<IConstructor> GetEnumerator() => ((IEnumerable<IConstructor>) Array.Empty<IConstructor>()).GetEnumerator();
 

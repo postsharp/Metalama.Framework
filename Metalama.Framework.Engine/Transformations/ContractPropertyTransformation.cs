@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,7 +20,7 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
     private readonly MethodKind? _targetMethodKind;
 
     public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration, MethodKind? targetMethodKind ) :
-        base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+        base( advice, overriddenDeclaration, ObjectReader.Empty )
     {
         this._targetMethodKind = targetMethodKind;
     }
@@ -37,8 +38,8 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
             [NotNullWhen( true )] out ExpressionSyntax? proceedExpression,
             out string? returnValueLocalName )
         {
-            if ( accessor != null 
-                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind) 
+            if ( accessor != null
+                 && (this._targetMethodKind == null || this._targetMethodKind == accessor.MethodKind)
                  && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
             {
                 if ( direction == ContractDirection.Output )
@@ -62,11 +63,11 @@ internal sealed class ContractPropertyTransformation : OverridePropertyBaseTrans
                     {
                         { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerable or EnumerableKind.UntypedIEnumerable } => TemplateKind.IEnumerable,
                         { IsIteratorMethod: true, EnumerableKind: EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator } => TemplateKind.IEnumerator,
-                        _ => TemplateKind.Default,
+                        _ => TemplateKind.Default
                     };
 
                 proceedExpression = this.CreateProceedDynamicExpression( context, accessor, templateKind )
-                    .ToExpressionSyntax( new( context.Compilation, context.SyntaxGenerationContext ) );
+                    .ToExpressionSyntax( new SyntaxSerializationContext( context.Compilation, context.SyntaxGenerationContext ) );
 
                 return true;
             }

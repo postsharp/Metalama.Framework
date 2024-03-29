@@ -14,15 +14,12 @@ internal class EmptyMethodCollection : IMethodCollection
 
     public INamedType DeclaringType { get; }
 
-    public EmptyMethodCollection( INamedType declaringType)
+    public EmptyMethodCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IMethod> OfName( string name )
-    {
-        return Array.Empty<IMethod>();
-    }
+    public IEnumerable<IMethod> OfName( string name ) => Array.Empty<IMethod>();
 
     public IEnumerator<IMethod> GetEnumerator() => ((IEnumerable<IMethod>) Array.Empty<IMethod>()).GetEnumerator();
 

@@ -149,8 +149,7 @@ internal sealed class IntroduceEventTransformation : IntroduceMemberTransformati
                     { MethodKind: MethodKind.EventAdd } when eventBuilder is { IsEventField: true, ExplicitInterfaceImplementations.Count: > 0 }
                                                              && initializerExpression != null
                         => SyntaxFactoryEx.FormattedBlock(
-                            ExpressionStatement(
-                                context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression( initializerExpression ) ) ),
+                            ExpressionStatement( context.AspectReferenceSyntaxProvider.GetEventFieldInitializerExpression( initializerExpression ) ) ),
                     _ => SyntaxFactoryEx.FormattedBlock()
                 };
 

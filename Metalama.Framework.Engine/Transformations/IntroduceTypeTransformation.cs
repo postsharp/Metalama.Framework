@@ -18,8 +18,11 @@ internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTr
     {
         var type =
             ClassDeclaration( this.IntroducedDeclaration.Name )
-            .NormalizeWhitespace();
+                .NormalizeWhitespace();
 
-        return new[] { new InjectedMemberOrNamedType( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
+        return new[]
+        {
+            new InjectedMemberOrNamedType( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration )
+        };
     }
 }

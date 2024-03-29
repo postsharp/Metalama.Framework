@@ -203,8 +203,7 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
         MemberInjectionContext context,
         out ExpressionSyntax? initializerExpression,
         out MethodDeclarationSyntax? initializerMethod )
-    {
-        return this.GetInitializerExpressionOrMethod(
+        => this.GetInitializerExpressionOrMethod(
             advice,
             context,
             this.Type,
@@ -213,7 +212,6 @@ internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
             this.InitializerTags,
             out initializerExpression,
             out initializerMethod );
-    }
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;
 }

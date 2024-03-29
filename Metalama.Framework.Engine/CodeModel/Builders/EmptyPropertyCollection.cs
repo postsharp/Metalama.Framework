@@ -14,17 +14,14 @@ internal class EmptyPropertyCollection : IPropertyCollection
 
     public INamedType DeclaringType { get; }
 
-    public IProperty this[string name] => throw new InvalidOperationException();
+    public IProperty this[ string name ] => throw new InvalidOperationException();
 
-    public EmptyPropertyCollection(INamedType declaringType)
+    public EmptyPropertyCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IProperty> OfName( string name )
-    {
-        return Array.Empty<IProperty>();
-    }
+    public IEnumerable<IProperty> OfName( string name ) => Array.Empty<IProperty>();
 
     public IEnumerator<IProperty> GetEnumerator() => ((IEnumerable<IProperty>) Array.Empty<IProperty>()).GetEnumerator();
 

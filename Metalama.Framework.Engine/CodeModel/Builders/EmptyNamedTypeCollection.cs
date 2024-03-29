@@ -12,15 +12,9 @@ internal class EmptyNamedTypeCollection : INamedTypeCollection
 {
     public int Count => 0;
 
-    public IEnumerable<INamedType> OfName( string name )
-    {
-        return Array.Empty<INamedType>();
-    }
+    public IEnumerable<INamedType> OfName( string name ) => Array.Empty<INamedType>();
 
-    public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition )
-    {
-        return Array.Empty<INamedType>();
-    }
+    public IEnumerable<INamedType> OfTypeDefinition( INamedType typeDefinition ) => Array.Empty<INamedType>();
 
     public IEnumerator<INamedType> GetEnumerator() => ((IEnumerable<INamedType>) Array.Empty<INamedType>()).GetEnumerator();
 

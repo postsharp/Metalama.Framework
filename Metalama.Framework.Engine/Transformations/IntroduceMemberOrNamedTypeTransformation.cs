@@ -12,7 +12,8 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal abstract class IntroduceMemberOrNamedTypeTransformation<T> : BaseTransformation, IIntroduceDeclarationTransformation, IInjectMemberOrNamedTypeTransformation
+internal abstract class IntroduceMemberOrNamedTypeTransformation<T> : BaseTransformation, IIntroduceDeclarationTransformation,
+                                                                      IInjectMemberOrNamedTypeTransformation
     where T : MemberOrNamedTypeBuilder
 {
     protected IntroduceMemberOrNamedTypeTransformation( Advice advice, T introducedDeclaration ) : base( advice )

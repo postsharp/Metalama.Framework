@@ -14,9 +14,9 @@ internal class EmptyGenericParameterList : IGenericParameterList
 
     public INamedType DeclaringType { get; }
 
-    public ITypeParameter this[int index] => throw new InvalidOperationException();
+    public ITypeParameter this[ int index ] => throw new InvalidOperationException();
 
-    public EmptyGenericParameterList(INamedType declaringType)
+    public EmptyGenericParameterList( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }

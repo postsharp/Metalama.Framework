@@ -14,17 +14,14 @@ internal class EmptyEventCollection : IEventCollection
 
     public INamedType DeclaringType { get; }
 
-    public IProperty this[string name] => throw new InvalidOperationException();
+    public IProperty this[ string name ] => throw new InvalidOperationException();
 
-    public EmptyEventCollection( INamedType declaringType)
+    public EmptyEventCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IEvent> OfName( string name )
-    {
-        return Array.Empty<IEvent>();
-    }
+    public IEnumerable<IEvent> OfName( string name ) => Array.Empty<IEvent>();
 
     public IEnumerator<IEvent> GetEnumerator() => ((IEnumerable<IEvent>) Array.Empty<IEvent>()).GetEnumerator();
 

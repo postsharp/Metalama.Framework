@@ -43,7 +43,7 @@ internal abstract class OverridePropertyBaseTransformation : OverridePropertyOrI
             Writeability.All => SyntaxKind.SetAccessorDeclaration,
             _ => SyntaxKind.None
         };
-        
+
         var modifiers = this.OverriddenDeclaration
             .GetSyntaxModifierList( ModifierCategories.Static )
             .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( SyntaxFactory.Space ) );

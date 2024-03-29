@@ -16,7 +16,7 @@ internal class EmptyImplementedInterfaceCollection : IImplementedInterfaceCollec
 
     public bool Contains( Type type ) => false;
 
-    public IEnumerator<INamedType> GetEnumerator() => ((IEnumerable<INamedType>)Array.Empty<INamedType>()).GetEnumerator();
+    public IEnumerator<INamedType> GetEnumerator() => ((IEnumerable<INamedType>) Array.Empty<INamedType>()).GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 }

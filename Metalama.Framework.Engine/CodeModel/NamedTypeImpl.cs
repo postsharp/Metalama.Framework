@@ -205,9 +205,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     {
         var constructors = this.Compilation.GetConstructorCollection( this.TypeSymbol );
 
-        foreach (var constructor in constructors)
+        foreach ( var constructor in constructors )
         {
-            if (constructor.Target is IMethodSymbol methodSymbol && methodSymbol.IsPrimaryConstructor())
+            if ( constructor.Target is IMethodSymbol methodSymbol && methodSymbol.IsPrimaryConstructor() )
             {
                 return this.Compilation.Factory.GetConstructor( methodSymbol );
             }

@@ -521,8 +521,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     internal IMethod GetMethod( SubstitutedMethod substitutedMethod )
-    {
-        return (IMethod) this._defaultCache.GetOrAdd(
+        => (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromSubstitutedDeclaration( substitutedMethod ).As<ICompilationElement>(),
             static ( l, c ) =>
             {
@@ -536,7 +535,6 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                         .AssertCast<INamedTypeSymbol>() );
             },
             this._compilationModel );
-    }
 
     internal IMethod GetAccessor( AccessorBuilder methodBuilder, ReferenceResolutionOptions options )
         => (IMethod) this._defaultCache.GetOrAdd(
@@ -630,6 +628,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             static ( l, c ) => new BuiltEvent( (EventBuilder) l.Target!, c ),
             this._compilationModel );
     }
+
     internal INamedType GetNamedType( NamedTypeBuilder namedTypeBuilder, ReferenceResolutionOptions options )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( namedTypeBuilder ) )
@@ -656,7 +655,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
             AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
             ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options ),
-            NamedTypeBuilder namedTypeBuilder => this.GetNamedType(namedTypeBuilder, options),
+            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global

@@ -14,15 +14,12 @@ internal class EmptyIndexerCollection : IIndexerCollection
 
     public INamedType DeclaringType { get; }
 
-    public EmptyIndexerCollection( INamedType declaringType)
+    public EmptyIndexerCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IIndexer> OfName( string name )
-    {
-        return Array.Empty<IIndexer>();
-    }
+    public IEnumerable<IIndexer> OfName( string name ) => Array.Empty<IIndexer>();
 
     public IEnumerator<IIndexer> GetEnumerator() => ((IEnumerable<IIndexer>) Array.Empty<IIndexer>()).GetEnumerator();
 

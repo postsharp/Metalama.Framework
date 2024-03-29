@@ -56,7 +56,10 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
                         Token( SyntaxKind.SemicolonToken ) );
 
-                return new[] { new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
+                return new[]
+                {
+                    new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder )
+                };
             }
             else
             {
@@ -76,7 +79,10 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
                         Token( SyntaxKind.SemicolonToken ) );
 
-                return new[] { new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
+                return new[]
+                {
+                    new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder )
+                };
             }
         }
         else
@@ -85,7 +91,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 
             // Async iterator can have empty body and still be in iterator, returning anything is invalid.
             var block = SyntaxFactoryEx.FormattedBlock(
-                !methodBuilder.ReturnParameter.Type.Is( typeof(void) ) 
+                !methodBuilder.ReturnParameter.Type.Is( typeof(void) )
                     ? methodBuilder.GetIteratorInfo().IsIteratorMethod == true
                         ? new StatementSyntax[]
                         {

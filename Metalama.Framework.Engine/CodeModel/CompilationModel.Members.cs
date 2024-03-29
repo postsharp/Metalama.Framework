@@ -75,8 +75,11 @@ public sealed partial class CompilationModel
             _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToTypedRef(), out var parameters )
                  && parameters.Contains( parameterBuilder.ToTypedRef<IParameter>() )
         };
+
     internal bool Contains( NamedTypeBuilder namedTypeBuilder )
-        => this._namedTypes.TryGetValue( namedTypeBuilder.DeclaringType?.GetSymbol() ?? namedTypeBuilder.Namespace.GetSymbol() ?? throw new AssertionFailedException(), out var namedTypes )
+        => this._namedTypes.TryGetValue(
+               namedTypeBuilder.DeclaringType?.GetSymbol() ?? namedTypeBuilder.Namespace.GetSymbol() ?? throw new AssertionFailedException(),
+               out var namedTypes )
            && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
 
     private bool Contains( DeclarationBuilder builder )
@@ -230,31 +233,25 @@ public sealed partial class CompilationModel
             ( c, t ) => new EventUpdatableCollection( c, t ) );
 
     internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( INamedTypeSymbol declaringType, bool mutable )
-    {
-        return this.GetMemberCollection<INamedTypeSymbol, INamedType, InterfaceUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
-    }
 
     internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( INamedTypeSymbol declaringType, bool mutable )
-    {
-        return this.GetMemberCollection<INamedTypeSymbol, INamedType, AllInterfaceUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, INamedType, AllInterfaceUpdatableCollection>(
             ref this._allInterfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
-    }
 
     internal ParameterUpdatableCollection GetParameterCollection( in Ref<IHasParameters> parent, bool mutable = false )
-    {
-        return this.GetMemberCollection<Ref<IHasParameters>, IParameter, ParameterUpdatableCollection>(
+        => this.GetMemberCollection<Ref<IHasParameters>, IParameter, ParameterUpdatableCollection>(
             ref this._parameters,
             mutable,
             parent,
             ( c, t ) => new ParameterUpdatableCollection( c, t ) );
-    }
 
     internal AttributeUpdatableCollection GetAttributeCollection( in Ref<IDeclaration> parent, bool mutable = false )
     {
@@ -308,7 +305,7 @@ public sealed partial class CompilationModel
         }
         else
         {
-            collection = new TypeUpdatableCollection(this, declaringNamespaceOrType);
+            collection = new TypeUpdatableCollection( this, declaringNamespaceOrType );
             this._namedTypes = this._namedTypes.SetItem( declaringNamespaceOrType, collection );
         }
 
@@ -337,7 +334,7 @@ public sealed partial class CompilationModel
         {
             this.RemoveAttributes( removeAttributes );
         }
-        
+
         // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
@@ -364,10 +361,8 @@ public sealed partial class CompilationModel
     }
 
     private void AddAnnotation( AddAnnotationTransformation addAnnotationTransformation )
-    {
-        this.Annotations =
+        => this.Annotations =
             this.Annotations.Add( addAnnotationTransformation.TargetDeclaration.ToTypedRef(), addAnnotationTransformation.AnnotationInstance );
-    }
 
     private void RemoveAttributes( RemoveAttributesTransformation removeAttributes )
     {
@@ -497,7 +492,10 @@ public sealed partial class CompilationModel
                 break;
 
             case INamedType namedType:
-                var types = this.GetNamedTypeCollection( (INamespaceOrTypeSymbol)namedType.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull(), true );
+                var types = this.GetNamedTypeCollection(
+                    (INamespaceOrTypeSymbol) namedType.ContainingDeclaration.AssertNotNull().GetSymbol().AssertNotNull(),
+                    true );
+
                 types.Add( namedType.ToMemberRef() );
 
                 break;

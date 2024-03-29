@@ -12,81 +12,79 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents a method override, which redirects to another method without requiring template expansion.
+/// </summary>
+internal sealed class RedirectMethodTransformation : OverrideMemberTransformation
 {
-    /// <summary>
-    /// Represents a method override, which redirects to another method without requiring template expansion.
-    /// </summary>
-    internal sealed class RedirectMethodTransformation : OverrideMemberTransformation
+    private readonly IMethod _targetMethod;
+
+    private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+
+    public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
+        : base( advice, overriddenDeclaration, ObjectReader.Empty )
     {
-        private readonly IMethod _targetMethod;
+        this._targetMethod = targetMethod;
+    }
 
-        private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    {
+        var body =
+            SyntaxFactoryEx.FormattedBlock(
+                this.OverriddenDeclaration.ReturnType
+                != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
+                    ? ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
+                        GetInvocationExpression(),
+                        Token( SyntaxKind.SemicolonToken ) )
+                    : ExpressionStatement( GetInvocationExpression() ) );
 
-        public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod )
-            : base( advice, overriddenDeclaration, ObjectReader.Empty )
+        return new[]
         {
-            this._targetMethod = targetMethod;
+            new InjectedMemberOrNamedType(
+                this,
+                MethodDeclaration(
+                    List<AttributeListSyntax>(),
+                    this.OverriddenDeclaration.GetSyntaxModifierList(),
+                    context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
+                    null,
+                    Identifier(
+                        context.InjectionNameProvider.GetOverrideName(
+                            this.OverriddenDeclaration.DeclaringType,
+                            this.ParentAdvice.AspectLayerId,
+                            this.OverriddenDeclaration ) ),
+                    context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
+                    context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, true ),
+                    context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
+                    body,
+                    null ),
+                this.ParentAdvice.AspectLayerId,
+                InjectedMemberSemantic.Override,
+                this.OverriddenDeclaration )
+        };
+
+        ExpressionSyntax GetInvocationExpression()
+        {
+            return
+                InvocationExpression(
+                    GetInvocationTargetExpression(),
+                    ArgumentList( SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
         }
 
-        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+        ExpressionSyntax GetInvocationTargetExpression()
         {
-            var body =
-                SyntaxFactoryEx.FormattedBlock(
-                    this.OverriddenDeclaration.ReturnType
-                    != this.OverriddenDeclaration.Compilation.GetCompilationModel().Cache.SystemVoidType
-                        ? ReturnStatement(
-                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Space ),
-                            GetInvocationExpression(),
-                            Token( SyntaxKind.SemicolonToken ) )
-                        : ExpressionStatement( GetInvocationExpression() ) );
+            var expression =
+                this.OverriddenDeclaration.IsStatic
+                    ? (ExpressionSyntax) IdentifierName( this._targetMethod.Name )
+                    : MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        IdentifierName( this._targetMethod.Name ) );
 
-            return new[]
-            {
-                new InjectedMemberOrNamedType(
-                    this,
-                    MethodDeclaration(
-                        List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ).WithTrailingTrivia( Space ),
-                        null,
-                        Identifier(
-                            context.InjectionNameProvider.GetOverrideName(
-                                this.OverriddenDeclaration.DeclaringType,
-                                this.ParentAdvice.AspectLayerId,
-                                this.OverriddenDeclaration ) ),
-                        context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
-                        context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation, removeDefaultValues: true ),
-                        context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
-                        body,
-                        null ),
-                    this.ParentAdvice.AspectLayerId,
-                    InjectedMemberSemantic.Override,
-                    this.OverriddenDeclaration )
-            };
-
-            ExpressionSyntax GetInvocationExpression()
-            {
-                return
-                    InvocationExpression(
-                        GetInvocationTargetExpression(),
-                        ArgumentList(
-                            SeparatedList( this.OverriddenDeclaration.Parameters.SelectAsReadOnlyList( p => Argument( IdentifierName( p.Name ) ) ) ) ) );
-            }
-
-            ExpressionSyntax GetInvocationTargetExpression()
-            {
-                var expression =
-                    this.OverriddenDeclaration.IsStatic
-                        ? (ExpressionSyntax) IdentifierName( this._targetMethod.Name )
-                        : MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            ThisExpression(),
-                            IdentifierName( this._targetMethod.Name ) );
-
-                return expression
-                    .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
-            }
+            return expression
+                .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

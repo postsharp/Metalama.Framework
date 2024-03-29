@@ -14,17 +14,14 @@ internal class EmptyFieldCollection : IFieldCollection
 
     public INamedType DeclaringType { get; }
 
-    public IField this[string name] => throw new InvalidOperationException();
+    public IField this[ string name ] => throw new InvalidOperationException();
 
-    public EmptyFieldCollection( INamedType declaringType)
+    public EmptyFieldCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IField> OfName( string name )
-    {
-        return Array.Empty<IField>();
-    }
+    public IEnumerable<IField> OfName( string name ) => Array.Empty<IField>();
 
     public IEnumerator<IField> GetEnumerator() => ((IEnumerable<IField>) Array.Empty<IField>()).GetEnumerator();
 

@@ -14,15 +14,12 @@ internal class EmptyFieldOrPropertyCollection : IFieldOrPropertyCollection
 
     public INamedType DeclaringType { get; }
 
-    public EmptyFieldOrPropertyCollection( INamedType declaringType)
+    public EmptyFieldOrPropertyCollection( INamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }
 
-    public IEnumerable<IFieldOrProperty> OfName( string name )
-    {
-        return Array.Empty<IFieldOrProperty>();
-    }
+    public IEnumerable<IFieldOrProperty> OfName( string name ) => Array.Empty<IFieldOrProperty>();
 
     public IEnumerator<IFieldOrProperty> GetEnumerator() => ((IEnumerable<IFieldOrProperty>) Array.Empty<IFieldOrProperty>()).GetEnumerator();
 

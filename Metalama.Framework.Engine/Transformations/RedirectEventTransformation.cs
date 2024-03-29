@@ -12,84 +12,83 @@ using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents an event override, which redirects to accessors of another event without requiring template expansion.
+/// </summary>
+internal sealed class RedirectEventTransformation : OverrideMemberTransformation
 {
-    /// <summary>
-    /// Represents an event override, which redirects to accessors of another event without requiring template expansion.
-    /// </summary>
-    internal sealed class RedirectEventTransformation : OverrideMemberTransformation
+    private readonly IEvent _targetEvent;
+
+    private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
+
+    public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
+        : base( advice, overriddenDeclaration, ObjectReader.Empty )
     {
-        private readonly IEvent _targetEvent;
+        this._targetEvent = targetEvent;
+    }
 
-        private new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
-
-        public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent )
-            : base( advice, overriddenDeclaration, ObjectReader.Empty ) 
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    {
+        return new[]
         {
-            this._targetEvent = targetEvent;
-        }
+            new InjectedMemberOrNamedType(
+                this,
+                EventDeclaration(
+                    List<AttributeListSyntax>(),
+                    this.OverriddenDeclaration.GetSyntaxModifierList(),
+                    context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
+                    null,
+                    Identifier(
+                        context.InjectionNameProvider.GetOverrideName(
+                            this.OverriddenDeclaration.DeclaringType,
+                            this.ParentAdvice.AspectLayerId,
+                            this.OverriddenDeclaration ) ),
+                    AccessorList( List( GetAccessors() ) ) ),
+                this.ParentAdvice.AspectLayerId,
+                InjectedMemberSemantic.Override,
+                this.OverriddenDeclaration )
+        };
 
-        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+        IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
         {
             return new[]
-            {
-                new InjectedMemberOrNamedType(
-                    this,
-                    EventDeclaration(
+                {
+                    AccessorDeclaration(
+                        SyntaxKind.AddAccessorDeclaration,
                         List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
-                        null,
-                        Identifier(
-                            context.InjectionNameProvider.GetOverrideName(
-                                this.OverriddenDeclaration.DeclaringType,
-                                this.ParentAdvice.AspectLayerId,
-                                this.OverriddenDeclaration ) ),
-                        AccessorList( List( GetAccessors() ) ) ),
-                    this.ParentAdvice.AspectLayerId,
-                    InjectedMemberSemantic.Override,
-                    this.OverriddenDeclaration )
-            };
+                        this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
+                        CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
+                        null ),
+                    AccessorDeclaration(
+                        SyntaxKind.RemoveAccessorDeclaration,
+                        List<AttributeListSyntax>(),
+                        this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
+                        CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
+                        null )
+                }.WhereNotNull()
+                .ToArray();
+        }
 
-            IReadOnlyList<AccessorDeclarationSyntax> GetAccessors()
-            {
-                return new[]
-                    {
-                        AccessorDeclaration(
-                            SyntaxKind.AddAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
-                            CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
-                            null ),
-                        AccessorDeclaration(
-                            SyntaxKind.RemoveAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
-                            CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
-                            null )
-                    }.WhereNotNull()
-                    .ToArray();
-            }
+        BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
+        {
+            return
+                SyntaxFactoryEx.FormattedBlock(
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            assignmentKind,
+                            CreateAccessTargetExpression(),
+                            IdentifierName( "value" ) ) ) );
+        }
 
-            BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
-            {
-                return
-                    SyntaxFactoryEx.FormattedBlock(
-                        ExpressionStatement(
-                            AssignmentExpression(
-                                assignmentKind,
-                                CreateAccessTargetExpression(),
-                                IdentifierName( "value" ) ) ) );
-            }
-
-            ExpressionSyntax CreateAccessTargetExpression()
-            {
-                return
-                    this._targetEvent.IsStatic
-                        ? IdentifierName( this._targetEvent.Name )
-                        : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
-                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
-            }
+        ExpressionSyntax CreateAccessTargetExpression()
+        {
+            return
+                this._targetEvent.IsStatic
+                    ? IdentifierName( this._targetEvent.Name )
+                    : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this._targetEvent.Name ) )
+                        .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Previous );
         }
     }
 }

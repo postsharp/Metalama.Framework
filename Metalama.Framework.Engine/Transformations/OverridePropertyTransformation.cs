@@ -12,122 +12,124 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+internal sealed class OverridePropertyTransformation : OverridePropertyBaseTransformation
 {
-    internal sealed class OverridePropertyTransformation : OverridePropertyBaseTransformation
+    private BoundTemplateMethod? GetTemplate { get; }
+
+    private BoundTemplateMethod? SetTemplate { get; }
+
+    public OverridePropertyTransformation(
+        Advice advice,
+        IProperty overriddenDeclaration,
+        BoundTemplateMethod? getTemplate,
+        BoundTemplateMethod? setTemplate,
+        IObjectReader tags )
+        : base( advice, overriddenDeclaration, tags )
     {
-        private BoundTemplateMethod? GetTemplate { get; }
+        // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
+        // The caller is responsible for verifying the compatibility of the template with the target.
 
-        private BoundTemplateMethod? SetTemplate { get; }
+        this.GetTemplate = getTemplate;
+        this.SetTemplate = setTemplate;
+    }
 
-        public OverridePropertyTransformation(
-            Advice advice,
-            IProperty overriddenDeclaration,
-            BoundTemplateMethod? getTemplate,
-            BoundTemplateMethod? setTemplate,
-            IObjectReader tags )
-            : base( advice, overriddenDeclaration, tags )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    {
+        var getTemplate = this.GetTemplate;
+        var setTemplate = this.SetTemplate;
+
+        var templateExpansionError = false;
+        BlockSyntax? getAccessorBody = null;
+
+        if ( this.OverriddenDeclaration.GetMethod != null )
         {
-            // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
-            // The caller is responsible for verifying the compatibility of the template with the target.
-
-            this.GetTemplate = getTemplate;
-            this.SetTemplate = setTemplate;
-        }
-
-        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
-        {
-            var getTemplate = this.GetTemplate;
-            var setTemplate = this.SetTemplate;
-
-            var templateExpansionError = false;
-            BlockSyntax? getAccessorBody = null;
-
-            if ( this.OverriddenDeclaration.GetMethod != null )
+            if ( getTemplate != null )
             {
-                if ( getTemplate != null )
-                {
-                    templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
-                        context,
-                        getTemplate,
-                        this.OverriddenDeclaration.GetMethod,
-                        out getAccessorBody );
-                }
-                else
-                {
-                    getAccessorBody = this.CreateIdentityAccessorBody( context, SyntaxKind.GetAccessorDeclaration );
-                }
+                templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                    context,
+                    getTemplate,
+                    this.OverriddenDeclaration.GetMethod,
+                    out getAccessorBody );
             }
             else
             {
-                getAccessorBody = null;
+                getAccessorBody = this.CreateIdentityAccessorBody( context, SyntaxKind.GetAccessorDeclaration );
             }
+        }
+        else
+        {
+            getAccessorBody = null;
+        }
 
-            BlockSyntax? setAccessorBody = null;
+        BlockSyntax? setAccessorBody = null;
 
-            if ( this.OverriddenDeclaration.SetMethod != null )
+        if ( this.OverriddenDeclaration.SetMethod != null )
+        {
+            if ( setTemplate != null )
             {
-                if ( setTemplate != null )
-                {
-                    templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
-                        context,
-                        setTemplate,
-                        this.OverriddenDeclaration.SetMethod,
-                        out setAccessorBody );
-                }
-                else
-                {
-                    setAccessorBody = this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration );
-                }
+                templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
+                    context,
+                    setTemplate,
+                    this.OverriddenDeclaration.SetMethod,
+                    out setAccessorBody );
             }
             else
             {
-                setAccessorBody = null;
+                setAccessorBody = this.CreateIdentityAccessorBody( context, SyntaxKind.SetAccessorDeclaration );
             }
-
-            if ( templateExpansionError )
-            {
-                // Template expansion error.
-                return Enumerable.Empty<InjectedMemberOrNamedType>();
-            }
-
-            return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
         }
-
-        private bool TryExpandAccessorTemplate(
-            MemberInjectionContext context,
-            BoundTemplateMethod accessorTemplate,
-            IMethod accessor,
-            [NotNullWhen( true )] out BlockSyntax? body )
+        else
         {
-            SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind ) => this.CreateProceedDynamicExpression( context, accessor, kind );
-
-            var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
-                this.OverriddenDeclaration,
-                accessor,
-                new MetaApiProperties(
-                    this.ParentAdvice.SourceCompilation,
-                    context.DiagnosticSink,
-                    accessorTemplate.TemplateMember.Cast(),
-                    this.Tags,
-                    this.ParentAdvice.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    this.ParentAdvice.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default ) );
-
-            var expansionContext = new TemplateExpansionContext(
-                context,
-                this.ParentAdvice.TemplateInstance.TemplateProvider,
-                metaApi,
-                accessor,
-                accessorTemplate,
-                ProceedExpressionProvider,
-                this.ParentAdvice.AspectLayerId );
-
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
-
-            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
+            setAccessorBody = null;
         }
+
+        if ( templateExpansionError )
+        {
+            // Template expansion error.
+            return Enumerable.Empty<InjectedMemberOrNamedType>();
+        }
+
+        return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );
+    }
+
+    private bool TryExpandAccessorTemplate(
+        MemberInjectionContext context,
+        BoundTemplateMethod accessorTemplate,
+        IMethod accessor,
+        [NotNullWhen( true )] out BlockSyntax? body )
+    {
+        SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind )
+        {
+            return this.CreateProceedDynamicExpression( context, accessor, kind );
+        }
+
+        var metaApi = MetaApi.ForFieldOrPropertyOrIndexer(
+            this.OverriddenDeclaration,
+            accessor,
+            new MetaApiProperties(
+                this.ParentAdvice.SourceCompilation,
+                context.DiagnosticSink,
+                accessorTemplate.TemplateMember.Cast(),
+                this.Tags,
+                this.ParentAdvice.AspectLayerId,
+                context.SyntaxGenerationContext,
+                this.ParentAdvice.Aspect,
+                context.ServiceProvider,
+                MetaApiStaticity.Default ) );
+
+        var expansionContext = new TemplateExpansionContext(
+            context,
+            this.ParentAdvice.TemplateInstance.TemplateProvider,
+            metaApi,
+            accessor,
+            accessorTemplate,
+            ProceedExpressionProvider,
+            this.ParentAdvice.AspectLayerId );
+
+        var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.TemplateMember.Declaration );
+
+        return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
     }
 }
