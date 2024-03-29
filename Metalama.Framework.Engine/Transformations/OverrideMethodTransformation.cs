@@ -24,7 +24,7 @@ internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransform
         this.BoundTemplate = boundTemplate;
     }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         SyntaxUserExpression ProceedExpressionProvider( TemplateKind kind )
         {

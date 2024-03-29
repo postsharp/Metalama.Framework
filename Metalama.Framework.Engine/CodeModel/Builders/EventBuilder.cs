@@ -42,10 +42,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this._fieldAttributes = new List<IAttributeData>();
     }
 
-    public void AddFieldAttribute( IAttributeData attributeData )
-    {
-        this._fieldAttributes.Add( attributeData );
-    }
+    public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
 
     public INamedType Type
     {
@@ -129,7 +126,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
-    public IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
+    public IInjectMemberOrNamedTypeTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

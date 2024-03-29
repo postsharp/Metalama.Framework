@@ -28,11 +28,11 @@ internal sealed class RedirectEventTransformation : OverrideMemberTransformation
         this._targetEvent = targetEvent;
     }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         return new[]
         {
-            new InjectedMember(
+            new InjectedMemberOrNamedType(
                 this,
                 EventDeclaration(
                     List<AttributeListSyntax>(),

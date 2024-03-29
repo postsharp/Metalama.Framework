@@ -437,7 +437,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         TransformationCollection transformationCollection,
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
     {
-        {
             if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
             {
                 lock ( replacedIntroduceDeclarationTransformations )
@@ -451,9 +450,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
             switch ( transformation )
             {
-                case IInjectMemberTransformation injectMemberTransformation:
+            case IInjectMemberOrNamedTypeTransformation injectMemberTransformation:
                     // Transformed syntax tree must match insert position.
-                    Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
+                Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxTree );
 
                     // Create the SyntaxGenerationContext for the insertion point.
                     var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
@@ -493,7 +492,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     break;
             }
 
-            IEnumerable<InjectedMember> PostProcessInjectedMembers( IEnumerable<InjectedMember> injectedMembers )
+        IEnumerable<InjectedMemberOrNamedType> PostProcessInjectedMembers( IEnumerable<InjectedMemberOrNamedType> injectedMembers )
             {
                 if ( transformation is IntroducePropertyTransformation introducePropertyTransformation )
                 {
@@ -537,13 +536,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 return injectedMembers;
             }
         }
-    }
 
     private static int GetSyntaxTreePosition( InsertPosition insertPosition )
-        => insertPosition.Relation switch
+        => insertPosition switch
         {
-            InsertPositionRelation.After => insertPosition.SyntaxNode.Span.End + 1,
-            InsertPositionRelation.Within => ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, TypeBuilder.ContainingDeclaration: INamedType { } containingType }
+                => ((BaseTypeDeclarationSyntax) containingType.GetPrimaryDeclarationSyntax().AssertNotNull()).CloseBraceToken.Span.Start - 1,
             _ => 0
         };
 
@@ -942,7 +942,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             //       TransformationCollection is not finalized at this point and now selects statements based on InjectedMember, which we are creating here.
 
             transformationCollection.AddInjectedMember(
-                new InjectedMember(
+                new InjectedMemberOrNamedType(
                     originTransformation,
                     member.DeclarationKind,
                     auxiliaryMemberFactory.GetAuxiliaryContractMember( rootMember, compilationModel, advice, returnVariableName ),
@@ -952,14 +952,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
     }
 
+    // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
+    //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
     private static bool RequiresAuxiliaryContractMember( IMember member, InsertStatementTransformationContextImpl insertStatementContext )
-        =>
-
-            // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
-            //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
-            insertStatementContext.WasUsedForOutputContracts
-            || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
-                    or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
-                    or IMethod { IsPartial: true, HasImplementation: false }
-                && insertStatementContext.WasUsedForInputContracts);
+        => insertStatementContext.WasUsedForOutputContracts
+           || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
+                   or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
+                   or IMethod { IsPartial: true, HasImplementation: false }
+               && insertStatementContext.WasUsedForInputContracts);
 }

@@ -53,7 +53,7 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         }
     }
 
-    public INamedType DeclaringType { get; }
+    public INamedType? DeclaringType { get; }
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
@@ -103,9 +103,9 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         }
     }
 
-    public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
+    public override IDeclaration ContainingDeclaration => Invariant.AssertNotNull(this.DeclaringType, "Declaring type should not be null (missing override?).");
 
-    protected MemberOrNamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice )
+    protected MemberOrNamedTypeBuilder( Advice advice, INamedType? declaringType, string name ) : base( advice )
     {
         this.DeclaringType = declaringType;
         this._name = name;

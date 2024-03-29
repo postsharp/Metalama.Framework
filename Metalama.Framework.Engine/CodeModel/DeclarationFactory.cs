@@ -630,6 +630,19 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
+    internal INamedType GetNamedType( NamedTypeBuilder namedTypeBuilder, ReferenceResolutionOptions options )
+    {
+        if ( options.MustExist() && !this._compilationModel.Contains( namedTypeBuilder ) )
+        {
+            throw CreateBuilderNotExists( namedTypeBuilder );
+        }
+
+        return (INamedType) this._defaultCache.GetOrAdd(
+            Ref.FromBuilder( namedTypeBuilder ).As<ICompilationElement>(),
+            static ( l, c ) => new BuiltNamedType( (NamedTypeBuilder) l.Target!, c ),
+            this._compilationModel );
+    }
+
     internal IDeclaration GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default )
         => builder switch
         {
@@ -643,6 +656,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
             AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
             ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options ),
+            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global

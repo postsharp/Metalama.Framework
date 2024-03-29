@@ -159,8 +159,8 @@ internal sealed class AspectReferenceResolver
         var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol );
 
         // If the override target was introduced, determine the index.
-        var targetIntroductionInjectedMember = this._injectionRegistry.GetInjectedMemberForSymbol( resolvedReferencedSymbol );
-        var targetIntroductionIndex = this.GetIntroductionLogicalIndex( targetIntroductionInjectedMember );
+        var targetIntroductionInjectedMemberOrNamedType = this._injectionRegistry.GetInjectedMemberOrNamedTypeForSymbol( resolvedReferencedSymbol );
+        var targetIntroductionIndex = this.GetIntroductionLogicalIndex( targetIntroductionInjectedMemberOrNamedType );
 
         var overrideIndices = this.GetOverrideIndices( resolvedReferencedSymbol );
 
@@ -172,11 +172,11 @@ internal sealed class AspectReferenceResolver
             referenceSpecification,
             annotationLayerIndex,
             resolvedReferencedSymbol,
-            targetIntroductionInjectedMember,
+            targetIntroductionInjectedMemberOrNamedType,
             targetIntroductionIndex,
             overrideIndices,
             out var resolvedIndex,
-            out var resolvedInjectedMember );
+            out var resolvedInjectedMemberOrNamedType );
 
         // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
         Invariant.Assert(
@@ -195,8 +195,8 @@ internal sealed class AspectReferenceResolver
         {
             // Resolved to the initial version of the symbol (before any aspects).
 
-            if ( targetIntroductionInjectedMember == null
-                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+            if ( targetIntroductionInjectedMemberOrNamedType == null
+                 || (targetIntroductionInjectedMemberOrNamedType.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
                      && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null) )
             {
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
@@ -217,11 +217,11 @@ internal sealed class AspectReferenceResolver
                 return CreateResolved( resolvedReferencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) );
             }
         }
-        else if ( targetIntroductionInjectedMember != null && resolvedIndex < targetIntroductionIndex )
+        else if ( targetIntroductionInjectedMemberOrNamedType != null && resolvedIndex < targetIntroductionIndex )
         {
             // Resolved to a version before the symbol was introduced.
             // The only valid case are introduced promoted fields.
-            if ( targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+            if ( targetIntroductionInjectedMemberOrNamedType.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
                  && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() == null )
             {
                 // This is the same as targeting the property.
@@ -233,7 +233,7 @@ internal sealed class AspectReferenceResolver
                     $"Resolving {resolvedReferencedSymbol} aspect reference to a non-initial state before the introduction is valid only for replaced introduced members." );
             }
         }
-        else if ( targetIntroductionInjectedMember != null && resolvedIndex == targetIntroductionIndex )
+        else if ( targetIntroductionInjectedMemberOrNamedType != null && resolvedIndex == targetIntroductionIndex )
         {
             // Targeting the introduced version of the symbol.
             // The only way to get here is for declarations with implicit implementation, everything else is not valid.
@@ -252,7 +252,7 @@ internal sealed class AspectReferenceResolver
         {
             // One particular override.
             return CreateResolved(
-                this.GetSymbolFromInjectedMember( resolvedReferencedSymbol, resolvedInjectedMember.AssertNotNull() )
+                this.GetSymbolFromInjectedMemberOrNamedType( resolvedReferencedSymbol, resolvedInjectedMemberOrNamedType.AssertNotNull() )
                     .ToSemantic( IntermediateSymbolSemanticKind.Default ) );
         }
         else if ( resolvedIndex == new MemberLayerIndex( this._orderedLayers.Count, 0, 0 ) )
@@ -290,13 +290,13 @@ internal sealed class AspectReferenceResolver
         AspectReferenceSpecification referenceSpecification,
         MemberLayerIndex annotationLayerIndex,
         ISymbol referencedSymbol,
-        InjectedMember? targetIntroductionInjectedMember,
+        InjectedMemberOrNamedType? targetIntroductionInjectedMemberOrNamedType,
         MemberLayerIndex? targetIntroductionIndex,
         IReadOnlyList<OverrideIndex> overrideIndices,
         out MemberLayerIndex resolvedIndex,
-        out InjectedMember? resolvedInjectedMember )
+        out InjectedMemberOrNamedType? resolvedInjectedMemberOrNamedType )
     {
-        resolvedInjectedMember = null;
+        resolvedInjectedMemberOrNamedType = null;
 
         switch ( referenceSpecification.Order )
         {
@@ -308,13 +308,13 @@ internal sealed class AspectReferenceResolver
                 if ( lowerOverride.Override != null )
                 {
                     resolvedIndex = lowerOverride.Index;
-                    resolvedInjectedMember = lowerOverride.Override;
+                    resolvedInjectedMemberOrNamedType = lowerOverride.Override;
                 }
                 else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex
                                                           && HasImplicitImplementation( referencedSymbol ) )
                 {
                     resolvedIndex = targetIntroductionIndex.Value;
-                    resolvedInjectedMember = targetIntroductionInjectedMember;
+                    resolvedInjectedMemberOrNamedType = targetIntroductionInjectedMemberOrNamedType;
                 }
                 else
                 {
@@ -330,13 +330,13 @@ internal sealed class AspectReferenceResolver
                 if ( previousOverride.Override != null )
                 {
                     resolvedIndex = previousOverride.Index;
-                    resolvedInjectedMember = previousOverride.Override;
+                    resolvedInjectedMemberOrNamedType = previousOverride.Override;
                 }
                 else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value < annotationLayerIndex
                                                           && HasImplicitImplementation( referencedSymbol ) )
                 {
                     resolvedIndex = targetIntroductionIndex.Value;
-                    resolvedInjectedMember = targetIntroductionInjectedMember;
+                    resolvedInjectedMemberOrNamedType = targetIntroductionInjectedMemberOrNamedType;
                 }
                 else
                 {
@@ -353,14 +353,14 @@ internal sealed class AspectReferenceResolver
                 if ( lowerOrEqualOverride.Override != null )
                 {
                     resolvedIndex = lowerOrEqualOverride.Index;
-                    resolvedInjectedMember = lowerOrEqualOverride.Override;
+                    resolvedInjectedMemberOrNamedType = lowerOrEqualOverride.Override;
                 }
                 else if ( targetIntroductionIndex != null && targetIntroductionIndex.Value <= annotationLayerIndex )
                 {
                     Invariant.Assert( HasImplicitImplementation( referencedSymbol ) );
 
                     resolvedIndex = targetIntroductionIndex.Value;
-                    resolvedInjectedMember = targetIntroductionInjectedMember;
+                    resolvedInjectedMemberOrNamedType = targetIntroductionInjectedMemberOrNamedType;
                 }
                 else
                 {
@@ -394,27 +394,27 @@ internal sealed class AspectReferenceResolver
                     .SelectAsReadOnlyList(
                         x =>
                         {
-                            var injectedMember = @this._injectionRegistry.GetInjectedMemberForSymbol( x ).AssertNotNull();
+                            var InjectedMemberOrNamedType = @this._injectionRegistry.GetInjectedMemberOrNamedTypeForSymbol( x ).AssertNotNull();
 
                             return
                                 new OverrideIndex(
-                                    @this.GetMemberLayerIndex( injectedMember ),
-                                    injectedMember );
+                                    @this.GetMemberLayerIndex( InjectedMemberOrNamedType ),
+                                    InjectedMemberOrNamedType );
                         } )
                     .Materialize()
                     .AssertSorted( x => x.Index );
         }
     }
 
-    private MemberLayerIndex? GetIntroductionLogicalIndex( InjectedMember? injectedMember )
+    private MemberLayerIndex? GetIntroductionLogicalIndex( InjectedMemberOrNamedType? InjectedMemberOrNamedType )
     {
         // This supports only field promotions.
-        if ( injectedMember == null )
+        if ( InjectedMemberOrNamedType == null )
         {
             return null;
         }
 
-        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
+        if ( InjectedMemberOrNamedType.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
         {
             var replacedMember = replacedMemberRef.GetTarget(
                 this._finalCompilationModel,
@@ -447,24 +447,24 @@ internal sealed class AspectReferenceResolver
             }
         }
 
-        return this.GetMemberLayerIndex( injectedMember );
+        return this.GetMemberLayerIndex( InjectedMemberOrNamedType );
     }
 
     private MemberLayerIndex GetAnnotationLayerIndex( ISymbol containingSymbol )
     {
-        var containingInjectedMember =
-            this._injectionRegistry.GetInjectedMemberForSymbol( containingSymbol )
+        var containingInjectedMemberOrNamedType =
+            this._injectionRegistry.GetInjectedMemberOrNamedTypeForSymbol( containingSymbol )
             ?? throw new AssertionFailedException( $"Could not find injected member for {containingSymbol}." );
 
-        return this.GetMemberLayerIndex( containingInjectedMember );
+        return this.GetMemberLayerIndex( containingInjectedMemberOrNamedType );
     }
 
-    private MemberLayerIndex GetMemberLayerIndex( InjectedMember injectedMember )
-        => injectedMember.Transformation != null
+    private MemberLayerIndex GetMemberLayerIndex( InjectedMemberOrNamedType InjectedMemberOrNamedType )
+        => InjectedMemberOrNamedType.Transformation != null
             ? new MemberLayerIndex(
-                this._layerIndex[injectedMember.AspectLayerId.AssertNotNull()],
-                injectedMember.Transformation.OrderWithinPipelineStepAndType + 1,
-                injectedMember.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 )
+                this._layerIndex[InjectedMemberOrNamedType.AspectLayerId.AssertNotNull()],
+                InjectedMemberOrNamedType.Transformation.OrderWithinPipelineStepAndType + 1,
+                InjectedMemberOrNamedType.Transformation.OrderWithinPipelineStepAndTypeAndAspectInstance + 1 )
             : new MemberLayerIndex( 0, 0, 0 );
 
     /// <summary>
@@ -695,11 +695,11 @@ internal sealed class AspectReferenceResolver
     /// Translates the resolved injected member to the same kind of symbol as the referenced symbol.
     /// </summary>
     /// <param name="referencedSymbol"></param>
-    /// <param name="resolvedInjectedMember"></param>
+    /// <param name="resolvedInjectedMemberOrNamedType"></param>
     /// <returns></returns>
-    private ISymbol GetSymbolFromInjectedMember( ISymbol referencedSymbol, InjectedMember resolvedInjectedMember )
+    private ISymbol GetSymbolFromInjectedMemberOrNamedType( ISymbol referencedSymbol, InjectedMemberOrNamedType resolvedInjectedMemberOrNamedType )
     {
-        var symbol = this._injectionRegistry.GetSymbolForInjectedMember( resolvedInjectedMember );
+        var symbol = this._injectionRegistry.GetSymbolForInjectedMemberOrNamedType( resolvedInjectedMemberOrNamedType );
 
         return GetCorrespondingSymbolForResolvedSymbol( referencedSymbol, symbol );
     }
@@ -757,5 +757,5 @@ internal sealed class AspectReferenceResolver
         }
     }
 
-    private record struct OverrideIndex( MemberLayerIndex Index, InjectedMember Override );
+    private record struct OverrideIndex( MemberLayerIndex Index, InjectedMemberOrNamedType Override );
 }

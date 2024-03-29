@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.RemoveTemplate = removeTemplate;
         }
 
-        public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+        public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
         {
             var eventName = context.InjectionNameProvider.GetOverrideName(
                 this.OverriddenDeclaration.DeclaringType,

@@ -229,7 +229,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     if ( insertPositionNode != null )
                     {
-                        A.CallTo( () => ((IInjectMemberTransformation) overrideDeclarationTransformation).InsertPosition )
+                        A.CallTo( () => ((IInjectMemberOrNamedTypeTransformation) overrideDeclarationTransformation).InsertPosition )
                             .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
                     }
                     else
@@ -239,7 +239,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     A.CallTo( () => overrideDeclarationTransformation.OverriddenDeclaration ).Returns( overridenMember );
 
-                    A.CallTo( () => ((IInjectMemberTransformation) overrideDeclarationTransformation).TransformedSyntaxTree )
+                    A.CallTo( () => ((IInjectMemberOrNamedTypeTransformation) overrideDeclarationTransformation).TransformedSyntaxTree )
                         .Returns( symbolHelperNode.SyntaxTree );
                 }
                 else if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
@@ -463,10 +463,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
-            A.CallTo( () => ((IInjectMemberTransformation) observableTransformation).InsertPosition )
+            A.CallTo( () => ((IInjectMemberOrNamedTypeTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
 
-            A.CallTo( () => ((IInjectMemberTransformation) observableTransformation).TransformedSyntaxTree )
+            A.CallTo( () => ((IInjectMemberOrNamedTypeTransformation) observableTransformation).TransformedSyntaxTree )
                 .Returns( symbolHelperNode.SyntaxTree );
 
             // ReSharper disable SuspiciousTypeConversion.Global

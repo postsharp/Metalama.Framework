@@ -3,9 +3,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Linking;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
@@ -14,14 +13,14 @@ namespace Metalama.Framework.Engine.Transformations;
 /// Represents a member to be introduced in a type and encapsulates the information needed by the <see cref="AspectLinker"/>
 /// to perform the linking.
 /// </summary>
-internal sealed class InjectedMember
+internal class InjectedMemberOrNamedType
 {
     public DeclarationKind Kind { get; }
 
     /// <summary>
-    /// Gets the <see cref="ITransformation" /> that created or resulted in creation of this object or <c>null</c> if being result of the source code.
+    /// Gets the <see cref="IInjectMemberOrNamedTypeTransformation" /> that created this object.
     /// </summary>
-    public ITransformation? Transformation { get; }
+    public IInjectMemberOrNamedTypeTransformation Transformation { get; }
 
     public IDeclarationBuilder? DeclarationBuilder => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilder;
 
@@ -31,9 +30,9 @@ internal sealed class InjectedMember
     public MemberDeclarationSyntax Syntax { get; }
 
     /// <summary>
-    /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMember"/>.
+    /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMemberOrNamedType"/>.
     /// </summary>
-    public AspectLayerId? AspectLayerId { get; }
+    public AspectLayerId AspectLayerId { get; }
 
     /// <summary>
     /// Gets the semantic of the introduced member as supported by the linker.
@@ -41,22 +40,18 @@ internal sealed class InjectedMember
     public InjectedMemberSemantic Semantic { get; }
 
     /// <summary>
-    /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMember"/>.
-    /// This is used to associate diagnostic suppressions to the introduced member and for inserted statements.
+    /// Gets the declaration (overriden or introduced) that corresponds to the current <see cref="InjectedMemberOrNamedType"/>.
+    /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
+    /// are not suppressed from the introduced member.
     /// </summary>
-    public IMemberOrNamedType Declaration { get; }
+    public IMemberOrNamedType? Declaration { get; }
 
-    public SyntaxTree TargetSyntaxTree
-        => this.Transformation != null
-            ? this.Transformation.TransformedSyntaxTree
-            : this.Declaration.GetPrimarySyntaxTree().AssertNotNull();
-
-    public InjectedMember(
-        IInjectMemberTransformation injectMemberTransformation,
+    public InjectedMemberOrNamedType(
+        IInjectMemberOrNamedTypeTransformation injectMemberTransformation,
         MemberDeclarationSyntax syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        IMemberBuilder declaration ) : this(
+        MemberOrNamedTypeBuilder declaration ) : this(
         injectMemberTransformation,
         declaration.DeclarationKind,
         syntax,
@@ -64,12 +59,12 @@ internal sealed class InjectedMember
         semantic,
         declaration ) { }
 
-    public InjectedMember(
+    public InjectedMemberOrNamedType(
         OverrideMemberTransformation overrideMemberTransformation,
         MemberDeclarationSyntax syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        IMemberOrNamedType declaration ) : this(
+        IMemberOrNamedType? declaration ) : this(
         overrideMemberTransformation,
         overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
         syntax,
@@ -77,8 +72,8 @@ internal sealed class InjectedMember
         semantic,
         declaration ) { }
 
-    private InjectedMember(
-        InjectedMember prototype,
+    protected InjectedMemberOrNamedType(
+        InjectedMemberOrNamedType prototype,
         MemberDeclarationSyntax syntax ) : this(
         prototype.Transformation,
         prototype.Kind,
@@ -87,13 +82,13 @@ internal sealed class InjectedMember
         prototype.Semantic,
         prototype.Declaration ) { }
 
-    internal InjectedMember(
-        ITransformation? transformation,
+    internal InjectedMemberOrNamedType(
+        IInjectMemberOrNamedTypeTransformation transformation,
         DeclarationKind kind,
         MemberDeclarationSyntax syntax,
-        AspectLayerId? aspectLayerId,
+        AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        IMemberOrNamedType declaration )
+        IMemberOrNamedType? declaration )
     {
         this.Transformation = transformation;
         this.Syntax = syntax;
@@ -103,7 +98,7 @@ internal sealed class InjectedMember
         this.Kind = kind;
     }
 
-    public override string ToString() => this.Transformation?.ToString() ?? "(linker auxiliary)";
+    public override string? ToString() => this.Transformation.ToString();
 
-    internal InjectedMember WithSyntax( MemberDeclarationSyntax newSyntax ) => new( this, newSyntax );
+    internal InjectedMemberOrNamedType WithSyntax( MemberDeclarationSyntax newSyntax ) => new( this, newSyntax );
 }

@@ -28,12 +28,12 @@ internal sealed class LinkerInjectionRegistry
     private readonly TransformationLinkerOrderComparer _comparer;
     private readonly PartialCompilation _intermediateCompilation;
     private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _transformedSyntaxTreeMap;
-    private readonly IReadOnlyList<InjectedMember> _injectedMembers;
+    private readonly IReadOnlyList<InjectedMemberOrNamedType> _injectedMembers;
     private readonly IReadOnlyCollection<ISymbol> _overrideTargets;
     private readonly IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> _builderToTransformationMap;
     private readonly IReadOnlyDictionary<ISymbol, IReadOnlyList<ISymbol>> _overrideTargetToOverrideListMap;
-    private readonly IReadOnlyDictionary<ISymbol, InjectedMember> _symbolToInjectedMemberMap;
-    private readonly IReadOnlyDictionary<InjectedMember, ISymbol> _injectedMemberToSymbolMap;
+    private readonly IReadOnlyDictionary<ISymbol, InjectedMemberOrNamedType> _symbolToInjectedMemberMap;
+    private readonly IReadOnlyDictionary<InjectedMemberOrNamedType, ISymbol> _injectedMemberToSymbolMap;
     private readonly IReadOnlyDictionary<ISymbol, ISymbol> _overrideToOverrideTargetMap;
     private readonly ISet<ISymbol> _auxiliarySourceMembers;
 
@@ -44,7 +44,7 @@ internal sealed class LinkerInjectionRegistry
         TransformationLinkerOrderComparer comparer,
         PartialCompilation intermediateCompilation,
         IEnumerable<SyntaxTreeTransformation> transformations,
-        IEnumerable<InjectedMember> injectedMembers,
+        IEnumerable<InjectedMemberOrNamedType> injectedMembers,
         IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> builderToTransformationMap,
         IReadOnlyDictionary<IDeclaration, IReadOnlyList<IntroduceParameterTransformation>> introducedParametersByTargetDeclaration,
         ISet<ITransformation> transformationsCausingAuxiliaryOverrides,
@@ -54,8 +54,8 @@ internal sealed class LinkerInjectionRegistry
         ConcurrentBag<ISymbol> overrideTargets;
         ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
         ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
-        ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
-        ConcurrentDictionary<InjectedMember, ISymbol> injectedMemberToSymbolMap;
+        ConcurrentDictionary<ISymbol, InjectedMemberOrNamedType> symbolToInjectedMemberMap;
+        ConcurrentDictionary<InjectedMemberOrNamedType, ISymbol> injectedMemberToSymbolMap;
         HashSet<ISymbol> auxiliarySourceMembers;
 
         this._comparer = comparer;
@@ -82,14 +82,14 @@ internal sealed class LinkerInjectionRegistry
             overrideTargetMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
         this._symbolToInjectedMemberMap = symbolToInjectedMemberMap =
-            new ConcurrentDictionary<ISymbol, InjectedMember>( intermediateCompilation.CompilationContext.SymbolComparer );
+            new ConcurrentDictionary<ISymbol, InjectedMemberOrNamedType>( intermediateCompilation.CompilationContext.SymbolComparer );
 
-        this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMember, ISymbol>();
+        this._injectedMemberToSymbolMap = injectedMemberToSymbolMap = new ConcurrentDictionary<InjectedMemberOrNamedType, ISymbol>();
 
         var overriddenDeclarations = new ConcurrentDictionary<IDeclaration, List<ISymbol>>( intermediateCompilation.CompilationContext.Comparers.Default );
-        var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, InjectedMember>();
+        var builderToInjectedMemberMap = new ConcurrentDictionary<IDeclarationBuilder, InjectedMemberOrNamedType>();
 
-        void ProcessInjectedMember( InjectedMember injectedMember )
+        void ProcessInjectedMember( InjectedMemberOrNamedType injectedMember )
         {
             var injectedMemberSymbol = GetCanonicalSymbolForInjectedMember( injectedMember );
 
@@ -198,7 +198,7 @@ internal sealed class LinkerInjectionRegistry
         concurrentTaskRunner.RunInParallelAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
-        ISymbol GetCanonicalSymbolForInjectedMember( InjectedMember injectedMember )
+        ISymbol GetCanonicalSymbolForInjectedMember( InjectedMemberOrNamedType injectedMember )
         {
             var intermediateSyntaxTree = this._transformedSyntaxTreeMap[injectedMember.TargetSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( injectedMember.Syntax ).AssertNotNull();
@@ -369,7 +369,7 @@ internal sealed class LinkerInjectionRegistry
     /// </summary>
     /// <param name="symbol">Symbol.</param>
     /// <returns>An introduced member, or <c>null</c> if the declaration represented by this symbol was not introduced.</returns>
-    public InjectedMember? GetInjectedMemberForSymbol( ISymbol symbol )
+    public InjectedMemberOrNamedType? GetInjectedMemberForSymbol( ISymbol symbol )
     {
         switch ( symbol )
         {
@@ -410,13 +410,13 @@ internal sealed class LinkerInjectionRegistry
     /// </summary>
     /// <param name="injectedMember"></param>
     /// <returns></returns>
-    public ISymbol GetSymbolForInjectedMember( InjectedMember injectedMember ) => this._injectedMemberToSymbolMap[injectedMember];
+    public ISymbol GetSymbolForInjectedMember( InjectedMemberOrNamedType injectedMember ) => this._injectedMemberToSymbolMap[injectedMember];
 
     /// <summary>
     /// Gets introduced members for all transformations.
     /// </summary>
     /// <returns>Enumeration of introduced members.</returns>
-    public IEnumerable<InjectedMember> GetInjectedMembers() => this._injectedMembers;
+    public IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers() => this._injectedMembers;
 
     /// <summary>
     /// Gets all symbols for overridden members.

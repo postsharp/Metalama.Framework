@@ -24,7 +24,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         this.ReplacedMember = targetType.StaticConstructor?.ToMemberRef<IMember>() ?? default;
     }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         var constructorBuilder = this.IntroducedDeclaration;
 
@@ -40,7 +40,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
 
         return new[]
         {
-            new InjectedMember(
+            new InjectedMemberOrNamedType(
                 this,
                 syntax,
                 this.ParentAdvice.AspectLayerId,

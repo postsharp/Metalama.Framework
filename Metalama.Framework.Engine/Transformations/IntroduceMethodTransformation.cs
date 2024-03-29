@@ -18,7 +18,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
 {
     public IntroduceMethodTransformation( Advice advice, MethodBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
     {
         var methodBuilder = this.IntroducedDeclaration;
 
@@ -33,7 +33,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                     Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                     null );
 
-            return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
+            return new[] { new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
         }
         else if ( methodBuilder.DeclarationKind == DeclarationKind.Operator )
         {

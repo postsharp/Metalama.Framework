@@ -26,7 +26,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
         IObjectReader tags )
         : base( advice, overriddenDeclaration, tags ) { }
 
-    protected IEnumerable<InjectedMember> GetInjectedMembersImpl(
+    protected IEnumerable<InjectedMemberOrNamedType> GetInjectedMembersImpl(
         MemberInjectionContext context,
         BlockSyntax? getAccessorBody,
         BlockSyntax? setAccessorBody )
@@ -42,7 +42,7 @@ internal abstract class OverrideIndexerBaseTransformation : OverridePropertyOrIn
 
         var overrides = new[]
         {
-            new InjectedMember(
+            new InjectedMemberOrNamedType(
                 this,
                 IndexerDeclaration(
                     List<AttributeListSyntax>(),

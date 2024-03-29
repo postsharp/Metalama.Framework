@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
+internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberOrNamedTypeTransformation, IOverrideDeclarationTransformation
 {
     protected IObjectReader Tags { get; }
 
@@ -32,7 +32,7 @@ internal abstract class OverrideMemberTransformation : BaseTransformation, IInje
         this.Tags = tags;
     }
 
-    public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
+    public abstract IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
 
     protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
         => ProceedHelper.CreateMemberAccessExpression( this.OverriddenDeclaration, this.ParentAdvice.AspectLayerId, referenceTargetKind, generationContext );

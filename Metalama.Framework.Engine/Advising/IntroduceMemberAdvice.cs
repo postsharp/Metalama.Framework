@@ -14,7 +14,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
+internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : IntroduceMemberOrNamedTypeAdvice<TMember, TBuilder>
     where TMember : class, IMember
     where TBuilder : MemberBuilder
 {
@@ -24,8 +24,6 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
     protected OverrideStrategy OverrideStrategy { get; }
 
     protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
-
-    protected TBuilder Builder { get; init; }
 
     protected TemplateMember<TMember>? Template { get; }
 
@@ -44,7 +42,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
         string? layerName,
-        IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
+        IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
     {
         var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
         var templateAttributeProperties = templateAttribute?.Properties;
@@ -71,12 +69,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
         }
 
         this.OverrideStrategy = overrideStrategy;
-        this._buildAction = buildAction;
         this.Tags = tags;
-
-        // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
-        // constructor. Other designs are more cumbersome.
-        this.Builder = null!;
     }
 
     protected virtual void InitializeCore(
@@ -133,7 +126,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
 
         this.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
-        this._buildAction?.Invoke( this.Builder );
+        this.BuildAction?.Invoke( this.Builder );
 
         this.ValidateBuilder( targetDeclaration, diagnosticAdder );
     }
