@@ -72,7 +72,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override IMember? OverriddenMember => this.OverriddenIndexer;
 
-    public IInjectMemberOrNamedTypeTransformation ToTransformation() => new IntroduceIndexerTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation() => new IntroduceIndexerTransformation( this.ParentAdvice, this );
 
     public IndexerBuilder(
         Advice advice,

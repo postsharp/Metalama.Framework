@@ -35,7 +35,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         this.SetTemplate = setTemplate;
     }
 
-    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var getTemplate = this.GetTemplate;
         var setTemplate = this.SetTemplate;
@@ -88,7 +88,7 @@ internal sealed class OverridePropertyTransformation : OverridePropertyBaseTrans
         if ( templateExpansionError )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMemberOrNamedType>();
+            return Enumerable.Empty<InjectedMember>();
         }
 
         return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );

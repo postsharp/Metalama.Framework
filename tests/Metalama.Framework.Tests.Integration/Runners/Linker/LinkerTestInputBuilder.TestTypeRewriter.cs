@@ -407,12 +407,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 };
 
                 // Create transformation fake.
-                var transformation = (IInjectMemberOrNamedTypeTransformation) A.Fake<object>(
+                var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o =>
                     {
                         _ = o
                             .Implements<ITransformation>()
-                            .Implements<IInjectMemberOrNamedTypeTransformation>()
+                            .Implements<IInjectMemberTransformation>()
                             .Implements<IIntroduceDeclarationTransformation>()
                             .Implements<IDeclarationBuilderImpl>()
                             .Implements<IMemberBuilder>()
@@ -491,7 +491,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     .Returns(
                         new[]
                         {
-                            new InjectedMemberOrNamedType(
+                            new InjectedMember(
                                 transformation,
                                 declarationKind,
                                 introductionSyntax,
@@ -580,10 +580,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var aspectLayer = this._owner.GetOrAddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IInjectMemberOrNamedTypeTransformation) A.Fake<object>(
+                var transformation = (IInjectMemberTransformation) A.Fake<object>(
                     o => o
                         .Implements<ITransformation>()
-                        .Implements<IInjectMemberOrNamedTypeTransformation>()
+                        .Implements<IInjectMemberTransformation>()
                         .Implements<IOverrideDeclarationTransformation>()
                         .Implements<ITestTransformation>() );
 
@@ -692,7 +692,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         () =>
                             new[]
                             {
-                            new InjectedMemberOrNamedType(
+                            new InjectedMember(
                                     transformation,
                                     declarationKind,
                                     overrideSyntax,

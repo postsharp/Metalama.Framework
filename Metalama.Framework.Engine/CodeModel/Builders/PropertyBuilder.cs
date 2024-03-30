@@ -63,7 +63,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public override IMember? OverriddenMember => this.OverriddenProperty;
 
-    public virtual IInjectMemberOrNamedTypeTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
+    public virtual IInjectMemberTransformation ToTransformation() => new IntroducePropertyTransformation( this.ParentAdvice, this );
 
     public IExpression? InitializerExpression
     {

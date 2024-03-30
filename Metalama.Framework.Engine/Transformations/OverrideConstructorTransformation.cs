@@ -33,7 +33,7 @@ internal sealed class OverrideConstructorTransformation : OverrideMemberTransfor
         this.Template = template;
     }
 
-    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var proceedExpression = this.CreateProceedExpression( context );
 

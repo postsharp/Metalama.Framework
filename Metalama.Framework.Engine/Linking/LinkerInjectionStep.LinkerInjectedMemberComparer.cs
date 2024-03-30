@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
 {
-    private sealed class InjectedMemberComparer : IComparer<InjectedMemberOrNamedType>
+    private sealed class InjectedMemberComparer : IComparer<InjectedMember>
     {
         private static readonly ImmutableDictionary<DeclarationKind, int> _orderedDeclarationKinds = new Dictionary<DeclarationKind, int>()
         {
@@ -38,7 +38,7 @@ internal sealed partial class LinkerInjectionStep
 
         private InjectedMemberComparer() { }
 
-        public int Compare( InjectedMemberOrNamedType? x, InjectedMemberOrNamedType? y )
+        public int Compare( InjectedMember? x, InjectedMember? y )
         {
             if ( x == y )
             {
@@ -202,12 +202,11 @@ internal sealed partial class LinkerInjectionStep
         private static int GetAccessibilityOrder( Accessibility accessibility )
             => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-        private static int GetTransformationTypeOrder( IInjectMemberOrNamedTypeTransformation injectMemberTransformation )
-            => injectMemberTransformation is IOverrideDeclarationTransformation ? 0 : 1;
+        private static int GetTransformationTypeOrder( ITransformation? transformation ) => transformation is IOverrideDeclarationTransformation ? 0 : 1;
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
-        private static IMemberOrNamedType GetDeclaration( InjectedMemberOrNamedType injectedMember )
+        private static IMemberOrNamedType GetDeclaration( InjectedMember injectedMember )
         {
             var declaration = injectedMember.Declaration;
 

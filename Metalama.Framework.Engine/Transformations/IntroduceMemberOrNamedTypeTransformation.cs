@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.Transformations;
 
 internal abstract class IntroduceMemberOrNamedTypeTransformation<T> : BaseTransformation, IIntroduceDeclarationTransformation,
-                                                                      IInjectMemberOrNamedTypeTransformation
+                                                                      IInjectMemberTransformation
     where T : MemberOrNamedTypeBuilder
 {
     protected IntroduceMemberOrNamedTypeTransformation( Advice advice, T introducedDeclaration ) : base( advice )
@@ -21,7 +21,7 @@ internal abstract class IntroduceMemberOrNamedTypeTransformation<T> : BaseTransf
         this.IntroducedDeclaration = introducedDeclaration.AssertNotNull();
     }
 
-    public abstract IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context );
+    public abstract IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context );
 
     public virtual InsertPosition InsertPosition => this.IntroducedDeclaration.ToInsertPosition();
 

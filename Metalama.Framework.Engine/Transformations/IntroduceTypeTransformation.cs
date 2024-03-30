@@ -14,7 +14,7 @@ internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTr
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
-    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var type =
             ClassDeclaration( this.IntroducedDeclaration.Name )
@@ -22,7 +22,7 @@ internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTr
 
         return new[]
         {
-            new InjectedMemberOrNamedType( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration )
+            new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration )
         };
     }
 }

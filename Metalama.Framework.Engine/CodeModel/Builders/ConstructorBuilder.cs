@@ -20,7 +20,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public override bool IsExplicitInterfaceImplementation => false;
 
-    public IInjectMemberOrNamedTypeTransformation ToTransformation()
+    public IInjectMemberTransformation ToTransformation()
         => this.IsStatic
             ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this )
             : new ReplaceDefaultConstructorTransformation( this.ParentAdvice, this );
@@ -38,12 +38,6 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public ConstructorBuilder( INamedType targetType, Advice advice )
         : base( advice, targetType, null! ) { }
-
-    public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-        => throw new NotImplementedException();
-
-    public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
-        => throw new NotImplementedException();
 
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 

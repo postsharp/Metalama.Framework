@@ -31,7 +31,7 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
         this.BoundTemplate = boundTemplate;
     }
 
-    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var proceedExpression = this.CreateProceedExpression( context );
 
@@ -86,7 +86,7 @@ internal sealed class OverrideFinalizerTransformation : OverrideMemberTransforma
                 newMethodBody,
                 null );
 
-        return new[] { new InjectedMemberOrNamedType( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
+        return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Override, this.OverriddenDeclaration ) };
     }
 
     private SyntaxUserExpression CreateProceedExpression( MemberInjectionContext context )

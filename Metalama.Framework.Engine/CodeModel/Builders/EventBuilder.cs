@@ -126,7 +126,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public override IMember? OverriddenMember => (IMemberImpl?) this.OverriddenEvent;
 
-    public IInjectMemberOrNamedTypeTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
+    public IInjectMemberTransformation ToTransformation() => new IntroduceEventTransformation( this.ParentAdvice, this );
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

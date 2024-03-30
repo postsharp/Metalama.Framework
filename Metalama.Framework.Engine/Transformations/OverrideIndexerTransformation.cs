@@ -32,7 +32,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         this.SetTemplate = setTemplate;
     }
 
-    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var templateExpansionError = false;
         BlockSyntax? getAccessorBody = null;
@@ -82,7 +82,7 @@ internal sealed class OverrideIndexerTransformation : OverrideIndexerBaseTransfo
         if ( templateExpansionError )
         {
             // Template expansion error.
-            return Enumerable.Empty<InjectedMemberOrNamedType>();
+            return Enumerable.Empty<InjectedMember>();
         }
 
         return this.GetInjectedMembersImpl( context, getAccessorBody, setAccessorBody );

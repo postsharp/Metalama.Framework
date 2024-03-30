@@ -33,7 +33,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             templateKind,
             this.OverriddenDeclaration );
 
-    protected InjectedMemberOrNamedType[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
+    protected InjectedMember[] GetInjectedMembersImpl( MemberInjectionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
     {
         TypeSyntax? returnType = null;
 

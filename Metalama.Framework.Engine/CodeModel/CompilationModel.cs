@@ -28,10 +28,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
-namespace Metalama.Framework.Engine.CodeModel;
-
-public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal, ISdkCompilation
+namespace Metalama.Framework.Engine.CodeModel
 {
+    public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilationInternal, ISdkCompilation
+    {
         static CompilationModel()
         {
             MetalamaEngineModuleInitializer.EnsureInitialized();
@@ -79,7 +79,7 @@ public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilat
             Compilation compilation,
             CompilationModelOptions options,
             string? debugLabel )
-        => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options, debugLabel );
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options, debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> _allMemberAttributesByType;
@@ -191,10 +191,10 @@ public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilat
 
             // Initialize dictionaries of modified members.
             void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
-        {
-            dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
+            {
+                dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
                     .WithComparers( this.CompilationContext.SymbolComparer );
-        }
+            }
 
             InitializeDictionary( out this._fields );
             InitializeDictionary( out this._methods );
@@ -205,7 +205,7 @@ public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilat
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
-        this._namedTypes = ImmutableDictionary.Create<ISymbol, TypeUpdatableCollection>().WithComparers( this.CompilationContext.SymbolComparer );
+            this._namedTypes = ImmutableDictionary.Create<ISymbol, TypeUpdatableCollection>().WithComparers( this.CompilationContext.SymbolComparer );
 
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( RefEqualityComparer<IHasParameters>.Default );
@@ -314,7 +314,7 @@ public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilat
             this.Annotations = prototype.Annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
-        this._namedTypes = prototype._namedTypes;
+            this._namedTypes = prototype._namedTypes;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
@@ -611,4 +611,5 @@ public sealed partial class CompilationModel : SymbolBasedDeclaration, ICompilat
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
 
         public override bool BelongsToCurrentProject => true;
+    }
 }

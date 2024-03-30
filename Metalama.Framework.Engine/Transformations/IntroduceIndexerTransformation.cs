@@ -16,7 +16,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
 {
     public IntroduceIndexerTransformation( Advice advice, IndexerBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
-    public override IEnumerable<InjectedMemberOrNamedType> GetInjectedMembers( MemberInjectionContext context )
+    public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
         var indexerBuilder = this.IntroducedDeclaration;
         var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
@@ -36,7 +36,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
                 null,
                 default );
 
-        var injectedIndexer = new InjectedMemberOrNamedType(
+        var injectedIndexer = new InjectedMember(
             this,
             indexer,
             this.ParentAdvice.AspectLayerId,
