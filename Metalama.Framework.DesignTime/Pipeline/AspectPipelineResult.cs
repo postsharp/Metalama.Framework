@@ -578,18 +578,6 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
 
     public Invalidator ToInvalidator() => new( this );
 
-    internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
-    {
-        if ( this.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
-        {
-            return (syntaxTreeResult.Diagnostics, syntaxTreeResult.Suppressions);
-        }
-        else
-        {
-            return (ImmutableArray<Diagnostic>.Empty, ImmutableArray<CacheableScopedSuppression>.Empty);
-        }
-    }
-
     public bool IsSyntaxTreeDirty( SyntaxTree syntaxTree ) => !this.SyntaxTreeResults.ContainsKey( syntaxTree.FilePath );
 
     public IEnumerable<string> InheritableAspectTypes => this._inheritableAspects.Keys;

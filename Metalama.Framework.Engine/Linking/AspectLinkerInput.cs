@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 
@@ -31,8 +30,6 @@ internal readonly struct AspectLinkerInput
     /// </summary>
     public IReadOnlyList<OrderedAspectLayer> OrderedAspectLayers { get; }
 
-    public IReadOnlyList<ScopedSuppression> DiagnosticSuppressions { get; }
-
     public CompileTimeProject CompileTimeProject { get; }
 
     public AspectLinkerInput(
@@ -40,14 +37,12 @@ internal readonly struct AspectLinkerInput
         CompilationModel sourceCompilationModel,
         IReadOnlyCollection<ITransformation> transformations,
         IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
-        IReadOnlyList<ScopedSuppression> suppressions,
         CompileTimeProject compileTimeProject )
     {
         this.CompilationModel = compilationModel;
         this.SourceCompilationModel = sourceCompilationModel;
         this.Transformations = transformations;
         this.OrderedAspectLayers = orderedAspectLayers;
-        this.DiagnosticSuppressions = suppressions;
         this.CompileTimeProject = compileTimeProject;
     }
 }

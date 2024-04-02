@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     /// Invokes some user code, handles exceptions, switches the <see cref="UserCodeExecutionContext"/>,
     /// and optionally invokes an <see cref="IUserCodeInvokerHook"/> (this hook is used by Try Metalama).
     /// </summary>
-    internal sealed class UserCodeInvoker : IProjectService, IGlobalService
+    public sealed class UserCodeInvoker : IProjectService, IGlobalService
     {
         private readonly IUserCodeInvokerHook? _hook;
 

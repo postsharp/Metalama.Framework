@@ -1,6 +1,6 @@
 #if TEST_OPTIONS
-// @Skipped (#31074)
-#endif
+// @ClearIgnoredDiagnostics
+# endif
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;

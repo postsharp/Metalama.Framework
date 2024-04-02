@@ -8,10 +8,13 @@ using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Services;
 using Metalama.Framework.DesignTime.Utilities;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -35,6 +38,7 @@ namespace Metalama.Framework.DesignTime
 
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
+        private readonly UserCodeInvoker _userCodeInvoker;
 
         static TheDiagnosticSuppressor()
         {
@@ -52,6 +56,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
                 this._designTimeDiagnosticDefinitions = serviceProvider.GetRequiredService<IUserDiagnosticRegistrationService>().DiagnosticDefinitions;
                 this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+                this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
@@ -100,9 +105,9 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                // Execute the pipeline.
                 var pipelineResult = pipeline.Execute( compilation, cancellationToken );
 
-                // Execute the pipeline.
                 if ( !pipelineResult.IsSuccessful )
                 {
                     this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{compilation.AssemblyName}'): the pipeline failed." );
@@ -122,9 +127,9 @@ namespace Metalama.Framework.DesignTime
                 {
                     var syntaxTree = diagnosticGroup.Key;
 
-                    var suppressions = pipelineResult.Value.GetDiagnosticsOnSyntaxTree( syntaxTree.FilePath ).Suppressions;
+                    var suppressions = pipelineResult.Value.GetSuppressionsOnSyntaxTree( syntaxTree.FilePath );
 
-                    var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) )
+                    var designTimeSuppressions = suppressions.Where( s => supportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) )
                         .ToReadOnlyList();
 
                     if ( designTimeSuppressions.Count == 0 )
@@ -135,9 +140,10 @@ namespace Metalama.Framework.DesignTime
                     var semanticModel = compilation.GetCachedSemanticModel( syntaxTree );
 
                     var suppressionsBySymbol =
-                        ImmutableDictionaryOfArray<SerializableDeclarationId, CacheableScopedSuppression>.Create(
+                        ImmutableDictionaryOfArray<SerializableDeclarationId, ISuppression>.Create(
                             designTimeSuppressions,
-                            s => s.DeclarationId );
+                            s => s.DeclarationId,
+                            s => s.Suppression );
 
                     foreach ( var diagnostic in diagnosticGroup )
                     {
@@ -166,6 +172,22 @@ namespace Metalama.Framework.DesignTime
                         foreach ( var suppression in suppressionsBySymbol[symbolId]
                                      .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
                         {
+                            if ( suppression.Filter is { } filter )
+                            {
+                                var executionContext = new UserCodeExecutionContext(
+                                    pipeline.ServiceProvider,
+                                    UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
+
+                                var filterPassed = this._userCodeInvoker.Invoke(
+                                    () => filter( SuppressionFactories.CreateDiagnostic( diagnostic, cancellationToken ) ),
+                                    executionContext );
+
+                                if ( !filterPassed )
+                                {
+                                    continue;
+                                }
+                            }
+
                             suppressionsCount++;
 
                             if ( supportedSuppressionDescriptors.TryGetValue(
@@ -176,7 +198,7 @@ namespace Metalama.Framework.DesignTime
                             }
                             else
                             {
-                                // We can't report a warning here, but DesignTimeAnalyzer does it.
+                                // We can't report a warning here, but our design-time analyzer does it.
                             }
                         }
                     }

@@ -134,8 +134,8 @@ namespace Metalama.Framework.DesignTime
                 }
                 else
                 {
-                    diagnostics = pipelineResult.Value.GetAllDiagnostics( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
-                    suppressions = pipelineResult.Value.GetSuppressionOnSyntaxTree( syntaxTreeFilePath );
+                    diagnostics = pipelineResult.Value.GetDiagnosticsOnSyntaxTree( syntaxTreeFilePath ).Concat( filteredPipelineDiagnostics );
+                    suppressions = pipelineResult.Value.GetSuppressionsOnSyntaxTree( syntaxTreeFilePath );
                 }
 
                 // Execute the analyses that are not performed in the pipeline.
@@ -170,7 +170,7 @@ namespace Metalama.Framework.DesignTime
 
                 // If we have unsupported suppressions, a diagnostic here because a Suppressor cannot report.
                 foreach ( var suppression in suppressions.Where(
-                             s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Definition.SuppressedDiagnosticId ) ) )
+                             s => !this.DiagnosticDefinitions.SupportedSuppressionDescriptors.ContainsKey( s.Suppression.Definition.SuppressedDiagnosticId ) ) )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -185,7 +185,7 @@ namespace Metalama.Framework.DesignTime
                             ReportDiagnostic(
                                 DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateRoslynDiagnostic(
                                     location,
-                                    (Id: suppression.Definition.SuppressedDiagnosticId, symbol) ) );
+                                    (Id: suppression.Suppression.Definition.SuppressedDiagnosticId, symbol) ) );
                         }
                     }
                 }

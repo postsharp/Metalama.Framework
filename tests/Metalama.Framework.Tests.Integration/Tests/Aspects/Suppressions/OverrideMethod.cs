@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @Skipped (#31074)
+// @ClearIgnoredDiagnostics
 #endif
 
 #if !TESTRUNNER

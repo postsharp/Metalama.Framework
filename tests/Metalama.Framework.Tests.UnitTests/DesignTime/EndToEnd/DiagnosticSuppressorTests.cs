@@ -125,4 +125,49 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
 
         Assert.Equal( "code.cs(21,13): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
     }
+
+    [Fact]
+    public async Task ParametricSuppression()
+    {
+        const string code = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Diagnostics;
+            using System.Linq;
+
+            class SuppressWarningAttribute : ConstructorAspect
+            {
+                private static readonly SuppressionDefinition _suppression = new("CS8618");
+
+                public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+                {
+                    builder.Diagnostics.Suppress(
+                        _suppression.WithFilter(static diag => diag.Arguments.Any(arg => arg is string s && s == "o1")), builder.Target);
+                }
+            }
+
+            class TargetClass
+            {
+                object o1;
+                object o2;
+
+                [SuppressWarning]
+                public TargetClass() { }
+            }
+
+            class AnotherClass
+            {
+                object o1;
+                object o2;
+
+                public AnotherClass() { }
+            }
+            """;
+
+        var suppressions = await this.ExecuteSuppressorAsync( code, "CS8618" );
+
+        var suppression = Assert.Single( suppressions );
+
+        Assert.Equal( "code.cs(23,12): warning CS8618: Non-nullable field 'o1' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.", suppression.SuppressedDiagnostic.ToString() );
+    }
 }

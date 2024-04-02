@@ -4,8 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
@@ -27,28 +25,22 @@ namespace Metalama.Framework.Engine.Linking;
 
 internal sealed partial class LinkerInjectionStep
 {
-    private sealed partial class Rewriter : SafeSyntaxRewriter
+    private sealed class Rewriter : SafeSyntaxRewriter
     {
         private readonly CompilationModel _compilation;
         private readonly SemanticModelProvider _semanticModelProvider;
 
         private readonly LinkerInjectionStep _parent;
-        private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
         private readonly TransformationCollection _transformationCollection;
         private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
-
-        // Maps a diagnostic id to the number of times it has been suppressed.
-        private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
         public Rewriter(
             LinkerInjectionStep parent,
             TransformationCollection syntaxTransformationCollection,
-            ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
             CompilationModel compilation,
             SyntaxTree syntaxTreeForGlobalAttributes )
         {
             this._parent = parent;
-            this._diagnosticSuppressions = diagnosticSuppressions;
             this._compilation = compilation;
             this._transformationCollection = syntaxTransformationCollection;
             this._semanticModelProvider = compilation.RoslynCompilation.GetSemanticModelProvider();
@@ -63,84 +55,6 @@ internal sealed partial class LinkerInjectionStep
             => this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, node );
 
         public override bool VisitIntoStructuredTrivia => true;
-
-        /// <summary>
-        /// Gets the list of suppressions for a given syntax node.
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        private IEnumerable<string> GetSuppressions( SyntaxNode node )
-        {
-            return node switch
-            {
-                FieldDeclarationSyntax { Declaration.Variables.Count: 1 } field => FindSuppressionsCore( field.Declaration.Variables.First() ),
-
-                // If we have a field declaration that declares many field, we merge all suppressions
-                // and suppress all for all fields. This is significantly simpler than splitting the declaration.
-                FieldDeclarationSyntax { Declaration.Variables.Count: > 1 } field => field.Declaration.Variables.SelectAsReadOnlyList( FindSuppressionsCore )
-                    .SelectMany( l => l ),
-
-                _ => FindSuppressionsCore( node )
-            };
-
-            IEnumerable<string> FindSuppressionsCore( SyntaxNode identifierNode )
-            {
-                var declaredSymbol = this._semanticModelProvider.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( identifierNode );
-
-                if ( declaredSymbol != null )
-                {
-                    var declaration = this._compilation.Factory.GetDeclaration( declaredSymbol );
-
-                    return this.GetSuppressions( declaration );
-                }
-                else
-                {
-                    return ImmutableArray<string>.Empty;
-                }
-            }
-        }
-
-        private IEnumerable<string> GetSuppressions( IDeclaration declaration )
-            => this._diagnosticSuppressions[declaration].Select( s => s.Definition.SuppressedDiagnosticId );
-
-        /// <summary>
-        /// Adds suppression to a node. This is done both by adding <c>#pragma warning</c> trivia
-        /// around the node and by updating (or even suppressing) the <c>#pragma warning</c>
-        /// inside the node.
-        /// </summary>
-        private T AddSuppression<T>( T node, IReadOnlyList<string> suppressionsOnThisElement, SyntaxGenerationContext context )
-            where T : SyntaxNode
-        {
-            var transformedNode = node;
-
-            if ( !this._activeSuppressions.IsEmpty && node is not BaseTypeDeclarationSyntax )
-            {
-                // TODO: We are probably processing classes incorrectly.
-
-                // Since we're adding suppressions, we need to visit each `#pragma warning` of the added node to update them.
-                transformedNode = (T) this.Visit( transformedNode ).AssertNotNull();
-            }
-
-            if ( suppressionsOnThisElement.Any() )
-            {
-                // Add `#pragma warning` trivia around the node.
-                var errorCodes = SeparatedList<ExpressionSyntax>( suppressionsOnThisElement.Distinct().OrderBy( e => e ).Select( IdentifierName ) );
-
-                var disable = Trivia( context.SyntaxGenerator.PragmaWarningDirectiveTrivia( SyntaxKind.DisableKeyword, errorCodes ) )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
-
-                var restore = Trivia( context.SyntaxGenerator.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes ) )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
-
-                transformedNode = transformedNode
-                    .WithRequiredLeadingTrivia(
-                        transformedNode.GetLeadingTrivia().InsertRange( 0, new[] { context.ElasticEndOfLineTrivia, disable, context.ElasticEndOfLineTrivia } ) )
-                    .WithRequiredTrailingTrivia(
-                        transformedNode.GetTrailingTrivia().AddRange( new[] { context.ElasticEndOfLineTrivia, restore, context.ElasticEndOfLineTrivia } ) );
-            }
-
-            return transformedNode;
-        }
 
         private (SyntaxList<AttributeListSyntax> Attributes, List<SyntaxTrivia> Trivia)? RewriteDeclarationAttributeLists(
             SyntaxNode originalDeclaringNode,
@@ -379,23 +293,13 @@ internal sealed partial class LinkerInjectionStep
         {
             var originalNode = node;
             var members = new List<EnumMemberDeclarationSyntax>( node.Members.Count );
-            var context = this.GetSyntaxGenerationContext( node );
 
-            using ( var suppressionContext = this.WithSuppressions( node ) )
+            // Process the type members.
+            foreach ( var member in node.Members )
             {
-                // Process the type members.
-                foreach ( var member in node.Members )
-                {
-                    var visitedMember = this.VisitEnumMemberDeclarationCore( member );
+                var visitedMember = this.VisitEnumMemberDeclarationCore( member );
 
-                    using ( var memberSuppressions = this.WithSuppressions( member ) )
-                    {
-                        var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions, context );
-                        members.Add( memberWithSuppressions );
-                    }
-                }
-
-                node = this.AddSuppression( node, suppressionContext.NewSuppressions, context );
+                members.Add( visitedMember );
             }
 
             node = node.WithMembers( SeparatedList( members ) );
@@ -410,12 +314,6 @@ internal sealed partial class LinkerInjectionStep
         public override SyntaxNode VisitDelegateDeclaration( DelegateDeclarationSyntax node )
         {
             var originalNode = node;
-            var context = this.GetSyntaxGenerationContext( node );
-
-            using ( var suppressionContext = this.WithSuppressions( node ) )
-            {
-                node = this.AddSuppression( node, suppressionContext.NewSuppressions, context );
-            }
 
             // Rewrite attributes.
             var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -441,77 +339,68 @@ internal sealed partial class LinkerInjectionStep
                 ref baseList,
                 ref parameterList );
 
-            using ( var suppressionContext = this.WithSuppressions( node ) )
-            {
                 // Process the type members.
-                foreach ( var member in node.Members )
+            foreach ( var member in node.Members )
+            {
+                foreach ( var visitedMember in this.VisitMember( member ) )
                 {
-                    foreach ( var visitedMember in this.VisitMember( member ) )
-                    {
-                        using ( var memberSuppressions = this.WithSuppressions( member ) )
-                        {
-                            var memberWithSuppressions = this.AddSuppression( visitedMember, memberSuppressions.NewSuppressions, syntaxGenerationContext );
-                            members.Add( memberWithSuppressions );
-                        }
-                    }
-
-                    // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                    AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
+                    members.Add( visitedMember );
                 }
 
-                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
-
-                node = this.AddSuppression( node, suppressionContext.NewSuppressions, syntaxGenerationContext );
-
-                // If the type has no braces, add them.
-                if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
-                {
-                    // TODO: trivias.
-                    node = (T) node
-                        .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                        .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                        .WithSemicolonToken( default );
-                }
-
-                node = (T) node.WithMembers( List( members ) );
-
-                // Process the type bases.
-                if ( additionalBaseList.Any() )
-                {
-                    if ( baseList == null )
-                    {
-                        node = (T) node
-                            .WithIdentifier(
-                                node.Identifier.WithOptionalTrailingTrivia(
-                                    default,
-                                    syntaxGenerationContext.Options.TriviaMatters || node.Identifier.ContainsDirectives ) )
-                            .WithBaseList(
-                                BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
-                                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                            .WithOptionalTrailingTrivia( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
-                    }
-                    else
-                    {
-                        node = (T) node.WithBaseList(
-                            BaseList(
-                                baseList.Types.AddRange(
-                                    additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
-                    }
-                }
-                else if ( baseList != null )
-                {
-                    node = (T) node.WithBaseList( baseList );
-                }
-
-                node = (T) node.WithParameterList( parameterList );
-
-                // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-                node = this.ReplaceAttributes( node, rewrittenAttributes );
-
-                return node;
+                // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
+                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
             }
+
+            AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
+
+            // If the type has no braces, add them.
+            if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
+            {
+                // TODO: trivias.
+                node = (T) node
+                    .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                    .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                    .WithSemicolonToken( default );
+            }
+
+            node = (T) node.WithMembers( List( members ) );
+
+            // Process the type bases.
+            if ( additionalBaseList.Any() )
+            {
+                if ( baseList == null )
+                {
+                    node = (T) node
+                        .WithIdentifier(
+                            node.Identifier.WithOptionalTrailingTrivia(
+                                default,
+                                syntaxGenerationContext.Options.TriviaMatters || node.Identifier.ContainsDirectives ) )
+                        .WithBaseList(
+                            BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
+                                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
+                        .WithOptionalTrailingTrivia( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
+                }
+                else
+                {
+                    node = (T) node.WithBaseList(
+                        BaseList(
+                            baseList.Types.AddRange(
+                                additionalBaseList.SelectAsReadOnlyList(
+                                    i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
+                }
+            }
+            else if ( baseList != null )
+            {
+                node = (T) node.WithBaseList( baseList );
+            }
+
+            node = (T) node.WithParameterList( parameterList );
+
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
+
+            return node;
 
             // TODO: Try to avoid closure allocation.
             void AddInjectionsOnPosition( InsertPosition position )
@@ -595,11 +484,6 @@ internal sealed partial class LinkerInjectionStep
 
                                 break;
                             }
-                    }
-
-                    using ( var suppressions = this.WithSuppressions( injectedMember.Declaration ) )
-                    {
-                        injectedNode = this.AddSuppression( injectedNode, suppressions.NewSuppressions, syntaxGenerationContext );
                     }
 
                     members.Add( injectedNode );
@@ -1385,38 +1269,5 @@ internal sealed partial class LinkerInjectionStep
 
             return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
         }
-
-        public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node )
-        {
-            // Don't disable or restore warnings that have been suppressed in a parent scope.
-
-            var remainingErrorCodes = node
-                .ErrorCodes
-                .Where( c => !this._activeSuppressions.Contains( GetErrorCode( c ) ) )
-                .ToImmutableArray();
-
-            if ( remainingErrorCodes.IsEmpty )
-            {
-                return null;
-            }
-            else
-            {
-                return node.WithErrorCodes( SeparatedList( remainingErrorCodes ) );
-            }
-
-            static string GetErrorCode( ExpressionSyntax expression )
-            {
-                return expression switch
-                {
-                    IdentifierNameSyntax identifier => identifier.Identifier.Text,
-                    LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
-                    _ => throw new AssertionFailedException( $"Unexpected expression '{expression.Kind()}' at '{expression.GetLocation()}'." )
-                };
-            }
-        }
-
-        private SuppressionContext WithSuppressions( SyntaxNode node ) => new( this, this.GetSuppressions( node ) );
-
-        private SuppressionContext WithSuppressions( IDeclaration declaration ) => new( this, this.GetSuppressions( declaration ) );
     }
 }
