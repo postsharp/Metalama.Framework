@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Options;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
@@ -124,9 +125,29 @@ public class TestOptions
 
     /// <summary>
     /// Gets or sets a value indicating whether the output <c>t.cs</c> file should be formatted, which includes simplifying the code and adding <c>using</c> directives. The default behavior is <c>true</c>.
-    /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>.
+    /// To enable this option in a test, add this comment to your test file: <c>// @FormatOutput</c>. This is equivalent to <c>// @OutputFormatting(Formatted)</c>
     /// </summary>
-    public bool? FormatOutput { get; set; }
+    public bool? FormatOutput 
+    {
+        get => this.OutputFormatting switch
+        {
+            CodeFormattingOptions.Default => false,
+            CodeFormattingOptions.None => false,
+            CodeFormattingOptions.Formatted => true,
+            null => null,
+            var v => throw new AssertionFailedException($"Unknown: {v}"),
+        };
+
+        set => _ = value switch
+        {
+            false => this.OutputFormatting = CodeFormattingOptions.Default,
+            true => this.OutputFormatting = CodeFormattingOptions.Formatted,
+            _ => this.OutputFormatting = null,
+        };
+
+    }
+
+    public CodeFormattingOptions? OutputFormatting { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether whitespace are taken into account while comparing the the expected output <c>t.cs</c> file with the actual output. The default behavior is <c>false</c>.
@@ -561,6 +582,17 @@ public class TestOptions
 
                 case "FormatOutput":
                     this.FormatOutput = true;
+                    break;
+
+                case "OutputFormatting":
+                    if ( optionArg != null && Enum.TryParse<CodeFormattingOptions>( optionArg, out var formatOutput ) )
+                    {
+                        this.OutputFormatting = formatOutput;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException( $"'{optionArg} is not a valid OutputFormattingValue." );
+                    }
 
                     break;
 
@@ -838,6 +870,6 @@ public class TestOptions
             RequireOrderedAspects = this.RequireOrderedAspects ?? testContextOptions.RequireOrderedAspects,
             FormatCompileTimeCode = this.FormatCompileTimeCode ?? testContextOptions.FormatCompileTimeCode,
             IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses,
-            FormatOutput = this.FormatOutput ?? testContextOptions.FormatOutput
+            OutputFormatting = this.OutputFormatting ?? testContextOptions.OutputFormatting,
         };
 }

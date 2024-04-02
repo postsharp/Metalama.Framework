@@ -323,9 +323,9 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( outputTrivia.Any() && !outputAttributeLists.Any() )
                     {
-                        newList = newList.WithOptionalLeadingTrivia(
-                            newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ),
-                            syntaxGenerationContext.Options );
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                        newList = newList.WithLeadingTrivia( newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ) );
+#pragma warning restore LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
 
                         outputTrivia.Clear();
                     }
@@ -340,11 +340,11 @@ internal sealed partial class LinkerInjectionStep
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
+#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     outputAttributeLists[0] =
                         outputAttributeLists[0]
-                            .WithOptionalLeadingTrivia(
-                                outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ),
-                                syntaxGenerationContext.Options );
+                            .WithLeadingTrivia( outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ) );
+#pragma warning restore LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 }
                 else
                 {
@@ -358,7 +358,7 @@ internal sealed partial class LinkerInjectionStep
         {
             if ( attributesTuple is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) || ( node.HasLeadingTrivia && trivia.Count == 0) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     return (T) node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );

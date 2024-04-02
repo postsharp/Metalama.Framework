@@ -1,5 +1,5 @@
 #if TESTOPTIONS
-// @OutputFormatting(Default)
+// @OutputFormatting(Formatted)
 #endif
 
 using System;
@@ -12,7 +12,7 @@ using Metalama.Framework.Fabrics;
 
 #pragma warning disable CS0169
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia_DocComment;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia_DocComment_Format;
 
 public sealed class TestAspect : TypeAspect
 {

@@ -34,7 +34,7 @@ namespace Metalama.Testing.UnitTesting
             var projectDirectory = Path.Combine( baseDirectory, "Project" );
             this._projectDirectory = CreateDirectoryLazy( projectDirectory );
 
-            this.CodeFormattingOptions = contextOptions.FormatOutput ? CodeFormattingOptions.Formatted : CodeFormattingOptions.Default;
+            this.CodeFormattingOptions = contextOptions.OutputFormatting;
             this.FormatCompileTimeCode = contextOptions.FormatCompileTimeCode;
             this.AdditionalAssemblies = contextOptions.AdditionalAssemblies;
             this.RequireOrderedAspects = contextOptions.RequireOrderedAspects;
