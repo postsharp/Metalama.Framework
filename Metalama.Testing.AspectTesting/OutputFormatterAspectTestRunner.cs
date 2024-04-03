@@ -30,7 +30,7 @@ namespace Metalama.Testing.AspectTesting
                 references,
                 logger ) { }
 
-        protected override TestContextOptions GetContextOptions( TestContextOptions options ) => options with { CodeFormattingOptions = Framework.Engine.Options.CodeFormattingOptions.Formatted };
+        protected override TestContextOptions GetContextOptions( TestContextOptions options ) => options with { FormatOutput = true };
 
         protected override async Task RunAsync(
             TestInput testInput,
