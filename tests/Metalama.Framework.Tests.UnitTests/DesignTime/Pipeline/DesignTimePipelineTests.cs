@@ -58,6 +58,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
                                 Path.Combine( Path.GetDirectoryName( typeof(object).Assembly.Location )!, r + ".dll" ) ) ) )
                 .AddReferences(
                     MetadataReference.CreateFromFile( typeof(object).Assembly.Location ),
+                    MetadataReference.CreateFromFile( typeof(Console).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(DynamicAttribute).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(Enumerable).Assembly.Location ),
                     MetadataReference.CreateFromFile( typeof(CompileTimeAttribute).Assembly.Location ),
@@ -1461,5 +1462,85 @@ class D{version}
                                       """;
 
         Assert.Equal( expectedResult.Replace( "\r\n", "\n" ), dumpedResults.Replace( "\r\n", "\n" ) );
+    }
+
+    [Fact]
+    public void PromotedFieldAccessor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Fabrics;
+            using System;
+            using System.Linq;
+
+            [assembly: AspectOrder(typeof(UninlineableOverrideAspect), typeof(OverridePropertyAttribute))]
+
+            class FieldsFabric : ProjectFabric
+            {
+                public override void AmendProject(IProjectAmender amender)
+                {
+                    amender.Outbound
+                        .SelectMany(p => p.Types)
+                        .SelectMany(t => t.Fields)
+                        .AddAspect<OverridePropertyAttribute>();
+
+                    amender.Outbound
+                        .SelectMany(p => p.Types)
+                        .SelectMany(t => t.Properties)
+                        .SelectMany(p => new[] { p.GetMethod!, p.SetMethod! })
+                        .Where(m => m != null)
+                        .AddAspect<UninlineableOverrideAspect>();
+                }
+            }
+
+            class OverridePropertyAttribute : OverrideFieldOrPropertyAspect
+            {
+                public override dynamic? OverrideProperty
+                {
+                    get
+                    {
+                        Console.WriteLine("This is the overridden getter.");
+                        return meta.Proceed();
+                    }
+
+                    set
+                    {
+                        Console.WriteLine($"This is the overridden setter.");
+                        meta.Proceed();
+                    }
+                }
+            }
+
+            class UninlineableOverrideAspect : OverrideMethodAspect
+            {
+                public override dynamic? OverrideMethod()
+                {
+                    if (new Random().Next() == 0)
+                    {
+                        Console.WriteLine($"Uninlineable: randomly");
+                        return meta.Proceed();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Uninlineable: normally");
+                        return meta.Proceed();
+                    }
+                }
+            }
+
+            class TargetClass
+            {
+                int i;
+            }
+            """;
+
+        var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
     }
 }

@@ -278,7 +278,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             if ( this.Target is IDeclarationBuilder builder )
             {
-                return builder.ContainingDeclaration.AssertNotNull().GetSymbol( compilationContext ).AssertNotNull();
+                var containingDeclaration = builder.ContainingDeclaration;
+
+                // This can happen for accessor method of a builder member.
+                if ( containingDeclaration is IDeclarationBuilder containingBuilder )
+                {
+                    containingDeclaration = containingBuilder.ContainingDeclaration;
+                }
+
+                return containingDeclaration.AssertNotNull().GetSymbol( compilationContext ).AssertNotNull();
             }
 
             return this.GetSymbolIgnoringKind( compilationContext );

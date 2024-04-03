@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be not null." );
+                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be null." );
             }
 
             return obj;
@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             if ( obj == null )
             {
-                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be not null." );
+                throw new AssertionFailedException( justification ?? $"The reference to {typeof(T).Name} must not be null." );
             }
 
             return obj.Value;
@@ -186,7 +186,7 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             if ( items == null )
             {
-                throw new AssertionFailedException( "The enumeration must not be not null." );
+                throw new AssertionFailedException( "The enumeration must not be null." );
             }
 
             var i = 0;
@@ -195,7 +195,7 @@ namespace Metalama.Framework.Engine
             {
                 if ( item == null )
                 {
-                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be not null." );
+                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be null." );
                 }
 
                 i++;
@@ -218,13 +218,13 @@ namespace Metalama.Framework.Engine
 #if DEBUG
             if ( items.IsDefault )
             {
-                throw new AssertionFailedException( "The enumeration must not be not null." );
+                throw new AssertionFailedException( "The enumeration must not be null." );
             }
 
             for ( var index = 0; index < items.Length; index++ )
             {
                 _ = items[index]
-                    ?? throw new AssertionFailedException( $"The {index}-th {typeof(T).Name} must not be not null." );
+                    ?? throw new AssertionFailedException( $"The {index}-th {typeof(T).Name} must not be null." );
             }
 #endif
             return items!;
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine
             {
                 if ( items[i] == null )
                 {
-                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be not null." );
+                    throw new AssertionFailedException( $"The {i}-th {typeof(T).Name} must not be null." );
                 }
             }
 #endif
