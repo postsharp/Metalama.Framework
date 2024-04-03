@@ -28,7 +28,6 @@ namespace Metalama.Testing.AspectTesting.Licensing
                 LicensingOptions = new LicensingInitializationOptions()
                 {
                     ProjectLicense = projectLicense,
-                    DisableLicenseAudit = true,
                     IgnoreUnattendedProcessLicense = ignoreUserProfileLicenses,
                     IgnoreUserProfileLicenses = ignoreUserProfileLicenses
                 }

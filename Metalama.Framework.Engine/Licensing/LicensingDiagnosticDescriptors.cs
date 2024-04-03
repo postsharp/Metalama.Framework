@@ -66,7 +66,7 @@ public static class LicensingDiagnosticDescriptors
         = new(
             NoLicenseKeyRegisteredId,
             Severity.Error,
-            "You must activate Metalama or register a license key before building your project. See https://postsharp.net/links/metalama-register-license.",
+            "You must activate Metalama or register a license key before building your project. See https://www.postsharp.net/links/metalama-register-license.",
             "You must activate Metalama or register a license key before building your project.",
             _category );
 
