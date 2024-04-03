@@ -154,6 +154,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         if ( !typeIdResolver.TryResolveId( aspectClass, out var aspectTypeSymbol ) )
         {
             this._logger.Warning?.Log( $"Could not resolve '{aspectClass}'." );
+
             return [];
         }
 
