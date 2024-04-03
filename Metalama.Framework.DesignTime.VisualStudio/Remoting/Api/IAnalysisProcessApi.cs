@@ -69,6 +69,7 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     /// </summary>
     Task<IEnumerable<AspectDatabaseAspectInstance>> GetAspectInstancesAsync(
         ProjectKey projectKey,
+        string aspectClassAssembly,
         string aspectClassId,
         [UsedImplicitly] CancellationToken cancellationToken = default );
 }

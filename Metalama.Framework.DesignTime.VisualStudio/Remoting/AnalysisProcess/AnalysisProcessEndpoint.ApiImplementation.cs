@@ -166,7 +166,8 @@ internal sealed partial class AnalysisProcessEndpoint
 
         public Task<IEnumerable<AspectDatabaseAspectInstance>> GetAspectInstancesAsync(
             ProjectKey projectKey,
-            string aspectClass,
+            string aspectClassAssembly,
+            string aspectClassId,
             CancellationToken cancellationToken )
         {
             if ( this._aspectDatabase is null )
@@ -176,7 +177,7 @@ internal sealed partial class AnalysisProcessEndpoint
                 return Task.FromResult( Enumerable.Empty<AspectDatabaseAspectInstance>() );
             }
 
-            return this._aspectDatabase.GetAspectInstancesAsync( projectKey, new SerializableTypeId( aspectClass ), cancellationToken );
+            return this._aspectDatabase.GetAspectInstancesAsync( projectKey, aspectClassAssembly, new SerializableTypeId( aspectClassId ), cancellationToken );
         }
     }
 }
