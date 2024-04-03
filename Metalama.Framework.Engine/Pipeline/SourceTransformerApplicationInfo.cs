@@ -37,4 +37,6 @@ internal sealed class SourceTransformerApplicationInfo : ApplicationInfoBase
     public override string Name => "Metalama.Framework";
 
     public override ImmutableArray<IComponentInfo> Components => ImmutableArray<IComponentInfo>.Empty;
+
+    public override bool IsLicenseAuditEnabled => true;
 }
