@@ -870,6 +870,6 @@ public class TestOptions
             RequireOrderedAspects = this.RequireOrderedAspects ?? testContextOptions.RequireOrderedAspects,
             FormatCompileTimeCode = this.FormatCompileTimeCode ?? testContextOptions.FormatCompileTimeCode,
             IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses,
-            OutputFormatting = this.OutputFormatting ?? testContextOptions.OutputFormatting,
+            CodeFormattingOptions = this.OutputFormatting ?? testContextOptions.CodeFormattingOptions,
         };
 }

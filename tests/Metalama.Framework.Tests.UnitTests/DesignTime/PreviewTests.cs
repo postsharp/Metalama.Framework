@@ -27,7 +27,7 @@ public sealed class PreviewTests : DesignTimeTestBase
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
     }
 
-    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { OutputFormatting = Engine.Options.CodeFormattingOptions.Formatted };
+    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { CodeFormattingOptions = Engine.Options.CodeFormattingOptions.Formatted };
 
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,

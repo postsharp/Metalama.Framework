@@ -33,11 +33,15 @@ public sealed record TestContextOptions
     /// </summary>
     public bool FormatOutput 
     {
-        get => this.OutputFormatting == CodeFormattingOptions.Formatted;
-        init => throw new NotSupportedException("Obsolete. Use OutputFormatting instead.");
+        get => this.CodeFormattingOptions == CodeFormattingOptions.Formatted;
+        init => _ = value switch
+        {
+            true => this.CodeFormattingOptions = CodeFormattingOptions.Formatted,
+            false => this.CodeFormattingOptions = CodeFormattingOptions.Default
+        };
     }
 
-    public CodeFormattingOptions OutputFormatting { get; init; }
+    internal CodeFormattingOptions CodeFormattingOptions { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the compile-time code should be formatted.
