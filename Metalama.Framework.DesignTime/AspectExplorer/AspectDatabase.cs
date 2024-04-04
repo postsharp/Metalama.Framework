@@ -161,6 +161,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         if ( aspectTypeSymbol.ContainingAssembly.Name != aspectClassAssembly )
         {
             this._logger.Trace?.Log( $"Assembly mismatch: '{aspectTypeSymbol.ContainingAssembly.Name}' != '{aspectClassAssembly}'." );
+            
             return [];
         }
 
