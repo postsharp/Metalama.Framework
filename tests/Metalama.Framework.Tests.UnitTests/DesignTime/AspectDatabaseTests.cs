@@ -306,25 +306,25 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     [Fact]
     public async Task MultipleAspectsSameNameTest()
     {
-        static string GetCode(int i) =>
-            $$"""
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
+        static string GetCode( int i )
+            => $$"""
+                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Code;
 
-            class Aspect : OverrideMethodAspect
-            {
-                public override dynamic? OverrideMethod()
-                {
-                    return meta.Proceed();
-                }
-            }
+                 class Aspect : OverrideMethodAspect
+                 {
+                     public override dynamic? OverrideMethod()
+                     {
+                         return meta.Proceed();
+                     }
+                 }
 
-            class Target{{i}}
-            {
-                [Aspect]
-                void M() { }
-            }
-            """;
+                 class Target{{i}}
+                 {
+                     [Aspect]
+                     void M() { }
+                 }
+                 """;
 
         using var testContext = this.CreateTestContext();
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
