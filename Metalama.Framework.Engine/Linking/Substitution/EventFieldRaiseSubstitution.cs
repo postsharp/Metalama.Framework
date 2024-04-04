@@ -41,7 +41,7 @@ internal sealed class EventFieldRaiseSubstitution : SyntaxNodeSubstitution
                     memberAccess.WithName( IdentifierName( targetName ) );
 
             default:
-                throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
     }
 }

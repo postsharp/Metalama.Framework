@@ -83,7 +83,7 @@ internal sealed class LinkerSyntaxHandler
                            ?? accessorDecl.ExpressionBody ?? throw new AssertionFailedException( $"'{symbol}' has no implementation." );
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected symbol: '{symbol}'." );
+                    throw new AssertionFailedException( $"Unexpected symbol: {symbol}" );
             }
         }
 

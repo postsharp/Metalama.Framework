@@ -196,7 +196,7 @@ internal sealed partial class LinkerAnalysisStep
 
                     default:
                         // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                        throw new AssertionFailedException( $"Don't know how to process ' {symbol?.Kind.ToString() ?? "(null)"}'." );
+                        throw new AssertionFailedException( $"Don't know how to process '{symbol}'." );
                 }
             }
 

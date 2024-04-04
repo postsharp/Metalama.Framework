@@ -11,5 +11,9 @@ namespace Metalama.Framework.Engine
         public AssertionFailedException() { }
 
         public AssertionFailedException( string message ) : base( message ) { }
+
+        internal AssertionFailedException( in AssertionFailedInterpolatedStringHandler messageHandler ) : base( messageHandler.GetFormattedText() )
+        {
+        }
     }
 }

@@ -72,7 +72,7 @@ internal sealed class AspectReferenceOverrideSubstitution : AspectReferenceRenam
                         targetSymbol.ContainingType,
                         this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
                 {
-                    throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
+                    throw new AssertionFailedException( $"Resolved symbol is declared in a derived class: {targetSymbol.ContainingType}" );
                 }
                 else if ( this.CompilationContext.SymbolComparer.Is(
                              this.AspectReference.ContainingSemantic.Symbol.ContainingType,

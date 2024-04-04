@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.Linking
                         expressionBody.ArrowToken.TrailingTrivia,
                         propertyDeclaration.SemicolonToken.LeadingTrivia,
                         propertyDeclaration.SemicolonToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException( $"Unexpected property declaration at '{propertyDeclaration.GetLocation()}'." )
+                    _ => throw new AssertionFailedException( $"Unexpected property declaration: '{propertyDeclaration}'." )
                 };
 
                 accessorListLeadingTrivia =
@@ -252,7 +252,7 @@ namespace Metalama.Framework.Engine.Linking
                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
                             semicolonToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
                             generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList),
-                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration: {accessorDeclaration}" )
                     };
 
                 return accessorDeclaration.PartialUpdate(

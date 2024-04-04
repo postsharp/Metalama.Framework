@@ -43,7 +43,7 @@ internal sealed class ForcedInitializationSubstitution : SyntaxNodeSubstitution
                     Block( List( GetInitializationStatements().Append( ExpressionStatement( arrowExpressionClause.Expression ) ) ) );
 
             default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
 
         IEnumerable<StatementSyntax> GetInitializationStatements()

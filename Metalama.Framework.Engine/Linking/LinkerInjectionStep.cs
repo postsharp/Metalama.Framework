@@ -147,7 +147,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             {
                 INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
                 ICompilation => transformation.TransformedSyntaxTree,
-                var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" )
+                var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };
 
             static IDeclaration GetCanonicalTargetDeclaration( IDeclaration declaration )
@@ -158,7 +158,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     INamedType type => type,
                     IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
                     ICompilation compilation => compilation,
-                    var t => throw new AssertionFailedException( $"Unsupported: {t.DeclarationKind}" )
+                    var d => throw new AssertionFailedException( $"Unsupported: {d}" )
                 };
             }
         }
