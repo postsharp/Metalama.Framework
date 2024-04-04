@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -164,6 +165,19 @@ public static class SyntaxExtensions
         return node.WithLeadingTrivia( leadingTrivia );
     }
 
+    internal static TNode WithRequiredLeadingTrivia<TNode>( this TNode node, IList<SyntaxTrivia> leadingTrivia )
+        where TNode : SyntaxNode
+        => node.WithLeadingTrivia( TriviaList( leadingTrivia ) );
+
+    internal static TNode WithRequiredLeadingTrivia<TNode>( this TNode node, SyntaxTriviaList leadingTrivia )
+        where TNode : SyntaxNode
+        => node.WithLeadingTrivia( leadingTrivia );
+
+    internal static SyntaxToken WithRequiredLeadingTrivia( this SyntaxToken token, IList<SyntaxTrivia> leadingTrivia )
+        => token.WithLeadingTrivia( TriviaList( leadingTrivia ) );
+
+    internal static SyntaxToken WithRequiredLeadingTrivia( this SyntaxToken token, SyntaxTriviaList leadingTrivia ) => token.WithLeadingTrivia( leadingTrivia );
+
     internal static TNode WithOptionalLeadingLineFeed<TNode>(
         this TNode node,
         SyntaxGenerationContext context )
@@ -264,6 +278,20 @@ public static class SyntaxExtensions
 
         return node.WithTrailingTrivia( trailingTrivia );
     }
+
+    internal static TNode WithRequiredTrailingTrivia<TNode>( this TNode node, IList<SyntaxTrivia> trailingTrivia )
+        where TNode : SyntaxNode
+        => node.WithTrailingTrivia( TriviaList( trailingTrivia ) );
+
+    internal static TNode WithRequiredTrailingTrivia<TNode>( this TNode node, SyntaxTriviaList trailingTrivia )
+        where TNode : SyntaxNode
+        => node.WithTrailingTrivia( trailingTrivia );
+
+    internal static SyntaxToken WithRequiredTrailingTrivia( this SyntaxToken token, IList<SyntaxTrivia> trailingTrivia )
+        => token.WithTrailingTrivia( TriviaList( trailingTrivia ) );
+
+    internal static SyntaxToken WithRequiredTrailingTrivia( this SyntaxToken token, SyntaxTriviaList trailingTrivia )
+        => token.WithTrailingTrivia( trailingTrivia );
 
     internal static TNode WithOptionalTrailingTrivia<TNode>( this TNode node, SyntaxTrivia trailingTrivia, SyntaxGenerationOptions options )
         where TNode : SyntaxNode

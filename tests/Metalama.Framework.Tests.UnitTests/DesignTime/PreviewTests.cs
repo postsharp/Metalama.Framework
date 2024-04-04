@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Preview;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -27,7 +28,7 @@ public sealed class PreviewTests : DesignTimeTestBase
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
     }
 
-    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { FormatOutput = true };
+    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { CodeFormattingOptions = CodeFormattingOptions.Formatted };
 
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
