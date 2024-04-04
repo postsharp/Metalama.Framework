@@ -24,18 +24,16 @@ internal sealed partial class LinkerLinkingStep
 
             if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
             {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 if ( finalStatements.Count > 0 )
                 {
                     finalStatements[^1] = finalStatements[^1]
-                        .WithTrailingTrivia( finalStatements[^1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                        .WithRequiredTrailingTrivia( finalStatements[^1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
                 }
                 else
                 {
                     node = node.WithCloseBraceToken(
-                        node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
+                        node.CloseBraceToken.WithRequiredLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
                 }
-#pragma warning restore LAMA0832
             }
 
             if ( anyRewrittenStatement )
@@ -54,17 +52,15 @@ internal sealed partial class LinkerLinkingStep
 
             if ( overflowingTrivia.ShouldBePreserved( generationContext.Options ) )
             {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 if ( finalStatements.Count > 0 )
                 {
                     finalStatements[^1] = finalStatements[^1]
-                        .WithTrailingTrivia( finalStatements[^1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                        .WithRequiredTrailingTrivia( finalStatements[^1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
                 }
                 else
                 {
                     throw new AssertionFailedException( $"No final statement for switch section at '{node.GetLocation()}'." );
                 }
-#pragma warning restore LAMA0832
             }
 
             if ( anyRewrittenStatement )
@@ -178,9 +174,7 @@ internal sealed partial class LinkerLinkingStep
                                         .AddRange( leadingTrivia )
                                     : finalStatements[^1].GetTrailingTrivia().AddRange( leadingTrivia );
 
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                            finalStatements[^1] = finalStatements[^1].WithTrailingTrivia( newTrailingTrivia );
-#pragma warning restore LAMA0832
+                            finalStatements[^1] = finalStatements[^1].WithRequiredTrailingTrivia( newTrailingTrivia );
 
                             overflowingTrivia = trailingTrivia.StripFirstTrailingNewLine();
                         }
@@ -235,15 +229,13 @@ internal sealed partial class LinkerLinkingStep
                     }
                     else
                     {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                         statements[firstStatementIndex] =
                             statements[firstStatementIndex]
-                                .WithLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
+                                .WithRequiredLeadingTrivia( leadingTrivia.AddRange( statements[firstStatementIndex].GetLeadingTrivia() ) );
 
                         statements[lastStatementIndex] =
                             statements[lastStatementIndex]
-                                .WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
-#pragma warning restore LAMA0832
+                                .WithRequiredTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
                     }
                 }
             }
@@ -276,17 +268,15 @@ internal sealed partial class LinkerLinkingStep
         {
             token = base.VisitToken( token );
 
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
             if ( TryFilterTriviaList( token.LeadingTrivia, out var filteredLeadingTrivia ) )
             {
-                token = token.WithLeadingTrivia( filteredLeadingTrivia );
+                token = token.WithRequiredLeadingTrivia( filteredLeadingTrivia );
             }
 
             if ( TryFilterTriviaList( token.TrailingTrivia, out var filteredTrailingTrivia ) )
             {
-                token = token.WithTrailingTrivia( filteredTrailingTrivia );
+                token = token.WithRequiredTrailingTrivia( filteredTrailingTrivia );
             }
-#pragma warning restore LAMA0832
 
             return token;
 

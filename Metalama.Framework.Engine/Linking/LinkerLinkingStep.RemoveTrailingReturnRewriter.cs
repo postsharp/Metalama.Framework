@@ -54,11 +54,9 @@ internal sealed partial class LinkerLinkingStep
 
                     additionalTrailingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia );
 
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     return node.PartialUpdate(
                         statements: List( newStatements ),
-                        closeBraceToken: node.CloseBraceToken.WithLeadingTrivia( additionalTrailingTrivia ) );
-#pragma warning restore LAMA0832
+                        closeBraceToken: node.CloseBraceToken.WithRequiredLeadingTrivia( additionalTrailingTrivia ) );
                 }
                 else
                 {

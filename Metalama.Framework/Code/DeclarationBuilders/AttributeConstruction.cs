@@ -169,7 +169,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
                 if ( fieldOrProperty == null )
                 {
                     throw new ArgumentOutOfRangeException(
-                        nameof( namedArguments ),
+                        nameof(namedArguments),
                         $"The type '{constructor.DeclaringType.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage )}' does not contain a field or property named '{name}'." );
                 }
 

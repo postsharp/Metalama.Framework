@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Fabrics;
 
-#pragma warning disable CS0169
+#pragma warning disable CS0169, CS0649
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia_DocComment;
 

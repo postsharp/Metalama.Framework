@@ -31,6 +31,7 @@ public sealed record TestContextOptions
     /// <summary>
     /// Gets a value indicating whether the output code should be formatted.
     /// </summary>
+    [Obsolete( "Use CodeFormattingOptions instead.", false )]
     public bool FormatOutput
     {
         get => this.CodeFormattingOptions == CodeFormattingOptions.Formatted;
@@ -42,7 +43,10 @@ public sealed record TestContextOptions
             };
     }
 
-    internal CodeFormattingOptions CodeFormattingOptions { get; init; }
+    /// <summary>
+    /// Gets code formatting options that indicate how the output code should be formatted.
+    /// </summary>
+    public CodeFormattingOptions CodeFormattingOptions { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the compile-time code should be formatted.

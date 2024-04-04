@@ -61,9 +61,7 @@ internal sealed partial class LinkerLinkingStep
                             .. labeledStatement.Statement.GetLeadingTrivia()
                         ];
 
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                        newStatements.Add( labeledStatement.Statement.WithLeadingTrivia( trivia ) );
-#pragma warning restore LAMA0832
+                        newStatements.Add( labeledStatement.Statement.WithRequiredLeadingTrivia( trivia ) );
                     }
                     else
                     {

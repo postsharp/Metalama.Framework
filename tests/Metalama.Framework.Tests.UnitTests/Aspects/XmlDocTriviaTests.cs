@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +19,7 @@ public sealed class XmlDocTriviaTests : AspectTestBase
     [InlineData( CodeFormattingOptions.None )]
     [InlineData( CodeFormattingOptions.Default )]
     [InlineData( CodeFormattingOptions.Formatted )]
-    public async Task IntroduceAttribute(CodeFormattingOptions codeFormattingOptions)
+    public async Task IntroduceAttribute( CodeFormattingOptions codeFormattingOptions )
     {
         using var testContext = this.CreateTestContext( new TestContextOptions() { CodeFormattingOptions = codeFormattingOptions } );
 
@@ -86,7 +86,7 @@ public class TestClass
 
         var expectedTransformedProperty =
             codeFormattingOptions != CodeFormattingOptions.Formatted 
-            ? @"
+                ? @"
 [TestAspect]
 public class TestClass
 {
@@ -117,7 +117,7 @@ public class TestClass
     [global::TestAttribute]
     public string? Method() => null;
 }"
-            : @"
+                : @"
 [TestAspect]
 public class TestClass
 {
