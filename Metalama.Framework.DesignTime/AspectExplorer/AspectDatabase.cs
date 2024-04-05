@@ -171,14 +171,28 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             .Where( aspectInstance => aspectInstance.AspectClass.FullName == aspectClassFullName )
             .Select(
                 aspectInstance => new AspectDatabaseAspectInstance(
-                    aspectInstance.TargetDeclaration.ToSerializableId().Id,
+                    GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                     aspectInstance.Advice
                         .SelectMany( advice => advice.Transformations )
                         .Select(
                             transformation => new AspectDatabaseAspectTransformation(
-                                transformation.TargetDeclaration.ToSerializableId().Id,
+                                GetSerializableIdForOriginalDeclaration( transformation.TargetDeclaration ),
                                 transformation.ToString()! ) )
                         .ToArray() ) );
+
+        static string GetSerializableIdForOriginalDeclaration( IDeclaration declaration )
+        {
+            // TargetDeclaration is (usually) a transformed declaration (e.g. a constructor with an added parameter),
+            // but we need the original declaration to get the correct serializable ID.
+            // We can do that by going through the symbol, when it exists, which is never modified.
+
+            if ( declaration.GetSymbol() is { } symbol )
+            {
+                return symbol.GetSerializableId().Id;
+            }
+
+            return declaration.ToSerializableId().Id;
+        }
 
         static string? GetPredecessorFullName( IIntrospectionAspectPredecessor predecessor )
         {
@@ -194,11 +208,11 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             .Where( aspectInstance => aspectInstance.Predecessors.Any( predecessor => GetPredecessorFullName( predecessor.Instance ) == aspectClassFullName ) )
             .Select(
                 aspectInstance => new AspectDatabaseAspectInstance(
-                    aspectInstance.TargetDeclaration.ToSerializableId().Id,
+                    GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                     new[]
                     {
                         new AspectDatabaseAspectTransformation(
-                            aspectInstance.TargetDeclaration.ToSerializableId().Id,
+                            GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                             $"Provide the '{aspectInstance.AspectClass}' aspect." )
                     } ) );
 

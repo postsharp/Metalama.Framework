@@ -348,4 +348,81 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         var aspectInstances2 = await aspectDatabase.GetAspectInstancesAsync( projectKey2, "project2", new( "Y:global::Aspect" ), default );
         AssertAspectInstances( ["M:Target2.M"], aspectInstances2 );
     }
+
+    [Fact]
+    public async Task IntroduceParameterTransformation()
+    {
+        const string code =
+            """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using System.Linq;
+
+            class MyAspect : TypeAspect
+            {
+                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                {
+                    base.BuildAspect(builder);
+            
+                    builder.Advice.IntroduceParameter(builder.Target.Constructors.Single(), "p", typeof(int), TypedConstant.Create(0));
+                }
+            }
+
+            [MyAspect]
+            class WithoutCtor
+            {
+            }
+
+            [MyAspect]
+            class WithCtor
+            {
+                public WithCtor()
+                {
+                }
+            }
+            """;
+
+        using var testContext = this.CreateTestContext();
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
+        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new() { ["code.cs"] = code } );
+
+        var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
+
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::MyAspect" ), default );
+
+#pragma warning disable IDE0053 // Use expression body for lambda expression
+        Assert.Collection(
+            aspectInstances.OrderBy( i => i.TargetDeclarationId ),
+            aspectInstance =>
+            {
+                Assert.Equal( "T:WithCtor", aspectInstance.TargetDeclarationId );
+
+                Assert.Collection(
+                    aspectInstance.Transformations,
+                    transformation =>
+                    {
+                        Assert.Equal( "Introduce the parameter 'p'.", transformation.Description );
+                        Assert.Equal( "M:WithCtor.#ctor", transformation.TargetDeclarationId );
+                    } );
+            },
+            aspectInstance =>
+            {
+                Assert.Equal( "T:WithoutCtor", aspectInstance.TargetDeclarationId );
+
+                Assert.Collection(
+                    aspectInstance.Transformations.OrderBy( i => i.TargetDeclarationId ),
+                    transformation =>
+                    {
+                        Assert.Equal( "Introduce the parameter 'p'.", transformation.Description );
+                        Assert.Equal( "M:WithoutCtor.#ctor", transformation.TargetDeclarationId );
+                    },
+                    transformation =>
+                    {
+                        Assert.Equal( "Introduce constructor 'WithoutCtor..ctor()'.", transformation.Description );
+                    } );
+            } );
+#pragma warning restore IDE0053
+    }
 }
