@@ -434,7 +434,7 @@ internal sealed partial class ProjectVersionProvider
             {
                 return second;
             }
-            else if ( !first.HasChange || !second.IsIncremental )
+            else if ( !first.HasChange )
             {
                 return new CompilationChanges(
                     firstHandle.OldProjectVersion,

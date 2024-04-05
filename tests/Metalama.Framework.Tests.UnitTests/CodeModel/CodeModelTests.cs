@@ -1243,7 +1243,7 @@ public class PublicClass
             var nonNullableObjectType = (INamedType) objectType.ToNonNullableType();
             Assert.False( nonNullableObjectType.IsNullable );
             Assert.Same( objectType, nonNullableObjectType.UnderlyingType );
-            var nullableObjectType = (INamedType) objectType.ToNullableType();
+            var nullableObjectType = objectType.ToNullableType();
             Assert.NotSame( objectType, nullableObjectType );
             Assert.True( nullableObjectType.IsNullable );
             Assert.Same( nonNullableObjectType, nullableObjectType.ToNonNullableType() );
@@ -1726,15 +1726,15 @@ public partial class C
         {
             using var testContext = this.CreateTestContext();
 
-            var code = """
-                public partial class C<T1,T2,T3,T4>
-                  where T2 : struct
-                  where T3 : class
-                  where T4 : notnull
-                {
-                    public void M(T1? p1, T2? p2, T3? p3, T4 p4) {}
-                }
-                """;
+            const string code = """
+                                public partial class C<T1,T2,T3,T4>
+                                  where T2 : struct
+                                  where T3 : class
+                                  where T4 : notnull
+                                {
+                                    public void M(T1? p1, T2? p2, T3? p3, T4 p4) {}
+                                }
+                                """;
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.Single();

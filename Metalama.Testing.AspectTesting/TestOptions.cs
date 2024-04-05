@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json;
@@ -838,6 +839,12 @@ public class TestOptions
             RequireOrderedAspects = this.RequireOrderedAspects ?? testContextOptions.RequireOrderedAspects,
             FormatCompileTimeCode = this.FormatCompileTimeCode ?? testContextOptions.FormatCompileTimeCode,
             IgnoreUserProfileLicenses = this.IgnoreUserProfileLicenses ?? testContextOptions.IgnoreUserProfileLicenses,
-            FormatOutput = this.FormatOutput ?? testContextOptions.FormatOutput
+            CodeFormattingOptions =
+            this.FormatOutput switch
+            {
+                true => CodeFormattingOptions.Formatted,
+                false => CodeFormattingOptions.Default,
+                null => (CodeFormattingOptions?) null
+            } ?? testContextOptions.CodeFormattingOptions
         };
 }
