@@ -6,6 +6,6 @@ internal class TargetCode
   private int Method(int a)
   {
     Console.WriteLine("Oops");
-    return a + 1;
+    return a;
   }
 }

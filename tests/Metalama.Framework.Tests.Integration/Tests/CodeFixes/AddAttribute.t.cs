@@ -6,6 +6,6 @@ internal class TargetCode
   [My]
   private int Method(int a)
   {
-    return a + 1;
+    return a;
   }
 }

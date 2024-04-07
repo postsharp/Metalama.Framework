@@ -67,7 +67,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             ((LinkerTestTextResult) testResult).Builder = builder;
 
-            await this.RunAsync( testInput, testResult, testContext );
+            await base.RunAsync( testInput, testResult, testContext );
 
             if ( !testResult.Success )
             {

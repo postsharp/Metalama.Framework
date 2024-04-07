@@ -4,8 +4,10 @@ using Metalama.Backstage.Configuration;
 
 namespace Metalama.Testing.AspectTesting;
 
-[ConfigurationFile("testRunner.json")]
+[ConfigurationFile( "testRunner.json", "testRunner" )]
 public record TestRunnerOptions : ConfigurationFile
 {
-    public bool OpenDiffTool { get; init; } = true;
+    public bool LaunchDiffTool { get; init; } = true;
+
+    public int MaxDiffToolInstances { get; init; } = 1;
 }

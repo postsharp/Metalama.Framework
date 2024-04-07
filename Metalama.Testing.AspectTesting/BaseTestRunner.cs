@@ -61,6 +61,7 @@ internal abstract partial class BaseTestRunner
         this.Logger = logger;
         this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
         this._testRunnerOptions = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<TestRunnerOptions>();
+        DiffRunner.MaxInstancesToLaunch( this._testRunnerOptions.MaxDiffToolInstances );
     }
 
     /// <summary>
@@ -148,8 +149,7 @@ internal abstract partial class BaseTestRunner
 
                 using var testContext = new TestContext( transformedOptions );
 
-                var state = this.CreateTestResult();
-                using var testResult = new TestResult();
+                using var testResult = this.CreateTestResult();
                 await this.RunAsync( testInput, testResult, testContext );
                 this.SaveResults( testInput, testResult );
                 this.ExecuteAssertions( testInput, testResult );
@@ -681,7 +681,7 @@ internal abstract partial class BaseTestRunner
 
     protected void AssertTextEqual( string expectedText, string expectedPath, string actualText, string actualPath )
     {
-        var useDiff = this._testRunnerOptions.OpenDiffTool && !DiffRunner.Disabled;
+        var useDiff = this._testRunnerOptions.LaunchDiffTool && !DiffRunner.Disabled;
 
         if ( expectedText != actualText )
         {

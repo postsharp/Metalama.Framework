@@ -68,7 +68,7 @@ internal class AspectTestRunner : BaseTestRunner
             this._runCount++;
         }
 
-        await this.RunAsync( testInput, testResult, testContext );
+        await base.RunAsync( testInput, testResult, testContext );
 
         if ( testResult.InputCompilation == null )
         {
