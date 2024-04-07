@@ -150,8 +150,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 (_, CompileTimeChangeKind.None) => this.CompileTimeChangeKind,
                 (CompileTimeChangeKind.None, _) => newChange.CompileTimeChangeKind,
                 (CompileTimeChangeKind.NewlyCompileTime, CompileTimeChangeKind.NoLongerCompileTime) => CompileTimeChangeKind.None,
-                (CompileTimeChangeKind.NewlyCompileTime, _) => CompileTimeChangeKind.NewlyCompileTime,
+                (CompileTimeChangeKind.NewlyCompileTime, CompileTimeChangeKind.NewlyCompileTime) => CompileTimeChangeKind.NewlyCompileTime,
                 (CompileTimeChangeKind.NoLongerCompileTime, CompileTimeChangeKind.NewlyCompileTime) => CompileTimeChangeKind.None,
+                (CompileTimeChangeKind.NoLongerCompileTime, CompileTimeChangeKind.NoLongerCompileTime) => CompileTimeChangeKind.NoLongerCompileTime,
 
                 _ => throw new AssertionFailedException(
                     $"Invalid CompileTimeChangeKind combination: ({this.CompileTimeChangeKind}, {newChange.CompileTimeChangeKind})." )

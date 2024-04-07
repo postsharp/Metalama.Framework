@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -31,17 +31,22 @@ public sealed record TestContextOptions
     /// <summary>
     /// Gets a value indicating whether the output code should be formatted.
     /// </summary>
-    public bool FormatOutput 
+    [Obsolete( "Use CodeFormattingOptions instead.", false )]
+    public bool FormatOutput
     {
         get => this.CodeFormattingOptions == CodeFormattingOptions.Formatted;
-        init => _ = value switch
-        {
-            true => this.CodeFormattingOptions = CodeFormattingOptions.Formatted,
-            false => this.CodeFormattingOptions = CodeFormattingOptions.Default
-        };
+        init
+            => _ = value switch
+            {
+                true => this.CodeFormattingOptions = CodeFormattingOptions.Formatted,
+                false => this.CodeFormattingOptions = CodeFormattingOptions.Default
+            };
     }
 
-    internal CodeFormattingOptions CodeFormattingOptions { get; init; }
+    /// <summary>
+    /// Gets code formatting options that indicate how the output code should be formatted.
+    /// </summary>
+    public CodeFormattingOptions CodeFormattingOptions { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether the compile-time code should be formatted.

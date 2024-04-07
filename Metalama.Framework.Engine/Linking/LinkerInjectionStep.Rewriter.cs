@@ -132,13 +132,11 @@ internal sealed partial class LinkerInjectionStep
                 var restore = Trivia( context.SyntaxGenerator.PragmaWarningDirectiveTrivia( SyntaxKind.RestoreKeyword, errorCodes ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                 transformedNode = transformedNode
-                    .WithLeadingTrivia(
+                    .WithRequiredLeadingTrivia(
                         transformedNode.GetLeadingTrivia().InsertRange( 0, new[] { context.ElasticEndOfLineTrivia, disable, context.ElasticEndOfLineTrivia } ) )
-                    .WithTrailingTrivia(
+                    .WithRequiredTrailingTrivia(
                         transformedNode.GetTrailingTrivia().AddRange( new[] { context.ElasticEndOfLineTrivia, restore, context.ElasticEndOfLineTrivia } ) );
-#pragma warning restore LAMA0832
             }
 
             return transformedNode;
@@ -323,9 +321,7 @@ internal sealed partial class LinkerInjectionStep
 
                     if ( outputTrivia.Any() && !outputAttributeLists.Any() )
                     {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                        newList = newList.WithLeadingTrivia( newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ) );
-#pragma warning restore LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                        newList = newList.WithRequiredLeadingTrivia( newList.GetLeadingTrivia().InsertRange( 0, outputTrivia ) );
 
                         outputTrivia.Clear();
                     }
@@ -340,11 +336,9 @@ internal sealed partial class LinkerInjectionStep
                 {
                     syntaxGenerationContext ??= this.GetSyntaxGenerationContext( originalDeclaringNode );
 
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     outputAttributeLists[0] =
                         outputAttributeLists[0]
-                            .WithLeadingTrivia( outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ) );
-#pragma warning restore LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
+                            .WithRequiredLeadingTrivia( outputAttributeLists[0].GetLeadingTrivia().AddRange( firstListLeadingTrivia ) );
                 }
                 else
                 {
@@ -360,9 +354,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) || (node.HasLeadingTrivia && trivia.Count == 0) )
                 {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                    return (T) node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
-#pragma warning restore LAMA0832
+                    return (T) node.WithAttributeLists( default ).WithRequiredLeadingTrivia( trivia ).WithAttributeLists( attributes );
                 }
                 else
                 {
@@ -1183,9 +1175,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                    node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
-#pragma warning restore LAMA0832
+                    node = node.WithAttributeLists( default ).WithRequiredLeadingTrivia( trivia ).WithAttributeLists( attributes );
                 }
                 else
                 {
@@ -1208,9 +1198,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                    node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
-#pragma warning restore LAMA0832
+                    node = node.WithAttributeLists( default ).WithRequiredLeadingTrivia( trivia ).WithAttributeLists( attributes );
                 }
                 else
                 {
@@ -1315,9 +1303,7 @@ internal sealed partial class LinkerInjectionStep
             {
                 if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) )
                 {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-                    node = node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );
-#pragma warning restore LAMA0832
+                    node = node.WithAttributeLists( default ).WithRequiredLeadingTrivia( trivia ).WithAttributeLists( attributes );
                 }
                 else
                 {

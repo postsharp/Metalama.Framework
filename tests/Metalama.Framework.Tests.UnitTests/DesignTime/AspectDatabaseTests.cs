@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 #pragma warning disable VSTHRD200
 
-public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : DesignTimeTestBase( testOutputHelper )
+public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : DesignTimeTestBase( testOutputHelper )
 {
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
@@ -97,7 +97,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
             ],
             aspectClasses );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "Y:global::Aspect" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::Aspect" ), default );
 
         AssertAspectInstances(
             [
@@ -183,7 +183,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "Y:global::Aspect" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::Aspect" ), default );
 
         AssertAspectTransformations(
             [
@@ -194,7 +194,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
             ],
             aspectInstances );
 
-        var compilationInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, new( "Y:global::CompilationAttribute" ), default );
+        var compilationInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::CompilationAttribute" ), default );
 
         AssertAspectTransformations(
             ["Introduce attribute of type 'MyAttribute' into 'project'"],
@@ -281,7 +281,7 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
 
         var aspectClass = new SerializableTypeId( "Y:global::Aspect" );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, aspectClass, default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", aspectClass, default );
 
         AssertAspectInstances( ["T:Target"], aspectInstances );
 
@@ -298,8 +298,54 @@ public sealed class AspectExplorerTests( ITestOutputHelper testOutputHelper ) : 
         Assert.Equal( 1, aspectClassesChanges );
         Assert.Equal( 1, aspectInstancesChanges );
 
-        aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, aspectClass, default );
+        aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", aspectClass, default );
 
         AssertAspectInstances( ["T:NewTarget", "T:Target"], aspectInstances );
+    }
+
+    [Fact]
+    public async Task MultipleAspectsSameNameTest()
+    {
+        static string GetCode( int i )
+            => $$"""
+                 using Metalama.Framework.Aspects;
+                 using Metalama.Framework.Code;
+
+                 class Aspect : OverrideMethodAspect
+                 {
+                     public override dynamic? OverrideMethod()
+                     {
+                         return meta.Proceed();
+                     }
+                 }
+
+                 class Target{{i}}
+                 {
+                     [Aspect]
+                     void M() { }
+                 }
+                 """;
+
+        using var testContext = this.CreateTestContext();
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
+
+        var projectKey1 = workspaceProvider.AddOrUpdateProject( "project1", new() { ["code1.cs"] = GetCode( 1 ) } );
+        var projectKey2 = workspaceProvider.AddOrUpdateProject( "project2", new() { ["code2.cs"] = GetCode( 2 ) } );
+
+        var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
+
+        var aspectClasses1 = await aspectDatabase.GetAspectClassesAsync( projectKey1, default );
+        AssertAspectClasses( ["Y:global::Aspect", "Y:global::Metalama.Framework.Validation.InternalImplementAttribute"], aspectClasses1 );
+
+        var aspectClasses2 = await aspectDatabase.GetAspectClassesAsync( projectKey2, default );
+        AssertAspectClasses( ["Y:global::Aspect", "Y:global::Metalama.Framework.Validation.InternalImplementAttribute"], aspectClasses2 );
+
+        var aspectInstances1 = await aspectDatabase.GetAspectInstancesAsync( projectKey1, "project1", new( "Y:global::Aspect" ), default );
+        AssertAspectInstances( ["M:Target1.M"], aspectInstances1 );
+
+        var aspectInstances2 = await aspectDatabase.GetAspectInstancesAsync( projectKey2, "project2", new( "Y:global::Aspect" ), default );
+        AssertAspectInstances( ["M:Target2.M"], aspectInstances2 );
     }
 }

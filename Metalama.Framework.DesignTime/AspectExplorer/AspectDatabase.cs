@@ -103,6 +103,7 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
 
     public async Task<IEnumerable<AspectDatabaseAspectInstance>> GetAspectInstancesAsync(
         ProjectKey projectKey,
+        string aspectClassAssembly,
         SerializableTypeId aspectClass,
         CancellationToken cancellationToken )
     {
@@ -154,6 +155,13 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
         {
             this._logger.Warning?.Log( $"Could not resolve '{aspectClass}'." );
 
+            return [];
+        }
+
+        if ( aspectTypeSymbol.ContainingAssembly.Name != aspectClassAssembly )
+        {
+            this._logger.Trace?.Log( $"Assembly mismatch: '{aspectTypeSymbol.ContainingAssembly.Name}' != '{aspectClassAssembly}'." );
+            
             return [];
         }
 
