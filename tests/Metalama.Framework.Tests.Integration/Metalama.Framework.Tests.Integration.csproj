@@ -27,7 +27,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitRunnerVisualStudioVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
         <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />

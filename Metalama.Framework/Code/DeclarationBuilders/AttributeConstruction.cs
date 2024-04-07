@@ -84,7 +84,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             namedArguments ??= ImmutableArray<KeyValuePair<string, object?>>.Empty;
 
             // Translate provided IType - typed parameters to System.Type to get the correct constructor.
-            // Also translate CompileTimeType to System.Type, since CompileTimeType can't be transalted to a symbol in the run-time assembly.
+            // Also translate CompileTimeType to System.Type, since CompileTimeType can't be translated to a symbol in the run-time assembly.
             var constructorArgumentTypes =
                 constructorArguments
                     .Select( x => x?.GetType() )
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
                 if ( fieldOrProperty == null )
                 {
                     throw new ArgumentOutOfRangeException(
-                        nameof( namedArguments ),
+                        nameof(namedArguments),
                         $"The type '{constructor.DeclaringType.ToDisplayString( CodeDisplayFormat.ShortDiagnosticMessage )}' does not contain a field or property named '{name}'." );
                 }
 

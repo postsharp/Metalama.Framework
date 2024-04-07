@@ -358,7 +358,7 @@ internal sealed partial class LinkerInjectionStep
         {
             if ( attributesTuple is var (attributes, trivia) )
             {
-                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) || ( node.HasLeadingTrivia && trivia.Count == 0) )
+                if ( trivia.ShouldBePreserved( this.SyntaxGenerationOptions ) || (node.HasLeadingTrivia && trivia.Count == 0) )
                 {
 #pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
                     return (T) node.WithAttributeLists( default ).WithLeadingTrivia( trivia ).WithAttributeLists( attributes );

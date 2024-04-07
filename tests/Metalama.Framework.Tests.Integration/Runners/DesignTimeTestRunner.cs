@@ -26,9 +26,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
             TestInput testInput,
             TestResult testResult,
             TestContext testContext,
-            Dictionary<string, object?> state )
+            TestTextResult textResult )
         {
-            await base.RunAsync( testInput, testResult, testContext, state );
+            await base.RunAsync( testInput, testResult, testContext, textResult );
 
             using var pipeline = new TestDesignTimeAspectPipeline( testContext.ServiceProvider, testContext.Domain );
 

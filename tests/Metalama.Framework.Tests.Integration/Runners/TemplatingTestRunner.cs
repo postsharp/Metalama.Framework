@@ -91,15 +91,15 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="testContext"></param>
-        /// <param name="state"></param>
+        /// <param name="textResult"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             TestContext testContext,
-            Dictionary<string, object?> state )
+            TestTextResult textResult )
         {
-            await base.RunAsync( testInput, testResult, testContext, state );
+            await base.RunAsync( testInput, testResult, testContext, textResult );
 
             if ( !testResult.Success )
             {

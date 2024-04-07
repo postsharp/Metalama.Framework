@@ -30,11 +30,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
             TestInput testInput,
             TestResult testResult,
             TestContext testContext,
-            Dictionary<string, object?> state )
+            TestTextResult textResult )
         {
             Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
-            await base.RunAsync( testInput, testResult, testContext, state );
+            await base.RunAsync( testInput, testResult, testContext, textResult );
 
             var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
 

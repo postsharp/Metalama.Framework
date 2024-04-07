@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using DiffEngine;
 using JetBrains.Annotations;
+using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Infrastructure;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine;
@@ -46,6 +48,7 @@ internal abstract partial class BaseTestRunner
 
     private readonly TestProjectReferences _references;
     private readonly IFileSystem _fileSystem;
+    private TestRunnerOptions _testRunnerOptions;
 
     private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,
@@ -57,6 +60,7 @@ internal abstract partial class BaseTestRunner
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
         this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
+        this._testRunnerOptions = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<TestRunnerOptions>();
     }
 
     /// <summary>
@@ -120,6 +124,8 @@ internal abstract partial class BaseTestRunner
         }
     }
 
+    protected virtual TestTextResult CreateTestState() => new();
+
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
         // Avoid run too many tests in parallel regardless of the way the runners are scheduled.
@@ -142,7 +148,7 @@ internal abstract partial class BaseTestRunner
 
                 using var testContext = new TestContext( transformedOptions );
 
-                Dictionary<string, object?> state = new( StringComparer.Ordinal );
+                var state = this.CreateTestState();
                 using var testResult = new TestResult();
                 await this.RunAsync( testInput, testResult, testContext, state );
                 this.SaveResults( testInput, testResult, state );
@@ -173,7 +179,7 @@ internal abstract partial class BaseTestRunner
             testInput,
             testResult,
             testContext,
-            new Dictionary<string, object?>( StringComparer.InvariantCulture ) );
+            this.CreateTestState() );
 
     protected virtual TestContextOptions GetContextOptions( TestContextOptions options ) => options;
 
@@ -185,12 +191,12 @@ internal abstract partial class BaseTestRunner
     /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
     ///     a partial object in case of exception.</param>
     /// <param name="testContext"></param>
-    /// <param name="state"></param>
+    /// <param name="textResult"></param>
     protected virtual async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
         TestContext testContext,
-        Dictionary<string, object?> state )
+        TestTextResult textResult )
     {
         if ( testInput.Options.InvalidSourceOptions.Count > 0 )
         {
@@ -277,7 +283,7 @@ internal abstract partial class BaseTestRunner
                     return (project, null);
                 }
 
-                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, state );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, textResult );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
 
                 return (document.Project, document);
@@ -513,9 +519,9 @@ internal abstract partial class BaseTestRunner
     /// Processes syntax root of the test file before it is added to the test project.
     /// </summary>
     /// <param name="syntaxRoot"></param>
-    /// <param name="state"></param>
+    /// <param name="textResult"></param>
     /// <returns></returns>
-    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state ) => syntaxRoot;
+    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestTextResult textResult ) => syntaxRoot;
 
     private static void ValidateCustomAttributes( Compilation compilation )
     {
@@ -531,7 +537,7 @@ internal abstract partial class BaseTestRunner
 
     protected virtual bool CompareTransformedCode => true;
 
-    private protected virtual void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    private protected virtual void SaveResults( TestInput testInput, TestResult testResult, TestTextResult textResult )
     {
         if ( this.ProjectDirectory == null )
         {
@@ -625,9 +631,12 @@ internal abstract partial class BaseTestRunner
             }
         }
 
-        state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
-        state["actualTransformedNormalizedSourceText"] = actualTransformedSourceTextForComparison;
-        state["actualTransformedSourceTextForStorage"] = actualTransformedSourceTextForStorage;
+        textResult.SetBaseState(
+            expectedSourceTextForComparison,
+            expectedTransformedPath,
+            actualTransformedSourceTextForComparison,
+            actualTransformedSourceTextForStorage,
+            actualTransformedPath );
 
         static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
         {
@@ -655,17 +664,75 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    protected class TestTextResult
+    {
+        public string? ExpectedTransformedSourceText { get; private set; }
+
+        public string? ActualTransformedNormalizedSourceText { get; private set; }
+
+        public string? ActualTransformedSourceTextForStorage { get; private set; }
+
+        public string? ActualTransformedSourcePath { get; private set; }
+
+        public string? ExpectedTransformedSourcePath { get; private set; }
+
+        internal void SetBaseState(
+            string? expectedTransformedSourceText,
+            string? expectedTransformedSourcePath,
+            string? actualTransformedNormalizedSourceText,
+            string? actualTransformedSourceTextForStorage,
+            string? actualTransformedSourcePath )
+
+        {
+            this.ExpectedTransformedSourceText = expectedTransformedSourceText;
+            this.ExpectedTransformedSourcePath = expectedTransformedSourcePath;
+            this.ActualTransformedNormalizedSourceText = actualTransformedNormalizedSourceText;
+            this.ActualTransformedSourceTextForStorage = actualTransformedSourceTextForStorage;
+            this.ActualTransformedSourcePath = actualTransformedSourcePath;
+        }
+    }
+
+    protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, TestTextResult textResult )
     {
         if ( !this.CompareTransformedCode )
         {
             return;
         }
 
-        var expectedTransformedSourceText = (string) state["expectedTransformedSourceText"]!;
-        var actualTransformedNormalizedSourceText = (string) state["actualTransformedNormalizedSourceText"]!;
 
-        Assert.Equal( expectedTransformedSourceText, actualTransformedNormalizedSourceText );
+/* Unmerged change from project 'Metalama.Testing.AspectTesting'
+Before:
+        this.AssertTextEqual(
+After:
+        AssertTextEqual(
+*/
+this.AssertTextEqual(
+            textResult.ExpectedTransformedSourceText!,
+            textResult.ExpectedTransformedSourcePath!,
+            textResult.ActualTransformedNormalizedSourceText!,
+            textResult.ActualTransformedSourcePath! );
+    }
+
+    protected void AssertTextEqual( string expectedText, string expectedPath, string actualText, string actualPath )
+    {
+        var useDiff = this._testRunnerOptions.OpenDiffTool && !DiffRunner.Disabled;
+        
+        if ( expectedText != actualText )
+        {
+            if ( useDiff )
+            {
+                DiffRunner.Launch( actualPath, expectedPath );
+            }
+
+            Assert.Equal( expectedText, actualText );
+        }
+        else
+        {
+            if ( useDiff )
+            {
+                DiffRunner.Kill( actualPath, expectedPath );
+            }
+        }
     }
 
     private protected virtual bool ShouldStopOnInvalidInput( TestOptions testOptions ) => !testOptions.AcceptInvalidInput.GetValueOrDefault( true );

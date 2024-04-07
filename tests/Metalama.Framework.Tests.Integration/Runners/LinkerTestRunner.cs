@@ -42,13 +42,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="testContext"></param>
-        /// <param name="state"></param>
+        /// <param name="textResult"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
             TestContext testContext,
-            Dictionary<string, object?> state )
+            TestTextResult textResult )
         {
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
@@ -67,9 +67,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
 
-            state["builder"] = builder;
+            ((LinkerTestTextResult) textResult).Builder = builder;
 
-            await base.RunAsync( testInput, testResult, testContext, state );
+            await base.RunAsync( testInput, testResult, testContext, textResult );
 
             if ( !testResult.Success )
             {
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, TestTextResult textResult )
         {
             var assertionWalker = new LinkerInlineAssertionWalker();
 
@@ -120,14 +120,21 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 assertionWalker.Visit( syntaxTree.OutputRunTimeSyntaxRoot );
             }
 
-            base.ExecuteAssertions( testInput, testResult, state );
+            base.ExecuteAssertions( testInput, testResult, textResult );
         }
 
-        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, Dictionary<string, object?> state )
+        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestTextResult textResult )
         {
-            var builder = (LinkerTestInputBuilder) state["builder"]!;
+            var builder = ((LinkerTestTextResult) textResult).Builder!;
 
             return builder.ProcessSyntaxRoot( syntaxRoot );
+        }
+
+        protected override TestTextResult CreateTestState() => new LinkerTestTextResult();
+
+        private class LinkerTestTextResult : TestTextResult
+        {
+            public LinkerTestInputBuilder? Builder { get; set; }
         }
     }
 }

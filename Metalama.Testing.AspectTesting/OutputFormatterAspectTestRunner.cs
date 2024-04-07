@@ -36,7 +36,7 @@ namespace Metalama.Testing.AspectTesting
             TestInput testInput,
             TestResult testResult,
             TestContext projectOptions,
-            Dictionary<string, object?> state )
+            TestTextResult textResult )
         {
             var expectedEol =
                 testInput.Options.ExpectedEndOfLine switch
@@ -84,7 +84,7 @@ namespace Metalama.Testing.AspectTesting
             }
 
             // Run the sample.
-            await base.RunAsync( testInput, testResult, projectOptions, state );
+            await base.RunAsync( testInput, testResult, projectOptions, textResult );
 
             // If we have an expected EOL, verify that EOLs are preserved in the output document.
             if ( expectedEol != null && testResult.OutputProject != null )
