@@ -56,8 +56,7 @@ internal class AspectTestRunner : BaseTestRunner
     protected override async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContext testContext,
-        TestTextResult textResult )
+        TestContext testContext )
     {
         if ( this._runCount > 0 )
         {
@@ -69,7 +68,7 @@ internal class AspectTestRunner : BaseTestRunner
             this._runCount++;
         }
 
-        await base.RunAsync( testInput, testResult, testContext, textResult );
+        await this.RunAsync( testInput, testResult, testContext );
 
         if ( testResult.InputCompilation == null )
         {
@@ -424,9 +423,9 @@ internal class AspectTestRunner : BaseTestRunner
     }
 #endif
 
-    private protected override void SaveResults( TestInput testInput, TestResult testResult, TestTextResult textResult )
+    private protected override void SaveResults( TestInput testInput, TestResult testResult )
     {
-        base.SaveResults( testInput, testResult, textResult );
+        base.SaveResults( testInput, testResult );
 
         var expectedProgramOutputPath = Path.Combine(
             Path.GetDirectoryName( testInput.FullPath )!,
@@ -488,24 +487,24 @@ internal class AspectTestRunner : BaseTestRunner
             }
         }
 
-        var aspectTestTextResult = (AspectTestTextResult) textResult;
+        var aspectTestResult = (AspectTestResult) testResult;
 
-        aspectTestTextResult.SetProgramOutput( actualProgramOutput, actualProgramOutputPath, expectedProgramOutput, expectedProgramOutputPath );
+        aspectTestResult.SetProgramOutput( actualProgramOutput, actualProgramOutputPath, expectedProgramOutput, expectedProgramOutputPath );
     }
 
-    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, TestTextResult textResult )
+    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult )
     {
-        base.ExecuteAssertions( testInput, testResult, textResult );
+        base.ExecuteAssertions( testInput, testResult );
 
         if ( testInput.Options.CompareProgramOutput ?? true )
         {
-            var aspectTestTextResult = (AspectTestTextResult) textResult;
+            var aspectTestResult = (AspectTestResult) testResult;
 
             this.AssertTextEqual(
-                aspectTestTextResult.ExpectedProgramOutputText!,
-                aspectTestTextResult.ExpectedProgramOutputPath!,
-                aspectTestTextResult.ActualProgramOutputText!,
-                aspectTestTextResult.ActualProgramOutputPath! );
+                aspectTestResult.ExpectedProgramOutputText!,
+                aspectTestResult.ExpectedProgramOutputPath!,
+                aspectTestResult.ActualProgramOutputText!,
+                aspectTestResult.ActualProgramOutputPath! );
         }
 
 #if DEBUG
@@ -531,9 +530,9 @@ internal class AspectTestRunner : BaseTestRunner
 #endif
     }
 
-    protected override TestTextResult CreateTestState() => new AspectTestTextResult();
+    protected override TestResult CreateTestResult() => new AspectTestResult();
 
-    private sealed class AspectTestTextResult : TestTextResult
+    private sealed class AspectTestResult : TestResult
     {
         public string? ActualProgramOutputText { get; private set; }
 

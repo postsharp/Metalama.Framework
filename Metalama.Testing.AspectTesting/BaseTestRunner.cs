@@ -124,7 +124,7 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    protected virtual TestTextResult CreateTestState() => new();
+    protected virtual TestResult CreateTestResult() => new();
 
     private async Task RunAndAssertCoreAsync( TestInput testInput, TestContextOptions testContextOptions )
     {
@@ -148,11 +148,11 @@ internal abstract partial class BaseTestRunner
 
                 using var testContext = new TestContext( transformedOptions );
 
-                var state = this.CreateTestState();
+                var state = this.CreateTestResult();
                 using var testResult = new TestResult();
-                await this.RunAsync( testInput, testResult, testContext, state );
-                this.SaveResults( testInput, testResult, state );
-                this.ExecuteAssertions( testInput, testResult, state );
+                await this.RunAsync( testInput, testResult, testContext );
+                this.SaveResults( testInput, testResult );
+                this.ExecuteAssertions( testInput, testResult );
             }
             catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException
                                          || (e.InnerException?.GetType().FullName is { } innerException
@@ -173,15 +173,18 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    [PublicAPI]
-    public Task RunAsync( TestInput testInput, TestResult testResult, TestContext testContext )
-        => this.RunAsync(
-            testInput,
-            testResult,
-            testContext,
-            this.CreateTestState() );
-
     protected virtual TestContextOptions GetContextOptions( TestContextOptions options ) => options;
+
+    public async Task<TestResult> RunAsync(
+        TestInput testInput,
+        TestContext testContext )
+    {
+        var testResult = this.CreateTestResult();
+
+        await this.RunAsync( testInput, testResult, testContext );
+
+        return testResult;
+    }
 
     /// <summary>
     /// Runs a test. The present implementation of this method only prepares an input project and stores it in the <see cref="TestResult"/>.
@@ -191,12 +194,10 @@ internal abstract partial class BaseTestRunner
     /// <param name="testResult">The output object must be created by the caller and passed, so that the caller can get
     ///     a partial object in case of exception.</param>
     /// <param name="testContext"></param>
-    /// <param name="textResult"></param>
     protected virtual async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContext testContext,
-        TestTextResult textResult )
+        TestContext testContext )
     {
         if ( testInput.Options.InvalidSourceOptions.Count > 0 )
         {
@@ -283,7 +284,7 @@ internal abstract partial class BaseTestRunner
                     return (project, null);
                 }
 
-                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, textResult );
+                var transformedSyntaxRoot = this.PreprocessSyntaxRoot( prunedSyntaxRoot, testResult );
                 var document = project.AddDocument( fileName, transformedSyntaxRoot, filePath: fileName );
 
                 return (document.Project, document);
@@ -519,9 +520,9 @@ internal abstract partial class BaseTestRunner
     /// Processes syntax root of the test file before it is added to the test project.
     /// </summary>
     /// <param name="syntaxRoot"></param>
-    /// <param name="textResult"></param>
+    /// <param name="testResult"></param>
     /// <returns></returns>
-    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestTextResult textResult ) => syntaxRoot;
+    private protected virtual SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult ) => syntaxRoot;
 
     private static void ValidateCustomAttributes( Compilation compilation )
     {
@@ -537,7 +538,7 @@ internal abstract partial class BaseTestRunner
 
     protected virtual bool CompareTransformedCode => true;
 
-    private protected virtual void SaveResults( TestInput testInput, TestResult testResult, TestTextResult textResult )
+    private protected virtual void SaveResults( TestInput testInput, TestResult testResult )
     {
         if ( this.ProjectDirectory == null )
         {
@@ -631,7 +632,7 @@ internal abstract partial class BaseTestRunner
             }
         }
 
-        textResult.SetTransformedSource(
+        testResult.SetTransformedSource(
             expectedSourceTextForComparison,
             expectedTransformedPath,
             actualTransformedSourceTextForComparison,
@@ -664,35 +665,7 @@ internal abstract partial class BaseTestRunner
         }
     }
 
-    protected class TestTextResult
-    {
-        public string? ExpectedTransformedSourceText { get; private set; }
-
-        public string? ActualTransformedNormalizedSourceText { get; private set; }
-
-        public string? ActualTransformedSourceTextForStorage { get; private set; }
-
-        public string? ActualTransformedSourcePath { get; private set; }
-
-        public string? ExpectedTransformedSourcePath { get; private set; }
-
-        internal void SetTransformedSource(
-            string? expectedTransformedSourceText,
-            string? expectedTransformedSourcePath,
-            string? actualTransformedNormalizedSourceText,
-            string? actualTransformedSourceTextForStorage,
-            string? actualTransformedSourcePath )
-
-        {
-            this.ExpectedTransformedSourceText = expectedTransformedSourceText;
-            this.ExpectedTransformedSourcePath = expectedTransformedSourcePath;
-            this.ActualTransformedNormalizedSourceText = actualTransformedNormalizedSourceText;
-            this.ActualTransformedSourceTextForStorage = actualTransformedSourceTextForStorage;
-            this.ActualTransformedSourcePath = actualTransformedSourcePath;
-        }
-    }
-
-    protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult, TestTextResult textResult )
+    protected virtual void ExecuteAssertions( TestInput testInput, TestResult testResult )
     {
         if ( !this.CompareTransformedCode )
         {
@@ -700,10 +673,10 @@ internal abstract partial class BaseTestRunner
         }
 
         this.AssertTextEqual(
-            textResult.ExpectedTransformedSourceText!,
-            textResult.ExpectedTransformedSourcePath!,
-            textResult.ActualTransformedNormalizedSourceText!,
-            textResult.ActualTransformedSourcePath! );
+            testResult.ExpectedTransformedSourceText!,
+            testResult.ExpectedTransformedSourcePath!,
+            testResult.ActualTransformedNormalizedSourceText!,
+            testResult.ActualTransformedSourcePath! );
     }
 
     protected void AssertTextEqual( string expectedText, string expectedPath, string actualText, string actualPath )

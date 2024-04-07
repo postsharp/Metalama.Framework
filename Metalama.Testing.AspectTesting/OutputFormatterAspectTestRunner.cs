@@ -30,22 +30,20 @@ internal sealed class OutputFormatterAspectTestRunner : AspectTestRunner
     protected override TestContextOptions GetContextOptions( TestContextOptions options )
         => options with { CodeFormattingOptions = CodeFormattingOptions.Formatted };
 
-        protected override async Task RunAsync(
-            TestInput testInput,
-            TestResult testResult,
-            TestContext projectOptions,
-            TestTextResult textResult )
-        {
-            var expectedEol =
-                testInput.Options.ExpectedEndOfLine switch
-                {
-                    null => null,
-                    "CR" => "\r",
-                    "LF" => "\n",
-                    "CRLF" => "\r\n",
-                    _ => throw new AssertionFailedException(
-                        $"Unexpected value for the ExpectedEndOfLine test option: '{testInput.Options.ExpectedEndOfLine}'." )
-                };
+    protected override async Task RunAsync(
+        TestInput testInput,
+        TestResult testResult,
+        TestContext projectOptions )
+    {
+        var expectedEol =
+            testInput.Options.ExpectedEndOfLine switch
+            {
+                null => null,
+                "CR" => "\r",
+                "LF" => "\n",
+                "CRLF" => "\r\n",
+                _ => throw new AssertionFailedException( $"Unexpected value for the ExpectedEndOfLine test option: '{testInput.Options.ExpectedEndOfLine}'." )
+            };
 
         // If we have an expected EOL, change the EOLs of the input.
         if ( expectedEol != null )
@@ -81,8 +79,8 @@ internal sealed class OutputFormatterAspectTestRunner : AspectTestRunner
             testInput = testInput.WithSource( sb.ToString() );
         }
 
-            // Run the sample.
-            await base.RunAsync( testInput, testResult, projectOptions, textResult );
+        // Run the sample.
+        await base.RunAsync( testInput, testResult, projectOptions );
 
         // If we have an expected EOL, verify that EOLs are preserved in the output document.
         if ( expectedEol != null && testResult.OutputProject != null )

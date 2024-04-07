@@ -29,12 +29,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContext testContext,
-            TestTextResult textResult )
+            TestContext testContext )
         {
             Assert.True( testInput.Options.TestScenario is TestScenario.ApplyLiveTemplate or TestScenario.PreviewLiveTemplate );
 
-            await base.RunAsync( testInput, testResult, testContext, textResult );
+            await base.RunAsync( testInput, testResult, testContext );
 
             var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
 

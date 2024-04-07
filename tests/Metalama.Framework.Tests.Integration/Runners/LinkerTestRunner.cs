@@ -42,13 +42,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
         /// <param name="testInput">Specifies the input test parameters such as the name and the source.</param>
         /// <param name="testResult"></param>
         /// <param name="testContext"></param>
-        /// <param name="textResult"></param>
         /// <returns>The result of the test execution.</returns>
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContext testContext,
-            TestTextResult textResult )
+            TestContext testContext )
         {
             // There is a chicken-or-egg in the design of the test because the project-scoped service provider is needed before the compilation
             // is created. We break the cycle by providing the service provider with the default set of references, which should work for 
@@ -67,9 +65,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             var builder = new LinkerTestInputBuilder( serviceProvider, preliminaryCompilationContext );
 
-            ((LinkerTestTextResult) textResult).Builder = builder;
+            ((LinkerTestTextResult) testResult).Builder = builder;
 
-            await base.RunAsync( testInput, testResult, testContext, textResult );
+            await this.RunAsync( testInput, testResult, testContext );
 
             if ( !testResult.Success )
             {
@@ -111,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
         }
 
-        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, TestTextResult textResult )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
             var assertionWalker = new LinkerInlineAssertionWalker();
 
@@ -120,19 +118,19 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 assertionWalker.Visit( syntaxTree.OutputRunTimeSyntaxRoot );
             }
 
-            base.ExecuteAssertions( testInput, testResult, textResult );
+            base.ExecuteAssertions( testInput, testResult);
         }
 
-        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestTextResult textResult )
+        private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult )
         {
-            var builder = ((LinkerTestTextResult) textResult).Builder!;
+            var builder = ((LinkerTestTextResult) testResult).Builder!;
 
             return builder.ProcessSyntaxRoot( syntaxRoot );
         }
 
-        protected override TestTextResult CreateTestState() => new LinkerTestTextResult();
+        protected override TestResult CreateTestResult() => new LinkerTestTextResult();
 
-        private class LinkerTestTextResult : TestTextResult
+        private class LinkerTestTextResult : TestResult
         {
             public LinkerTestInputBuilder? Builder { get; set; }
         }
