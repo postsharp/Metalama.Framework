@@ -490,7 +490,7 @@ internal class AspectTestRunner : BaseTestRunner
 
         var aspectTestTextResult = (AspectTestTextResult) textResult;
 
-        aspectTestTextResult.SetAspectState( actualProgramOutput, actualProgramOutputPath, expectedProgramOutput, expectedProgramOutputPath );
+        aspectTestTextResult.SetProgramOutput( actualProgramOutput, actualProgramOutputPath, expectedProgramOutput, expectedProgramOutputPath );
     }
 
     protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, TestTextResult textResult )
@@ -500,8 +500,12 @@ internal class AspectTestRunner : BaseTestRunner
         if ( testInput.Options.CompareProgramOutput ?? true )
         {
             var aspectTestTextResult = (AspectTestTextResult) textResult;
-            
-            this.AssertTextEqual( aspectTestTextResult.ExpectedProgramOutputText!, aspectTestTextResult.ExpectedProgramOutputPath!, aspectTestTextResult.ActualProgramOutputText!, aspectTestTextResult.ActualProgramOutputPath! );
+
+            this.AssertTextEqual(
+                aspectTestTextResult.ExpectedProgramOutputText!,
+                aspectTestTextResult.ExpectedProgramOutputPath!,
+                aspectTestTextResult.ActualProgramOutputText!,
+                aspectTestTextResult.ActualProgramOutputPath! );
         }
 
 #if DEBUG
@@ -532,12 +536,18 @@ internal class AspectTestRunner : BaseTestRunner
     private sealed class AspectTestTextResult : TestTextResult
     {
         public string? ActualProgramOutputText { get; private set; }
+
         public string? ActualProgramOutputPath { get; private set; }
-        
+
         public string? ExpectedProgramOutputText { get; private set; }
+
         public string? ExpectedProgramOutputPath { get; private set; }
 
-        public void SetAspectState( string actualProgramOutputText, string actualProgramOutputPath, string expectedProgramOutputText, string expectedProgramOutputPath )
+        public void SetProgramOutput(
+            string actualProgramOutputText,
+            string actualProgramOutputPath,
+            string expectedProgramOutputText,
+            string expectedProgramOutputPath )
         {
             this.ActualProgramOutputText = actualProgramOutputText;
             this.ActualProgramOutputPath = actualProgramOutputPath;

@@ -631,7 +631,7 @@ internal abstract partial class BaseTestRunner
             }
         }
 
-        textResult.SetBaseState(
+        textResult.SetTransformedSource(
             expectedSourceTextForComparison,
             expectedTransformedPath,
             actualTransformedSourceTextForComparison,
@@ -676,7 +676,7 @@ internal abstract partial class BaseTestRunner
 
         public string? ExpectedTransformedSourcePath { get; private set; }
 
-        internal void SetBaseState(
+        internal void SetTransformedSource(
             string? expectedTransformedSourceText,
             string? expectedTransformedSourcePath,
             string? actualTransformedNormalizedSourceText,
