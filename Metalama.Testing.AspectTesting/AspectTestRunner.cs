@@ -500,14 +500,7 @@ internal class AspectTestRunner : BaseTestRunner
         if ( testInput.Options.CompareProgramOutput ?? true )
         {
             var aspectTestTextResult = (AspectTestTextResult) textResult;
-
-/* Unmerged change from project 'Metalama.Testing.AspectTesting'
-Before:
-            this.AssertTextEqual( aspectTestTextResult.ExpectedProgramOutputText!, aspectTestTextResult.ExpectedProgramOutputPath!, aspectTestTextResult.ActualProgramOutputText!, aspectTestTextResult.ActualProgramOutputPath! );
-After:
-            AssertTextEqual( aspectTestTextResult.ExpectedProgramOutputText!, aspectTestTextResult.ExpectedProgramOutputPath!, aspectTestTextResult.ActualProgramOutputText!, aspectTestTextResult.ActualProgramOutputPath! );
-*/
-
+            
             this.AssertTextEqual( aspectTestTextResult.ExpectedProgramOutputText!, aspectTestTextResult.ExpectedProgramOutputPath!, aspectTestTextResult.ActualProgramOutputText!, aspectTestTextResult.ActualProgramOutputPath! );
         }
 

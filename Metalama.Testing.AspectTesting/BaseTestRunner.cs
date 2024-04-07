@@ -699,14 +699,7 @@ internal abstract partial class BaseTestRunner
             return;
         }
 
-
-/* Unmerged change from project 'Metalama.Testing.AspectTesting'
-Before:
         this.AssertTextEqual(
-After:
-        AssertTextEqual(
-*/
-this.AssertTextEqual(
             textResult.ExpectedTransformedSourceText!,
             textResult.ExpectedTransformedSourcePath!,
             textResult.ActualTransformedNormalizedSourceText!,
@@ -716,7 +709,7 @@ this.AssertTextEqual(
     protected void AssertTextEqual( string expectedText, string expectedPath, string actualText, string actualPath )
     {
         var useDiff = this._testRunnerOptions.OpenDiffTool && !DiffRunner.Disabled;
-        
+
         if ( expectedText != actualText )
         {
             if ( useDiff )
