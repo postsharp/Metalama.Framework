@@ -49,6 +49,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
       <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+      <ProjectReference Include="..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
     </ItemGroup>
 
     <!-- Exclude full pdbs from packing so the .snupkg doesn't get refused by nuget.org. -->

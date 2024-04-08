@@ -4,7 +4,7 @@
     
     <PropertyGroup>
         <!-- We are targeting .NET 6.0 because we can provide an unloadable implementation of CompileTimeDomain. -->
-        <TargetFrameworks>netstandard2.0;net472;net6.0</TargetFrameworks>
+        <TargetFrameworks>net472;net6.0</TargetFrameworks>
         <!-- Packaging -->
         <Description>Test framework for Metalama aspects and fabrics. This is not your typical test framework. When referencing this package, every _file_ is turned into a test by default. Please read the documentation before use.</Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -16,6 +16,7 @@
         <!-- Workspaces is used in TestRunner, Workspaces.Lightweight is a dependency of Metalama.Framework.Engine -->
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(ThisRoslynVersion)" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(ThisRoslynVersion)" />
+        <PackageReference Include="DiffEngine" Version="15.3.0" />
         <PackageReference Include="xunit.assert" Version="$(xUnitApiVersion)" />
         <PackageReference Include="xunit.extensibility.core" Version="$(xUnitApiVersion)" />
         <PackageReference Include="xunit.extensibility.execution" Version="$(xUnitApiVersion)" />

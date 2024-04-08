@@ -25,7 +25,7 @@ namespace Metalama.Testing.AspectTesting;
 /// Represents the result of a test run.
 /// </summary>
 [PublicAPI]
-internal sealed class TestResult : IDisposable
+internal class TestResult : IDisposable
 {
     private static readonly Regex _cleanCallStackRegex = new( " in (.*):line \\d+" );
 
@@ -402,6 +402,30 @@ internal sealed class TestResult : IDisposable
         {
             yield return $"//    CodeFix: {codeFix}`\n";
         }
+    }
+
+    public string? ExpectedTransformedSourceText { get; private set; }
+
+    public string? ActualTransformedNormalizedSourceText { get; private set; }
+
+    public string? ActualTransformedSourceTextForStorage { get; private set; }
+
+    public string? ActualTransformedSourcePath { get; private set; }
+
+    public string? ExpectedTransformedSourcePath { get; private set; }
+
+    internal void SetTransformedSource(
+        string? expectedTransformedSourceText,
+        string? expectedTransformedSourcePath,
+        string? actualTransformedNormalizedSourceText,
+        string? actualTransformedSourceTextForStorage,
+        string? actualTransformedSourcePath )
+    {
+        this.ExpectedTransformedSourceText = expectedTransformedSourceText;
+        this.ExpectedTransformedSourcePath = expectedTransformedSourcePath;
+        this.ActualTransformedNormalizedSourceText = actualTransformedNormalizedSourceText;
+        this.ActualTransformedSourceTextForStorage = actualTransformedSourceTextForStorage;
+        this.ActualTransformedSourcePath = actualTransformedSourcePath;
     }
 
     public void Dispose()

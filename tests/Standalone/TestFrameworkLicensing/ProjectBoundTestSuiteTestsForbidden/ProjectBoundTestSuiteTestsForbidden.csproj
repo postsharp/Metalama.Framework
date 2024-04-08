@@ -18,7 +18,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(XUnitRunnerVisualStudioVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
         <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
         <PackageReference Include="Metalama.Testing.AspectTesting" Version="$(MetalamaVersion)" />
