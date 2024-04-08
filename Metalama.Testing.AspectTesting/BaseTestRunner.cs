@@ -48,7 +48,7 @@ internal abstract partial class BaseTestRunner
 
     private readonly TestProjectReferences _references;
     private readonly IFileSystem _fileSystem;
-    private TestRunnerOptions _testRunnerOptions;
+    private readonly TestRunnerOptions _testRunnerOptions;
 
     private protected BaseTestRunner(
         GlobalServiceProvider serviceProvider,

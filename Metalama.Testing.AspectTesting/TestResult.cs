@@ -420,7 +420,6 @@ internal class TestResult : IDisposable
         string? actualTransformedNormalizedSourceText,
         string? actualTransformedSourceTextForStorage,
         string? actualTransformedSourcePath )
-
     {
         this.ExpectedTransformedSourceText = expectedTransformedSourceText;
         this.ExpectedTransformedSourcePath = expectedTransformedSourcePath;

@@ -12,7 +12,6 @@ using Metalama.Framework.Tests.Integration.Runners.Linker;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -130,7 +129,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
         protected override TestResult CreateTestResult() => new LinkerTestTextResult();
 
-        private class LinkerTestTextResult : TestResult
+        private sealed class LinkerTestTextResult : TestResult
         {
             public LinkerTestInputBuilder? Builder { get; set; }
         }
