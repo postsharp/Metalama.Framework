@@ -12,7 +12,8 @@ namespace Metalama.Framework.Code;
 [PublicAPI]
 public readonly struct SourceSpan
 {
-    private readonly ISourceReferenceImpl _sourceReferenceImpl;
+    private readonly ISourceReferenceImpl? _sourceReferenceImpl;
+    private readonly string? _text;
 
     internal SourceSpan(
         string filePath,
@@ -25,15 +26,37 @@ public readonly struct SourceSpan
         int endColumn,
         ISourceReferenceImpl sourceReferenceImpl )
     {
-        this.SyntaxTree = syntaxTree;
+        this.FilePath = filePath;
         this.Start = start;
         this.End = end;
-        this._sourceReferenceImpl = sourceReferenceImpl;
-        this.FilePath = filePath;
         this.StartLine = startLine;
         this.EndLine = endLine;
         this.StartColumn = startColumn;
         this.EndColumn = endColumn;
+        this.SyntaxTree = syntaxTree;
+        this._sourceReferenceImpl = sourceReferenceImpl;
+    }
+
+    public SourceSpan(
+        string filePath,
+        object syntaxTree,
+        int start,
+        int end,
+        int startLine,
+        int startColumn,
+        int endLine,
+        int endColumn,
+        string text )
+    {
+        this.FilePath = filePath;
+        this.Start = start;
+        this.End = end;
+        this.StartLine = startLine;
+        this.EndLine = endLine;
+        this.StartColumn = startColumn;
+        this.EndColumn = endColumn;
+        this.SyntaxTree = syntaxTree;
+        this._text = text;
     }
 
     /// <summary>
@@ -73,7 +96,7 @@ public readonly struct SourceSpan
     /// Gets the text representation (i.e. the source code) of the current syntax node or token.
     /// </summary>
     /// <returns>The source code of the current syntax node.</returns>
-    public string GetText() => this._sourceReferenceImpl.GetText( this );
+    public string GetText() => this._text ?? this._sourceReferenceImpl!.GetText( this );
 
     public override string ToString() => $"{this.FilePath}";
 }

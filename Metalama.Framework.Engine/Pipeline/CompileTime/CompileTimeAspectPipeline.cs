@@ -93,7 +93,8 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 ImmutableArray<SyntaxTreeTransformation>.Empty,
                 ImmutableArray<ManagedResource>.Empty,
                 partialCompilation,
-                ImmutableArray<AdditionalCompilationOutputFile>.Empty );
+                ImmutableArray<AdditionalCompilationOutputFile>.Empty,
+                ImmutableArray<ScopedSuppression>.Empty );
         }
 
         // Report error if the compilation does not have the METALAMA preprocessor symbol.
@@ -223,7 +224,8 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 syntaxTreeTransformations,
                 additionalResources,
                 resultingCompilation,
-                result.Value.AdditionalCompilationOutputFiles );
+                result.Value.AdditionalCompilationOutputFiles,
+                result.Value.Diagnostics.DiagnosticSuppressions );
         }
         catch ( DiagnosticException exception ) when ( exception.InSourceCode )
         {

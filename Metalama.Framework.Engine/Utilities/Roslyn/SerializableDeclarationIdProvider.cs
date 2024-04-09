@@ -74,6 +74,13 @@ public static class SerializableDeclarationIdProvider
                     return true;
                 }
 
+            case IModuleSymbol:
+                {
+                    id = default;
+
+                    return false;
+                }
+
             default:
                 var documentationId = DocumentationCommentId.CreateDeclarationId( symbol );
 

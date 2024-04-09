@@ -23,10 +23,10 @@ namespace Metalama.Framework.Diagnostics
         /// <summary>
         /// Suppresses a diagnostic by specifying the declaration in which the suppression must be effective.
         /// </summary>
-        /// <param name="suppression">The suppression definition, which must be defined as a static field or property.</param>
+        /// <param name="suppression">The suppression.</param>
         /// <param name="scope">The declaration in which the diagnostic must be suppressed.</param>
         /// <param name="source"></param>
-        void Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source );
+        void Suppress( ISuppression suppression, IDeclaration scope, IDiagnosticSource source );
 
         /// <summary>
         /// Suggest a code fix without reporting a diagnostic.

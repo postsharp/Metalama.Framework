@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode;
 /// The point of this type is to avoid formatting the string when there is no exception but to carry on sufficient information to
 /// create this string if needed.
 /// </summary>
-internal readonly struct UserCodeDescription : IFormattable
+public readonly struct UserCodeDescription : IFormattable
 {
     private readonly object? _arg1;
     private readonly object? _arg2;

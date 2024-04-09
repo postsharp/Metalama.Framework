@@ -105,7 +105,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         this._rewriter.NonObservableTransformations )
                     .ToOrderedList( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ),
                 orderedLayers,
-                new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );
 
             return linkerInput;

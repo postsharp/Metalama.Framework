@@ -108,7 +108,7 @@ public sealed class DesignTimePipelineTests : UnitTestClass
 
         foreach ( var suppression in syntaxTreeResult.Suppressions )
         {
-            stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.DeclarationId}" );
+            stringBuilder.AppendLineInvariant( $"   {suppression}" );
         }
 
         // Introductions
@@ -1033,7 +1033,7 @@ class D{version}
         Assert.True( pipeline.TryExecute( compilation2, default, out var compilationResult ) );
 
         // Note that LAMA0118 is no longer reported by the pipeline but by the analyzer.
-        Assert.Empty( compilationResult.GetAllDiagnostics( "Aspect.cs" ) );
+        Assert.Empty( compilationResult.GetDiagnosticsOnSyntaxTree( "Aspect.cs" ) );
 
         Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 

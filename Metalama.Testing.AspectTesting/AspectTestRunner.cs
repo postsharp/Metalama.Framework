@@ -206,6 +206,14 @@ internal class AspectTestRunner : BaseTestRunner
 
         await testResult.SetOutputCompilationAsync( resultCompilation );
 
+        if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
+        {
+            testResult.SetFailed( "Syntax tree verification failed." );
+            testResult.OutputCompilationDiagnostics.Report( diagnostics );
+
+            return false;
+        }
+
         // Emit binary and report diagnostics.
         bool MustBeReported( Diagnostic d )
         {
@@ -216,16 +224,20 @@ internal class AspectTestRunner : BaseTestRunner
                 return false;
             }
 
-            return d.Severity >= minimalVerbosity
-                   && !testInput.ShouldIgnoreDiagnostic( d.Id );
-        }
+            if ( d.Severity < minimalVerbosity || testInput.ShouldIgnoreDiagnostic( d.Id ) )
+            {
+                return false;
+            }
 
-        if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
-        {
-            testResult.SetFailed( "Syntax tree verification failed." );
-            testResult.OutputCompilationDiagnostics.Report( diagnostics );
+            foreach ( var suppression in pipelineResult.DiagnosticSuppressions )
+            {
+                if ( suppression.Matches( d, resultCompilation, filter => filter() ) )
+                {
+                    return false;
+                }
+            }
 
-            return false;
+            return true;
         }
 
         if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )

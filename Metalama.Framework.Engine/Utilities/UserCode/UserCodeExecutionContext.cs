@@ -105,6 +105,9 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     internal static DisposeAction WithContext( in ProjectServiceProvider serviceProvider, CompilationModel compilation, UserCodeDescription description )
         => WithContext( new UserCodeExecutionContext( serviceProvider, description, compilationModel: compilation ) );
 
+    public UserCodeExecutionContext( ProjectServiceProvider serviceProvider, UserCodeDescription description )
+        : this( serviceProvider, description, null ) { }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UserCodeExecutionContext"/> class that can be used
     /// to invoke user code using <see cref="UserCodeInvoker.Invoke"/> but not <see cref="UserCodeInvoker.TryInvoke{T}"/>.
