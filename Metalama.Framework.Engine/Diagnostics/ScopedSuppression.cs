@@ -51,7 +51,7 @@ public sealed class ScopedSuppression : IScopedSuppression
             return false;
         }
 
-        var diagnosticSymbol = compilation.GetSemanticModel( location.SourceTree ).GetDeclaredSymbol( node );
+        var diagnosticSymbol = compilation.GetCachedSemanticModel( location.SourceTree ).GetDeclaredSymbol( node );
 
         while ( diagnosticSymbol != null )
         {

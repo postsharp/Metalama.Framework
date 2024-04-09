@@ -7,8 +7,8 @@ using System;
 namespace Metalama.Framework.Diagnostics;
 
 /// <summary>
-/// Defines the suppression of a kind of diagnostics. Suppressions must be
-/// defined as static fields or properties of an aspect classes. Suppressions are instantiated with <see cref="IDiagnosticSink.Suppress"/>.
+/// Defines the suppression of a kind of diagnostics. Suppression definitions must be
+/// static fields or properties of an aspect classes. Suppressions are instantiated with <see cref="IDiagnosticSink.Suppress"/>.
 /// </summary>
 /// <seealso href="@diagnostics"/>
 [CompileTime]
@@ -31,12 +31,12 @@ public sealed class SuppressionDefinition : ISuppression
 
     SuppressionDefinition ISuppression.Definition => this;
 
-    Func<SuppressionDiagnostic, bool>? ISuppression.Filter => null;
+    Func<ISuppressibleDiagnostic, bool>? ISuppression.Filter => null;
 
     /// <summary>
     /// Returns a new instance of the current suppression with a filter that will be applied to the diagnostics.
     /// </summary>
-    public ISuppression WithFilter( Func<SuppressionDiagnostic, bool> filter ) => new SuppressionImpl( this, filter );
+    public ISuppression WithFilter( Func<ISuppressibleDiagnostic, bool> filter ) => new SuppressionImpl( this, filter );
 
     public override string ToString() => $"suppress {this.SuppressedDiagnosticId}";
 }

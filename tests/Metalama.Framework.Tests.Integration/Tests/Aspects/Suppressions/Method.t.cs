@@ -1,4 +1,4 @@
-// Warning CS0219 on `x`: `The variable 'x' is assigned but its value is never used`
+// Warning CS0219 on `y`: `The variable 'y' is assigned but its value is never used`
 internal class TargetClass
 {
     [SuppressWarning]
@@ -9,6 +9,6 @@ internal class TargetClass
     // CS0219 expected
     private void M1(string m)
     {
-        var x = 0;
+        var y = 0;
     }
 }

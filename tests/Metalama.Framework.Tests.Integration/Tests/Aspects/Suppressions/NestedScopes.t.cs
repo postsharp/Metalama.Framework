@@ -1,5 +1,5 @@
 // Warning CS0219 on `a`: `The variable 'a' is assigned but its value is never used`
-// Warning CS0219 on `y`: `The variable 'y' is assigned but its value is never used`
+// Warning CS0219 on `e`: `The variable 'e' is assigned but its value is never used`
 internal class TargetClass
 {
     [SuppressWarning]
@@ -7,17 +7,17 @@ internal class TargetClass
     {
         var a = 0;
 #pragma warning disable CS0219
-        var x = 0;
+        var b = 0;
 #pragma warning restore CS0219
-        var y = 0;
+        var c = 0;
         return;
     }
     private void M1(string m)
     {
 #pragma warning disable CS0219
-        var x = 0;
+        var d = 0;
 #pragma warning restore CS0219
         // CS0219 expected
-        var y = 0;
+        var e = 0;
     }
 }

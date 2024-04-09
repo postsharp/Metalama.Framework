@@ -2,12 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics;
 
@@ -16,34 +17,50 @@ public class SuppressionFactories
     public static SuppressionDescriptor CreateDescriptor( string diagnosticId )
         => new( "Metalama." + diagnosticId, diagnosticId, justification: string.Empty );
 
-    public static SuppressionDiagnostic CreateDiagnostic( Diagnostic diagnostic, CancellationToken cancellationToken = default )
+    public static ISuppressibleDiagnostic CreateDiagnostic( Diagnostic diagnostic ) => new SuppressibleDiagnostic( diagnostic );
+
+    private sealed class SuppressibleDiagnostic( Diagnostic diagnostic ) : ISuppressibleDiagnostic
     {
-        var recorder = new RecorderFormatProvider();
-        diagnostic.GetMessage( recorder );
-        var args = recorder.Arguments;
-        var invariantMessage = diagnostic.GetMessage( CultureInfo.InvariantCulture );
+        public string Id { get; } = diagnostic.Id;
 
-        SourceSpan? span = null;
+        [Memo]
+        public string InvariantMessage => diagnostic.GetMessage( CultureInfo.InvariantCulture );
 
-        if ( diagnostic.Location.SourceTree is { } tree )
+        [Memo]
+        public ImmutableArray<object?> Arguments => this.ExtractArguments();
+
+        private ImmutableArray<object?> ExtractArguments()
         {
-            var sourceSpan = diagnostic.Location.SourceSpan;
-            var lineSpan = tree.GetLineSpan( sourceSpan, cancellationToken );
-            var text = tree.GetText( cancellationToken ).ToString( sourceSpan );
-
-            span = new SourceSpan(
-                tree.FilePath,
-                tree,
-                sourceSpan.Start,
-                sourceSpan.End,
-                lineSpan.StartLinePosition.Line,
-                lineSpan.StartLinePosition.Character,
-                lineSpan.EndLinePosition.Line,
-                lineSpan.EndLinePosition.Character,
-                text );
+            var recorder = new RecorderFormatProvider();
+            diagnostic.GetMessage( recorder );
+            return recorder.Arguments.ToImmutableArray();
         }
 
-        return new( diagnostic.Id, invariantMessage, args.ToImmutableArray(), span );
+        [Memo]
+        public SourceSpan? Span => this.GetSpan();
+
+        private SourceSpan? GetSpan()
+        {
+            if ( diagnostic.Location.SourceTree is { } tree )
+            {
+                var sourceSpan = diagnostic.Location.SourceSpan;
+                var lineSpan = tree.GetLineSpan( sourceSpan );
+                var text = tree.GetText().ToString( sourceSpan );
+
+                return new SourceSpan(
+                    tree.FilePath,
+                    tree,
+                    sourceSpan.Start,
+                    sourceSpan.End,
+                    lineSpan.StartLinePosition.Line,
+                    lineSpan.StartLinePosition.Character,
+                    lineSpan.EndLinePosition.Line,
+                    lineSpan.EndLinePosition.Character,
+                    text );
+            }
+
+            return null;
+        }
     }
 
     private sealed class RecorderFormatProvider : IFormatProvider, ICustomFormatter

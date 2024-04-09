@@ -4,11 +4,11 @@ using System;
 
 namespace Metalama.Framework.Diagnostics;
 
-internal sealed class SuppressionImpl( SuppressionDefinition definition, Func<SuppressionDiagnostic, bool> filter ) : ISuppression
+internal sealed class SuppressionImpl( SuppressionDefinition definition, Func<ISuppressibleDiagnostic, bool> filter ) : ISuppression
 {
     public SuppressionDefinition Definition { get; } = definition;
 
-    public Func<SuppressionDiagnostic, bool> Filter { get; } = filter;
+    public Func<ISuppressibleDiagnostic, bool> Filter { get; } = filter;
 
     public override string ToString() => $"{this.Definition} with filter";
 }

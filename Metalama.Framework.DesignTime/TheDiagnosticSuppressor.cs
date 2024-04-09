@@ -179,7 +179,7 @@ namespace Metalama.Framework.DesignTime
                                     UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
 
                                 var filterPassed = this._userCodeInvoker.Invoke(
-                                    () => filter( SuppressionFactories.CreateDiagnostic( diagnostic, cancellationToken ) ),
+                                    () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ),
                                     executionContext );
 
                                 if ( !filterPassed )
