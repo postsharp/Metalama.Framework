@@ -1,3 +1,5 @@
+![Metalama Logo](https://raw.githubusercontent.com/postsharp/Metalama/master/images/metalama-by-postsharp-light.svg)
+
 ## Metalama Command Line Tools
 
 Metalama Command Line Tools is used for registering a Metalama license key, configuration, and troubleshooting.
