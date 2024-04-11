@@ -29,4 +29,9 @@
     <ItemGroup>
       <PackageReference Include="xunit.abstractions" Version="2.0.3" />
     </ItemGroup>
+
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>
