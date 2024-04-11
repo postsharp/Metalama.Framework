@@ -7,6 +7,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <AssemblyName>Metalama.Testing.UnitTesting$(ThisRoslynVersionProjectSuffix)</AssemblyName>
         <PackageId>Metalama.Testing.UnitTesting</PackageId>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,5 +28,10 @@
 
     <ItemGroup>
       <PackageReference Include="xunit.abstractions" Version="2.0.3" />
+    </ItemGroup>
+
+    <!-- Packaging -->
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 </Project>
