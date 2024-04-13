@@ -3,24 +3,42 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
+// ReSharper disable PossibleMultipleEnumeration
 internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 {
     private readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
 
-    public async Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+    public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull
     {
-        // Enqueue all items.
-        var queue = new ConcurrentQueue<T>();
+        using var enumerator = items.GetEnumerator();
 
-        foreach ( var item in items )
+        if ( !enumerator.MoveNext() )
         {
-            queue.Enqueue( item );
+            return Task.CompletedTask;
+        }
+
+        var item1 = enumerator.Current;
+
+        if ( !enumerator.MoveNext() )
+        {
+            action( item1 );
+
+            return Task.CompletedTask;
+        }
+
+        var queue = new ConcurrentQueue<T>();
+        queue.Enqueue( item1 );
+
+        while ( enumerator.MoveNext() )
+        {
+            queue.Enqueue( enumerator.Current );
         }
 
         // Start tasks to process the queue.
@@ -33,7 +51,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
 
         // Await all tasks.
-        await Task.WhenAll( tasks );
+        return Task.WhenAll( tasks );
 
         // Process the queue.
         void ProcessQueue()
@@ -46,7 +64,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
     }
 
-    public async Task RunInParallelAsync<TItem, TContext>(
+    public Task RunInParallelAsync<TItem, TContext>(
         IEnumerable<TItem> items,
         Action<TItem, TContext> action,
         Func<TContext> createContext,
@@ -54,12 +72,29 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         where TItem : notnull
         where TContext : IDisposable
     {
-        // Enqueue all items.
-        var queue = new ConcurrentQueue<TItem>();
+        using var enumerator = items.GetEnumerator();
 
-        foreach ( var item in items )
+        if ( !enumerator.MoveNext() )
         {
-            queue.Enqueue( item );
+            return Task.CompletedTask;
+        }
+
+        var item1 = enumerator.Current;
+
+        if ( !enumerator.MoveNext() )
+        {
+            using var context = createContext();
+            action( item1, context );
+
+            return Task.CompletedTask;
+        }
+
+        var queue = new ConcurrentQueue<TItem>();
+        queue.Enqueue( item1 );
+
+        while ( enumerator.MoveNext() )
+        {
+            queue.Enqueue( enumerator.Current );
         }
 
         // Start tasks to process the queue.
@@ -72,7 +107,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
 
         // Await all tasks.
-        await Task.WhenAll( tasks );
+        return Task.WhenAll( tasks );
 
         // Process the queue.
         void ProcessQueue()
@@ -87,14 +122,29 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
     }
 
-    public async Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
+    public Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull
     {
-        var queue = new ConcurrentQueue<T>();
+        using var enumerator = items.GetEnumerator();
 
-        foreach ( var item in items )
+        if ( !enumerator.MoveNext() )
         {
-            queue.Enqueue( item );
+            return Task.CompletedTask;
+        }
+
+        var item1 = enumerator.Current;
+
+        if ( !enumerator.MoveNext() )
+        {
+            return action( items.First() );
+        }
+
+        var queue = new ConcurrentQueue<T>();
+        queue.Enqueue( item1 );
+
+        while ( enumerator.MoveNext() )
+        {
+            queue.Enqueue( enumerator.Current );
         }
 
         var taskCount = Math.Min( Environment.ProcessorCount, queue.Count );
@@ -105,7 +155,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
             tasks[i] = Task.Factory.StartNew( ProcessQueueAsync, cancellationToken, TaskCreationOptions.None, this._scheduler ).Unwrap();
         }
 
-        await Task.WhenAll( tasks );
+        return Task.WhenAll( tasks );
 
         async Task ProcessQueueAsync()
         {

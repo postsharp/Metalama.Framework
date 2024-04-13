@@ -618,6 +618,7 @@ internal abstract partial class BaseTestRunner
         if ( this.Logger != null )
         {
             var logger = this.Logger!;
+            logger.WriteLine( "Test principal file: " + testInput.FullPath );
             logger.WriteLine( "Expected transformed file: " + expectedTransformedPath );
             logger.WriteLine( "Actual transformed file: " + actualTransformedPath );
             logger.WriteLine( "" );

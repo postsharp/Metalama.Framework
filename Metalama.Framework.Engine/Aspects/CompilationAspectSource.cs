@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -10,9 +9,11 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -23,11 +24,13 @@ namespace Metalama.Framework.Engine.Aspects;
 internal sealed class CompilationAspectSource : IAspectSource
 {
     private readonly IAttributeDeserializer _attributeDeserializer;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
     private ImmutableDictionaryOfArray<IType, Ref<IDeclaration>>? _exclusions;
 
     public CompilationAspectSource( in ProjectServiceProvider serviceProvider, ImmutableArray<IAspectClass> aspectTypes )
     {
         this._attributeDeserializer = serviceProvider.GetRequiredService<IUserCodeAttributeDeserializer>();
+        this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
         this.AspectClasses = aspectTypes;
     }
 
@@ -50,67 +53,65 @@ internal sealed class CompilationAspectSource : IAspectSource
         return this._exclusions;
     }
 
-    public AspectSourceResult GetAspectInstances(
+    public Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        IDiagnosticAdder diagnosticAdder,
+        AspectResultCollector collector,
         CancellationToken cancellationToken )
     {
         if ( !compilation.Factory.TryGetTypeByReflectionName( aspectClass.FullName, out var aspectType ) )
         {
             // This happens at design time when the IDE sends an incomplete compilation. We cannot apply the aspects in this case,
             // but we prefer not to throw an exception since the case is expected.
-            return AspectSourceResult.Empty;
+            return Task.CompletedTask;
         }
 
-        var attributes = compilation.GetAllAttributesOfType( aspectType );
-
-        var aspectInstances = attributes
-            .Select(
-                attribute =>
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var attributeData = attribute.GetAttributeData();
-
-                    if ( this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attributeInstance ) )
-                    {
-                        var targetDeclaration = attribute.ContainingDeclaration;
-
-                        var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
-                            (IAspect) attributeInstance,
-                            targetDeclaration,
-                            attribute );
-
-                        var eligibility = aspectInstance.ComputeEligibility( targetDeclaration );
-
-                        if ( eligibility == EligibleScenarios.None )
-                        {
-                            var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Default;
-
-                            var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
-                                requestedEligibility,
-                                new DescribedObject<IDeclaration>( targetDeclaration ) )!;
-
-                            diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
-                                    attribute.GetDiagnosticLocation(),
-                                    (aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, reason) ) );
-
-                            return null;
-                        }
-
-                        return aspectInstance;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                } )
-            .WhereNotNull();
-
+        // Process exclusions.
         var exclusions = this.DiscoverExclusions( compilation )[aspectType];
 
-        return new AspectSourceResult( aspectInstances, exclusions );
+        foreach ( var exclusion in exclusions )
+        {
+            collector.AddExclusion( exclusion );
+        }
+
+        // Process attributes in parallel.
+        var attributes = compilation.GetAllAttributesOfType( aspectType );
+
+        return this._concurrentTaskRunner.RunInParallelAsync( attributes, ProcessAttribute, cancellationToken );
+
+        void ProcessAttribute( IAttribute attribute )
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var attributeData = attribute.GetAttributeData();
+
+            if ( this._attributeDeserializer.TryCreateAttribute( attributeData, collector, out var attributeInstance ) )
+            {
+                var targetDeclaration = attribute.ContainingDeclaration;
+
+                var aspectInstance = ((AspectClass) aspectClass).CreateAspectInstanceFromAttribute(
+                    (IAspect) attributeInstance,
+                    targetDeclaration,
+                    attribute );
+
+                var eligibility = aspectInstance.ComputeEligibility( targetDeclaration );
+
+                if ( eligibility == EligibleScenarios.None )
+                {
+                    var requestedEligibility = aspectInstance.IsInheritable ? EligibleScenarios.Inheritance : EligibleScenarios.Default;
+
+                    var reason = ((AspectClass) aspectClass).GetIneligibilityJustification(
+                        requestedEligibility,
+                        new DescribedObject<IDeclaration>( targetDeclaration ) )!;
+
+                    collector.Report(
+                        GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
+                            attribute.GetDiagnosticLocation(),
+                            (aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, reason) ) );
+                }
+
+                collector.AddAspectInstance( aspectInstance );
+            }
+        }
     }
 }

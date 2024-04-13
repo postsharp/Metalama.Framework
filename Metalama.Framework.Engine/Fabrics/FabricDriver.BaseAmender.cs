@@ -16,7 +16,6 @@ using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -32,7 +31,6 @@ internal abstract partial class FabricDriver
         private Ref<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
-        private AspectReceiverSelector<T>? _declarationSelector;
 
         protected BaseAmender(
             IProject project,
@@ -47,9 +45,6 @@ internal abstract partial class FabricDriver
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
-        private AspectReceiverSelector<T> GetAspectTargetSelector()
-            => this._declarationSelector ??= new AspectReceiverSelector<T>( this.TargetDeclaration, this, CompilationModelVersion.Initial );
-
         public IProject Project { get; }
 
         public LicenseVerifier? LicenseVerifier { get; }
@@ -59,11 +54,6 @@ internal abstract partial class FabricDriver
         public abstract void AddValidatorSource( IValidatorSource validatorSource );
 
         public abstract void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectTargetSelector().With( selector );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector )
-            => this.GetAspectTargetSelector().With( selector );
 
         ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 
@@ -85,7 +75,15 @@ internal abstract partial class FabricDriver
             => this._fabricInstance.ValidatorDriverFactory.GetDeclarationValidatorDriver( validate );
 
         [Memo]
-        public IAspectReceiver<T> Outbound => this.GetAspectTargetSelector().With( t => t );
+        public IAspectReceiver<T> Outbound
+            => new AspectReceiver<T>(
+                this.TargetDeclaration,
+                this,
+                CompilationModelVersion.Final,
+                ( compilation, action, collector, cancellationToken ) => action(
+                    this.TargetDeclaration.GetTarget( compilation ),
+                    collector,
+                    cancellationToken ) );
 
         string IDiagnosticSource.DiagnosticSourceDescription => $"fabric {this._fabricInstance.Fabric.GetType().FullName}";
     }

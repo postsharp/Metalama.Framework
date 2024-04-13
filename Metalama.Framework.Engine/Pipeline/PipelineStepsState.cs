@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -42,6 +43,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     private readonly OverflowAspectSource _overflowAspectSource = new();
     private readonly IntrospectionPipelineListener? _introspectionListener;
     private readonly bool _shouldDetectUnorderedAspects;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
     private PipelineStep? _currentStep;
 
@@ -70,6 +72,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         AspectPipelineConfiguration pipelineConfiguration,
         CancellationToken cancellationToken )
     {
+        this._concurrentTaskRunner = pipelineConfiguration.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
         this._introspectionListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
         this._shouldDetectUnorderedAspects = pipelineConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>().RequireOrderedAspects;
 
@@ -117,7 +120,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
             var compilation = this.LastCompilation;
 
-            this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, stepIndex, cancellationToken );
+            this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, this._diagnostics, stepIndex, cancellationToken );
 
             stepIndex++;
         }
@@ -210,19 +213,23 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public ImmutableArray<AspectInstance> ExecuteAspectSource(
+    public async Task<ImmutableArray<AspectInstance>> ExecuteAspectSourceAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
         IEnumerable<IAspectSource> aspectSources,
+        IUserDiagnosticSink diagnosticSink,
         CancellationToken cancellationToken )
     {
-        var aspectSourceResults = aspectSources.Where( a => a.AspectClasses.Contains( aspectClass ) )
-            .Select( s => s.GetAspectInstances( compilation, aspectClass, this, cancellationToken ) )
-            .ToReadOnlyList();
+        var aspectResults = new AspectResultCollector( diagnosticSink );
+
+        await this._concurrentTaskRunner.RunInParallelAsync(
+            aspectSources.Where( a => a.AspectClasses.Contains( aspectClass ) ),
+            source => source.AddAspectInstancesAsync( compilation, aspectClass, aspectResults, cancellationToken ),
+            cancellationToken );
 
         HashSet<IDeclaration>? exclusions = null;
 
-        foreach ( var exclusion in aspectSourceResults.SelectMany( x => x.Exclusions ) )
+        foreach ( var exclusion in aspectResults.AspectExclusions )
         {
             exclusions ??= new HashSet<IDeclaration>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
@@ -249,9 +256,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             return false;
         }
 
-        var aspectInstances = aspectSourceResults
-            .SelectMany( x => x.AspectInstances )
-            .Select(
+        var aspectInstances = aspectResults.AspectInstances
+            .SelectAsReadOnlyCollection(
                 x =>
                 {
                     var target = (IDeclarationImpl) x.TargetDeclaration.GetTarget( compilation );
@@ -272,8 +278,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         // Process aspect requirements.
         // We always add an aspect instance if there is a requirement, even if there is already an instance, because this has the side effect of exposing
         // the predecessors to the IAspectInstance in the last instance of the aggregated aspect.
-        var requirements = aspectSourceResults.SelectMany( x => x.Requirements )
-            .Select( x => (TargetDeclaration: x.TargetDeclaration.GetTarget( compilation ), x.Predecessor) )
+        var requirements = aspectResults.AspectRequirements
+            .SelectAsReadOnlyCollection( x => (TargetDeclaration: x.TargetDeclaration.GetTarget( compilation ), x.Predecessor) )
             .GroupBy( x => x.TargetDeclaration );
 
         foreach ( var requirement in requirements )
@@ -463,11 +469,11 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         }
     }
 
-    public void AddOptionsSources( IEnumerable<IHierarchicalOptionsSource> optionsSources )
+    public async Task AddOptionsSourcesAsync( IEnumerable<IHierarchicalOptionsSource> optionsSources, CancellationToken cancellationToken )
     {
         foreach ( var source in optionsSources )
         {
-            this.LastCompilation.HierarchicalOptionsManager?.AddSource( source, this.LastCompilation, this._diagnostics );
+            await this.LastCompilation.HierarchicalOptionsManager.AddSourceAsync( source, this.LastCompilation, this._diagnostics, cancellationToken );
         }
     }
 

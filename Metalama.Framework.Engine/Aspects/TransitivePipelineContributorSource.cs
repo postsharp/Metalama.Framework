@@ -6,10 +6,10 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
 using Microsoft.CodeAnalysis;
@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -30,6 +31,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
     private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
     private readonly ImmutableArray<TransitiveValidatorInstance> _referenceValidators;
     private readonly ImmutableDictionary<AssemblyIdentity, ITransitiveAspectsManifest> _manifests;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
     public TransitivePipelineContributorSource(
         Compilation compilation,
@@ -37,6 +39,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         ProjectServiceProvider serviceProvider )
     {
         var inheritableAspectProvider = serviceProvider.GetService<ITransitiveAspectManifestProvider>();
+        this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
         var inheritedAspectsBuilder = ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance>.CreateBuilder();
         var validatorsBuilder = ImmutableArray.CreateBuilder<TransitiveValidatorInstance>();
@@ -112,28 +115,28 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
     public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
 
-    public AspectSourceResult GetAspectInstances(
+    public Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        IDiagnosticAdder diagnosticAdder,
+        AspectResultCollector collector,
         CancellationToken cancellationToken )
     {
-        List<AspectInstance> aspectInstances = new();
+        return this._concurrentTaskRunner.RunInParallelAsync( this._inheritedAspects[aspectClass], ProcessAspectInstance, cancellationToken );
 
-        foreach ( var inheritedAspectInstance in this._inheritedAspects[aspectClass] )
+        void ProcessAspectInstance( InheritableAspectInstance inheritedAspectInstance )
         {
             var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTargetOrNull( compilation );
 
             if ( baseDeclaration == null )
             {
-                continue;
+                return;
             }
 
             // We need to provide instances on the first level of derivation only because the caller will add to the next levels.
 
             foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( DerivedTypesOptions.DirectOnly ) )
             {
-                aspectInstances.Add(
+                collector.AddAspectInstance(
                     new AspectInstance(
                         inheritedAspectInstance.Aspect,
                         derived,
@@ -141,42 +144,40 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
                         new AspectPredecessor( AspectPredecessorKind.Inherited, inheritedAspectInstance ) ) );
             }
         }
-
-        return new AspectSourceResult( aspectInstances );
     }
 
-    IEnumerable<ValidatorInstance> IValidatorSource.GetValidators(
+    Task IValidatorSource.AddValidatorsAsync(
         ValidatorKind kind,
-        CompilationModelVersion version,
+        CompilationModelVersion compilationModelVersion,
         CompilationModel compilation,
-        UserDiagnosticSink diagnosticAdder )
+        AspectResultCollector collector,
+        CancellationToken cancellationToken )
     {
         if ( kind == ValidatorKind.Reference )
         {
-            return this._referenceValidators.Select(
-                    v =>
-                    {
-                        var validationTarget = v.ValidatedDeclaration.GetTargetOrNull( compilation );
+            foreach ( var validator in this._referenceValidators )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
 
-                        if ( validationTarget?.GetSymbol() == null )
-                        {
-                            return null;
-                        }
+                var validationTarget = validator.ValidatedDeclaration.GetTargetOrNull( compilation );
 
-                        return new ReferenceValidatorInstance(
-                            validationTarget,
-                            v.GetReferenceValidatorDriver(),
-                            ValidatorImplementation.Create( v.Object, v.State ),
-                            v.ReferenceKinds,
-                            v.IncludeDerivedTypes,
-                            v.DiagnosticSourceDescription );
-                    } )
-                .WhereNotNull();
+                if ( validationTarget?.GetSymbol() == null )
+                {
+                    continue;
+                }
+
+                collector.AddValidator(
+                    new ReferenceValidatorInstance(
+                        validationTarget,
+                        validator.GetReferenceValidatorDriver(),
+                        ValidatorImplementation.Create( validator.Object, validator.State ),
+                        validator.ReferenceKinds,
+                        validator.IncludeDerivedTypes,
+                        validator.DiagnosticSourceDescription ) );
+            }
         }
-        else
-        {
-            return Enumerable.Empty<ValidatorInstance>();
-        }
+
+        return Task.CompletedTask;
     }
 
     public IEnumerable<string> GetOptionTypes()

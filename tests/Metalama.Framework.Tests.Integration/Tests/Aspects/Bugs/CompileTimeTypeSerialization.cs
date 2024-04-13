@@ -20,7 +20,7 @@ public sealed class ListImplementedTypesAttribute : TypeAspect
 
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var types = new[] { Type }.Concat(builder.AspectInstance.SecondaryInstances.Select(i => ((ListImplementedTypesAttribute)i.Aspect).Type));
+        var types = new[] { Type }.Concat(builder.AspectInstance.SecondaryInstances.Select(i => ((ListImplementedTypesAttribute)i.Aspect).Type)).OrderBy( t=>t.FullName );
 
         var sb = new StringBuilder();
         foreach (var type in types)

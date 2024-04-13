@@ -121,22 +121,21 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
 
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
-        public AspectSourceResult GetAspectInstances(
+        public Task AddAspectInstancesAsync(
             CompilationModel compilation,
             IAspectClass aspectClass,
-            IDiagnosticAdder diagnosticAdder,
+            AspectResultCollector collector,
             CancellationToken cancellationToken )
         {
             var targetDeclaration = compilation.Factory.GetDeclaration( this._parent._targetSymbol );
 
-            return new AspectSourceResult(
-                new[]
-                {
-                    ((AspectClass) aspectClass).CreateAspectInstance(
-                        targetDeclaration,
-                        (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
-                        new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToTypedRef() ) ) )
-                } );
+            collector.AddAspectInstance(
+                ((AspectClass) aspectClass).CreateAspectInstance(
+                    targetDeclaration,
+                    (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
+                    new AspectPredecessor( AspectPredecessorKind.Interactive, new LiveTemplatePredecessor( targetDeclaration.ToTypedRef() ) ) ) );
+
+            return Task.CompletedTask;
         }
     }
 

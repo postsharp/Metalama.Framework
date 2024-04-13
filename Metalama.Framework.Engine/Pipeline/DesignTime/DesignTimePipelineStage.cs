@@ -58,7 +58,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     diagnosticSink,
                     cancellationToken );
 
-                referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
+                referenceValidators = (await validatorRunner.GetReferenceValidatorsAsync( initialCompilation, diagnosticSink, cancellationToken ))
+                    .ToImmutableArray();
             }
             else
             {

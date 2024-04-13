@@ -121,11 +121,11 @@ public sealed partial class AspectWeaverContext
 
         var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentBag<SyntaxReference>>();
 
-        await taskScheduler.RunInParallelAsync( this.AspectInstances.Values, ProcessAspectInstance, cancellationToken );
+        await taskScheduler.RunInParallelAsync( this.AspectInstances, ProcessAspectInstance, cancellationToken );
 
-        void ProcessAspectInstance( IAspectInstance aspectInstance )
+        void ProcessAspectInstance( KeyValuePair<ISymbol, IAspectInstance> aspectInstance )
         {
-            var symbol = aspectInstance.TargetDeclaration.GetSymbol( this._compilation.Compilation );
+            var symbol = aspectInstance.Value.TargetDeclaration.GetSymbol( this._compilation.Compilation );
 
             if ( symbol != null )
             {

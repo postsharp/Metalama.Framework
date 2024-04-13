@@ -2,9 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Immutable;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -20,9 +20,9 @@ internal interface IAspectSource
     /// Returns a set of <see cref="AspectInstance"/> of a given type. This method is called when the given aspect
     /// type is being processed, not before.
     /// </summary>
-    AspectSourceResult GetAspectInstances(
+    Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        IDiagnosticAdder diagnosticAdder,
+        AspectResultCollector collector,
         CancellationToken cancellationToken );
 }

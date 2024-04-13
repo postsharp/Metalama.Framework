@@ -97,18 +97,18 @@ namespace Metalama.Framework.Engine.CodeModel
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
-            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
+            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees, RewriteSyntaxTreeAsync, cancellationToken );
 
-            async Task RewriteSyntaxTreeAsync( SyntaxTree tree )
+            async Task RewriteSyntaxTreeAsync( KeyValuePair<string, SyntaxTree> tree )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var oldRoot = await tree.GetRootAsync( cancellationToken );
+                var oldRoot = await tree.Value.GetRootAsync( cancellationToken );
                 var newRoot = rewriterFactory( oldRoot ).Visit( oldRoot );
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( tree, tree.WithRootAndOptions( newRoot, tree.Options ) ) );
+                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( tree.Value, tree.Value.WithRootAndOptions( newRoot, tree.Value.Options ) ) );
                 }
             }
 

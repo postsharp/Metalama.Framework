@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -287,7 +288,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         {
             throw new InvalidOperationException(
                 $"'The '{api}' API is not supported in the BuildAspect context at design time. " +
-                $"It is only supported in the context of a adding new aspects ({nameof(IAspectReceiverSelector<IDeclaration>)}.{nameof(IAspectReceiverSelector<IDeclaration>.With)})'."
+                $"It is only supported in the context of a adding new aspects ({nameof(IValidatorReceiver)}.{nameof(IValidatorReceiver<IDeclaration>.Select)})' and sibling methods."
                 +
                 $"You can use {nameof(MetalamaExecutionContext)}.{nameof(MetalamaExecutionContext.Current)}.{nameof(IExecutionContext.ExecutionScenario)}.{nameof(IExecutionScenario.IsDesignTime)} to run your code at design time only." );
         }

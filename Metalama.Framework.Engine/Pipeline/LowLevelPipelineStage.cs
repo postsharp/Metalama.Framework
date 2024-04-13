@@ -38,9 +38,13 @@ internal sealed class LowLevelPipelineStage : PipelineStage
     {
         var compilationModel = input.LastCompilationModel;
 
-        var aspectInstances = input.ContributorSources.AspectSources
-            .Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-            .SelectMany( x => x.AspectInstances )
+        var collector = new AspectResultCollector( diagnostics );
+
+        await Task.WhenAll(
+            input.ContributorSources.AspectSources
+                .Select( s => s.AddAspectInstancesAsync( compilationModel, this._aspectClass, collector, cancellationToken ) ) );
+
+        var aspectInstances = collector.AspectInstances
             .GroupBy(
                 i => i.TargetDeclaration.GetSymbol( compilationModel.RoslynCompilation )
                     .AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )

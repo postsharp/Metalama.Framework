@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -62,11 +63,30 @@ internal sealed class ValidationRunner
         return new ValidationResult( hasDeclarationValidator, referenceValidators, userDiagnosticSink.ToImmutable() );
     }
 
-    public void RunDeclarationValidators( CompilationModel compilation, CompilationModelVersion version, UserDiagnosticSink diagnosticAdder )
+    private async Task<IReadOnlyCollection<ValidatorInstance>> GetValidatorsAsync(
+        ValidatorKind kind,
+        CompilationModel compilation,
+        CompilationModelVersion version,
+        UserDiagnosticSink diagnosticAdder,
+        CancellationToken cancellationToken )
     {
-        var validators = this._sources
-            .SelectMany( s => s.GetValidators( ValidatorKind.Definition, version, compilation, diagnosticAdder ) )
-            .Cast<DeclarationValidatorInstance>();
+        var collector = new AspectResultCollector( diagnosticAdder );
+
+        var tasks = this._sources
+            .Select( s => s.AddValidatorsAsync( kind, version, compilation, collector, cancellationToken ) );
+
+        await Task.WhenAll( tasks );
+
+        return collector.Validators;
+    }
+
+    public async Task RunDeclarationValidatorsAsync(
+        CompilationModel compilation,
+        CompilationModelVersion version,
+        UserDiagnosticSink diagnosticAdder,
+        CancellationToken cancellationToken )
+    {
+        var validators = await this.GetValidatorsAsync( ValidatorKind.Definition, compilation, version, diagnosticAdder, cancellationToken );
 
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
 
@@ -76,7 +96,7 @@ internal sealed class ValidationRunner
             {
                 userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
 
-                validator.Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
+                ((DeclarationValidatorInstance) validator).Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
             }
         }
     }
@@ -87,13 +107,13 @@ internal sealed class ValidationRunner
         UserDiagnosticSink diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var initialCompilationValidationTask = this.RunDeclarationValidatorsAsync(
+        var initialCompilationValidationTask = this.RunDeclarationValidatorsCoreAsync(
             initialCompilation,
             CompilationModelVersion.Initial,
             diagnosticAdder,
             cancellationToken );
 
-        var finalCompilationValidationTask = this.RunDeclarationValidatorsAsync(
+        var finalCompilationValidationTask = this.RunDeclarationValidatorsCoreAsync(
             finalCompilation,
             CompilationModelVersion.Final,
             diagnosticAdder,
@@ -107,30 +127,27 @@ internal sealed class ValidationRunner
         return hasInitialCompilationValidator || hasFinalCompilationValidator;
     }
 
-    private async Task<bool> RunDeclarationValidatorsAsync(
+    private async Task<bool> RunDeclarationValidatorsCoreAsync(
         CompilationModel compilation,
         CompilationModelVersion version,
         UserDiagnosticSink diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var validators = this._sources
-            .SelectMany( s => s.GetValidators( ValidatorKind.Definition, version, compilation, diagnosticAdder ) )
-            .Cast<DeclarationValidatorInstance>()
-            .ToImmutableArray();
+        var validators = await this.GetValidatorsAsync( ValidatorKind.Definition, compilation, version, diagnosticAdder, cancellationToken );
 
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
 
         await this._concurrentTaskRunner.RunInParallelAsync( validators, RunValidator, cancellationToken );
 
-        return validators.Any();
+        return validators.Count > 0;
 
-        void RunValidator( DeclarationValidatorInstance validator )
+        void RunValidator( ValidatorInstance validator )
         {
             using ( UserCodeExecutionContext.WithContext( userCodeExecutionContext ) )
             {
                 userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
 
-                validator.Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
+                ((DeclarationValidatorInstance) validator).Validate( diagnosticAdder, this._userCodeInvoker, userCodeExecutionContext );
             }
         }
     }
@@ -140,7 +157,7 @@ internal sealed class ValidationRunner
         UserDiagnosticSink diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var validators = this.GetReferenceValidators( initialCompilation, diagnosticAdder );
+        var validators = await this.GetReferenceValidatorsAsync( initialCompilation, diagnosticAdder, cancellationToken );
 
         var validatorsBySymbol = validators
             .ToMultiValueDictionary(
@@ -170,10 +187,20 @@ internal sealed class ValidationRunner
             .ToImmutableArray();
     }
 
-    public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, UserDiagnosticSink diagnosticAdder )
-        => this._sources
-            .SelectMany( s => s.GetValidators( ValidatorKind.Reference, CompilationModelVersion.Current, initialCompilation, diagnosticAdder ) )
-            .Cast<ReferenceValidatorInstance>();
+    public async Task<IEnumerable<ReferenceValidatorInstance>> GetReferenceValidatorsAsync(
+        CompilationModel initialCompilation,
+        UserDiagnosticSink diagnosticAdder,
+        CancellationToken cancellationToken )
+    {
+        var validators = await this.GetValidatorsAsync(
+            ValidatorKind.Reference,
+            initialCompilation,
+            CompilationModelVersion.Current,
+            diagnosticAdder,
+            cancellationToken );
+
+        return validators.Cast<ReferenceValidatorInstance>();
+    }
 
     private sealed class ValidatorProvider : IReferenceValidatorProvider
     {
