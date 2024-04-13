@@ -1,21 +1,19 @@
-﻿using Metalama.Framework.Engine.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal class OutboundActionCollectionContext
+internal class OutboundActionCollectionContext : DeclarationSelectionContext
 {
-    public CancellationToken CancellationToken { get; }
-
     public OutboundActionCollector Collector { get; }
 
-    public CompilationModel Compilation { get; }
-
-    public OutboundActionCollectionContext( OutboundActionCollector collector, CompilationModel compilation, CancellationToken cancellationToken )
+    public OutboundActionCollectionContext( OutboundActionCollector collector, CompilationModel compilation, CancellationToken cancellationToken ) : base(
+        compilation,
+        cancellationToken )
     {
-        this.CancellationToken = cancellationToken;
         this.Collector = collector;
-        this.Compilation = compilation;
     }
 }

@@ -76,13 +76,10 @@ internal abstract partial class FabricDriver
 
         [Memo]
         public IAspectReceiver<T> Outbound
-            => new AspectReceiver<T>(
+            => new RootAspectReceiver<T>(
                 this.TargetDeclaration,
                 this,
-                CompilationModelVersion.Final,
-                ( action, context ) => action(
-                    this.TargetDeclaration.GetTarget( context.Compilation ),
-                    context ) );
+                CompilationModelVersion.Final );
 
         string IDiagnosticSource.DiagnosticSourceDescription => $"fabric {this._fabricInstance.Fabric.GetType().FullName}";
     }

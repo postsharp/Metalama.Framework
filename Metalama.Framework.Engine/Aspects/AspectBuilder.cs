@@ -81,11 +81,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         [Memo]
         public IAspectReceiver<T> Outbound
-            => new AspectReceiver<T>(
+            => new RootAspectReceiver<T>(
                 this.Target.ToTypedRef(),
                 this,
-                CompilationModelVersion.Current,
-                ( action, context ) => action( this.Target.ForCompilation( context.Compilation ), context ) );
+                CompilationModelVersion.Current );
 
         IDeclaration IAspectBuilder.Target => this.Target;
 

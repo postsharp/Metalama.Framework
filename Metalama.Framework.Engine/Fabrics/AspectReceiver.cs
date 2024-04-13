@@ -17,6 +17,8 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,23 +31,23 @@ namespace Metalama.Framework.Engine.Fabrics
     /// API to programmatically add children aspects.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal sealed class AspectReceiver<T> : IAspectReceiver<T>
+    internal class AspectReceiver<T> : IAspectReceiver<T>
         where T : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<Func<T, OutboundActionCollectionContext, Task>, OutboundActionCollectionContext, Task> _adder;
+        private readonly Func<Func<T, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> _adder;
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         // We track the number of children to know if we must cache results.
         private int _childrenCount;
 
-        public AspectReceiver(
+        internal AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,
             IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
-            Func<Func<T, OutboundActionCollectionContext, Task>, OutboundActionCollectionContext, Task> addTargets )
+            Func<Func<T, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
         {
             this._concurrentTaskRunner = parent.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
@@ -54,7 +56,7 @@ namespace Metalama.Framework.Engine.Fabrics
             this._adder = addTargets;
         }
 
-        private bool ShouldCache => this._childrenCount > 1;
+        protected virtual bool ShouldCache => this._childrenCount > 1;
 
         private AspectReceiver<TChild> AddChild<TChild>( AspectReceiver<TChild> child )
             where TChild : class, IDeclaration
@@ -319,7 +321,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._containingDeclaration,
                     this._parent,
                     this._compilationModelVersion,
-                    ( action, context ) => this._adder(
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
                         ( declaration, context2 ) =>
                         {
                             var children = selector( declaration );
@@ -328,8 +331,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 children,
                                 child => action( child, context ),
                                 context2.CancellationToken );
-                        },
-                        context ) ) );
+                        } ) ) );
 
         public IAspectReceiver<TMember> Select<TMember>( Func<T, TMember> selector )
             where TMember : class, IDeclaration
@@ -338,9 +340,9 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._containingDeclaration,
                     this._parent,
                     this._compilationModelVersion,
-                    ( action, context ) => this._adder(
-                        ( declaration, context2 ) => action( selector( declaration ), context2 ),
-                        context ) ) );
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, context2 ) => action( selector( declaration ), context2 ) ) ) );
 
         public IAspectReceiver<T> Where( Func<T, bool> predicate )
             => this.AddChild(
@@ -348,7 +350,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._containingDeclaration,
                     this._parent,
                     this._compilationModelVersion,
-                    ( action, context ) => this._adder(
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
                         ( declaration, context2 ) =>
                         {
                             if ( predicate( declaration ) )
@@ -359,8 +362,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             {
                                 return Task.CompletedTask;
                             }
-                        },
-                        context ) ) );
+                        } ) ) );
 
         public void SetOptions<TOptions>( Func<T, TOptions> func )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
@@ -533,6 +535,62 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
+        private async Task InvokeAdderAsync(
+            DeclarationSelectionContext selectionContext,
+            Func<T, DeclarationSelectionContext, Task> processTarget,
+            UserCodeInvoker? invoker = null,
+            UserCodeExecutionContext? executionContext = null )
+        {
+            ConcurrentBag<T> cached = null;
+            var processTargetWithCachingIfNecessary = processTarget;
+
+            if ( this.ShouldCache )
+            {
+                // GetFromCacheAsync uses a semaphore to control exclusivity.  AddToCache must be called is the method returns null.
+                cached = await selectionContext.GetFromCacheAsync<ConcurrentBag<T>>( this, selectionContext.CancellationToken );
+
+                if ( cached != null )
+                {
+                    await this._concurrentTaskRunner.RunInParallelAsync(
+                        cached,
+                        x => processTarget( x, selectionContext ),
+                        selectionContext.CancellationToken );
+                }
+                else
+                {
+                    cached = new ConcurrentBag<T>();
+
+                    processTargetWithCachingIfNecessary = ( a, ctx ) =>
+                    {
+                        cached.Add( a );
+
+                        return processTarget( a, ctx );
+                    };
+                }
+            }
+
+            if ( invoker != null && executionContext != null )
+            {
+#if DEBUG
+                if ( !ReferenceEquals( executionContext.Compilation, selectionContext.Compilation ) )
+                {
+                    throw new AssertionFailedException( "Execution context mismatch." );
+                }
+#endif
+
+                await invoker.InvokeAsync( () => this._adder( processTargetWithCachingIfNecessary, selectionContext ), executionContext );
+            }
+            else
+            {
+                await this._adder( processTargetWithCachingIfNecessary, selectionContext );
+            }
+
+            if ( this.ShouldCache )
+            {
+                selectionContext.AddToCache( this, cached );
+            }
+        }
+
         private async Task SelectAndValidateAspectTargetsAsync(
             UserCodeInvoker? invoker,
             UserCodeExecutionContext? executionContext,
@@ -543,23 +601,9 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             var compilation = context.Compilation;
 
-            if ( invoker != null && executionContext != null )
-            {
-#if DEBUG
-                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
-                {
-                    throw new AssertionFailedException( "Execution context mismatch." );
-                }
-#endif
+            await this.InvokeAdderAsync( context, ProcessTarget, invoker, executionContext );
 
-                await invoker.InvokeAsync( () => this._adder( ProcessTarget, context ), executionContext );
-            }
-            else
-            {
-                await this._adder( ProcessTarget, context );
-            }
-
-            Task ProcessTarget( T targetDeclaration, OutboundActionCollectionContext context2 )
+            Task ProcessTarget( T targetDeclaration, DeclarationSelectionContext context2 )
             {
                 context2.CancellationToken.ThrowIfCancellationRequested();
 
@@ -578,7 +622,7 @@ namespace Metalama.Framework.Engine.Fabrics
                        || (containingDeclaration is IMember m && m.DeclaringType.Equals( targetDeclaration )))
                      || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
-                    context2.Collector.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, containingDeclaration) ) );
@@ -601,7 +645,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 {
                     var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
-                    context2.Collector.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, reason) ) );
@@ -611,11 +655,11 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 if ( invoker != null && executionContext != null )
                 {
-                    return invoker.InvokeAsync( () => addResult( targetDeclaration, context2 ), executionContext );
+                    return invoker.InvokeAsync( () => addResult( targetDeclaration, context ), executionContext );
                 }
                 else
                 {
-                    return addResult( targetDeclaration, context2 );
+                    return addResult( targetDeclaration, context );
                 }
             }
         }
@@ -629,22 +673,9 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             var compilation = context.Compilation;
 
-            if ( invoker != null && executionContext != null )
-            {
-#if DEBUG
-                if ( !ReferenceEquals( executionContext.Compilation, compilation ) )
-                {
-                    throw new AssertionFailedException( "Execution context mismatch." );
-                }
-#endif
-                await invoker.InvokeAsync( () => this._adder( ProcessTarget, context ), executionContext );
-            }
-            else
-            {
-                await this._adder( ProcessTarget, context );
-            }
+            await this.InvokeAdderAsync( context, ProcessTarget, invoker, executionContext );
 
-            Task ProcessTarget( T targetDeclaration, OutboundActionCollectionContext context2 )
+            Task ProcessTarget( T targetDeclaration, DeclarationSelectionContext context2 )
             {
                 if ( targetDeclaration == null! )
                 {
@@ -661,13 +692,13 @@ namespace Metalama.Framework.Engine.Fabrics
                 if ( (!targetDeclaration.IsContainedIn( containingTypeOrCompilation ) || targetDeclaration.DeclaringAssembly.IsExternal)
                      && containingTypeOrCompilation.DeclarationKind != DeclarationKind.Compilation )
                 {
-                    context2.Collector.Report(
+                    context.Collector.Report(
                         diagnosticDefinition.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingTypeOrCompilation) ) );
                 }
 
-                return addAction( targetDeclaration, context2 );
+                return addAction( targetDeclaration, context );
             }
         }
 
