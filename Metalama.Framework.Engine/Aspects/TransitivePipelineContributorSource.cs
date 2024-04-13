@@ -118,7 +118,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
     public Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken )
     {
         return this._concurrentTaskRunner.RunInParallelAsync( this._inheritedAspects[aspectClass], ProcessAspectInstance, cancellationToken );
@@ -150,7 +150,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         CompilationModel compilation,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken )
     {
         if ( kind == ValidatorKind.Reference )

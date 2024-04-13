@@ -36,14 +36,14 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, Func<T, AspectResultCollector, CancellationToken, Task>, AspectResultCollector, CancellationToken, Task> _adder;
+        private readonly Func<CompilationModel, Func<T, OutboundActionCollector, CancellationToken, Task>, OutboundActionCollector, CancellationToken, Task> _adder;
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,
             IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
-            Func<CompilationModel, Func<T, AspectResultCollector, CancellationToken, Task>, AspectResultCollector, CancellationToken, Task> addTargets )
+            Func<CompilationModel, Func<T, OutboundActionCollector, CancellationToken, Task>, OutboundActionCollector, CancellationToken, Task> addTargets )
         {
             this._concurrentTaskRunner = parent.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Fabrics
             ValidatorImplementation implementation,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes,
-            AspectResultCollector collector )
+            OutboundActionCollector collector )
         {
             var description = MetalamaStringFormatter.Format(
                 $"reference validator for {validatedDeclaration.DeclarationKind} '{validatedDeclaration.ToDisplayString()}' provided by {this._parent.DiagnosticSourceDescription}" );
@@ -540,8 +540,8 @@ namespace Metalama.Framework.Engine.Fabrics
             CompilationModel compilation,
             AspectClass aspectClass,
             EligibleScenarios filteredEligibility,
-            Func<T, AspectResultCollector, Task> addResult,
-            AspectResultCollector collector,
+            Func<T, OutboundActionCollector, Task> addResult,
+            OutboundActionCollector collector,
             CancellationToken cancellationToken )
         {
             if ( invoker != null && executionContext != null )
@@ -560,7 +560,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 return this._adder( compilation, ProcessTarget, collector, cancellationToken );
             }
 
-            Task ProcessTarget( T targetDeclaration, AspectResultCollector collector, CancellationToken cancellationToken )
+            Task ProcessTarget( T targetDeclaration, OutboundActionCollector collector, CancellationToken cancellationToken )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -626,8 +626,8 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeExecutionContext? executionContext,
             CompilationModel compilation,
             DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)> diagnosticDefinition,
-            Func<T, AspectResultCollector, Task> addAction,
-            AspectResultCollector collector,
+            Func<T, OutboundActionCollector, Task> addAction,
+            OutboundActionCollector collector,
             CancellationToken cancellationToken )
         {
             if ( invoker != null && executionContext != null )
@@ -645,7 +645,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 await this._adder( compilation, ProcessTarget, collector, cancellationToken );
             }
 
-            Task ProcessTarget( T targetDeclaration, AspectResultCollector collector, CancellationToken cancellationToken )
+            Task ProcessTarget( T targetDeclaration, OutboundActionCollector collector, CancellationToken cancellationToken )
             {
                 if ( targetDeclaration == null! )
                 {

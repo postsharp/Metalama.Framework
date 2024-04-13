@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
@@ -13,7 +14,11 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects;
 
-internal sealed class AspectResultCollector : IDiagnosticAdder
+/// <summary>
+/// Collects the outgoing actions of a fabric or aspect (in user code, accessed through <see cref="IAspectBuilder{TAspectTarget}.Outbound"/>
+/// i.e. child aspects, aspect exclusions, validators, or options.
+/// </summary>
+internal sealed class OutboundActionCollector : IDiagnosticAdder
 {
     public IDiagnosticAdder Diagnostics { get; }
 
@@ -23,7 +28,7 @@ internal sealed class AspectResultCollector : IDiagnosticAdder
     private volatile ConcurrentBag<ValidatorInstance>? _validators;
     private volatile ConcurrentBag<HierarchicalOptionsInstance>? _hierarchicalOptions;
 
-    public AspectResultCollector( IDiagnosticAdder diagnosticAdder )
+    public OutboundActionCollector( IDiagnosticAdder diagnosticAdder )
     {
         this.Diagnostics = diagnosticAdder;
     }

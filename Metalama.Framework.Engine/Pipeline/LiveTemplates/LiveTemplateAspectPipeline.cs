@@ -124,7 +124,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         public Task AddAspectInstancesAsync(
             CompilationModel compilation,
             IAspectClass aspectClass,
-            AspectResultCollector collector,
+            OutboundActionCollector collector,
             CancellationToken cancellationToken )
         {
             var targetDeclaration = compilation.Factory.GetDeclaration( this._parent._targetSymbol );

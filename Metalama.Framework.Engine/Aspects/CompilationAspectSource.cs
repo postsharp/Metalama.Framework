@@ -56,7 +56,7 @@ internal sealed class CompilationAspectSource : IAspectSource
     public Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken )
     {
         if ( !compilation.Factory.TryGetTypeByReflectionName( aspectClass.FullName, out var aspectType ) )

@@ -16,7 +16,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
 
     public AspectPredecessor Predecessor { get; }
 
-    private readonly Func<ProgrammaticValidatorSource, CompilationModel, AspectResultCollector, CancellationToken, Task> _addValidatorsAction;
+    private readonly Func<ProgrammaticValidatorSource, CompilationModel, OutboundActionCollector, CancellationToken, Task> _addValidatorsAction;
     private readonly ValidatorKind _kind;
     private readonly CompilationModelVersion _compilationModelVersion;
 
@@ -25,7 +25,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         ValidatorKind validatorKind,
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
-        Func<ProgrammaticValidatorSource, CompilationModel, AspectResultCollector, CancellationToken, Task> addValidatorsAction )
+        Func<ProgrammaticValidatorSource, CompilationModel, OutboundActionCollector, CancellationToken, Task> addValidatorsAction )
     {
         if ( validatorKind != ValidatorKind.Reference )
         {
@@ -45,7 +45,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
         ValidatorDelegate<DeclarationValidationContext> method,
-        Func<ProgrammaticValidatorSource, CompilationModel, AspectResultCollector, CancellationToken, Task> addValidatorsAction )
+        Func<ProgrammaticValidatorSource, CompilationModel, OutboundActionCollector, CancellationToken, Task> addValidatorsAction )
     {
         if ( validatorKind != ValidatorKind.Definition )
         {
@@ -63,7 +63,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         CompilationModel compilation,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken )
     {
         if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )

@@ -10,14 +10,14 @@ namespace Metalama.Framework.Engine.HierarchicalOptions;
 
 internal sealed class ProgrammaticHierarchicalOptionsSource : IHierarchicalOptionsSource
 {
-    private readonly Func<CompilationModel, AspectResultCollector, CancellationToken, Task> _collectOptionsAction;
+    private readonly Func<CompilationModel, OutboundActionCollector, CancellationToken, Task> _collectOptionsAction;
 
-    public ProgrammaticHierarchicalOptionsSource( Func<CompilationModel, AspectResultCollector, CancellationToken, Task> collectOptionsAction )
+    public ProgrammaticHierarchicalOptionsSource( Func<CompilationModel, OutboundActionCollector, CancellationToken, Task> collectOptionsAction )
     {
         this._collectOptionsAction = collectOptionsAction;
     }
 
-    public Task CollectOptionsAsync( CompilationModel compilation, AspectResultCollector collector, CancellationToken cancellationToken )
+    public Task CollectOptionsAsync( CompilationModel compilation, OutboundActionCollector collector, CancellationToken cancellationToken )
     {
         return this._collectOptionsAction( compilation, collector, cancellationToken );
     }

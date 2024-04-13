@@ -36,7 +36,7 @@ internal sealed class FabricAspectSource : IAspectSource
     Task IAspectSource.AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken )
     {
         // Group drivers by their target declaration.

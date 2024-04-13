@@ -70,7 +70,7 @@ internal sealed class ValidationRunner
         UserDiagnosticSink diagnosticAdder,
         CancellationToken cancellationToken )
     {
-        var collector = new AspectResultCollector( diagnosticAdder );
+        var collector = new OutboundActionCollector( diagnosticAdder );
 
         var tasks = this._sources
             .Select( s => s.AddValidatorsAsync( kind, version, compilation, collector, cancellationToken ) );

@@ -20,6 +20,6 @@ internal interface IValidatorSource
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         CompilationModel compilation,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken );
 }

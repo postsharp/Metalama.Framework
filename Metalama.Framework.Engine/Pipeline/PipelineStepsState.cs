@@ -220,7 +220,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         IUserDiagnosticSink diagnosticSink,
         CancellationToken cancellationToken )
     {
-        var aspectResults = new AspectResultCollector( diagnosticSink );
+        var aspectResults = new OutboundActionCollector( diagnosticSink );
 
         await this._concurrentTaskRunner.RunInParallelAsync(
             aspectSources.Where( a => a.AspectClasses.Contains( aspectClass ) ),

@@ -12,11 +12,11 @@ namespace Metalama.Framework.Engine.Fabrics;
 
 internal sealed class ProgrammaticAspectSource : IAspectSource
 {
-    private readonly Func<CompilationModel, AspectResultCollector, CancellationToken, Task>? _addResultsAction;
+    private readonly Func<CompilationModel, OutboundActionCollector, CancellationToken, Task>? _addResultsAction;
 
     public ProgrammaticAspectSource(
         IAspectClass aspectClass,
-        Func<CompilationModel, AspectResultCollector, CancellationToken, Task> collect )
+        Func<CompilationModel, OutboundActionCollector, CancellationToken, Task> collect )
     {
         this._addResultsAction = collect;
         this.AspectClasses = ImmutableArray.Create( aspectClass );
@@ -27,7 +27,7 @@ internal sealed class ProgrammaticAspectSource : IAspectSource
     public Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken )
     {
         if ( this._addResultsAction != null )

@@ -9,5 +9,5 @@ namespace Metalama.Framework.Engine.HierarchicalOptions;
 
 internal interface IHierarchicalOptionsSource
 {
-    Task CollectOptionsAsync( CompilationModel compilation, AspectResultCollector collector, CancellationToken cancellationToken );
+    Task CollectOptionsAsync( CompilationModel compilation, OutboundActionCollector collector, CancellationToken cancellationToken );
 }

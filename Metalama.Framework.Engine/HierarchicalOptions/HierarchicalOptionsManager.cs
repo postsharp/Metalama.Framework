@@ -118,7 +118,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         IUserDiagnosticSink diagnosticSink,
         CancellationToken cancellationToken )
     {
-        var collector = new AspectResultCollector( diagnosticSink );
+        var collector = new OutboundActionCollector( diagnosticSink );
         await source.CollectOptionsAsync( compilationModel, collector, cancellationToken );
 
         foreach ( var configurator in collector.HierarchicalOptions )

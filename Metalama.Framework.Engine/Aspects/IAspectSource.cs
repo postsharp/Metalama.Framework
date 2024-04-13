@@ -23,6 +23,6 @@ internal interface IAspectSource
     Task AddAspectInstancesAsync(
         CompilationModel compilation,
         IAspectClass aspectClass,
-        AspectResultCollector collector,
+        OutboundActionCollector collector,
         CancellationToken cancellationToken );
 }

@@ -30,7 +30,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
         this._invoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
-    public Task CollectOptionsAsync( CompilationModel compilation, AspectResultCollector collector, CancellationToken cancellationToken )
+    public Task CollectOptionsAsync( CompilationModel compilation, OutboundActionCollector collector, CancellationToken cancellationToken )
     {
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
         var systemAttributeType = compilation.Factory.GetTypeByReflectionType( typeof(Attribute) );
