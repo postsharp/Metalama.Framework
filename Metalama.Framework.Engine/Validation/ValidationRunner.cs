@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -73,7 +74,7 @@ internal sealed class ValidationRunner
         var collector = new OutboundActionCollector( diagnosticAdder );
 
         var tasks = this._sources
-            .Select( s => s.AddValidatorsAsync( kind, version, compilation, collector, cancellationToken ) );
+            .Select( s => s.AddValidatorsAsync( kind, version, new OutboundActionCollectionContext( collector, compilation, cancellationToken ) ) );
 
         await Task.WhenAll( tasks );
 

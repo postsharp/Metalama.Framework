@@ -2,21 +2,19 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections.Immutable;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
 internal sealed class ProgrammaticAspectSource : IAspectSource
 {
-    private readonly Func<CompilationModel, OutboundActionCollector, CancellationToken, Task>? _addResultsAction;
+    private readonly Func<OutboundActionCollectionContext, Task> _addResultsAction;
 
     public ProgrammaticAspectSource(
         IAspectClass aspectClass,
-        Func<CompilationModel, OutboundActionCollector, CancellationToken, Task> collect )
+        Func<OutboundActionCollectionContext, Task> collect )
     {
         this._addResultsAction = collect;
         this.AspectClasses = ImmutableArray.Create( aspectClass );
@@ -25,14 +23,12 @@ internal sealed class ProgrammaticAspectSource : IAspectSource
     public ImmutableArray<IAspectClass> AspectClasses { get; }
 
     public Task AddAspectInstancesAsync(
-        CompilationModel compilation,
         IAspectClass aspectClass,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
         if ( this._addResultsAction != null )
         {
-            return this._addResultsAction.Invoke( compilation, collector, cancellationToken );
+            return this._addResultsAction.Invoke( context );
         }
 
         return Task.CompletedTask;

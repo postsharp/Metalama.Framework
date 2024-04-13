@@ -1,11 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Validation;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -16,7 +14,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
 
     public AspectPredecessor Predecessor { get; }
 
-    private readonly Func<ProgrammaticValidatorSource, CompilationModel, OutboundActionCollector, CancellationToken, Task> _addValidatorsAction;
+    private readonly Func<ProgrammaticValidatorSource, OutboundActionCollectionContext, Task> _addValidatorsAction;
     private readonly ValidatorKind _kind;
     private readonly CompilationModelVersion _compilationModelVersion;
 
@@ -25,7 +23,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         ValidatorKind validatorKind,
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
-        Func<ProgrammaticValidatorSource, CompilationModel, OutboundActionCollector, CancellationToken, Task> addValidatorsAction )
+        Func<ProgrammaticValidatorSource, OutboundActionCollectionContext, Task> addValidatorsAction )
     {
         if ( validatorKind != ValidatorKind.Reference )
         {
@@ -45,7 +43,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
         ValidatorDelegate<DeclarationValidationContext> method,
-        Func<ProgrammaticValidatorSource, CompilationModel, OutboundActionCollector, CancellationToken, Task> addValidatorsAction )
+        Func<ProgrammaticValidatorSource, OutboundActionCollectionContext, Task> addValidatorsAction )
     {
         if ( validatorKind != ValidatorKind.Definition )
         {
@@ -62,13 +60,11 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
     public Task AddValidatorsAsync(
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
-        CompilationModel compilation,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
         if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )
         {
-            return this._addValidatorsAction.Invoke( this, compilation, collector, cancellationToken );
+            return this._addValidatorsAction.Invoke( this, context );
         }
         else
         {

@@ -2,11 +2,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Fabrics;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;
@@ -21,17 +20,15 @@ internal sealed class OverflowAspectSource : IAspectSource
     public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsReadOnlyCollection( a => a.AspectClass ).Distinct().ToImmutableArray();
 
     public Task AddAspectInstancesAsync(
-        CompilationModel compilation,
         IAspectClass aspectClass,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
         var tasks =
             this._aspectSources
                 .Where( s => s.AspectClass.FullName == aspectClass.FullName )
                 .Select( a => a.Source )
                 .Distinct()
-                .Select( a => a.AddAspectInstancesAsync( compilation, aspectClass, collector, cancellationToken ) );
+                .Select( a => a.AddAspectInstancesAsync( aspectClass, context ) );
 
         return Task.WhenAll( tasks );
     }

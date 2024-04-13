@@ -8,11 +8,11 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -54,11 +54,12 @@ internal sealed class CompilationAspectSource : IAspectSource
     }
 
     public Task AddAspectInstancesAsync(
-        CompilationModel compilation,
         IAspectClass aspectClass,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
+        var compilation = context.Compilation;
+        var cancellationToken = context.CancellationToken;
+
         if ( !compilation.Factory.TryGetTypeByReflectionName( aspectClass.FullName, out var aspectType ) )
         {
             // This happens at design time when the IDE sends an incomplete compilation. We cannot apply the aspects in this case,
@@ -71,7 +72,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
         foreach ( var exclusion in exclusions )
         {
-            collector.AddExclusion( exclusion );
+            context.Collector.AddExclusion( exclusion );
         }
 
         // Process attributes in parallel.
@@ -85,7 +86,7 @@ internal sealed class CompilationAspectSource : IAspectSource
 
             var attributeData = attribute.GetAttributeData();
 
-            if ( this._attributeDeserializer.TryCreateAttribute( attributeData, collector, out var attributeInstance ) )
+            if ( this._attributeDeserializer.TryCreateAttribute( attributeData, context.Collector, out var attributeInstance ) )
             {
                 var targetDeclaration = attribute.ContainingDeclaration;
 
@@ -104,13 +105,13 @@ internal sealed class CompilationAspectSource : IAspectSource
                         requestedEligibility,
                         new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
-                    collector.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
                             attribute.GetDiagnosticLocation(),
                             (aspectClass.ShortName, targetDeclaration.DeclarationKind, targetDeclaration, reason) ) );
                 }
 
-                collector.AddAspectInstance( aspectInstance );
+                context.Collector.AddAspectInstance( aspectInstance );
             }
         }
     }

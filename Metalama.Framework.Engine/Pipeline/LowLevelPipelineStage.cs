@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -42,7 +43,10 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         await Task.WhenAll(
             input.ContributorSources.AspectSources
-                .Select( s => s.AddAspectInstancesAsync( compilationModel, this._aspectClass, collector, cancellationToken ) ) );
+                .Select(
+                    s => s.AddAspectInstancesAsync(
+                        this._aspectClass,
+                        new OutboundActionCollectionContext( collector, input.LastCompilationModel, cancellationToken ) ) ) );
 
         var aspectInstances = collector.AspectInstances
             .GroupBy(

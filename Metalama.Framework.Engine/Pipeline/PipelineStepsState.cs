@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Options;
@@ -220,16 +221,16 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         IUserDiagnosticSink diagnosticSink,
         CancellationToken cancellationToken )
     {
-        var aspectResults = new OutboundActionCollector( diagnosticSink );
+        var collector = new OutboundActionCollector( diagnosticSink );
 
         await this._concurrentTaskRunner.RunInParallelAsync(
             aspectSources.Where( a => a.AspectClasses.Contains( aspectClass ) ),
-            source => source.AddAspectInstancesAsync( compilation, aspectClass, aspectResults, cancellationToken ),
+            source => source.AddAspectInstancesAsync( aspectClass, new OutboundActionCollectionContext( collector, compilation, cancellationToken ) ),
             cancellationToken );
 
         HashSet<IDeclaration>? exclusions = null;
 
-        foreach ( var exclusion in aspectResults.AspectExclusions )
+        foreach ( var exclusion in collector.AspectExclusions )
         {
             exclusions ??= new HashSet<IDeclaration>( ReferenceEqualityComparer<IDeclaration>.Instance );
 
@@ -256,7 +257,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
             return false;
         }
 
-        var aspectInstances = aspectResults.AspectInstances
+        var aspectInstances = collector.AspectInstances
             .SelectAsReadOnlyCollection(
                 x =>
                 {
@@ -278,7 +279,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
         // Process aspect requirements.
         // We always add an aspect instance if there is a requirement, even if there is already an instance, because this has the side effect of exposing
         // the predecessors to the IAspectInstance in the last instance of the aggregated aspect.
-        var requirements = aspectResults.AspectRequirements
+        var requirements = collector.AspectRequirements
             .SelectAsReadOnlyCollection( x => (TargetDeclaration: x.TargetDeclaration.GetTarget( compilation ), x.Predecessor) )
             .GroupBy( x => x.TargetDeclaration );
 

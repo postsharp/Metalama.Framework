@@ -80,10 +80,9 @@ internal abstract partial class FabricDriver
                 this.TargetDeclaration,
                 this,
                 CompilationModelVersion.Final,
-                ( compilation, action, collector, cancellationToken ) => action(
-                    this.TargetDeclaration.GetTarget( compilation ),
-                    collector,
-                    cancellationToken ) );
+                ( action, context ) => action(
+                    this.TargetDeclaration.GetTarget( context.Compilation ),
+                    context ) );
 
         string IDiagnosticSource.DiagnosticSourceDescription => $"fabric {this._fabricInstance.Fabric.GetType().FullName}";
     }

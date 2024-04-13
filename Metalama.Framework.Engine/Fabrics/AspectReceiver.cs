@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics
@@ -36,20 +35,34 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, Func<T, OutboundActionCollector, CancellationToken, Task>, OutboundActionCollector, CancellationToken, Task> _adder;
+        private readonly Func<Func<T, OutboundActionCollectionContext, Task>, OutboundActionCollectionContext, Task> _adder;
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+
+        // We track the number of children to know if we must cache results.
+        private int _childrenCount;
 
         public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,
             IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
-            Func<CompilationModel, Func<T, OutboundActionCollector, CancellationToken, Task>, OutboundActionCollector, CancellationToken, Task> addTargets )
+            Func<Func<T, OutboundActionCollectionContext, Task>, OutboundActionCollectionContext, Task> addTargets )
         {
             this._concurrentTaskRunner = parent.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
             this._parent = parent;
             this._compilationModelVersion = compilationModelVersion;
             this._adder = addTargets;
+        }
+
+
+        private bool ShouldCache => this._childrenCount > 1;
+
+        private AspectReceiver<TChild> AddChild<TChild>( AspectReceiver<TChild> child ) 
+            where TChild : class, IDeclaration
+        {
+            this._childrenCount++;
+
+            return child;
         }
 
         private AspectClass GetAspectClass<TAspect>()
@@ -70,6 +83,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterAspectSource( IAspectSource aspectSource )
         {
+            this._childrenCount++;
+
             this._parent.LicenseVerifier?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
 
             this._parent.AddAspectSource( aspectSource );
@@ -77,6 +92,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
+            this._childrenCount++;
+
             this._parent.LicenseVerifier?.VerifyCanAddValidator( this._parent.AspectPredecessor );
 
             this._parent.AddValidatorSource( validatorSource );
@@ -84,6 +101,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private void RegisterOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource )
         {
+            this._childrenCount++;
+
             this._parent.AddOptionsSource( hierarchicalOptionsSource );
         }
 
@@ -93,12 +112,12 @@ namespace Metalama.Framework.Engine.Fabrics
             ValidatorImplementation implementation,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes,
-            OutboundActionCollector collector )
+            OutboundActionCollectionContext context )
         {
             var description = MetalamaStringFormatter.Format(
                 $"reference validator for {validatedDeclaration.DeclarationKind} '{validatedDeclaration.ToDisplayString()}' provided by {this._parent.DiagnosticSourceDescription}" );
 
-            collector.AddValidator(
+            context.Collector.AddValidator(
                 new ReferenceValidatorInstance(
                     validatedDeclaration,
                     driver,
@@ -112,7 +131,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 switch ( validatedMethod.MethodKind )
                 {
                     case MethodKind.PropertyGet:
-                        collector.AddValidator(
+                        context.Collector.AddValidator(
                             new ReferenceValidatorInstance(
                                 validatedMethod.DeclaringMember!,
                                 driver,
@@ -127,7 +146,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     case MethodKind.PropertySet:
                     case MethodKind.EventAdd:
                     case MethodKind.EventRemove:
-                        collector.AddValidator(
+                        context.Collector.AddValidator(
                             new ReferenceValidatorInstance(
                                 validatedMethod.DeclaringMember!,
                                 driver,
@@ -173,20 +192,19 @@ namespace Metalama.Framework.Engine.Fabrics
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    ( source, compilation, collector, cancellationToken ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
+                        context.Compilation,
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                        ( item, collector ) => this.SelectReferenceValidatorInstancesAsync(
+                        ( item, context ) => this.SelectReferenceValidatorInstancesAsync(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
                             referenceKinds,
                             includeDerivedTypes,
-                            collector ),
-                        collector,
-                        cancellationToken ) ) );
+                            context ),
+                        context ) ) );
         }
 
         public void ValidateReferences( ReferenceValidator validator )
@@ -200,10 +218,10 @@ namespace Metalama.Framework.Engine.Fabrics
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    ( source, compilation, collector, cancellationToken ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
+                        context.Compilation,
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         ( item, c ) => this.SelectReferenceValidatorInstancesAsync(
                             item,
@@ -212,8 +230,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             validator.ValidatedReferenceKinds,
                             validator.IncludeDerivedTypes,
                             c ),
-                        collector,
-                        cancellationToken ) ) );
+                        context ) ) );
         }
 
         public void ValidateReferences<TValidator>( Func<T, TValidator> getValidator )
@@ -228,10 +245,10 @@ namespace Metalama.Framework.Engine.Fabrics
                     ValidatorKind.Reference,
                     CompilationModelVersion.Current,
                     this._parent.AspectPredecessor,
-                    ( source, compilation, collector, cancellationToken ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
+                        context.Compilation,
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         ( item, c ) =>
                         {
@@ -245,8 +262,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 validator.IncludeDerivedTypes,
                                 c );
                         },
-                        collector,
-                        cancellationToken ) ) );
+                        context ) ) );
         }
 
         public void Validate( ValidatorDelegate<DeclarationValidationContext> validateMethod )
@@ -261,14 +277,14 @@ namespace Metalama.Framework.Engine.Fabrics
                     this._compilationModelVersion,
                     this._parent.AspectPredecessor,
                     validateMethod,
-                    ( source, compilation, collector, cancellationToken ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
+                    ( source, context ) => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
+                        context.Compilation,
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         ( item, c ) =>
                         {
-                            c.AddValidator(
+                            context.Collector.AddValidator(
                                 new DeclarationValidatorInstance(
                                     item,
                                     (ValidatorDriver<DeclarationValidationContext>) source.Driver,
@@ -277,8 +293,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return Task.CompletedTask;
                         },
-                        collector,
-                        cancellationToken ) ) );
+                        context ) ) );
         }
 
         public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )
@@ -297,63 +312,60 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public IValidatorReceiver<T> AfterAllAspects()
-            => new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._adder );
+            => this.AddChild( new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._adder ) );
 
         public IValidatorReceiver<T> BeforeAnyAspect()
-            => new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._adder );
+            => this.AddChild( new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._adder ) );
 
         public IAspectReceiver<TMember> SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => new AspectReceiver<TMember>(
-                this._containingDeclaration,
-                this._parent,
-                this._compilationModelVersion,
-                ( compilation, action, collector, cancellationToken ) => this._adder(
-                    compilation,
-                    ( declaration, collector, cancellationToken ) =>
-                    {
-                        var children = selector( declaration );
+            => this.AddChild(
+                new AspectReceiver<TMember>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this._adder(
+                        ( declaration, context ) =>
+                        {
+                            var children = selector( declaration );
 
-                        return this._concurrentTaskRunner.RunInParallelAsync(
-                            children,
-                            child => action( child, collector, cancellationToken ),
-                            cancellationToken );
-                    },
-                    collector,
-                    cancellationToken ) );
+                            return this._concurrentTaskRunner.RunInParallelAsync(
+                                children,
+                                child => action( child, context ),
+                                context.CancellationToken );
+                        },
+                        context ) ) );
 
         public IAspectReceiver<TMember> Select<TMember>( Func<T, TMember> selector )
             where TMember : class, IDeclaration
-            => new AspectReceiver<TMember>(
-                this._containingDeclaration,
-                this._parent,
-                this._compilationModelVersion,
-                ( compilation, action, collector, cancellationToken ) => this._adder(
-                    compilation,
-                    ( declaration, collector, cancellationToken ) => action( selector( declaration ), collector, cancellationToken ),
-                    collector,
-                    cancellationToken ) );
+            => this.AddChild(
+                new AspectReceiver<TMember>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this._adder(
+                        ( declaration, context ) => action( selector( declaration ), context ),
+                        context ) ) );
 
         public IAspectReceiver<T> Where( Func<T, bool> predicate )
-            => new AspectReceiver<T>(
-                this._containingDeclaration,
-                this._parent,
-                this._compilationModelVersion,
-                ( compilation, action, collector, cancellationToken ) => this._adder(
-                    compilation,
-                    ( declaration, collector, cancellationToken ) =>
-                    {
-                        if ( predicate( declaration ) )
+            => this.AddChild(
+                new AspectReceiver<T>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this._adder(
+                        ( declaration, context ) =>
                         {
-                            return action( declaration, collector, cancellationToken );
-                        }
-                        else
-                        {
-                            return Task.CompletedTask;
-                        }
-                    },
-                    collector,
-                    cancellationToken ) );
+                            if ( predicate( declaration ) )
+                            {
+                                return action( declaration, context );
+                            }
+                            else
+                            {
+                                return Task.CompletedTask;
+                            }
+                        },
+                        context ) ) );
 
         public void SetOptions<TOptions>( Func<T, TOptions> func )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
@@ -363,20 +375,20 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterOptionsSource(
                 new ProgrammaticHierarchicalOptionsSource(
-                    ( compilation, collector, cancellationToken )
+                    ( context )
                         => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                             userCodeInvoker,
-                            executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                            compilation,
+                            executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
+                            context.Compilation,
                             GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                            ( declaration, collector ) =>
+                            ( declaration, context ) =>
                             {
                                 if ( userCodeInvoker.TryInvoke(
                                         () => func( declaration ),
                                         executionContext,
                                         out var options ) )
                                 {
-                                    collector.AddOptions(
+                                    context.Collector.AddOptions(
                                         new HierarchicalOptionsInstance(
                                             declaration,
                                             options ) );
@@ -384,8 +396,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                                 return Task.CompletedTask;
                             },
-                            collector,
-                            cancellationToken ) ) );
+                            context ) ) );
         }
 
         public void SetOptions<TOptions>( TOptions options )
@@ -396,23 +407,22 @@ namespace Metalama.Framework.Engine.Fabrics
 
             this.RegisterOptionsSource(
                 new ProgrammaticHierarchicalOptionsSource(
-                    ( compilation, collector, cancellationToken )
+                    ( context )
                         => this.SelectAndValidateValidatorOrConfiguratorTargetsAsync(
                             userCodeInvoker,
-                            executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                            compilation,
+                            executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
+                            context.Compilation,
                             GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
-                            ( declaration, collector ) =>
+                            ( declaration, context ) =>
                             {
-                                collector.AddOptions(
+                                context.Collector.AddOptions(
                                     new HierarchicalOptionsInstance(
                                         declaration,
                                         options ) );
 
                                 return Task.CompletedTask;
                             },
-                            collector,
-                            cancellationToken ) ) );
+                            context ) ) );
         }
 
         IValidatorReceiver<T> IValidatorReceiver<T>.Where( Func<T, bool> predicate ) => this.Where( predicate );
@@ -461,20 +471,19 @@ namespace Metalama.Framework.Engine.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
-                    ( compilation, collector, cancellationToken ) => this.SelectAndValidateAspectTargetsAsync(
+                    ( context ) => this.SelectAndValidateAspectTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         aspectClass,
                         eligibility,
-                        ( t, collector ) =>
+                        ( t, context ) =>
                         {
                             if ( userCodeInvoker.TryInvoke(
                                     () => createAspect( t ),
                                     executionContext,
                                     out var aspect ) )
                             {
-                                collector.AddAspectInstance(
+                                context.Collector.AddAspectInstance(
                                     new AspectInstance(
                                         aspect,
                                         t,
@@ -484,8 +493,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return Task.CompletedTask;
                         },
-                        collector,
-                        cancellationToken ) ) );
+                        context ) ) );
         }
 
         public void AddAspectIfEligible<TAspect>( Func<T, TAspect> createAspect, EligibleScenarios eligibility )
@@ -507,20 +515,19 @@ namespace Metalama.Framework.Engine.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
-                    ( compilation, collector, cancellationToken ) => this.SelectAndValidateAspectTargetsAsync(
+                    ( context ) => this.SelectAndValidateAspectTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         aspectClass,
                         eligibility,
-                        ( t, collector2 ) =>
+                        ( t, context ) =>
                         {
                             if ( userCodeInvoker.TryInvoke(
                                     () => new TAspect(),
                                     executionContext,
                                     out var aspect ) )
                             {
-                                collector2.AddAspectInstance(
+                                context.Collector.AddAspectInstance(
                                     new AspectInstance(
                                         aspect,
                                         t,
@@ -530,20 +537,19 @@ namespace Metalama.Framework.Engine.Fabrics
 
                             return Task.CompletedTask;
                         },
-                        collector,
-                        cancellationToken ) ) );
+                        context ) ) );
         }
 
         private Task SelectAndValidateAspectTargetsAsync(
             UserCodeInvoker? invoker,
             UserCodeExecutionContext? executionContext,
-            CompilationModel compilation,
             AspectClass aspectClass,
             EligibleScenarios filteredEligibility,
-            Func<T, OutboundActionCollector, Task> addResult,
-            OutboundActionCollector collector,
-            CancellationToken cancellationToken )
+            Func<T, OutboundActionCollectionContext, Task> addResult,
+            OutboundActionCollectionContext context )
         {
+            var compilation = context.Compilation;
+
             if ( invoker != null && executionContext != null )
             {
 #if DEBUG
@@ -553,16 +559,16 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
 #endif
 
-                return invoker.InvokeAsync( () => this._adder( compilation, ProcessTarget, collector, cancellationToken ), executionContext );
+                return invoker.InvokeAsync( () => this._adder( ProcessTarget, context ), executionContext );
             }
             else
             {
-                return this._adder( compilation, ProcessTarget, collector, cancellationToken );
+                return this._adder( ProcessTarget, context );
             }
 
-            Task ProcessTarget( T targetDeclaration, OutboundActionCollector collector, CancellationToken cancellationToken )
+            Task ProcessTarget( T targetDeclaration, OutboundActionCollectionContext context )
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                context.CancellationToken.ThrowIfCancellationRequested();
 
                 if ( targetDeclaration == null! )
                 {
@@ -579,7 +585,7 @@ namespace Metalama.Framework.Engine.Fabrics
                        || (containingDeclaration is IMember m && m.DeclaringType.Equals( targetDeclaration )))
                      || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
-                    collector.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, containingDeclaration) ) );
@@ -602,7 +608,7 @@ namespace Metalama.Framework.Engine.Fabrics
                 {
                     var reason = aspectClass.GetIneligibilityJustification( requiredEligibility, new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
-                    collector.Report(
+                    context.Collector.Report(
                         GeneralDiagnosticDescriptors.IneligibleChildAspect.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), aspectClass.ShortName, targetDeclaration, reason) ) );
@@ -612,11 +618,11 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 if ( invoker != null && executionContext != null )
                 {
-                    return invoker.InvokeAsync( () => addResult( targetDeclaration, collector ), executionContext );
+                    return invoker.InvokeAsync( () => addResult( targetDeclaration, context ), executionContext );
                 }
                 else
                 {
-                    return addResult( targetDeclaration, collector );
+                    return addResult( targetDeclaration, context );
                 }
             }
         }
@@ -626,9 +632,8 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeExecutionContext? executionContext,
             CompilationModel compilation,
             DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)> diagnosticDefinition,
-            Func<T, OutboundActionCollector, Task> addAction,
-            OutboundActionCollector collector,
-            CancellationToken cancellationToken )
+            Func<T, OutboundActionCollectionContext, Task> addAction,
+            OutboundActionCollectionContext context )
         {
             if ( invoker != null && executionContext != null )
             {
@@ -638,21 +643,21 @@ namespace Metalama.Framework.Engine.Fabrics
                     throw new AssertionFailedException( "Execution context mismatch." );
                 }
 #endif
-                await invoker.InvokeAsync( () => this._adder( compilation, ProcessTarget, collector, cancellationToken ), executionContext );
+                await invoker.InvokeAsync( () => this._adder( ProcessTarget, context ), executionContext );
             }
             else
             {
-                await this._adder( compilation, ProcessTarget, collector, cancellationToken );
+                await this._adder( ProcessTarget, context );
             }
 
-            Task ProcessTarget( T targetDeclaration, OutboundActionCollector collector, CancellationToken cancellationToken )
+            Task ProcessTarget( T targetDeclaration, OutboundActionCollectionContext context )
             {
                 if ( targetDeclaration == null! )
                 {
                     return Task.CompletedTask;
                 }
 
-                cancellationToken.ThrowIfCancellationRequested();
+                context.CancellationToken.ThrowIfCancellationRequested();
 
                 var predecessorInstance = (IAspectPredecessorImpl) this._parent.AspectPredecessor.Instance;
 
@@ -662,13 +667,13 @@ namespace Metalama.Framework.Engine.Fabrics
                 if ( (!targetDeclaration.IsContainedIn( containingTypeOrCompilation ) || targetDeclaration.DeclaringAssembly.IsExternal)
                      && containingTypeOrCompilation.DeclarationKind != DeclarationKind.Compilation )
                 {
-                    collector.Report(
+                    context.Collector.Report(
                         diagnosticDefinition.CreateRoslynDiagnostic(
                             predecessorInstance.GetDiagnosticLocation( compilation.RoslynCompilation ),
                             (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingTypeOrCompilation) ) );
                 }
 
-                return addAction( targetDeclaration, collector );
+                return addAction( targetDeclaration, context );
             }
         }
 
@@ -682,23 +687,21 @@ namespace Metalama.Framework.Engine.Fabrics
             this.RegisterAspectSource(
                 new ProgrammaticAspectSource(
                     aspectClass,
-                    ( compilation, collector, cancellationToken ) => this.SelectAndValidateAspectTargetsAsync(
+                    ( context ) => this.SelectAndValidateAspectTargetsAsync(
                         userCodeInvoker,
-                        executionContext.WithCompilationAndDiagnosticAdder( compilation, collector ),
-                        compilation,
+                        executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         aspectClass,
                         EligibleScenarios.None,
-                        ( declaration, collector ) =>
+                        ( declaration, context ) =>
                         {
-                            collector.AddAspectRequirement(
+                            context.Collector.AddAspectRequirement(
                                 new AspectRequirement(
                                     declaration.ToTypedRef<IDeclaration>(),
                                     this._parent.AspectPredecessor.Instance ) );
 
                             return Task.CompletedTask;
                         },
-                        collector,
-                        cancellationToken ) ) );
+                        context ) ) );
         }
     }
 }

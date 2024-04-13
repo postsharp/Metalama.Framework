@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.Aspects
                 this.Target.ToTypedRef(),
                 this,
                 CompilationModelVersion.Current,
-                ( compilation, action, collector, cancellationToken ) => action( this.Target.ForCompilation( compilation ), collector, cancellationToken ) );
+                ( action, context ) => action( this.Target.ForCompilation( context.Compilation ), context ) );
 
         IDeclaration IAspectBuilder.Target => this.Target;
 

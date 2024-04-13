@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
@@ -122,14 +123,12 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
         public Task AddAspectInstancesAsync(
-            CompilationModel compilation,
             IAspectClass aspectClass,
-            OutboundActionCollector collector,
-            CancellationToken cancellationToken )
+            OutboundActionCollectionContext context )
         {
-            var targetDeclaration = compilation.Factory.GetDeclaration( this._parent._targetSymbol );
+            var targetDeclaration = context.Compilation.Factory.GetDeclaration( this._parent._targetSymbol );
 
-            collector.AddAspectInstance(
+            context.Collector.AddAspectInstance(
                 ((AspectClass) aspectClass).CreateAspectInstance(
                     targetDeclaration,
                     (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),

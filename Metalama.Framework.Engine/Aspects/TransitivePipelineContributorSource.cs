@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -18,7 +19,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -116,16 +116,14 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
     public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
 
     public Task AddAspectInstancesAsync(
-        CompilationModel compilation,
         IAspectClass aspectClass,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
-        return this._concurrentTaskRunner.RunInParallelAsync( this._inheritedAspects[aspectClass], ProcessAspectInstance, cancellationToken );
+        return this._concurrentTaskRunner.RunInParallelAsync( this._inheritedAspects[aspectClass], ProcessAspectInstance, context.CancellationToken );
 
         void ProcessAspectInstance( InheritableAspectInstance inheritedAspectInstance )
         {
-            var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTargetOrNull( compilation );
+            var baseDeclaration = inheritedAspectInstance.TargetDeclaration.GetTargetOrNull( context.Compilation );
 
             if ( baseDeclaration == null )
             {
@@ -136,7 +134,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
             foreach ( var derived in ((IDeclarationImpl) baseDeclaration).GetDerivedDeclarations( DerivedTypesOptions.DirectOnly ) )
             {
-                collector.AddAspectInstance(
+                context.Collector.AddAspectInstance(
                     new AspectInstance(
                         inheritedAspectInstance.Aspect,
                         derived,
@@ -149,24 +147,22 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
     Task IValidatorSource.AddValidatorsAsync(
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
-        CompilationModel compilation,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
         if ( kind == ValidatorKind.Reference )
         {
             foreach ( var validator in this._referenceValidators )
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                context.CancellationToken.ThrowIfCancellationRequested();
 
-                var validationTarget = validator.ValidatedDeclaration.GetTargetOrNull( compilation );
+                var validationTarget = validator.ValidatedDeclaration.GetTargetOrNull( context.Compilation );
 
                 if ( validationTarget?.GetSymbol() == null )
                 {
                     continue;
                 }
 
-                collector.AddValidator(
+                context.Collector.AddValidator(
                     new ReferenceValidatorInstance(
                         validationTarget,
                         validator.GetReferenceValidatorDriver(),

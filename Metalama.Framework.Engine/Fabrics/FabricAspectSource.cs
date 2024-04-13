@@ -3,11 +3,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -34,18 +32,18 @@ internal sealed class FabricAspectSource : IAspectSource
     ImmutableArray<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
 
     Task IAspectSource.AddAspectInstancesAsync(
-        CompilationModel compilation,
         IAspectClass aspectClass,
-        OutboundActionCollector collector,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
+        var compilation = context.Compilation;
+
         // Group drivers by their target declaration.
         var driversByTarget =
             this._drivers.Select( x => (Driver: x, Target: x.GetTargetIfInPartialCompilation( compilation )) )
                 .Where( x => x.Target != null )
                 .GroupBy( x => x.Target );
 
-        return this._concurrentTaskRunner.RunInParallelAsync( driversByTarget, ProcessDriver, cancellationToken );
+        return this._concurrentTaskRunner.RunInParallelAsync( driversByTarget, ProcessDriver, context.CancellationToken );
 
         // Process target declarations.
         void ProcessDriver( IGrouping<IDeclaration?, (TypeFabricDriver Driver, IDeclaration? Target)> driverGroup )
@@ -61,7 +59,7 @@ internal sealed class FabricAspectSource : IAspectSource
                         this._fabricManager.ServiceProvider,
                         x.Driver,
                         x.Driver.CompileTimeProject.TemplateReflectionContext ?? compilation.CompilationContext,
-                        collector,
+                        context.Collector,
                         null ) )
                 .ToImmutableArray();
 
@@ -84,7 +82,7 @@ internal sealed class FabricAspectSource : IAspectSource
             // Creates the aggregate AspectInstance for the target declaration.
             var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, default );
 
-            collector.AddAspectInstance( aggregateInstance );
+            context.Collector.AddAspectInstance( aggregateInstance );
         }
     }
 }
