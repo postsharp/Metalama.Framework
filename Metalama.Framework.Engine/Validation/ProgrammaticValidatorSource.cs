@@ -57,7 +57,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         this._addValidatorsAction = addValidatorsAction;
     }
 
-    public Task AddValidatorsAsync(
+    public Task CollectValidatorsAsync(
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         OutboundActionCollectionContext context )

@@ -225,7 +225,7 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
 
         await this._concurrentTaskRunner.RunInParallelAsync(
             aspectSources.Where( a => a.AspectClasses.Contains( aspectClass ) ),
-            source => source.AddAspectInstancesAsync( aspectClass, new OutboundActionCollectionContext( collector, compilation, cancellationToken ) ),
+            source => source.CollectAspectInstancesAsync( aspectClass, new OutboundActionCollectionContext( collector, compilation, cancellationToken ) ),
             cancellationToken );
 
         HashSet<IDeclaration>? exclusions = null;

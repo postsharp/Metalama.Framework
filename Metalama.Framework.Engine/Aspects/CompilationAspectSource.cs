@@ -53,7 +53,7 @@ internal sealed class CompilationAspectSource : IAspectSource
         return this._exclusions;
     }
 
-    public Task AddAspectInstancesAsync(
+    public Task CollectAspectInstancesAsync(
         IAspectClass aspectClass,
         OutboundActionCollectionContext context )
     {

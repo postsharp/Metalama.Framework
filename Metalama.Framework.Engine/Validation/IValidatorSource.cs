@@ -14,7 +14,7 @@ internal enum CompilationModelVersion
 
 internal interface IValidatorSource
 {
-    Task AddValidatorsAsync(
+    Task CollectValidatorsAsync(
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         OutboundActionCollectionContext context );

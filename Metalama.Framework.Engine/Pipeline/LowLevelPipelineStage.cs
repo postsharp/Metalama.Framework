@@ -44,7 +44,7 @@ internal sealed class LowLevelPipelineStage : PipelineStage
         await Task.WhenAll(
             input.ContributorSources.AspectSources
                 .Select(
-                    s => s.AddAspectInstancesAsync(
+                    s => s.CollectAspectInstancesAsync(
                         this._aspectClass,
                         new OutboundActionCollectionContext( collector, input.LastCompilationModel, cancellationToken ) ) ) );
 

@@ -19,7 +19,7 @@ internal sealed class OverflowAspectSource : IAspectSource
 
     public ImmutableArray<IAspectClass> AspectClasses => this._aspectSources.SelectAsReadOnlyCollection( a => a.AspectClass ).Distinct().ToImmutableArray();
 
-    public Task AddAspectInstancesAsync(
+    public Task CollectAspectInstancesAsync(
         IAspectClass aspectClass,
         OutboundActionCollectionContext context )
     {
@@ -28,7 +28,7 @@ internal sealed class OverflowAspectSource : IAspectSource
                 .Where( s => s.AspectClass.FullName == aspectClass.FullName )
                 .Select( a => a.Source )
                 .Distinct()
-                .Select( a => a.AddAspectInstancesAsync( aspectClass, context ) );
+                .Select( a => a.CollectAspectInstancesAsync( aspectClass, context ) );
 
         return Task.WhenAll( tasks );
     }

@@ -122,7 +122,7 @@ public sealed class LiveTemplateAspectPipeline : AspectPipeline
 
         public ImmutableArray<IAspectClass> AspectClasses { get; }
 
-        public Task AddAspectInstancesAsync(
+        public Task CollectAspectInstancesAsync(
             IAspectClass aspectClass,
             OutboundActionCollectionContext context )
         {

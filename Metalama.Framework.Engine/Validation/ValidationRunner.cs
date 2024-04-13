@@ -74,7 +74,7 @@ internal sealed class ValidationRunner
         var collector = new OutboundActionCollector( diagnosticAdder );
 
         var tasks = this._sources
-            .Select( s => s.AddValidatorsAsync( kind, version, new OutboundActionCollectionContext( collector, compilation, cancellationToken ) ) );
+            .Select( s => s.CollectValidatorsAsync( kind, version, new OutboundActionCollectionContext( collector, compilation, cancellationToken ) ) );
 
         await Task.WhenAll( tasks );
 

@@ -31,7 +31,7 @@ internal sealed class FabricAspectSource : IAspectSource
 
     ImmutableArray<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
 
-    Task IAspectSource.AddAspectInstancesAsync(
+    Task IAspectSource.CollectAspectInstancesAsync(
         IAspectClass aspectClass,
         OutboundActionCollectionContext context )
     {

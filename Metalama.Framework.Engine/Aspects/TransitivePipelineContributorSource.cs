@@ -115,7 +115,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
 
     public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
 
-    public Task AddAspectInstancesAsync(
+    public Task CollectAspectInstancesAsync(
         IAspectClass aspectClass,
         OutboundActionCollectionContext context )
     {
@@ -144,7 +144,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         }
     }
 
-    Task IValidatorSource.AddValidatorsAsync(
+    Task IValidatorSource.CollectValidatorsAsync(
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
         OutboundActionCollectionContext context )

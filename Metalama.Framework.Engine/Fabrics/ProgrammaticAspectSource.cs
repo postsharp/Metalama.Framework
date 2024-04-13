@@ -22,7 +22,7 @@ internal sealed class ProgrammaticAspectSource : IAspectSource
 
     public ImmutableArray<IAspectClass> AspectClasses { get; }
 
-    public Task AddAspectInstancesAsync(
+    public Task CollectAspectInstancesAsync(
         IAspectClass aspectClass,
         OutboundActionCollectionContext context )
     {

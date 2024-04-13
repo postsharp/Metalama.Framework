@@ -19,7 +19,7 @@ internal interface IAspectSource
     /// Returns a set of <see cref="AspectInstance"/> of a given type. This method is called when the given aspect
     /// type is being processed, not before.
     /// </summary>
-    Task AddAspectInstancesAsync(
+    Task CollectAspectInstancesAsync(
         IAspectClass aspectClass,
         OutboundActionCollectionContext context );
 }
