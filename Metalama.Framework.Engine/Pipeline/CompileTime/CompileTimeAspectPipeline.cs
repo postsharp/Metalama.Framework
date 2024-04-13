@@ -166,6 +166,11 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             // Format the output.
             if ( this.ProjectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted || this.ProjectOptions.WriteHtml )
             {
+                if ( !this.ProjectOptions.IsTest )
+                {
+                    diagnosticAdder.Report( GeneralDiagnosticDescriptors.CodeFormattingEnabled.CreateRoslynDiagnostic( null, default ) );
+                }
+
                 // ReSharper disable once AccessToModifiedClosure
                 resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
             }
