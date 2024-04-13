@@ -332,6 +332,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Error,
                 "The option cannot be applied to a declaration because eligibility conditions are not met." );
 
+        internal static readonly DiagnosticDefinition
+            CodeFormattingEnabled = new(
+                "LAMA0066",
+                _category,
+                "Formatting of generated code is enabled. Build performance could be significantly affected.",
+                Warning,
+                "Code formatting is enabled. Build performance could be significantly affected." );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

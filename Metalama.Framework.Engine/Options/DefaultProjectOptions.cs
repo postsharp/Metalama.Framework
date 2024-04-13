@@ -91,6 +91,8 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? RestoreSources => null;
 
+    public virtual bool? WriteTransformedFiles => false;
+
     public virtual bool IsTest => false;
 
     public virtual string? TemplateLanguageVersion => null;

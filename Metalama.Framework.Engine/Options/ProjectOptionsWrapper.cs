@@ -72,6 +72,8 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool? WriteLicenseUsageData => this.Wrapped.WriteLicenseUsageData;
 
+    public virtual bool? WriteTransformedFiles => this.Wrapped.WriteTransformedFiles;
+
     public virtual bool IsTest => this.Wrapped.IsTest;
 
     public virtual bool RoslynIsCompileTimeOnly => this.Wrapped.RoslynIsCompileTimeOnly;

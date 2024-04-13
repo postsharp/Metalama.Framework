@@ -53,7 +53,7 @@ public partial class MSBuildProjectOptions : DefaultProjectOptions
 
     private CodeFormattingOptions GetTextOutputOptionsCore()
     {
-        if ( !string.IsNullOrEmpty( this.TransformedFilesOutputPath ) || this.DebugTransformedCode == true )
+        if ( this.WriteTransformedFiles == true || this.DebugTransformedCode == true )
         {
             if ( this.GetBooleanOption( MSBuildPropertyNames.MetalamaFormatOutput ) )
             {
@@ -148,6 +148,9 @@ public partial class MSBuildProjectOptions : DefaultProjectOptions
 
     [Memo]
     public override string? TransformedFilesOutputPath => this.GetStringOption( MSBuildPropertyNames.MetalamaCompilerTransformedFilesOutputPath );
+
+    [Memo]
+    public override bool? WriteTransformedFiles => this.GetBooleanOption( MSBuildPropertyNames.MetalamaEmitCompilerTransformedFiles );
 
     public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
     {
