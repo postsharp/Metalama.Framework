@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
             void ProcessTransformationsOnType( IGrouping<INamedType, ITransformation> transformationsOnType )
             {

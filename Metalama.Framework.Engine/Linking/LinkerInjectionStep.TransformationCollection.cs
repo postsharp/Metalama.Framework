@@ -272,12 +272,12 @@ internal sealed partial class LinkerInjectionStep
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
-            await concurrentTaskRunner.RunInParallelAsync(
+            await concurrentTaskRunner.RunConcurrentlyAsync(
                 this._introductionMemberLevelTransformations.Values,
                 t => t.Sort(),
                 cancellationToken );
 
-            await concurrentTaskRunner.RunInParallelAsync(
+            await concurrentTaskRunner.RunConcurrentlyAsync(
                 this._symbolMemberLevelTransformations.Values,
                 t => t.Sort(),
                 cancellationToken );

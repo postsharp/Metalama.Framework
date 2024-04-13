@@ -110,7 +110,7 @@ internal sealed partial class LinkerAnalysisStep
             }
 
             var taskScheduler = this._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-            await taskScheduler.RunInParallelAsync( this._reachableSemantics, AnalyzeSemantic, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( this._reachableSemantics, AnalyzeSemantic, cancellationToken );
 
             return results;
         }

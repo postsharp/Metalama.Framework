@@ -327,7 +327,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             var children = selector( declaration );
 
-                            return this._concurrentTaskRunner.RunInParallelAsync(
+                            return this._concurrentTaskRunner.RunConcurrentlyAsync(
                                 children,
                                 child => action( child, context ),
                                 context2.CancellationToken );
@@ -551,7 +551,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 if ( cached != null )
                 {
-                    await this._concurrentTaskRunner.RunInParallelAsync(
+                    await this._concurrentTaskRunner.RunConcurrentlyAsync(
                         cached,
                         x => processTarget( x, selectionContext ),
                         selectionContext.CancellationToken );

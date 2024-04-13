@@ -121,7 +121,7 @@ public sealed partial class AspectWeaverContext
 
         var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentBag<SyntaxReference>>();
 
-        await taskScheduler.RunInParallelAsync( this.AspectInstances, ProcessAspectInstance, cancellationToken );
+        await taskScheduler.RunConcurrentlyAsync( this.AspectInstances, ProcessAspectInstance, cancellationToken );
 
         void ProcessAspectInstance( KeyValuePair<ISymbol, IAspectInstance> aspectInstance )
         {
@@ -140,7 +140,7 @@ public sealed partial class AspectWeaverContext
 
         ConcurrentLinkedList<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
-        await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
+        await taskScheduler.RunConcurrentlyAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
 
         async Task ProcessSyntaxTreeAsync( KeyValuePair<SyntaxTree, ConcurrentBag<SyntaxReference>> group )
         {

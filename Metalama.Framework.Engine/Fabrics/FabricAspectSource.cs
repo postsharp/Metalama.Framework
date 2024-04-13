@@ -43,7 +43,7 @@ internal sealed class FabricAspectSource : IAspectSource
                 .Where( x => x.Target != null )
                 .GroupBy( x => x.Target );
 
-        return this._concurrentTaskRunner.RunInParallelAsync( driversByTarget, ProcessDriver, context.CancellationToken );
+        return this._concurrentTaskRunner.RunConcurrentlyAsync( driversByTarget, ProcessDriver, context.CancellationToken );
 
         // Process target declarations.
         void ProcessDriver( IGrouping<IDeclaration?, (TypeFabricDriver Driver, IDeclaration? Target)> driverGroup )

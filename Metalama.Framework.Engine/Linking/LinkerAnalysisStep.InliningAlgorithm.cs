@@ -66,7 +66,7 @@ internal sealed partial class LinkerAnalysisStep
                 VisitSemantic( semantic, inliningContext );
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( this._reachableSemantics, ProcessSemantic, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( this._reachableSemantics, ProcessSemantic, cancellationToken );
 
             return inliningSpecifications.ToReadOnlyList();
 

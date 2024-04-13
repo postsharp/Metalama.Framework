@@ -78,7 +78,7 @@ internal sealed class CompilationAspectSource : IAspectSource
         // Process attributes in parallel.
         var attributes = compilation.GetAllAttributesOfType( aspectType );
 
-        return this._concurrentTaskRunner.RunInParallelAsync( attributes, ProcessAttribute, cancellationToken );
+        return this._concurrentTaskRunner.RunConcurrentlyAsync( attributes, ProcessAttribute, cancellationToken );
 
         void ProcessAttribute( IAttribute attribute )
         {

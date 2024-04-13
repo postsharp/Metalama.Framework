@@ -138,7 +138,7 @@ internal sealed class ValidationRunner
 
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
 
-        await this._concurrentTaskRunner.RunInParallelAsync( validators, RunValidator, cancellationToken );
+        await this._concurrentTaskRunner.RunConcurrentlyAsync( validators, RunValidator, cancellationToken );
 
         return validators.Count > 0;
 
@@ -172,7 +172,7 @@ internal sealed class ValidationRunner
 
         var referenceValidatorProvider = new ValidatorProvider( validatorsBySymbol );
 
-        await this._concurrentTaskRunner.RunInParallelAsync(
+        await this._concurrentTaskRunner.RunConcurrentlyAsync(
             initialCompilation.PartialCompilation.SyntaxTrees.Values,
             ( syntaxTree, visitor ) => visitor.Visit( syntaxTree ),
             () => new ReferenceValidationVisitor(

@@ -170,7 +170,7 @@ internal sealed class LinkerInjectionRegistry
         }
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        concurrentTaskRunner.RunInParallelAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
+        concurrentTaskRunner.RunConcurrentlyAsync( this._injectedMembers, ProcessInjectedMember, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
         void ProcessOverride( KeyValuePair<IDeclaration, List<ISymbol>> value )
@@ -195,7 +195,7 @@ internal sealed class LinkerInjectionRegistry
         }
 
 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        concurrentTaskRunner.RunInParallelAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
+        concurrentTaskRunner.RunConcurrentlyAsync( overriddenDeclarations, ProcessOverride, cancellationToken ).Wait( cancellationToken );
 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
         ISymbol GetCanonicalSymbolForInjectedMember( InjectedMember injectedMember )

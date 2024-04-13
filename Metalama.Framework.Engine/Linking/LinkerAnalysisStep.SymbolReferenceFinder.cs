@@ -98,7 +98,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
 
             return symbolReferences.ToReadOnlyList();
         }
@@ -137,7 +137,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
 
             return symbolReferences.ToReadOnlyList();
         }

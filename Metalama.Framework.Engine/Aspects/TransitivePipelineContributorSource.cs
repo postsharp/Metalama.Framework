@@ -119,7 +119,7 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
         IAspectClass aspectClass,
         OutboundActionCollectionContext context )
     {
-        return this._concurrentTaskRunner.RunInParallelAsync( this._inheritedAspects[aspectClass], ProcessAspectInstance, context.CancellationToken );
+        return this._concurrentTaskRunner.RunConcurrentlyAsync( this._inheritedAspects[aspectClass], ProcessAspectInstance, context.CancellationToken );
 
         void ProcessAspectInstance( InheritableAspectInstance inheritedAspectInstance )
         {

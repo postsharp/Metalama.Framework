@@ -308,7 +308,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await concurrentTaskRunner.RunInParallelAsync( resolvedReferencesBySource, Process, cancellationToken );
+            await concurrentTaskRunner.RunConcurrentlyAsync( resolvedReferencesBySource, Process, cancellationToken );
         }
 
         private static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> GetNonInlinedReferences(

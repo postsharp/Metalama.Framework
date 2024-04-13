@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
             var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
-            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees, RewriteSyntaxTreeAsync, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( compilation.SyntaxTrees, RewriteSyntaxTreeAsync, cancellationToken );
 
             async Task RewriteSyntaxTreeAsync( KeyValuePair<string, SyntaxTree> tree )
             {

@@ -59,7 +59,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         var aspectInstancesOfSameType = new ConcurrentLinkedList<ImmutableArray<AspectInstance>>();
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
-        await this._concurrentTaskRunner.RunInParallelAsync(
+        await this._concurrentTaskRunner.RunConcurrentlyAsync(
             instancesByType,
             t => this.ProcessTypeAsync(
                 t,

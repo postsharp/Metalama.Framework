@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync(
+            await this._concurrentTaskRunner.RunConcurrentlyAsync(
                 input.IntermediateCompilation.ModifiedSyntaxTrees.Values,
                 ProcessTransformationAsync,
                 cancellationToken );

@@ -3,18 +3,16 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-// ReSharper disable PossibleMultipleEnumeration
 internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 {
     private readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
 
-    public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+    public Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull
     {
         using var enumerator = items.GetEnumerator();
@@ -64,7 +62,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
     }
 
-    public Task RunInParallelAsync<TItem, TContext>(
+    public Task RunConcurrentlyAsync<TItem, TContext>(
         IEnumerable<TItem> items,
         Action<TItem, TContext> action,
         Func<TContext> createContext,
@@ -122,7 +120,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
     }
 
-    public Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
+    public Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull
     {
         using var enumerator = items.GetEnumerator();
@@ -136,7 +134,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         if ( !enumerator.MoveNext() )
         {
-            return action( items.First() );
+            return action( item1 );
         }
 
         var queue = new ConcurrentQueue<T>();
