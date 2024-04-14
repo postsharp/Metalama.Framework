@@ -119,6 +119,8 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         new IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes = false );
 
+        new IAspectReceiver<INamedType> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
+
         /// <summary>
         /// Filters the set of declarations included in the current set.
         /// </summary>
@@ -244,6 +246,8 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         new IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false );
 
+        new IAspectReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options = DerivedTypesOptions.Default );
+
         /// <summary>
         /// Filters the set of declarations included in the current set.
         /// </summary>
@@ -268,5 +272,15 @@ namespace Metalama.Framework.Aspects
         new IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag );
 
         new IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag );
+    }
+
+    [CompileTime]
+    public static class AspectReceiverExtensions
+    {
+        public static IAspectReceiver<IAssembly> SelectReferencedAssembly( this IAspectReceiver<ICompilation> receiver, string assemblyName )
+            => receiver.SelectMany( c => c.ReferencedAssemblies.OfName( assemblyName ) );
+
+        public static IAspectReceiver<INamedType> SelectType( this IAspectReceiver<ICompilation> receiver, Type type )
+            => receiver.Select( c => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( type ) );
     }
 }

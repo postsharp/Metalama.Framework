@@ -284,6 +284,72 @@ namespace Metalama.Framework.Engine.Fabrics
 
         IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
 
+        IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFrom( baseType, options );
+
+        IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom(
+            Type baseType,
+            DerivedTypesOptions options )
+            => this.SelectTypesDerivedFrom( baseType, options );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypesDerivedFrom(
+            Type baseType,
+            DerivedTypesOptions options )
+            => this.SelectTypesDerivedFrom( baseType, options );
+
+        public IAspectReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.AddChild(
+                new AspectReceiver<INamedType, TTag>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            if ( declaration is ICompilation compilation )
+                            {
+                                var types = compilation.GetDerivedTypes( baseType, options );
+
+                                return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                    types,
+                                    child => action( child, tag, context ),
+                                    context2.CancellationToken );
+                            }
+                            else if ( options != DerivedTypesOptions.Default )
+                            {
+                                throw new NotImplementedException(
+                                    $"Non-default DerivedTypesOptions are only implemented for ICompilation but an have a {declaration.DeclarationKind.ToDisplayString()}." );
+                            }
+                            else
+                            {
+                                var types = declaration switch
+                                {
+                                    INamespace ns => ns.SelectManyRecursive( x => x.Namespaces )
+                                        .SelectMany( x => x.Types )
+                                        .SelectManyRecursive( x => x.NestedTypes ),
+                                    INamedType namedType => namedType.SelectManyRecursive( x => x.NestedTypes ),
+                                    _ when declaration.GetTopmostNamedType() is { } topmostType => topmostType.SelectManyRecursive( x => x.NestedTypes ),
+                                    _ => Enumerable.Empty<INamedType>()
+                                };
+
+                                return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                    types,
+                                    child =>
+                                    {
+                                        if ( child.Is( baseType ) )
+                                        {
+                                            return action( child, tag, context );
+                                        }
+                                        else
+                                        {
+                                            return Task.CompletedTask;
+                                        }
+                                    },
+                                    context2.CancellationToken );
+                            }
+                        } ) ) );
+
         IAspectReceiver<TDeclaration, TTag> IAspectReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
@@ -441,9 +507,9 @@ namespace Metalama.Framework.Engine.Fabrics
                         {
                             IEnumerable<INamedType> types;
 
-                            if ( declaration is ICompilation compilation )
+                            if ( declaration is IAssembly assembly )
                             {
-                                types = includeNestedTypes ? compilation.AllTypes : compilation.Types;
+                                types = includeNestedTypes ? assembly.AllTypes : assembly.Types;
                             }
                             else
                             {
@@ -556,8 +622,6 @@ namespace Metalama.Framework.Engine.Fabrics
 
         IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.Select<TMember>( Func<TDeclaration, TMember> selector )
             => this.Select( ( declaration, _ ) => selector( declaration ) );
-
-        private delegate void ValidateWithTag( in DeclarationValidationContext context, TTag tag );
 
         private sealed class FinalValidatorHelper<TOutput>
         {

@@ -139,6 +139,8 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </remarks>
     IValidatorReceiver<INamedType> SelectTypes( bool includeNestedTypes = false );
 
+    IValidatorReceiver<INamedType> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
+
     /// <summary>
     /// Filters the set of declarations included in the query.
     /// </summary>
@@ -238,6 +240,8 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
     new IValidatorReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false );
+
+    new IValidatorReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
 
     /// <summary>
     /// Filters the set of declarations included in the query.
