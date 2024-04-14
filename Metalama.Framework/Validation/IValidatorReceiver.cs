@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
 
@@ -55,6 +56,21 @@ public interface IValidatorReceiver
 public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     where TDeclaration : class, IDeclaration
 {
+    /// <summary>
+    /// Gets the current project.
+    /// </summary>
+    IProject Project { get; }
+
+    /// <summary>
+    /// Gets the current namespace, i.e. the one of the originating fabric or aspect instance.
+    /// </summary>
+    string? OriginatingNamespace { get; }
+
+    /// <summary>
+    /// Gets the declaration of the originating fabric or aspect instance.
+    /// </summary>
+    IRef<IDeclaration> OriginatingDeclaration { get; }
+
     /// <summary>
     /// Registers a reference validator, provided by a delegate that provides an instance of the <see cref="ReferenceValidator"/> abstract class.
     /// The reference validator will be invoked to validate references to any declaration in the current set. Only source code references
@@ -111,6 +127,17 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </summary>
     IValidatorReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
         where TMember : class, IDeclaration;
+
+    /// <summary>
+    /// Selects all types in the current context. If the current object represents <see cref="ICompilation"/> or <see cref="INamespace"/>, this
+    /// method returns all the types in the compilation or namespace. If the current object represents a set of types, this method returns
+    /// the current set. If the current object represent a set of members or parameters, the method will return their declaring types.
+    /// </summary>
+    /// <param name="includeNestedTypes">Indicates whether nested types should be recursively included in the output.</param>
+    /// <remarks>
+    /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+    /// </remarks>
+    IValidatorReceiver<INamedType> SelectTypes( bool includeNestedTypes = false );
 
     /// <summary>
     /// Filters the set of declarations included in the query.

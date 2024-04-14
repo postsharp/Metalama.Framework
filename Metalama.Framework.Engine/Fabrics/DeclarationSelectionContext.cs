@@ -19,11 +19,11 @@ internal class DeclarationSelectionContext
 
     public CompilationModel Compilation { get; }
 
-    private class Node
+    private sealed class Node
     {
         public SemaphoreSlim Semaphore { get; } = new( 1 );
 
-        public object? Payload;
+        public object? Payload { get; set; }
     }
 
     public DeclarationSelectionContext( CompilationModel compilation, CancellationToken cancellationToken )
@@ -53,7 +53,7 @@ internal class DeclarationSelectionContext
 
     public void AddToCache( IAspectReceiver<IDeclaration> receiver, object payload )
     {
-        if ( !this._selectionCache.TryGetValue( receiver, out var node ) )
+        if ( !this._selectionCache.AssertNotNull().TryGetValue( receiver, out var node ) )
         {
             throw new AssertionFailedException();
         }

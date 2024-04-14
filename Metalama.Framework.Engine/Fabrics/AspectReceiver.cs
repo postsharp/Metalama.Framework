@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
@@ -15,9 +16,9 @@ using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Options;
+using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,6 +56,12 @@ namespace Metalama.Framework.Engine.Fabrics
             this._compilationModelVersion = compilationModelVersion;
             this._adder = addTargets;
         }
+
+        public IProject Project => this._parent.Project;
+
+        public string? OriginatingNamespace => this._parent.Namespace;
+
+        public IRef<IDeclaration> OriginatingDeclaration => this._containingDeclaration;
 
         protected virtual bool ShouldCache => this._childrenCount > 1;
 
@@ -344,6 +351,45 @@ namespace Metalama.Framework.Engine.Fabrics
                         context,
                         ( declaration, context2 ) => action( selector( declaration ), context2 ) ) ) );
 
+        public IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes )
+            => this.AddChild( new AspectReceiver<INamedType>(
+                                  this._containingDeclaration,
+                                  this._parent,
+                                  this._compilationModelVersion,
+                                  ( action, context ) => this.InvokeAdderAsync(
+                                      context,
+                                      ( declaration, context2 ) =>
+                                      {
+                                          IEnumerable<INamedType> types;
+
+                                          if ( declaration is ICompilation compilation )
+                                          {
+                                              types = includeNestedTypes ? compilation.AllTypes : compilation.Types;
+                                          }
+                                          else
+                                          {
+                                              types = declaration switch
+                                              {
+                                                  INamespace ns => ns.SelectManyRecursive( x => x.Namespaces ).SelectMany( x => x.Types ),
+                                                  INamedType type => new[] { type },
+                                                  _ when declaration.GetTopmostNamedType() is { } topmostType => new[] { topmostType },
+                                                  _ => Enumerable.Empty<INamedType>()
+                                              };
+
+                                              if ( includeNestedTypes )
+                                              {
+                                                  types = types.SelectManyRecursive( t => t.NestedTypes );
+                                              }
+                                          }
+
+                                          return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                              types,
+                                              child => action( child, context ),
+                                              context2.CancellationToken );
+                                      } ) ) );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<T>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
+
         public IAspectReceiver<T> Where( Func<T, bool> predicate )
             => this.AddChild(
                 new AspectReceiver<T>(
@@ -587,7 +633,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
             if ( this.ShouldCache )
             {
-                selectionContext.AddToCache( this, cached );
+                selectionContext.AddToCache( this, cached.AssertNotNull() );
             }
         }
 

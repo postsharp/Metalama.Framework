@@ -44,6 +44,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IProject Project => this.Target.Compilation.Project;
 
+        [Memo]
+        public string? Namespace => this.Target.GetNamespace()?.FullName;
+
         public IAspectInstance AspectInstance => this._aspectBuilderState.AspectInstance;
 
         void IPipelineContributorSourceCollector.AddAspectSource( IAspectSource aspectSource )

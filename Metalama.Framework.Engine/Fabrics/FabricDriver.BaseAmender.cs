@@ -47,6 +47,8 @@ internal abstract partial class FabricDriver
 
         public IProject Project { get; }
 
+        public abstract string? Namespace { get; }
+
         public LicenseVerifier? LicenseVerifier { get; }
 
         public abstract void AddAspectSource( IAspectSource aspectSource );

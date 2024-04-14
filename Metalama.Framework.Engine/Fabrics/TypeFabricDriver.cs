@@ -132,6 +132,8 @@ internal sealed class TypeFabricDriver : FabricDriver
 
         public IAdviceFactory Advice { get; }
 
+        public override string? Namespace => this.Type.Namespace.FullName;
+
         public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
         public override void AddValidatorSource( IValidatorSource validatorSource ) => this._aspectBuilder.AddValidatorSource( validatorSource );
