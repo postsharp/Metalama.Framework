@@ -146,4 +146,127 @@ namespace Metalama.Framework.Aspects
         void SetOptions<TOptions>( TOptions options )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
     }
+
+    [InternalImplement]
+    [CompileTime]
+    public interface IAspectReceiver<out TDeclaration, out TTag> : IValidatorReceiver<TDeclaration, TTag>, IAspectReceiver<TDeclaration>
+        where TDeclaration : class, IDeclaration
+    {
+        /// <summary>
+        /// Adds a aspect to the current set of declarations or throws an exception if the aspect is not eligible for the aspect. This overload is non-generic.
+        /// </summary>
+        /// <param name="aspectType">The exact type of the aspect returned by <paramref name="createAspect"/>. It is not allowed to specify a base type in this parameter, only the exact type.</param>
+        /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
+        void AddAspect( Type aspectType, Func<TDeclaration, TTag, IAspect> createAspect );
+
+        /// <summary>
+        /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. This overload is non-generic.
+        /// </summary>
+        /// <param name="aspectType">The exact type of the aspect returned by <paramref name="createAspect"/>. It is not allowed to specify a base type in this parameter, only the exact type.</param>
+        /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
+        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Default"/> | <see cref="EligibleScenarios.Inheritance"/>.
+        /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
+        /// </param>
+        void AddAspectIfEligible(
+            Type aspectType,
+            Func<TDeclaration, TTag, IAspect> createAspect,
+            EligibleScenarios eligibility = EligibleScenarios.Default | EligibleScenarios.Inheritance );
+
+        /// <summary>
+        /// Adds an aspect to the current set of declarations or throws an exception if the aspect is not eligible for the aspect.
+        /// </summary>
+        /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
+        void AddAspect<TAspect>( Func<TDeclaration, TTag, TAspect> createAspect )
+            where TAspect : class, IAspect<TDeclaration>;
+
+        /// <summary>
+        /// Adds an aspect to the current set of declarations but only if the aspect is eligible for the declaration. 
+        /// </summary>
+        /// <param name="createAspect">A function that returns the aspect for a given declaration.</param>
+        /// <param name="eligibility">The scenarios for which the aspect may be eligible. The default value is <see cref="EligibleScenarios.Default"/> | <see cref="EligibleScenarios.Inheritance"/>.
+        /// If <see cref="EligibleScenarios.None"/> is provided, eligibility is not checked.
+        /// </param>
+        void AddAspectIfEligible<TAspect>(
+            Func<TDeclaration, TTag, TAspect> createAspect,
+            EligibleScenarios eligibility = EligibleScenarios.Default | EligibleScenarios.Inheritance )
+            where TAspect : class, IAspect<TDeclaration>;
+
+        /// <summary>
+        /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+        /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
+        /// <see cref="IValidatorReceiver.Validate"/>
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectMany{TMember}"/> is executed concurrently. It is therefore preferable to use the <see cref="Where"/>, <see cref="Select{TMember}"/>
+        /// or <see cref="SelectMany{TMember}"/> methods of the current interface instead of using the equivalent system methods inside the <paramref name="selector"/> query.</para>
+        /// </remarks>
+        new IAspectReceiver<TMember, TTag> SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            where TMember : class, IDeclaration;
+
+        /// <summary>
+        /// Selects members of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+        /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>,
+        /// <see cref="IValidatorReceiver.Validate"/>
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectMany{TMember}"/> is executed concurrently. It is therefore preferable to use the <see cref="Where"/>, <see cref="Select{TMember}"/>
+        /// or <see cref="SelectMany{TMember}"/> methods of the current interface instead of using the equivalent system methods inside the <paramref name="selector"/> query.</para>
+        /// </remarks>
+        new IAspectReceiver<TMember, TTag> SelectMany<TMember>( Func<TDeclaration, TTag, IEnumerable<TMember>> selector )
+            where TMember : class, IDeclaration;
+
+        /// <summary>
+        /// Selects a member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+        /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>.  <see cref="IValidatorReceiver.Validate"/>
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
+        /// </summary>
+        new IAspectReceiver<TMember, TTag> Select<TMember>( Func<TDeclaration, TMember> selector )
+            where TMember : class, IDeclaration;
+
+        /// <summary>
+        /// Selects a member or the parent of the target declaration of the current aspect or fabric with the purpose of adding aspects, annotations or validators to them
+        /// using e.g. <see cref="IAspectReceiver{TDeclaration}.AddAspectIfEligible{TAspect}(Metalama.Framework.Eligibility.EligibleScenarios)"/>.  <see cref="IValidatorReceiver.Validate"/>
+        /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
+        /// </summary>
+        new IAspectReceiver<TMember, TTag> Select<TMember>( Func<TDeclaration, TTag, TMember> selector )
+            where TMember : class, IDeclaration;
+
+        /// <summary>
+        /// Selects all types in the current context. If the current object represents <see cref="ICompilation"/> or <see cref="INamespace"/>, this
+        /// method returns all the types in the compilation or namespace. If the current object represents a set of types, this method returns
+        /// the current set. If the current object represent a set of members or parameters, the method will return their declaring types.
+        /// </summary>
+        /// <param name="includeNestedTypes">Indicates whether nested types should be recursively included in the output.</param>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+        /// </remarks>
+        new IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false );
+
+        /// <summary>
+        /// Filters the set of declarations included in the current set.
+        /// </summary>
+        new IAspectReceiver<TDeclaration, TTag> Where( Func<TDeclaration, bool> predicate );
+
+        /// <summary>
+        /// Filters the set of declarations included in the current set.
+        /// </summary>
+        new IAspectReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate );
+
+        /// <summary>
+        /// Sets options for the declarations in the current set of declarations by supplying a <see cref="Func{TResult}"/>.
+        /// </summary>
+        /// <param name="func">A function giving the options for the given declaration.</param>
+        /// <typeparam name="TOptions">The type of options.</typeparam>
+        /// <remarks>
+        /// This method should only set the option properties that need to be changed. All unchanged properties must be let null.
+        /// </remarks>
+        void SetOptions<TOptions>( Func<TDeclaration, TTag, TOptions> func )
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
+
+        new IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag );
+
+        new IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag );
+    }
 }

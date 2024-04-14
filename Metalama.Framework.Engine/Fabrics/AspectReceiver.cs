@@ -31,14 +31,14 @@ namespace Metalama.Framework.Engine.Fabrics
     /// An implementation of <see cref="IAspectReceiver{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    internal class AspectReceiver<T> : IAspectReceiver<T>
-        where T : class, IDeclaration
+    /// <typeparam name="TDeclaration"></typeparam>
+    internal class AspectReceiver<TDeclaration, TTag> : IAspectReceiver<TDeclaration, TTag>
+        where TDeclaration : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<Func<T, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> _adder;
+        private readonly Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> _adder;
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
         // We track the number of children to know if we must cache results.
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Fabrics
             ISdkRef<IDeclaration> containingDeclaration,
             IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
-            Func<Func<T, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
+            Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
         {
             this._concurrentTaskRunner = parent.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
@@ -65,8 +65,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         protected virtual bool ShouldCache => this._childrenCount > 1;
 
-        private AspectReceiver<TChild> AddChild<TChild>( AspectReceiver<TChild> child )
-            where TChild : class, IDeclaration
+        private AspectReceiver<TChildDeclaration, TChildTag> AddChild<TChildDeclaration, TChildTag>( AspectReceiver<TChildDeclaration, TChildTag> child )
+            where TChildDeclaration : class, IDeclaration
         {
             this._childrenCount++;
 
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         context,
-                        ( item, context2 ) => this.SelectReferenceValidatorInstancesAsync(
+                        ( item, _, context2 ) => this.SelectReferenceValidatorInstancesAsync(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         context,
-                        ( item, c ) => this.SelectReferenceValidatorInstancesAsync(
+                        ( item, _, c ) => this.SelectReferenceValidatorInstancesAsync(
                             item,
                             source.Driver,
                             ValidatorImplementation.Create( validator ),
@@ -239,7 +239,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             c ) ) ) );
         }
 
-        public void ValidateReferences<TValidator>( Func<T, TValidator> getValidator )
+        public void ValidateReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
             where TValidator : ReferenceValidator
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
@@ -256,9 +256,9 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         context,
-                        ( item, c ) =>
+                        ( item, tag, c ) =>
                         {
-                            var validator = userCodeInvoker.Invoke( () => getValidator( item ), executionContext );
+                            var validator = userCodeInvoker.Invoke( () => getValidator( item, tag ), executionContext );
 
                             return this.SelectReferenceValidatorInstancesAsync(
                                 item,
@@ -269,6 +269,81 @@ namespace Metalama.Framework.Engine.Fabrics
                                 c );
                         } ) ) );
         }
+
+        void IValidatorReceiver<TDeclaration>.SuggestCodeFix( Func<TDeclaration, CodeFix> codeFix )
+            => this.SuggestCodeFix( ( declaration, _ ) => codeFix( declaration ) );
+
+        IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.AfterAllAspects() => this.AfterAllAspects();
+
+        IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.BeforeAnyAspect() => this.BeforeAnyAspect();
+
+        IAspectReceiver<TMember, TTag> IAspectReceiver<TDeclaration, TTag>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IAspectReceiver<TMember, TTag> IAspectReceiver<TDeclaration, TTag>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
+
+        IAspectReceiver<TDeclaration, TTag> IAspectReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        IAspectReceiver<TDeclaration, TNewTag> IAspectReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
+
+        public IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
+            => this.AddChild(
+                new AspectReceiver<TDeclaration, TNewTag>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            var newTag = getTag( declaration, tag );
+
+                            return action( declaration, newTag, context2 );
+                        } ) ) );
+
+        IAspectReceiver<TMember> IAspectReceiver<TDeclaration>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IAspectReceiver<TMember> IAspectReceiver<TDeclaration>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypes( bool includeNestedTypes )
+            => this.SelectTypes( includeNestedTypes );
+
+        IAspectReceiver<TDeclaration> IAspectReceiver<TDeclaration>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        void IAspectReceiver<TDeclaration>.SetOptions<TOptions>( Func<TDeclaration, TOptions> func )
+            => this.SetOptions( ( declaration, _ ) => func( declaration ) );
+
+        IValidatorReceiver<TDeclaration, TTag> IValidatorReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
+
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
+            => this.WithTag( getTag );
+
+        IValidatorReceiver<TDeclaration, TTag> IValidatorReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, TTag, bool> predicate )
+            => this.Where( predicate );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.Select<TMember>( Func<TDeclaration, TTag, TMember> selector )
+            => this.Select( selector );
+
+        IValidatorReceiver<TMember, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectMany<TMember>( Func<TDeclaration, TTag, IEnumerable<TMember>> selector )
+            => this.SelectMany( selector );
 
         public void Validate( ValidatorDelegate<DeclarationValidationContext> validateMethod )
         {
@@ -287,122 +362,127 @@ namespace Metalama.Framework.Engine.Fabrics
                         executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                         GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                         context,
-                        ( item, context2 ) =>
+                        ( item, tag, context2 ) =>
                         {
                             context2.Collector.AddValidator(
                                 new DeclarationValidatorInstance(
                                     item,
                                     (ValidatorDriver<DeclarationValidationContext>) source.Driver,
                                     ValidatorImplementation.Create( source.Predecessor.Instance ),
-                                    this._parent.DiagnosticSourceDescription ) );
+                                    this._parent.DiagnosticSourceDescription,
+                                    tag) );
 
                             return Task.CompletedTask;
                         } ) ) );
         }
 
-        public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )
-        {
-            this.Validate( new FinalValidatorHelper<IDiagnostic>( diagnostic ).ReportDiagnostic );
-        }
+        void IValidatorReceiver<TDeclaration>.ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
+            => this.ValidateReferences( ( declaration, _ ) => validator( declaration ) );
 
-        public void SuppressDiagnostic( Func<T, SuppressionDefinition> suppression )
-        {
-            this.Validate( new FinalValidatorHelper<SuppressionDefinition>( suppression ).SuppressDiagnostic );
-        }
+        void IValidatorReceiver<TDeclaration>.ReportDiagnostic( Func<TDeclaration, IDiagnostic> diagnostic )
+            => this.ReportDiagnostic( ( declaration, _ ) => diagnostic( declaration ) );
 
-        public void SuggestCodeFix( Func<T, CodeFix> codeFix )
-        {
-            this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
-        }
+        void IValidatorReceiver<TDeclaration>.SuppressDiagnostic( Func<TDeclaration, SuppressionDefinition> suppression )
+            => this.SuppressDiagnostic( ( declaration, _ ) => suppression( declaration ) );
 
-        public IValidatorReceiver<T> AfterAllAspects()
-            => this.AddChild( new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._adder ) );
+        public void ReportDiagnostic( Func<TDeclaration, TTag, IDiagnostic> diagnostic )
+            => this.Validate( new FinalValidatorHelper<IDiagnostic>( diagnostic ).ReportDiagnostic );
 
-        public IValidatorReceiver<T> BeforeAnyAspect()
-            => this.AddChild( new AspectReceiver<T>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._adder ) );
+        public void SuppressDiagnostic( Func<TDeclaration, TTag, SuppressionDefinition> suppression )
+            => this.Validate( new FinalValidatorHelper<SuppressionDefinition>( suppression ).SuppressDiagnostic );
 
-        public IAspectReceiver<TMember> SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector )
+        public void SuggestCodeFix( Func<TDeclaration, TTag, CodeFix> codeFix ) => this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
+
+        public IValidatorReceiver<TDeclaration, TTag> AfterAllAspects()
+            => this.AddChild( new AspectReceiver<TDeclaration, TTag>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._adder ) );
+
+        public IValidatorReceiver<TDeclaration, TTag> BeforeAnyAspect()
+            => this.AddChild(
+                new AspectReceiver<TDeclaration, TTag>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._adder ) );
+
+        public IAspectReceiver<TMember, TTag> SelectMany<TMember>( Func<TDeclaration, TTag, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
             => this.AddChild(
-                new AspectReceiver<TMember>(
+                new AspectReceiver<TMember, TTag>(
                     this._containingDeclaration,
                     this._parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
                         context,
-                        ( declaration, context2 ) =>
+                        ( declaration, tag, context2 ) =>
                         {
-                            var children = selector( declaration );
+                            var children = selector( declaration, tag );
 
                             return this._concurrentTaskRunner.RunConcurrentlyAsync(
                                 children,
-                                child => action( child, context ),
+                                child => action( child, tag, context ),
                                 context2.CancellationToken );
                         } ) ) );
 
-        public IAspectReceiver<TMember> Select<TMember>( Func<T, TMember> selector )
+        public IAspectReceiver<TMember, TTag> Select<TMember>( Func<TDeclaration, TTag, TMember> selector )
             where TMember : class, IDeclaration
             => this.AddChild(
-                new AspectReceiver<TMember>(
+                new AspectReceiver<TMember, TTag>(
                     this._containingDeclaration,
                     this._parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
                         context,
-                        ( declaration, context2 ) => action( selector( declaration ), context2 ) ) ) );
+                        ( declaration, tag, context2 ) => action( selector( declaration, tag ), tag, context2 ) ) ) );
 
-        public IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes )
-            => this.AddChild( new AspectReceiver<INamedType>(
-                                  this._containingDeclaration,
-                                  this._parent,
-                                  this._compilationModelVersion,
-                                  ( action, context ) => this.InvokeAdderAsync(
-                                      context,
-                                      ( declaration, context2 ) =>
-                                      {
-                                          IEnumerable<INamedType> types;
-
-                                          if ( declaration is ICompilation compilation )
-                                          {
-                                              types = includeNestedTypes ? compilation.AllTypes : compilation.Types;
-                                          }
-                                          else
-                                          {
-                                              types = declaration switch
-                                              {
-                                                  INamespace ns => ns.SelectManyRecursive( x => x.Namespaces ).SelectMany( x => x.Types ),
-                                                  INamedType type => new[] { type },
-                                                  _ when declaration.GetTopmostNamedType() is { } topmostType => new[] { topmostType },
-                                                  _ => Enumerable.Empty<INamedType>()
-                                              };
-
-                                              if ( includeNestedTypes )
-                                              {
-                                                  types = types.SelectManyRecursive( t => t.NestedTypes );
-                                              }
-                                          }
-
-                                          return this._concurrentTaskRunner.RunConcurrentlyAsync(
-                                              types,
-                                              child => action( child, context ),
-                                              context2.CancellationToken );
-                                      } ) ) );
-
-        IValidatorReceiver<INamedType> IValidatorReceiver<T>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
-
-        public IAspectReceiver<T> Where( Func<T, bool> predicate )
+        public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes )
             => this.AddChild(
-                new AspectReceiver<T>(
+                new AspectReceiver<INamedType, TTag>(
                     this._containingDeclaration,
                     this._parent,
                     this._compilationModelVersion,
                     ( action, context ) => this.InvokeAdderAsync(
                         context,
-                        ( declaration, context2 ) =>
+                        ( declaration, tag, context2 ) =>
                         {
-                            if ( predicate( declaration ) )
+                            IEnumerable<INamedType> types;
+
+                            if ( declaration is ICompilation compilation )
                             {
-                                return action( declaration, context2 );
+                                types = includeNestedTypes ? compilation.AllTypes : compilation.Types;
+                            }
+                            else
+                            {
+                                types = declaration switch
+                                {
+                                    INamespace ns => ns.SelectManyRecursive( x => x.Namespaces ).SelectMany( x => x.Types ),
+                                    INamedType type => new[] { type },
+                                    _ when declaration.GetTopmostNamedType() is { } topmostType => new[] { topmostType },
+                                    _ => Enumerable.Empty<INamedType>()
+                                };
+
+                                if ( includeNestedTypes )
+                                {
+                                    types = types.SelectManyRecursive( t => t.NestedTypes );
+                                }
+                            }
+
+                            return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                types,
+                                child => action( child, tag, context ),
+                                context2.CancellationToken );
+                        } ) ) );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
+
+        public IAspectReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate )
+            => this.AddChild(
+                new AspectReceiver<TDeclaration, TTag>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, tag, context2 ) =>
+                        {
+                            if ( predicate( declaration, tag ) )
+                            {
+                                return action( declaration, tag, context2 );
                             }
                             else
                             {
@@ -410,8 +490,8 @@ namespace Metalama.Framework.Engine.Fabrics
                             }
                         } ) ) );
 
-        public void SetOptions<TOptions>( Func<T, TOptions> func )
-            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
+        public void SetOptions<TOptions>( Func<TDeclaration, TTag, TOptions> func )
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new()
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
@@ -424,10 +504,10 @@ namespace Metalama.Framework.Engine.Fabrics
                             executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                             GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                             context,
-                            ( declaration, context2 ) =>
+                            ( declaration, tag, context2 ) =>
                             {
                                 if ( userCodeInvoker.TryInvoke(
-                                        () => func( declaration ),
+                                        () => func( declaration, tag ),
                                         executionContext,
                                         out var options ) )
                                 {
@@ -442,7 +522,7 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public void SetOptions<TOptions>( TOptions options )
-            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<T>, new()
+            where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new()
         {
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
@@ -455,7 +535,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             executionContext.WithCompilationAndDiagnosticAdder( context.Compilation, context.Collector ),
                             GeneralDiagnosticDescriptors.CanAddValidatorOnlyUnderParent,
                             context,
-                            ( declaration, context2 ) =>
+                            ( declaration, _, context2 ) =>
                             {
                                 context2.Collector.AddOptions(
                                     new HierarchicalOptionsInstance(
@@ -466,44 +546,47 @@ namespace Metalama.Framework.Engine.Fabrics
                             } ) ) );
         }
 
-        IValidatorReceiver<T> IValidatorReceiver<T>.Where( Func<T, bool> predicate ) => this.Where( predicate );
+        IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.Where( Func<TDeclaration, bool> predicate )
+            => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
-        IValidatorReceiver<TMember> IValidatorReceiver<T>.SelectMany<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.SelectMany( selector );
+        IValidatorReceiver<TDeclaration, TTag1> IValidatorReceiver<TDeclaration>.WithTag<TTag1>( Func<TDeclaration, TTag1> getTag )
+            => throw new NotImplementedException();
 
-        IValidatorReceiver<TMember> IValidatorReceiver<T>.Select<TMember>( Func<T, TMember> selector ) => this.Select( selector );
+        IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
+            => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
+
+        IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.Select<TMember>( Func<TDeclaration, TMember> selector )
+            => this.Select( ( declaration, _ ) => selector( declaration ) );
+
+        private delegate void ValidateWithTag( in DeclarationValidationContext context, TTag tag );
 
         private sealed class FinalValidatorHelper<TOutput>
         {
-            private readonly Func<T, TOutput> _func;
+            private readonly Func<TDeclaration, TTag, TOutput> _func;
 
-            public FinalValidatorHelper( Func<T, TOutput> func )
+            public FinalValidatorHelper( Func<TDeclaration, TTag, TOutput> func )
             {
                 this._func = func;
             }
 
             public void ReportDiagnostic( in DeclarationValidationContext context )
-            {
-                context.Diagnostics.Report( (IDiagnostic) this._func( (T) context.Declaration )! );
-            }
+                => context.Diagnostics.Report( (IDiagnostic) this._func( (TDeclaration) context.Declaration, (TTag) context.Tag! )! );
 
             public void SuppressDiagnostic( in DeclarationValidationContext context )
-            {
-                context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (T) context.Declaration )! );
-            }
+                => context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (TDeclaration) context.Declaration, (TTag) context.Tag! )! );
 
             public void SuggestCodeFix( in DeclarationValidationContext context )
-            {
-                context.Diagnostics.Suggest( (CodeFix) (object) this._func( (T) context.Declaration )! );
-            }
+                => context.Diagnostics.Suggest( (CodeFix) (object) this._func( (TDeclaration) context.Declaration, (TTag) context.Tag! )! );
         }
 
-        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
-            where TAspect : class, IAspect<T>
+        public void AddAspect<TAspect>( Func<TDeclaration, TTag, TAspect> createAspect )
+            where TAspect : class, IAspect<TDeclaration>
             => this.AddAspectIfEligible( createAspect, EligibleScenarios.None );
 
-        public void AddAspect( Type aspectType, Func<T, IAspect> createAspect ) => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
+        public void AddAspect( Type aspectType, Func<TDeclaration, TTag, IAspect> createAspect )
+            => this.AddAspectIfEligible( aspectType, createAspect, EligibleScenarios.None );
 
-        public void AddAspectIfEligible( Type aspectType, Func<T, IAspect> createAspect, EligibleScenarios eligibility )
+        public void AddAspectIfEligible( Type aspectType, Func<TDeclaration, TTag, IAspect> createAspect, EligibleScenarios eligibility )
         {
             var aspectClass = this.GetAspectClass( aspectType );
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
@@ -518,17 +601,17 @@ namespace Metalama.Framework.Engine.Fabrics
                         aspectClass,
                         eligibility,
                         context,
-                        ( t, context2 ) =>
+                        ( item, tag, context2 ) =>
                         {
                             if ( userCodeInvoker.TryInvoke(
-                                    () => createAspect( t ),
+                                    () => createAspect( item, tag ),
                                     executionContext,
                                     out var aspect ) )
                             {
                                 context2.Collector.AddAspectInstance(
                                     new AspectInstance(
                                         aspect,
-                                        t,
+                                        item,
                                         aspectClass,
                                         this._parent.AspectPredecessor ) );
                             }
@@ -537,16 +620,31 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
-        public void AddAspectIfEligible<TAspect>( Func<T, TAspect> createAspect, EligibleScenarios eligibility )
-            where TAspect : class, IAspect<T>
+        public void AddAspectIfEligible<TAspect>( Func<TDeclaration, TTag, TAspect> createAspect, EligibleScenarios eligibility )
+            where TAspect : class, IAspect<TDeclaration>
             => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
 
+        void IAspectReceiver<TDeclaration>.AddAspect( Type aspectType, Func<TDeclaration, IAspect> createAspect ) => throw new NotImplementedException();
+
+        void IAspectReceiver<TDeclaration>.AddAspectIfEligible(
+            Type aspectType,
+            Func<TDeclaration, IAspect> createAspect,
+            EligibleScenarios eligibility )
+            => throw new NotImplementedException();
+
+        void IAspectReceiver<TDeclaration>.AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect ) => throw new NotImplementedException();
+
+        void IAspectReceiver<TDeclaration>.AddAspectIfEligible<TAspect>(
+            Func<TDeclaration, TAspect> createAspect,
+            EligibleScenarios eligibility )
+            => throw new NotImplementedException();
+
         public void AddAspect<TAspect>()
-            where TAspect : class, IAspect<T>, new()
+            where TAspect : class, IAspect<TDeclaration>, new()
             => this.AddAspectIfEligible<TAspect>( EligibleScenarios.None );
 
         public void AddAspectIfEligible<TAspect>( EligibleScenarios eligibility )
-            where TAspect : class, IAspect<T>, new()
+            where TAspect : class, IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
@@ -562,7 +660,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         aspectClass,
                         eligibility,
                         context,
-                        ( t, context2 ) =>
+                        ( t, _, context2 ) =>
                         {
                             if ( userCodeInvoker.TryInvoke(
                                     () => new TAspect(),
@@ -581,36 +679,38 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
+        private readonly record struct CachedItem( TDeclaration Declaration, TTag Tag );
+
         private async Task InvokeAdderAsync(
             DeclarationSelectionContext selectionContext,
-            Func<T, DeclarationSelectionContext, Task> processTarget,
+            Func<TDeclaration, TTag, DeclarationSelectionContext, Task> processTarget,
             UserCodeInvoker? invoker = null,
             UserCodeExecutionContext? executionContext = null )
         {
-            ConcurrentBag<T> cached = null;
+            ConcurrentBag<CachedItem>? cached = null;
             var processTargetWithCachingIfNecessary = processTarget;
 
             if ( this.ShouldCache )
             {
                 // GetFromCacheAsync uses a semaphore to control exclusivity.  AddToCache must be called is the method returns null.
-                cached = await selectionContext.GetFromCacheAsync<ConcurrentBag<T>>( this, selectionContext.CancellationToken );
+                cached = await selectionContext.GetFromCacheAsync<ConcurrentBag<CachedItem>>( this, selectionContext.CancellationToken );
 
                 if ( cached != null )
                 {
                     await this._concurrentTaskRunner.RunConcurrentlyAsync(
                         cached,
-                        x => processTarget( x, selectionContext ),
+                        x => processTarget( x.Declaration, x.Tag, selectionContext ),
                         selectionContext.CancellationToken );
                 }
                 else
                 {
-                    cached = new ConcurrentBag<T>();
+                    cached = new ConcurrentBag<CachedItem>();
 
-                    processTargetWithCachingIfNecessary = ( a, ctx ) =>
+                    processTargetWithCachingIfNecessary = ( a, tag, ctx ) =>
                     {
-                        cached.Add( a );
+                        cached.Add( new CachedItem( a, tag ) );
 
-                        return processTarget( a, ctx );
+                        return processTarget( a, tag, ctx );
                     };
                 }
             }
@@ -643,13 +743,13 @@ namespace Metalama.Framework.Engine.Fabrics
             AspectClass aspectClass,
             EligibleScenarios filteredEligibility,
             OutboundActionCollectionContext context,
-            Func<T, OutboundActionCollectionContext, Task> addResult )
+            Func<TDeclaration, TTag, OutboundActionCollectionContext, Task> addResult )
         {
             var compilation = context.Compilation;
 
             await this.InvokeAdderAsync( context, ProcessTarget, invoker, executionContext );
 
-            Task ProcessTarget( T targetDeclaration, DeclarationSelectionContext context2 )
+            Task ProcessTarget( TDeclaration targetDeclaration, TTag tag, DeclarationSelectionContext context2 )
             {
                 context2.CancellationToken.ThrowIfCancellationRequested();
 
@@ -701,11 +801,11 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 if ( invoker != null && executionContext != null )
                 {
-                    return invoker.InvokeAsync( () => addResult( targetDeclaration, context ), executionContext );
+                    return invoker.InvokeAsync( () => addResult( targetDeclaration, tag, context ), executionContext );
                 }
                 else
                 {
-                    return addResult( targetDeclaration, context );
+                    return addResult( targetDeclaration, tag, context );
                 }
             }
         }
@@ -715,13 +815,13 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeExecutionContext? executionContext,
             DiagnosticDefinition<(FormattableString Predecessor, IDeclaration Child, IDeclaration Parent)> diagnosticDefinition,
             OutboundActionCollectionContext context,
-            Func<T, OutboundActionCollectionContext, Task> addAction )
+            Func<TDeclaration, TTag, OutboundActionCollectionContext, Task> addAction )
         {
             var compilation = context.Compilation;
 
             await this.InvokeAdderAsync( context, ProcessTarget, invoker, executionContext );
 
-            Task ProcessTarget( T targetDeclaration, DeclarationSelectionContext context2 )
+            Task ProcessTarget( TDeclaration targetDeclaration, TTag tag, DeclarationSelectionContext context2 )
             {
                 if ( targetDeclaration == null! )
                 {
@@ -744,12 +844,12 @@ namespace Metalama.Framework.Engine.Fabrics
                             (predecessorInstance.FormatPredecessor( compilation ), targetDeclaration, containingTypeOrCompilation) ) );
                 }
 
-                return addAction( targetDeclaration, context );
+                return addAction( targetDeclaration, tag, context );
             }
         }
 
         public void RequireAspect<TAspect>()
-            where TAspect : class, IAspect<T>, new()
+            where TAspect : class, IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
@@ -764,7 +864,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         aspectClass,
                         EligibleScenarios.None,
                         context,
-                        ( declaration, context2 ) =>
+                        ( declaration, _, context2 ) =>
                         {
                             context2.Collector.AddAspectRequirement(
                                 new AspectRequirement(
