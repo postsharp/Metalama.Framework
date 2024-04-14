@@ -31,7 +31,6 @@ namespace Metalama.Framework.Engine.Fabrics
     /// An implementation of <see cref="IAspectReceiver{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.
     /// </summary>
-    /// <typeparam name="TDeclaration"></typeparam>
     internal class AspectReceiver<TDeclaration, TTag> : IAspectReceiver<TDeclaration, TTag>
         where TDeclaration : class, IDeclaration
     {
@@ -370,7 +369,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                     (ValidatorDriver<DeclarationValidationContext>) source.Driver,
                                     ValidatorImplementation.Create( source.Predecessor.Instance ),
                                     this._parent.DiagnosticSourceDescription,
-                                    tag) );
+                                    tag ) );
 
                             return Task.CompletedTask;
                         } ) ) );
@@ -549,8 +548,8 @@ namespace Metalama.Framework.Engine.Fabrics
         IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
-        IValidatorReceiver<TDeclaration, TTag1> IValidatorReceiver<TDeclaration>.WithTag<TTag1>( Func<TDeclaration, TTag1> getTag )
-            => throw new NotImplementedException();
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
 
         IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
             => this.SelectMany( ( declaration, _ ) => selector( declaration ) );
@@ -624,20 +623,22 @@ namespace Metalama.Framework.Engine.Fabrics
             where TAspect : class, IAspect<TDeclaration>
             => this.AddAspectIfEligible( typeof(TAspect), createAspect, eligibility );
 
-        void IAspectReceiver<TDeclaration>.AddAspect( Type aspectType, Func<TDeclaration, IAspect> createAspect ) => throw new NotImplementedException();
+        void IAspectReceiver<TDeclaration>.AddAspect( Type aspectType, Func<TDeclaration, IAspect> createAspect )
+            => this.AddAspect( aspectType, ( declaration, _ ) => createAspect( declaration ) );
 
         void IAspectReceiver<TDeclaration>.AddAspectIfEligible(
             Type aspectType,
             Func<TDeclaration, IAspect> createAspect,
             EligibleScenarios eligibility )
-            => throw new NotImplementedException();
+            => this.AddAspectIfEligible( aspectType, ( declaration, _ ) => createAspect( declaration ), eligibility );
 
-        void IAspectReceiver<TDeclaration>.AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect ) => throw new NotImplementedException();
+        void IAspectReceiver<TDeclaration>.AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
+            => this.AddAspect( ( declaration, _ ) => createAspect( declaration ) );
 
         void IAspectReceiver<TDeclaration>.AddAspectIfEligible<TAspect>(
             Func<TDeclaration, TAspect> createAspect,
             EligibleScenarios eligibility )
-            => throw new NotImplementedException();
+            => this.AddAspectIfEligible( ( declaration, _ ) => createAspect( declaration ), eligibility );
 
         public void AddAspect<TAspect>()
             where TAspect : class, IAspect<TDeclaration>, new()
