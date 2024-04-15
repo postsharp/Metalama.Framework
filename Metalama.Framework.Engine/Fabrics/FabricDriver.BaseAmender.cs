@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
 
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 
 internal abstract partial class FabricDriver
 {
-    protected abstract class BaseAmender<T> : IAmender<T>, IAspectReceiverParent
+    protected abstract class BaseAmender<T> : RootAspectReceiver<T>, IAmender<T>, IAspectReceiverParent
         where T : class, IDeclaration
     {
         // The Target property is protected (and not exposed to the API) because
@@ -31,22 +32,24 @@ internal abstract partial class FabricDriver
         private Ref<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
+        private readonly IProject _project;
 
         protected BaseAmender(
             IProject project,
             FabricManager fabricManager,
             FabricInstance fabricInstance,
-            in Ref<T> targetDeclaration )
+            in Ref<T> targetDeclaration ) : base( fabricManager.ServiceProvider, targetDeclaration, CompilationModelVersion.Final )
         {
+            this._project = project;
             this._fabricInstance = fabricInstance;
             this.TargetDeclaration = targetDeclaration;
             this._fabricManager = fabricManager;
-            this.Project = project;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
-        public IProject Project { get; }
 
+        IProject IAspectReceiverParent.Project => this._project;
+        
         public abstract string? Namespace { get; }
 
         public LicenseVerifier? LicenseVerifier { get; }
@@ -60,7 +63,7 @@ internal abstract partial class FabricDriver
         ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 
         BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._fabricManager.AspectClasses;
-
+        
         UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._fabricManager.UserCodeInvoker;
 
         public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );

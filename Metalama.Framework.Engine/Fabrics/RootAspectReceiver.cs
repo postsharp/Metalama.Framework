@@ -2,11 +2,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Validation;
+using System;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal sealed class RootAspectReceiver<T> : AspectReceiver<T, int>
+internal class RootAspectReceiver<T> : AspectReceiver<T, int>
     where T : class, IDeclaration
 {
     internal RootAspectReceiver(
@@ -17,6 +20,9 @@ internal sealed class RootAspectReceiver<T> : AspectReceiver<T, int>
         parent,
         compilationModelVersion,
         ( action, context ) => action( (T) containingDeclaration.GetTarget( context.Compilation ), 0, context ) ) { }
+
+    internal RootAspectReceiver( ProjectServiceProvider serviceProvider, ISdkRef<IDeclaration> containingDeclaration, CompilationModelVersion compilationModelVersion ) :
+        base( serviceProvider, containingDeclaration, compilationModelVersion, ( action, context ) => action( (T) containingDeclaration.GetTarget( context.Compilation ), 0, context ) ) { }
 
     protected override bool ShouldCache => false;
 }

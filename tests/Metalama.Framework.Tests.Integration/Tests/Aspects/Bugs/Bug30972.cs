@@ -33,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30972
     {
         public override void AmendProject(IProjectAmender amender)
         {
-            amender.Outbound.SelectMany(p => p.Types.SelectMany(t => t.Fields)).AddAspect<TestAspect>();
+            amender.SelectMany(p => p.Types.SelectMany(t => t.Fields)).AddAspect<TestAspect>();
         }
     }
 

@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.HierarchicalOptions;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -52,6 +53,20 @@ namespace Metalama.Framework.Engine.Fabrics
             this._concurrentTaskRunner = parent.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
             this._containingDeclaration = containingDeclaration;
             this._parent = parent;
+            this._compilationModelVersion = compilationModelVersion;
+            this._adder = addTargets;
+        }
+        
+        // This constructor is used by fabric amenders, which are their own parents.
+        internal AspectReceiver(
+            ProjectServiceProvider serviceProvider,
+            ISdkRef<IDeclaration> containingDeclaration,
+            CompilationModelVersion compilationModelVersion,
+            Func<Func<TDeclaration, TTag, DeclarationSelectionContext, Task>, DeclarationSelectionContext, Task> addTargets )
+        {
+            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+            this._containingDeclaration = containingDeclaration;
+            this._parent = (IAspectReceiverParent) this;
             this._compilationModelVersion = compilationModelVersion;
             this._adder = addTargets;
         }
@@ -352,6 +367,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
         IAspectReceiver<TDeclaration, TTag> IAspectReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
+
+        IAspectReceiver<TDeclaration, TTag1> IAspectReceiver<TDeclaration>.WithTag<TTag1>( Func<TDeclaration, TTag1> getTag )
+            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
 
         IAspectReceiver<TDeclaration, TNewTag> IAspectReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
             => this.WithTag( ( declaration, _ ) => getTag( declaration ) );

@@ -8,7 +8,7 @@ public class Fabric : TransitiveProjectFabric
 {
     public override void AmendProject(IProjectAmender amender)
     {
-        amender.Outbound
+        amender
             .SelectMany(compilation => compilation.AllTypes)
             .Where(type => type.Accessibility is Metalama.Framework.Code.Accessibility.Public)
             .SelectMany(type => type.Methods)

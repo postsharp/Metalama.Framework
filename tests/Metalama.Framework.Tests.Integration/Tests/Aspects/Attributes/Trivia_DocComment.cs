@@ -49,7 +49,7 @@ partial class TestTypes
     {
         public override void AmendType(ITypeAmender amender)
         {
-            amender.Outbound.SelectMany(t => t.NestedTypes).AddAspect<TestAspect>();
+            amender.SelectMany(t => t.NestedTypes).AddAspect<TestAspect>();
         }
     }
 }

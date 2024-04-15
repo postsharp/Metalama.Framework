@@ -12,8 +12,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Options.NamespaceFabric_
         {
             public override void AmendNamespace( INamespaceAmender amender )
             {
-                amender.Outbound.SetOptions( c => new MyOptions { Value = "Namespace" } );
-                amender.Outbound.Select( c => c.Types.OfName( nameof(C2) ).Single() ).SetOptions( c => new MyOptions { Value = "C2" } );
+                amender.SetOptions( c => new MyOptions { Value = "Namespace" } );
+                amender.Select( c => c.Types.OfName( nameof(C2) ).Single() ).SetOptions( c => new MyOptions { Value = "C2" } );
             }
         }
 

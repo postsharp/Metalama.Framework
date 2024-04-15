@@ -11,7 +11,6 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TwoProjectFabr
         public override void AmendProject( IProjectAmender amender )
         {
             amender
-                .Outbound
                 .SelectMany( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(string) ) ) )
                 .AddAspect<Aspect>();
         }
@@ -22,7 +21,6 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TwoProjectFabr
         public override void AmendProject( IProjectAmender amender )
         {
             amender
-                .Outbound
                 .SelectMany( c => c.Types.SelectMany( t => t.Methods ).Where( m => m.ReturnType.Is( typeof(int) ) ) )
                 .AddAspect<Aspect>();
         }

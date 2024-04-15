@@ -1149,7 +1149,7 @@ class D{version}
                             {
                                 public override void AmendProject( IProjectAmender amender )
                                 {
-                                    amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                    amender.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
                                 }
                             }
                             """,
@@ -1181,7 +1181,7 @@ class D{version}
                                   {
                                       public override void AmendProject( IProjectAmender amender )
                                       {
-                                          amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
+                                          amender.SetOptions<MyOptions>( o => new MyOptions { Value = "THE_VALUE" } );
                                       }
                                   }
                                   """;
@@ -1482,12 +1482,12 @@ class D{version}
             {
                 public override void AmendProject(IProjectAmender amender)
                 {
-                    amender.Outbound
+                    amender
                         .SelectMany(p => p.Types)
                         .SelectMany(t => t.Fields)
                         .AddAspect<OverridePropertyAttribute>();
 
-                    amender.Outbound
+                    amender
                         .SelectMany(p => p.Types)
                         .SelectMany(t => t.Properties)
                         .SelectMany(p => new[] { p.GetMethod!, p.SetMethod! })

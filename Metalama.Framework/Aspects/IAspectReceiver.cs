@@ -147,6 +147,9 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         void SetOptions<TOptions>( TOptions options )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
+        
+        
+        new IAspectReceiver<TDeclaration, TTag> WithTag<TTag>( Func<TDeclaration, TTag> getTag );
     }
 
     [InternalImplement]

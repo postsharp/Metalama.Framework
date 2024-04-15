@@ -10,7 +10,7 @@ internal class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound
+        amender
             .SelectMany(
                 c => c.DescendantsAndSelf()
                     .SelectMany( t => t.Types )
