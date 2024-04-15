@@ -11,11 +11,10 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
         public override void AmendNamespace( INamespaceAmender amender )
         {
             amender
-                .SelectMany(
-                    c => c.DescendantsAndSelf()
-                        .SelectMany( t => t.Types )
-                        .SelectMany( t => t.Methods )
-                        .Where( m => m.ReturnType.Is( typeof(string) ) ) )
+                .SelectMany( c => c.DescendantsAndSelf() )
+                .SelectMany( t => t.Types )
+                .SelectMany( t => t.Methods )
+                .Where( m => m.ReturnType.Is( typeof(string) ) )
                 .AddAspect<Aspect>();
         }
     }

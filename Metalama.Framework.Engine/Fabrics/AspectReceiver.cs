@@ -784,6 +784,8 @@ namespace Metalama.Framework.Engine.Fabrics
                         cached,
                         x => processTarget( x.Declaration, x.Tag, selectionContext ),
                         selectionContext.CancellationToken );
+                    
+                    return;
                 }
                 else
                 {

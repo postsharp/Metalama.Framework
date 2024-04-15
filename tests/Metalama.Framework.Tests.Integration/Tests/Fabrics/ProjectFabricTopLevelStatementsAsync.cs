@@ -22,8 +22,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
             Console.WriteLine( "This is the overriding method." );
 
             return meta.Proceed();
-
-            ;
         }
     }
 
