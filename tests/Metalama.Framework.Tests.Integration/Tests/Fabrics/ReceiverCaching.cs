@@ -20,6 +20,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ReceiverCachin
         public override void AmendNamespace( INamespaceAmender amender )
         {
             var types = amender
+                .Outbound
                 .SelectMany( c => c.DescendantsAndSelf() )
                 .SelectMany( t => t.Types );
 
