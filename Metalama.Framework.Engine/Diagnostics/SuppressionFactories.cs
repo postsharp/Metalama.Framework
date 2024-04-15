@@ -33,6 +33,7 @@ public class SuppressionFactories
         {
             var recorder = new RecorderFormatProvider();
             diagnostic.GetMessage( recorder );
+            
             return recorder.Arguments.ToImmutableArray();
         }
 

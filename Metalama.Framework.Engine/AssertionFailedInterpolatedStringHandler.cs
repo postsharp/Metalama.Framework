@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -14,238 +15,156 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Metalama.Framework.Engine
+namespace Metalama.Framework.Engine;
+
+/// <summary>
+/// Improves errors by enhancing specific values when creating AssertionFailedException.
+/// </summary>
+[InterpolatedStringHandler]
+internal readonly ref struct AssertionFailedInterpolatedStringHandler
 {
-    /// <summary>
-    /// Improves errors by enhancing specific values when creating AssertionFailedException.
-    /// </summary>
-    [InterpolatedStringHandler]
-    internal ref struct AssertionFailedInterpolatedStringHandler
+    private readonly StringBuilder _builder;
+
+    public AssertionFailedInterpolatedStringHandler( int literalLength, [UsedImplicitly] int formattedCount )
     {
-        private readonly StringBuilder _builder;
+        this._builder = new StringBuilder( literalLength );
+    }
 
-        public AssertionFailedInterpolatedStringHandler( int literalLength, int formattedCount )
-        {
-            this._builder = new StringBuilder( literalLength );
-        }
+    public void AppendLiteral( string s ) => this._builder.Append( s );
 
-        public void AppendLiteral( string s )
+    public void AppendFormatted<T>( T? value )
+    {
+        try
         {
-            this._builder.Append( s );
-        }
-
-        public void AppendFormatted<T>( T? value )
-        {
-            try
+            switch ( value )
             {
-                switch ( value )
-                {
-                    case ISymbol symbol:
-                        this._builder.Append( FormatSymbol( symbol ) );
-                        break;
-                    case SyntaxNode syntaxNode:
-                        this._builder.Append( FormatSyntaxNode( syntaxNode ) );
-                        break;
-                    default:
-                        this._builder.Append( value?.ToString() );
-                        break;
-                }
-            }
-            catch ( Exception e )
-            {
-                this._builder.AppendInvariant( $"{{'{e}'}}" );
-            }
-        }
+                case ISymbol symbol:
+                    this._builder.Append( FormatSymbol( symbol ) );
 
-        private static string FormatSymbol( ISymbol? symbol )
-        {
-            switch ( symbol )
-            {
-                case null:
-                    return "(null)";
+                    break;
 
-                case IParameterSymbol parameterSymbol:
-                    return $"{SymbolKind.Parameter}:{parameterSymbol.ContainingSymbol}:{parameterSymbol}{FormatLocations( parameterSymbol!.Locations )}";
+                case SyntaxNode syntaxNode:
+                    this._builder.Append( FormatSyntaxNode( syntaxNode ) );
 
-                case IErrorTypeSymbol errorSymbol:
-                    return $"{SymbolKind.ErrorType}:<{errorSymbol!.CandidateReason}>({string.Join( ",", errorSymbol!.CandidateSymbols.Select( FormatSymbol ) )}){FormatLocations( symbol!.Locations )}";
+                    break;
 
                 default:
-                    var symbolString = symbol.ToString();
+                    this._builder.Append( value?.ToString() );
 
-                    if ( string.IsNullOrEmpty( symbolString ) )
-                    {
-                        return $"{symbol?.Kind}:({FormatSymbol( symbol!.ContainingSymbol )}).<empty>{FormatLocations( symbol!.Locations )}";
-                    }
-                    else
-                    {
-                        return $"{symbol?.Kind}:{symbolString}{FormatLocations( symbol!.Locations )}";
-                    }
+                    break;
             }
         }
-
-        private static string FormatSyntaxNode( SyntaxNode node )
+        catch ( Exception e )
         {
-            /*
-             * Attempts to render a shallow structure of the syntax node. This works by "masking" some tokens in descendant tokens of this node, while ignoring all the trivia.
-             * Masking of a node is done if it exceeds masking depth (current limit is 1) and removes tokens from syntax kind in <> angle brackets, e.g.  <SimpleMemberAccessExpression>(ref <SimpleMemberAccessExpression>).
-             * Masking depth is defined as follows:
-             *   1) Current node has depth 0.
-             *   2) ExpressionSyntax is masked if not a direct child of this node (i.e. depth > 1).
-             *   3) BlockSyntax is masked 
-             *   2) StatementSyntx is masked if not a direct child of this node.
-             *   3) ExpressionStatement .
-             */
-
-            var walker = new MaskingDepthWalker( 1 );
-            walker.Visit( node );
-
-            return RenderSyntaxNode( node, walker.MaskedNodes, walker.EllipsisSpans );
+            this._builder.AppendInvariant( $"{{'{e}'}}" );
         }
+    }
 
-        private static string FormatLocations( ImmutableArray<Location> locations )
+    private static string FormatSymbol( ISymbol? symbol )
+    {
+        switch ( symbol )
         {
-            if ( locations.IsEmpty )
-            {
-                return "";
-            }
-            else
-            {
-                var firstLocation = locations.First();
+            case null:
+                return "(null)";
 
-                if ( firstLocation.SourceTree != null )
+            case IParameterSymbol parameterSymbol:
+                return $"{SymbolKind.Parameter}:{parameterSymbol.ContainingSymbol}:{parameterSymbol}{FormatLocations( parameterSymbol.Locations )}";
+
+            case IErrorTypeSymbol errorSymbol:
+                return
+                    $"{SymbolKind.ErrorType}:<{errorSymbol.CandidateReason}>({string.Join( ",", errorSymbol.CandidateSymbols.Select( FormatSymbol ) )}){FormatLocations( errorSymbol.Locations )}";
+
+            default:
+                var symbolString = symbol.ToString();
+
+                if ( string.IsNullOrEmpty( symbolString ) )
                 {
-                    var lineSpan = firstLocation.SourceTree.GetLineSpan( firstLocation.SourceSpan );
-                    var filePath = Path.GetFileName( firstLocation.SourceTree.FilePath );
-
-                    return $":[({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}]";
+                    return $"{symbol.Kind}:({FormatSymbol( symbol.ContainingSymbol )}).<empty>{FormatLocations( symbol.Locations )}";
                 }
                 else
                 {
-                    return $":[{firstLocation}]";
+                    return $"{symbol.Kind}:{symbolString}{FormatLocations( symbol.Locations )}";
                 }
-            }
         }
+    }
 
-        internal string GetFormattedText() => this._builder.ToString();
+    private static string FormatSyntaxNode( SyntaxNode node )
+    {
+        /*
+         * Attempts to render a shallow structure of the syntax node. This works by "masking" some tokens in descendant tokens of this node,
+         * while ignoring all the trivia. Masking of a node is done if it exceeds masking depth (current limit is 1) and removes tokens from
+         * syntax kind in <> angle brackets, e.g.  <SimpleMemberAccessExpression>(ref <SimpleMemberAccessExpression>).
+         * Lists (type members, block statements, switch sections, etc.) are simplified by using ellipses, i.e. <...>.
+         */
 
-        private static string RenderSyntaxNode( SyntaxNode rootNode, IList<SyntaxNode> maskedNodes, IList<TextSpan> ellipsisSpan )
+        var walker = new MaskingDepthWalker( 1 );
+        walker.Visit( node );
+
+        return RenderSyntaxNode( node, walker.MaskedNodes, walker.EllipsisSpans );
+    }
+
+    private static string FormatLocations( ImmutableArray<Location> locations )
+    {
+        if ( locations.IsEmpty )
         {
-            var builder = new StringBuilder();
-            var sortedMaskedNodes = maskedNodes.OrderBy( n => n.SpanStart ).ToArray();
-            var sortedEllipsisSpans = ellipsisSpan.OrderBy( s => s.Start ).ToArray();
+            return "";
+        }
+        else
+        {
+            var firstLocation = locations.First();
 
-            // Presume that masked spans do not intersect.
-
-            var currentMasked = 0;
-            var currentEllipsis = 0;
-            var appendLeadingSpace = false;
-
-            var rootLocation = rootNode.GetLocation();
-            string locationText;
-
-            if ( rootLocation.SourceTree != null )
+            if ( firstLocation.SourceTree != null )
             {
-                var lineSpan = rootLocation.SourceTree.GetLineSpan( rootLocation.SourceSpan );
-                var filePath = Path.GetFileName( rootLocation.SourceTree.FilePath );
-                locationText = $":({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}";
+                var lineSpan = firstLocation.SourceTree.GetLineSpan( firstLocation.SourceSpan );
+                var filePath = Path.GetFileName( firstLocation.SourceTree.FilePath );
+
+                return $":[({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}]";
             }
             else
             {
-                locationText = $":{rootLocation}";
+                return $":[{firstLocation}]";
             }
+        }
+    }
 
-            builder.Append( $"[{rootNode.Kind()}{locationText}] " );
+    internal string GetFormattedText() => this._builder.ToString();
 
-            foreach ( var token in rootNode.DescendantTokens() )
+    private static string RenderSyntaxNode( SyntaxNode rootNode, IEnumerable<SyntaxNode> maskedNodes, IEnumerable<TextSpan> ellipsisSpan )
+    {
+        var builder = new StringBuilder();
+        var sortedMaskedNodes = maskedNodes.OrderBy( n => n.SpanStart ).ToArray();
+        var sortedEllipsisSpans = ellipsisSpan.OrderBy( s => s.Start ).ToArray();
+
+        // Presume that masked spans do not intersect.
+
+        var currentMasked = 0;
+        var currentEllipsis = 0;
+        var appendLeadingSpace = false;
+
+        var rootLocation = rootNode.GetLocation();
+        string locationText;
+
+        if ( rootLocation.SourceTree != null )
+        {
+            var lineSpan = rootLocation.SourceTree.GetLineSpan( rootLocation.SourceSpan );
+            var filePath = Path.GetFileName( rootLocation.SourceTree.FilePath );
+            locationText = $":({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}";
+        }
+        else
+        {
+            locationText = $":{rootLocation}";
+        }
+
+        builder.AppendInvariant( $"[{rootNode.Kind()}{locationText}] " );
+
+        foreach ( var token in rootNode.DescendantTokens() )
+        {
+            // Repeat until we have span that does not start in the current masked node.
+            while ( currentMasked < sortedMaskedNodes.Length && token.Span.Start > sortedMaskedNodes[currentMasked].Span.End - 1 )
             {
-                // Repeat until we have span that does not start in the current masked node.
-                while ( currentMasked < sortedMaskedNodes.Length && token.Span.Start > sortedMaskedNodes[currentMasked].Span.End - 1 )
-                {
-                    builder.AppendInvariant( $"<{sortedMaskedNodes[currentMasked].Kind()}>" );
+                builder.AppendInvariant( $"<{sortedMaskedNodes[currentMasked].Kind()}>" );
 
-                    if ( sortedMaskedNodes[currentMasked].GetTrailingTrivia().Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
-                    {
-                        // Write space if there was any trailing whitespace trivia.
-                        builder.Append( ' ' );
-                        appendLeadingSpace = false;
-                    }
-                    else
-                    {
-                        appendLeadingSpace = true;
-                    }
-
-                    currentMasked++;
-
-                }
-
-                // Repeat until we have span that does not start in the current masked node.
-                while ( currentEllipsis < sortedEllipsisSpans.Length && token.Span.Start > sortedEllipsisSpans[currentEllipsis].End - 1 )
-                {
-                    builder.AppendInvariant( $"<...>" );
-
-                    appendLeadingSpace = false;
-                    currentEllipsis++;
-                }
-
-                if ( (currentMasked < sortedMaskedNodes.Length && token.Span.Intersection( sortedMaskedNodes[currentMasked].Span )?.Length > 0)
-                    || (currentEllipsis < sortedEllipsisSpans.Length && token.Span.Intersection( sortedEllipsisSpans[currentEllipsis] )?.Length > 0) )
-                {
-                    // Token is masked or in ellipsis.
-                    continue;
-                }
-
-                if ( appendLeadingSpace && token.LeadingTrivia.Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
-                {
-                    // Write space if there was any leading whitespace trivia and previous token did not have whitespace trailing trivia.
-                    appendLeadingSpace = false;
-                    builder.Append( ' ' );
-                }
-
-                // Write token.
-                switch ( token.Kind() )
-                {
-                    case SyntaxKind.IdentifierToken:
-                        if ( token.ValueText != "var" )
-                        {
-                            builder.Append( "<identifier>" );
-                        }
-                        else
-                        {
-                            builder.Append( "var" );
-                        }
-                        break;
-
-                    case SyntaxKind.NumericLiteralToken:
-                        builder.Append( "<numeric_literal>" );
-                        break;
-
-                    case SyntaxKind.CharacterLiteralToken:
-                        builder.Append( "<char_literal>" );
-                        break;
-
-                    case SyntaxKind.StringLiteralToken:
-                        builder.Append( "<string_literal>" );
-                        break;
-
-                    case SyntaxKind.SingleLineRawStringLiteralToken or SyntaxKind.MultiLineRawStringLiteralToken:
-                        builder.Append( "<raw_string_literal>" );
-                        break;
-
-                    case SyntaxKind.Utf8StringLiteralToken or SyntaxKind.Utf8SingleLineRawStringLiteralToken or SyntaxKind.Utf8MultiLineRawStringLiteralToken:
-                        builder.Append( "<utf8_string_literal>" );
-                        break;
-
-                    case SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlTextLiteralNewLineToken or SyntaxKind.XmlEntityLiteralToken:
-                        builder.Append( "<xml_literal>" );
-                        break;
-
-                    default:
-                        builder.Append( token );
-                        break;
-                }
-
-                if ( token.TrailingTrivia.Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
+                if ( sortedMaskedNodes[currentMasked].GetTrailingTrivia().Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
                 {
                     // Write space if there was any trailing whitespace trivia.
                     builder.Append( ' ' );
@@ -255,242 +174,317 @@ namespace Metalama.Framework.Engine
                 {
                     appendLeadingSpace = true;
                 }
-            }
-
-            while ( currentMasked < sortedMaskedNodes.Length )
-            {
-                builder.AppendInvariant( $"<{sortedMaskedNodes[currentMasked].Kind()}>" );
-
-                if ( sortedMaskedNodes[currentMasked].GetTrailingTrivia().Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
-                {
-                    // Write space if there was any trailing whitespace trivia.
-                    builder.Append( ' ' );
-                }
 
                 currentMasked++;
-
             }
 
             // Repeat until we have span that does not start in the current masked node.
-            while ( currentEllipsis < sortedEllipsisSpans.Length )
+            while ( currentEllipsis < sortedEllipsisSpans.Length && token.Span.Start > sortedEllipsisSpans[currentEllipsis].End - 1 )
             {
                 builder.AppendInvariant( $"<...>" );
+
+                appendLeadingSpace = false;
                 currentEllipsis++;
             }
 
-            return builder.ToString();
+            if ( (currentMasked < sortedMaskedNodes.Length && token.Span.Intersection( sortedMaskedNodes[currentMasked].Span )?.Length > 0)
+                 || (currentEllipsis < sortedEllipsisSpans.Length && token.Span.Intersection( sortedEllipsisSpans[currentEllipsis] )?.Length > 0) )
+            {
+                // Token is masked or in ellipsis.
+                continue;
+            }
+
+            if ( appendLeadingSpace && token.LeadingTrivia.Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
+            {
+                // Write space if there was any leading whitespace trivia and previous token did not have whitespace trailing trivia.
+                builder.Append( ' ' );
+            }
+
+            // Write token.
+            switch ( token.Kind() )
+            {
+                case SyntaxKind.IdentifierToken:
+                    builder.Append( token.ValueText != "var" ? "<identifier>" : "var" );
+
+                    break;
+
+                case SyntaxKind.NumericLiteralToken:
+                    builder.Append( "<numeric_literal>" );
+
+                    break;
+
+                case SyntaxKind.CharacterLiteralToken:
+                    builder.Append( "<char_literal>" );
+
+                    break;
+
+                case SyntaxKind.StringLiteralToken:
+                    builder.Append( "<string_literal>" );
+
+                    break;
+
+#if ROSLYN_4_8_0_OR_GREATER
+                case SyntaxKind.SingleLineRawStringLiteralToken or SyntaxKind.MultiLineRawStringLiteralToken:
+                    builder.Append( "<raw_string_literal>" );
+
+                    break;
+
+                case SyntaxKind.Utf8StringLiteralToken:
+                    builder.Append( "<utf8_string_literal>" );
+
+                    break;
+
+                case SyntaxKind.Utf8SingleLineRawStringLiteralToken or SyntaxKind.Utf8MultiLineRawStringLiteralToken:
+                    builder.Append( "<utf8_raw_string_literal>" );
+
+                    break;
+#endif
+
+                case SyntaxKind.XmlTextLiteralToken or SyntaxKind.XmlTextLiteralNewLineToken or SyntaxKind.XmlEntityLiteralToken:
+                    builder.Append( "<xml_literal>" );
+
+                    break;
+
+                default:
+                    builder.Append( token );
+
+                    break;
+            }
+
+            if ( token.TrailingTrivia.Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
+            {
+                // Write space if there was any trailing whitespace trivia.
+                builder.Append( ' ' );
+                appendLeadingSpace = false;
+            }
+            else
+            {
+                appendLeadingSpace = true;
+            }
         }
 
-        public class MaskingDepthWalker : SafeSyntaxWalker
+        while ( currentMasked < sortedMaskedNodes.Length )
         {
-            private readonly int _maskingDepthLimit;
-            private int _currentMaskingDepth;
+            builder.AppendInvariant( $"<{sortedMaskedNodes[currentMasked].Kind()}>" );
 
-            public List<SyntaxNode> MaskedNodes { get; }
-
-            public List<TextSpan> EllipsisSpans { get; }
-
-            public MaskingDepthWalker( int maskingDepthLimit )
+            if ( sortedMaskedNodes[currentMasked].GetTrailingTrivia().Any( t => t.Kind() is SyntaxKind.WhitespaceTrivia ) )
             {
-                this.MaskedNodes = new List<SyntaxNode>();
-                this.EllipsisSpans = new List<TextSpan>();
-                this._maskingDepthLimit = maskingDepthLimit;
+                // Write space if there was any trailing whitespace trivia.
+                builder.Append( ' ' );
             }
 
-            protected override void VisitCore( SyntaxNode? node )
+            currentMasked++;
+        }
+
+        // Repeat until we have span that does not start in the current masked node.
+        while ( currentEllipsis < sortedEllipsisSpans.Length )
+        {
+            builder.AppendInvariant( $"<...>" );
+            currentEllipsis++;
+        }
+
+        return builder.ToString();
+    }
+
+    public class MaskingDepthWalker : SafeSyntaxWalker
+    {
+        private readonly int _maskingDepthLimit;
+        private int _currentMaskingDepth;
+
+        public List<SyntaxNode> MaskedNodes { get; }
+
+        public List<TextSpan> EllipsisSpans { get; }
+
+        public MaskingDepthWalker( int maskingDepthLimit )
+        {
+            this.MaskedNodes = new List<SyntaxNode>();
+            this.EllipsisSpans = new List<TextSpan>();
+            this._maskingDepthLimit = maskingDepthLimit;
+        }
+
+        protected override void VisitCore( SyntaxNode? node )
+        {
+            if ( node == null )
             {
-                if ( node == null )
+                return;
+            }
+
+            if ( this._currentMaskingDepth > this._maskingDepthLimit )
+            {
+                this.MaskedNodes.Add( node );
+
+                return;
+            }
+
+            var increaseMaskingDepth =
+                node switch
                 {
-                    return;
-                }
+                    ExpressionStatementSyntax => false,
+                    GenericNameSyntax => false,
+                    QualifiedNameSyntax => false,
+                    AliasQualifiedNameSyntax => false,
+                    AccessorListSyntax => false,
+                    AccessorDeclarationSyntax => false,
+                    BlockSyntax { Parent: ElseClauseSyntax } => false,
+                    IdentifierNameSyntax { Identifier.ValueText: "var" } => false,
+                    _ => true
+                };
 
-                if ( this._currentMaskingDepth > this._maskingDepthLimit )
-                {
-                    this.MaskedNodes.Add( node );
-                    return;
-                }
-
-                var increaseMaskingDepth =
-                    node switch
-                    {
-                        ExpressionStatementSyntax => false,
-                        GenericNameSyntax => false,
-                        QualifiedNameSyntax => false,
-                        AliasQualifiedNameSyntax => false,
-                        AccessorListSyntax => false,
-                        AccessorDeclarationSyntax => false,
-                        BlockSyntax { Parent: ElseClauseSyntax } => false,
-                        IdentifierNameSyntax { Identifier: { ValueText: "var" } } => false,
-                        _ => true,
-                    };
-
-                if ( increaseMaskingDepth )
-                {
-                    try
-                    {
-                        this._currentMaskingDepth++;
-
-                        base.VisitCore( node );
-                    }
-                    finally
-                    {
-                        this._currentMaskingDepth--;
-                    }
-                }
-                else
-                {
-                    base.VisitCore( node );
-                }
-            }
-
-            public override void VisitClassDeclaration( ClassDeclarationSyntax node )
+            if ( increaseMaskingDepth )
             {
-                this.VisitTypeDeclaration( node );
-            }
-
-            public override void VisitStructDeclaration( StructDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node );
-            }
-
-            public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node );
-            }
-
-            public override void VisitEnumDeclaration( EnumDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node );
-            }
-
-            public override void VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
-            {
-                this.VisitTypeDeclaration( node );
-            }
-
-            private void VisitTypeDeclaration( BaseTypeDeclarationSyntax node )
-            {
-                // Type needs to only mask it's members.
-
-                if ( this._currentMaskingDepth - 1 > this._maskingDepthLimit )
-                {
-                    this.MaskedNodes.Add( node );
-                    return;
-                }
-
                 try
                 {
                     this._currentMaskingDepth++;
 
-                    if ( this._currentMaskingDepth > this._maskingDepthLimit )
-                    {
-                        switch ( node )
-                        {
-                            case TypeDeclarationSyntax typeDeclaration:
-                                this.EllipsisSpans.Add( typeDeclaration.Members.Span );
-                                break;
-
-                            case EnumDeclarationSyntax enumDeclaration:
-                                this.EllipsisSpans.Add( enumDeclaration.Members.Span );
-                                break;
-                        }
-                        return;
-                    }
+                    base.VisitCore( node );
                 }
                 finally
                 {
                     this._currentMaskingDepth--;
                 }
             }
-
-            public override void VisitBlock( BlockSyntax node )
+            else
             {
-                if ( this._currentMaskingDepth >= this._maskingDepthLimit )
-                {
-                    if ( node.Statements.Span.Length > 0 )
-                    {
-                        this.EllipsisSpans.Add( node.Statements.Span );
-                    }
+                base.VisitCore( node );
+            }
+        }
 
-                    return;
-                }
+        public override void VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-                foreach ( var statement in node.Statements )
-                {
-                    base.VisitCore( statement );
-                }
+        public override void VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+        public override void VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+        public override void VisitEnumDeclaration( EnumDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+        public override void VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+        private void VisitTypeDeclaration( BaseTypeDeclarationSyntax node )
+        {
+            // Type needs to only mask it's members.
+
+            if ( this._currentMaskingDepth - 1 > this._maskingDepthLimit )
+            {
+                this.MaskedNodes.Add( node );
+
+                return;
             }
 
-            public override void VisitCollectionExpression( CollectionExpressionSyntax node )
+            try
             {
-                if ( this._currentMaskingDepth >= this._maskingDepthLimit )
+                this._currentMaskingDepth++;
+
+                if ( this._currentMaskingDepth > this._maskingDepthLimit )
                 {
-                    if ( node.Elements.Span.Length > 0 )
+                    switch ( node )
                     {
-                        this.EllipsisSpans.Add( node.Elements.Span );
+                        case TypeDeclarationSyntax typeDeclaration:
+                            this.EllipsisSpans.Add( typeDeclaration.Members.Span );
+
+                            break;
+
+                        case EnumDeclarationSyntax enumDeclaration:
+                            this.EllipsisSpans.Add( enumDeclaration.Members.Span );
+
+                            break;
                     }
-
-                    return;
-                }
-
-                foreach ( var element in node.Elements )
-                {
-                    base.VisitCore( element );
                 }
             }
-
-            public override void VisitInitializerExpression( InitializerExpressionSyntax node )
+            finally
             {
-                if ( this._currentMaskingDepth >= this._maskingDepthLimit )
-                {
-                    if ( node.Expressions.Span.Length > 0 )
-                    {
-                        this.EllipsisSpans.Add( node.Expressions.Span );
-                    }
+                this._currentMaskingDepth--;
+            }
+        }
 
-                    return;
+        public override void VisitBlock( BlockSyntax node )
+        {
+            if ( this._currentMaskingDepth >= this._maskingDepthLimit )
+            {
+                if ( node.Statements.Span.Length > 0 )
+                {
+                    this.EllipsisSpans.Add( node.Statements.Span );
                 }
 
-                foreach ( var expression in node.Expressions )
-                {
-                    base.VisitCore( expression );
-                }
+                return;
             }
 
-            public override void VisitSwitchExpression( SwitchExpressionSyntax node )
+            foreach ( var statement in node.Statements )
             {
-                if ( this._currentMaskingDepth >= this._maskingDepthLimit )
-                {
-                    if ( node.Arms.Span.Length > 0 )
-                    {
-                        this.EllipsisSpans.Add( node.Arms.Span );
-                    }
+                base.VisitCore( statement );
+            }
+        }
 
-                    return;
+#if ROSLYN_4_8_0_OR_GREATER
+        public override void VisitCollectionExpression( CollectionExpressionSyntax node )
+        {
+            if ( this._currentMaskingDepth >= this._maskingDepthLimit )
+            {
+                if ( node.Elements.Span.Length > 0 )
+                {
+                    this.EllipsisSpans.Add( node.Elements.Span );
                 }
 
-                foreach ( var arm in node.Arms )
-                {
-                    base.VisitCore( arm );
-                }
+                return;
             }
 
-            public override void VisitSwitchStatement( SwitchStatementSyntax node )
+            foreach ( var element in node.Elements )
             {
-                if ( this._currentMaskingDepth >= this._maskingDepthLimit )
-                {
-                    if ( node.Sections.Span.Length > 0 )
-                    {
-                        this.EllipsisSpans.Add( node.Sections.Span );
-                    }
+                base.VisitCore( element );
+            }
+        }
+#endif
 
-                    return;
+        public override void VisitInitializerExpression( InitializerExpressionSyntax node )
+        {
+            if ( this._currentMaskingDepth >= this._maskingDepthLimit )
+            {
+                if ( node.Expressions.Span.Length > 0 )
+                {
+                    this.EllipsisSpans.Add( node.Expressions.Span );
                 }
 
-                foreach ( var section in node.Sections )
+                return;
+            }
+
+            foreach ( var expression in node.Expressions )
+            {
+                base.VisitCore( expression );
+            }
+        }
+
+        public override void VisitSwitchExpression( SwitchExpressionSyntax node )
+        {
+            if ( this._currentMaskingDepth >= this._maskingDepthLimit )
+            {
+                if ( node.Arms.Span.Length > 0 )
                 {
-                    base.VisitCore( section );
+                    this.EllipsisSpans.Add( node.Arms.Span );
                 }
+
+                return;
+            }
+
+            foreach ( var arm in node.Arms )
+            {
+                base.VisitCore( arm );
+            }
+        }
+
+        public override void VisitSwitchStatement( SwitchStatementSyntax node )
+        {
+            if ( this._currentMaskingDepth >= this._maskingDepthLimit )
+            {
+                if ( node.Sections.Span.Length > 0 )
+                {
+                    this.EllipsisSpans.Add( node.Sections.Span );
+                }
+
+                return;
+            }
+
+            foreach ( var section in node.Sections )
+            {
+                base.VisitCore( section );
             }
         }
     }

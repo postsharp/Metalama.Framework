@@ -294,13 +294,13 @@ internal sealed partial class LinkerInjectionStep
             var originalNode = node;
             var members = new List<EnumMemberDeclarationSyntax>( node.Members.Count );
 
-                // Process the type members.
-                foreach ( var member in node.Members )
-                {
-                    var visitedMember = this.VisitEnumMemberDeclarationCore( member );
+            // Process the type members.
+            foreach ( var member in node.Members )
+            {
+                var visitedMember = this.VisitEnumMemberDeclarationCore( member );
 
                 members.Add( visitedMember );
-                    }
+            }
 
             node = node.WithMembers( SeparatedList( members ) );
 
@@ -339,68 +339,68 @@ internal sealed partial class LinkerInjectionStep
                 ref baseList,
                 ref parameterList );
 
-                // Process the type members.
-                foreach ( var member in node.Members )
+            // Process the type members.
+            foreach ( var member in node.Members )
+            {
+                foreach ( var visitedMember in this.VisitMember( member ) )
                 {
-                    foreach ( var visitedMember in this.VisitMember( member ) )
-                    {
                     members.Add( visitedMember );
-                        }
-
-                    // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                    AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
                 }
 
-                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
+                // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
+                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
+            }
 
-                // If the type has no braces, add them.
-                if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
+            AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
+
+            // If the type has no braces, add them.
+            if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
+            {
+                // TODO: trivias.
+                node = (T) node
+                    .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                    .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                    .WithSemicolonToken( default );
+            }
+
+            node = (T) node.WithMembers( List( members ) );
+
+            // Process the type bases.
+            if ( additionalBaseList.Any() )
+            {
+                if ( baseList == null )
                 {
-                    // TODO: trivias.
                     node = (T) node
-                        .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                        .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
-                        .WithSemicolonToken( default );
+                        .WithIdentifier(
+                            node.Identifier.WithOptionalTrailingTrivia(
+                                default,
+                                syntaxGenerationContext.Options.TriviaMatters || node.Identifier.ContainsDirectives ) )
+                        .WithBaseList(
+                            BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
+                                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
+                        .WithOptionalTrailingTrivia( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
                 }
-
-                node = (T) node.WithMembers( List( members ) );
-
-                // Process the type bases.
-                if ( additionalBaseList.Any() )
+                else
                 {
-                    if ( baseList == null )
-                    {
-                        node = (T) node
-                            .WithIdentifier(
-                                node.Identifier.WithOptionalTrailingTrivia(
-                                    default,
-                                    syntaxGenerationContext.Options.TriviaMatters || node.Identifier.ContainsDirectives ) )
-                            .WithBaseList(
-                                BaseList( SeparatedList( additionalBaseList.SelectAsReadOnlyList( i => i.Syntax ) ) )
-                                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
-                            .WithOptionalTrailingTrivia( node.Identifier.TrailingTrivia, syntaxGenerationContext.Options );
-                    }
-                    else
-                    {
-                        node = (T) node.WithBaseList(
-                            BaseList(
-                                baseList.Types.AddRange(
-                                    additionalBaseList.SelectAsReadOnlyList(
-                                        i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
-                    }
+                    node = (T) node.WithBaseList(
+                        BaseList(
+                            baseList.Types.AddRange(
+                                additionalBaseList.SelectAsReadOnlyList(
+                                    i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                 }
-                else if ( baseList != null )
-                {
-                    node = (T) node.WithBaseList( baseList );
-                }
+            }
+            else if ( baseList != null )
+            {
+                node = (T) node.WithBaseList( baseList );
+            }
 
-                node = (T) node.WithParameterList( parameterList );
+            node = (T) node.WithParameterList( parameterList );
 
-                // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-                node = this.ReplaceAttributes( node, rewrittenAttributes );
+            // Rewrite attributes.
+            var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+            node = this.ReplaceAttributes( node, rewrittenAttributes );
 
-                return node;
+            return node;
 
             // TODO: Try to avoid closure allocation.
             void AddInjectionsOnPosition( InsertPosition position )
@@ -1269,5 +1269,5 @@ internal sealed partial class LinkerInjectionStep
 
             return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
         }
-            }
+    }
 }
