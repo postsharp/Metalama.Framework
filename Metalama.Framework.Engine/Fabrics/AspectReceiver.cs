@@ -587,7 +587,7 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeInvoker? invoker = null,
             UserCodeExecutionContext? executionContext = null )
         {
-            ConcurrentBag<T> cached = null;
+            ConcurrentBag<T>? cached = null;
             var processTargetWithCachingIfNecessary = processTarget;
 
             if ( this.ShouldCache )
