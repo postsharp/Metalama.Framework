@@ -31,23 +31,11 @@ internal sealed class AspectPipelineResultAndState
 
     internal IEnumerable<Diagnostic> GetAllDiagnostics() => this.Result.SyntaxTreeResults.SelectMany( x => x.Value.Diagnostics );
 
-    internal ImmutableArray<Diagnostic> GetAllDiagnostics( string path )
+    internal ImmutableArray<CacheableScopedSuppression> GetSuppressionsOnSyntaxTree( string path )
     {
-        if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
         {
-            return syntaxTreeResults.Diagnostics;
-        }
-        else
-        {
-            return ImmutableArray<Diagnostic>.Empty;
-        }
-    }
-
-    internal ImmutableArray<CacheableScopedSuppression> GetSuppressionOnSyntaxTree( string path )
-    {
-        if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
-        {
-            return syntaxTreeResults.Suppressions;
+            return syntaxTreeResult.Suppressions;
         }
         else
         {
@@ -55,10 +43,15 @@ internal sealed class AspectPipelineResultAndState
         }
     }
 
-    internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
+    internal ImmutableArray<Diagnostic> GetDiagnosticsOnSyntaxTree( string path )
     {
-        var fromPipeline = this.Result.GetDiagnosticsOnSyntaxTree( path );
-
-        return (fromPipeline.Diagnostics, fromPipeline.Suppressions);
+        if ( this.Result.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResult ) )
+        {
+            return syntaxTreeResult.Diagnostics;
+        }
+        else
+        {
+            return ImmutableArray<Diagnostic>.Empty;
+        }
     }
 }

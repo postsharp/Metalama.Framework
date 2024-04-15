@@ -3,34 +3,88 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using System;
 
-namespace Metalama.Framework.Engine.Diagnostics
+namespace Metalama.Framework.Engine.Diagnostics;
+
+/// <summary>
+/// Represents the suppression of a diagnostic of a given id in a given scope, possibly with a filter.
+/// </summary>
+public sealed class ScopedSuppression : IScopedSuppression
 {
-    /// <summary>
-    /// Represents the suppression of a diagnostic of a given id in a given scope.
-    /// </summary>
-    public sealed class ScopedSuppression : IScopedSuppression
+    public ISuppression Suppression { get; }
+
+    public ISymbol? GetScopeSymbolOrNull( Compilation compilation ) => this.Declaration.GetSymbol();
+
+    public IDeclaration Declaration { get; }
+
+    internal ScopedSuppression( ISuppression suppression, IDeclaration declaration )
     {
-        public SuppressionDefinition Definition { get; }
+        this.Suppression = suppression;
+        this.Declaration = declaration;
+    }
 
-        public ISymbol? GetScopeSymbolOrNull( Compilation compilation ) => this.Declaration.GetSymbol();
+    public override string ToString() => $"{this.Suppression} on {this.Declaration}";
 
-        public IDeclaration Declaration { get; }
+    public bool Matches( Diagnostic diagnostic, Compilation compilation, Func<Func<bool>, bool> codeInvoker )
+    {
+        var symbolId = this.Declaration.GetSerializableId();
 
-        internal ScopedSuppression( SuppressionDefinition definition, IDeclaration declaration )
+        return this.Matches( diagnostic, compilation, codeInvoker, symbolId );
+    }
+
+    public bool Matches( Diagnostic diagnostic, Compilation compilation, Func<Func<bool>, bool> codeInvoker, SerializableDeclarationId declarationId )
+    {
+        var location = diagnostic.Location;
+
+        if ( location.SourceTree == null )
         {
-            this.Definition = definition;
-            this.Declaration = declaration;
+            return false;
         }
 
-        public override string ToString() => $"{this.Definition} in {this.Declaration}";
-    }
+        var node = location.SourceTree.GetRoot().FindNode( location.SourceSpan ).FindSymbolDeclaringNode();
 
-    public interface IScopedSuppression
-    {
-        SuppressionDefinition Definition { get; }
+        if ( node == null )
+        {
+            return false;
+        }
 
-        ISymbol? GetScopeSymbolOrNull( Compilation compilation );
+        var diagnosticSymbol = compilation.GetCachedSemanticModel( location.SourceTree ).GetDeclaredSymbol( node );
+
+        while ( diagnosticSymbol != null )
+        {
+            if ( diagnosticSymbol.TryGetSerializableId( out var id ) && declarationId.Equals( id ) )
+            {
+                break;
+            }
+
+            diagnosticSymbol = diagnosticSymbol.ContainingSymbol;
+        }
+
+        if ( diagnosticSymbol == null )
+        {
+            return false;
+        }
+
+        if ( this.Suppression.Filter is { } filter )
+        {
+            var filterPassed = codeInvoker( () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ) );
+
+            if ( !filterPassed )
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
+}
+
+public interface IScopedSuppression
+{
+    ISuppression Suppression { get; }
+
+    ISymbol? GetScopeSymbolOrNull( Compilation compilation );
 }

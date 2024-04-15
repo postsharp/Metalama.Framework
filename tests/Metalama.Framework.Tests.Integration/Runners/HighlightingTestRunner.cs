@@ -106,9 +106,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override HtmlCodeWriterOptions GetHtmlCodeWriterOptions( TestOptions options )
             => new( options.AddHtmlTitles.GetValueOrDefault(), _htmlProlog, this._htmlEpilogue );
 
-        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+        protected override void ExecuteAssertions( TestInput testInput, TestResult testResult )
         {
-            base.ExecuteAssertions( testInput, testResult, state );
+            base.ExecuteAssertions( testInput, testResult );
 
             Assert.NotNull( testInput.ProjectDirectory );
             Assert.NotNull( testInput.RelativePath );

@@ -25,10 +25,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
         protected override async Task RunAsync(
             TestInput testInput,
             TestResult testResult,
-            TestContext testContext,
-            Dictionary<string, object?> state )
+            TestContext testContext )
         {
-            await base.RunAsync( testInput, testResult, testContext, state );
+            await base.RunAsync( testInput, testResult, testContext );
 
             using var pipeline = new TestDesignTimeAspectPipeline( testContext.ServiceProvider, testContext.Domain );
 

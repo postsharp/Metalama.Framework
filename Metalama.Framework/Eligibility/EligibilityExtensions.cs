@@ -149,7 +149,7 @@ public static partial class EligibilityExtensions
         => new ExcludedScenarioEligibilityBuilder<T>( eligibilityBuilder, EligibleScenarios.Inheritance );
 
     /// <summary>
-    /// Adds a group of conditions to the given <see cref="IEligibilityBuilder"/>, where all conditions must be satisfied
+    /// Adds a group of conditions to the given <see cref="IEligibilityBuilder"/>, where at least one condition must be satisfied
     /// by the declaration in order to be eligible for the aspect.
     /// </summary>
     public static void MustSatisfyAny<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )
@@ -157,7 +157,7 @@ public static partial class EligibilityExtensions
         => eligibilityBuilder.Aggregate( BooleanCombinationOperator.Or, requirements );
 
     /// <summary>
-    /// Adds a group of conditions to the given <see cref="IEligibilityBuilder"/>, where at least one condition must be satisfied
+    /// Adds a group of conditions to the given <see cref="IEligibilityBuilder"/>, where all conditions must be satisfied
     /// by the declaration in order to be eligible for the aspect.
     /// </summary>
     public static void MustSatisfyAll<T>( this IEligibilityBuilder<T> eligibilityBuilder, params Action<IEligibilityBuilder<T>>[] requirements )

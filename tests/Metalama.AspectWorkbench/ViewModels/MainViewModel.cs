@@ -129,169 +129,179 @@ namespace Metalama.AspectWorkbench.ViewModels
                 null );
 
             var compilationStopwatch = Stopwatch.StartNew();
-            using var testResult = new TestResult();
-
+            TestResult? testResult = null;
             Exception? exception = null;
 
             try
             {
-                await testRunner.RunAsync( testInput, testResult, testContext );
-            }
-            catch ( Exception e )
-            {
-                exception = e;
-            }
-            finally
-            {
-                compilationStopwatch.Stop();
-            }
 
-            var errorsDocument = new FlowDocument();
-
-            var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
-
-            if ( testSyntaxTree != null )
-            {
-                var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
-
-                if ( annotatedTemplateSyntax != null )
+                try
                 {
-                    // Display the annotated syntax tree.
-                    this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
-                        testResult.SyntaxTrees.First().InputDocument,
-                        diagnostics: testResult.Diagnostics );
+                    testResult = await testRunner.RunAsync( testInput, testContext );
+                }
+                catch ( Exception e )
+                {
+                    exception = e;
+                }
+                finally
+                {
+                    compilationStopwatch.Stop();
                 }
 
-                var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+                var errorsDocument = new FlowDocument();
 
-                if ( transformedTemplateSyntax != null )
+                var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
+
+                if ( testSyntaxTree != null )
                 {
-                    // Render the transformed tree.
-                    var project3 = testRunner.CreateProject( testInput.Options );
+                    var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
 
-                    var document3 = project3.AddDocument(
-                        testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
-                        transformedTemplateSyntax,
-                        filePath: testSyntaxTree.OutputCompileTimePath );
-
-                    if ( testInput.Options.FormatCompileTimeCode != false )
+                    if ( annotatedTemplateSyntax != null )
                     {
-                        var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
-
-                        this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
-                    }
-                    else
-                    {
-                        this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( document3, true );
+                        // Display the annotated syntax tree.
+                        this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
+                            testResult.SyntaxTrees.First().InputDocument,
+                            diagnostics: testResult.Diagnostics );
                     }
 
-                    if ( testResult.CompileTimeCompilation != null )
+                    var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+
+                    if ( transformedTemplateSyntax != null )
                     {
-                        if ( !SyntaxTreeStructureVerifier.VerifyMetaSyntax( testResult.CompileTimeCompilation, serviceProvider ) )
+                        // Render the transformed tree.
+                        var project3 = testRunner.CreateProject( testInput.Options );
+
+                        var document3 = project3.AddDocument(
+                            testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
+                            transformedTemplateSyntax,
+                            filePath: testSyntaxTree.OutputCompileTimePath );
+
+                        if ( testInput.Options.FormatCompileTimeCode != false )
                         {
-                            testResult.SetFailed(
-                                "The compiled template syntax tree object model is incorrect: roundloop parsing verification failed. Add a breakpoint in SyntaxTreeStructureVerifier.Verify and diff manually." );
+                            var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+
+                            this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                        }
+                        else
+                        {
+                            this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( document3, true );
+                        }
+
+                        if ( testResult.CompileTimeCompilation != null )
+                        {
+                            if ( !SyntaxTreeStructureVerifier.VerifyMetaSyntax( testResult.CompileTimeCompilation, serviceProvider ) )
+                            {
+                                testResult.SetFailed(
+                                    "The compiled template syntax tree object model is incorrect: roundloop parsing verification failed. Add a breakpoint in SyntaxTreeStructureVerifier.Verify and diff manually." );
+                            }
                         }
                     }
                 }
-            }
 
-            // Multi file tests are not supported.
-            var testOutput = testResult.GetTestOutputsWithDiagnostics().SingleOrDefault();
+                // Multi file tests are not supported.
+                var testOutput = testResult.GetTestOutputsWithDiagnostics().SingleOrDefault();
 
-            if ( testOutput == null )
-            {
-                errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );
-
-                return;
-            }
-
-            var consolidatedOutputSyntax = await testOutput.GetRootAsync();
-
-            if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
-            {
-                consolidatedOutputSyntax = consolidatedOutputSyntax.NormalizeWhitespace();
-            }
-
-            var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
-
-            var project = testResult.OutputProject ?? testResult.InputProject;
-
-            if ( project != null )
-            {
-                var consolidatedOutputDocument = project.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
-
-                // Display the transformed code.
-                this.TransformedCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( consolidatedOutputDocument );
-            }
-
-            // Display the intermediate linker code.
-            if ( testResult.IntermediateLinkerCompilation != null )
-            {
-                var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
-
-                intermediateSyntaxTree = intermediateSyntaxTree.WithRootAndOptions( (await intermediateSyntaxTree.GetRootAsync()).NormalizeWhitespace(), intermediateSyntaxTree.Options );
-
-                var linkerProject = testRunner.CreateProject( testInput.Options );
-
-                var linkerDocument = linkerProject.AddDocument(
-                    "IntermediateLinkerCode.cs",
-                    RenderAspectReferences( await intermediateSyntaxTree.GetRootAsync() ) );
-
-                this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
-            }
-
-            if ( exception != null )
-            {
-                errorsDocument.Blocks.Add( new Paragraph( new Run( exception.ToString() ) { Foreground = Brushes.Red } ) );
-            }
-            else
-            {
-                // Compare the output and shows the result.
-                if ( TestOutputNormalizer.NormalizeTestOutput( this.ExpectedTransformedCode, false, true ) ==
-                     TestOutputNormalizer.NormalizeTestOutput( consolidatedOutputText.ToString(), false, true ) )
+                if ( testOutput == null )
                 {
-                    errorsDocument.Blocks.Add(
-                        new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( "The test did not produce any output." ) { Foreground = Brushes.Red } ) );
+
+                    return;
+                }
+
+                var consolidatedOutputSyntax = await testOutput.GetRootAsync();
+
+                if ( !testInput.Options.FormatOutput.GetValueOrDefault() )
+                {
+                    consolidatedOutputSyntax = consolidatedOutputSyntax.NormalizeWhitespace();
+                }
+
+                var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
+
+                var project = testResult.OutputProject ?? testResult.InputProject;
+
+                if ( project != null )
+                {
+                    var consolidatedOutputDocument = project.AddDocument( "ConsolidatedOutput.cs", consolidatedOutputSyntax );
+
+                    // Display the transformed code.
+                    this.TransformedCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( consolidatedOutputDocument );
+                }
+
+                // Display the intermediate linker code.
+                if ( testResult.IntermediateLinkerCompilation != null )
+                {
+                    var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
+
+                    intermediateSyntaxTree = intermediateSyntaxTree.WithRootAndOptions(
+                        (await intermediateSyntaxTree.GetRootAsync()).NormalizeWhitespace(),
+                        intermediateSyntaxTree.Options );
+
+                    var linkerProject = testRunner.CreateProject( testInput.Options );
+
+                    var linkerDocument = linkerProject.AddDocument(
+                        "IntermediateLinkerCode.cs",
+                        RenderAspectReferences( await intermediateSyntaxTree.GetRootAsync() ) );
+
+                    this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
+                }
+
+                if ( exception != null )
+                {
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( exception.ToString() ) { Foreground = Brushes.Red } ) );
+                }
+                else
+                {
+                    // Compare the output and shows the result.
+                    if ( TestOutputNormalizer.NormalizeTestOutput( this.ExpectedTransformedCode, false, true ) ==
+                         TestOutputNormalizer.NormalizeTestOutput( consolidatedOutputText.ToString(), false, true ) )
+                    {
+                        errorsDocument.Blocks.Add(
+                            new Paragraph( new Run( "The transformed target code is equal to expectations." ) { Foreground = Brushes.Green } ) );
+                    }
+                    else
+                    {
+                        errorsDocument.Blocks.Add(
+                            new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                    }
+                }
+
+                var errors = testResult.Diagnostics;
+
+                errorsDocument.Blocks.AddRange(
+                    errors.Select(
+                        e => new Paragraph(
+                            new Run( e.ToString() )
+                            {
+                                Foreground = e.Severity switch
+                                {
+                                    DiagnosticSeverity.Error => Brushes.Red,
+                                    DiagnosticSeverity.Warning => Brushes.Chocolate,
+                                    _ => Brushes.Black
+                                }
+                            } ) ) );
+
+                if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
+                {
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( testResult.ErrorMessage ) { Foreground = Brushes.Red } ) );
+                }
+
+                this.ErrorsDocument = errorsDocument;
+
+                this.ActualProgramOutput = testResult.ProgramOutput;
+
+                if ( this.ActualProgramOutput == this.ExpectedProgramOutput )
+                {
+                    errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output is equal to expectations." ) { Foreground = Brushes.Green } ) );
                 }
                 else
                 {
                     errorsDocument.Blocks.Add(
-                        new Paragraph( new Run( "The transformed target code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                        new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
                 }
             }
-
-            var errors = testResult.Diagnostics;
-
-            errorsDocument.Blocks.AddRange(
-                errors.Select(
-                    e => new Paragraph(
-                        new Run( e.ToString() )
-                        {
-                            Foreground = e.Severity switch
-                            {
-                                DiagnosticSeverity.Error => Brushes.Red,
-                                DiagnosticSeverity.Warning => Brushes.Chocolate,
-                                _ => Brushes.Black
-                            }
-                        } ) ) );
-
-            if ( !string.IsNullOrEmpty( testResult.ErrorMessage ) )
+            finally
             {
-                errorsDocument.Blocks.Add( new Paragraph( new Run( testResult.ErrorMessage ) { Foreground = Brushes.Red } ) );
-            }
-
-            this.ErrorsDocument = errorsDocument;
-
-            this.ActualProgramOutput = testResult.ProgramOutput;
-
-            if ( this.ActualProgramOutput == this.ExpectedProgramOutput )
-            {
-                errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output is equal to expectations." ) { Foreground = Brushes.Green } ) );
-            }
-            else
-            {
-                errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
+                testResult?.Dispose();
             }
         }
 

@@ -14,12 +14,15 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -218,6 +221,7 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
                 context.AddResources( pipelineResult.Value.AdditionalResources );
                 context.AddSyntaxTreeTransformations( pipelineResult.Value.SyntaxTreeTransformations );
                 HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult.Value );
+                HandleSuppressions( context, projectServiceProvider, pipelineResult.Value.DiagnosticSuppressions );
             }
         }
         catch ( Exception e )
@@ -290,6 +294,38 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
         catch
         {
             // TODO: Warn.
+        }
+    }
+
+    private static void HandleSuppressions(
+        TransformerContext context,
+        ProjectServiceProvider projectServiceProvider,
+        ImmutableArray<ScopedSuppression> diagnosticSuppressions )
+    {
+        var userCodeInvoker = projectServiceProvider.GetRequiredService<UserCodeInvoker>();
+
+        foreach ( var suppression in diagnosticSuppressions )
+        {
+            var declarationId = suppression.Declaration.GetSerializableId();
+
+            UserCodeExecutionContext? executionContext = null;
+
+            if ( suppression.Suppression.Filter != null )
+            {
+                executionContext = new UserCodeExecutionContext(
+                    projectServiceProvider,
+                    UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Suppression.Definition, suppression.Declaration ) );
+            }
+
+            context.RegisterDiagnosticFilter(
+                SuppressionFactories.CreateDescriptor( suppression.Suppression.Definition.SuppressedDiagnosticId ),
+                request =>
+                {
+                    if ( suppression.Matches( request.Diagnostic, request.Compilation, filter => userCodeInvoker.Invoke( filter, executionContext! ), declarationId ) )
+                    {
+                        request.Suppress();
+                    }
+                } );
         }
     }
 }

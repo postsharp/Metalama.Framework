@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
@@ -211,11 +210,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
-        // Group diagnostic suppressions by target.
-        var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
-            s => s.Declaration,
-            input.CompilationModel.Comparers.Default );
-
         // Replace wildcard AssemblyVersionAttribute with actual version.
         var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
         var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );
@@ -258,7 +252,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             Rewriter rewriter = new(
                 this,
                 transformationCollection,
-                suppressionsByTarget,
                 input.CompilationModel,
                 syntaxTreeForGlobalAttributes );
 

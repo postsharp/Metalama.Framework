@@ -38,8 +38,6 @@ public static class SyntaxExtensions
     /// <summary>
     /// Find the parent node that declares an <see cref="ISymbol"/>, but not a local variable or a function.
     /// </summary>
-    /// <param name="node"></param>
-    /// <returns></returns>
     public static SyntaxNode? FindSymbolDeclaringNode( this SyntaxNode node )
     {
         var current = node;

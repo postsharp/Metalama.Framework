@@ -58,9 +58,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     input.FirstCompilationModel.AssertNotNull(),
                     pipelineStepsResult.Transformations,
                     input.AspectLayers,
-                    input.Diagnostics.DiagnosticSuppressions.Concat(
-                        pipelineStepsResult.Diagnostics.DiagnosticSuppressions,
-                        validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
             var linkerResult = await linker.ExecuteAsync( cancellationToken );

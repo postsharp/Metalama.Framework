@@ -27,7 +27,7 @@ internal sealed class CountingDiagnosticSink : IUserDiagnosticSink
         this._underlying.Report( diagnostic, location, source );
     }
 
-    public void Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source )
+    public void Suppress( ISuppression suppression, IDeclaration scope, IDiagnosticSource source )
         => this._underlying.Suppress( suppression, scope, source );
 
     public void Suggest( CodeFix codeFix, IDiagnosticLocation location, IDiagnosticSource source ) => this._underlying.Suggest( codeFix, location, source );

@@ -11,7 +11,6 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -57,8 +56,7 @@ internal class AspectTestRunner : BaseTestRunner
     protected override async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContext testContext,
-        Dictionary<string, object?> state )
+        TestContext testContext )
     {
         if ( this._runCount > 0 )
         {
@@ -70,7 +68,7 @@ internal class AspectTestRunner : BaseTestRunner
             this._runCount++;
         }
 
-        await base.RunAsync( testInput, testResult, testContext, state );
+        await base.RunAsync( testInput, testResult, testContext );
 
         if ( testResult.InputCompilation == null )
         {
@@ -208,6 +206,14 @@ internal class AspectTestRunner : BaseTestRunner
 
         await testResult.SetOutputCompilationAsync( resultCompilation );
 
+        if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
+        {
+            testResult.SetFailed( "Syntax tree verification failed." );
+            testResult.OutputCompilationDiagnostics.Report( diagnostics );
+
+            return false;
+        }
+
         // Emit binary and report diagnostics.
         bool MustBeReported( Diagnostic d )
         {
@@ -218,16 +224,20 @@ internal class AspectTestRunner : BaseTestRunner
                 return false;
             }
 
-            return d.Severity >= minimalVerbosity
-                   && !testInput.ShouldIgnoreDiagnostic( d.Id );
-        }
+            if ( d.Severity < minimalVerbosity || testInput.ShouldIgnoreDiagnostic( d.Id ) )
+            {
+                return false;
+            }
 
-        if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
-        {
-            testResult.SetFailed( "Syntax tree verification failed." );
-            testResult.OutputCompilationDiagnostics.Report( diagnostics );
+            foreach ( var suppression in pipelineResult.DiagnosticSuppressions )
+            {
+                if ( suppression.Matches( d, resultCompilation, filter => filter() ) )
+                {
+                    return false;
+                }
+            }
 
-            return false;
+            return true;
         }
 
         if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
@@ -425,9 +435,9 @@ internal class AspectTestRunner : BaseTestRunner
     }
 #endif
 
-    private protected override void SaveResults( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    private protected override void SaveResults( TestInput testInput, TestResult testResult )
     {
-        base.SaveResults( testInput, testResult, state );
+        base.SaveResults( testInput, testResult );
 
         var expectedProgramOutputPath = Path.Combine(
             Path.GetDirectoryName( testInput.FullPath )!,
@@ -489,19 +499,24 @@ internal class AspectTestRunner : BaseTestRunner
             }
         }
 
-        state["actualProgramOutput"] = actualProgramOutput;
-        state["expectedProgramOutput"] = expectedProgramOutput;
+        var aspectTestResult = (AspectTestResult) testResult;
+
+        aspectTestResult.SetProgramOutput( actualProgramOutput, actualProgramOutputPath, expectedProgramOutput, expectedProgramOutputPath );
     }
 
-    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )
+    protected override void ExecuteAssertions( TestInput testInput, TestResult testResult )
     {
-        base.ExecuteAssertions( testInput, testResult, state );
+        base.ExecuteAssertions( testInput, testResult );
 
         if ( testInput.Options.CompareProgramOutput ?? true )
         {
-            var expectedOutput = (string) state["expectedProgramOutput"]!;
-            var actualOutput = (string) state["actualProgramOutput"]!;
-            Assert.Equal( expectedOutput, actualOutput );
+            var aspectTestResult = (AspectTestResult) testResult;
+
+            this.AssertTextEqual(
+                aspectTestResult.ExpectedProgramOutputText!,
+                aspectTestResult.ExpectedProgramOutputPath!,
+                aspectTestResult.ActualProgramOutputText!,
+                aspectTestResult.ActualProgramOutputPath! );
         }
 
 #if DEBUG
@@ -525,5 +540,30 @@ internal class AspectTestRunner : BaseTestRunner
             */
         }
 #endif
+    }
+
+    protected override TestResult CreateTestResult() => new AspectTestResult();
+
+    private sealed class AspectTestResult : TestResult
+    {
+        public string? ActualProgramOutputText { get; private set; }
+
+        public string? ActualProgramOutputPath { get; private set; }
+
+        public string? ExpectedProgramOutputText { get; private set; }
+
+        public string? ExpectedProgramOutputPath { get; private set; }
+
+        public void SetProgramOutput(
+            string actualProgramOutputText,
+            string actualProgramOutputPath,
+            string expectedProgramOutputText,
+            string expectedProgramOutputPath )
+        {
+            this.ActualProgramOutputText = actualProgramOutputText;
+            this.ActualProgramOutputPath = actualProgramOutputPath;
+            this.ExpectedProgramOutputText = expectedProgramOutputText;
+            this.ExpectedProgramOutputPath = expectedProgramOutputPath;
+        }
     }
 }

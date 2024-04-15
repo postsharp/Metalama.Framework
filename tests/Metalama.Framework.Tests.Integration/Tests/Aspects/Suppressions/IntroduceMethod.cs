@@ -1,5 +1,5 @@
 #if TEST_OPTIONS
-// @Skipped (#31074)
+// @ClearIgnoredDiagnostics
 #endif
 
 #if !TESTRUNNER
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.OverrideMeth
         // CS0219 expected 
         private void M1( string m )
         {
-            var x = 0;
+            var y = 0;
         }
     }
 }

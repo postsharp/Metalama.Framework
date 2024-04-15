@@ -4,7 +4,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.UnitTesting;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,8 +32,7 @@ internal sealed class OutputFormatterAspectTestRunner : AspectTestRunner
     protected override async Task RunAsync(
         TestInput testInput,
         TestResult testResult,
-        TestContext projectOptions,
-        Dictionary<string, object?> state )
+        TestContext projectOptions )
     {
         var expectedEol =
             testInput.Options.ExpectedEndOfLine switch
@@ -81,7 +79,7 @@ internal sealed class OutputFormatterAspectTestRunner : AspectTestRunner
         }
 
         // Run the sample.
-        await base.RunAsync( testInput, testResult, projectOptions, state );
+        await base.RunAsync( testInput, testResult, projectOptions );
 
         // If we have an expected EOL, verify that EOLs are preserved in the output document.
         if ( expectedEol != null && testResult.OutputProject != null )

@@ -222,7 +222,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        private void ValidateUserSuppression( SuppressionDefinition definition )
+        private void ValidateSuppressionDefinition( SuppressionDefinition definition )
         {
             if ( this._diagnosticManifest != null && !this._diagnosticManifest.DefinesSuppression( definition.SuppressedDiagnosticId ) )
             {
@@ -241,9 +241,9 @@ namespace Metalama.Framework.Engine.Diagnostics
             this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, source, codeFixes: codeFixTitles ) );
         }
 
-        void IDiagnosticSink.Suppress( SuppressionDefinition suppression, IDeclaration scope, IDiagnosticSource source )
+        void IDiagnosticSink.Suppress( ISuppression suppression, IDeclaration scope, IDiagnosticSource source )
         {
-            this.ValidateUserSuppression( suppression );
+            this.ValidateSuppressionDefinition( suppression.Definition );
             this.Suppress( new ScopedSuppression( suppression, scope ) );
         }
 

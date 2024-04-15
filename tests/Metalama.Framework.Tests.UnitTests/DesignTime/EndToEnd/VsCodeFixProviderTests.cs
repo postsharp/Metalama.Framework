@@ -61,7 +61,7 @@ public sealed class VsCodeFixProviderTests : DistributedDesignTimeTestBase
         var pipeline = testContext.PipelineFactory.GetOrCreatePipeline( project )!;
         var result = await pipeline.ExecuteAsync( (await project.GetCompilationAsync())!, AsyncExecutionContext.Get() );
         Assert.True( result.IsSuccessful );
-        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" ).Diagnostics;
+        var diagnostics = result.Value.GetDiagnosticsOnSyntaxTree( "code.cs" );
         Assert.Single( diagnostics, d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id );
         Assert.Single( diagnostics, d => d.Id == GeneralDiagnosticDescriptors.SuggestedCodeFix.Id );
 

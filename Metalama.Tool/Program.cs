@@ -3,6 +3,7 @@
 using Metalama.Backstage.Commands;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.Engine.Configuration;
+using Metalama.Testing.AspectTesting;
 using Metalama.Tool.Divorce;
 using Metalama.Tool.Licensing;
 using Spectre.Console.Cli;
@@ -18,6 +19,7 @@ namespace Metalama.Tool
             var options = new BackstageCommandOptions( new ApplicationInfo() );
             options.AddConfigurationFileAdapter<UserDiagnosticsConfiguration>();
             options.AddConfigurationFileAdapter<DesignTimeConfiguration>();
+            options.AddConfigurationFileAdapter<TestRunnerOptions>();
 
             BackstageCommandFactory.ConfigureCommandApp(
                 app,

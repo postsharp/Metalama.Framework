@@ -171,6 +171,11 @@ public interface IProjectOptions : IProjectService
     /// </summary>
     string? TransformedFilesOutputPath { get; }
 
+    /// <summary>
+    /// Gets a value indicating whether transformed files will be written to disk.
+    /// </summary>
+    bool? WriteTransformedFiles { get; }
+
     bool IsTest { get; }
 
     // Note: when adding a new property, also update ProjectOptionsEqualityComparer.
