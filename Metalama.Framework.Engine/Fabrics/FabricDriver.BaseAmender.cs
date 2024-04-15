@@ -15,7 +15,6 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
 
@@ -47,9 +46,8 @@ internal abstract partial class FabricDriver
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
-
         IProject IAspectReceiverParent.Project => this._project;
-        
+
         public abstract string? Namespace { get; }
 
         public LicenseVerifier? LicenseVerifier { get; }
@@ -63,7 +61,7 @@ internal abstract partial class FabricDriver
         ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 
         BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._fabricManager.AspectClasses;
-        
+
         UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._fabricManager.UserCodeInvoker;
 
         public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );
