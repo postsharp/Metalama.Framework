@@ -10,7 +10,8 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 {
-    private readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
+    // We used a shared scheduler to limit concurrency in the whole process.
+    private static readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
 
     public Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull
@@ -45,7 +46,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         for ( var i = 0; i < taskCount; i++ )
         {
-            tasks[i] = Task.Factory.StartNew( ProcessQueue, cancellationToken, TaskCreationOptions.None, this._scheduler );
+            tasks[i] = Task.Factory.StartNew( ProcessQueue, cancellationToken, TaskCreationOptions.None, _scheduler );
         }
 
         // Await all tasks.
@@ -101,7 +102,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         for ( var i = 0; i < taskCount; i++ )
         {
-            tasks[i] = Task.Factory.StartNew( ProcessQueue, cancellationToken, TaskCreationOptions.None, this._scheduler );
+            tasks[i] = Task.Factory.StartNew( ProcessQueue, cancellationToken, TaskCreationOptions.None, _scheduler );
         }
 
         // Await all tasks.
@@ -150,7 +151,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         for ( var i = 0; i < taskCount; i++ )
         {
-            tasks[i] = Task.Factory.StartNew( ProcessQueueAsync, cancellationToken, TaskCreationOptions.None, this._scheduler ).Unwrap();
+            tasks[i] = Task.Factory.StartNew( ProcessQueueAsync, cancellationToken, TaskCreationOptions.None, _scheduler ).Unwrap();
         }
 
         return Task.WhenAll( tasks );
