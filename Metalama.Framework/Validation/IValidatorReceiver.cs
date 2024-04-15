@@ -146,7 +146,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </summary>
     IValidatorReceiver<TDeclaration> Where( Func<TDeclaration, bool> predicate );
 
-    IValidatorReceiver<TDeclaration, TTag> WithTag<TTag>( Func<TDeclaration, TTag> getTag );
+    IValidatorReceiver<TDeclaration, TTag> Tag<TTag>( Func<TDeclaration, TTag> getTag );
 }
 
 public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorReceiver<TDeclaration>
@@ -253,7 +253,7 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// </summary>
     IValidatorReceiver<TDeclaration, TTag> Where( Func<TDeclaration, TTag, bool> predicate );
 
-    new IValidatorReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag );
+    new IValidatorReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag );
 
-    IValidatorReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag );
+    IValidatorReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag );
 }

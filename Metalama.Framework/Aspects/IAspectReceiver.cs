@@ -149,7 +149,7 @@ namespace Metalama.Framework.Aspects
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
         
         
-        new IAspectReceiver<TDeclaration, TTag> WithTag<TTag>( Func<TDeclaration, TTag> getTag );
+        new IAspectReceiver<TDeclaration, TTag> Tag<TTag>( Func<TDeclaration, TTag> getTag );
     }
 
     [InternalImplement]
@@ -272,9 +272,9 @@ namespace Metalama.Framework.Aspects
         void SetOptions<TOptions>( Func<TDeclaration, TTag, TOptions> func )
             where TOptions : class, IHierarchicalOptions, IHierarchicalOptions<TDeclaration>, new();
 
-        new IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag );
+        new IAspectReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag );
 
-        new IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag );
+        new IAspectReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag );
     }
 
     [CompileTime]

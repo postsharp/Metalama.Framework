@@ -368,13 +368,13 @@ namespace Metalama.Framework.Engine.Fabrics
         IAspectReceiver<TDeclaration, TTag> IAspectReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
-        IAspectReceiver<TDeclaration, TTag1> IAspectReceiver<TDeclaration>.WithTag<TTag1>( Func<TDeclaration, TTag1> getTag )
-            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
+        IAspectReceiver<TDeclaration, TTag1> IAspectReceiver<TDeclaration>.Tag<TTag1>( Func<TDeclaration, TTag1> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
 
-        IAspectReceiver<TDeclaration, TNewTag> IAspectReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
-            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
+        IAspectReceiver<TDeclaration, TNewTag> IAspectReceiver<TDeclaration, TTag>.Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
 
-        public IAspectReceiver<TDeclaration, TNewTag> WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
+        public IAspectReceiver<TDeclaration, TNewTag> Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
             => this.AddChild(
                 new AspectReceiver<TDeclaration, TNewTag>(
                     this._containingDeclaration,
@@ -413,11 +413,11 @@ namespace Metalama.Framework.Engine.Fabrics
         IValidatorReceiver<TDeclaration, TTag> IValidatorReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
-        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
-            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
 
-        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.WithTag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
-            => this.WithTag( getTag );
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration, TTag>.Tag<TNewTag>( Func<TDeclaration, TTag, TNewTag> getTag )
+            => this.Tag( getTag );
 
         IValidatorReceiver<TDeclaration, TTag> IValidatorReceiver<TDeclaration, TTag>.Where( Func<TDeclaration, TTag, bool> predicate )
             => this.Where( predicate );
@@ -513,7 +513,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         context,
                         ( declaration, tag, context2 ) => action( selector( declaration, tag ), tag, context2 ) ) ) );
 
-        public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes )
+        public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false )
             => this.AddChild(
                 new AspectReceiver<INamedType, TTag>(
                     this._containingDeclaration,
@@ -632,8 +632,8 @@ namespace Metalama.Framework.Engine.Fabrics
         IValidatorReceiver<TDeclaration> IValidatorReceiver<TDeclaration>.Where( Func<TDeclaration, bool> predicate )
             => this.Where( ( declaration, _ ) => predicate( declaration ) );
 
-        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration>.WithTag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
-            => this.WithTag( ( declaration, _ ) => getTag( declaration ) );
+        IValidatorReceiver<TDeclaration, TNewTag> IValidatorReceiver<TDeclaration>.Tag<TNewTag>( Func<TDeclaration, TNewTag> getTag )
+            => this.Tag( ( declaration, _ ) => getTag( declaration ) );
 
         IValidatorReceiver<TMember> IValidatorReceiver<TDeclaration>.SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
             => this.SelectMany( ( declaration, _ ) => selector( declaration ) );

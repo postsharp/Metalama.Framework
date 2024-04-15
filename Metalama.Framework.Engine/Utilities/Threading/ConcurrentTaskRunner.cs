@@ -166,5 +166,5 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
         }
     }
 
-    public void Dispose() => this._scheduler.Dispose();
+    public void Dispose() { }
 }
