@@ -201,8 +201,7 @@ internal class AspectTestRunner : BaseTestRunner
         var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
         testResult.OutputCompilation = resultCompilation;
         testResult.HasOutputCode = true;
-
-        var minimalVerbosity = testInput.Options.ReportOutputWarnings.GetValueOrDefault() ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+        testResult.DiagnosticSuppressions = pipelineResult.DiagnosticSuppressions;
 
         await testResult.SetOutputCompilationAsync( resultCompilation );
 
@@ -215,38 +214,13 @@ internal class AspectTestRunner : BaseTestRunner
         }
 
         // Emit binary and report diagnostics.
-        bool MustBeReported( Diagnostic d )
-        {
-            if ( d.Id == "CS1701" )
-            {
-                // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
-                // This warning is ignored by MSBuild anyway.
-                return false;
-            }
-
-            if ( d.Severity < minimalVerbosity || testInput.ShouldIgnoreDiagnostic( d.Id ) )
-            {
-                return false;
-            }
-
-            foreach ( var suppression in pipelineResult.DiagnosticSuppressions )
-            {
-                if ( suppression.Matches( d, resultCompilation, filter => filter() ) )
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
         {
             // We don't build the PDB because the syntax trees were not written to disk anyway.
             var peStream = new MemoryStream();
             var emitResult = resultCompilation.Emit( peStream );
 
-            testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics.Where( MustBeReported ) );
+            testResult.OutputCompilationDiagnostics.Report( emitResult.Diagnostics );
 
             if ( !emitResult.Success )
             {
@@ -266,7 +240,7 @@ internal class AspectTestRunner : BaseTestRunner
         }
         else
         {
-            testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics().Where( MustBeReported ) );
+            testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics() );
         }
 
         return true;

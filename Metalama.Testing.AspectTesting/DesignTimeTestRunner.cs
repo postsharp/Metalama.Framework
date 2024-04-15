@@ -44,6 +44,20 @@ namespace Metalama.Testing.AspectTesting
                     : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
 
                 await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
+
+                testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
+
+                if ( introducedSyntaxTree != null )
+                {
+                    var outputCompilation = testResult.InputCompilation!.AddSyntaxTrees( introducedSyntaxTree.GeneratedSyntaxTree );
+
+                    testResult.OutputCompilation = outputCompilation;
+                    testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );
+                }
+                else
+                {
+                    testResult.OutputCompilation = testResult.InputCompilation;
+                }
             }
             else
             {

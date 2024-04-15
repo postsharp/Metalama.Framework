@@ -396,33 +396,12 @@ namespace Metalama.Framework.Engine.Templating
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
         {
-            var suppressNullableWarning = false;
+            SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+                operand,
+                this._syntaxSerializationContext.CompilationContext,
+                out var typeSymbol );
 
-            if ( this._templateExpansionContext.SyntaxGenerator.IsNullAware )
-            {
-                suppressNullableWarning = true;
-
-                if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
-                        operand,
-                        this._syntaxSerializationContext.CompilationContext,
-                        out var typeSymbol ) )
-                {
-                    // Value types, including nullable value types don't need suppression.
-                    if ( typeSymbol is { IsValueType: true } )
-                    {
-                        suppressNullableWarning = false;
-                    }
-
-                    if ( typeSymbol.IsNullable() == false )
-                    {
-                        suppressNullableWarning = false;
-                    }
-                }
-            }
-
-            return suppressNullableWarning
-                ? SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand )
-                : operand;
+            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, typeSymbol );
         }
 
         public ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression )

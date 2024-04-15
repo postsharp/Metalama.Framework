@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -23,7 +24,8 @@ internal sealed class CacheableScopedSuppression : IScopedSuppression
     {
         this.Suppression = suppression.Suppression;
 
-        this.DeclarationId = suppression.Declaration.ToSerializableId();
+        // If the declaration has been mutated (constructor parameter introduction), we need to get the original symbol here.
+        this.DeclarationId = suppression.Declaration.GetSymbol()?.GetSerializableId() ?? suppression.Declaration.ToSerializableId();
     }
 
     public override string ToString() => $"{this.Suppression} on {this.DeclarationId}";
