@@ -362,7 +362,7 @@ namespace Metalama.Framework.Engine.Linking
                                         {
                                             SyntaxKind.GetAccessorDeclaration => symbol.GetMethod.AssertNotNull(),
                                             SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => symbol.SetMethod.AssertNotNull(),
-                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
+                                            _ => throw new AssertionFailedException( $"Unexpected accessor: {a}" )
                                         } ) ) ) )
                     .WithSourceCodeAnnotation();
 
@@ -488,7 +488,7 @@ namespace Metalama.Framework.Engine.Linking
                                     SyntaxKind.InitAccessorDeclaration => symbol.SetMethod != null
                                         ? this.FilterAttributesOnSpecialImpl( symbol.SetMethod, a )
                                         : a,
-                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" )
+                                    _ => throw new AssertionFailedException( $"Unexpected accessor: {a}" )
                                 } ) ) );
 
             return

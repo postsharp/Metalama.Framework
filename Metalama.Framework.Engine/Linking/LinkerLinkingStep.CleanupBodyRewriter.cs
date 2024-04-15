@@ -59,7 +59,7 @@ internal sealed partial class LinkerLinkingStep
                 }
                 else
                 {
-                    throw new AssertionFailedException( $"No final statement for switch section at '{node.GetLocation()}'." );
+                    throw new AssertionFailedException( $"No final statement for switch section: {node}." );
                 }
             }
 

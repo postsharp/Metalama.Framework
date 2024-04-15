@@ -716,7 +716,7 @@ internal sealed partial class LinkerInjectionStep
                                                                 exitStatements,
                                                                 expressionBody.Expression,
                                                                 a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" )
+                                                    _ => throw new AssertionFailedException( $"Not supported: {a}" )
                                                 }
                                                 : a ) ) ) );
 
@@ -732,7 +732,7 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                 default:
-                    throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
+                    throw new AssertionFailedException( $"Not supported: {currentNode}" );
             }
 
             static BlockSyntax ReplaceBlock(
@@ -930,7 +930,7 @@ internal sealed partial class LinkerInjectionStep
                         break;
 
                     default:
-                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax.Kind()}" );
+                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax}" );
                 }
 
                 // TODO: This may be slower than replacing specific index.
@@ -1410,7 +1410,7 @@ internal sealed partial class LinkerInjectionStep
                 {
                     IdentifierNameSyntax identifier => identifier.Identifier.Text,
                     LiteralExpressionSyntax literal => $"CS{literal.Token.Value:0000}",
-                    _ => throw new AssertionFailedException( $"Unexpected expression '{expression.Kind()}' at '{expression.GetLocation()}'." )
+                    _ => throw new AssertionFailedException( $"Unexpected expression '{expression}'." )
                 };
             }
         }

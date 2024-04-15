@@ -347,7 +347,7 @@ internal sealed partial class LinkerAnalysisStep
                     }
 
                     var rootNode = declaration.Body ?? (SyntaxNode?) declaration.ExpressionBody
-                        ?? throw new AssertionFailedException( "Declaration without body." );
+                        ?? throw new AssertionFailedException( $"Declaration without body: {declaration}" );
 
                     AddSubstitution(
                         context,
@@ -461,7 +461,7 @@ internal sealed partial class LinkerAnalysisStep
                 if ( !dictionary.TryAdd( substitution.TargetNode, substitution ) )
                 {
                     // TODO: The item was already added, but there is no logic to cover this situation.
-                    throw new AssertionFailedException( $"The substitution was already added for node at '{substitution.TargetNode.GetLocation()}'." );
+                    throw new AssertionFailedException( $"The substitution was already added for node {substitution.TargetNode}." );
                 }
             }
         }
@@ -493,7 +493,7 @@ internal sealed partial class LinkerAnalysisStep
                     return new RecordParameterSubstitution( this._intermediateCompilationContext, recordParameter, targetSymbol, returnVariableIdentifier );
 
                 default:
-                    throw new AssertionFailedException( $"Unexpected combination: ('{root.GetLocation()}', '{targetSymbol}')." );
+                    throw new AssertionFailedException( $"Unexpected combination: ('{root}', '{targetSymbol}')." );
             }
         }
     }

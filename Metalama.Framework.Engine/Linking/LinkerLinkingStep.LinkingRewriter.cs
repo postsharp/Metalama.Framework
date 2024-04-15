@@ -178,7 +178,7 @@ internal sealed partial class LinkerLinkingStep
                                 break;
 
                             default:
-                                throw new AssertionFailedException( $"Unexpected member {member.Kind()} at '{member.GetLocation()}'." );
+                                throw new AssertionFailedException( $"Unexpected member: {member}" );
                         }
                     }
                 }
