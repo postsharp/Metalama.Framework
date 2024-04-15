@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
@@ -184,7 +183,7 @@ internal sealed partial class LinkerInjectionStep
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"{removedSyntax.Kind()} is not supported removed syntax." );
+                    throw new AssertionFailedException( $"Not supported removed syntax: {removedSyntax}" );
             }
         }
 

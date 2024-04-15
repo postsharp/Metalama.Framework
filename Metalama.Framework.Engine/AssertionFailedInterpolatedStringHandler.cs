@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
