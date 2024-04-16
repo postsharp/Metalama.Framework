@@ -374,7 +374,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public IReadOnlyCollection<TDeclaration> ToCollection( ICompilation? compilation )
         {
-            var bag = new ConcurrentBag<TDeclaration>();
+            var bag = new ConcurrentQueue<TDeclaration>();
 
             this.Parent.ServiceProvider.Global.GetRequiredService<ITaskRunner>()
                 .RunSynchronously(
@@ -385,7 +385,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 CancellationToken.None ),
                             ( declaration, tag, arg3 ) =>
                             {
-                                bag.Add( declaration );
+                                bag.Enqueue( declaration );
 
                                 return Task.CompletedTask;
                             } ) );
@@ -806,13 +806,13 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeInvoker? invoker = null,
             UserCodeExecutionContext? executionContext = null )
         {
-            ConcurrentBag<CachedItem>? cached = null;
+            ConcurrentQueue<CachedItem>? cached = null;
             var processTargetWithCachingIfNecessary = processTarget;
 
             if ( this.ShouldCache )
             {
                 // GetFromCacheAsync uses a semaphore to control exclusivity.  AddToCache must be called is the method returns null.
-                cached = await selectionContext.GetFromCacheAsync<ConcurrentBag<CachedItem>>( this, selectionContext.CancellationToken );
+                cached = await selectionContext.GetFromCacheAsync<ConcurrentQueue<CachedItem>>( this, selectionContext.CancellationToken );
 
                 if ( cached != null )
                 {
@@ -825,11 +825,11 @@ namespace Metalama.Framework.Engine.Fabrics
                 }
                 else
                 {
-                    cached = new ConcurrentBag<CachedItem>();
+                    cached = new ConcurrentQueue<CachedItem>();
 
                     processTargetWithCachingIfNecessary = ( a, tag, ctx ) =>
                     {
-                        cached.Add( new CachedItem( a, tag ) );
+                        cached.Enqueue( new CachedItem( a, tag ) );
 
                         return processTarget( a, tag, ctx );
                     };

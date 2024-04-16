@@ -101,7 +101,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             TestDirectoryOptionsReader reader = new( this._serviceProvider, projectProperties.SourceDirectory );
             TestFactory factory = new( this._serviceProvider, projectProperties, reader, this._assembly );
 
-            ConcurrentBag<Task> tasks = new();
+            ConcurrentQueue<Task> tasks = new();
             var pendingTasks = new StrongBox<int>( 0 );
 
             void AddTestsInDirectory( string directory )
@@ -196,7 +196,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                         }
 
                         Interlocked.Increment( ref pendingTasks.Value );
-                        tasks.Add( Task.Run( () => AddTestsInDirectory( nestedDir ) ) );
+                        tasks.Enqueue( Task.Run( () => AddTestsInDirectory( nestedDir ) ) );
                     }
                 }
                 finally
