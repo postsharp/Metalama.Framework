@@ -58,4 +58,17 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
             ValidatedClass.Method( typeof(ValidatedClass) );
         }
     }
+
+    // <target>
+    namespace Subnamespace
+    {
+        internal class ReferencingClassInSubnamespace
+        {
+            private void ReferencingMethod()
+            {
+                ValidatedClass variable;
+                ValidatedClass.Method( typeof(ValidatedClass) );
+            }
+        }
+    }
 }

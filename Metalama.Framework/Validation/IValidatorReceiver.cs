@@ -155,6 +155,11 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// Methods of this interface have overloads that accept this tag. 
     /// </summary>
     IValidatorReceiver<TDeclaration, TTag> Tag<TTag>( Func<TDeclaration, TTag> getTag );
+
+    /// <summary>
+    /// Evaluates the current query into a collection. This method should only be used for debugging or testing purposes.
+    /// </summary>
+    IReadOnlyCollection<TDeclaration> ToCollection( ICompilation? compilation = null );
 }
 
 public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorReceiver<TDeclaration>
