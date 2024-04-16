@@ -5,7 +5,6 @@ using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
@@ -13,7 +12,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 public sealed class ReferenceIndexBuilder
 {
-    private readonly ConcurrentDictionary<ISymbol, ConcurrentDictionary<ISymbol, List<ReferencingNode>>> _references = new();
+    private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _references = new();
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly IReferenceIndexerOptions _options;
     private bool _frozen;
@@ -48,16 +47,75 @@ public sealed class ReferenceIndexBuilder
         CheckSymbolKind( referencedSymbol );
         CheckSymbolKind( referencingSymbol );
 
-        var referencingSymbols = this._references.GetOrAddNew( referencedSymbol );
-        var nodes = referencingSymbols.GetOrAddNew( referencingSymbol );
+        // Index the explicit reference.
+        var referencedSymbolInfo = this._references.GetOrAdd( referencedSymbol, static s => new ReferencedSymbolInfo( s ) );
+        referencedSymbolInfo.AddReference( referencingSymbol, node, referenceKinds );
 
-        lock ( nodes )
+        // Create indirect references (containing declarations, base types).
+        this.AddToParents( referencedSymbolInfo );
+    }
+
+    private void AddToParents( ReferencedSymbolInfo child )
+    {
+        // Recurse on the base type.
+        var referencedSymbol = child.ReferencedSymbol;
+
+        if ( referencedSymbol is INamedTypeSymbol { BaseType: { } baseType }
+             && this._options.MustDescendIntoReferencedBaseTypes( ReferenceKinds.All ) )
         {
-            nodes.Add( new ReferencingNode( node, referenceKinds ) );
+            this.AddToParent( child, baseType, ChildKinds.DerivedType );
+        }
+
+        // Descent into the containing type.
+        if ( referencedSymbol.ContainingType != null )
+        {
+            if ( this._options.MustDescendIntoReferencedDeclaringType( ReferenceKinds.All ) )
+            {
+                this.AddToParent( child, referencedSymbol.ContainingType, ChildKinds.ContainingDeclaration );
+
+                // There is no need to continue the descent since it was done when processing the containing type.
+                return;
+            }
+        }
+
+        // Descent into the containing namespace.
+        if ( referencedSymbol.ContainingNamespace is { IsGlobalNamespace: false } )
+        {
+            if ( this._options.MustDescendIntoReferencedNamespace( ReferenceKinds.All ) )
+            {
+                this.AddToParent( child, referencedSymbol.ContainingNamespace, ChildKinds.ContainingDeclaration );
+
+                // There is no need to continue the descent since it was done when processing the containing type.
+                return;
+            }
+        }
+
+        // Descent into the containing assembly.
+        if ( referencedSymbol.ContainingAssembly != null )
+        {
+            if ( this._options.MustDescendIntoReferencedAssembly( ReferenceKinds.All ) )
+            {
+                this.AddToParent( child, referencedSymbol.ContainingAssembly, ChildKinds.ContainingDeclaration );
+            }
         }
     }
 
-    public void Index( SemanticModel semanticModel, CancellationToken cancellationToken )
+    private void AddToParent( ReferencedSymbolInfo child, ISymbol parent, ChildKinds childKind )
+    {
+        if ( !this._references.TryGetValue( parent, out var parentNode ) )
+        {
+            parentNode = new ReferencedSymbolInfo( parent );
+
+            if ( this._references.GetOrAdd( parent, parentNode ) == parentNode )
+            {
+                this.AddToParents( parentNode );
+            }
+        }
+
+        parentNode.AddChild( child, childKind );
+    }
+
+    public void IndexSyntaxTree( SemanticModel semanticModel, CancellationToken cancellationToken )
     {
         if ( this._frozen )
         {

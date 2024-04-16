@@ -33,7 +33,7 @@ public class ReferenceValidatorRunner
     {
         // Collect all references.
         var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Properties );
-        referenceIndexBuilder.Index( semanticModel, cancellationToken );
+        referenceIndexBuilder.IndexSyntaxTree( semanticModel, cancellationToken );
 
         // Run the validator.
         return this.RunValidatorsCoreAsync(
@@ -56,7 +56,7 @@ public class ReferenceValidatorRunner
 
         await this._concurrentTaskRunner.RunConcurrentlyAsync(
             initialCompilation.PartialCompilation.SyntaxTrees.Values,
-            syntaxTree => referenceIndexBuilder.Index(
+            syntaxTree => referenceIndexBuilder.IndexSyntaxTree(
                 semanticModelProvider.GetSemanticModel( syntaxTree, true ),
                 cancellationToken ),
             cancellationToken );
@@ -83,10 +83,10 @@ public class ReferenceValidatorRunner
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: initialCompilation );
         await this._concurrentTaskRunner.RunConcurrentlyAsync( referenceIndex.ReferencedSymbols, AnalyzeReferencedSymbolsAsync, cancellationToken );
 
-        Task AnalyzeReferencedSymbolsAsync( ReferenceIndex.ReferencedSymbolInfo symbolInfo )
+        Task AnalyzeReferencedSymbolsAsync( ReferencedSymbolInfo symbolInfo )
             => AnalyzeReferencedSymbolsImplAsync( symbolInfo, symbolInfo.ReferencedSymbol, false );
 
-        async Task AnalyzeReferencedSymbolsImplAsync( ReferenceIndex.ReferencedSymbolInfo references, ISymbol referencedSymbol, bool isBaseType )
+        async Task AnalyzeReferencedSymbolsImplAsync( ReferencedSymbolInfo references, ISymbol referencedSymbol, bool isBaseType )
         {
             // Iterate all validators interested in the referenced symbol.
             foreach ( var validator in referenceValidatorProvider.GetValidators( referencedSymbol ) )
@@ -99,59 +99,30 @@ public class ReferenceValidatorRunner
                 userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
 
                 // Validate all references.
-                await this._concurrentTaskRunner.RunConcurrentlyAsync( references.References, AnalyzeReferencingSymbols, cancellationToken );
+                var childKinds = validator.IncludeDerivedTypes ? ChildKinds.All : ChildKinds.ContainingDeclaration;
 
-                void AnalyzeReferencingSymbols( ReferenceIndex.ReferencingSymbolInfo reference )
+                await this._concurrentTaskRunner.RunConcurrentlyAsync(
+                    references.GetAllReferences( childKinds ),
+                    AnalyzeReferencingSymbols,
+                    cancellationToken );
+
+                void AnalyzeReferencingSymbols( ReferencingSymbolInfo reference )
                 {
-                    if ( (validator.ReferenceKinds & references.AllReferenceKinds) != 0 )
+                    foreach ( var node in reference.Nodes )
                     {
-                        foreach ( var node in reference.Nodes )
+                        if ( (validator.ReferenceKinds & node.ReferenceKinds) != 0 )
                         {
-                            if ( (validator.ReferenceKinds & node.ReferenceKinds) != 0 )
-                            {
-                                var referencingDeclaration = initialCompilation.Factory.GetDeclaration( reference.ReferencingSymbol );
+                            var referencingDeclaration = initialCompilation.Factory.GetDeclaration( reference.ReferencingSymbol );
 
-                                validator.Validate(
-                                    referencingDeclaration,
-                                    node.Syntax,
-                                    node.ReferenceKinds,
-                                    diagnosticAdder,
-                                    this._userCodeInvoker,
-                                    userCodeExecutionContext );
-                            }
+                            validator.Validate(
+                                referencingDeclaration,
+                                node.Syntax,
+                                node.ReferenceKinds,
+                                diagnosticAdder,
+                                this._userCodeInvoker,
+                                userCodeExecutionContext );
                         }
                     }
-                }
-            }
-
-            // Recurse on the base type.
-
-            if ( referencedSymbol is INamedTypeSymbol { BaseType: { } baseType }
-                 && indexerOptions.MustDescendIntoReferencedBaseTypes( references.AllReferenceKinds ) )
-            {
-                await AnalyzeReferencedSymbolsImplAsync( references, baseType, true );
-            }
-
-            // Recurse on the containing type.
-            if ( referencedSymbol.ContainingType != null )
-            {
-                if ( indexerOptions.MustDescendIntoReferencedDeclaringType( references.AllReferenceKinds ) )
-                {
-                    await AnalyzeReferencedSymbolsImplAsync( references, referencedSymbol.ContainingType, false );
-                }
-            }
-            else if ( referencedSymbol.ContainingNamespace is { IsGlobalNamespace: false } )
-            {
-                if ( indexerOptions.MustDescendIntoReferencedNamespace( references.AllReferenceKinds ) )
-                {
-                    await AnalyzeReferencedSymbolsImplAsync( references, referencedSymbol.ContainingNamespace, false );
-                }
-            }
-            else if ( referencedSymbol.ContainingAssembly != null )
-            {
-                if ( indexerOptions.MustDescendIntoReferencedAssembly( references.AllReferenceKinds ) )
-                {
-                    await AnalyzeReferencedSymbolsImplAsync( references, referencedSymbol.ContainingAssembly, false );
                 }
             }
         }

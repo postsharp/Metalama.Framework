@@ -52,7 +52,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitIdentifierName( IdentifierNameSyntax node )
     {
-        this.ReferenceNodeAndChildren( node, ReferenceKinds.Default );
+        this.ReferenceNodeAndVisitChildren( node, ReferenceKinds.Default );
     }
 
     public override void VisitGenericName( GenericNameSyntax node )
@@ -63,7 +63,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
     {
-        this.ReferenceNodeAndChildren( node, ReferenceKinds.Default );
+        this.ReferenceNodeAndVisitChildren( node, ReferenceKinds.Default );
     }
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
@@ -103,8 +103,28 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
+    private bool MustSkipChildren( SyntaxNode node )
+    {
+        if ( node is MemberAccessExpressionSyntax memberAccess )
+        {
+            // Do not index MemberAccessExpression if the expression is a type, `this` or `base`.
+            if ( (memberAccess.Expression.Kind() is SyntaxKind.BaseExpression or SyntaxKind.ThisExpression)
+                 || this._semanticModel!.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void VisitChildren( SyntaxNode node )
     {
+        if ( this.MustSkipChildren( node ) )
+        {
+            return;
+        }
+
         foreach ( var nodeOrToken in node.ChildNodesAndTokens() )
         {
             if ( nodeOrToken.IsNode )
@@ -118,11 +138,11 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         if ( node.IsNameOf() )
         {
-            this.ReferenceNodeAndChildren( node.ArgumentList.Arguments[0].Expression, ReferenceKinds.NameOf );
+            this.ReferenceNodeAndVisitChildren( node.ArgumentList.Arguments[0].Expression, ReferenceKinds.NameOf );
         }
         else
         {
-            this.ReferenceNodeAndChildren( node.Expression, ReferenceKinds.Invocation );
+            this.ReferenceNodeAndVisitChildren( node.Expression, ReferenceKinds.Invocation );
 
             foreach ( var arg in node.ArgumentList.Arguments )
             {
@@ -170,7 +190,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitAttribute( AttributeSyntax node )
     {
-        this.ReferenceNodeAndChildren( node.Name, ReferenceKinds.AttributeType );
+        this.ReferenceNodeAndVisitChildren( node.Name, ReferenceKinds.AttributeType );
 
         if ( node.ArgumentList != null && this._options.MustDescendIntoImplementation() )
         {
@@ -296,7 +316,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
         using ( this.EnterDefinition( node ) )
         {
-            this.ReferenceNodeAndChildren( node, ReferenceKinds.Default );
+            this.ReferenceNodeAndVisitChildren( node, ReferenceKinds.Default );
             this.Visit( node.AttributeLists );
 
             if ( this._options.MustDescendIntoMembers() )
@@ -560,17 +580,32 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
-        this.ReferenceNodeAndChildren( node, ReferenceKinds.ObjectCreation );
+        var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
+
+        this.ReferenceSymbol( symbol, node, ReferenceKinds.ObjectCreation );
+
+        this.Visit( node.ArgumentList );
+        this.Visit( node.Initializer );
     }
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
     {
-        this.ReferenceNodeAndChildren( node, ReferenceKinds.ObjectCreation );
+        this.ReferenceNodeAndVisitChildren( node, ReferenceKinds.ObjectCreation );
     }
 
     public override void VisitUsingDirective( UsingDirectiveSyntax node )
     {
-        this.ReferenceNodeAndChildren( node.Name, ReferenceKinds.Using );
+        this.ReferenceNodeAndVisitChildren( node.Name, ReferenceKinds.Using );
+    }
+
+    public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
+    {
+        this.ReferenceNodeAndVisitChildren( node.Name, ReferenceKinds.MemberAccess );
+
+        if ( !this.MustSkipChildren( node ) )
+        {
+            this.Visit( node.Expression );
+        }
     }
 
     public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
@@ -583,7 +618,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this.Visit( node.Members );
     }
 
-    private void ReferenceNodeAndChildren( SyntaxNode? node, ReferenceKinds referenceKind )
+    private void ReferenceNodeAndVisitChildren( SyntaxNode? node, ReferenceKinds referenceKind )
     {
         if ( node == null )
         {
@@ -621,16 +656,14 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     }
 
     // Returns true if a diagnostic was reported for the symbol.
-    private void ReferenceSymbol(
+    private bool ReferenceSymbol(
         ISymbol? symbol,
         SyntaxNodeOrToken node,
-        ReferenceKinds referenceKinds,
-        bool isBaseType = false,
-        bool isContainingType = false )
+        ReferenceKinds referenceKinds )
     {
         if ( symbol == null || this._currentDeclaration == null )
         {
-            return;
+            return false;
         }
 
         switch ( symbol.Kind )
@@ -654,7 +687,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
             default:
                 // Not referenced.
-                return;
+                return false;
         }
 
         if ( referenceKinds == ReferenceKinds.None )
@@ -665,6 +698,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
 
         this._referenceIndexBuilder.AddReference( symbol, this._currentDeclaration, node, referenceKinds );
+
+        return true;
     }
 
     private ContextCookie EnterDefinition( SyntaxNode node )
@@ -705,27 +740,27 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SyntaxKind.IdentifierName:
             case SyntaxKind.QualifiedName:
             case SyntaxKind.PredefinedType:
-                this.ReferenceNodeAndChildren( type, kind );
+                this.ReferenceNodeAndVisitChildren( type, kind );
 
                 break;
 
             case SyntaxKind.NullableType:
-                this.ReferenceNodeAndChildren( ((NullableTypeSyntax) type).ElementType, kind | ReferenceKinds.NullableType );
+                this.ReferenceNodeAndVisitChildren( ((NullableTypeSyntax) type).ElementType, kind | ReferenceKinds.NullableType );
 
                 break;
 
             case SyntaxKind.ArrayType:
-                this.ReferenceNodeAndChildren( ((ArrayTypeSyntax) type).ElementType, kind | ReferenceKinds.ArrayType );
+                this.ReferenceNodeAndVisitChildren( ((ArrayTypeSyntax) type).ElementType, kind | ReferenceKinds.ArrayType );
 
                 break;
 
             case SyntaxKind.PointerType:
-                this.ReferenceNodeAndChildren( ((PointerTypeSyntax) type).ElementType, kind | ReferenceKinds.PointerType );
+                this.ReferenceNodeAndVisitChildren( ((PointerTypeSyntax) type).ElementType, kind | ReferenceKinds.PointerType );
 
                 break;
 
             case SyntaxKind.RefType:
-                this.ReferenceNodeAndChildren( ((RefTypeSyntax) type).Type, kind | ReferenceKinds.RefType );
+                this.ReferenceNodeAndVisitChildren( ((RefTypeSyntax) type).Type, kind | ReferenceKinds.RefType );
 
                 break;
 
