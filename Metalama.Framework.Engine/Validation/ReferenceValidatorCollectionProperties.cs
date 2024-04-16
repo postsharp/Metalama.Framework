@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceValidatorCollectionProperties
+public sealed class ReferenceValidatorCollectionProperties : IReferenceIndexerOptions
 {
     // Reference kinds that do not require descending into members.
 
@@ -83,18 +83,17 @@ public sealed class ReferenceValidatorCollectionProperties
 
     public static ReferenceValidatorCollectionProperties Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
 
-    internal bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
+    public bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
 
-    internal bool MustDescendIntoImplementation() => this._mustDescendIntoImplementation;
+    public bool MustDescendIntoImplementation() => this._mustDescendIntoImplementation;
 
-    internal bool MustDescendIntoReferencedBaseTypes( ReferenceKinds referenceKinds ) => (referenceKinds & this._kindsRequiringDescentIntoBaseTypes) != 0;
+    public bool MustDescendIntoReferencedBaseTypes( ReferenceKinds referenceKinds ) => (referenceKinds & this._kindsRequiringDescentIntoBaseTypes) != 0;
 
-    internal bool MustDescendIntoReferencedDeclaringType( ReferenceKinds referenceKinds )
+    public bool MustDescendIntoReferencedDeclaringType( ReferenceKinds referenceKinds )
         => (referenceKinds & this._kindsRequiringDescentIntoReferencedDeclaringType) != 0;
 
-    internal bool MustDescendIntoReferencedNamespace( ReferenceKinds referenceKinds )
+    public bool MustDescendIntoReferencedNamespace( ReferenceKinds referenceKinds )
         => (referenceKinds & this._kindsRequiringDescentIntoReferencedNamespace) != 0;
 
-    internal bool MustDescendIntoReferencedAssembly( ReferenceKinds referenceKinds )
-        => (referenceKinds & this._kindsRequiringDescentIntoReferencedAssembly) != 0;
+    public bool MustDescendIntoReferencedAssembly( ReferenceKinds referenceKinds ) => (referenceKinds & this._kindsRequiringDescentIntoReferencedAssembly) != 0;
 }
