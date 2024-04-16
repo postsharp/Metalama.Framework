@@ -90,6 +90,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         var queue = new ConcurrentQueue<TItem>();
         queue.Enqueue( item1 );
+        queue.Enqueue( enumerator.Current );
 
         while ( enumerator.MoveNext() )
         {
@@ -140,6 +141,7 @@ internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 
         var queue = new ConcurrentQueue<T>();
         queue.Enqueue( item1 );
+        queue.Enqueue( enumerator.Current );
 
         while ( enumerator.MoveNext() )
         {
