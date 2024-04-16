@@ -352,41 +352,42 @@ namespace Metalama.Framework.Engine.Fabrics
                         ( declaration, context2 ) => action( selector( declaration ), context2 ) ) ) );
 
         public IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes )
-            => this.AddChild( new AspectReceiver<INamedType>(
-                                  this._containingDeclaration,
-                                  this._parent,
-                                  this._compilationModelVersion,
-                                  ( action, context ) => this.InvokeAdderAsync(
-                                      context,
-                                      ( declaration, context2 ) =>
-                                      {
-                                          IEnumerable<INamedType> types;
+            => this.AddChild(
+                new AspectReceiver<INamedType>(
+                    this._containingDeclaration,
+                    this._parent,
+                    this._compilationModelVersion,
+                    ( action, context ) => this.InvokeAdderAsync(
+                        context,
+                        ( declaration, context2 ) =>
+                        {
+                            IEnumerable<INamedType> types;
 
-                                          if ( declaration is ICompilation compilation )
-                                          {
-                                              types = includeNestedTypes ? compilation.AllTypes : compilation.Types;
-                                          }
-                                          else
-                                          {
-                                              types = declaration switch
-                                              {
-                                                  INamespace ns => ns.SelectManyRecursive( x => x.Namespaces ).SelectMany( x => x.Types ),
-                                                  INamedType type => new[] { type },
-                                                  _ when declaration.GetTopmostNamedType() is { } topmostType => new[] { topmostType },
-                                                  _ => Enumerable.Empty<INamedType>()
-                                              };
+                            if ( declaration is ICompilation compilation )
+                            {
+                                types = includeNestedTypes ? compilation.AllTypes : compilation.Types;
+                            }
+                            else
+                            {
+                                types = declaration switch
+                                {
+                                    INamespace ns => ns.SelectManyRecursive( x => x.Namespaces ).SelectMany( x => x.Types ),
+                                    INamedType type => new[] { type },
+                                    _ when declaration.GetTopmostNamedType() is { } topmostType => new[] { topmostType },
+                                    _ => Enumerable.Empty<INamedType>()
+                                };
 
-                                              if ( includeNestedTypes )
-                                              {
-                                                  types = types.SelectManyRecursive( t => t.NestedTypes );
-                                              }
-                                          }
+                                if ( includeNestedTypes )
+                                {
+                                    types = types.SelectManyRecursive( t => t.NestedTypes );
+                                }
+                            }
 
-                                          return this._concurrentTaskRunner.RunConcurrentlyAsync(
-                                              types,
-                                              child => action( child, context ),
-                                              context2.CancellationToken );
-                                      } ) ) );
+                            return this._concurrentTaskRunner.RunConcurrentlyAsync(
+                                types,
+                                child => action( child, context ),
+                                context2.CancellationToken );
+                        } ) ) );
 
         IValidatorReceiver<INamedType> IValidatorReceiver<T>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
 
@@ -587,13 +588,13 @@ namespace Metalama.Framework.Engine.Fabrics
             UserCodeInvoker? invoker = null,
             UserCodeExecutionContext? executionContext = null )
         {
-            ConcurrentBag<T>? cached = null;
+            ConcurrentQueue<T>? cached = null;
             var processTargetWithCachingIfNecessary = processTarget;
 
             if ( this.ShouldCache )
             {
                 // GetFromCacheAsync uses a semaphore to control exclusivity.  AddToCache must be called is the method returns null.
-                cached = await selectionContext.GetFromCacheAsync<ConcurrentBag<T>>( this, selectionContext.CancellationToken );
+                cached = await selectionContext.GetFromCacheAsync<ConcurrentQueue<T>>( this, selectionContext.CancellationToken );
 
                 if ( cached != null )
                 {
@@ -601,16 +602,16 @@ namespace Metalama.Framework.Engine.Fabrics
                         cached,
                         x => processTarget( x, selectionContext ),
                         selectionContext.CancellationToken );
-                    
+
                     return;
                 }
                 else
                 {
-                    cached = new ConcurrentBag<T>();
+                    cached = new ConcurrentQueue<T>();
 
                     processTargetWithCachingIfNecessary = ( a, ctx ) =>
                     {
-                        cached.Add( a );
+                        cached.Enqueue( a );
 
                         return processTarget( a, ctx );
                     };

@@ -51,7 +51,7 @@ internal sealed class LinkerInjectionRegistry
         IConcurrentTaskRunner concurrentTaskRunner,
         CancellationToken cancellationToken )
     {
-        ConcurrentBag<ISymbol> overrideTargets;
+        ConcurrentQueue<ISymbol> overrideTargets;
         ConcurrentDictionary<ISymbol, IReadOnlyList<ISymbol>> overrideMap;
         ConcurrentDictionary<ISymbol, ISymbol> overrideTargetMap;
         ConcurrentDictionary<ISymbol, InjectedMember> symbolToInjectedMemberMap;
@@ -69,7 +69,7 @@ internal sealed class LinkerInjectionRegistry
         this._builderToTransformationMap = builderToTransformationMap;
         this._introducedParametersByTargetDeclaration = introducedParametersByTargetDeclaration;
 
-        this._overrideTargets = overrideTargets = new ConcurrentBag<ISymbol>();
+        this._overrideTargets = overrideTargets = new ConcurrentQueue<ISymbol>();
 
         var auxiliarySourceMemberMap = new ConcurrentDictionary<ISymbol, ISymbol>( intermediateCompilation.CompilationContext.SymbolComparer );
 
@@ -185,7 +185,7 @@ internal sealed class LinkerInjectionRegistry
 
             overrides.Sort( ( x, y ) => this._comparer.Compare( symbolToInjectedMemberMap[x].Transformation, symbolToInjectedMemberMap[y].Transformation ) );
 
-            overrideTargets.Add( overrideTargetSymbol );
+            overrideTargets.Enqueue( overrideTargetSymbol );
             overrideMap.TryAdd( overrideTargetSymbol, overrides );
 
             foreach ( var overrideSymbol in overrides )

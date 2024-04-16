@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel
             CancellationToken cancellationToken = default )
         {
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-            var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
+            var modifiedSyntaxTrees = new ConcurrentQueue<SyntaxTreeTransformation>();
 
             await taskScheduler.RunConcurrentlyAsync( compilation.SyntaxTrees, RewriteSyntaxTreeAsync, cancellationToken );
 
@@ -108,7 +108,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( tree.Value, tree.Value.WithRootAndOptions( newRoot, tree.Value.Options ) ) );
+                    modifiedSyntaxTrees.Enqueue(
+                        SyntaxTreeTransformation.ReplaceTree( tree.Value, tree.Value.WithRootAndOptions( newRoot, tree.Value.Options ) ) );
                 }
             }
 

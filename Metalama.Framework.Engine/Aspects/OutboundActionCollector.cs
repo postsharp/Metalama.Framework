@@ -22,11 +22,11 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 {
     public IDiagnosticAdder Diagnostics { get; }
 
-    private volatile ConcurrentBag<AspectInstance>? _aspectInstances;
-    private volatile ConcurrentBag<Ref<IDeclaration>>? _exclusions;
-    private volatile ConcurrentBag<AspectRequirement>? _requirements;
-    private volatile ConcurrentBag<ValidatorInstance>? _validators;
-    private volatile ConcurrentBag<HierarchicalOptionsInstance>? _hierarchicalOptions;
+    private volatile ConcurrentQueue<AspectInstance>? _aspectInstances;
+    private volatile ConcurrentQueue<Ref<IDeclaration>>? _exclusions;
+    private volatile ConcurrentQueue<AspectRequirement>? _requirements;
+    private volatile ConcurrentQueue<ValidatorInstance>? _validators;
+    private volatile ConcurrentQueue<HierarchicalOptionsInstance>? _hierarchicalOptions;
 
     public OutboundActionCollector( IDiagnosticAdder diagnosticAdder )
     {
@@ -52,11 +52,11 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 
         if ( aspectInstances == null )
         {
-            Interlocked.CompareExchange( ref this._aspectInstances, new ConcurrentBag<AspectInstance>(), null );
+            Interlocked.CompareExchange( ref this._aspectInstances, new ConcurrentQueue<AspectInstance>(), null );
             aspectInstances = this._aspectInstances;
         }
 
-        aspectInstances.Add( aspectInstance );
+        aspectInstances.Enqueue( aspectInstance );
     }
 
     public void AddExclusion( Ref<IDeclaration> exclusion )
@@ -65,11 +65,11 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 
         if ( exclusions == null )
         {
-            Interlocked.CompareExchange( ref this._exclusions, new ConcurrentBag<Ref<IDeclaration>>(), null );
+            Interlocked.CompareExchange( ref this._exclusions, new ConcurrentQueue<Ref<IDeclaration>>(), null );
             exclusions = this._exclusions;
         }
 
-        exclusions.Add( exclusion );
+        exclusions.Enqueue( exclusion );
     }
 
     public void AddAspectRequirement( AspectRequirement requirement )
@@ -78,11 +78,11 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 
         if ( requirements == null )
         {
-            Interlocked.CompareExchange( ref this._requirements, new ConcurrentBag<AspectRequirement>(), null );
+            Interlocked.CompareExchange( ref this._requirements, new ConcurrentQueue<AspectRequirement>(), null );
             requirements = this._requirements;
         }
 
-        requirements.Add( requirement );
+        requirements.Enqueue( requirement );
     }
 
     public void AddValidator( ValidatorInstance validator )
@@ -91,11 +91,11 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 
         if ( validators == null )
         {
-            Interlocked.CompareExchange( ref this._validators, new ConcurrentBag<ValidatorInstance>(), null );
+            Interlocked.CompareExchange( ref this._validators, new ConcurrentQueue<ValidatorInstance>(), null );
             validators = this._validators;
         }
 
-        validators.Add( validator );
+        validators.Enqueue( validator );
     }
 
     public void AddOptions( HierarchicalOptionsInstance options )
@@ -104,11 +104,11 @@ internal sealed class OutboundActionCollector : IDiagnosticAdder
 
         if ( optionsBag == null )
         {
-            Interlocked.CompareExchange( ref this._hierarchicalOptions, new ConcurrentBag<HierarchicalOptionsInstance>(), null );
+            Interlocked.CompareExchange( ref this._hierarchicalOptions, new ConcurrentQueue<HierarchicalOptionsInstance>(), null );
             optionsBag = this._hierarchicalOptions;
         }
 
-        optionsBag.Add( options );
+        optionsBag.Enqueue( options );
     }
 
     public void Report( Diagnostic diagnostic ) => this.Diagnostics.Report( diagnostic );

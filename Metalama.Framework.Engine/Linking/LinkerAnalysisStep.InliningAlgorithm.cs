@@ -45,7 +45,7 @@ internal sealed partial class LinkerAnalysisStep
 
         internal async Task<IReadOnlyList<InliningSpecification>> RunAsync( CancellationToken cancellationToken )
         {
-            var inliningSpecifications = new ConcurrentBag<InliningSpecification>();
+            var inliningSpecifications = new ConcurrentQueue<InliningSpecification>();
 
             void ProcessSemantic( IntermediateSymbolSemantic semantic )
             {
@@ -152,7 +152,7 @@ internal sealed partial class LinkerAnalysisStep
                             // * Inlining of in the final semantic, which is a special case.
                             Invariant.Assert( info.ReturnVariableIdentifier == null );
 
-                            inliningSpecifications.Add(
+                            inliningSpecifications.Enqueue(
                                 new InliningSpecification(
                                     destinationSemantic,
                                     context.Ordinal,
@@ -172,7 +172,7 @@ internal sealed partial class LinkerAnalysisStep
                                   && info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax )
                         {
                             // If inlining into a local function, revert to simple inlining.
-                            inliningSpecifications.Add(
+                            inliningSpecifications.Enqueue(
                                 new InliningSpecification(
                                     destinationSemantic,
                                     context.Ordinal,
@@ -203,7 +203,7 @@ internal sealed partial class LinkerAnalysisStep
 
                             var returnVariableIdentifier = info.ReturnVariableIdentifier ?? context.ReturnVariableIdentifier;
 
-                            inliningSpecifications.Add(
+                            inliningSpecifications.Enqueue(
                                 new InliningSpecification(
                                     destinationSemantic,
                                     context.Ordinal,

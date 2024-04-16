@@ -119,7 +119,7 @@ public sealed partial class AspectWeaverContext
 
         var taskScheduler = this.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-        var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentBag<SyntaxReference>>();
+        var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentQueue<SyntaxReference>>();
 
         await taskScheduler.RunConcurrentlyAsync( this.AspectInstances, ProcessAspectInstance, cancellationToken );
 
@@ -132,8 +132,8 @@ public sealed partial class AspectWeaverContext
                 foreach ( var syntaxReference in symbol.DeclaringSyntaxReferences )
                 {
                     nodesBySyntaxTree
-                        .GetOrAdd( syntaxReference.SyntaxTree, _ => new ConcurrentBag<SyntaxReference>() )
-                        .Add( syntaxReference );
+                        .GetOrAdd( syntaxReference.SyntaxTree, _ => new ConcurrentQueue<SyntaxReference>() )
+                        .Enqueue( syntaxReference );
                 }
             }
         }
@@ -142,7 +142,7 @@ public sealed partial class AspectWeaverContext
 
         await taskScheduler.RunConcurrentlyAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
 
-        async Task ProcessSyntaxTreeAsync( KeyValuePair<SyntaxTree, ConcurrentBag<SyntaxReference>> group )
+        async Task ProcessSyntaxTreeAsync( KeyValuePair<SyntaxTree, ConcurrentQueue<SyntaxReference>> group )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
