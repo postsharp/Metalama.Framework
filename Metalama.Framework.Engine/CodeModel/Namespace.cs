@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private INamedTypeCollection TypesCore
             => new NamedTypeCollection(
                 this.Compilation,
-                this.Compilation.GetNamedTypeCollection( this._symbol ) );
+                this.Compilation.GetNamedTypeCollection( this._symbol.ToTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
 
         // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
 

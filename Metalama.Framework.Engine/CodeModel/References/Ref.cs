@@ -351,6 +351,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             {
                 DeclarationRefTargetKind.Assembly when symbol is IAssemblySymbol => symbol,
                 DeclarationRefTargetKind.Module when symbol is IModuleSymbol => symbol,
+                DeclarationRefTargetKind.NamedType when symbol is INamedTypeSymbol => symbol,
                 DeclarationRefTargetKind.Default => symbol,
                 DeclarationRefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
                 DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertNotNull(),

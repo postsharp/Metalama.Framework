@@ -24,13 +24,9 @@ namespace Metalama.Framework.Engine.CodeModel
             where T : ISymbol
             => (T?) ((ISdkDeclaration) declaration).Symbol;
 
-        public static ITypeSymbol GetSymbol( this IType type )
-            => ((ISdkType) type).TypeSymbol ?? throw new InvalidOperationException(
-                "Assertion failed: until type introductions are supported, all types are assumed to have a Roslyn symbol." );
+        public static ITypeSymbol? GetSymbol( this IType type ) => ((ISdkType) type).TypeSymbol;
 
-        public static INamedTypeSymbol GetSymbol( this INamedType namedType )
-            => namedType.GetSymbol<INamedTypeSymbol>() ?? throw new InvalidOperationException(
-                "Assertion failed: until type introductions are supported, all types are assumed to have a Roslyn symbol." );
+        public static INamedTypeSymbol? GetSymbol( this INamedType namedType ) => namedType.GetSymbol<INamedTypeSymbol>();
 
         public static IMethodSymbol? GetSymbol( this IMethodBase method ) => method.GetSymbol<IMethodSymbol>();
 

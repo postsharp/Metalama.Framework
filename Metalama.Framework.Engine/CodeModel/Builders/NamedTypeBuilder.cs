@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, ITypeBuilder, ISdkType, ISdkDeclaration
+internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, ISdkType, ISdkDeclaration
 {
     public NamedTypeBuilder( Advice advice, INamespace declaringNamespace, string name ) : base( advice, null, name )
     {

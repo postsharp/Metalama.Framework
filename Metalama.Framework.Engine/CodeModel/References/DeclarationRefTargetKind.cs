@@ -22,6 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         PropertySetReturnParameter,
         EventRaise,
         EventRaiseParameter,
-        EventRaiseReturnParameter
+        EventRaiseReturnParameter,
+        NamedType,
     }
 }

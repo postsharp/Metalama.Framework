@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a class, struct, interface, enum, or delegate.
     /// </summary>
-    public interface INamedType : IType, IGeneric, IEquatable<INamedType>
+    public interface INamedType : IType, IGeneric, INamespaceOrNamedType, IEquatable<INamedType>
     {
         /// <summary>
         /// Gets a value indicating whether the type is marked as <c>partial</c> in source code. 

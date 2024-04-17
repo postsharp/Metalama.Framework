@@ -15,7 +15,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 {
     private ImmutableDictionary<string, UpdatableMemberRefArray<T>>? _byNameDictionary;
 
-    protected NonUniquelyNamedUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    protected NonUniquelyNamedUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation, declaringType ) { }
 
     private ImmutableDictionary<string, UpdatableMemberRefArray<T>> GetInitializedByNameDictionary()
         => this._byNameDictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<T>>.Empty.WithComparers( StringComparer.Ordinal );

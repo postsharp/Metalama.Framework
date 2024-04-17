@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>, INamedTypeCollectionImpl
 {
-    public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public TypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation, declaringType ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
     {
@@ -44,11 +44,13 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
     protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
     protected override IEnumerable<ISymbol> GetSymbolsOfName( string name )
-        => this.DeclaringTypeOrNamespace.GetTypeMembers( name )
+        // TODO (TypeBuilder): Remove GetSymbol.
+        => ((INamespaceOrTypeSymbol)this.DeclaringTypeOrNamespace.GetSymbol(this.Compilation.RoslynCompilation)).GetTypeMembers( name )
             .Where( this.IsSymbolIncluded );
 
     protected override IEnumerable<ISymbol> GetSymbols()
-        => this.DeclaringTypeOrNamespace.GetTypeMembers()
+        // TODO (TypeBuilder): Remove GetSymbol.
+        => ((INamespaceOrTypeSymbol)this.DeclaringTypeOrNamespace.GetSymbol(this.Compilation.RoslynCompilation)).GetTypeMembers()
             .Where( this.IsSymbolIncluded );
 
     public IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )

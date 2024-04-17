@@ -25,6 +25,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
         }
     }
 
+    [CompileTime]
+    public struct Data
+    {
+    }
+
     [Aspect]
     public class ValidatedClass
     {

@@ -85,6 +85,10 @@ public static class DeclarationExtensions
 
     internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, CompilationContext compilationContext ) => Ref.FromSymbol( symbol, compilationContext );
 
+    internal static Ref<TDeclaration> ToTypedRef<TDeclaration>( this ISymbol symbol, CompilationContext compilationContext )
+        where TDeclaration : class, IDeclaration
+        => Ref.FromSymbol( symbol, compilationContext ).As<TDeclaration>();
+
     internal static Ref<T> ToTypedRef<T>( this T declaration )
         where T : class, IDeclaration
         => ((IDeclarationImpl) declaration).ToRef().As<T>();

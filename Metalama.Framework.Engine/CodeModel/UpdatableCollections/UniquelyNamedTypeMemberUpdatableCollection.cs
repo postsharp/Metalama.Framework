@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +15,14 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
     // would cause inconsistent behaviors between design time and compile time.
 
     protected override ISymbol? GetMember( string name )
-        => this.DeclaringTypeOrNamespace.GetMembers( name ).FirstOrDefault( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+        // TODO (TypeBuilder): Remove GetSymbol.
+        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol(this.Compilation.RoslynCompilation)).GetMembers( name ).FirstOrDefault( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
     protected override IEnumerable<ISymbol> GetMembers()
-        => this.DeclaringTypeOrNamespace.GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+        // TODO (TypeBuilder): Remove GetSymbol.
+        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol( this.Compilation.RoslynCompilation )).GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
-    protected UniquelyNamedTypeMemberUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base(
+    protected UniquelyNamedTypeMemberUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base(
         compilation,
         declaringType ) { }
 }

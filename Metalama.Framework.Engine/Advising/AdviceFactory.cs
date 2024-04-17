@@ -569,7 +569,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType( INamespace targetNamespace, string typeName, Action<ITypeBuilder>? buildType = null )
+    public IIntroductionAdviceResult<INamedType> IntroduceType( INamespace targetNamespace, string typeName, Action<INamedTypeBuilder>? buildType = null )
     {
         if ( this._templateInstance == null )
         {
@@ -591,7 +591,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType( INamedType targetType, string typeName, Action<ITypeBuilder>? buildType = null )
+    public IIntroductionAdviceResult<INamedType> IntroduceType( INamedType targetType, string typeName, Action<INamedTypeBuilder>? buildType = null )
     {
         if ( this._templateInstance == null )
         {

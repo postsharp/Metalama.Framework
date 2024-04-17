@@ -173,9 +173,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this.CompilationContext = CompilationContextFactory.GetInstance( partialCompilation.Compilation );
 
             this._staticConstructors =
-                ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+                ImmutableDictionary<Ref<INamedType>, IConstructorBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
 
-            this._finalizers = ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( this.CompilationContext.SymbolComparer );
+            this._finalizers = ImmutableDictionary<Ref<INamedType>, IMethodBuilder>.Empty.WithComparers( RefEqualityComparer<INamedType>.Default );
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
 
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
@@ -190,10 +190,10 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Options = options ?? CompilationModelOptions.Default;
 
             // Initialize dictionaries of modified members.
-            void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
+            static void InitializeDictionary<T>( out ImmutableDictionary<Ref<INamedType>, T> dictionary )
             {
-                dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
-                    .WithComparers( this.CompilationContext.SymbolComparer );
+                dictionary = ImmutableDictionary.Create<Ref<INamedType>, T>()
+                    .WithComparers( RefEqualityComparer<INamedType>.Default );
             }
 
             InitializeDictionary( out this._fields );
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
-            this._namedTypes = ImmutableDictionary.Create<ISymbol, TypeUpdatableCollection>().WithComparers( this.CompilationContext.SymbolComparer );
+            this._namedTypes = ImmutableDictionary.Create<Ref<INamespaceOrNamedType>, TypeUpdatableCollection>().WithComparers( RefEqualityComparer<INamespaceOrNamedType>.Default );
 
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( RefEqualityComparer<IHasParameters>.Default );
@@ -354,12 +354,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamedTypeCollection Types
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace, false ) );
+                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef(this.CompilationContext).As<INamespaceOrNamedType>(), false ) );
 
         public INamedTypeCollection AllTypes
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace, true ) );
+                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(), true ) );
 
         [Memo]
         public override IAttributeCollection Attributes

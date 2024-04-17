@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,11 +12,13 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
     where T : class, IMemberOrNamedType
 {
     protected override IEnumerable<ISymbol> GetSymbolsOfName( string name )
-        => this.DeclaringTypeOrNamespace.GetMembers( name ).Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+        // TODO (TypeBuilder): Remove GetSymbol.
+        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol( this.Compilation.RoslynCompilation )).GetMembers( name ).Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
     protected override IEnumerable<ISymbol> GetSymbols()
-        => this.DeclaringTypeOrNamespace.GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+        // TODO (TypeBuilder): Remove GetSymbol.
+        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol( this.Compilation.RoslynCompilation )).GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
 
-    protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType )
+    protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType )
         : base( compilation, declaringType ) { }
 }
