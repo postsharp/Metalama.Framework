@@ -42,10 +42,7 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
         this._fieldAttributes = new List<IAttributeData>();
     }
 
-    public void AddFieldAttribute( IAttributeData attributeData )
-    {
-        this._fieldAttributes.Add( attributeData );
-    }
+    public void AddFieldAttribute( IAttributeData attributeData ) => this._fieldAttributes.Add( attributeData );
 
     public INamedType Type
     {

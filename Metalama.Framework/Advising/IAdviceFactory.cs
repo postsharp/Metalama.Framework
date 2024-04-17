@@ -42,6 +42,10 @@ namespace Metalama.Framework.Advising
         /// <seealso href="@overriding-methods"/>
         IOverrideAdviceResult<IMethod> Override( IMethod targetMethod, in MethodTemplateSelector template, object? args = null, object? tags = null );
 
+        IIntroductionAdviceResult<INamedType> IntroduceType( INamespace targetNamespace, string typeName, Action<ITypeBuilder>? buildType = null );
+
+        IIntroductionAdviceResult<INamedType> IntroduceType( INamedType targetType, string typeName, Action<ITypeBuilder>? buildType = null );
+
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
         /// </summary>

@@ -134,7 +134,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection NestedTypes
         => new NamedTypeCollection(
             this._facade,
-            new TypeUpdatableCollection( this.Compilation, this.TypeSymbol ) );
+            this.Compilation.GetNamedTypeCollection( this.TypeSymbol ) );
 
     [Memo]
     public IPropertyCollection Properties

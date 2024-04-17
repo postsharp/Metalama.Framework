@@ -243,8 +243,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                     SyntaxKind.ThisConstructorInitializer,
                                     ArgumentList(
                                         SeparatedList(
-                                                nonOptionalParameters.SelectAsArray(
-                                                    p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
+                                                nonOptionalParameters.SelectAsArray( p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
                                             .AddRange(
                                                 optionalParameters.SelectAsArray(
                                                     p =>
@@ -262,13 +261,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             return constructors;
 
             static SyntaxToken GetArgumentRefToken( IParameter p )
-                => p.RefKind switch
+            {
+                return p.RefKind switch
                 {
                     RefKind.None or RefKind.In => default,
                     RefKind.Ref or RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
                     RefKind.Out => Token( SyntaxKind.OutKeyword ),
                     _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" )
                 };
+            }
         }
 
         private static TypeDeclarationSyntax CreatePartialType( INamedType type, BaseListSyntax? baseList, SyntaxList<MemberDeclarationSyntax> members )
@@ -335,13 +336,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             }
 
             static SyntaxKind GetVariance( VarianceKind variance )
-                => variance switch
+            {
+                return variance switch
                 {
                     VarianceKind.None => SyntaxKind.None,
                     VarianceKind.In => SyntaxKind.InKeyword,
                     VarianceKind.Out => SyntaxKind.OutKeyword,
                     _ => throw new AssertionFailedException( $"Unknown variance: {variance}." )
                 };
+            }
 
             return TypeParameterList(
                 SeparatedList(

@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.CodeModel
             Compilation compilation,
             CompilationModelOptions options,
             string? debugLabel )
-            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options: options, debugLabel: debugLabel );
+            => new( project, PartialCompilation.CreateComplete( compilation ), null, null, null, null, options, debugLabel );
 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<Ref<INamedType>, AttributeRef> _allMemberAttributesByType;
@@ -191,8 +191,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
             // Initialize dictionaries of modified members.
             void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
-                => dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
+            {
+                dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
                     .WithComparers( this.CompilationContext.SymbolComparer );
+            }
 
             InitializeDictionary( out this._fields );
             InitializeDictionary( out this._methods );
@@ -202,6 +204,8 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._indexers );
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
+
+            this._namedTypes = ImmutableDictionary.Create<ISymbol, TypeUpdatableCollection>().WithComparers( this.CompilationContext.SymbolComparer );
 
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( RefEqualityComparer<IHasParameters>.Default );
@@ -310,6 +314,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Annotations = prototype.Annotations;
             this._parameters = prototype._parameters;
             this._attributes = prototype._attributes;
+            this._namedTypes = prototype._namedTypes;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;

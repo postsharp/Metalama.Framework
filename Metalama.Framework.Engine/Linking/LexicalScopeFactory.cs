@@ -104,6 +104,11 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
         if ( symbol == null )
         {
             // Builder-based source.
+            if ( contextType.GetPrimaryDeclarationSyntax() == null )
+            {
+                // TODO: Temp hack.
+                return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
+            }
 
             var typeDeclaration = contextType.GetPrimaryDeclarationSyntax().AssertNotNull().GetDeclaringType().AssertNotNull();
 
