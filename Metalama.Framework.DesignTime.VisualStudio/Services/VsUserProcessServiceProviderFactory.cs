@@ -17,17 +17,8 @@ internal sealed class VsUserProcessServiceProviderFactory : DesignTimeUserProces
 
     protected override CompilerServiceProvider CreateCompilerServiceProvider() => new VsUserProcessCompilerServiceProvider();
 
-    protected override ServiceProvider<IGlobalService>
-        AddServices( ServiceProvider<IGlobalService> serviceProvider )
-    {
-        serviceProvider = base.AddServices( serviceProvider );
-
-        var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( serviceProvider );
-
-        serviceProvider = serviceProvider.WithService( userProcessRegistrationService );
-        serviceProvider = serviceProvider.WithService( new LocalWorkspaceProvider( serviceProvider ) );
-        serviceProvider = serviceProvider.WithService( sp => new VsUserProcessInvalidationService( sp ) );
-
-        return serviceProvider;
-    }
+    protected override ServiceProvider<IGlobalService> AddServices( ServiceProvider<IGlobalService> serviceProvider )
+        => base.AddServices( serviceProvider )
+            .WithService( sp => UserProcessServiceHubEndpoint.GetInstance( sp ) )
+            .WithService( sp => new LocalWorkspaceProvider( sp ) );
 }

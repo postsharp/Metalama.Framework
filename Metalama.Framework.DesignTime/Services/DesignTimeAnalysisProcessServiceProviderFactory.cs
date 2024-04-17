@@ -49,7 +49,9 @@ public class DesignTimeAnalysisProcessServiceProviderFactory : DesignTimeService
         serviceProvider = base.AddServices( serviceProvider )
             .WithServices( new AnalysisProcessEventHub( serviceProvider ) );
 
-        serviceProvider = serviceProvider.WithService( GetWorkspaceProvider( serviceProvider ) );
+        serviceProvider = serviceProvider
+            .WithService( GetWorkspaceProvider( serviceProvider ) )
+            .WithService( sp => new DesignTimeInvalidationService( sp ) );
 
         // Add the pipeline factory.
         var pipelineFactory = new DesignTimeAspectPipelineFactory( serviceProvider, new CompileTimeDomain( serviceProvider, "DesignTime" ) );
