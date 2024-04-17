@@ -12,7 +12,7 @@ public abstract class ReferenceValidator : OutboundReferenceValidator
 {
     public abstract void Validate( in ReferenceValidationContext context );
 
-    public override void ValidateReference( ReferenceValidationContext context ) => this.Validate( context );
+    public override void ValidateReferences( ReferenceValidationContext context ) => this.Validate( context );
 
     // The default value is for backward compatibility.
     public override ReferenceGranularity Granularity => ReferenceGranularity.Member;

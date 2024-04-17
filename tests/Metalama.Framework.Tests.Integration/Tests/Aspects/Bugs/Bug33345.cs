@@ -67,14 +67,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33345
 
         public void BuildAspect(IAspectBuilder<IDeclaration> builder)
         {
-            builder.Outbound.ValidateReferences(this.ValidateReference, ReferenceKinds.All);
+            builder.Outbound.ValidateOutboundReferences(this.ValidateReference, ReferenceGranularity.Declaration, ReferenceKinds.All);
         }
 
         public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder)
         {
         }
 
-        private void ValidateReference(in ReferenceValidationContext context)
+        private void ValidateReference( ReferenceValidationContext context)
         {
             if ( !context.ReferencingType.Is((INamedType)context.ReferencedDeclaration.ContainingDeclaration!) && !context.ReferencingType.Namespace.FullName.EndsWith(".Tests"))
             {

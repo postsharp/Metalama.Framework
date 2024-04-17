@@ -10,9 +10,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
 
-#pragma warning disable CS0168, CS8618, CS0169, CS0219, CS0067
+#pragma warning disable CS0168, CS8618, CS0169, CS0219, CS0067, CS0618, CS0612
 
-namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
+namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_LegacyAPI
 {
     internal class Aspect : TypeAspect
     {
@@ -24,15 +24,15 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         {
             builder
                 .Outbound
-                .ValidateOutboundReferences( Validate, ReferenceGranularity.Member, ReferenceKinds.All );
+                .ValidateReferences( Validate, ReferenceKinds.All );
         }
 
-        private static void Validate(  ReferenceValidationContext context )
+        private static void Validate( in ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( x =>
+            context.Diagnostics.Report(
                 _warning.WithArguments(
-                    ( x.ReferenceKinds, x.ReferencingDeclaration.DeclarationKind, x.ReferencingDeclaration,
-                      context.ReferencedDeclaration.DeclarationKind, context.ReferencedDeclaration, x.Source.Kind ) ) );
+                    ( context.ReferenceKinds, context.ReferencingDeclaration.DeclarationKind, context.ReferencingDeclaration,
+                      context.ReferencedDeclaration.DeclarationKind, context.ReferencedDeclaration, context.Source.Kind ) ) );
         }
     }
 

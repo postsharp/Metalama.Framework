@@ -14,9 +14,9 @@ public class TheValidator : OutboundReferenceValidator
     private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
         new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
 
-    public override void ValidateReference( ReferenceValidationContext context )
+    public override void ValidateReferences( ReferenceValidationContext context )
     {
-        context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
+        context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKinds, x.ReferencingDeclaration ) ) );
     }
 
     public override ReferenceGranularity Granularity => ReferenceGranularity.Declaration;

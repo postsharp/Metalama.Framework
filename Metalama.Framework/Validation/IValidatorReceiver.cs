@@ -87,7 +87,11 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// The reference validator will be invoked to validate references to any declaration in the current set. Only source code references
     /// are validated. References added by aspects are ignored by design.
     /// </summary>
+    [Obsolete( "Use ValidateOutboundReferences." )]
     void ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
+        where TValidator : ReferenceValidator;
+
+    void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TValidator> validator )
         where TValidator : OutboundReferenceValidator;
 
     /// <summary>

@@ -27,7 +27,7 @@ namespace Metalama.Framework.Validation
             {
                 context.Diagnostics.Report(
                     r => FrameworkDiagnosticDescriptors.InternalImplementConstraint.WithArguments(
-                        (context.ReferencedDeclaration, (INamedType) r.Declaration) ) );
+                        (context.ReferencedDeclaration, (INamedType) r.ReferencingDeclaration) ) );
             }
         }
     }

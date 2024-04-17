@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
+using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Diagnostics;
+namespace Metalama.Framework.Validation;
 
+[CompileTime]
 public readonly struct ReferenceInstance
 {
     private readonly ReferenceValidationContext _context;
@@ -21,7 +23,7 @@ public readonly struct ReferenceInstance
         this.ReferenceKinds = referenceKinds;
     }
 
-    public IDeclaration Declaration => this._context.ResolveDeclaration( this );
+    public IDeclaration ReferencingDeclaration => this._context.ResolveDeclaration( this );
 
     public IDiagnosticLocation? DiagnosticLocation => this._context.ResolveLocation( this );
 
@@ -29,5 +31,6 @@ public readonly struct ReferenceInstance
 
     public ReferenceKinds ReferenceKinds { get; }
 
-    public ScopedDiagnosticSink Diagnostics => new( this._context.Diagnostics.Sink, this._context.DiagnosticSource, this.DiagnosticLocation, this.Declaration );
+    public ScopedDiagnosticSink Diagnostics
+        => new( this._context.Diagnostics.Sink, this._context.DiagnosticSource, this.DiagnosticLocation, this.ReferencingDeclaration );
 }

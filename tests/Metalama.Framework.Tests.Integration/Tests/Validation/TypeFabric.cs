@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
 
             private static void Validate(  ReferenceValidationContext context )
             {
-                context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
+                context.Diagnostics.Report( r => _warning.WithArguments( ( r.ReferenceKinds, r.ReferencingDeclaration ) ) );
             }
         }
     }

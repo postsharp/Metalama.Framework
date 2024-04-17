@@ -22,12 +22,12 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_Derived
         {
             builder
                 .Outbound
-                .ValidateReferences( Validate, ReferenceKinds.All, true );
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All, true );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration, context.Source.Kind ) ) );
+            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKinds, x.ReferencingDeclaration, x.Source.Kind ) ) );
         }
     }
 

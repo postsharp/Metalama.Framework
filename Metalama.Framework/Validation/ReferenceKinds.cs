@@ -133,7 +133,6 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Base constructor (either <c>this</c> or <c>base</c>).
         /// </summary>
-        BaseConstructor = 1 << 23,
-        MemberAccess = 1 << 24
+        BaseConstructor = 1 << 23
     }
 }

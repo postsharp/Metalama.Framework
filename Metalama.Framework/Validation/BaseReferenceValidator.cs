@@ -9,7 +9,7 @@ public abstract class BaseReferenceValidator : ICompileTimeSerializable
 {
     internal BaseReferenceValidator() { }
 
-    public abstract void ValidateReference( ReferenceValidationContext context );
+    public abstract void ValidateReferences( ReferenceValidationContext context );
 
     /// <summary>
     /// Gets the kinds of references for which the <see cref="Validator{TContext}.Validate"/> method should be invoked.

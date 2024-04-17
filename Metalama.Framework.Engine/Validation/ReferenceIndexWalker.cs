@@ -108,7 +108,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         if ( node is MemberAccessExpressionSyntax memberAccess )
         {
             // Do not index MemberAccessExpression if the expression is a type, `this` or `base`.
-            if ( (memberAccess.Expression.Kind() is SyntaxKind.BaseExpression or SyntaxKind.ThisExpression)
+            if ( memberAccess.Expression.Kind() is SyntaxKind.BaseExpression or SyntaxKind.ThisExpression
                  || this._semanticModel!.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
             {
                 return true;
@@ -600,7 +600,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
     {
-        this.ReferenceNodeAndVisitChildren( node.Name, ReferenceKinds.MemberAccess );
+        this.ReferenceNodeAndVisitChildren( node.Name, ReferenceKinds.Default );
 
         if ( !this.MustSkipChildren( node ) )
         {

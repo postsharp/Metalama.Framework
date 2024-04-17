@@ -180,10 +180,17 @@ namespace Metalama.Framework.Engine.Fabrics
             ValidatorDelegate<ReferenceValidationContext> validateMethod,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes )
-            => this.ValidateOutboundReferences( ctx => validateMethod( ctx ), ReferenceGranularity.Declaration, referenceKinds, includeDerivedTypes );
+            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.Declaration, referenceKinds, includeDerivedTypes );
 
         public void ValidateOutboundReferences(
             Action<ReferenceValidationContext> validateMethod,
+            ReferenceGranularity granularity,
+            ReferenceKinds referenceKinds,
+            bool includeDerivedTypes = false )
+            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.Declaration, referenceKinds, includeDerivedTypes );
+
+        private void ValidateOutboundReferencesCore(
+            Delegate validateMethod, // Intentionally weakly typed since we accept two signatures.
             ReferenceGranularity granularity,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes = false )
@@ -256,6 +263,9 @@ namespace Metalama.Framework.Engine.Fabrics
                             validator.Granularity,
                             c ) ) ) );
         }
+
+        void IValidatorReceiver<TDeclaration>.ValidateOutboundReferences<TValidator>( Func<TDeclaration, TValidator> getValidator )
+            => this.ValidateOutboundReferences( ( declaration, _ ) => getValidator( declaration ) );
 
         public void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
             where TValidator : OutboundReferenceValidator
