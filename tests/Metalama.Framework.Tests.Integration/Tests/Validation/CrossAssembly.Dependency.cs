@@ -16,10 +16,10 @@ namespace Metalama.Framework.Tests.Integration.Validation.CrossAssembly
         {
             builder
                 .Outbound
-                .ValidateReferences( Validate, ReferenceKinds.All );
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
             context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
         }

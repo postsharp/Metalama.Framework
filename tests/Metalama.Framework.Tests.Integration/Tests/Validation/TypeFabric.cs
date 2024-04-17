@@ -20,10 +20,10 @@ namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
 
             public override void AmendType( ITypeAmender amender )
             {
-                amender.ValidateReferences( Validate, ReferenceKinds.All );
+                amender.ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All );
             }
 
-            private static void Validate( in ReferenceValidationContext context )
+            private static void Validate(  ReferenceValidationContext context )
             {
                 context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
             }

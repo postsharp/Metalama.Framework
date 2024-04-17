@@ -25,13 +25,16 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
 
     internal ValidatorImplementation Implementation { get; }
 
+    public ReferenceGranularity Granularity { get; }
+
     internal DesignTimeReferenceValidatorInstance(
         ISymbol validatedDeclaration,
         ReferenceKinds referenceReferenceKinds,
         bool includeDerivedTypes,
         ValidatorDriver driver,
         ValidatorImplementation implementation,
-        string description )
+        string description,
+        ReferenceGranularity granularity )
     {
         this.ValidatedDeclaration = SymbolDictionaryKey.CreatePersistentKey( validatedDeclaration );
         this.ValidatedDeclarationKind = validatedDeclaration.GetDeclarationKind();
@@ -39,6 +42,7 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
         this.IncludeDerivedTypes = includeDerivedTypes;
         this._driver = driver;
         this._description = description;
+        this.Granularity = granularity;
         this.Implementation = implementation;
     }
 
@@ -49,7 +53,8 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
             this.Implementation,
             this.ReferenceKinds,
             this.IncludeDerivedTypes,
-            this._description );
+            this._description,
+            this.Granularity );
 
     public TransitiveValidatorInstance ToTransitiveValidatorInstance()
         => new(
@@ -59,7 +64,8 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
             this.Implementation.Implementation,
             this.Implementation.State,
             this._driver.MethodName,
-            this._description );
+            this._description,
+            this.Granularity );
 
     public override string ToString() => this._description;
 }

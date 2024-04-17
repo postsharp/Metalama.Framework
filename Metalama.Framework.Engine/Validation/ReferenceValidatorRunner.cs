@@ -1,11 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,8 +82,6 @@ public class ReferenceValidatorRunner
         CancellationToken cancellationToken,
         ReferenceIndex referenceIndex )
     {
-        var indexerOptions = referenceValidatorProvider.Properties;
-
         // Analyze the references.
         var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: initialCompilation );
         await this._concurrentTaskRunner.RunConcurrentlyAsync( referenceIndex.ReferencedSymbols, AnalyzeReferencedSymbolsAsync, cancellationToken );
@@ -88,40 +91,69 @@ public class ReferenceValidatorRunner
 
         async Task AnalyzeReferencedSymbolsImplAsync( ReferencedSymbolInfo references, ISymbol referencedSymbol, bool isBaseType )
         {
-            // Iterate all validators interested in the referenced symbol.
-            foreach ( var validator in referenceValidatorProvider.GetValidators( referencedSymbol ) )
+            var allReferences = references.GetAllReferences( ChildKinds.All ).ToReadOnlyList();
+
+            var validatorsByGranularity = referenceValidatorProvider
+                .GetValidators( referencedSymbol )
+                .Where( v => !isBaseType || v.IncludeDerivedTypes )
+                .GroupBy( v => v.Granularity );
+
+            foreach ( var validatorGroup in validatorsByGranularity )
             {
-                if ( isBaseType && !validator.IncludeDerivedTypes )
+                // Static local functions to get the grouping factor.
+                static ISymbol? GetNamespace( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.ContainingNamespace;
+
+                static ISymbol? GetAssembly( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.ContainingAssembly;
+
+                static ISymbol? GetNamedType( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingType()?.GetTopmostContainingType();
+
+                static ISymbol? GetMember( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingMember();
+                
+                static ISymbol? GetDeclaration( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol;
+
+                // Choose the grouping factor according to the desired granularity.
+                var getGroupingKeyFunc = (Func<ReferencingSymbolInfo, ISymbol?>) (validatorGroup.Key switch
                 {
-                    continue;
-                }
+                    ReferenceGranularity.Compilation => GetAssembly,
+                    ReferenceGranularity.Namespace => GetNamespace,
+                    ReferenceGranularity.Type => GetNamedType,
+                    ReferenceGranularity.Member => GetMember,
+                    _ => GetDeclaration
+                });
 
-                userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
+                // Group the references.
+                var groupedReferences = allReferences.GroupBy( getGroupingKeyFunc ).Cache();
 
-                // Validate all references.
-                var childKinds = validator.IncludeDerivedTypes ? ChildKinds.All : ChildKinds.ContainingDeclaration;
-
-                await this._concurrentTaskRunner.RunConcurrentlyAsync(
-                    references.GetAllReferences( childKinds ),
-                    AnalyzeReferencingSymbols,
-                    cancellationToken );
-
-                void AnalyzeReferencingSymbols( ReferencingSymbolInfo reference )
+                // Iterate all validators.
+                foreach ( var validator in validatorGroup )
                 {
-                    foreach ( var node in reference.Nodes )
+                    userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
+
+                    // Select groups that have at least one relevant node for the validator. 
+                    var groupsForValidator =
+                        groupedReferences.Where( g => g.Any( r => r.Nodes.Any( n => (n.ReferenceKinds & validator.ReferenceKinds) != 0 ) ) );
+
+                    // Run the validation concurrently.
+                    await this._concurrentTaskRunner.RunConcurrentlyAsync(
+                        groupsForValidator,
+                        AnalyzeReferencingSymbols,
+                        cancellationToken );
+
+                    void AnalyzeReferencingSymbols( IGrouping<ISymbol?, ReferencingSymbolInfo> referenceGroup )
                     {
-                        if ( (validator.ReferenceKinds & node.ReferenceKinds) != 0 )
+                        if ( referenceGroup.Key == null )
                         {
-                            var referencingDeclaration = initialCompilation.Factory.GetDeclaration( reference.ReferencingSymbol );
-
-                            validator.Validate(
-                                referencingDeclaration,
-                                node.Syntax,
-                                node.ReferenceKinds,
-                                diagnosticAdder,
-                                this._userCodeInvoker,
-                                userCodeExecutionContext );
+                            return;
                         }
+
+                        var referencingDeclaration = initialCompilation.Factory.GetDeclaration( referenceGroup.Key );
+
+                        validator.Validate(
+                            referencingDeclaration,
+                            diagnosticAdder,
+                            this._userCodeInvoker,
+                            userCodeExecutionContext,
+                            referenceGroup );
                     }
                 }
             }

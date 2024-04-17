@@ -22,6 +22,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         this.Object = instance.Implementation.Implementation;
         this.State = instance.Implementation.State;
         this.DiagnosticSourceDescription = instance.DiagnosticSourceDescription;
+        this.Granularity = instance.Granularity;
     }
 
     public TransitiveValidatorInstance(
@@ -31,7 +32,8 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         object obj,
         IAspectState? state,
         string? methodName,
-        string diagnosticSourceDescription )
+        string diagnosticSourceDescription,
+        ReferenceGranularity granularity )
     {
         this.ValidatedDeclaration = validatedDeclaration;
         this.IncludeDerivedTypes = includeDerivedTypes;
@@ -40,6 +42,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         this.State = state;
         this.MethodName = methodName;
         this.DiagnosticSourceDescription = diagnosticSourceDescription;
+        this.Granularity = granularity;
     }
 
     private TransitiveValidatorInstance()
@@ -65,6 +68,8 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     public string? MethodName { get; private set; }
 
     internal string DiagnosticSourceDescription { get; }
+
+    public ReferenceGranularity Granularity { get; private set; } = ReferenceGranularity.Declaration; // Default value for backward compatibility with serialized values.
 
     internal ValidatorDriver GetReferenceValidatorDriver()
     {

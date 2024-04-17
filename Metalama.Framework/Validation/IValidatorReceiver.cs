@@ -33,8 +33,15 @@ public interface IValidatorReceiver
     /// <param name="validateMethod"></param>
     /// <param name="referenceKinds">Kinds of references that this method is interested to analyze. By default, all references are analyzed.</param>
     /// <param name="includeDerivedTypes"></param>
+    [Obsolete( "Use ValidateOutboundReferences." )]
     void ValidateReferences(
         ValidatorDelegate<ReferenceValidationContext> validateMethod,
+        ReferenceKinds referenceKinds = ReferenceKinds.All,
+        bool includeDerivedTypes = false );
+
+    void ValidateOutboundReferences(
+        Action<ReferenceValidationContext> validateMethod,
+        ReferenceGranularity granularity,
         ReferenceKinds referenceKinds = ReferenceKinds.All,
         bool includeDerivedTypes = false );
 
@@ -43,7 +50,10 @@ public interface IValidatorReceiver
     /// invoked to validate references to any declaration in the current set. Only source code references are validated.
     /// References added by aspects are ignored by design.
     /// </summary>
+    [Obsolete( "Use ValidateOutboundReferences." )]
     void ValidateReferences( ReferenceValidator validator );
+
+    void ValidateOutboundReferences( OutboundReferenceValidator validator );
 }
 
 /// <summary>
@@ -78,7 +88,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// are validated. References added by aspects are ignored by design.
     /// </summary>
     void ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
-        where TValidator : ReferenceValidator;
+        where TValidator : OutboundReferenceValidator;
 
     /// <summary>
     /// Reports a diagnostic for each declaration selected by the the current object.
@@ -170,8 +180,8 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// The reference validator will be invoked to validate references to any declaration in the current set. Only source code references
     /// are validated. References added by aspects are ignored by design.
     /// </summary>
-    void ValidateReferences<TValidator>( Func<TDeclaration, TTag, TValidator> validator )
-        where TValidator : ReferenceValidator;
+    void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> validator )
+        where TValidator : OutboundReferenceValidator;
 
     /// <summary>
     /// Reports a diagnostic for each declaration selected by the the current object.

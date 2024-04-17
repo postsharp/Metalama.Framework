@@ -16,10 +16,10 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
 
         public override void AmendNamespace( INamespaceAmender amender )
         {
-            amender.ValidateReferences( Validate, ReferenceKinds.All );
+            amender.ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
             context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
         }
