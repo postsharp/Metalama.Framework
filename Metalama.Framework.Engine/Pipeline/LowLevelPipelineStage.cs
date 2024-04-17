@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -38,9 +39,16 @@ internal sealed class LowLevelPipelineStage : PipelineStage
     {
         var compilationModel = input.LastCompilationModel;
 
-        var aspectInstances = input.ContributorSources.AspectSources
-            .Select( s => s.GetAspectInstances( compilationModel, this._aspectClass, diagnostics, cancellationToken ) )
-            .SelectMany( x => x.AspectInstances )
+        var collector = new OutboundActionCollector( diagnostics );
+
+        await Task.WhenAll(
+            input.ContributorSources.AspectSources
+                .Select(
+                    s => s.CollectAspectInstancesAsync(
+                        this._aspectClass,
+                        new OutboundActionCollectionContext( collector, input.LastCompilationModel, cancellationToken ) ) ) );
+
+        var aspectInstances = collector.AspectInstances
             .GroupBy(
                 i => i.TargetDeclaration.GetSymbol( compilationModel.RoslynCompilation )
                     .AssertNotNull( "The Roslyn compilation should include all introduced declarations." ) )

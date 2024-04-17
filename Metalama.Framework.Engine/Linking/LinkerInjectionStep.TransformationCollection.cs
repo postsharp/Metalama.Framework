@@ -28,7 +28,7 @@ internal sealed partial class LinkerInjectionStep
     private sealed class TransformationCollection
     {
         private readonly TransformationLinkerOrderComparer _comparer;
-        private readonly ConcurrentBag<InjectedMember> _injectedMembers;
+        private readonly ConcurrentQueue<InjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, List<InjectedMember>> _injectedMembersByInsertPosition;
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeDeclaration;
         private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
@@ -63,7 +63,7 @@ internal sealed partial class LinkerInjectionStep
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
             this._comparer = comparer;
-            this._injectedMembers = new ConcurrentBag<InjectedMember>();
+            this._injectedMembers = new ConcurrentQueue<InjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
             this._injectedInterfacesByTargetTypeDeclaration = new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
             this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
@@ -102,7 +102,7 @@ internal sealed partial class LinkerInjectionStep
             // Injected member should always be root type member (not an accessor).
             Invariant.Assert( injectedMember.Declaration is not { ContainingDeclaration: IMember } );
 
-            this._injectedMembers.Add( injectedMember );
+            this._injectedMembers.Enqueue( injectedMember );
 
             var nodes = this._injectedMembersByInsertPosition.GetOrAdd( insertPosition, _ => new List<InjectedMember>() );
 
@@ -272,12 +272,12 @@ internal sealed partial class LinkerInjectionStep
             IConcurrentTaskRunner concurrentTaskRunner,
             CancellationToken cancellationToken )
         {
-            await concurrentTaskRunner.RunInParallelAsync(
+            await concurrentTaskRunner.RunConcurrentlyAsync(
                 this._introductionMemberLevelTransformations.Values,
                 t => t.Sort(),
                 cancellationToken );
 
-            await concurrentTaskRunner.RunInParallelAsync(
+            await concurrentTaskRunner.RunConcurrentlyAsync(
                 this._symbolMemberLevelTransformations.Values,
                 t => t.Sort(),
                 cancellationToken );

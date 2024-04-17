@@ -104,6 +104,14 @@ namespace Metalama.Framework.Code
                 _ => declaration.GetClosestNamedType()?.GetTopmostNamedType()
             };
 
+        public static INamespace? GetNamespace( this IDeclaration declaration )
+            => declaration switch
+            {
+                INamespace ns => ns,
+                ICompilation compilation => compilation.GlobalNamespace,
+                _ => declaration.GetTopmostNamedType()?.Namespace
+            };
+
         /// <summary>
         /// Gets a representation of the current declaration in a different version of the compilation.
         /// </summary>

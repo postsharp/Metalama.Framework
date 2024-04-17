@@ -93,6 +93,10 @@ namespace Metalama.Framework.Aspects
         /// <see cref="IValidatorReceiver.Validate"/>
         /// or <see cref="IValidatorReceiver.ValidateReferences(Metalama.Framework.Validation.ValidatorDelegate{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceKinds,bool)"/>.
         /// </summary>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectMany{TMember}"/> is executed concurrently. It is therefore preferable to use the <see cref="Where"/>, <see cref="Select{TMember}"/>
+        /// or <see cref="SelectMany{TMember}"/> methods of the current interface instead of using the equivalent system methods inside the <paramref name="selector"/> query.</para>
+        /// </remarks>
         new IAspectReceiver<TMember> SelectMany<TMember>( Func<TDeclaration, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration;
 
@@ -103,6 +107,17 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         new IAspectReceiver<TMember> Select<TMember>( Func<TDeclaration, TMember> selector )
             where TMember : class, IDeclaration;
+
+        /// <summary>
+        /// Selects all types in the current context. If the current object represents <see cref="ICompilation"/> or <see cref="INamespace"/>, this
+        /// method returns all the types in the compilation or namespace. If the current object represents a set of types, this method returns
+        /// the current set. If the current object represent a set of members or parameters, the method will return their declaring types.
+        /// </summary>
+        /// <param name="includeNestedTypes">Indicates whether nested types should be recursively included in the output.</param>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+        /// </remarks>
+        new IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes = false );
 
         /// <summary>
         /// Filters the set of declarations included in the current set.

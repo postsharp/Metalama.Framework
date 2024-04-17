@@ -162,7 +162,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             }
         }
 
-        await this._concurrentTaskRunner.RunInParallelAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
+        await this._concurrentTaskRunner.RunConcurrentlyAsync( transformationsByCanonicalSyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
 
         // Finalize non-auxiliary transformations (sorting).
         await transformationCollection.FinalizeAsync(
@@ -188,7 +188,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             }
         }
 
-        await this._concurrentTaskRunner.RunInParallelAsync( pendingInsertStatementContexts, FlushPendingInsertStatementContext, cancellationToken );
+        await this._concurrentTaskRunner.RunConcurrentlyAsync( pendingInsertStatementContexts, FlushPendingInsertStatementContext, cancellationToken );
 
         // Process any auxiliary member transformations in parallel.
         void ProcessAuxiliaryMemberTransformations( KeyValuePair<IMember, AuxiliaryMemberTransformations> transformationPair )
@@ -206,7 +206,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 transformations );
         }
 
-        await this._concurrentTaskRunner.RunInParallelAsync( auxiliaryMemberTransformations, ProcessAuxiliaryMemberTransformations, cancellationToken );
+        await this._concurrentTaskRunner.RunConcurrentlyAsync( auxiliaryMemberTransformations, ProcessAuxiliaryMemberTransformations, cancellationToken );
 
         var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
@@ -245,7 +245,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         // Rewrite syntax trees.
         var inputCompilation = input.CompilationModel.PartialCompilation;
-        var transformations = new ConcurrentBag<SyntaxTreeTransformation>();
+        var transformations = new ConcurrentQueue<SyntaxTreeTransformation>();
 
         async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
         {
@@ -262,14 +262,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             {
                 var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                transformations.Add( SyntaxTreeTransformation.ReplaceTree( initialSyntaxTree, intermediateSyntaxTree ) );
+                transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( initialSyntaxTree, intermediateSyntaxTree ) );
             }
         }
 
-        await this._concurrentTaskRunner.RunInParallelAsync( inputCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
+        await this._concurrentTaskRunner.RunConcurrentlyAsync( inputCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
 
         var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( inputCompilation.LanguageOptions );
-        transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
+        transformations.Enqueue( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
         var intermediateCompilation = inputCompilation.Update( transformations );
 

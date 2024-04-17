@@ -193,7 +193,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync(
+            await this._concurrentTaskRunner.RunConcurrentlyAsync(
                 this._nonInlinedSemantics.Union( this._additionalTransformedSemantics ),
                 ProcessNonInlinedSemantic,
                 cancellationToken );
@@ -330,7 +330,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( this._inliningSpecifications, ProcessInliningSpecification, cancellationToken );
 
             void ProcessForcefullyInitializedType( ForcefullyInitializedType forcefullyInitializedType )
             {
@@ -358,7 +358,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( this._forcefullyInitializedTypes, ProcessForcefullyInitializedType, cancellationToken );
 
             // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
             return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );

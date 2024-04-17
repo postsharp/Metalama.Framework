@@ -95,20 +95,21 @@ namespace Metalama.Framework.Engine.CodeModel
             CancellationToken cancellationToken = default )
         {
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
-            var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
+            var modifiedSyntaxTrees = new ConcurrentQueue<SyntaxTreeTransformation>();
 
-            await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( compilation.SyntaxTrees, RewriteSyntaxTreeAsync, cancellationToken );
 
-            async Task RewriteSyntaxTreeAsync( SyntaxTree tree )
+            async Task RewriteSyntaxTreeAsync( KeyValuePair<string, SyntaxTree> tree )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var oldRoot = await tree.GetRootAsync( cancellationToken );
+                var oldRoot = await tree.Value.GetRootAsync( cancellationToken );
                 var newRoot = rewriterFactory( oldRoot ).Visit( oldRoot );
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( tree, tree.WithRootAndOptions( newRoot, tree.Options ) ) );
+                    modifiedSyntaxTrees.Enqueue(
+                        SyntaxTreeTransformation.ReplaceTree( tree.Value, tree.Value.WithRootAndOptions( newRoot, tree.Value.Options ) ) );
                 }
             }
 

@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.Linking
             void Process( KeyValuePair<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> pair )
             {
                 // Aspect references originating in non-reachable semantics should be ignored.
-                var bag = new ConcurrentBag<ResolvedAspectReference>();
+                var bag = new ConcurrentQueue<ResolvedAspectReference>();
 
                 foreach ( var reference in pair.Value )
                 {
@@ -288,17 +288,17 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( reachableSemantics.Contains( reference.ContainingSemantic ) )
                     {
-                        bag.Add( reference );
+                        bag.Enqueue( reference );
 
-                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd(
+                        ((ConcurrentQueue<ResolvedAspectReference>) reachableReferencesBySource.GetOrAdd(
                             reference.ContainingSemantic,
-                            _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
+                            _ => new ConcurrentQueue<ResolvedAspectReference>() )).Enqueue( reference );
 
                         var target = reference.ResolvedSemantic.ToAspectReferenceTarget( reference.TargetKind );
 
-                        ((ConcurrentBag<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd(
+                        ((ConcurrentQueue<ResolvedAspectReference>) reachableReferencesByTarget.GetOrAdd(
                             target,
-                            _ => new ConcurrentBag<ResolvedAspectReference>() )).Add( reference );
+                            _ => new ConcurrentQueue<ResolvedAspectReference>() )).Enqueue( reference );
                     }
                 }
 
@@ -308,7 +308,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            await concurrentTaskRunner.RunInParallelAsync( resolvedReferencesBySource, Process, cancellationToken );
+            await concurrentTaskRunner.RunConcurrentlyAsync( resolvedReferencesBySource, Process, cancellationToken );
         }
 
         private static IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> GetNonInlinedReferences(

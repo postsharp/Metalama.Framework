@@ -21,7 +21,7 @@ namespace Metalama.Framework.Fabrics
     /// Base interface for the argument of <see cref="ProjectFabric.AmendProject"/>, <see cref="NamespaceFabric.AmendNamespace"/>
     /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
     /// </summary>
-    public interface IAmender<out T> : IAmender, IAspectReceiverSelector<T>
+    public interface IAmender<out T> : IAmender
         where T : class, IDeclaration
     {
         /// <summary>

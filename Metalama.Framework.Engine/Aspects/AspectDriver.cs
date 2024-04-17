@@ -26,6 +26,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -103,7 +104,7 @@ internal sealed class AspectDriver : IAspectDriver
         }
     }
 
-    public AspectInstanceResult ExecuteAspect(
+    public Task<AspectInstanceResult> ExecuteAspectAsync(
         IAspectInstanceInternal aspectInstance,
         string? layer,
         CompilationModel initialCompilationRevision,
@@ -131,7 +132,7 @@ internal sealed class AspectDriver : IAspectDriver
             _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
         };
 
-        AspectInstanceResult EvaluateAspectImpl<T>( T targetDeclaration )
+        async Task<AspectInstanceResult> EvaluateAspectImpl<T>( T targetDeclaration )
             where T : class, IDeclaration
         {
             if ( aspectInstance.IsSkipped )
@@ -284,7 +285,12 @@ internal sealed class AspectDriver : IAspectDriver
                     diagnosticSink.Reset();
 
                     var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources );
-                    validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
+
+                    await validationRunner.RunDeclarationValidatorsAsync(
+                        initialCompilationRevision,
+                        CompilationModelVersion.Current,
+                        diagnosticSink,
+                        cancellationToken );
 
                     if ( !diagnosticSink.IsEmpty )
                     {

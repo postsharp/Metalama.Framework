@@ -64,7 +64,7 @@ class Fabric : ProjectFabric
 
     public override void AmendProject( IProjectAmender project )
     {
-        project.With( x => x ).Validate( Validate );
+        project.Outbound.Validate( Validate );
     }
 
     private static void Validate( in DeclarationValidationContext context )

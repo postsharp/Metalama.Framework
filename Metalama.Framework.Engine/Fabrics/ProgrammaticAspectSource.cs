@@ -2,43 +2,35 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
 internal sealed class ProgrammaticAspectSource : IAspectSource
 {
-    private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
-    private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>> _getRequirements;
+    private readonly Func<OutboundActionCollectionContext, Task> _addResultsAction;
 
     public ProgrammaticAspectSource(
         IAspectClass aspectClass,
-        Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>>? getInstances = null,
-        Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>>? getRequirements = null )
+        Func<OutboundActionCollectionContext, Task> collect )
     {
-        this._getInstances = getInstances ?? (( _, _ ) => Enumerable.Empty<AspectInstance>());
-        this._getRequirements = getRequirements ?? (( _, _ ) => Enumerable.Empty<AspectRequirement>());
+        this._addResultsAction = collect;
         this.AspectClasses = ImmutableArray.Create( aspectClass );
     }
 
     public ImmutableArray<IAspectClass> AspectClasses { get; }
 
-    public AspectSourceResult GetAspectInstances(
-        CompilationModel compilation,
+    public Task CollectAspectInstancesAsync(
         IAspectClass aspectClass,
-        IDiagnosticAdder diagnosticAdder,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
-        var aspectInstances = this._getInstances( compilation, diagnosticAdder );
+        if ( this._addResultsAction != null )
+        {
+            return this._addResultsAction.Invoke( context );
+        }
 
-        var requirements = this._getRequirements( compilation, diagnosticAdder );
-
-        return new AspectSourceResult( aspectInstances, requirements: requirements );
+        return Task.CompletedTask;
     }
 }

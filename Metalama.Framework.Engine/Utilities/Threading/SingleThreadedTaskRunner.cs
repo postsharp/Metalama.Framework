@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal class SingleThreadedTaskRunner : IConcurrentTaskRunner
 {
-    public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+    public Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull
     {
         var orderedItems = this.GetOrderedItems( items );
@@ -29,7 +29,7 @@ internal class SingleThreadedTaskRunner : IConcurrentTaskRunner
         }
     }
 
-    public Task RunInParallelAsync<TItem, TContext>(
+    public Task RunConcurrentlyAsync<TItem, TContext>(
         IEnumerable<TItem> items,
         Action<TItem, TContext> action,
         Func<TContext> createContext,
@@ -56,7 +56,7 @@ internal class SingleThreadedTaskRunner : IConcurrentTaskRunner
         }
     }
 
-    public async Task RunInParallelAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
+    public async Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Func<T, Task> action, CancellationToken cancellationToken )
         where T : notnull
     {
         var orderedItems = this.GetOrderedItems( items );

@@ -6,11 +6,12 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Options;
-using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Attribute = System.Attribute;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
@@ -28,8 +29,9 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
         this._invoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
-    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink )
+    public Task CollectOptionsAsync( OutboundActionCollectionContext context )
     {
+        var compilation = context.Compilation;
         var aspectType = compilation.Factory.GetTypeByReflectionType( typeof(IAspect) );
         var systemAttributeType = compilation.Factory.GetTypeByReflectionType( typeof(Attribute) );
 
@@ -51,7 +53,7 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
 
             foreach ( var attribute in compilation.GetAllAttributesOfType( attributeType ) )
             {
-                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), diagnosticSink, out var deserializedAttribute ) )
+                if ( !this._attributeDeserializer.TryCreateAttribute( attribute.GetAttributeData(), context.Collector, out var deserializedAttribute ) )
                 {
                     continue;
                 }
@@ -65,16 +67,22 @@ internal sealed class CompilationHierarchicalOptionsSource : IHierarchicalOption
 
                 var providerContext = new OptionsProviderContext(
                     attribute.ContainingDeclaration,
-                    new ScopedDiagnosticSink( diagnosticSink, new ProvideOptionsDiagnosticSource( attribute ), attribute, attribute.ContainingDeclaration ) );
+                    new ScopedDiagnosticSink(
+                        (IUserDiagnosticSink) context.Collector.Diagnostics,
+                        new ProvideOptionsDiagnosticSource( attribute ),
+                        attribute,
+                        attribute.ContainingDeclaration ) );
 
                 var optionList = this._invoker.Invoke( () => optionsAttribute.GetOptions( providerContext ).ToReadOnlyList(), invokerContext );
 
                 foreach ( var options in optionList )
                 {
-                    yield return new HierarchicalOptionsInstance( attribute.ContainingDeclaration, options );
+                    context.Collector.AddOptions( new HierarchicalOptionsInstance( attribute.ContainingDeclaration, options ) );
                 }
             }
         }
+
+        return Task.CompletedTask;
     }
 
     private sealed class ProvideOptionsDiagnosticSource : IDiagnosticSource

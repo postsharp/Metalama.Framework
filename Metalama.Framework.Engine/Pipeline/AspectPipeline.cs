@@ -434,12 +434,13 @@ public abstract class AspectPipeline : IDisposable
 
         var diagnosticSink = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject );
 
-        hierarchicalOptionsManager.Initialize(
+        await hierarchicalOptionsManager.InitializeAsync(
             pipelineConfiguration.CompileTimeProject,
             contributorSources.OptionsSources,
             contributorSources.ExternalOptionsProvider,
             compilationModel,
-            diagnosticSink );
+            diagnosticSink,
+            cancellationToken );
 
         diagnosticAdder.Report( diagnosticSink.ToImmutable().ReportedDiagnostics );
 

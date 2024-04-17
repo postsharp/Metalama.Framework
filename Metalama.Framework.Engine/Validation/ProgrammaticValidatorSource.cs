@@ -1,13 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -17,7 +14,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
 
     public AspectPredecessor Predecessor { get; }
 
-    private readonly Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> _func;
+    private readonly Func<ProgrammaticValidatorSource, OutboundActionCollectionContext, Task> _addValidatorsAction;
     private readonly ValidatorKind _kind;
     private readonly CompilationModelVersion _compilationModelVersion;
 
@@ -26,7 +23,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         ValidatorKind validatorKind,
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
-        Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
+        Func<ProgrammaticValidatorSource, OutboundActionCollectionContext, Task> addValidatorsAction )
     {
         if ( validatorKind != ValidatorKind.Reference )
         {
@@ -37,7 +34,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         this._kind = validatorKind;
         this._compilationModelVersion = compilationModelVersion;
         this.Predecessor = predecessor;
-        this._func = func;
+        this._addValidatorsAction = addValidatorsAction;
     }
 
     public ProgrammaticValidatorSource(
@@ -46,7 +43,7 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
         ValidatorDelegate<DeclarationValidationContext> method,
-        Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
+        Func<ProgrammaticValidatorSource, OutboundActionCollectionContext, Task> addValidatorsAction )
     {
         if ( validatorKind != ValidatorKind.Definition )
         {
@@ -57,22 +54,21 @@ internal sealed class ProgrammaticValidatorSource : IValidatorSource
         this._kind = validatorKind;
         this._compilationModelVersion = compilationModelVersion;
         this.Predecessor = predecessor;
-        this._func = func;
+        this._addValidatorsAction = addValidatorsAction;
     }
 
-    public IEnumerable<ValidatorInstance> GetValidators(
+    public Task CollectValidatorsAsync(
         ValidatorKind kind,
         CompilationModelVersion compilationModelVersion,
-        CompilationModel compilation,
-        UserDiagnosticSink diagnosticAdder )
+        OutboundActionCollectionContext context )
     {
         if ( kind == this._kind && this._compilationModelVersion == compilationModelVersion )
         {
-            return this._func.Invoke( this, compilation, diagnosticAdder );
+            return this._addValidatorsAction.Invoke( this, context );
         }
         else
         {
-            return Enumerable.Empty<ValidatorInstance>();
+            return Task.CompletedTask;
         }
     }
 }
