@@ -30,8 +30,7 @@ public sealed class ScopedSuppression : IScopedSuppression
 
     public bool Matches( Diagnostic diagnostic, Compilation compilation, Func<Func<bool>, bool> codeInvoker )
     {
-        // If the declaration has been mutated (constructor parameter introduction), we need to get the original symbol here.
-        var symbolId = this.Declaration.GetSymbol()?.GetSerializableId() ?? this.Declaration.GetSerializableId();
+        var symbolId = this.Declaration.GetSourceSerializableId();
 
         return this.Matches( diagnostic, compilation, codeInvoker, symbolId );
     }
