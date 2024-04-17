@@ -10,6 +10,9 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClass.ReferencingMethod()'.`
 // Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.ReferencingMethod()'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.ReferencingMethod()'.`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClassInSubnamespace.ReferencingMethod()'.`
+// Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClassInSubnamespace.ReferencingMethod()'.`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClassInSubnamespace.ReferencingMethod()'.`
 internal class ValidatedClass
 {
   public static void Method(object o)
@@ -35,5 +38,16 @@ internal class ReferencingClass
   {
     ValidatedClass variable;
     ValidatedClass.Method(typeof(ValidatedClass));
+  }
+}
+namespace Subnamespace
+{
+  internal class ReferencingClassInSubnamespace
+  {
+    private void ReferencingMethod()
+    {
+      ValidatedClass variable;
+      ValidatedClass.Method(typeof(ValidatedClass));
+    }
   }
 }

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
 
         public override void AmendNamespace( INamespaceAmender amender )
         {
-            amender.Outbound.ValidateReferences( Validate, ReferenceKinds.All );
+            amender.ValidateReferences( Validate, ReferenceKinds.All );
         }
 
         private static void Validate( in ReferenceValidationContext context )
@@ -56,6 +56,19 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
         {
             ValidatedClass variable;
             ValidatedClass.Method( typeof(ValidatedClass) );
+        }
+    }
+
+    // <target>
+    namespace Subnamespace
+    {
+        internal class ReferencingClassInSubnamespace
+        {
+            private void ReferencingMethod()
+            {
+                ValidatedClass variable;
+                ValidatedClass.Method( typeof(ValidatedClass) );
+            }
         }
     }
 }

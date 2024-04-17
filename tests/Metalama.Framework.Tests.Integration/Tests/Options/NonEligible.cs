@@ -30,6 +30,6 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( c => c.Types ).SetOptions( _ => new NonEligibleOptions() );
+        amender.SelectMany( c => c.Types ).SetOptions( _ => new NonEligibleOptions() );
     }
 }

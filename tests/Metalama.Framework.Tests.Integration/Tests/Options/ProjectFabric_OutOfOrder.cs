@@ -14,13 +14,13 @@ public class Fabric : ProjectFabric
     public override void AmendProject( IProjectAmender amender )
     {
         // Test that when we set project-level options last, they do not override leaf-level options.
-        amender.Outbound.Select( c => c.Types.OfName( nameof(C2) ).Single() ).SetOptions( c => new MyOptions { Value = "C2" } );
+        amender.Select( c => c.Types.OfName( nameof(C2) ).Single() ).SetOptions( c => new MyOptions { Value = "C2" } );
 
-        amender.Outbound.Select( c => c.Types.OfName( nameof(C2) ).Single() )
+        amender.Select( c => c.Types.OfName( nameof(C2) ).Single() )
             .Select( t => t.Methods.OfName( nameof(C2.M2) ).Single() )
             .SetOptions( c => new MyOptions { Value = "M2" } );
 
-        amender.Outbound.SetOptions( c => new MyOptions { Value = "Project" } );
+        amender.SetOptions( c => new MyOptions { Value = "Project" } );
     }
 }
 

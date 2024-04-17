@@ -732,8 +732,14 @@ public sealed class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
             if ( symbol is { ContainingNamespace: not null } and { Kind: not SymbolKind.Namespace }
                  && this._validatorProvider.Properties.MustDescendIntoReferencedNamespace( referenceKinds ) )
             {
-                // We validate namespaces, but not recursively because it is more cost-efficient when the user registers validators for all child namespaces.
-                this.ValidateSymbol( symbol.ContainingNamespace, node, referenceKinds, isBaseType );
+                for ( var ns = symbol.ContainingNamespace; !ns.IsGlobalNamespace; ns = ns.ContainingNamespace )
+                {
+                    if ( this.ValidateSymbol( ns, node, referenceKinds, isBaseType ) )
+                    {
+                        // Don't visit the parent if we reported a message for a child namespace.
+                        break;
+                    }
+                }
             }
             else if ( symbol.ContainingAssembly != null && this._validatorProvider.Properties.MustDescendIntoReferencedAssembly( referenceKinds ) )
             {

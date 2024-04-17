@@ -24,7 +24,7 @@ public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( new TheValidator() );
+        amender.SelectMany( p => p.Types ).ValidateReferences( new TheValidator() );
     }
 }
 

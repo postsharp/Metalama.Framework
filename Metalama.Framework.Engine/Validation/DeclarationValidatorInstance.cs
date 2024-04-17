@@ -10,18 +10,21 @@ namespace Metalama.Framework.Engine.Validation;
 internal sealed class DeclarationValidatorInstance : ValidatorInstance
 {
     private readonly ValidatorDriver<DeclarationValidationContext> _driver;
+    private readonly object? _tag;
 
     public DeclarationValidatorInstance(
         IDeclaration validatedDeclaration,
         ValidatorDriver<DeclarationValidationContext> driver,
         in ValidatorImplementation implementation,
-        string description ) : base(
+        string description,
+        object? tag ) : base(
         validatedDeclaration,
         driver,
         implementation,
         description )
     {
         this._driver = driver;
+        this._tag = tag;
     }
 
     public void Validate( IDiagnosticSink diagnosticAdder, UserCodeInvoker userCodeInvoker, UserCodeExecutionContext userCodeExecutionContext )
@@ -30,7 +33,8 @@ internal sealed class DeclarationValidatorInstance : ValidatorInstance
             this.ValidatedDeclaration,
             this.Implementation.State,
             diagnosticAdder,
-            this );
+            this,
+            this._tag );
 
         this._driver.Validate( this.Implementation, validationContext, userCodeInvoker, userCodeExecutionContext );
     }

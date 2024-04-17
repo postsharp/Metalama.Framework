@@ -22,7 +22,7 @@ internal interface IAspectReceiverParent : IValidatorDriverFactory, IPipelineCon
     ProjectServiceProvider ServiceProvider { get; }
 
     BoundAspectClassCollection AspectClasses { get; }
-
+    
     UserCodeInvoker UserCodeInvoker { get; }
 
     AspectPredecessor AspectPredecessor { get; }

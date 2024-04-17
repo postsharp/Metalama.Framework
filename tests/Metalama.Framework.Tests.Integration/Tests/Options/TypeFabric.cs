@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Options.TypeFabric_
         {
             public override void AmendType( ITypeAmender amender )
             {
-                amender.Outbound.SetOptions( c => new MyOptions { Value = "Type" } );
+                amender.SetOptions( c => new MyOptions { Value = "Type" } );
             }
         }
     }

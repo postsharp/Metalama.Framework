@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
     {
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.Outbound.SelectMany( p => p.Types.OfName( "MyRecord" ).SelectMany( t => t.Properties.Where( p => !p.IsImplicitlyDeclared ) ) )
+            amender.SelectMany( p => p.Types.OfName( "MyRecord" ).SelectMany( t => t.Properties.Where( p => !p.IsImplicitlyDeclared ) ) )
                 .AddAspect<MyAspect>();
         }
     }
