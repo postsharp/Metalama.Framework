@@ -41,11 +41,20 @@ public readonly struct ReferenceValidationDiagnosticSink
         }
     }
 
-    public void Report( Func<ReferenceInstance, IDiagnostic> getDiagnostic )
+    public void Report( Func<ReferenceInstance, IDiagnostic?> getDiagnostic, Func<ReferenceInstance,IDiagnosticLocation?>? getLocation = null )
     {
         foreach ( var scope in this._context.References )
         {
-            this.Sink.Report( getDiagnostic( scope ), this._context.ResolveLocation( scope ), this._context.DiagnosticSource );
+            var diagnostic = getDiagnostic( scope );
+
+            if ( diagnostic == null )
+            {
+                continue;
+            }
+
+            var location = getLocation?.Invoke( scope ) ?? this._context.ResolveLocation( scope );
+
+            this.Sink.Report( diagnostic, location, this._context.DiagnosticSource );
         }
     }
 

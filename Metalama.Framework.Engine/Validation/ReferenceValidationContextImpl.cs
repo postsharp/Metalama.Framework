@@ -51,7 +51,7 @@ internal sealed class ReferenceValidationContextImpl : ReferenceValidationContex
     internal override ISourceReferenceImpl SourceReferenceImpl => CodeModel.SourceReferenceImpl.Instance;
 
     public override IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance )
-        => this.ReferencedDeclaration.GetCompilationModel().Factory.GetDeclaration( (ISymbol) referenceInstance.Symbol );
+        => this.Compilation.GetCompilationModel().Factory.GetDeclaration( (ISymbol) referenceInstance.Symbol );
 
     public override IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance )
         => referenceInstance.NodeOrToken switch

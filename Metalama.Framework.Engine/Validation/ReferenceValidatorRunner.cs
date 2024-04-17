@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -106,7 +105,10 @@ public class ReferenceValidatorRunner
 
                 static ISymbol? GetAssembly( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.ContainingAssembly;
 
-                static ISymbol? GetNamedType( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingType()?.GetTopmostContainingType();
+                static ISymbol? GetParentType( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingType();
+
+                static ISymbol? GetTopLevelType( ReferencingSymbolInfo symbol )
+                    => symbol.ReferencingSymbol.GetClosestContainingType()?.GetTopmostContainingType();
 
                 static ISymbol? GetMember( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingMember();
 
@@ -117,7 +119,8 @@ public class ReferenceValidatorRunner
                 {
                     ReferenceGranularity.Compilation => GetAssembly,
                     ReferenceGranularity.Namespace => GetNamespace,
-                    ReferenceGranularity.Type => GetNamedType,
+                    ReferenceGranularity.Type => GetParentType,
+                    ReferenceGranularity.TopLevelType => GetTopLevelType,
                     ReferenceGranularity.Member => GetMember,
                     _ => GetDeclaration
                 });
@@ -139,10 +142,12 @@ public class ReferenceValidatorRunner
 #pragma warning restore CS0612 // Type or member is obsolete
                     {
                         // For backward compatibility, we have to flatten the group and do one call per syntax node.
-                        var flattenedReferences = groupedReferences.SelectMany<IGrouping<ISymbol?, ReferencingSymbolInfo>, (ISymbol?, ReferencingSymbolInfo)>(
-                            g => g.SelectMany<ReferencingSymbolInfo, (ISymbol?, ReferencingSymbolInfo)>(
-                                x => x.Nodes.SelectAsReadOnlyCollection<ReferencingNode, (ISymbol?, ReferencingSymbolInfo)>(
-                                    n => (g.Key, new ReferencingSymbolInfo( g.Key, [n] )) ) ) );
+                        var flattenedReferences = groupedReferences
+                            .Where( g => g.Key != null )
+                            .SelectMany<IGrouping<ISymbol?, ReferencingSymbolInfo>, (ISymbol?, ReferencingSymbolInfo)>(
+                                g => g.SelectMany<ReferencingSymbolInfo, (ISymbol?, ReferencingSymbolInfo)>(
+                                    x => x.Nodes.SelectAsReadOnlyCollection<ReferencingNode, (ISymbol?, ReferencingSymbolInfo)>(
+                                        n => (g.Key, new ReferencingSymbolInfo( g.Key!, [n] )) ) ) );
 
                         // Run the validation concurrently.
                         await this._concurrentTaskRunner.RunConcurrentlyAsync(

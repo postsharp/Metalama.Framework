@@ -22,7 +22,7 @@ internal class DerivedAspect : BaseAspect
     {
         builder
             .Outbound
-            .ValidateOutboundReferences( Validate,ReferenceGranularity.Declaration, ReferenceKinds.All );
+            .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
     }
 }
 

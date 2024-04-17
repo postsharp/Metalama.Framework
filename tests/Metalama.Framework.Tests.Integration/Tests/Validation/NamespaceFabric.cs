@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
 
         public override void AmendNamespace( INamespaceAmender amender )
         {
-            amender.ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All );
+            amender.ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
         private static void Validate( ReferenceValidationContext context )

@@ -18,15 +18,15 @@ public class TheValidator : OutboundReferenceValidator
     {
         context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKinds, x.ReferencingDeclaration ) ) );
     }
-    
-    public override ReferenceGranularity Granularity => ReferenceGranularity.Declaration;
+
+    public override ReferenceGranularity Granularity => ReferenceGranularity.ParameterOrAttribute;
 }
 
 public class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.SelectMany( p => p.Types ).ValidateOutboundReferences( t => new TheValidator()  );
+        amender.SelectMany( p => p.Types ).ValidateOutboundReferences( t => new TheValidator() );
     }
 }
 

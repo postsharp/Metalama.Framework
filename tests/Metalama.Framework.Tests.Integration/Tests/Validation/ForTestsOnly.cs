@@ -16,14 +16,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
 
         public void BuildAspect( IAspectBuilder<IDeclaration> builder )
         {
-            builder.Outbound.ValidateOutboundReferences( ValidateReference, ReferenceGranularity.Declaration, ReferenceKinds.All );
+            builder.Outbound.ValidateOutboundReferences( ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
-        private void ValidateReference(  ReferenceValidationContext context )
+        private void ValidateReference( ReferenceValidationContext context )
         {
-            if (!context.ReferencingType.Namespace.Name.EndsWith( ".Tests" ))
+            if (!context.Referencing.Namespace.Name.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _error.WithArguments( context.ReferencedDeclaration ) );
+                context.Diagnostics.Report( _error.WithArguments( context.Referenced.ParameterOrAttribute ) );
             }
         }
 

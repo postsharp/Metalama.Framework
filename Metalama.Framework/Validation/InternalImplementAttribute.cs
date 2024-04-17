@@ -23,11 +23,11 @@ namespace Metalama.Framework.Validation
 
         private static void Validate( ReferenceValidationContext context )
         {
-            if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
+            if ( context.Referencing.Assembly != context.Referenced.Assembly )
             {
                 context.Diagnostics.Report(
                     r => FrameworkDiagnosticDescriptors.InternalImplementConstraint.WithArguments(
-                        (context.ReferencedDeclaration, (INamedType) r.ReferencingDeclaration) ) );
+                        (context.Referenced.ParameterOrAttribute, (INamedType) r.ReferencingDeclaration) ) );
             }
         }
     }

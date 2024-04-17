@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Validation.PropertySetter
         {
             builder
                 .Outbound
-                .ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All );
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
         private static void Validate( ReferenceValidationContext context )

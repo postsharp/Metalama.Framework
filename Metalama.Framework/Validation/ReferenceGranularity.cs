@@ -5,36 +5,46 @@ using System;
 
 namespace Metalama.Framework.Validation;
 
+/// <summary>
+/// Levels of granularity on which a validation can be performed. The order of enum values are from the coarsest to the finest level.
+/// The finer the granularity of a validator, the more resources it will consume.
+/// </summary>
 [CompileTime]
 public enum ReferenceGranularity
 {
+    /// <summary>
+    /// Sets the validator granularity to the level of whole compilation.
+    /// </summary>
     Compilation,
+
+    /// <summary>
+    /// Sets the validator granularity to the level of namespaces (possibly the global namespace).
+    /// </summary>
     Namespace,
 
     /// <summary>
-    /// Sets the validator granularity to the topmost type (e.g. <c>class</c>, <c>struct</c>, ... but not a nested type).
+    /// Sets the validator granularity to the  level of top-level types, i.e. the types  directly belonging to the namespace, as opposed to a nested type.
+    /// </summary>
+    TopLevelType,
+
+    /// <summary>
+    /// Sets the validator granularity to the level of types, possibly nested types.
     /// </summary>
     Type,
 
     /// <summary>
-    /// Sets the validator granularity to the method, field, event, constructor, ...
+    /// Sets the validator granularity to the level of methods, fields, events, or constructors.
     /// </summary>
     Member,
 
     /// <summary>
-    /// Sets the validator granularity to the deepest declaration (parameter, type parameter).
+    /// Sets the validator granularity to the level of parameters, type parameters, custom attributes. 
     /// </summary>
-    Declaration,
+    ParameterOrAttribute,
 
     /// <summary>
-    /// 
+    /// Sets the validator granularity to the level of syntax nodes.
     /// </summary> 
     [Obsolete]
     SyntaxNode
-}
-
-[CompileTime]
-public static class ReferenceGranularityExtension
-{
-    public static ReferenceGranularity CombineWith( this ReferenceGranularity a, ReferenceGranularity b ) => a > b ? a : b;
 }

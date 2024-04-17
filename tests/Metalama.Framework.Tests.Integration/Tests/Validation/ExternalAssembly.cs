@@ -20,12 +20,12 @@ public class Fabric : ProjectFabric
     public override void AmendProject( IProjectAmender amender )
     {
         amender.SelectMany( compilation => compilation.ReferencedAssemblies.OfName( typeof(Regex).Assembly.GetName().Name! ) )
-            .ValidateOutboundReferences( Validate, ReferenceGranularity.Declaration, ReferenceKinds.All );
+            .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
     }
 
     private void Validate( ReferenceValidationContext context )
     {
-        context.Diagnostics.Report( _warning.WithArguments( ( (IAssembly)context.ReferencedDeclaration ).Identity.Name ) );
+        context.Diagnostics.Report( _warning.WithArguments( ( context.Referenced.Assembly.Identity.Name ) ) );
     }
 }
 
