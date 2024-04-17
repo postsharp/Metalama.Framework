@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Validation;
 
-internal class ReferenceValidationContextImpl : ReferenceValidationContext
+internal sealed class ReferenceValidationContextImpl : ReferenceValidationContext
 {
     private readonly ReferenceValidatorInstance _parent;
     private readonly IEnumerable<ReferencingSymbolInfo> _references;
@@ -31,6 +31,8 @@ internal class ReferenceValidationContextImpl : ReferenceValidationContext
         this._parent = parent;
         this._references = references;
     }
+
+    internal override ReferenceGranularity OutboundGranularity => this._parent.Granularity;
 
     [Memo]
     public override IEnumerable<ReferenceInstance> References

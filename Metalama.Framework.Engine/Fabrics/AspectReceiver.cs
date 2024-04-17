@@ -176,18 +176,21 @@ namespace Metalama.Framework.Engine.Fabrics
             return Task.CompletedTask;
         }
 
+#pragma warning disable CS0612 // Type or member is obsolete
+
         void IValidatorReceiver.ValidateReferences(
             ValidatorDelegate<ReferenceValidationContext> validateMethod,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes )
-            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.Declaration, referenceKinds, includeDerivedTypes );
+            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.SyntaxNode, referenceKinds, includeDerivedTypes );
 
         public void ValidateOutboundReferences(
             Action<ReferenceValidationContext> validateMethod,
             ReferenceGranularity granularity,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes = false )
-            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.Declaration, referenceKinds, includeDerivedTypes );
+            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.SyntaxNode, referenceKinds, includeDerivedTypes );
+#pragma warning restore CS0612 // Type or member is obsolete
 
         private void ValidateOutboundReferencesCore(
             Delegate validateMethod, // Intentionally weakly typed since we accept two signatures.

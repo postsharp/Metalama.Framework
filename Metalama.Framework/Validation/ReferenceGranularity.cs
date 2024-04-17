@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 
 namespace Metalama.Framework.Validation;
 
@@ -9,19 +10,31 @@ public enum ReferenceGranularity
 {
     Compilation,
     Namespace,
-    
+
     /// <summary>
-    /// The top most type (e.g. <c>class</c>, <c>struct</c>, ...).
+    /// Sets the validator granularity to the topmost type (e.g. <c>class</c>, <c>struct</c>, ... but not a nested type).
     /// </summary>
     Type,
-    
+
     /// <summary>
-    /// Method, field, event, constructor, ...
+    /// Sets the validator granularity to the method, field, event, constructor, ...
     /// </summary>
     Member,
-    
+
     /// <summary>
-    /// Parameter, type parameter
+    /// Sets the validator granularity to the deepest declaration (parameter, type parameter).
     /// </summary>
-    Declaration
+    Declaration,
+
+    /// <summary>
+    /// 
+    /// </summary> 
+    [Obsolete]
+    SyntaxNode
+}
+
+[CompileTime]
+public static class ReferenceGranularityExtension
+{
+    public static ReferenceGranularity CombineWith( this ReferenceGranularity a, ReferenceGranularity b ) => a > b ? a : b;
 }

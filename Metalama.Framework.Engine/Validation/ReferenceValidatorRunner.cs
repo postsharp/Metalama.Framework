@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -108,7 +109,7 @@ public class ReferenceValidatorRunner
                 static ISymbol? GetNamedType( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingType()?.GetTopmostContainingType();
 
                 static ISymbol? GetMember( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingMember();
-                
+
                 static ISymbol? GetDeclaration( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol;
 
                 // Choose the grouping factor according to the desired granularity.
@@ -130,30 +131,66 @@ public class ReferenceValidatorRunner
                     userCodeExecutionContext.Description = validator.Driver.GetUserCodeMemberInfo( validator );
 
                     // Select groups that have at least one relevant node for the validator. 
-                    var groupsForValidator =
+                    var groupedReferencesForValidator =
                         groupedReferences.Where( g => g.Any( r => r.Nodes.Any( n => (n.ReferenceKinds & validator.ReferenceKinds) != 0 ) ) );
 
-                    // Run the validation concurrently.
-                    await this._concurrentTaskRunner.RunConcurrentlyAsync(
-                        groupsForValidator,
-                        AnalyzeReferencingSymbols,
-                        cancellationToken );
-
-                    void AnalyzeReferencingSymbols( IGrouping<ISymbol?, ReferencingSymbolInfo> referenceGroup )
+#pragma warning disable CS0612 // Type or member is obsolete
+                    if ( validatorGroup.Key == ReferenceGranularity.SyntaxNode )
+#pragma warning restore CS0612 // Type or member is obsolete
                     {
-                        if ( referenceGroup.Key == null )
+                        // For backward compatibility, we have to flatten the group and do one call per syntax node.
+                        var flattenedReferences = groupedReferences.SelectMany<IGrouping<ISymbol?, ReferencingSymbolInfo>, (ISymbol?, ReferencingSymbolInfo)>(
+                            g => g.SelectMany<ReferencingSymbolInfo, (ISymbol?, ReferencingSymbolInfo)>(
+                                x => x.Nodes.SelectAsReadOnlyCollection<ReferencingNode, (ISymbol?, ReferencingSymbolInfo)>(
+                                    n => (g.Key, new ReferencingSymbolInfo( g.Key, [n] )) ) ) );
+
+                        // Run the validation concurrently.
+                        await this._concurrentTaskRunner.RunConcurrentlyAsync(
+                            flattenedReferences,
+                            AnalyzeReferencingSymbols,
+                            cancellationToken );
+
+                        void AnalyzeReferencingSymbols( (ISymbol? Symbol, ReferencingSymbolInfo Reference) reference )
                         {
-                            return;
+                            if ( reference.Symbol == null )
+                            {
+                                return;
+                            }
+
+                            var referencingDeclaration = initialCompilation.Factory.GetDeclaration( reference.Symbol );
+
+                            validator.Validate(
+                                referencingDeclaration,
+                                diagnosticAdder,
+                                this._userCodeInvoker,
+                                userCodeExecutionContext,
+                                new[] { reference.Reference } );
                         }
+                    }
+                    else
+                    {
+                        // Run the validation concurrently.
+                        await this._concurrentTaskRunner.RunConcurrentlyAsync(
+                            groupedReferencesForValidator,
+                            AnalyzeReferencingSymbols,
+                            cancellationToken );
 
-                        var referencingDeclaration = initialCompilation.Factory.GetDeclaration( referenceGroup.Key );
+                        void AnalyzeReferencingSymbols( IGrouping<ISymbol?, ReferencingSymbolInfo> referenceGroup )
+                        {
+                            if ( referenceGroup.Key == null )
+                            {
+                                return;
+                            }
 
-                        validator.Validate(
-                            referencingDeclaration,
-                            diagnosticAdder,
-                            this._userCodeInvoker,
-                            userCodeExecutionContext,
-                            referenceGroup );
+                            var referencingDeclaration = initialCompilation.Factory.GetDeclaration( referenceGroup.Key );
+
+                            validator.Validate(
+                                referencingDeclaration,
+                                diagnosticAdder,
+                                this._userCodeInvoker,
+                                userCodeExecutionContext,
+                                referenceGroup );
+                        }
                     }
                 }
             }
