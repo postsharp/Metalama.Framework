@@ -265,7 +265,12 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     private CompileTimeDomain CreateDomain()
 #if NET5_0_OR_GREATER
-        => new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
+    {
+        var domain = new UnloadableCompileTimeDomain( this.ServiceProvider.Global );
+        domain.UnloadTimeout += MemoryLeakHelper.CaptureDotMemoryDumpAndThrow;
+
+        return domain;
+    }
 #else
         => new( this.ServiceProvider.Global );
 #endif

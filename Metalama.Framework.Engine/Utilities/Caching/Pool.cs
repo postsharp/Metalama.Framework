@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 
 internal sealed class Pool<T>
 {
-    private readonly ConcurrentBag<T> _bag = new();
+    private readonly ConcurrentQueue<T> _bag = new();
     private readonly Func<T> _create;
 
     public Pool( Func<T> create )
@@ -17,7 +17,7 @@ internal sealed class Pool<T>
 
     public T Acquire()
     {
-        if ( this._bag.TryTake( out var value ) )
+        if ( this._bag.TryDequeue( out var value ) )
         {
             return value;
         }
@@ -29,6 +29,6 @@ internal sealed class Pool<T>
 
     public void Release( T value )
     {
-        this._bag.Add( value );
+        this._bag.Enqueue( value );
     }
 }
