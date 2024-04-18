@@ -24,15 +24,16 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         {
             builder
                 .Outbound
-                .ValidateReferences( Validate, ReferenceKinds.All );
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.Member, ReferenceKinds.All );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
             context.Diagnostics.Report(
-                _warning.WithArguments(
-                    ( context.ReferenceKinds, context.ReferencingDeclaration.DeclarationKind, context.ReferencingDeclaration,
-                      context.ReferencedDeclaration.DeclarationKind, context.ReferencedDeclaration, context.Source.Kind ) ) );
+                x =>
+                    _warning.WithArguments(
+                        ( x.ReferenceKind, x.ReferencingDeclaration.DeclarationKind, x.ReferencingDeclaration,
+                          context.Destination.Declaration.DeclarationKind, context.Destination.Declaration, x.Source.Kind ) ) );
         }
     }
 

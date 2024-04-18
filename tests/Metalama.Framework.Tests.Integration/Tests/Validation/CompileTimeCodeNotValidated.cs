@@ -18,15 +18,16 @@ namespace Metalama.Framework.Tests.Integration.Validation.CompileTimeCodeNotVali
 
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.SelectMany( compilation => compilation.Types ).ValidateReferences( Validate, ReferenceKinds.All );
+            amender.SelectMany( compilation => compilation.Types )
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
 
             // This reference is legal.
             _ = typeof(SomeClass);
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration ) ) );
+            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKind, x.ReferencingDeclaration ) ) );
         }
     }
 

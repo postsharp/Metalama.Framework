@@ -122,6 +122,7 @@ namespace Metalama.Framework.Engine.Fabrics
             ValidatorImplementation implementation,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes,
+            ReferenceGranularity granularity,
             OutboundActionCollectionContext context )
         {
             var description = MetalamaStringFormatter.Format(
@@ -134,7 +135,8 @@ namespace Metalama.Framework.Engine.Fabrics
                     implementation,
                     referenceKinds,
                     includeDerivedTypes,
-                    description ) );
+                    description,
+                    granularity ) );
 
             if ( validatedDeclaration is Method validatedMethod )
             {
@@ -148,7 +150,8 @@ namespace Metalama.Framework.Engine.Fabrics
                                 implementation,
                                 ReferenceKinds.Default,
                                 includeDerivedTypes,
-                                description ) );
+                                description,
+                                granularity ) );
 
                         break;
 
@@ -163,7 +166,8 @@ namespace Metalama.Framework.Engine.Fabrics
                                 implementation,
                                 ReferenceKinds.Assignment,
                                 includeDerivedTypes,
-                                description ) );
+                                description,
+                                granularity ) );
 
                         break;
                 }
@@ -172,10 +176,27 @@ namespace Metalama.Framework.Engine.Fabrics
             return Task.CompletedTask;
         }
 
-        public void ValidateReferences(
+#pragma warning disable CS0612 // Type or member is obsolete
+
+        void IValidatorReceiver.ValidateReferences(
             ValidatorDelegate<ReferenceValidationContext> validateMethod,
             ReferenceKinds referenceKinds,
             bool includeDerivedTypes )
+            => this.ValidateOutboundReferencesCore( validateMethod, ReferenceGranularity.SyntaxNode, referenceKinds, includeDerivedTypes );
+
+        public void ValidateOutboundReferences(
+            Action<ReferenceValidationContext> validateMethod,
+            ReferenceGranularity granularity,
+            ReferenceKinds referenceKinds,
+            bool includeDerivedTypes = false )
+            => this.ValidateOutboundReferencesCore( validateMethod, granularity, referenceKinds, includeDerivedTypes );
+#pragma warning restore CS0612 // Type or member is obsolete
+
+        private void ValidateOutboundReferencesCore(
+            Delegate validateMethod, // Intentionally weakly typed since we accept two signatures.
+            ReferenceGranularity granularity,
+            ReferenceKinds referenceKinds,
+            bool includeDerivedTypes = false )
         {
             var methodInfo = validateMethod.Method;
 
@@ -213,10 +234,14 @@ namespace Metalama.Framework.Engine.Fabrics
                             ValidatorImplementation.Create( source.Predecessor.Instance ),
                             referenceKinds,
                             includeDerivedTypes,
+                            granularity,
                             context2 ) ) ) );
         }
 
-        public void ValidateReferences( ReferenceValidator validator )
+        [Obsolete]
+        void IValidatorReceiver.ValidateReferences( ReferenceValidator validator ) => this.ValidateOutboundReferences( validator );
+
+        public void ValidateOutboundReferences( OutboundReferenceValidator validator )
         {
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
@@ -238,11 +263,15 @@ namespace Metalama.Framework.Engine.Fabrics
                             ValidatorImplementation.Create( validator ),
                             validator.ValidatedReferenceKinds,
                             validator.IncludeDerivedTypes,
+                            validator.Granularity,
                             c ) ) ) );
         }
 
-        public void ValidateReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
-            where TValidator : ReferenceValidator
+        void IValidatorReceiver<TDeclaration>.ValidateOutboundReferences<TValidator>( Func<TDeclaration, TValidator> getValidator )
+            => this.ValidateOutboundReferences( ( declaration, _ ) => getValidator( declaration ) );
+
+        public void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> getValidator )
+            where TValidator : OutboundReferenceValidator
         {
             var userCodeInvoker = this.Parent.UserCodeInvoker;
             var executionContext = UserCodeExecutionContext.Current;
@@ -268,6 +297,7 @@ namespace Metalama.Framework.Engine.Fabrics
                                 ValidatorImplementation.Create( validator ),
                                 validator.ValidatedReferenceKinds,
                                 validator.IncludeDerivedTypes,
+                                validator.Granularity,
                                 c );
                         } ) ) );
         }
@@ -383,7 +413,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             new DeclarationSelectionContext(
                                 (CompilationModel?) compilation ?? UserCodeExecutionContext.Current.Compilation.AssertNotNull(),
                                 CancellationToken.None ),
-                            ( declaration, tag, arg3 ) =>
+                            ( declaration, _, _ ) =>
                             {
                                 bag.Enqueue( declaration );
 
@@ -482,7 +512,7 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         void IValidatorReceiver<TDeclaration>.ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
-            => this.ValidateReferences( ( declaration, _ ) => validator( declaration ) );
+            => this.ValidateOutboundReferences( ( declaration, _ ) => validator( declaration ) );
 
         void IValidatorReceiver<TDeclaration>.ReportDiagnostic( Func<TDeclaration, IDiagnostic> diagnostic )
             => this.ReportDiagnostic( ( declaration, _ ) => diagnostic( declaration ) );

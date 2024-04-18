@@ -6,7 +6,7 @@ using Metalama.Framework.Diagnostics;
 namespace Metalama.Framework.Code;
 
 /// <summary>
-/// Represents a syntax node in source code. 
+/// Represents a syntax node in source code. Using <c>Metalama.Framework.Sdk</c> you can use <c>ToSyntaxNodeOrToken</c> to convert it to a Roslyn object.
 /// </summary>
 [CompileTime]
 public readonly struct SourceReference
@@ -23,7 +23,7 @@ public readonly struct SourceReference
     /// Gets the Roslyn <c>SyntaxNode</c>, <c>SyntaxToken</c>.
     /// This property can be used by SDK-based plugins. 
     /// </summary>
-    public object NodeOrToken { get; }
+    internal object NodeOrToken { get; }
 
     /// <summary>
     /// Gets the <c>SyntaxKind</c> of the node or token.

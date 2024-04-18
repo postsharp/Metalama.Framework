@@ -78,11 +78,15 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Element type of an array.
         /// </summary>
-        ArrayType = 1 << 12,
+        ArrayElementType = 1 << 12,
+
+        [Obsolete( "Renamed to ArrayElementType." )]
+        ArrayType = ArrayElementType,
 
         /// <summary>
         /// Nullable type.
         /// </summary>
+        [Obsolete( "No longer detected." )]
         NullableType = 1 << 13,
 
         /// <summary>
@@ -93,12 +97,16 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Type of a <c>ref</c>.
         /// </summary>
+        [Obsolete( "No longer detected." )]
         RefType = 1 << 15,
+
+        [Obsolete( "Renamed to TypleElementType." )]
+        TupleType = TupleElementType,
 
         /// <summary>
         /// Type of a tuple element.
         /// </summary>
-        TupleType = 1 << 16,
+        TupleElementType = 1 << 16,
 
         /// <summary>
         /// Invocation of a method or delegate.

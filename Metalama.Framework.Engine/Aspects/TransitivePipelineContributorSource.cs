@@ -169,7 +169,8 @@ internal sealed class TransitivePipelineContributorSource : IAspectSource, IVali
                         ValidatorImplementation.Create( validator.Object, validator.State ),
                         validator.ReferenceKinds,
                         validator.IncludeDerivedTypes,
-                        validator.DiagnosticSourceDescription ) );
+                        validator.DiagnosticSourceDescription,
+                        validator.Granularity ) );
             }
         }
 

@@ -25,25 +25,37 @@ public interface IValidatorReceiver
     /// <param name="validateMethod"></param>
     void Validate( ValidatorDelegate<DeclarationValidationContext> validateMethod );
 
-    /// <summary>
-    /// Registers a reference validator, provided as a delegate. The reference validator will be invoked to validate references to any declaration in the
-    /// current set. This method must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>. Only source code references are validated.
-    /// References added by aspects are ignored by design.
-    /// </summary>
-    /// <param name="validateMethod"></param>
-    /// <param name="referenceKinds">Kinds of references that this method is interested to analyze. By default, all references are analyzed.</param>
-    /// <param name="includeDerivedTypes"></param>
+    [Obsolete( "Use ValidateOutboundReferences." )]
     void ValidateReferences(
         ValidatorDelegate<ReferenceValidationContext> validateMethod,
         ReferenceKinds referenceKinds = ReferenceKinds.All,
         bool includeDerivedTypes = false );
 
     /// <summary>
+    /// Registers a reference validator, provided as a delegate. The reference validator will be invoked to validate references to any declaration in the
+    /// current set. This method must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>. Only source code references are validated.
+    /// References added by aspects are ignored by design.
+    /// </summary>
+    /// <param name="validateMethod">A delegate to a method of a fabric, aspect or validator class.</param>
+    /// <param name="granularity">The level of declarations at which the analysis should be performed. For instance, if <paramref name="validateMethod"/>
+    /// returns the same result for all references in the same namespace, <see cref="ReferenceGranularity.Namespace"/> should be used.</param>
+    /// <param name="referenceKinds">Kinds of references that this method is interested to analyze. By default, all references are analyzed.</param>
+    /// <param name="includeDerivedTypes">Indicates whether references to types derived from the current type (if relevant) should also be validated.</param>
+    void ValidateOutboundReferences(
+        Action<ReferenceValidationContext> validateMethod,
+        ReferenceGranularity granularity,
+        ReferenceKinds referenceKinds = ReferenceKinds.All,
+        bool includeDerivedTypes = false );
+
+    [Obsolete( "Use ValidateOutboundReferences." )]
+    void ValidateReferences( ReferenceValidator validator );
+
+    /// <summary>
     /// Registers a reference validator, provided as an instance of the <see cref="ReferenceValidator"/> abstract class. The reference validator  will be
     /// invoked to validate references to any declaration in the current set. Only source code references are validated.
     /// References added by aspects are ignored by design.
     /// </summary>
-    void ValidateReferences( ReferenceValidator validator );
+    void ValidateOutboundReferences( OutboundReferenceValidator validator );
 }
 
 /// <summary>
@@ -72,13 +84,17 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </summary>
     IRef<IDeclaration> OriginatingDeclaration { get; }
 
+    [Obsolete( "Use ValidateOutboundReferences." )]
+    void ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
+        where TValidator : ReferenceValidator;
+
     /// <summary>
     /// Registers a reference validator, provided by a delegate that provides an instance of the <see cref="ReferenceValidator"/> abstract class.
     /// The reference validator will be invoked to validate references to any declaration in the current set. Only source code references
     /// are validated. References added by aspects are ignored by design.
     /// </summary>
-    void ValidateReferences<TValidator>( Func<TDeclaration, TValidator> validator )
-        where TValidator : ReferenceValidator;
+    void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TValidator> validator )
+        where TValidator : OutboundReferenceValidator;
 
     /// <summary>
     /// Reports a diagnostic for each declaration selected by the the current object.
@@ -170,8 +186,8 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// The reference validator will be invoked to validate references to any declaration in the current set. Only source code references
     /// are validated. References added by aspects are ignored by design.
     /// </summary>
-    void ValidateReferences<TValidator>( Func<TDeclaration, TTag, TValidator> validator )
-        where TValidator : ReferenceValidator;
+    void ValidateOutboundReferences<TValidator>( Func<TDeclaration, TTag, TValidator> validator )
+        where TValidator : OutboundReferenceValidator;
 
     /// <summary>
     /// Reports a diagnostic for each declaration selected by the the current object.

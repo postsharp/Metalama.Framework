@@ -412,7 +412,8 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                     validator.IncludeDerivedTypes,
                     validator.Driver,
                     validator.Implementation,
-                    validator.DiagnosticSourceDescription );
+                    validator.DiagnosticSourceDescription,
+                    validator.Granularity );
 
                 if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {
