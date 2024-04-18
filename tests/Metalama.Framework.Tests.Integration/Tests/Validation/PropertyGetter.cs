@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Validation.PropertyGetter
         private static void Validate( ReferenceValidationContext context )
         {
             Debugger.Break();
-            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKinds, x.ReferencingDeclaration, x.Source.Kind ) ) );
+            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKind, x.ReferencingDeclaration, x.Source.Kind ) ) );
         }
     }
 

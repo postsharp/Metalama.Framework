@@ -5,4 +5,4 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public record struct ReferencingNode( SyntaxNodeOrToken Syntax, ReferenceKinds ReferenceKinds );
+public record struct ReferencingNode( SyntaxNodeOrToken Syntax, ReferenceKinds ReferenceKind );

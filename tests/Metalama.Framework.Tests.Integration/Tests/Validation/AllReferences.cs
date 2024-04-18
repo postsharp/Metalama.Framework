@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             context.Diagnostics.Report(
                 x =>
                     _warning.WithArguments(
-                        ( x.ReferenceKinds, x.ReferencingDeclaration.DeclarationKind, x.ReferencingDeclaration,
+                        ( x.ReferenceKind, x.ReferencingDeclaration.DeclarationKind, x.ReferencingDeclaration,
                           context.Referenced.ParameterOrAttribute.DeclarationKind, context.Referenced.ParameterOrAttribute, x.Source.Kind ) ) );
         }
     }

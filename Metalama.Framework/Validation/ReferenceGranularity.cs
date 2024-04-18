@@ -10,7 +10,7 @@ namespace Metalama.Framework.Validation;
 /// The finer the granularity of a validator, the more resources it will consume.
 /// </summary>
 [CompileTime]
-public enum ReferenceGranularity
+public enum ReferenceGranularity : byte
 {
     /// <summary>
     /// Sets the validator granularity to the level of whole compilation.

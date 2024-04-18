@@ -21,16 +21,17 @@ namespace Metalama.Framework.Validation
     public abstract class ReferenceValidationContext
     {
         private readonly IDiagnosticSink _diagnosticSink;
-        private readonly IDeclaration _referencedDeclaration;
-        private readonly IDeclaration _referencingDeclaration;
+        private ReferenceEnd _referencedEnd;
+        private ReferenceEnd _referencingEnd;
 
-        internal abstract ReferenceGranularity OutboundGranularity { get; }
-
+        /// <summary>
+        /// Gets the list of individual references that are being collectively analyzed and grouped by granularity.
+        /// </summary>
         public abstract IEnumerable<ReferenceInstance> References { get; }
 
         internal abstract IDiagnosticSource DiagnosticSource { get; }
 
-        internal ICompilation Compilation => this._referencedDeclaration.Compilation;
+        internal ICompilation Compilation => this._referencedEnd.Declaration.Compilation;
 
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
@@ -38,9 +39,15 @@ namespace Metalama.Framework.Validation
         /// </summary>
         public IAspectState? AspectState { get; }
 
-        public ReferenceEnd Referenced => new( this._referencedDeclaration, ReferenceGranularity.ParameterOrAttribute );
+        /// <summary>
+        /// Gets information about the referenced declaration.
+        /// </summary>
+        public ref ReferenceEnd Referenced => ref this._referencedEnd;
 
-        public ReferenceEnd Referencing => new( this._referencingDeclaration, this.OutboundGranularity );
+        /// <summary>
+        /// Gets information about the referencing declaration, i.e. the declaration containing the reference.
+        /// </summary>
+        public ref ReferenceEnd Referencing => ref this._referencingEnd;
 
         [Obsolete( "Use the Referenced property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
         public IDeclaration ReferencedDeclaration => this.Referenced.ParameterOrAttribute;
@@ -66,6 +73,9 @@ namespace Metalama.Framework.Validation
         [Obsolete( "Use References to get all references, then ReferenceInstance.Source." )]
         public SourceReference Syntax => this.Source;
 
+        /// <summary>
+        /// Gets an object that allows to report diagnostics to all reference instances at one.
+        /// </summary>
         public ReferenceValidationDiagnosticSink Diagnostics => new( this._diagnosticSink, this );
 
         internal abstract ISourceReferenceImpl SourceReferenceImpl { get; }
@@ -73,22 +83,30 @@ namespace Metalama.Framework.Validation
         internal ReferenceValidationContext(
             IDeclaration referencedDeclaration,
             IDeclaration referencingDeclaration,
+            ReferenceGranularity outboundGranularity,
             IAspectState? aspectState,
             IDiagnosticSink diagnosticSink )
         {
             this.AspectState = aspectState;
             this._diagnosticSink = diagnosticSink;
-            this._referencedDeclaration = referencedDeclaration;
-            this._referencingDeclaration = referencingDeclaration;
+            this._referencedEnd = new ReferenceEnd( referencedDeclaration, GetInboundGranularity( referencedDeclaration.DeclarationKind ) );
+            this._referencingEnd = new ReferenceEnd( referencingDeclaration, outboundGranularity );
         }
 
-        public abstract IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance );
+        private static ReferenceGranularity GetInboundGranularity( DeclarationKind kind )
+            => kind switch
+            {
+                DeclarationKind.Constructor or DeclarationKind.Event or DeclarationKind.Method or DeclarationKind.Field or DeclarationKind.Finalizer
+                    or DeclarationKind.Operator or DeclarationKind.Property => ReferenceGranularity.Member,
+                DeclarationKind.Compilation => ReferenceGranularity.Compilation,
+                DeclarationKind.Namespace => ReferenceGranularity.Namespace,
+                DeclarationKind.NamedType => ReferenceGranularity.Type,
+                DeclarationKind.Parameter or DeclarationKind.TypeParameter or DeclarationKind.Attribute => ReferenceGranularity.ParameterOrAttribute,
+                _ => throw new ArgumentOutOfRangeException( nameof(kind), $"Unexpected kind: '{kind}'" )
+            };
 
-        public abstract IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance );
+        internal abstract IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance );
 
-        internal ReferenceGranularity GetGranularity( ReferenceDirection direction )
-        {
-            throw new NotImplementedException();
-        }
+        internal abstract IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance );
     }
 }

@@ -10,8 +10,15 @@ namespace Metalama.Framework.Validation;
 
 [CompileTime]
 [PublicAPI]
-public readonly struct ReferenceEnd
+public struct ReferenceEnd
 {
+    // Caching fields. This struct is designed as a fatty one, living in its parent class and should never be copied to the stack.
+    private IDeclaration? _parameterOrAttribute;
+    private INamedType? _type;
+    private INamedType? _topLevelType;
+    private INamespace? _namespace;
+    private IMember? _member;
+
     /// <summary>
     /// Gets the declaration that was analyzed, whose kind corresponds to the <see cref="Granularity"/> of the analysis
     /// for this end of the reference.
@@ -22,36 +29,36 @@ public readonly struct ReferenceEnd
     /// Gets the granularity at which the analysis was performed for this end of the reference.
     /// </summary>
     public ReferenceGranularity Granularity { get; }
-
+    
     /// <summary>
     /// Gets the <see cref="IParameter"/>, <see cref="ITypeParameter"/> or <see cref="IAttribute"/> for which the analysis was performed,
     /// or throw an exception if the analysis <see cref="Granularity"/> was coarser than <see cref="ReferenceGranularity.ParameterOrAttribute"/>.
     /// </summary>
-    public IDeclaration ParameterOrAttribute => this.GetDeclarationOfGranularity( ReferenceGranularity.ParameterOrAttribute );
+    public IDeclaration ParameterOrAttribute => this._parameterOrAttribute ??= this.GetDeclarationOfGranularity( ReferenceGranularity.ParameterOrAttribute );
 
     /// <summary>
     /// Gets the closest <see cref="INamedType"/> of the declaration for the analysis was performed, 
     /// or throw an exception if the analysis <see cref="Granularity"/> was coarser than <see cref="ReferenceGranularity.Type"/>.
     /// </summary>
-    public INamedType Type => (INamedType) this.GetDeclarationOfGranularity( ReferenceGranularity.Type );
+    public INamedType Type => this._type ??= (INamedType) this.GetDeclarationOfGranularity( ReferenceGranularity.Type );
 
     /// <summary>
     /// Gets the top-level <see cref="INamedType"/> of the declaration for the analysis was performed, 
     /// or throw an exception if the analysis <see cref="Granularity"/> was coarser than <see cref="ReferenceGranularity.TopLevelType"/>.
     /// </summary>
-    public INamedType TopLevelType => (INamedType) this.GetDeclarationOfGranularity( ReferenceGranularity.TopLevelType );
+    public INamedType TopLevelType => this._topLevelType ??= (INamedType) this.GetDeclarationOfGranularity( ReferenceGranularity.TopLevelType );
 
     /// <summary>
     /// Gets the <see cref="INamespace"/> of the declaration for the analysis was performed, 
     /// or throw an exception if the analysis <see cref="Granularity"/> was coarser than <see cref="ReferenceGranularity.Namespace"/>.
     /// </summary>
-    public INamespace Namespace => (INamespace) this.GetDeclarationOfGranularity( ReferenceGranularity.Namespace );
+    public INamespace Namespace => this._namespace ??= (INamespace) this.GetDeclarationOfGranularity( ReferenceGranularity.Namespace );
 
     /// <summary>
     /// Gets the <see cref="IMember"/> of the declaration for the analysis was performed, 
     /// or throw an exception if the analysis <see cref="Granularity"/> was coarser than <see cref="ReferenceGranularity.Member"/>.
     /// </summary>
-    public IMember Member => (IMember) this.GetDeclarationOfGranularity( ReferenceGranularity.Member );
+    public IMember Member => this._member ??= (IMember) this.GetDeclarationOfGranularity( ReferenceGranularity.Member );
 
     /// <summary>
     /// Gets the <see cref="IAssembly"/> (or <see cref="ICompilation"/>) for which the analysis was performed.

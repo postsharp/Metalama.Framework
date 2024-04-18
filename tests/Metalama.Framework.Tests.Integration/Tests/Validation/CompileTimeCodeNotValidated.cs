@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.CompileTimeCodeNotVali
 
         private static void Validate( ReferenceValidationContext context )
         {
-            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKinds, x.ReferencingDeclaration ) ) );
+            context.Diagnostics.Report( x => _warning.WithArguments( ( x.ReferenceKind, x.ReferencingDeclaration ) ) );
         }
     }
 

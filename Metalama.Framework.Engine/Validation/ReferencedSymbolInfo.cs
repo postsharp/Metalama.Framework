@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 public sealed class ReferencedSymbolInfo
 {
-    private ConcurrentDictionary<ISymbol, List<ReferencingNode>>? _explicitReferences;
+    private ConcurrentDictionary<ISymbol, ReferencingNodeList>? _explicitReferences;
     private ConcurrentBag<ReferencedSymbolChild>? _children;
 
     public ISymbol ReferencedSymbol { get; }
@@ -31,7 +31,7 @@ public sealed class ReferencedSymbolInfo
 
     internal void AddReference( ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKinds )
     {
-        LazyInitializer.EnsureInitialized( ref this._explicitReferences, static () => new ConcurrentDictionary<ISymbol, List<ReferencingNode>>() );
+        LazyInitializer.EnsureInitialized( ref this._explicitReferences, static () => new ConcurrentDictionary<ISymbol, ReferencingNodeList>() );
 
         var nodes = this._explicitReferences.GetOrAddNew( referencingSymbol );
 

@@ -135,7 +135,7 @@ public class ReferenceValidatorRunner
 
                     // Select groups that have at least one relevant node for the validator. 
                     var groupedReferencesForValidator =
-                        groupedReferences.Where( g => g.Any( r => r.Nodes.Any( n => (n.ReferenceKinds & validator.ReferenceKinds) != 0 ) ) );
+                        groupedReferences.Where( g => g.Any( r => (r.Nodes.ReferenceKinds & validator.ReferenceKinds) != 0 ) );
 
 #pragma warning disable CS0612 // Type or member is obsolete
                     if ( validatorGroup.Key == ReferenceGranularity.SyntaxNode )

@@ -26,34 +26,32 @@ internal sealed class ReferenceValidationContextImpl : ReferenceValidationContex
         IDeclaration referencingDeclaration,
         IAspectState? aspectState,
         IDiagnosticSink diagnosticSink,
-        IEnumerable<ReferencingSymbolInfo> references ) : base( referencedDeclaration, referencingDeclaration, aspectState, diagnosticSink )
+        IEnumerable<ReferencingSymbolInfo> references ) : base( referencedDeclaration, referencingDeclaration, parent.Granularity, aspectState, diagnosticSink )
     {
         this._parent = parent;
         this._references = references;
     }
 
-    internal override ReferenceGranularity OutboundGranularity => this._parent.Granularity;
-
     [Memo]
     public override IEnumerable<ReferenceInstance> References
         => this._references.SelectMany(
                 r => r.Nodes
-                    .Where( n => (n.ReferenceKinds & this._parent.ReferenceKinds) != 0 )
-                    .Select( n => new ReferenceInstance( this, (object?) n.Syntax.AsNode() ?? n.Syntax.AsToken(), r.ReferencingSymbol, n.ReferenceKinds ) ) )
+                    .Where( n => (n.ReferenceKind & this._parent.ReferenceKinds) != 0 )
+                    .Select( n => new ReferenceInstance( this, (object?) n.Syntax.AsNode() ?? n.Syntax.AsToken(), r.ReferencingSymbol, n.ReferenceKind ) ) )
             .Cache();
 
     internal override IDiagnosticSource DiagnosticSource => this._parent;
 
     [Memo]
     [Obsolete]
-    public override ReferenceKinds ReferenceKinds => this.References.First().ReferenceKinds;
+    public override ReferenceKinds ReferenceKinds => this.References.First().ReferenceKind;
 
     internal override ISourceReferenceImpl SourceReferenceImpl => CodeModel.SourceReferenceImpl.Instance;
 
-    public override IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance )
+    internal override IDeclaration ResolveDeclaration( ReferenceInstance referenceInstance )
         => this.Compilation.GetCompilationModel().Factory.GetDeclaration( (ISymbol) referenceInstance.Symbol );
 
-    public override IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance )
+    internal override IDiagnosticLocation? ResolveLocation( ReferenceInstance referenceInstance )
         => referenceInstance.NodeOrToken switch
         {
             SyntaxNode node => node.GetDiagnosticLocation().ToDiagnosticLocation(),
