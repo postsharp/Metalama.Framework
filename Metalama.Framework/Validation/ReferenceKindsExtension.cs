@@ -17,6 +17,7 @@ public static class ReferenceKindsExtension
     public static string ToDisplayString( this ReferenceKinds kinds )
     {
         // We have some non-standard handling because of obsolete members.
+        // The behavior of Enum.ToString is random where there are synonyms.
 
         switch ( kinds )
         {
@@ -55,6 +56,7 @@ public static class ReferenceKindsExtension
         ConsiderKind( ReferenceKinds.Invocation );
         ConsiderKind( ReferenceKinds.Assignment );
         ConsiderKind( ReferenceKinds.OverrideMember );
+        ConsiderKind( ReferenceKinds.ArrayElementType );
         ConsiderKind( ReferenceKinds.Using );
         ConsiderKind( ReferenceKinds.NameOf );
         ConsiderKind( ReferenceKinds.BaseConstructor );
