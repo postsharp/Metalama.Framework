@@ -631,6 +631,16 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this.Visit( node.Members );
     }
 
+    public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
+    {
+        // We may have an indexer access, which will not be discovered in another node than this one.
+        var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
+        this.ReferenceSymbol( symbol, node.ArgumentList );
+
+        // Continue visiting the children.
+        base.VisitElementAccessExpression( node );
+    }
+
     private void VisitWithReferenceKinds( SyntaxNode? node, ReferenceKinds referenceKind )
     {
 #if DEBUG

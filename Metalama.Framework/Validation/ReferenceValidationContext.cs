@@ -112,7 +112,7 @@ namespace Metalama.Framework.Validation
             => kind switch
             {
                 DeclarationKind.Constructor or DeclarationKind.Event or DeclarationKind.Method or DeclarationKind.Field or DeclarationKind.Finalizer
-                    or DeclarationKind.Operator or DeclarationKind.Property => ReferenceGranularity.Member,
+                    or DeclarationKind.Operator or DeclarationKind.Property or DeclarationKind.Indexer => ReferenceGranularity.Member,
                 DeclarationKind.Compilation or DeclarationKind.AssemblyReference => ReferenceGranularity.Compilation,
                 DeclarationKind.Namespace => ReferenceGranularity.Namespace,
                 DeclarationKind.NamedType => ReferenceGranularity.Type,
