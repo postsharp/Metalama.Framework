@@ -49,6 +49,21 @@ namespace Metalama.Framework.Validation
         /// </summary>
         public ref ReferenceEnd Referencing => ref this._referencingEnd;
 
+        /// <summary>
+        /// Gets the <see cref="ReferenceEnd"/> according to a <see cref="ReferenceDirection"/>.
+        /// </summary>
+        public ref ReferenceEnd GetReferenceEnd( ReferenceDirection direction )
+        {
+            if ( direction == ReferenceDirection.Outbound )
+            {
+                return ref this._referencingEnd;
+            }
+            else
+            {
+                return ref this._referencedEnd;
+            }
+        }
+
         [Obsolete( "Use the Referenced property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
         public IDeclaration ReferencedDeclaration => this.Referenced.Declaration;
 
@@ -98,7 +113,7 @@ namespace Metalama.Framework.Validation
             {
                 DeclarationKind.Constructor or DeclarationKind.Event or DeclarationKind.Method or DeclarationKind.Field or DeclarationKind.Finalizer
                     or DeclarationKind.Operator or DeclarationKind.Property => ReferenceGranularity.Member,
-                DeclarationKind.Compilation => ReferenceGranularity.Compilation,
+                DeclarationKind.Compilation or DeclarationKind.AssemblyReference => ReferenceGranularity.Compilation,
                 DeclarationKind.Namespace => ReferenceGranularity.Namespace,
                 DeclarationKind.NamedType => ReferenceGranularity.Type,
                 DeclarationKind.Parameter or DeclarationKind.TypeParameter or DeclarationKind.Attribute => ReferenceGranularity.ParameterOrAttribute,

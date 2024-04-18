@@ -100,4 +100,6 @@ public struct ReferenceEnd
             _ => throw new ArgumentOutOfRangeException( nameof(requestedGranularity) )
         };
     }
+
+    public override string ToString() => this.Declaration.ToString();
 }
