@@ -12,7 +12,6 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -54,45 +53,33 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitIdentifierName( IdentifierNameSyntax node )
     {
-        var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
-
-        this.ReferenceSymbol( symbol, node );
+        this.IndexReference( node );
     }
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         this.Visit( node.Right );
+        this.IndexReference( node.Left, ReferenceKinds.Assignment );
 
-        var symbol = this._semanticModel!.GetSymbolInfo( node.Left ).Symbol;
-
-        if ( symbol != null )
+        switch ( node.Left )
         {
-            this.ReferenceSymbol( symbol, node.Left, ReferenceKinds.Assignment );
+            case MemberAccessExpressionSyntax memberAccess:
+                this.Visit( memberAccess.Expression );
 
-            switch ( node.Left )
-            {
-                case MemberAccessExpressionSyntax memberAccess:
-                    this.Visit( memberAccess.Expression );
+                break;
 
-                    break;
+            case ElementAccessExpressionSyntax elementAccess:
+                this.Visit( elementAccess.Expression );
+                this.Visit( elementAccess.ArgumentList );
 
-                case ElementAccessExpressionSyntax elementAccess:
-                    this.Visit( elementAccess.Expression );
-                    this.Visit( elementAccess.ArgumentList );
+                break;
 
-                    break;
+            case IdentifierNameSyntax:
+                // If we just have an identifier, we have nothing to visit.
+                break;
 
-                case IdentifierNameSyntax:
-                    // If we just have an identifier, we have nothing to visit.
-                    break;
-
-                // Other cases are possible but we don't implement them.
-                // For instance, we can assign the return value of a ref method.
-            }
-        }
-        else
-        {
-            this.VisitChildren( node.Left );
+            // Other cases are possible but we don't implement them.
+            // For instance, we can assign the return value of a ref method.
         }
     }
 
@@ -109,22 +96,6 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
 
         return false;
-    }
-
-    private void VisitChildren( SyntaxNode node )
-    {
-        if ( this.MustSkipChildren( node ) )
-        {
-            return;
-        }
-
-        foreach ( var nodeOrToken in node.ChildNodesAndTokens() )
-        {
-            if ( nodeOrToken.IsNode )
-            {
-                this.Visit( nodeOrToken.AsNode() );
-            }
-        }
     }
 
     public override void VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -326,9 +297,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         using ( this.EnterDefinition( node ) )
         {
-            var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ReferenceSymbol( symbol?.OverriddenMethod, node, ReferenceKinds.OverrideMember );
-            this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
+            this.IndexMember<IMethodSymbol>( node, m => m.OverriddenMethod, m => m.ExplicitInterfaceImplementations );
 
             this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
 
@@ -353,9 +322,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             this.Visit( node.AttributeLists );
 
-            var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ReferenceSymbol( symbol?.OverriddenProperty, node, ReferenceKinds.OverrideMember );
-            this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
+            this.IndexMember<IPropertySymbol>( node, m => m.OverriddenProperty, m => m.ExplicitInterfaceImplementations );
             this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
 
             this.Visit( node.AccessorList );
@@ -374,9 +341,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             this.Visit( node.AttributeLists );
 
-            var symbol = this._semanticModel.GetDeclaredSymbol( node );
-            this.ReferenceSymbol( symbol?.OverriddenEvent, node, ReferenceKinds.OverrideMember );
-            this.ValidateSymbols( node, symbol?.ExplicitInterfaceImplementations ?? default, ReferenceKinds.InterfaceMemberImplementation );
+            this.IndexMember<IEventSymbol>( node, m => m.OverriddenEvent, m => m.ExplicitInterfaceImplementations );
 
             this.VisitTypeReference( node.Type, ReferenceKinds.MemberType );
 
@@ -495,24 +460,27 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             this.Visit( node.AttributeLists );
 
             // Visit the base constructor.
-            ISymbol? baseConstructorSymbol;
-            SyntaxNodeOrToken baseConstructorNode;
-
             if ( node.Initializer != null )
             {
-                baseConstructorSymbol = this._semanticModel.GetSymbolInfo( node.Initializer ).Symbol;
-                baseConstructorNode = node.Initializer.ThisOrBaseKeyword;
+                this.IndexReference( node.Initializer, node.Initializer.ThisOrBaseKeyword, ReferenceKinds.BaseConstructor );
             }
             else
             {
-                var symbol = this._semanticModel.GetDeclaredSymbol( node );
-                baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
-                baseConstructorNode = node.Identifier;
-            }
+                // We need to find the base constructor.
+                if ( this._options.MustIndexReferenceKind( ReferenceKinds.BaseConstructor ) )
+                {
+                    var symbol = this._semanticModel.GetDeclaredSymbol( node );
+                    var baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
 
-            if ( baseConstructorSymbol != null )
-            {
-                this.ReferenceSymbol( baseConstructorSymbol, baseConstructorNode, ReferenceKinds.BaseConstructor );
+                    if ( baseConstructorSymbol != null )
+                    {
+                        this._referenceIndexBuilder.AddReference(
+                            baseConstructorSymbol,
+                            this._currentDeclaration.AssertNotNull(),
+                            node.Identifier,
+                            ReferenceKinds.BaseConstructor );
+                    }
+                }
             }
 
             // Visit parameters.
@@ -589,9 +557,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
-        var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
-
-        this.ReferenceSymbol( symbol, node, ReferenceKinds.ObjectCreation );
+        this.IndexReference( node, ReferenceKinds.ObjectCreation );
 
         this.Visit( node.ArgumentList );
         this.Visit( node.Initializer );
@@ -599,8 +565,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
     {
-        var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
-        this.ReferenceSymbol( symbol, node.NewKeyword, ReferenceKinds.ObjectCreation );
+        this.IndexReference( node, node.NewKeyword, ReferenceKinds.ObjectCreation );
 
         this.Visit( node.Initializer );
         this.Visit( node.ArgumentList );
@@ -634,8 +599,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
     {
         // We may have an indexer access, which will not be discovered in another node than this one.
-        var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
-        this.ReferenceSymbol( symbol, node.ArgumentList );
+        this.IndexReference( node, node.ArgumentList );
 
         // Continue visiting the children.
         base.VisitElementAccessExpression( node );
@@ -661,26 +625,94 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this._currentReferenceKinds = previousReferenceKinds;
     }
 
-    private void ValidateSymbols<T>( SyntaxNode node, ImmutableArray<T> symbols, ReferenceKinds referenceKinds )
-        where T : ISymbol
+    private void IndexReference(
+        SyntaxNode node,
+        ReferenceKinds referenceKinds = ReferenceKinds.Default )
+        => this.IndexReference( node, node, referenceKinds );
+
+    private void IndexReference(
+        SyntaxNode nodeForSymbol,
+        SyntaxNodeOrToken nodeForReference,
+        ReferenceKinds referenceKinds = ReferenceKinds.Default )
     {
-        if ( !symbols.IsDefaultOrEmpty )
+        if ( this._currentDeclaration == null )
         {
-            foreach ( var symbol in symbols )
+            return;
+        }
+
+        referenceKinds = this.GetEffectiveReferenceKind( referenceKinds );
+
+        if ( this._options.MustIndexReferenceKind( referenceKinds ) )
+        {
+            var symbol = this._semanticModel!.GetSymbolInfo( nodeForSymbol ).Symbol;
+
+            if ( !CanIndexSymbol( symbol ) )
             {
-                this.ReferenceSymbol( symbol, node, referenceKinds );
+                return;
+            }
+
+            this._referenceIndexBuilder.AddReference( symbol!, this._currentDeclaration, nodeForReference, referenceKinds );
+        }
+    }
+
+    private void IndexMember<T>(
+        MemberDeclarationSyntax node,
+        Func<T, T?> getOverridenMember,
+        Func<T, ImmutableArray<T>> getImplementedInterfaceMembers )
+        where T : class, ISymbol
+    {
+        if ( this._currentDeclaration == null )
+        {
+            return;
+        }
+
+        if ( this._options.MustIndexReferenceKind( ReferenceKinds.OverrideMember | ReferenceKinds.InterfaceMemberImplementation ) )
+        {
+            var symbol = (T?) this._currentDeclaration;
+
+            if ( symbol == null )
+            {
+                return;
+            }
+
+            if ( this._options.MustIndexReferenceKind( ReferenceKinds.OverrideMember ) )
+            {
+                var overridenMember = getOverridenMember( symbol );
+
+                if ( overridenMember != null )
+                {
+                    this._referenceIndexBuilder.AddReference( overridenMember, this._currentDeclaration, node, ReferenceKinds.OverrideMember );
+                }
+            }
+
+            if ( this._options.MustIndexReferenceKind( ReferenceKinds.InterfaceMemberImplementation ) )
+            {
+                var interfaceMembers = getImplementedInterfaceMembers( symbol );
+
+                foreach ( var member in interfaceMembers )
+                {
+                    this._referenceIndexBuilder.AddReference( member, this._currentDeclaration, node, ReferenceKinds.InterfaceMemberImplementation );
+                }
             }
         }
     }
 
-    private void ReferenceSymbol(
-        ISymbol? symbol,
-        SyntaxNodeOrToken node,
-        ReferenceKinds referenceKinds = ReferenceKinds.Default )
+    private ReferenceKinds GetEffectiveReferenceKind( ReferenceKinds referenceKinds )
     {
-        if ( symbol == null || this._currentDeclaration == null )
+        if ( referenceKinds is ReferenceKinds.Default or ReferenceKinds.None )
         {
-            return;
+            // This happens for standalone identifiers or for member access.
+            referenceKinds = this._currentReferenceKinds;
+        }
+
+        return referenceKinds;
+    }
+
+    private static bool CanIndexSymbol( ISymbol? symbol )
+    {
+        if ( symbol == null )
+        {
+            return false;
         }
 
         switch ( symbol.Kind )
@@ -699,21 +731,12 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SymbolKind.Property:
             case SymbolKind.TypeParameter:
             case SymbolKind.FunctionPointerType:
-                // Supported.
-                break;
+                return true;
 
             default:
                 // Not referenced.
-                return;
+                return false;
         }
-
-        if ( referenceKinds is ReferenceKinds.Default or ReferenceKinds.None )
-        {
-            // This happens for standalone identifiers or for member access.
-            referenceKinds = this._currentReferenceKinds;
-        }
-
-        this._referenceIndexBuilder.AddReference( symbol, this._currentDeclaration, node, referenceKinds );
     }
 
     private DeclarationContextCookie EnterDefinition( SyntaxNode node )
@@ -794,21 +817,17 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax) type;
-                    var symbol = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( genericType ).Symbol;
 
-                    if ( symbol != null )
+                    if ( genericType.Identifier.Text == nameof(Nullable<int>) )
                     {
-                        if ( symbol.SpecialType == SpecialType.System_Nullable_T )
-                        {
-                            // Process nullable types consitently as the ? operator.
-                            this.ReferenceSymbol( symbol.TypeArguments[0], genericType.TypeArgumentList.Arguments[0], kind );
+                        // Process nullable types consitently as the ? operator.
+                        this.IndexReference( genericType.TypeArgumentList.Arguments[0], kind );
 
-                            return;
-                        }
-                        else
-                        {
-                            this.ReferenceSymbol( symbol.ConstructedFrom, genericType, kind );
-                        }
+                        return;
+                    }
+                    else
+                    {
+                        this.IndexReference( genericType, kind );
                     }
 
                     foreach ( var arg in genericType.TypeArgumentList.Arguments )

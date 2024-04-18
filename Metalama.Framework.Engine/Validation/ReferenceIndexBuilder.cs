@@ -44,10 +44,13 @@ public sealed class ReferenceIndexBuilder
 
     internal void AddReference( ISymbol referencedSymbol, ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
     {
+        referencedSymbol = referencedSymbol.OriginalDefinition;
+        referencingSymbol = referencingSymbol.OriginalDefinition;
+
         CheckSymbolKind( referencedSymbol );
         CheckSymbolKind( referencingSymbol );
 
-        if ( !this._options.MustReferenceKind( referenceKind ) )
+        if ( !this._options.MustIndexReferenceKind( referenceKind ) )
         {
             return;
         }

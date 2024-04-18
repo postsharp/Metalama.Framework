@@ -88,7 +88,7 @@ public sealed class ReferenceIndexerOptions
 
     public static ReferenceIndexerOptions Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
 
-    public bool MustReferenceKind( ReferenceKinds kind ) => (this._allReferenceKinds & kind) != 0;
+    public bool MustIndexReferenceKind( ReferenceKinds kind ) => (this._allReferenceKinds & kind) != 0;
 
     public bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
 
