@@ -9,8 +9,8 @@ using System.Runtime.CompilerServices;
 namespace Metalama.Framework.Validation;
 
 /// <summary>
-/// Represents an end of a code reference. Code references have two ends: a referenced one (the <see crefReferenceDirectionnd.Outbound"/> end)
-/// and a referencing one (the <see crefReferenceDirectionnd.Inbound"/> end).
+/// Represents an end of a code reference. Code references have two ends: a referenced one (the <see cref="ReferenceDirection.Outbound"/> end)
+/// and a referencing one (the <see cref="ReferenceDirection.Inbound"/> end).
 /// </summary>
 [CompileTime]
 [PublicAPI]
