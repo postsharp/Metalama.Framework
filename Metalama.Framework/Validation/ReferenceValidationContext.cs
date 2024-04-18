@@ -50,13 +50,13 @@ namespace Metalama.Framework.Validation
         public ref ReferenceEnd Referencing => ref this._referencingEnd;
 
         [Obsolete( "Use the Referenced property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
-        public IDeclaration ReferencedDeclaration => this.Referenced.ParameterOrAttribute;
+        public IDeclaration ReferencedDeclaration => this.Referenced.Declaration;
 
         [Obsolete( "Use the Referenced property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
         public INamedType ReferencedType => this.Referenced.Type;
 
         [Obsolete( "Use the Referencing property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
-        public IDeclaration ReferencingDeclaration => this.Referencing.ParameterOrAttribute;
+        public IDeclaration ReferencingDeclaration => this.Referencing.Declaration;
 
         [Obsolete( "Use the Referencing property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
         public INamedType ReferencingType => this.Referencing.Type;
