@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 
 namespace Metalama.Framework.Validation;
 
@@ -32,35 +33,35 @@ public static class ReferenceKindsExtension
         List<string> values = new();
         var consideredKinds = ReferenceKinds.None;
 
-        void ConsiderKind( ReferenceKinds kind )
+        void ConsiderKind( ReferenceKinds kind, string name )
         {
             if ( kinds.IsDefined( kind ) )
             {
-                values.Add( kind.ToString() );
+                values.Add( name );
                 consideredKinds |= kind;
             }
         }
 
-        ConsiderKind( ReferenceKinds.Default );
-        ConsiderKind( ReferenceKinds.BaseType );
-        ConsiderKind( ReferenceKinds.TypeArgument );
-        ConsiderKind( ReferenceKinds.TypeOf );
-        ConsiderKind( ReferenceKinds.ParameterType );
-        ConsiderKind( ReferenceKinds.TypeConstraint );
-        ConsiderKind( ReferenceKinds.ObjectCreation );
-        ConsiderKind( ReferenceKinds.MemberType );
-        ConsiderKind( ReferenceKinds.LocalVariableType );
-        ConsiderKind( ReferenceKinds.ReturnType );
-        ConsiderKind( ReferenceKinds.PointerType );
-        ConsiderKind( ReferenceKinds.TupleElementType );
-        ConsiderKind( ReferenceKinds.Invocation );
-        ConsiderKind( ReferenceKinds.Assignment );
-        ConsiderKind( ReferenceKinds.OverrideMember );
-        ConsiderKind( ReferenceKinds.ArrayElementType );
-        ConsiderKind( ReferenceKinds.Using );
-        ConsiderKind( ReferenceKinds.NameOf );
-        ConsiderKind( ReferenceKinds.BaseConstructor );
-        ConsiderKind( ReferenceKinds.AttributeType );
+        ConsiderKind( ReferenceKinds.Default, nameof(ReferenceKinds.Default) );
+        ConsiderKind( ReferenceKinds.BaseType, nameof(ReferenceKinds.BaseType) );
+        ConsiderKind( ReferenceKinds.TypeArgument, nameof(ReferenceKinds.TypeArgument) );
+        ConsiderKind( ReferenceKinds.TypeOf, nameof(ReferenceKinds.TypeOf) );
+        ConsiderKind( ReferenceKinds.ParameterType, nameof(ReferenceKinds.ParameterType) );
+        ConsiderKind( ReferenceKinds.TypeConstraint, nameof(ReferenceKinds.TypeConstraint) );
+        ConsiderKind( ReferenceKinds.ObjectCreation, nameof(ReferenceKinds.ObjectCreation) );
+        ConsiderKind( ReferenceKinds.MemberType, nameof(ReferenceKinds.MemberType) );
+        ConsiderKind( ReferenceKinds.LocalVariableType, nameof(ReferenceKinds.LocalVariableType) );
+        ConsiderKind( ReferenceKinds.ReturnType, nameof(ReferenceKinds.ReturnType) );
+        ConsiderKind( ReferenceKinds.PointerType, nameof(ReferenceKinds.PointerType) );
+        ConsiderKind( ReferenceKinds.TupleElementType, nameof(ReferenceKinds.TupleElementType) );
+        ConsiderKind( ReferenceKinds.Invocation, nameof(ReferenceKinds.Invocation) );
+        ConsiderKind( ReferenceKinds.Assignment, nameof(ReferenceKinds.Assignment) );
+        ConsiderKind( ReferenceKinds.OverrideMember, nameof(ReferenceKinds.OverrideMember) );
+        ConsiderKind( ReferenceKinds.ArrayElementType, nameof(ReferenceKinds.ArrayElementType) );
+        ConsiderKind( ReferenceKinds.Using, nameof(ReferenceKinds.Using) );
+        ConsiderKind( ReferenceKinds.NameOf, nameof(ReferenceKinds.NameOf) );
+        ConsiderKind( ReferenceKinds.BaseConstructor, nameof(ReferenceKinds.BaseConstructor) );
+        ConsiderKind( ReferenceKinds.AttributeType, nameof(ReferenceKinds.AttributeType) );
 
         if ( consideredKinds != kinds )
         {
