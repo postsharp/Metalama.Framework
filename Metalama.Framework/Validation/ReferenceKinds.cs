@@ -2,9 +2,69 @@
 
 using Metalama.Framework.Aspects;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Validation
 {
+    public static class ReferenceKindsExtension
+    {
+        public static string ToDisplayString( this ReferenceKinds kinds )
+        {
+            // We have some non-standard handling because of obsolete members.
+
+            if ( kinds == ReferenceKinds.All )
+            {
+                return "All";
+            }
+            else if ( kinds == ReferenceKinds.None )
+            {
+                return "None";
+            }
+
+            List<string> values = new();
+            var consideredKinds = ReferenceKinds.None;
+
+            void ConsiderKind( ReferenceKinds kind )
+            {
+                if ( kind.IsDefined( kind ) )
+                {
+                    values.Add( kind.ToString() );
+                    consideredKinds |= kind;
+                }
+            }
+
+            ConsiderKind( ReferenceKinds.Default );
+            ConsiderKind( ReferenceKinds.BaseType );
+            ConsiderKind( ReferenceKinds.TypeArgument );
+            ConsiderKind( ReferenceKinds.TypeOf );
+            ConsiderKind( ReferenceKinds.ParameterType );
+            ConsiderKind( ReferenceKinds.TypeConstraint );
+            ConsiderKind( ReferenceKinds.ObjectCreation );
+            ConsiderKind( ReferenceKinds.MemberType );
+            ConsiderKind( ReferenceKinds.LocalVariableType );
+            ConsiderKind( ReferenceKinds.ReturnType );
+            ConsiderKind( ReferenceKinds.ArrayElementType );
+            ConsiderKind( ReferenceKinds.PointerType );
+            ConsiderKind( ReferenceKinds.TupleElementType );
+            ConsiderKind( ReferenceKinds.Invocation );
+            ConsiderKind( ReferenceKinds.Assignment );
+            ConsiderKind( ReferenceKinds.OverrideMember );
+            ConsiderKind( ReferenceKinds.Using );
+            ConsiderKind( ReferenceKinds.NameOf );
+            ConsiderKind( ReferenceKinds.BaseConstructor );
+
+            if ( consideredKinds != kinds )
+            {
+                // If we forgot something, fallback to ToString.
+                return kinds.ToString();
+            }
+
+            return string.Join( " | ", values );
+        }
+
+        public static bool IsDefined( this ReferenceKinds kinds, ReferenceKinds kind ) => (kinds & kind) == kind;
+    }
+
     /// <summary>
     /// Enumerates all kinds of references.
     /// </summary>

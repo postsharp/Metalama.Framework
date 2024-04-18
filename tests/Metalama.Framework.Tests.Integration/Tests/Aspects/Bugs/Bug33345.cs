@@ -77,7 +77,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33345
         {
             if (!context.Referencing.Type.Is( context.Referenced.Type! ) && !context.Referencing.Namespace.FullName.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _warning.WithArguments( context.Referenced.ParameterOrAttribute ) );
+                context.Diagnostics.Report( _warning.WithArguments( context.Referenced.Declaration ) );
             }
         }
     }

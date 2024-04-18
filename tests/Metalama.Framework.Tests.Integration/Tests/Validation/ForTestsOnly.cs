@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
         {
             if (!context.Referencing.Namespace.Name.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _error.WithArguments( context.Referenced.ParameterOrAttribute ) );
+                context.Diagnostics.Report( _error.WithArguments( context.Referenced.Declaration ) );
             }
         }
 

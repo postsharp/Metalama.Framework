@@ -20,7 +20,7 @@ public class TheAspect : TypeAspect
 
     private void ValidateReference( ReferenceValidationContext context )
     {
-        if (!( (INamedType)context.Referenced.ParameterOrAttribute ).Enhancements().HasAspect<TheAspect>())
+        if (!( (INamedType)context.Referenced.Declaration ).Enhancements().HasAspect<TheAspect>())
         {
             throw new InvalidOperationException();
         }
