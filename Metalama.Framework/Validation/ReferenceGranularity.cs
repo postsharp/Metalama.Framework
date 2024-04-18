@@ -43,7 +43,8 @@ public enum ReferenceGranularity : byte
     ParameterOrAttribute,
 
     /// <summary>
-    /// Sets the validator granularity to the level of syntax nodes.
+    /// Sets the validator granularity to the level of syntax nodes. This level exists for backward compatibility. It should not be used,
+    /// as it has no benefit over the next finest level, only a performance cost.
     /// </summary> 
     [Obsolete]
     SyntaxNode

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using Metalama.Framework.Serialization;
 
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Validation;
 /// <summary>
 /// Abstract base class for validator of code references.
 /// </summary>
+[PublicAPI]
 public abstract class BaseReferenceValidator : ICompileTimeSerializable
 {
     internal BaseReferenceValidator() { }
@@ -38,7 +40,9 @@ public abstract class BaseReferenceValidator : ICompileTimeSerializable
     public abstract ReferenceGranularity Granularity { get; }
 
     /// <summary>
-    /// Gets the direction (<see cref="ReferenceDirection.Inbound"/> or <see cref="ReferenceDirection.Outbound"/>) of validated reference ends.
+    /// Gets the direction (<see cref="ReferenceDirection.Inbound"/> or <see cref="ReferenceDirection.Outbound"/>) of to the validated reference ends.
+    /// If the <see cref="Direction"/> is set to <see cref="ReferenceDirection.Outbound"/>, the validator must be added to
+    /// the inbound (i.e. referenced) declaration, and the <see cref="ValidateReferences"/> method will be called with references on the outbound (referencing) ends.
     /// </summary>
     public abstract ReferenceDirection Direction { get; }
 }

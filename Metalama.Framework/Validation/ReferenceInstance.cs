@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -34,6 +35,7 @@ public readonly struct ReferenceInstance
     /// <summary>
     /// Gets the location where diagnostics should be reported.
     /// </summary>
+    [PublicAPI]
     public IDiagnosticLocation? DiagnosticLocation => this._context.ResolveLocation( this );
 
     public SourceReference Source => new( this.NodeOrToken, this._context.SourceReferenceImpl );

@@ -8,6 +8,10 @@ using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Validation;
 
+/// <summary>
+/// Represents an end of a code reference. Code references have two ends: a referenced one (the <see crefReferenceDirectionnd.Outbound"/> end)
+/// and a referencing one (the <see crefReferenceDirectionnd.Inbound"/> end).
+/// </summary>
 [CompileTime]
 [PublicAPI]
 public struct ReferenceEnd
@@ -29,7 +33,7 @@ public struct ReferenceEnd
     /// Gets the granularity at which the analysis was performed for this end of the reference.
     /// </summary>
     public ReferenceGranularity Granularity { get; }
-    
+
     /// <summary>
     /// Gets the <see cref="IParameter"/>, <see cref="ITypeParameter"/> or <see cref="IAttribute"/> for which the analysis was performed,
     /// or throw an exception if the analysis <see cref="Granularity"/> was coarser than <see cref="ReferenceGranularity.ParameterOrAttribute"/>.
@@ -101,5 +105,5 @@ public struct ReferenceEnd
         };
     }
 
-    public override string ToString() => this.Declaration.ToString();
+    public override string ToString() => this.Declaration.ToString() ?? "null";
 }
