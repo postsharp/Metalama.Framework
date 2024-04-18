@@ -38,6 +38,9 @@ public readonly struct ReferenceInstance
     [PublicAPI]
     public IDiagnosticLocation? DiagnosticLocation => this._context.ResolveLocation( this );
 
+    /// <summary>
+    /// Gets a reference of the source code of this reference.
+    /// </summary>
     public SourceReference Source => new( this.NodeOrToken, this._context.SourceReferenceImpl );
 
     /// <summary>

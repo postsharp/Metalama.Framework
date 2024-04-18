@@ -31,7 +31,7 @@ public readonly struct ReferenceValidationDiagnosticSink
     }
 
     /// <summary>
-    /// Reports a diagnostic to the default location of the current <see cref="ScopedDiagnosticSink"/>..
+    /// Reports the same diagnostic to the all references in the current context.
     /// </summary>
     public void Report( IDiagnostic diagnostic )
     {
@@ -41,7 +41,12 @@ public readonly struct ReferenceValidationDiagnosticSink
         }
     }
 
-    public void Report( Func<ReferenceInstance, IDiagnostic?> getDiagnostic, Func<ReferenceInstance,IDiagnosticLocation?>? getLocation = null )
+    /// <summary>
+    /// Reports a different diagnostic for each reference in the current context. 
+    /// </summary>
+    /// <param name="getDiagnostic">A delegate returning a diagnostic or <c>null</c> if no diagnostic should be reported for the given reference.</param>
+    /// <param name="getLocation">An optional delegate returning the location of the diagnostic. If <c>null</c>, the default location is used.</param>
+    public void Report( Func<ReferenceInstance, IDiagnostic?> getDiagnostic, Func<ReferenceInstance, IDiagnosticLocation?>? getLocation = null )
     {
         foreach ( var scope in this._context.References )
         {
