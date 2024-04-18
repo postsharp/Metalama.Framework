@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceValidatorCollectionProperties : IReferenceIndexerOptions
+public sealed class ReferenceIndexerOptions
 {
     // Reference kinds that do not require descending into members.
 
@@ -24,11 +24,14 @@ public sealed class ReferenceValidatorCollectionProperties : IReferenceIndexerOp
     private readonly ReferenceKinds _kindsRequiringDescentIntoReferencedDeclaringType;
     private readonly ReferenceKinds _kindsRequiringDescentIntoReferencedNamespace;
     private readonly ReferenceKinds _kindsRequiringDescentIntoReferencedAssembly;
+    private readonly ReferenceKinds _allReferenceKinds;
 
-    public ReferenceValidatorCollectionProperties( IEnumerable<IReferenceValidatorProperties> validators )
+    public ReferenceIndexerOptions( IEnumerable<IReferenceValidatorProperties> validators )
     {
         foreach ( var validator in validators )
         {
+            this._allReferenceKinds |= validator.ReferenceKinds;
+
             if ( validator is { IncludeDerivedTypes: true, ValidatedDeclarationKind: DeclarationKind.NamedType } )
             {
                 this._kindsRequiringDescentIntoBaseTypes |= validator.ReferenceKinds;
@@ -65,23 +68,27 @@ public sealed class ReferenceValidatorCollectionProperties : IReferenceIndexerOp
         }
     }
 
-    public ReferenceValidatorCollectionProperties( IEnumerable<ReferenceValidatorCollectionProperties>? childCollectionProperties )
+    public ReferenceIndexerOptions( IEnumerable<ReferenceIndexerOptions>? childIndexerOptions )
     {
-        if ( childCollectionProperties != null )
+        if ( childIndexerOptions != null )
         {
-            foreach ( var childCollectionProperty in childCollectionProperties )
+            foreach ( var child in childIndexerOptions )
             {
-                this._mustDescendIntoImplementation |= childCollectionProperty._mustDescendIntoImplementation;
-                this._mustDescendIntoMembers |= childCollectionProperty._mustDescendIntoMembers;
-                this._kindsRequiringDescentIntoReferencedAssembly |= childCollectionProperty._kindsRequiringDescentIntoReferencedAssembly;
-                this._kindsRequiringDescentIntoReferencedNamespace |= childCollectionProperty._kindsRequiringDescentIntoReferencedNamespace;
-                this._kindsRequiringDescentIntoReferencedDeclaringType |= childCollectionProperty._kindsRequiringDescentIntoReferencedDeclaringType;
-                this._kindsRequiringDescentIntoBaseTypes |= childCollectionProperty._kindsRequiringDescentIntoBaseTypes;
+                this._allReferenceKinds |= child._allReferenceKinds;
+
+                this._mustDescendIntoImplementation |= child._mustDescendIntoImplementation;
+                this._mustDescendIntoMembers |= child._mustDescendIntoMembers;
+                this._kindsRequiringDescentIntoReferencedAssembly |= child._kindsRequiringDescentIntoReferencedAssembly;
+                this._kindsRequiringDescentIntoReferencedNamespace |= child._kindsRequiringDescentIntoReferencedNamespace;
+                this._kindsRequiringDescentIntoReferencedDeclaringType |= child._kindsRequiringDescentIntoReferencedDeclaringType;
+                this._kindsRequiringDescentIntoBaseTypes |= child._kindsRequiringDescentIntoBaseTypes;
             }
         }
     }
 
-    public static ReferenceValidatorCollectionProperties Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
+    public static ReferenceIndexerOptions Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
+
+    public bool MustReferenceKind( ReferenceKinds kind ) => (this._allReferenceKinds & kind) != 0;
 
     public bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
 

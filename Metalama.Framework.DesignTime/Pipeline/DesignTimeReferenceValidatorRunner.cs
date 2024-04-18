@@ -60,7 +60,7 @@ internal static class DesignTimeReferenceValidatorRunner
             this._compilationModel = compilationModel;
         }
 
-        public ReferenceValidatorCollectionProperties Properties => this._validators.Properties;
+        public ReferenceIndexerOptions Options => this._validators.Options;
 
         public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol )
             => this._validatorCache.GetOrAdd(

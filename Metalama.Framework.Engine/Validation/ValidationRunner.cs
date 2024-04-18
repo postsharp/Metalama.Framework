@@ -204,10 +204,10 @@ internal sealed class ValidationRunner
         public ValidatorProvider( ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> validatorsBySymbol )
         {
             this._validatorsBySymbol = validatorsBySymbol;
-            this.Properties = new ReferenceValidatorCollectionProperties( validatorsBySymbol.SelectMany( x => x ) );
+            this.Options = new ReferenceIndexerOptions( validatorsBySymbol.SelectMany( x => x ) );
         }
 
-        public ReferenceValidatorCollectionProperties Properties { get; }
+        public ReferenceIndexerOptions Options { get; }
 
         public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol ) => this._validatorsBySymbol[symbol];
     }

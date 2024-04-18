@@ -21,7 +21,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     private readonly CancellationToken _cancellationToken;
     private readonly ISymbolClassificationService _symbolClassifier;
     private readonly ReferenceIndexBuilder _referenceIndexBuilder;
-    private readonly IReferenceIndexerOptions _options;
+    private readonly ReferenceIndexerOptions _options;
 
     private SemanticModel? _semanticModel;
     private ISymbol? _currentDeclaration;
@@ -31,7 +31,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         ProjectServiceProvider serviceProvider,
         CancellationToken cancellationToken,
         ReferenceIndexBuilder referenceIndexBuilder,
-        IReferenceIndexerOptions options )
+        ReferenceIndexerOptions options )
     {
         // This class cannot run concurrently on many threads.
         this._cancellationToken = cancellationToken;

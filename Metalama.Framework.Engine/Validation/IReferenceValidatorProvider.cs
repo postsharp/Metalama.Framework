@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 public interface IReferenceValidatorProvider
 {
-    ReferenceValidatorCollectionProperties Properties { get; }
+    ReferenceIndexerOptions Options { get; }
 
     ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol );
 }

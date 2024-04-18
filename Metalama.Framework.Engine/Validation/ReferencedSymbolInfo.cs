@@ -29,7 +29,7 @@ public sealed class ReferencedSymbolInfo
         this._children.Enqueue( new ReferencedSymbolChild( child, kind ) );
     }
 
-    internal void AddReference( ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKinds )
+    internal void AddReference( ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
     {
         LazyInitializer.EnsureInitialized( ref this._explicitReferences, static () => new ConcurrentDictionary<ISymbol, ReferencingNodeList>() );
 
@@ -37,7 +37,7 @@ public sealed class ReferencedSymbolInfo
 
         lock ( nodes )
         {
-            nodes.Add( new ReferencingNode( node, referenceKinds ) );
+            nodes.Add( new ReferencingNode( node, referenceKind ) );
         }
     }
 

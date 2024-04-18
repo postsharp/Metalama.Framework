@@ -14,10 +14,10 @@ public sealed class ReferenceIndexBuilder
 {
     private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _references = new();
     private readonly ProjectServiceProvider _serviceProvider;
-    private readonly IReferenceIndexerOptions _options;
+    private readonly ReferenceIndexerOptions _options;
     private bool _frozen;
 
-    public ReferenceIndexBuilder( ProjectServiceProvider serviceProvider, IReferenceIndexerOptions options )
+    public ReferenceIndexBuilder( ProjectServiceProvider serviceProvider, ReferenceIndexerOptions options )
     {
         this._serviceProvider = serviceProvider;
         this._options = options;
@@ -42,14 +42,19 @@ public sealed class ReferenceIndexBuilder
         }
     }
 
-    internal void AddReference( ISymbol referencedSymbol, ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKinds )
+    internal void AddReference( ISymbol referencedSymbol, ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
     {
         CheckSymbolKind( referencedSymbol );
         CheckSymbolKind( referencingSymbol );
 
+        if ( !this._options.MustReferenceKind( referenceKind ) )
+        {
+            return;
+        }
+
         // Index the explicit reference.
         var referencedSymbolInfo = this._references.GetOrAdd( referencedSymbol, static s => new ReferencedSymbolInfo( s ) );
-        referencedSymbolInfo.AddReference( referencingSymbol, node, referenceKinds );
+        referencedSymbolInfo.AddReference( referencingSymbol, node, referenceKind );
 
         // Create indirect references (containing declarations, base types).
         this.AddToParents( referencedSymbolInfo );
