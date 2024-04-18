@@ -12,6 +12,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Validation;
 
@@ -55,9 +56,9 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         var symbol = this._semanticModel!.GetSymbolInfo( node ).Symbol;
 
-        this.ReferenceSymbol( symbol, node, ReferenceKinds.Default );
+        this.ReferenceSymbol( symbol, node );
     }
-    
+
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         this.Visit( node.Right );
@@ -385,19 +386,27 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitFieldDeclaration( FieldDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node.Declaration.Variables[0] ) )
+        for ( var index = 0; index < node.Declaration.Variables.Count; index++ )
         {
-            this.Visit( node.AttributeLists );
-            this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
-        }
+            var variable = node.Declaration.Variables[index];
 
-        foreach ( var field in node.Declaration.Variables )
-        {
-            if ( field.Initializer != null && this._options.MustDescendIntoImplementation() )
+            using ( this.EnterDefinition( variable ) )
             {
-                using ( this.EnterDefinition( field ) )
+                if ( index == 0 )
                 {
-                    this.Visit( field.Initializer );
+                    // Attributes must be visited a single time.
+                    this.Visit( node.AttributeLists );
+                }
+
+                // The type must be visited every time.
+                this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
+
+                if ( variable.Initializer != null && this._options.MustDescendIntoImplementation() )
+                {
+                    using ( this.EnterDefinition( variable ) )
+                    {
+                        this.Visit( variable.Initializer );
+                    }
                 }
             }
         }
@@ -405,19 +414,27 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node.Declaration.Variables[0] ) )
+        for ( var index = 0; index < node.Declaration.Variables.Count; index++ )
         {
-            this.Visit( node.AttributeLists );
-            this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
-        }
+            var variable = node.Declaration.Variables[index];
 
-        foreach ( var field in node.Declaration.Variables )
-        {
-            if ( field.Initializer != null && this._options.MustDescendIntoImplementation() )
+            using ( this.EnterDefinition( variable ) )
             {
-                using ( this.EnterDefinition( field ) )
+                if ( index == 0 )
                 {
-                    this.Visit( field.Initializer );
+                    // Attributes must be visited a single time.
+                    this.Visit( node.AttributeLists );
+                }
+
+                // The type must be visited every time.
+                this.VisitTypeReference( node.Declaration.Type, ReferenceKinds.MemberType );
+
+                if ( variable.Initializer != null && this._options.MustDescendIntoImplementation() )
+                {
+                    using ( this.EnterDefinition( variable ) )
+                    {
+                        this.Visit( variable.Initializer );
+                    }
                 }
             }
         }
@@ -584,7 +601,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         var symbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
         this.ReferenceSymbol( symbol, node.NewKeyword, ReferenceKinds.ObjectCreation );
-        
+
         this.Visit( node.Initializer );
         this.Visit( node.ArgumentList );
     }
@@ -616,13 +633,13 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     private void VisitWithReferenceKinds( SyntaxNode? node, ReferenceKinds referenceKind )
     {
-        #if DEBUG
+#if DEBUG
         if ( referenceKind == ReferenceKinds.None )
         {
             throw new ArgumentOutOfRangeException( nameof(referenceKind) );
         }
-        #endif
-        
+#endif
+
         if ( node == null )
         {
             return;
@@ -646,16 +663,14 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-   
-    
-    private bool ReferenceSymbol(
+    private void ReferenceSymbol(
         ISymbol? symbol,
         SyntaxNodeOrToken node,
-        ReferenceKinds referenceKinds )
+        ReferenceKinds referenceKinds = ReferenceKinds.Default )
     {
         if ( symbol == null || this._currentDeclaration == null )
         {
-            return false;
+            return;
         }
 
         switch ( symbol.Kind )
@@ -679,18 +694,16 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
             default:
                 // Not referenced.
-                return false;
+                return;
         }
 
-        if ( referenceKinds == ReferenceKinds.Default || referenceKinds == ReferenceKinds.None )
+        if ( referenceKinds is ReferenceKinds.Default or ReferenceKinds.None )
         {
             // This happens for standalone identifiers or for member access.
             referenceKinds = this._currentReferenceKinds;
         }
 
         this._referenceIndexBuilder.AddReference( symbol, this._currentDeclaration, node, referenceKinds );
-
-        return true;
     }
 
     private DeclarationContextCookie EnterDefinition( SyntaxNode node )
@@ -736,29 +749,29 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 break;
 
             case SyntaxKind.NullableType:
-                this.VisitWithReferenceKinds( ((NullableTypeSyntax) type).ElementType, kind | ReferenceKinds.NullableType );
+                this.VisitWithReferenceKinds( ((NullableTypeSyntax) type).ElementType, kind );
 
                 break;
 
             case SyntaxKind.ArrayType:
-                this.VisitWithReferenceKinds( ((ArrayTypeSyntax) type).ElementType, kind | ReferenceKinds.ArrayType );
+                this.VisitWithReferenceKinds( ((ArrayTypeSyntax) type).ElementType, ReferenceKinds.ArrayElementType );
 
                 break;
 
             case SyntaxKind.PointerType:
-                this.VisitWithReferenceKinds( ((PointerTypeSyntax) type).ElementType, kind | ReferenceKinds.PointerType );
+                this.VisitWithReferenceKinds( ((PointerTypeSyntax) type).ElementType, ReferenceKinds.PointerType );
 
                 break;
 
             case SyntaxKind.RefType:
-                this.VisitWithReferenceKinds( ((RefTypeSyntax) type).Type, kind | ReferenceKinds.RefType );
+                this.VisitWithReferenceKinds( ((RefTypeSyntax) type).Type, kind );
 
                 break;
 
             case SyntaxKind.TupleType:
                 foreach ( var item in ((TupleTypeSyntax) type).Elements )
                 {
-                    this.VisitTypeReference( item.Type, kind | ReferenceKinds.TupleType );
+                    this.VisitTypeReference( item.Type, ReferenceKinds.TupleElementType );
                 }
 
                 break;
@@ -771,16 +784,26 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax) type;
-                    var symbol = this._semanticModel.GetSymbolInfo( genericType ).Symbol;
+                    var symbol = (INamedTypeSymbol?) this._semanticModel.GetSymbolInfo( genericType ).Symbol;
 
                     if ( symbol != null )
                     {
-                        this.ReferenceSymbol( ((INamedTypeSymbol) symbol).ConstructedFrom, genericType, kind );
+                        if ( symbol.SpecialType == SpecialType.System_Nullable_T )
+                        {
+                            // Process nullable types consitently as the ? operator.
+                            this.ReferenceSymbol( symbol.TypeArguments[0], genericType.TypeArgumentList.Arguments[0], kind );
+
+                            return;
+                        }
+                        else
+                        {
+                            this.ReferenceSymbol( symbol.ConstructedFrom, genericType, kind );
+                        }
                     }
 
                     foreach ( var arg in genericType.TypeArgumentList.Arguments )
                     {
-                        this.VisitTypeReference( arg, kind | ReferenceKinds.TypeArgument );
+                        this.VisitTypeReference( arg, ReferenceKinds.TypeArgument );
                     }
                 }
 
@@ -807,6 +830,4 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             }
         }
     }
-    
-
 }
