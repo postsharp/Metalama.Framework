@@ -23,7 +23,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     private readonly ReferenceIndexerOptions _options;
 
     private SemanticModel? _semanticModel;
-    private ISymbol? _currentDeclaration;
+    private ISymbol? _currentDeclarationSymbol;
+    private SyntaxNode? _currentDeclarationNode;
     private ReferenceKinds _currentReferenceKinds = ReferenceKinds.Default;
 
     public ReferenceIndexWalker(
@@ -476,7 +477,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                     {
                         this._referenceIndexBuilder.AddReference(
                             baseConstructorSymbol,
-                            this._currentDeclaration.AssertNotNull(),
+                            this.CurrentDeclarationSymbol.AssertNotNull(),
                             node.Identifier,
                             ReferenceKinds.BaseConstructor );
                     }
@@ -635,7 +636,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         SyntaxNodeOrToken nodeForReference,
         ReferenceKinds referenceKinds = ReferenceKinds.Default )
     {
-        if ( this._currentDeclaration == null )
+        if ( this._currentDeclarationNode == null )
         {
             return;
         }
@@ -651,7 +652,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 return;
             }
 
-            this._referenceIndexBuilder.AddReference( symbol!, this._currentDeclaration, nodeForReference, referenceKinds );
+            this._referenceIndexBuilder.AddReference( symbol!, this.CurrentDeclarationSymbol, nodeForReference, referenceKinds );
         }
     }
 
@@ -661,14 +662,14 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         Func<T, ImmutableArray<T>> getImplementedInterfaceMembers )
         where T : class, ISymbol
     {
-        if ( this._currentDeclaration == null )
+        if ( this._currentDeclarationNode == null )
         {
             return;
         }
 
         if ( this._options.MustIndexReferenceKind( ReferenceKinds.OverrideMember | ReferenceKinds.InterfaceMemberImplementation ) )
         {
-            var symbol = (T?) this._currentDeclaration;
+            var symbol = (T?) this.CurrentDeclarationSymbol;
 
             if ( symbol == null )
             {
@@ -681,7 +682,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
                 if ( overridenMember != null )
                 {
-                    this._referenceIndexBuilder.AddReference( overridenMember, this._currentDeclaration, node, ReferenceKinds.OverrideMember );
+                    this._referenceIndexBuilder.AddReference( overridenMember, this.CurrentDeclarationSymbol, node, ReferenceKinds.OverrideMember );
                 }
             }
 
@@ -691,7 +692,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
                 foreach ( var member in interfaceMembers )
                 {
-                    this._referenceIndexBuilder.AddReference( member, this._currentDeclaration, node, ReferenceKinds.InterfaceMemberImplementation );
+                    this._referenceIndexBuilder.AddReference( member, this.CurrentDeclarationSymbol, node, ReferenceKinds.InterfaceMemberImplementation );
                 }
             }
         }
@@ -739,21 +740,20 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
+    private ISymbol CurrentDeclarationSymbol
+        => this._currentDeclarationSymbol ??= this._currentDeclarationNode != null
+            ? this._semanticModel!.GetDeclaredSymbol( this._currentDeclarationNode ).AssertNotNull()
+            : throw new InvalidOperationException();
+
     private DeclarationContextCookie EnterDefinition( SyntaxNode node )
     {
-        var declaration = this._semanticModel.AssertNotNull().GetDeclaredSymbol( node );
-        var previousDeclaration = this._currentDeclaration;
+        var previousSymbol = this._currentDeclarationSymbol;
+        var previousNode = this._currentDeclarationNode;
 
-        if ( declaration != null )
-        {
-            this._currentDeclaration = declaration;
+        this._currentDeclarationSymbol = null;
+        this._currentDeclarationNode = node;
 
-            return new DeclarationContextCookie( this, previousDeclaration );
-        }
-        else
-        {
-            return default;
-        }
+        return new DeclarationContextCookie( this, previousSymbol, previousNode );
     }
 
     private void Visit<T>( SyntaxList<T> list )
@@ -844,18 +844,21 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         private readonly ReferenceIndexWalker? _parent;
         private readonly ISymbol? _previousDeclaration;
+        private readonly SyntaxNode? _previousNode;
 
-        public DeclarationContextCookie( ReferenceIndexWalker parent, ISymbol? previousDeclaration )
+        public DeclarationContextCookie( ReferenceIndexWalker parent, ISymbol? previousDeclaration, SyntaxNode? previousNode )
         {
             this._parent = parent;
             this._previousDeclaration = previousDeclaration;
+            this._previousNode = previousNode;
         }
 
         public void Dispose()
         {
             if ( this._parent != null )
             {
-                this._parent._currentDeclaration = this._previousDeclaration;
+                this._parent._currentDeclarationSymbol = this._previousDeclaration;
+                this._parent._currentDeclarationNode = this._previousNode;
             }
         }
     }
