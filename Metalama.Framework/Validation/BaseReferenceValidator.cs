@@ -23,4 +23,6 @@ public abstract class BaseReferenceValidator : ICompileTimeSerializable
     public virtual bool IncludeDerivedTypes => true;
 
     public abstract ReferenceGranularity Granularity { get; }
+
+    public abstract ReferenceDirection Direction { get; }
 }
