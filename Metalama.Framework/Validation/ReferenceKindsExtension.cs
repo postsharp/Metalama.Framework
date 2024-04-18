@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Metalama.Framework.Validation;
 
@@ -33,7 +34,7 @@ public static class ReferenceKindsExtension
 
         void ConsiderKind( ReferenceKinds kind )
         {
-            if ( kind.IsDefined( kind ) )
+            if ( kinds.IsDefined( kind ) )
             {
                 values.Add( kind.ToString() );
                 consideredKinds |= kind;
@@ -50,7 +51,6 @@ public static class ReferenceKindsExtension
         ConsiderKind( ReferenceKinds.MemberType );
         ConsiderKind( ReferenceKinds.LocalVariableType );
         ConsiderKind( ReferenceKinds.ReturnType );
-        ConsiderKind( ReferenceKinds.ArrayElementType );
         ConsiderKind( ReferenceKinds.PointerType );
         ConsiderKind( ReferenceKinds.TupleElementType );
         ConsiderKind( ReferenceKinds.Invocation );
@@ -60,11 +60,12 @@ public static class ReferenceKindsExtension
         ConsiderKind( ReferenceKinds.Using );
         ConsiderKind( ReferenceKinds.NameOf );
         ConsiderKind( ReferenceKinds.BaseConstructor );
+        ConsiderKind( ReferenceKinds.AttributeType );
 
         if ( consideredKinds != kinds )
         {
-            // If we forgot something, fallback to ToString.
-            return kinds.ToString();
+            // If we forgot something, fallback to the integer value, this is at least deterministic.
+            return ((int) kinds).ToString( CultureInfo.InvariantCulture );
         }
 
         return string.Join( " | ", values );
