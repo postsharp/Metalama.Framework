@@ -41,9 +41,16 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
         this._typeResolver ??= this._serviceProvider.GetRequiredService<ProjectSpecificCompileTimeTypeResolver>();
 
+        var type = compilationModel.Factory.GetTypeByReflectionName( typeName );
+
+        if ( type == null! )
+        {
+            throw new AssertionFailedException( $"The type '{type}' cannot be found." );
+        }
+
         return
             this._typeResolver.GetCompileTimeType(
-                    compilationModel.Factory.GetTypeByReflectionName( typeName ).GetSymbol().AssertNotNull(),
+                    type.GetSymbol().AssertNotNull(),
                     false )
                 .AssertNotNull();
     }

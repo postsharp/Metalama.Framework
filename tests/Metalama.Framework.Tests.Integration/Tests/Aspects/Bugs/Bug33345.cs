@@ -75,9 +75,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33345
 
         private void ValidateReference( ReferenceValidationContext context )
         {
-            if (!context.Referencing.Type.Is( context.Referenced.Type! ) && !context.Referencing.Namespace.FullName.EndsWith( ".Tests" ))
+            if (!context.Origin.Type.Is( context.Destination.Type! ) && !context.Origin.Namespace.FullName.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _warning.WithArguments( context.Referenced.Declaration ) );
+                context.Diagnostics.Report( _warning.WithArguments( context.Destination.Declaration ) );
             }
         }
     }

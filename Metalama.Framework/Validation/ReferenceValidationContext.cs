@@ -21,8 +21,8 @@ namespace Metalama.Framework.Validation
     public abstract class ReferenceValidationContext
     {
         private readonly IDiagnosticSink _diagnosticSink;
-        private ReferenceEnd _referencedEnd;
-        private ReferenceEnd _referencingEnd;
+        private ReferenceEnd _destinationEnd;
+        private ReferenceEnd _originEnd;
 
         /// <summary>
         /// Gets the list of individual references that are being collectively analyzed and grouped by granularity.
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Validation
 
         internal abstract IDiagnosticSource DiagnosticSource { get; }
 
-        internal ICompilation Compilation => this._referencedEnd.Declaration.Compilation;
+        internal ICompilation Compilation => this._destinationEnd.Declaration.Compilation;
 
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
@@ -42,41 +42,41 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets information about the referenced declaration.
         /// </summary>
-        public ref ReferenceEnd Referenced => ref this._referencedEnd;
+        public ref ReferenceEnd Destination => ref this._destinationEnd;
 
         /// <summary>
         /// Gets information about the referencing declaration, i.e. the declaration containing the reference.
         /// </summary>
-        public ref ReferenceEnd Referencing => ref this._referencingEnd;
+        public ref ReferenceEnd Origin => ref this._originEnd;
 
         /// <summary>
-        /// Gets the <see cref="ReferenceEnd"/> according to a <see cref="ReferenceDirection"/>.
+        /// Gets the <see cref="ReferenceEnd"/> according to a <see cref="ReferenceEndRole"/>.
         /// </summary>
-        public ref ReferenceEnd GetReferenceEnd( ReferenceDirection direction )
+        public ref ReferenceEnd GetReferenceEnd( ReferenceEndRole role )
         {
-            if ( direction == ReferenceDirection.Outbound )
+            if ( role == ReferenceEndRole.Origin )
             {
-                return ref this._referencingEnd;
+                return ref this._originEnd;
             }
             else
             {
-                return ref this._referencedEnd;
+                return ref this._destinationEnd;
             }
         }
 
-        [Obsolete( "Use the Referenced property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
-        public IDeclaration ReferencedDeclaration => this.Referenced.Declaration;
+        [Obsolete( "Use the Destination property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
+        public IDeclaration ReferencedDeclaration => this.Destination.Declaration;
 
-        [Obsolete( "Use the Referenced property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
-        public INamedType ReferencedType => this.Referenced.Type;
+        [Obsolete( "Use the Destination property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
+        public INamedType ReferencedType => this.Destination.Type;
 
-        [Obsolete( "Use the Referencing property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
-        public IDeclaration ReferencingDeclaration => this.Referencing.Declaration;
+        [Obsolete( "Use the Origin property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
+        public IDeclaration ReferencingDeclaration => this.Origin.Declaration;
 
-        [Obsolete( "Use the Referencing property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
-        public INamedType ReferencingType => this.Referencing.Type;
+        [Obsolete( "Use the Origin property and consider which ReferenceEnd property to get according to the granularity of the validator." )]
+        public INamedType ReferencingType => this.Origin.Type;
 
-        [Obsolete( "Use References to get all references, then ReferenceInstance.ReferenceKinds." )]
+        [Obsolete( "Use References to get all references, then ReferenceInstance.ReferenceKind." )]
         public abstract ReferenceKinds ReferenceKinds { get; }
 
         [Obsolete( "Use References to get all references, then ReferenceInstance.DiagnosticLocation." )]
@@ -104,8 +104,8 @@ namespace Metalama.Framework.Validation
         {
             this.AspectState = aspectState;
             this._diagnosticSink = diagnosticSink;
-            this._referencedEnd = new ReferenceEnd( referencedDeclaration, GetInboundGranularity( referencedDeclaration.DeclarationKind ) );
-            this._referencingEnd = new ReferenceEnd( referencingDeclaration, outboundGranularity );
+            this._destinationEnd = new ReferenceEnd( referencedDeclaration, GetInboundGranularity( referencedDeclaration.DeclarationKind ) );
+            this._originEnd = new ReferenceEnd( referencingDeclaration, outboundGranularity );
         }
 
         private static ReferenceGranularity GetInboundGranularity( DeclarationKind kind )

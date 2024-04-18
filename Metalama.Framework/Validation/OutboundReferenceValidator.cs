@@ -8,5 +8,5 @@ namespace Metalama.Framework.Validation;
 /// </summary>
 public abstract class OutboundReferenceValidator : BaseReferenceValidator
 {
-    public sealed override ReferenceDirection Direction => ReferenceDirection.Outbound;
+    public sealed override ReferenceEndRole ValidatedEndRole => ReferenceEndRole.Origin;
 }

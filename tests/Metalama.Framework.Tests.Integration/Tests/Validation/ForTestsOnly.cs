@@ -21,9 +21,9 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
 
         private void ValidateReference( ReferenceValidationContext context )
         {
-            if (!context.Referencing.Namespace.Name.EndsWith( ".Tests" ))
+            if (!context.Origin.Namespace.Name.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _error.WithArguments( context.Referenced.Declaration ) );
+                context.Diagnostics.Report( _error.WithArguments( context.Destination.Declaration ) );
             }
         }
 

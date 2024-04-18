@@ -40,9 +40,9 @@ public abstract class BaseReferenceValidator : ICompileTimeSerializable
     public abstract ReferenceGranularity Granularity { get; }
 
     /// <summary>
-    /// Gets the direction (<see cref="ReferenceDirection.Inbound"/> or <see cref="ReferenceDirection.Outbound"/>) of to the validated reference ends.
-    /// If the <see cref="Direction"/> is set to <see cref="ReferenceDirection.Outbound"/>, the validator must be added to
-    /// the inbound (i.e. referenced) declaration, and the <see cref="ValidateReferences"/> method will be called with references on the outbound (referencing) ends.
+    /// Gets the direction (<see cref="Validation.ReferenceEndRole.Destination"/> or <see cref="Validation.ReferenceEndRole.Origin"/>) of to the validated reference ends.
+    /// If the <see cref="ValidatedEndRole"/> is set to <see cref="Validation.ReferenceEndRole.Origin"/>, the validator must be added to
+    /// the destination (i.e. referenced) declaration, and the <see cref="ValidateReferences"/> method will be called with references on the origin (referencing) ends.
     /// </summary>
-    public abstract ReferenceDirection Direction { get; }
+    public abstract ReferenceEndRole ValidatedEndRole { get; }
 }

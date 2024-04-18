@@ -5,18 +5,18 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Validation;
 
 /// <summary>
-/// Identifies the end of the kind of <see cref="ReferenceEnd"/>.
+/// Identifies the role of the <see cref="ReferenceEnd"/>.
 /// </summary>
 [CompileTime]
-public enum ReferenceDirection : byte
+public enum ReferenceEndRole : byte
 {
     /// <summary>
     /// The <i>referenced</i> declaration.
     /// </summary>
-    Inbound,
+    Destination,
 
     /// <summary>
     /// The <i>referencing</i> declaration.
     /// </summary>
-    Outbound
+    Origin
 }

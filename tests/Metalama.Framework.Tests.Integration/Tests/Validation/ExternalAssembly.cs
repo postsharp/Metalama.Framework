@@ -25,7 +25,7 @@ public class Fabric : ProjectFabric
 
     private void Validate( ReferenceValidationContext context )
     {
-        context.Diagnostics.Report( _warning.WithArguments( ( context.Referenced.Assembly.Identity.Name ) ) );
+        context.Diagnostics.Report( _warning.WithArguments( ( context.Destination.Assembly.Identity.Name ) ) );
     }
 }
 
