@@ -40,7 +40,7 @@ public sealed class ReferenceIndexerOptions
 
         foreach ( var validator in validators )
         {
-            var validatorReferenceKinds = validator.ReferenceKinds;
+            var validatorReferenceKinds = validator.ReferenceKinds & GetReferenceKindsSupportedByDeclarationKind( validator.ValidatedDeclarationKind );
 
             this._allReferenceKinds |= validatorReferenceKinds;
 
@@ -138,6 +138,23 @@ public sealed class ReferenceIndexerOptions
             }
         }
     }
+
+    private static ReferenceKinds GetReferenceKindsSupportedByDeclarationKind( DeclarationKind declarationKind )
+        => declarationKind switch
+        {
+            DeclarationKind.Compilation or DeclarationKind.Namespace or DeclarationKind.NamedType or DeclarationKind.AssemblyReference => ReferenceKinds.All,
+            DeclarationKind.Constructor => ReferenceKinds.BaseConstructor | ReferenceKinds.ObjectCreation,
+            DeclarationKind.Event or DeclarationKind.Method => ReferenceKinds.Default | ReferenceKinds.Invocation | ReferenceKinds.NameOf
+                                                               | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember,
+            DeclarationKind.Property => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf
+                                        | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember,
+            DeclarationKind.Field => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf,
+            DeclarationKind.Finalizer => ReferenceKinds.None,
+            DeclarationKind.Indexer => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.InterfaceMemberImplementation
+                                       | ReferenceKinds.OverrideMember,
+            DeclarationKind.Operator => ReferenceKinds.Invocation,
+            _ => ReferenceKinds.None
+        };
 
     public static ReferenceIndexerOptions Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
 
