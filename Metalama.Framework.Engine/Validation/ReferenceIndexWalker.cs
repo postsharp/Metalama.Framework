@@ -692,7 +692,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             var symbol = this.SemanticModel.GetSymbolInfo( nodeForSymbol ).Symbol;
 
-            if ( !CanIndexSymbol( symbol ) )
+            if ( symbol == null || !CanIndexSymbol( symbol ) )
             {
                 return;
             }
@@ -703,7 +703,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 return;
             }
 
-            this._referenceIndexBuilder.AddReference( symbol!, this.CurrentDeclarationSymbol, nodeForReference, referenceKind );
+            this._referenceIndexBuilder.AddReference( symbol, this.CurrentDeclarationSymbol, nodeForReference, referenceKind );
         }
     }
 
@@ -760,13 +760,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         return referenceKinds;
     }
 
-    private static bool CanIndexSymbol( ISymbol? symbol )
+    private static bool CanIndexSymbol( ISymbol symbol )
     {
-        if ( symbol == null )
-        {
-            return false;
-        }
-
         switch ( symbol.Kind )
         {
             case SymbolKind.ArrayType:
@@ -797,7 +792,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             ? this.SemanticModel.GetDeclaredSymbol( this._currentDeclarationNode )
             : null;
 
-    public SemanticModel SemanticModel
+    private SemanticModel SemanticModel
         => this._semanticModel ??= this._semanticModelProvider.AssertNotNull().GetSemanticModel( this._syntaxTree.AssertNotNull(), true );
 
     private DeclarationContextCookie EnterDefinition( SyntaxNode node )
