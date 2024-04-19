@@ -145,8 +145,8 @@ public sealed class ReferenceIndexerOptions
             DeclarationKind.Compilation or DeclarationKind.Namespace or DeclarationKind.NamedType or DeclarationKind.AssemblyReference => ReferenceKinds.All,
             DeclarationKind.Constructor => ReferenceKinds.BaseConstructor | ReferenceKinds.ObjectCreation,
             DeclarationKind.Event or DeclarationKind.Method => ReferenceKinds.Default | ReferenceKinds.Invocation | ReferenceKinds.NameOf
-                                                               | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember,
-            DeclarationKind.Property => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf
+                                                               | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember | ReferenceKinds.Assignment,
+            DeclarationKind.Property => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf 
                                         | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember,
             DeclarationKind.Field => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf,
             DeclarationKind.Finalizer => ReferenceKinds.None,

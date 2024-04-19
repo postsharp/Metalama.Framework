@@ -1,3 +1,7 @@
+// Warning MY001 on `IValidatedInterface`: `Reference constraint of type 'BaseType' to type 'IValidatedInterface' from type 'ExplicitInterfaceImplementation' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `InterfaceMethod`: `Reference constraint of type 'InterfaceMemberImplementation' to type 'IValidatedInterface' from method 'ExplicitInterfaceImplementation.IValidatedInterface.InterfaceMethod()' (SyntaxKind=MethodDeclaration).`
+// Warning MY001 on `InterfaceProperty`: `Reference constraint of type 'InterfaceMemberImplementation' to type 'IValidatedInterface' from property 'ExplicitInterfaceImplementation.IValidatedInterface.InterfaceProperty' (SyntaxKind=PropertyDeclaration).`
+// Warning MY001 on `InterfaceEvent`: `Reference constraint of type 'InterfaceMemberImplementation' to type 'IValidatedInterface' from event 'ExplicitInterfaceImplementation.IValidatedInterface.InterfaceEvent' (SyntaxKind=EventDeclaration).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'AttributeType' to type 'ValidatedClass' from type 'DerivedClass' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'BaseType' to type 'ValidatedClass' from type 'DerivedClass' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' to type 'ValidatedClass' from field 'DerivedClass._field1' (SyntaxKind=IdentifierName).`
@@ -21,9 +25,16 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'NameOf' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `InstanceField`: `Reference constraint of type 'NameOf' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
-// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' to type 'ValidatedClass' from property 'DerivedClass.Property' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `Invoke`: `Reference constraint of type 'Invocation' to type 'ValidatedDelegate' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' to type 'ValidatedClass' from property 'DerivedClass.AutomaticProperty' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `Property`: `Reference constraint of type 'OverrideMember' to type 'ValidatedClass' from property 'DerivedClass.Property' (SyntaxKind=PropertyDeclaration).`
+// Warning MY001 on `Property`: `Reference constraint of type 'Default' to type 'ValidatedClass' from method 'DerivedClass.Property.get' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `Property`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.Property.set' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedDelegate`: `Reference constraint of type 'MemberType' to type 'ValidatedDelegate' from event 'DerivedClass.FieldLikeEvent' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedDelegate`: `Reference constraint of type 'MemberType' to type 'ValidatedDelegate' from event 'DerivedClass.ExplicitEvent' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `TheEvent`: `Reference constraint of type 'OverrideMember' to type 'ValidatedClass' from event 'DerivedClass.TheEvent' (SyntaxKind=EventDeclaration).`
+// Warning MY001 on `TheEvent`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.TheEvent.add' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `TheEvent`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.TheEvent.remove' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' to type 'ValidatedClass' from method 'ReferencingClass.ReferencingMethod()' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `Method`: `Reference constraint of type 'Invocation' to type 'ValidatedClass' from method 'ReferencingClass.ReferencingMethod()' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' to type 'ValidatedClass' from method 'ReferencingClass.ReferencingMethod()' (SyntaxKind=IdentifierName).`

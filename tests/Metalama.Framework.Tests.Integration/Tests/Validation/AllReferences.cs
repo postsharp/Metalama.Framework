@@ -50,6 +50,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public ValidatedClass() { }
 
         public ValidatedClass( int x ) { }
+        
+        public virtual int Property { get; set; }
+
+        public virtual event Action TheEvent
+        {
+            add { }
+            remove { }
+        }
     }
 
     [Aspect]
@@ -57,6 +65,28 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
     [Aspect]
     internal delegate void ValidatedDelegate();
+
+    [Aspect]
+    internal interface IValidatedInterface
+    {
+        void InterfaceMethod();
+        int InterfaceProperty { get; set; }
+
+        event Action InterfaceEvent;
+    }
+
+    internal class ExplicitInterfaceImplementation : IValidatedInterface
+    {
+        void IValidatedInterface.InterfaceMethod() { }
+
+        int IValidatedInterface.InterfaceProperty { get; set; }
+
+        event Action IValidatedInterface.InterfaceEvent
+        {
+            add { }
+            remove { }
+        }
+    }
 
     // <target>
     [ValidatedClass]
@@ -70,38 +100,70 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         // Typeof in field initializer.
         private Type _field2 = typeof(ValidatedClass);
-
+        
         // Constructors
         public DerivedClass() { }
 
         public DerivedClass( int x ) : base( 5 ) { }
 
-        // Override.
+        // Override method.
         public override void VirtualMethod()
         {
             // Base method call.
             base.VirtualMethod();
         }
 
+     
         // Parameters, return values.
         private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
+            // ObjectCreation
             ValidatedClass variable = new();
             var x = new ValidatedClass();
+            
+            // Default access
             _ = x.InstanceField;
+            
+            // Assignments
             x.InstanceField = 5;
             x.InstanceField += 5;
             StaticField = 5;
+            
+            // Invoke, typeof
             Method( typeof(ValidatedClass) );
 
+            // nameof
             var y = nameof(ValidatedClass);
             var z = nameof(InstanceField);
+
+            // Invoke event.
+            this.FieldLikeEvent();
+            this.FieldLikeEvent.Invoke(); // This is a normal access.
+            
+            // Event assignment
+            this.TheEvent += () => { };
+            this.TheEvent -= () => { };
+            this.FieldLikeEvent += () => { };
+            this.FieldLikeEvent -= () => { };
 
             return null;
         }
 
-        // Property.
-        public ValidatedClass? Property { get; set; }
+        // Automatic property.
+        public ValidatedClass? AutomaticProperty { get; set; }
+        
+        // Override property.
+        public override int Property
+        {
+            // Base property read.
+            get => base.Property;
+            
+            // Base property assignment.
+            set => base.Property = value;
+        }
+
+
+
 
         // Events
         public event ValidatedDelegate? FieldLikeEvent;
@@ -110,6 +172,17 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         {
             add { }
             remove { }
+        }
+        
+        public override event Action TheEvent
+        {
+            add
+            {
+                base.TheEvent += value; }
+            remove
+            {
+                base.TheEvent += value;
+            }
         }
     }
 
