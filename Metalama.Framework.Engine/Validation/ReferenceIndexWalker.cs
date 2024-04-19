@@ -17,6 +17,9 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 {
+    // We don't report MemberAccess as a reference kind to the user, but we use it internally.
+    private const ReferenceKinds _memberAccessKind = (ReferenceKinds) 0xf001;
+
     private readonly CancellationToken _cancellationToken;
     private readonly ISymbolClassificationService _symbolClassifier;
     private readonly ReferenceIndexBuilder _referenceIndexBuilder;
@@ -93,23 +96,6 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             // Other cases are possible but we don't implement them.
             // For instance, we can assign the return value of a ref method.
         }
-    }
-
-    private bool MustSkipChildren( SyntaxNode node )
-    {
-        if ( node is MemberAccessExpressionSyntax memberAccess )
-        {
-            // TODO: Can we avoid resolving the symbol here?
-            
-            // Do not index MemberAccessExpression if the expression is a type, `this` or `base`.
-            if ( memberAccess.Expression.Kind() is SyntaxKind.BaseExpression or SyntaxKind.ThisExpression
-                 || this.SemanticModel.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public override void VisitInvocationExpression( InvocationExpressionSyntax node )
@@ -630,9 +616,10 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         this.Visit( node.Name );
 
-        if ( !this.MustSkipChildren( node ) )
+        // Avoid indexing 'this', 'base' and types on the left side.
+        if ( node.Expression.Kind() is not (SyntaxKind.BaseExpression or SyntaxKind.ThisExpression) )
         {
-            this.VisitWithReferenceKinds( node.Expression, ReferenceKinds.Default );
+            this.VisitWithReferenceKinds( node.Expression, _memberAccessKind );
         }
     }
 
@@ -678,23 +665,30 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     private void IndexReference(
         SyntaxNode node,
         SyntaxToken identifier,
-        ReferenceKinds referenceKinds = ReferenceKinds.Default )
-        => this.IndexReference( node, node, identifier, referenceKinds );
+        ReferenceKinds referenceKind = ReferenceKinds.Default )
+        => this.IndexReference( node, node, identifier, referenceKind );
 
     private void IndexReference(
         SyntaxNode nodeForSymbol,
         SyntaxNodeOrToken nodeForReference,
         SyntaxToken identifierForFiltering,
-        ReferenceKinds referenceKinds = ReferenceKinds.Default )
+        ReferenceKinds referenceKind = ReferenceKinds.Default )
     {
         if ( this._currentDeclarationNode == null )
         {
             return;
         }
 
-        referenceKinds = this.GetEffectiveReferenceKind( referenceKinds );
+        referenceKind = this.GetEffectiveReferenceKind( referenceKind );
 
-        if ( this._options.MustIndexReference( referenceKinds, identifierForFiltering ) )
+        var isMemberAccessKind = referenceKind == _memberAccessKind;
+
+        if ( isMemberAccessKind )
+        {
+            referenceKind = ReferenceKinds.Default;
+        }
+
+        if ( this._options.MustIndexReference( referenceKind, identifierForFiltering ) )
         {
             var symbol = this.SemanticModel.GetSymbolInfo( nodeForSymbol ).Symbol;
 
@@ -703,7 +697,13 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 return;
             }
 
-            this._referenceIndexBuilder.AddReference( symbol!, this.CurrentDeclarationSymbol, nodeForReference, referenceKinds );
+            if ( isMemberAccessKind && symbol.Kind == SymbolKind.NamedType )
+            {
+                // We don't index access of static members on type level.
+                return;
+            }
+
+            this._referenceIndexBuilder.AddReference( symbol!, this.CurrentDeclarationSymbol, nodeForReference, referenceKind );
         }
     }
 
