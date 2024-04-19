@@ -22,7 +22,7 @@ namespace Metalama.Framework.Validation
     {
         private readonly IDeclaration _referencedDeclaration;
         private readonly IDeclaration _referencingDeclaration;
-        private readonly ReferenceGranularity _outboundGranularity;
+        private readonly ReferenceGranularity _originGranularity;
         private readonly IDiagnosticSink _diagnosticSink;
         private ReferenceEnd? _destinationEnd;
         private ReferenceEnd? _originEnd;
@@ -45,13 +45,13 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets information about the referenced declaration.
         /// </summary>
-        public ReferenceEnd Destination => this._destinationEnd ??= new ReferenceEnd( this._referencedDeclaration, this._outboundGranularity );
+        public ReferenceEnd Destination => this._destinationEnd ??= new ReferenceEnd( this._referencedDeclaration, GetInboundGranularity( this._referencedDeclaration.DeclarationKind ) );
 
         /// <summary>
         /// Gets information about the referencing declaration, i.e. the declaration containing the reference.
         /// </summary>
         public ReferenceEnd Origin
-            => this._originEnd ??= new ReferenceEnd( this._referencingDeclaration, GetInboundGranularity( this._referencingDeclaration.DeclarationKind ) );
+            => this._originEnd ??= new ReferenceEnd( this._referencingDeclaration, this._originGranularity );
 
         /// <summary>
         /// Gets the <see cref="ReferenceEnd"/> according to a <see cref="ReferenceEndRole"/>.
@@ -102,14 +102,14 @@ namespace Metalama.Framework.Validation
         internal ReferenceValidationContext(
             IDeclaration referencedDeclaration,
             IDeclaration referencingDeclaration,
-            ReferenceGranularity outboundGranularity,
+            ReferenceGranularity originGranularity,
             IAspectState? aspectState,
             IDiagnosticSink diagnosticSink )
         {
             this.AspectState = aspectState;
             this._referencedDeclaration = referencedDeclaration;
             this._referencingDeclaration = referencingDeclaration;
-            this._outboundGranularity = outboundGranularity;
+            this._originGranularity = originGranularity;
             this._diagnosticSink = diagnosticSink;
         }
 

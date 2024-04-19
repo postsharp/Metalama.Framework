@@ -87,8 +87,9 @@ public sealed class ReferenceIndexerOptions
                     else
                     {
                         var kindsNotSupportingIdentifierFiltering = validatorReferenceKinds & _kindsNotSupportingIdentifierFilteringOnTypes;
+                        var kindsSupportingIdentifierFiltering = validatorReferenceKinds & ~_kindsNotSupportingIdentifierFilteringOnTypes;
                         this._kindsSupportingIdentifierFiltering &= ~kindsNotSupportingIdentifierFiltering;
-                        identifierFilteringSupported = kindsNotSupportingIdentifierFiltering != 0;
+                        identifierFilteringSupported = kindsSupportingIdentifierFiltering != 0;
                     }
 
                     break;

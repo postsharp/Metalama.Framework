@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 public static class SourceReferenceExtensions
 {
     public static SyntaxNodeOrToken SyntaxNodeOrToken( this in SourceReference sourceReference )
-        => sourceReference.NodeOrToken switch
+        => sourceReference.NodeOrTokenInternal switch
         {
             SyntaxNode node => node,
             SyntaxToken token => token,

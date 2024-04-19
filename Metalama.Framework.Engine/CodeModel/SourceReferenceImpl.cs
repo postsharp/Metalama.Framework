@@ -18,28 +18,28 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
     private SourceReferenceImpl() { }
 
     IDiagnosticLocation ISourceReferenceImpl.GetDiagnosticLocation( in SourceReference sourceReference )
-        => sourceReference.NodeOrToken switch
+        => sourceReference.NodeOrTokenInternal switch
         {
             SyntaxNode node => node.GetDiagnosticLocation().ToDiagnosticLocation(),
             SyntaxToken token => token.GetLocation().ToDiagnosticLocation(),
-            _ => throw new AssertionFailedException( $"Unexpected type {sourceReference.NodeOrToken.GetType()}." )
+            _ => throw new AssertionFailedException( $"Unexpected type {sourceReference.NodeOrTokenInternal.GetType()}." )
         };
 
     string ISourceReferenceImpl.GetKind( in SourceReference sourceReference )
-        => sourceReference.NodeOrToken switch
+        => sourceReference.NodeOrTokenInternal switch
         {
             SyntaxNode node => node.Kind().ToString(),
             SyntaxToken token => token.Kind().ToString(),
-            _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
+            _ => throw new AssertionFailedException( $"{sourceReference.NodeOrTokenInternal} is not supported" )
         };
 
     public SourceSpan GetSourceSpan( in SourceReference sourceReference )
     {
-        var (syntaxTree, span) = sourceReference.NodeOrToken switch
+        var (syntaxTree, span) = sourceReference.NodeOrTokenInternal switch
         {
             SyntaxNode node => (node.SyntaxTree, node.Span),
             SyntaxToken token => (token.SyntaxTree.AssertNotNull(), token.Span),
-            _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
+            _ => throw new AssertionFailedException( $"{sourceReference.NodeOrTokenInternal} is not supported" )
         };
 
         var lineSpan = syntaxTree.GetLineSpan( span );
@@ -61,17 +61,17 @@ internal sealed class SourceReferenceImpl : ISourceReferenceImpl
 
 #pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
     public string GetText( in SourceReference sourceReference, bool normalized )
-        => sourceReference.NodeOrToken switch
+        => sourceReference.NodeOrTokenInternal switch
         {
             SyntaxNode node when normalized => node.NormalizeWhitespace().ToString(),
             SyntaxNode node when !normalized => node.ToFullString(),
             SyntaxToken token when normalized => token.NormalizeWhitespace().ToString(),
             SyntaxNode token when !normalized => token.ToFullString(),
-            _ => throw new AssertionFailedException( $"{sourceReference.NodeOrToken} is not supported" )
+            _ => throw new AssertionFailedException( $"{sourceReference.NodeOrTokenInternal} is not supported" )
         };
 #pragma warning restore LAMA0830
 
     public bool IsImplementationPart( in SourceReference sourceReference )
-        => !(sourceReference.NodeOrToken is MethodDeclarationSyntax { Body: null, ExpressionBody: null } method &&
+        => !(sourceReference.NodeOrTokenInternal is MethodDeclarationSyntax { Body: null, ExpressionBody: null } method &&
              method.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) ));
 }
