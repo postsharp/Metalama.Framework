@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Services
     /// A non-generic base class for <see cref="ServiceProvider{TBase}"/>.
     /// </summary>
     [PublicAPI]
-    public abstract class ServiceProvider
+    public abstract class ServiceProvider : IDisposable
     {
         internal IServiceProvider? NextProvider { get; private protected set; }
 
@@ -26,5 +26,7 @@ namespace Metalama.Framework.Engine.Services
 
             return null;
         }
+
+        public virtual void Dispose() { }
     }
 }

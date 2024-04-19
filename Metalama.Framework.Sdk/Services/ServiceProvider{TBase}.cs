@@ -177,7 +177,20 @@ public sealed class ServiceProvider<TBase> : ServiceProvider, IServiceProvider<T
         => (T?) this.GetService( typeof(T) );
 
     public override string ToString() => $"ServiceProvider Entries={this._services.Count}";
-    
+
+    public override void Dispose()
+    {
+        foreach ( var serviceNode in this._services.Values )
+        {
+            serviceNode.Dispose();
+        }
+
+        if ( this.NextProvider is IDisposable disposable )
+        {
+            disposable.Dispose();
+        }
+    }
+
     private sealed class ServiceNode
     {
         private readonly Func<IServiceProvider, object>? _func;
