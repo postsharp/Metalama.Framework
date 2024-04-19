@@ -38,14 +38,14 @@ public interface IValidatorReceiver
     /// </summary>
     /// <param name="validateMethod">A delegate to a method of a fabric, aspect or validator class.</param>
     /// <param name="granularity">The level of declarations at which the analysis should be performed. For instance, if <paramref name="validateMethod"/>
-    /// returns the same result for all references in the same namespace, <see cref="ReferenceGranularity.Namespace"/> should be used.</param>
+    ///     returns the same result for all references in the same namespace, <see cref="ReferenceGranularity.Namespace"/> should be used.</param>
     /// <param name="referenceKinds">Kinds of references that this method is interested to analyze. By default, all references are analyzed.</param>
-    /// <param name="includeDerivedTypes">Indicates whether references to types derived from the current type (if relevant) should also be validated.</param>
+    /// <param name="options"></param>
     void ValidateOutboundReferences(
         Action<ReferenceValidationContext> validateMethod,
         ReferenceGranularity granularity,
         ReferenceKinds referenceKinds = ReferenceKinds.All,
-        bool includeDerivedTypes = false );
+        ReferenceValidationOptions options = ReferenceValidationOptions.Default );
 
     [Obsolete( "Use ValidateOutboundReferences." )]
     void ValidateReferences( ReferenceValidator validator );

@@ -45,4 +45,7 @@ public abstract class BaseReferenceValidator : ICompileTimeSerializable
     /// the destination (i.e. referenced) declaration, and the <see cref="ValidateReferences"/> method will be called with references on the origin (referencing) ends.
     /// </summary>
     public abstract ReferenceEndRole ValidatedEndRole { get; }
+
+    internal ReferenceValidationOptions Options
+        => this.IncludeDerivedTypes ? ReferenceValidationOptions.IncludeDerivedTypes : ReferenceValidationOptions.Default;
 }

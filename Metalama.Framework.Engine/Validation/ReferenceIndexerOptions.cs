@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -42,7 +41,7 @@ public sealed class ReferenceIndexerOptions
         foreach ( var validator in validators )
         {
             var validatorReferenceKinds = validator.ReferenceKinds;
-            
+
             this._allReferenceKinds |= validatorReferenceKinds;
 
             if ( validator is { IncludeDerivedTypes: true, ValidatedDeclarationKind: DeclarationKind.NamedType } )
@@ -151,7 +150,7 @@ public sealed class ReferenceIndexerOptions
             return false;
         }
 
-        if ( identifier.RawKind != 0  && (this._kindsSupportingIdentifierFiltering & kind) != 0 )
+        if ( identifier.RawKind != 0 && (this._kindsSupportingIdentifierFiltering & kind) != 0 )
         {
             var identifierText = identifier.Text;
 

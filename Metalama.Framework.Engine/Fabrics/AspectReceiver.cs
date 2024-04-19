@@ -188,8 +188,8 @@ namespace Metalama.Framework.Engine.Fabrics
             Action<ReferenceValidationContext> validateMethod,
             ReferenceGranularity granularity,
             ReferenceKinds referenceKinds,
-            bool includeDerivedTypes = false )
-            => this.ValidateOutboundReferencesCore( validateMethod, granularity, referenceKinds, includeDerivedTypes );
+            ReferenceValidationOptions options )
+            => this.ValidateOutboundReferencesCore( validateMethod, granularity, referenceKinds, options == ReferenceValidationOptions.IncludeDerivedTypes );
 #pragma warning restore CS0612 // Type or member is obsolete
 
         private void ValidateOutboundReferencesCore(

@@ -20,9 +20,12 @@ namespace Metalama.Framework.Validation
     [PublicAPI]
     public abstract class ReferenceValidationContext
     {
+        private readonly IDeclaration _referencedDeclaration;
+        private readonly IDeclaration _referencingDeclaration;
+        private readonly ReferenceGranularity _outboundGranularity;
         private readonly IDiagnosticSink _diagnosticSink;
-        private ReferenceEnd _destinationEnd;
-        private ReferenceEnd _originEnd;
+        private ReferenceEnd? _destinationEnd;
+        private ReferenceEnd? _originEnd;
 
         /// <summary>
         /// Gets the list of individual references that are being collectively analyzed and grouped by granularity.
@@ -31,7 +34,7 @@ namespace Metalama.Framework.Validation
 
         internal abstract IDiagnosticSource DiagnosticSource { get; }
 
-        internal ICompilation Compilation => this._destinationEnd.Declaration.Compilation;
+        internal ICompilation Compilation => this._referencedDeclaration.Compilation;
 
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
@@ -42,25 +45,26 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets information about the referenced declaration.
         /// </summary>
-        public ref ReferenceEnd Destination => ref this._destinationEnd;
+        public ReferenceEnd Destination => this._destinationEnd ??= new ReferenceEnd( this._referencedDeclaration, this._outboundGranularity );
 
         /// <summary>
         /// Gets information about the referencing declaration, i.e. the declaration containing the reference.
         /// </summary>
-        public ref ReferenceEnd Origin => ref this._originEnd;
+        public ReferenceEnd Origin
+            => this._originEnd ??= new ReferenceEnd( this._referencingDeclaration, GetInboundGranularity( this._referencingDeclaration.DeclarationKind ) );
 
         /// <summary>
         /// Gets the <see cref="ReferenceEnd"/> according to a <see cref="ReferenceEndRole"/>.
         /// </summary>
-        public ref ReferenceEnd GetReferenceEnd( ReferenceEndRole role )
+        public ReferenceEnd GetReferenceEnd( ReferenceEndRole role )
         {
             if ( role == ReferenceEndRole.Origin )
             {
-                return ref this._originEnd;
+                return this.Origin;
             }
             else
             {
-                return ref this._destinationEnd;
+                return this.Destination;
             }
         }
 
@@ -103,9 +107,10 @@ namespace Metalama.Framework.Validation
             IDiagnosticSink diagnosticSink )
         {
             this.AspectState = aspectState;
+            this._referencedDeclaration = referencedDeclaration;
+            this._referencingDeclaration = referencingDeclaration;
+            this._outboundGranularity = outboundGranularity;
             this._diagnosticSink = diagnosticSink;
-            this._destinationEnd = new ReferenceEnd( referencedDeclaration, GetInboundGranularity( referencedDeclaration.DeclarationKind ) );
-            this._originEnd = new ReferenceEnd( referencingDeclaration, outboundGranularity );
         }
 
         private static ReferenceGranularity GetInboundGranularity( DeclarationKind kind )
