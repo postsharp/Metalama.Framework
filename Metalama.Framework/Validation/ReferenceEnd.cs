@@ -14,9 +14,8 @@ namespace Metalama.Framework.Validation;
 /// </summary>
 [CompileTime]
 [PublicAPI]
-public struct ReferenceEnd
+public sealed class ReferenceEnd
 {
-    // Caching fields. This struct is designed as a fatty one, living in its parent class and should never be copied to the stack.
     private IDeclaration? _parameterOrAttribute;
     private INamedType? _type;
     private INamedType? _topLevelType;

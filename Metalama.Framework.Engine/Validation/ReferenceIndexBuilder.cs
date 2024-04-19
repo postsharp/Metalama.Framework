@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
@@ -10,7 +11,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceIndexBuilder
+internal sealed class ReferenceIndexBuilder
 {
     private readonly ConcurrentDictionary<ISymbol, ReferencedSymbolInfo> _references = new();
     private readonly ProjectServiceProvider _serviceProvider;
@@ -123,15 +124,26 @@ public sealed class ReferenceIndexBuilder
         parentNode.AddChild( child, childKind );
     }
 
-    public void IndexSyntaxTree( SemanticModel semanticModel, CancellationToken cancellationToken )
+    internal void IndexSemanticModel( SemanticModel semanticModel, CancellationToken cancellationToken )
     {
         if ( this._frozen )
         {
             throw new InvalidOperationException();
         }
 
-        var visitor = new ReferenceIndexWalker( this._serviceProvider, cancellationToken, this, this._options );
+        var visitor = new ReferenceIndexWalker( this._serviceProvider, cancellationToken, this, this._options, null );
         visitor.Visit( semanticModel );
+    }
+
+    internal void IndexSyntaxTree( SyntaxTree syntaxTree, SemanticModelProvider semanticModelProvider, CancellationToken cancellationToken )
+    {
+        if ( this._frozen )
+        {
+            throw new InvalidOperationException();
+        }
+
+        var visitor = new ReferenceIndexWalker( this._serviceProvider, cancellationToken, this, this._options, semanticModelProvider );
+        visitor.Visit( syntaxTree );
     }
 
     public ReferenceIndex ToReadOnly()

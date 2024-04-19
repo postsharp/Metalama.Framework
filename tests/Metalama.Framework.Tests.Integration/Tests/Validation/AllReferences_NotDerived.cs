@@ -11,7 +11,7 @@ using Metalama.Framework.Validation;
 
 #pragma warning disable CS0168, CS8618, CS0169, CS0219, CS0067
 
-namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_Derived
+namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_NotDerived
 {
     internal class Aspect : TypeAspect
     {
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_Derived
         {
             builder
                 .Outbound
-                .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All, ReferenceValidationOptions.IncludeDerivedTypes );
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
         private static void Validate( ReferenceValidationContext context )

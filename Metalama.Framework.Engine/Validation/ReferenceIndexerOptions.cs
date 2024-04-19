@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -13,10 +14,15 @@ public sealed class ReferenceIndexerOptions
 
     private const ReferenceKinds _typeDeclarationOnlyKinds = ReferenceKinds.BaseType | ReferenceKinds.Using;
 
+    // Any reference on members (indirectly referencing the type) cannot be detected by identifier filtering.
+    private const ReferenceKinds _kindsNotSupportingIdentifierFilteringOnTypes =
+        ReferenceKinds.Default | ReferenceKinds.OverrideMember | ReferenceKinds.Assignment
+        | ReferenceKinds.Invocation | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.NameOf;
+
     // Reference kinds that do not require descending into implementations. 
     private const ReferenceKinds _memberDeclarationOnlyKinds =
         ReferenceKinds.ParameterType | ReferenceKinds.ReturnType | ReferenceKinds.AttributeType | ReferenceKinds.InterfaceMemberImplementation
-        | ReferenceKinds.OverrideMember | ReferenceKinds.MemberType;
+        | ReferenceKinds.OverrideMember | ReferenceKinds.MemberType | ReferenceKinds.NameOf | ReferenceKinds.Using;
 
     private readonly bool _mustDescendIntoMembers;
     private readonly ReferenceKinds _kindsRequiringDescentIntoBaseTypes;
@@ -24,52 +30,98 @@ public sealed class ReferenceIndexerOptions
     private readonly ReferenceKinds _kindsRequiringDescentIntoReferencedDeclaringType;
     private readonly ReferenceKinds _kindsRequiringDescentIntoReferencedNamespace;
     private readonly ReferenceKinds _kindsRequiringDescentIntoReferencedAssembly;
+    private readonly ReferenceKinds _kindsSupportingIdentifierFiltering = ReferenceKinds.All;
     private readonly ReferenceKinds _allReferenceKinds;
+    private readonly ImmutableHashSet<string> _filteredIdentifiers;
 
     public ReferenceIndexerOptions( IEnumerable<IReferenceValidatorProperties> validators )
     {
+        var filteredIdentifiers = ImmutableHashSet.CreateBuilder<string>();
+
         foreach ( var validator in validators )
         {
-            this._allReferenceKinds |= validator.ReferenceKinds;
+            var validatorReferenceKinds = validator.ReferenceKinds & GetReferenceKindsSupportedByDeclarationKind( validator.ValidatedDeclarationKind );
+
+            this._allReferenceKinds |= validatorReferenceKinds;
 
             if ( validator is { IncludeDerivedTypes: true, ValidatedDeclarationKind: DeclarationKind.NamedType } )
             {
-                this._kindsRequiringDescentIntoBaseTypes |= validator.ReferenceKinds;
+                this._kindsRequiringDescentIntoBaseTypes |= validatorReferenceKinds;
             }
 
-            if ( (validator.ReferenceKinds & ~(_memberDeclarationOnlyKinds | _typeDeclarationOnlyKinds)) != 0 )
+            if ( (validatorReferenceKinds & ~(_memberDeclarationOnlyKinds | _typeDeclarationOnlyKinds)) != 0 )
             {
                 this._mustDescendIntoImplementation = true;
             }
 
-            if ( (validator.ReferenceKinds & ~_typeDeclarationOnlyKinds) != 0 )
+            if ( (validatorReferenceKinds & ~_typeDeclarationOnlyKinds) != 0 )
             {
                 this._mustDescendIntoMembers = true;
             }
 
+            var identifierFilteringSupported = false;
+
             switch ( validator.ValidatedDeclarationKind )
             {
                 case DeclarationKind.Namespace:
-                    this._kindsRequiringDescentIntoReferencedNamespace |= validator.ReferenceKinds;
+                    this._kindsRequiringDescentIntoReferencedNamespace |= validatorReferenceKinds;
+                    this._kindsSupportingIdentifierFiltering &= ~validatorReferenceKinds;
 
                     break;
 
                 case DeclarationKind.AssemblyReference:
                 case DeclarationKind.Compilation:
-                    this._kindsRequiringDescentIntoReferencedAssembly |= validator.ReferenceKinds;
+                    this._kindsRequiringDescentIntoReferencedAssembly |= validatorReferenceKinds;
+                    this._kindsSupportingIdentifierFiltering &= ~validatorReferenceKinds;
 
                     break;
 
                 case DeclarationKind.NamedType:
-                    this._kindsRequiringDescentIntoReferencedDeclaringType |= validator.ReferenceKinds;
+                    this._kindsRequiringDescentIntoReferencedDeclaringType |= validatorReferenceKinds;
+
+                    if ( validator.IncludeDerivedTypes )
+                    {
+                        this._kindsRequiringDescentIntoReferencedAssembly |= validatorReferenceKinds;
+                        this._kindsSupportingIdentifierFiltering &= ~validatorReferenceKinds;
+                    }
+                    else
+                    {
+                        var kindsNotSupportingIdentifierFiltering = validatorReferenceKinds & _kindsNotSupportingIdentifierFilteringOnTypes;
+                        var kindsSupportingIdentifierFiltering = validatorReferenceKinds & ~_kindsNotSupportingIdentifierFilteringOnTypes;
+                        this._kindsSupportingIdentifierFiltering &= ~kindsNotSupportingIdentifierFiltering;
+                        identifierFilteringSupported = kindsSupportingIdentifierFiltering != 0;
+                    }
+
+                    break;
+
+                case DeclarationKind.Constructor:
+                case DeclarationKind.Event:
+                case DeclarationKind.Method:
+                case DeclarationKind.Field:
+                case DeclarationKind.Property:
+                    identifierFilteringSupported = true;
 
                     break;
             }
+
+            if ( identifierFilteringSupported )
+            {
+                var identifier = validator.Identifier;
+
+                if ( identifier != null )
+                {
+                    filteredIdentifiers.Add( identifier );
+                }
+            }
         }
+
+        this._filteredIdentifiers = filteredIdentifiers.ToImmutable();
     }
 
     public ReferenceIndexerOptions( IEnumerable<ReferenceIndexerOptions>? childIndexerOptions )
     {
+        this._filteredIdentifiers = ImmutableHashSet<string>.Empty;
+
         if ( childIndexerOptions != null )
         {
             foreach ( var child in childIndexerOptions )
@@ -82,25 +134,65 @@ public sealed class ReferenceIndexerOptions
                 this._kindsRequiringDescentIntoReferencedNamespace |= child._kindsRequiringDescentIntoReferencedNamespace;
                 this._kindsRequiringDescentIntoReferencedDeclaringType |= child._kindsRequiringDescentIntoReferencedDeclaringType;
                 this._kindsRequiringDescentIntoBaseTypes |= child._kindsRequiringDescentIntoBaseTypes;
+                this._kindsSupportingIdentifierFiltering &= child._kindsSupportingIdentifierFiltering;
+                this._filteredIdentifiers = this._filteredIdentifiers.Union( child._filteredIdentifiers );
             }
         }
     }
 
+    private static ReferenceKinds GetReferenceKindsSupportedByDeclarationKind( DeclarationKind declarationKind )
+        => declarationKind switch
+        {
+            DeclarationKind.Compilation or DeclarationKind.Namespace or DeclarationKind.NamedType or DeclarationKind.AssemblyReference => ReferenceKinds.All,
+            DeclarationKind.Constructor => ReferenceKinds.BaseConstructor | ReferenceKinds.ObjectCreation,
+            DeclarationKind.Event or DeclarationKind.Method => ReferenceKinds.Default | ReferenceKinds.Invocation | ReferenceKinds.NameOf
+                                                               | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember | ReferenceKinds.Assignment,
+            DeclarationKind.Property => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf 
+                                        | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember,
+            DeclarationKind.Field => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf,
+            DeclarationKind.Finalizer => ReferenceKinds.None,
+            DeclarationKind.Indexer => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.InterfaceMemberImplementation
+                                       | ReferenceKinds.OverrideMember,
+            DeclarationKind.Operator => ReferenceKinds.Invocation,
+            _ => ReferenceKinds.None
+        };
+
     public static ReferenceIndexerOptions Empty { get; } = new( ImmutableArray<IReferenceValidatorProperties>.Empty );
 
-    public bool MustIndexReferenceKind( ReferenceKinds kind ) => (this._allReferenceKinds & kind) != 0;
+    internal bool MustIndexReferenceKind( ReferenceKinds kind ) => (this._allReferenceKinds & kind) != 0;
 
-    public bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
+    internal bool MustIndexReference( ReferenceKinds kind, in SyntaxToken identifier )
+    {
+        if ( (this._allReferenceKinds & kind) == 0 )
+        {
+            return false;
+        }
 
-    public bool MustDescendIntoImplementation() => this._mustDescendIntoImplementation;
+        if ( identifier.RawKind != 0 && (this._kindsSupportingIdentifierFiltering & kind) != 0 )
+        {
+            var identifierText = identifier.Text;
 
-    public bool MustDescendIntoReferencedBaseTypes( ReferenceKinds referenceKinds ) => (referenceKinds & this._kindsRequiringDescentIntoBaseTypes) != 0;
+            if ( identifierText != "var" )
+            {
+                return this._filteredIdentifiers.Contains( identifierText );
+            }
+        }
 
-    public bool MustDescendIntoReferencedDeclaringType( ReferenceKinds referenceKinds )
+        return true;
+    }
+
+    internal bool MustDescendIntoMembers() => this._mustDescendIntoMembers;
+
+    internal bool MustDescendIntoImplementation() => this._mustDescendIntoImplementation;
+
+    internal bool MustDescendIntoReferencedBaseTypes( ReferenceKinds referenceKinds ) => (referenceKinds & this._kindsRequiringDescentIntoBaseTypes) != 0;
+
+    internal bool MustDescendIntoReferencedDeclaringType( ReferenceKinds referenceKinds )
         => (referenceKinds & this._kindsRequiringDescentIntoReferencedDeclaringType) != 0;
 
-    public bool MustDescendIntoReferencedNamespace( ReferenceKinds referenceKinds )
+    internal bool MustDescendIntoReferencedNamespace( ReferenceKinds referenceKinds )
         => (referenceKinds & this._kindsRequiringDescentIntoReferencedNamespace) != 0;
 
-    public bool MustDescendIntoReferencedAssembly( ReferenceKinds referenceKinds ) => (referenceKinds & this._kindsRequiringDescentIntoReferencedAssembly) != 0;
+    internal bool MustDescendIntoReferencedAssembly( ReferenceKinds referenceKinds )
+        => (referenceKinds & this._kindsRequiringDescentIntoReferencedAssembly) != 0;
 }

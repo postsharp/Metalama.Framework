@@ -21,8 +21,10 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     private readonly ISymbolClassificationService _symbolClassifier;
     private readonly ReferenceIndexBuilder _referenceIndexBuilder;
     private readonly ReferenceIndexerOptions _options;
+    private readonly SemanticModelProvider? _semanticModelProvider;
 
     private SemanticModel? _semanticModel;
+    private SyntaxTree? _syntaxTree;
     private ISymbol? _currentDeclarationSymbol;
     private SyntaxNode? _currentDeclarationNode;
     private ReferenceKinds _currentReferenceKinds = ReferenceKinds.Default;
@@ -31,19 +33,28 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         ProjectServiceProvider serviceProvider,
         CancellationToken cancellationToken,
         ReferenceIndexBuilder referenceIndexBuilder,
-        ReferenceIndexerOptions options )
+        ReferenceIndexerOptions options,
+        SemanticModelProvider? semanticModelProvider )
     {
         // This class cannot run concurrently on many threads.
         this._cancellationToken = cancellationToken;
         this._referenceIndexBuilder = referenceIndexBuilder;
         this._options = options;
+        this._semanticModelProvider = semanticModelProvider;
         this._symbolClassifier = serviceProvider.GetRequiredService<ISymbolClassificationService>();
     }
 
     public void Visit( SemanticModel semanticModel )
     {
         this._semanticModel = semanticModel;
-        this.Visit( semanticModel.SyntaxTree.GetRoot() );
+        this._syntaxTree = semanticModel.SyntaxTree;
+        this.Visit( this._syntaxTree.GetRoot() );
+    }
+
+    public void Visit( SyntaxTree syntaxTree )
+    {
+        this._syntaxTree = syntaxTree;
+        this.Visit( this._syntaxTree.GetRoot() );
     }
 
     public override void DefaultVisit( SyntaxNode node )
@@ -54,13 +65,13 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitIdentifierName( IdentifierNameSyntax node )
     {
-        this.IndexReference( node );
+        this.IndexReference( node, node.Identifier );
     }
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
         this.Visit( node.Right );
-        this.IndexReference( node.Left, ReferenceKinds.Assignment );
+        this.VisitWithReferenceKinds( node.Left, ReferenceKinds.Assignment );
 
         switch ( node.Left )
         {
@@ -90,7 +101,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             // Do not index MemberAccessExpression if the expression is a type, `this` or `base`.
             if ( memberAccess.Expression.Kind() is SyntaxKind.BaseExpression or SyntaxKind.ThisExpression
-                 || this._semanticModel!.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
+                 || this.SemanticModel!.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
             {
                 return true;
             }
@@ -173,7 +184,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     private bool CanSkipTypeDeclaration( SyntaxNode node )
     {
-        var symbol = this._semanticModel?.GetDeclaredSymbol( node );
+        var symbol = this.SemanticModel?.GetDeclaredSymbol( node );
 
         if ( symbol != null && this._symbolClassifier.GetExecutionScope( symbol ) != ExecutionScope.RunTime )
         {
@@ -454,23 +465,33 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
+    private static SyntaxToken GetTypeIdentifier( TypeSyntax? syntax )
+        => syntax switch
+        {
+            IdentifierNameSyntax identifier => identifier.Identifier,
+            GenericNameSyntax generic => generic.Identifier,
+            QualifiedNameSyntax qualified => GetTypeIdentifier( qualified.Right ),
+            _ => default
+        };
+
     public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
     {
         using ( this.EnterDefinition( node ) )
         {
             this.Visit( node.AttributeLists );
+            var baseClassIdentifier = GetTypeIdentifier( ((TypeDeclarationSyntax) node.Parent!).BaseList?.Types[0].Type );
 
             // Visit the base constructor.
             if ( node.Initializer != null )
             {
-                this.IndexReference( node.Initializer, node.Initializer.ThisOrBaseKeyword, ReferenceKinds.BaseConstructor );
+                this.IndexReference( node.Initializer, node.Initializer.ThisOrBaseKeyword, baseClassIdentifier, ReferenceKinds.BaseConstructor );
             }
             else
             {
                 // We need to find the base constructor.
-                if ( this._options.MustIndexReferenceKind( ReferenceKinds.BaseConstructor ) )
+                if ( this._options.MustIndexReference( ReferenceKinds.BaseConstructor, baseClassIdentifier ) )
                 {
-                    var symbol = this._semanticModel.GetDeclaredSymbol( node );
+                    var symbol = this.SemanticModel.GetDeclaredSymbol( node );
                     var baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
 
                     if ( baseConstructorSymbol != null )
@@ -558,7 +579,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
-        this.IndexReference( node, ReferenceKinds.ObjectCreation );
+        this.IndexReference( node, default, ReferenceKinds.ObjectCreation );
 
         this.Visit( node.ArgumentList );
         this.Visit( node.Initializer );
@@ -566,7 +587,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
     {
-        this.IndexReference( node, node.NewKeyword, ReferenceKinds.ObjectCreation );
+        this.IndexReference( node, node.NewKeyword, default, ReferenceKinds.ObjectCreation );
 
         this.Visit( node.Initializer );
         this.Visit( node.ArgumentList );
@@ -600,7 +621,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
     {
         // We may have an indexer access, which will not be discovered in another node than this one.
-        this.IndexReference( node, node.ArgumentList );
+        this.IndexReference( node, node.ArgumentList, default );
 
         // Continue visiting the children.
         base.VisitElementAccessExpression( node );
@@ -628,12 +649,14 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     private void IndexReference(
         SyntaxNode node,
+        SyntaxToken identifier,
         ReferenceKinds referenceKinds = ReferenceKinds.Default )
-        => this.IndexReference( node, node, referenceKinds );
+        => this.IndexReference( node, node, identifier, referenceKinds );
 
     private void IndexReference(
         SyntaxNode nodeForSymbol,
         SyntaxNodeOrToken nodeForReference,
+        SyntaxToken identifierForFiltering,
         ReferenceKinds referenceKinds = ReferenceKinds.Default )
     {
         if ( this._currentDeclarationNode == null )
@@ -643,9 +666,9 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
         referenceKinds = this.GetEffectiveReferenceKind( referenceKinds );
 
-        if ( this._options.MustIndexReferenceKind( referenceKinds ) )
+        if ( this._options.MustIndexReference( referenceKinds, identifierForFiltering ) )
         {
-            var symbol = this._semanticModel!.GetSymbolInfo( nodeForSymbol ).Symbol;
+            var symbol = this.SemanticModel!.GetSymbolInfo( nodeForSymbol ).Symbol;
 
             if ( !CanIndexSymbol( symbol ) )
             {
@@ -742,8 +765,11 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     private ISymbol CurrentDeclarationSymbol
         => this._currentDeclarationSymbol ??= this._currentDeclarationNode != null
-            ? this._semanticModel!.GetDeclaredSymbol( this._currentDeclarationNode ).AssertNotNull()
+            ? this.SemanticModel!.GetDeclaredSymbol( this._currentDeclarationNode ).AssertNotNull()
             : throw new InvalidOperationException();
+
+    public SemanticModel SemanticModel
+        => this._semanticModel ??= this._semanticModelProvider.AssertNotNull().GetSemanticModel( this._syntaxTree.AssertNotNull(), true );
 
     private DeclarationContextCookie EnterDefinition( SyntaxNode node )
     {
@@ -821,13 +847,13 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                     if ( genericType.Identifier.Text == nameof(Nullable<int>) )
                     {
                         // Process nullable types consitently as the ? operator.
-                        this.IndexReference( genericType.TypeArgumentList.Arguments[0], kind );
+                        this.VisitWithReferenceKinds( genericType.TypeArgumentList.Arguments[0], kind );
 
                         return;
                     }
                     else
                     {
-                        this.IndexReference( genericType, kind );
+                        this.IndexReference( genericType, genericType.Identifier, kind );
                     }
 
                     foreach ( var arg in genericType.TypeArgumentList.Arguments )
