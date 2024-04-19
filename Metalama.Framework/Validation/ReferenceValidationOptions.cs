@@ -6,6 +6,10 @@ using System;
 
 namespace Metalama.Framework.Validation;
 
+/// <summary>
+/// Options for validators added by <see cref="IValidatorReceiver.ValidateOutboundReferences(System.Action{Metalama.Framework.Validation.ReferenceValidationContext},Metalama.Framework.Validation.ReferenceGranularity,Metalama.Framework.Validation.ReferenceKinds,Metalama.Framework.Validation.ReferenceValidationOptions)"/>
+/// when supplying a delegate.
+/// </summary>
 [Flags]
 [CompileTime]
 public enum ReferenceValidationOptions
@@ -14,7 +18,10 @@ public enum ReferenceValidationOptions
 
     /// <summary>
     /// Indicates that references to derived types should also be visited by the validation method.
-    /// This property is only evaluated when the validated declaration is an <see cref="INamedType"/>.
+    /// This value is only taken into when the validated declaration is an <see cref="INamedType"/>.
+    /// Equivalent to <see cref="BaseReferenceValidator.IncludeDerivedTypes"/>.
     /// </summary>
     IncludeDerivedTypes = 1
+    
+    // An envisioned option is ExcludeMembers, which would cause references to type members not to be referenced.
 };
