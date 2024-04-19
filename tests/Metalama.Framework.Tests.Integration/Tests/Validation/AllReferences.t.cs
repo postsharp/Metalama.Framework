@@ -14,8 +14,8 @@
 // Warning MY001 on `var`: `Reference constraint of type 'LocalVariableType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `new ValidatedClass()`: `Reference constraint of type 'ObjectCreation' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=ObjectCreationExpression).`
 // Warning MY001 on `InstanceField`: `Reference constraint of type 'Default' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
-// Warning MY001 on `x.InstanceField`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=SimpleMemberAccessExpression).`
-// Warning MY001 on `x.InstanceField`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=SimpleMemberAccessExpression).`
+// Warning MY001 on `InstanceField`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `InstanceField`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `StaticField`: `Reference constraint of type 'Assignment' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `Method`: `Reference constraint of type 'Invocation' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`

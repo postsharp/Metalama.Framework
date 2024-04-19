@@ -32,6 +32,8 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
 
     public DeclarationKind ValidatedDeclarationKind => this.ValidatedDeclaration.DeclarationKind;
 
+    public string? Identifier => (this.ValidatedDeclaration as INamedDeclaration)?.Name;
+
     public ReferenceGranularity Granularity { get; }
 
     internal void Validate(

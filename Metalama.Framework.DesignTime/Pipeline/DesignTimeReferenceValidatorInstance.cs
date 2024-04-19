@@ -23,6 +23,8 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
 
     public DeclarationKind ValidatedDeclarationKind { get; }
 
+    public string? Identifier { get; set; }
+
     internal ValidatorImplementation Implementation { get; }
 
     public ReferenceGranularity Granularity { get; }
@@ -44,6 +46,7 @@ internal sealed class DesignTimeReferenceValidatorInstance : IReferenceValidator
         this._description = description;
         this.Granularity = granularity;
         this.Implementation = implementation;
+        this.Identifier = validatedDeclaration.Name;
     }
 
     internal ReferenceValidatorInstance ToReferenceValidationInstance( CompilationModel compilation )
