@@ -14,7 +14,7 @@ internal class TargetCode
     {
       global::System.Console.WriteLine("TargetCode.M2() says hello.");
       global::System.Console.WriteLine("TargetCode.M() says hello.");
-      return default(global::System.String);
+      return default(global::System.String)!;
     }
   }
 }

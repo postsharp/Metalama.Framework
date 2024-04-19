@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -42,12 +43,52 @@ internal class TestResult : IDisposable
 
     public IDiagnosticBag PipelineDiagnostics { get; } = new DiagnosticBag();
 
-    public IEnumerable<Diagnostic> Diagnostics
-        => this.OutputCompilationDiagnostics
-            .Concat( this.PipelineDiagnostics )
-            .Concat( this.InputCompilationDiagnostics );
-
     // We don't add the CompileTimeCompilationDiagnostics to Diagnostics because they are already in PipelineDiagnostics.
+    public IEnumerable<Diagnostic> Diagnostics
+    {
+        get
+        {
+            var minimalSeverity = this.TestInput?.Options.ReportOutputWarnings == true ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error;
+
+            var allDiagnostics = this.OutputCompilationDiagnostics.Where( d => d.Severity >= minimalSeverity )
+                .Concat( this.PipelineDiagnostics )
+                .Concat( this.InputCompilationDiagnostics );
+
+            return allDiagnostics.Where( MustBeReported );
+
+            bool MustBeReported( Diagnostic d )
+            {
+                if ( d.Id == "CS1701" )
+                {
+                    // Ignore warning CS1701: Assuming assembly reference "Assembly Name #1" matches "Assembly Name #2", you may need to supply runtime policy.
+                    // This warning is ignored by MSBuild anyway.
+                    return false;
+                }
+
+                if ( this.TestInput?.ShouldIgnoreDiagnostic( d.Id ) == true )
+                {
+                    return false;
+                }
+
+                foreach ( var suppression in this.DiagnosticSuppressions )
+                {
+                    if ( suppression.Matches( d, this.InputCompilation!, filter => filter() ) )
+                    {
+                        return false;
+                    }
+
+                    if ( suppression.Matches( d, this.OutputCompilation!, filter => filter() ) )
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+    }
+
+    public ImmutableArray<ScopedSuppression> DiagnosticSuppressions { get; set; } = ImmutableArray<ScopedSuppression>.Empty;
 
     public IReadOnlyList<TestSyntaxTree> SyntaxTrees => this._syntaxTrees;
 
@@ -175,7 +216,7 @@ internal class TestResult : IDisposable
              this.TestInput == null ||
              this.InputProject == null )
         {
-            throw new InvalidOperationException( "The object has not bee properly initialized." );
+            throw new InvalidOperationException( "The object has not been properly initialized." );
         }
 
         foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )

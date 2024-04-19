@@ -513,7 +513,7 @@ public class TestOptions
 
                 case "DesignTime":
                     this.TestRunnerFactoryType =
-                        "Metalama.Framework.Tests.Integration.Runners.DesignTimeTestRunnerFactory";
+                        "Metalama.Testing.AspectTesting.DesignTimeTestRunnerFactory, Metalama.Testing.AspectTesting";
 
                     break;
 
