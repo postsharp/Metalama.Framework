@@ -18,8 +18,7 @@ public sealed class ServiceFactoryTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var entryPointManager = new DesignTimeEntryPointManager();
         var factory = createFactory( entryPointManager );
-        var serviceProvider = factory.GetServiceProvider( testContext.ServiceProvider.Global );
-        serviceProvider.Dispose();
+        _ = factory.GetServiceProvider( testContext.ServiceProvider.Global );
     }
 
     [Fact]
