@@ -1,6 +1,5 @@
 #if TEST_OPTIONS
 // @DesignTime
-// @Skipped(#34803)
 #endif
 
 using System;
