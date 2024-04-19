@@ -2,6 +2,7 @@
 // Warning MY001 on `InterfaceMethod`: `Reference constraint of type 'InterfaceMemberImplementation' to type 'IValidatedInterface' from method 'ExplicitInterfaceImplementation.IValidatedInterface.InterfaceMethod()' (SyntaxKind=MethodDeclaration).`
 // Warning MY001 on `InterfaceProperty`: `Reference constraint of type 'InterfaceMemberImplementation' to type 'IValidatedInterface' from property 'ExplicitInterfaceImplementation.IValidatedInterface.InterfaceProperty' (SyntaxKind=PropertyDeclaration).`
 // Warning MY001 on `InterfaceEvent`: `Reference constraint of type 'InterfaceMemberImplementation' to type 'IValidatedInterface' from event 'ExplicitInterfaceImplementation.IValidatedInterface.InterfaceEvent' (SyntaxKind=EventDeclaration).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'AttributeType' to type 'ValidatedClass' from type 'ValidatedList' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'AttributeType' to type 'ValidatedClass' from type 'DerivedClass' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'BaseType' to type 'ValidatedClass' from type 'DerivedClass' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' to type 'ValidatedClass' from field 'DerivedClass._field1' (SyntaxKind=IdentifierName).`
@@ -26,6 +27,8 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'NameOf' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `InstanceField`: `Reference constraint of type 'NameOf' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `Invoke`: `Reference constraint of type 'Invocation' to type 'ValidatedDelegate' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ArrayElementType' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
+// Warning MY001 on `[new DerivedClass()]`: `Reference constraint of type 'ArrayCreation' to type 'ValidatedClass' from method 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=CollectionExpression).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' to type 'ValidatedClass' from property 'DerivedClass.AutomaticProperty' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `Property`: `Reference constraint of type 'OverrideMember' to type 'ValidatedClass' from property 'DerivedClass.Property' (SyntaxKind=PropertyDeclaration).`
 // Warning MY001 on `Property`: `Reference constraint of type 'Default' to type 'ValidatedClass' from method 'DerivedClass.Property.get' (SyntaxKind=IdentifierName).`

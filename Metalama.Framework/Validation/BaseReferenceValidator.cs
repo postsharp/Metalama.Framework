@@ -23,14 +23,16 @@ public abstract class BaseReferenceValidator : ICompileTimeSerializable
 
     /// <summary>
     /// Gets the kinds of references for which the <see cref="ValidateReferences"/> method should be invoked.
+    /// For optimal performance, the set should be restricted to its required minimum. Flags that are not compatible
+    /// with the validated kind of declarations are automatically ignored.
     /// </summary>
-    public virtual ReferenceKinds ValidatedReferenceKinds => ReferenceKinds.All;
+    public abstract ReferenceKinds ValidatedReferenceKinds { get; }
 
     /// <summary>
     /// Gets a value indicating whether references to derived types should also be visited by the <see cref="ValidateReferences"/> method.
     /// This property is only evaluated when the validated declaration is an <see cref="INamedType"/>.
     /// </summary>
-    public virtual bool IncludeDerivedTypes => true;
+    public virtual bool IncludeDerivedTypes => false;
 
     /// <summary>
     /// Gets level of declarations at which the analysis should be performed. For instance, if the <see cref="ValidateReferences"/> method
