@@ -57,11 +57,12 @@ public static class ReferenceKindsExtension
         ConsiderKind( ReferenceKinds.Assignment, nameof(ReferenceKinds.Assignment) );
         ConsiderKind( ReferenceKinds.OverrideMember, nameof(ReferenceKinds.OverrideMember) );
         ConsiderKind( ReferenceKinds.ArrayElementType, nameof(ReferenceKinds.ArrayElementType) );
-        ConsiderKind( ReferenceKinds.Using, nameof(ReferenceKinds.Using) );
+        ConsiderKind( ReferenceKinds.UsingNamespace, nameof(ReferenceKinds.UsingNamespace) );
         ConsiderKind( ReferenceKinds.NameOf, nameof(ReferenceKinds.NameOf) );
         ConsiderKind( ReferenceKinds.BaseConstructor, nameof(ReferenceKinds.BaseConstructor) );
         ConsiderKind( ReferenceKinds.AttributeType, nameof(ReferenceKinds.AttributeType) );
         ConsiderKind( ReferenceKinds.InterfaceMemberImplementation, nameof(ReferenceKinds.InterfaceMemberImplementation) );
+        ConsiderKind( ReferenceKinds.ArrayCreation, nameof(ReferenceKinds.ArrayCreation) );
 
         if ( consideredKinds != kinds )
         {

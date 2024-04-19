@@ -579,10 +579,34 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
-        this.IndexReference( node, default, ReferenceKinds.ObjectCreation );
+        this.IndexReference( node, GetTypeIdentifier( node.Type ), ReferenceKinds.ObjectCreation );
 
         this.Visit( node.ArgumentList );
         this.Visit( node.Initializer );
+    }
+
+    public override void VisitArrayCreationExpression( ArrayCreationExpressionSyntax node )
+    {
+        this.IndexReference( node, GetTypeIdentifier( node.Type ), ReferenceKinds.ArrayCreation );
+
+        this.Visit( node.Initializer );
+    }
+
+    public override void VisitCollectionExpression( CollectionExpressionSyntax node )
+    {
+        if ( this._options.MustIndexReferenceKind( ReferenceKinds.ArrayCreation | ReferenceKinds.ObjectCreation ) )
+        {
+            var expressionType = this.SemanticModel.GetTypeInfo( node ).ConvertedType;
+
+            if ( expressionType is IArrayTypeSymbol arrayType )
+            {
+                this._referenceIndexBuilder.AddReference( arrayType.ElementType, this.CurrentDeclarationSymbol, node, ReferenceKinds.ArrayCreation );
+            }
+            else
+            {
+                this._referenceIndexBuilder.AddReference( expressionType, this.CurrentDeclarationSymbol, node, ReferenceKinds.ObjectCreation );
+            }
+        }
     }
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
@@ -595,7 +619,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitUsingDirective( UsingDirectiveSyntax node )
     {
-        this.VisitWithReferenceKinds( node.Name, ReferenceKinds.Using );
+        this.VisitWithReferenceKinds( node.Name, ReferenceKinds.UsingNamespace );
     }
 
     public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )

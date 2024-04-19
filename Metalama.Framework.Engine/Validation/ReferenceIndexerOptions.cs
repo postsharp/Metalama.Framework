@@ -12,7 +12,8 @@ public sealed class ReferenceIndexerOptions
 {
     // Reference kinds that do not require descending into members.
 
-    private const ReferenceKinds _typeDeclarationOnlyKinds = ReferenceKinds.BaseType | ReferenceKinds.Using;
+    private const ReferenceKinds _typeDeclarationOnlyKinds = ReferenceKinds.BaseType |
+                                                             ReferenceKinds.UsingNamespace;
 
     // Any reference on members (indirectly referencing the type) cannot be detected by identifier filtering.
     private const ReferenceKinds _kindsNotSupportingIdentifierFilteringOnTypes =
@@ -22,7 +23,7 @@ public sealed class ReferenceIndexerOptions
     // Reference kinds that do not require descending into implementations. 
     private const ReferenceKinds _memberDeclarationOnlyKinds =
         ReferenceKinds.ParameterType | ReferenceKinds.ReturnType | ReferenceKinds.AttributeType | ReferenceKinds.InterfaceMemberImplementation
-        | ReferenceKinds.OverrideMember | ReferenceKinds.MemberType | ReferenceKinds.NameOf | ReferenceKinds.Using;
+        | ReferenceKinds.OverrideMember | ReferenceKinds.MemberType | ReferenceKinds.NameOf | ReferenceKinds.UsingNamespace;
 
     private readonly bool _mustDescendIntoMembers;
     private readonly ReferenceKinds _kindsRequiringDescentIntoBaseTypes;
@@ -146,8 +147,9 @@ public sealed class ReferenceIndexerOptions
             DeclarationKind.Compilation or DeclarationKind.Namespace or DeclarationKind.NamedType or DeclarationKind.AssemblyReference => ReferenceKinds.All,
             DeclarationKind.Constructor => ReferenceKinds.BaseConstructor | ReferenceKinds.ObjectCreation,
             DeclarationKind.Event or DeclarationKind.Method => ReferenceKinds.Default | ReferenceKinds.Invocation | ReferenceKinds.NameOf
-                                                               | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember | ReferenceKinds.Assignment,
-            DeclarationKind.Property => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf 
+                                                               | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember
+                                                               | ReferenceKinds.Assignment,
+            DeclarationKind.Property => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf
                                         | ReferenceKinds.InterfaceMemberImplementation | ReferenceKinds.OverrideMember,
             DeclarationKind.Field => ReferenceKinds.Default | ReferenceKinds.Assignment | ReferenceKinds.NameOf,
             DeclarationKind.Finalizer => ReferenceKinds.None,

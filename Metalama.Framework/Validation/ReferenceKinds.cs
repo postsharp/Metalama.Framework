@@ -51,7 +51,8 @@ namespace Metalama.Framework.Validation
         TypeConstraint = 1 << 5,
 
         /// <summary>
-        /// Object construction, i.e. constructor invocation.
+        /// Object construction, i.e. constructor invocation. The reference generally points to the constructor. In case of collection expression, the reference
+        /// points to the type.
         /// </summary>
         ObjectCreation = 1 << 7,
 
@@ -119,19 +120,22 @@ namespace Metalama.Framework.Validation
         Assignment = 1 << 18,
 
         /// <summary>
-        /// The member is being overridden using an <c>override</c>.
+        /// The member is being overridden using an <c>override</c>. The reference points to the overridden member.
         /// </summary>
         OverrideMember = 1 << 19,
 
         /// <summary>
-        /// Implicit or explicit implementation of an interface member.
+        /// Implicit or explicit implementation of an interface member. The reference points to the interface member.
         /// </summary>
         InterfaceMemberImplementation = 1 << 20,
 
         /// <summary>
-        /// Inside a <c>using</c> directive.
+        /// Inside a <c>using</c> namespace directive.
         /// </summary>
-        Using = 1 << 21,
+        UsingNamespace = 1 << 21,
+
+        [Obsolete( "Renamed to UsingNamespace." )]
+        Using = UsingNamespace,
 
         /// <summary>
         /// <c>nameof</c>.
@@ -139,8 +143,13 @@ namespace Metalama.Framework.Validation
         NameOf = 1 << 22,
 
         /// <summary>
-        /// Base constructor (either <c>this</c> or <c>base</c>).
+        /// Base constructor (either <c>this</c> or <c>base</c>). The reference points to the base constructor.
         /// </summary>
-        BaseConstructor = 1 << 23
+        BaseConstructor = 1 << 23,
+
+        /// <summary>
+        /// Creation of an array. The reference points to the type.
+        /// </summary>
+        ArrayCreation = 1 << 24
     }
 }
