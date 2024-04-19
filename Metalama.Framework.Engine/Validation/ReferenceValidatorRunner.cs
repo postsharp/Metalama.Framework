@@ -38,7 +38,7 @@ public class ReferenceValidatorRunner
     {
         // Collect all references.
         var referenceIndexBuilder = new ReferenceIndexBuilder( this._serviceProvider, referenceValidatorProvider.Options );
-        referenceIndexBuilder.IndexSyntaxTree( semanticModel, cancellationToken );
+        referenceIndexBuilder.IndexSemanticModel( semanticModel, cancellationToken );
 
         // Run the validator.
         return this.RunValidatorsCoreAsync(
@@ -62,7 +62,8 @@ public class ReferenceValidatorRunner
         await this._concurrentTaskRunner.RunConcurrentlyAsync(
             initialCompilation.PartialCompilation.SyntaxTrees.Values,
             syntaxTree => referenceIndexBuilder.IndexSyntaxTree(
-                semanticModelProvider.GetSemanticModel( syntaxTree, true ),
+                syntaxTree,
+                semanticModelProvider,
                 cancellationToken ),
             cancellationToken );
 
