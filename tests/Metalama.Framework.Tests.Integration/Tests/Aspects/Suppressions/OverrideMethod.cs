@@ -12,7 +12,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.IntroduceMethod
+namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.OverrideMethod
 {
     public class SuppressWarningAttribute : MethodAspect
     {
