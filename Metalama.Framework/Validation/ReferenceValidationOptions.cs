@@ -22,6 +22,6 @@ public enum ReferenceValidationOptions
     /// Equivalent to <see cref="BaseReferenceValidator.IncludeDerivedTypes"/>.
     /// </summary>
     IncludeDerivedTypes = 1
-    
+
     // An envisioned option is ExcludeMembers, which would cause references to type members not to be referenced.
-};
+}
