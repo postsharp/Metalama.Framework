@@ -20,6 +20,8 @@ public class TheValidator : OutboundReferenceValidator
     }
 
     public override ReferenceGranularity Granularity => ReferenceGranularity.ParameterOrAttribute;
+
+    public override ReferenceKinds ValidatedReferenceKinds => ReferenceKinds.All;
 }
 
 public class Fabric : ProjectFabric

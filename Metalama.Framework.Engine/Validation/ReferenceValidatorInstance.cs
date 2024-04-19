@@ -32,7 +32,16 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
 
     public DeclarationKind ValidatedDeclarationKind => this.ValidatedDeclaration.DeclarationKind;
 
-    public string? Identifier => (this.ValidatedDeclaration as INamedDeclaration)?.Name;
+    /// <summary>
+    /// Gets the identifier on which the reference to be validated can be filtered.
+    /// </summary>
+    public string? Identifier
+        => this.ValidatedDeclaration switch
+        {
+            IConstructor constructor => constructor.DeclaringType.Name,
+            INamedDeclaration namedDeclaration => namedDeclaration.Name,
+            _ => null
+        };
 
     public ReferenceGranularity Granularity { get; }
 

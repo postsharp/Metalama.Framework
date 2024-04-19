@@ -43,8 +43,13 @@ internal sealed class ReferenceIndexBuilder
         }
     }
 
-    internal void AddReference( ISymbol referencedSymbol, ISymbol referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
+    internal void AddReference( ISymbol? referencedSymbol, ISymbol? referencingSymbol, SyntaxNodeOrToken node, ReferenceKinds referenceKind )
     {
+        if ( referencedSymbol == null || referencingSymbol == null )
+        {
+            return;
+        }
+        
         referencedSymbol = referencedSymbol.OriginalDefinition;
         referencingSymbol = referencingSymbol.OriginalDefinition;
 

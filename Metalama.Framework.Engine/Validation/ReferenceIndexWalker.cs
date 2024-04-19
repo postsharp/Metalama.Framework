@@ -99,9 +99,11 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     {
         if ( node is MemberAccessExpressionSyntax memberAccess )
         {
+            // TODO: Can we avoid resolving the symbol here?
+            
             // Do not index MemberAccessExpression if the expression is a type, `this` or `base`.
             if ( memberAccess.Expression.Kind() is SyntaxKind.BaseExpression or SyntaxKind.ThisExpression
-                 || this.SemanticModel!.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
+                 || this.SemanticModel.GetSymbolInfo( memberAccess ).Symbol is { IsStatic: true } )
             {
                 return true;
             }
@@ -184,7 +186,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     private bool CanSkipTypeDeclaration( SyntaxNode node )
     {
-        var symbol = this.SemanticModel?.GetDeclaredSymbol( node );
+        var symbol = this.SemanticModel.GetDeclaredSymbol( node );
 
         if ( symbol != null && this._symbolClassifier.GetExecutionScope( symbol ) != ExecutionScope.RunTime )
         {
@@ -592,9 +594,10 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this.Visit( node.Initializer );
     }
 
+#if ROSLYN_4_8_0_OR_GREATER
     public override void VisitCollectionExpression( CollectionExpressionSyntax node )
     {
-        if ( this._options.MustIndexReferenceKind( ReferenceKinds.ArrayCreation | ReferenceKinds.ObjectCreation ) )
+        if ( this._options.MustIndexReferenceKind( ReferenceKinds.ArrayCreation | ReferenceKinds.ObjectCreation ) && this._currentDeclarationNode != null )
         {
             var expressionType = this.SemanticModel.GetTypeInfo( node ).ConvertedType;
 
@@ -602,12 +605,13 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             {
                 this._referenceIndexBuilder.AddReference( arrayType.ElementType, this.CurrentDeclarationSymbol, node, ReferenceKinds.ArrayCreation );
             }
-            else
+            else if ( expressionType != null )
             {
                 this._referenceIndexBuilder.AddReference( expressionType, this.CurrentDeclarationSymbol, node, ReferenceKinds.ObjectCreation );
             }
         }
     }
+#endif
 
     public override void VisitImplicitObjectCreationExpression( ImplicitObjectCreationExpressionSyntax node )
     {
@@ -692,7 +696,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
         if ( this._options.MustIndexReference( referenceKinds, identifierForFiltering ) )
         {
-            var symbol = this.SemanticModel!.GetSymbolInfo( nodeForSymbol ).Symbol;
+            var symbol = this.SemanticModel.GetSymbolInfo( nodeForSymbol ).Symbol;
 
             if ( !CanIndexSymbol( symbol ) )
             {
@@ -787,10 +791,11 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-    private ISymbol CurrentDeclarationSymbol
+    // We are accepting nulls to be more resilient at design time.
+    private ISymbol? CurrentDeclarationSymbol
         => this._currentDeclarationSymbol ??= this._currentDeclarationNode != null
-            ? this.SemanticModel!.GetDeclaredSymbol( this._currentDeclarationNode ).AssertNotNull()
-            : throw new InvalidOperationException();
+            ? this.SemanticModel.GetDeclaredSymbol( this._currentDeclarationNode )
+            : null;
 
     public SemanticModel SemanticModel
         => this._semanticModel ??= this._semanticModelProvider.AssertNotNull().GetSemanticModel( this._syntaxTree.AssertNotNull(), true );

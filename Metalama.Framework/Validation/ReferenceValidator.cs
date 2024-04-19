@@ -15,4 +15,8 @@ public abstract class ReferenceValidator : OutboundReferenceValidator
 
     // The default value is for backward compatibility.
     public sealed override ReferenceGranularity Granularity => ReferenceGranularity.Member;
+
+    public override ReferenceKinds ValidatedReferenceKinds => ReferenceKinds.All;
+
+    public override bool IncludeDerivedTypes => true;
 }
