@@ -3,6 +3,8 @@
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Aspects;
 
@@ -24,4 +26,16 @@ public static class AspectReceiverExtensions
     /// </summary>
     public static IAspectReceiver<INamedType> SelectType( this IAspectReceiver<ICompilation> receiver, Type type )
         => receiver.Select( c => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( type ) );
+
+    /// <summary>
+    /// Selects several <see cref="INamedType"/> in the current compilation or in a reference assembly given their reflection <see cref="Type"/>.
+    /// </summary>
+    public static IAspectReceiver<INamedType> SelectTypes( this IAspectReceiver<ICompilation> receiver, IEnumerable<Type> types )
+        => receiver.SelectMany( c => types.Select( t => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( t ) ) );
+
+    /// <summary>
+    /// Selects several <see cref="INamedType"/> in the current compilation or in a reference assembly given their reflection <see cref="Type"/>.
+    /// </summary>
+    public static IAspectReceiver<INamedType> SelectTypes( this IAspectReceiver<ICompilation> receiver, Type[] types )
+        => receiver.SelectTypes( (IEnumerable<Type>) types );
 }
