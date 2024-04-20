@@ -13,5 +13,5 @@ public interface IReferenceValidatorProperties
 
     DeclarationKind ValidatedDeclarationKind { get; }
 
-    string? Identifier { get; }
+    string? ValidatedIdentifier { get; }
 }

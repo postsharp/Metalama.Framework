@@ -36,7 +36,7 @@ internal sealed class ReferenceValidationContextImpl : ReferenceValidationContex
     public override IEnumerable<ReferenceInstance> References
         => this._references.SelectMany(
                 r => r.Nodes
-                    .Where( n => (n.ReferenceKind & this._parent.ReferenceKinds) != 0 )
+                    .Where( n => (n.ReferenceKind & this._parent.Properties.ReferenceKinds) != 0 )
                     .Select( n => new ReferenceInstance( this, (object?) n.Syntax.AsNode() ?? n.Syntax.AsToken(), r.ReferencingSymbol, n.ReferenceKind ) ) )
             .Cache();
 

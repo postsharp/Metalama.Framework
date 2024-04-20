@@ -96,7 +96,7 @@ public class ReferenceValidatorRunner
 
             var validatorsByGranularity = referenceValidatorProvider
                 .GetValidators( referencedSymbol )
-                .Where( v => !isBaseType || v.IncludeDerivedTypes )
+                .Where( v => !isBaseType || v.Properties.IncludeDerivedTypes )
                 .GroupBy( v => v.Granularity );
 
             foreach ( var validatorGroup in validatorsByGranularity )
@@ -136,7 +136,7 @@ public class ReferenceValidatorRunner
 
                     // Select groups that have at least one relevant node for the validator. 
                     var groupedReferencesForValidator =
-                        groupedReferences.Where( g => g.Any( r => (r.Nodes.ReferenceKinds & validator.ReferenceKinds) != 0 ) );
+                        groupedReferences.Where( g => g.Any( r => (r.Nodes.ReferenceKinds & validator.Properties.ReferenceKinds) != 0 ) );
 
 #pragma warning disable CS0612 // Type or member is obsolete
                     if ( validatorGroup.Key == ReferenceGranularity.SyntaxNode )
