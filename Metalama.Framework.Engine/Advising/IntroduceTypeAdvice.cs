@@ -19,13 +19,13 @@ namespace Metalama.Framework.Engine.Advising
         public IntroduceTypeAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
-            IDeclaration? targetDeclaration,
+            INamespaceOrNamedType? targetNamespaceOrType,
             string? explicitName,
             ICompilation sourceCompilation,
             Action<NamedTypeBuilder>? buildAction,
-            string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
+            string? layerName ) : base( aspect, templateInstance, targetNamespaceOrType, sourceCompilation, buildAction, layerName )
         {
-            this.Builder = new NamedTypeBuilder( this, (INamedType) targetDeclaration.AssertNotNull(), explicitName.AssertNotNull() );
+            this.Builder = new NamedTypeBuilder( this, targetNamespaceOrType.AssertNotNull(), explicitName.AssertNotNull() );
         }
 
         public override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )

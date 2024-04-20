@@ -569,7 +569,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType( INamespace targetNamespace, string typeName, Action<INamedTypeBuilder>? buildType = null )
+    public IIntroductionAdviceResult<INamedType> IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string typeName, Action<INamedTypeBuilder>? buildType = null )
     {
         if ( this._templateInstance == null )
         {
@@ -581,29 +581,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             var advice = new IntroduceTypeAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
-                targetNamespace,
-                typeName,
-                this._state.CurrentCompilation,
-                buildType,
-                this._layerName );
-
-            return this.ExecuteAdvice<INamedType>( advice );
-        }
-    }
-
-    public IIntroductionAdviceResult<INamedType> IntroduceType( INamedType targetType, string typeName, Action<INamedTypeBuilder>? buildType = null )
-    {
-        if ( this._templateInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
-        using ( this.WithNonUserCode() )
-        {
-            var advice = new IntroduceTypeAdvice(
-                this._state.AspectInstance,
-                this._templateInstance,
-                targetType,
+                targetNamespaceOrType,
                 typeName,
                 this._state.CurrentCompilation,
                 buildType,

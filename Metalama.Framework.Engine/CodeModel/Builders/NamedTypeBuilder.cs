@@ -19,14 +19,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, ISdkType, ISdkDeclaration
 {
-    public NamedTypeBuilder( Advice advice, INamespace declaringNamespace, string name ) : base( advice, null, name )
+    public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base( advice, declaringNamespaceOrType as INamedType, name )
     {
-        this.Namespace = declaringNamespace;
-    }
-
-    public NamedTypeBuilder( Advice advice, INamedType declaringType, string name ) : base( advice, declaringType, name )
-    {
-        this.Namespace = this.DeclaringType!.Namespace;
+        this.Namespace = declaringNamespaceOrType switch
+        {
+            INamespace @namespace => @namespace,
+            INamedType namedType => namedType.Namespace,
+            _ => throw new AssertionFailedException($"Unsupported: {declaringNamespaceOrType}"),
+        };
     }
 
     public override IDeclaration ContainingDeclaration => (IDeclaration?) this.DeclaringType ?? this.Namespace;
