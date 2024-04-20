@@ -204,7 +204,7 @@ internal sealed class ValidationRunner
         public ValidatorProvider( ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> validatorsBySymbol )
         {
             this._validatorsBySymbol = validatorsBySymbol;
-            this.Options = new ReferenceIndexerOptions( validatorsBySymbol.SelectMany( x => x ) );
+            this.Options = new ReferenceIndexerOptions( validatorsBySymbol.SelectMany( x => x ).Select( x => x.Properties ) );
         }
 
         public ReferenceIndexerOptions Options { get; }

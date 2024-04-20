@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceValidatorProperties
+public class ReferenceValidatorInstance : ValidatorInstance
 {
     public ReferenceValidatorInstance(
         IDeclaration validatedDeclaration,
@@ -19,31 +19,13 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
         string description,
         ReferenceGranularity granularity ) : base( validatedDeclaration, driver, implementation, description )
     {
-        this.ReferenceKinds = referenceKinds;
-        this.IncludeDerivedTypes = includeDerivedTypes;
+        this.Properties = new ReferenceValidatorProperties( validatedDeclaration, referenceKinds, includeDerivedTypes );
         this.Granularity = granularity;
     }
 
-    // Aspect or fabric.
-
-    public ReferenceKinds ReferenceKinds { get; }
-
-    public bool IncludeDerivedTypes { get; }
-
-    public DeclarationKind ValidatedDeclarationKind => this.ValidatedDeclaration.DeclarationKind;
-
-    /// <summary>
-    /// Gets the identifier on which the reference to be validated can be filtered.
-    /// </summary>
-    public string? Identifier
-        => this.ValidatedDeclaration switch
-        {
-            IConstructor constructor => constructor.DeclaringType.Name,
-            INamedDeclaration namedDeclaration => namedDeclaration.Name,
-            _ => null
-        };
-
     public ReferenceGranularity Granularity { get; }
+
+    public IReferenceValidatorProperties Properties { get; }
 
     internal void Validate(
         IDeclaration referencingDeclaration,

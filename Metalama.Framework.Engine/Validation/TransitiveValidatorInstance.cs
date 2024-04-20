@@ -15,12 +15,15 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 {
     internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
+        var implementation = instance.Implementation;
+        var properties = instance.Properties;
+
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToTypedRef();
-        this.ReferenceKinds = instance.ReferenceKinds;
-        this.IncludeDerivedTypes = instance.IncludeDerivedTypes;
+        this.ReferenceKinds = properties.ReferenceKinds;
+        this.IncludeDerivedTypes = properties.IncludeDerivedTypes;
         this.MethodName = instance.Driver.MethodName;
-        this.Object = instance.Implementation.Implementation;
-        this.State = instance.Implementation.State;
+        this.Object = implementation.Implementation;
+        this.State = implementation.State;
         this.DiagnosticSourceDescription = instance.DiagnosticSourceDescription;
         this.Granularity = instance.Granularity;
     }

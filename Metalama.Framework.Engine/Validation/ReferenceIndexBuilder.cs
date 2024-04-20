@@ -49,7 +49,7 @@ internal sealed class ReferenceIndexBuilder
         {
             return;
         }
-        
+
         referencedSymbol = referencedSymbol.OriginalDefinition;
         referencingSymbol = referencingSymbol.OriginalDefinition;
 
@@ -140,7 +140,7 @@ internal sealed class ReferenceIndexBuilder
         visitor.Visit( semanticModel );
     }
 
-    internal void IndexSyntaxTree( SyntaxTree syntaxTree, SemanticModelProvider semanticModelProvider, CancellationToken cancellationToken )
+    internal void IndexSyntaxTree( SyntaxTree syntaxTree, SemanticModelProvider semanticModelProvider, CancellationToken cancellationToken = default )
     {
         if ( this._frozen )
         {

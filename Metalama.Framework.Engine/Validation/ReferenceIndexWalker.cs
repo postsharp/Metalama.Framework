@@ -25,6 +25,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     private readonly ReferenceIndexBuilder _referenceIndexBuilder;
     private readonly ReferenceIndexerOptions _options;
     private readonly SemanticModelProvider? _semanticModelProvider;
+    private readonly IReferenceIndexObserver? _observer;
 
     private SemanticModel? _semanticModel;
     private SyntaxTree? _syntaxTree;
@@ -45,6 +46,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this._options = options;
         this._semanticModelProvider = semanticModelProvider;
         this._symbolClassifier = serviceProvider.GetRequiredService<ISymbolClassificationService>();
+        this._observer = serviceProvider.GetService<IReferenceIndexObserver>();
     }
 
     public void Visit( SemanticModel semanticModel )
@@ -145,7 +147,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitParameter( ParameterSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.VisitTypeReference( node.Type, ReferenceKinds.ParameterType );
             this.Visit( node.AttributeLists );
@@ -168,19 +170,6 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
     public override void VisitTypeConstraint( TypeConstraintSyntax node )
     {
         this.VisitTypeReference( node.Type, ReferenceKinds.TypeConstraint );
-    }
-
-    private bool CanSkipTypeDeclaration( SyntaxNode node )
-    {
-        var symbol = this.SemanticModel.GetDeclaredSymbol( node );
-
-        if ( symbol != null && this._symbolClassifier.GetExecutionScope( symbol ) != ExecutionScope.RunTime )
-        {
-            // We only validate run-time code.
-            return true;
-        }
-
-        return false;
     }
 
     private void VisitMembers( SyntaxList<MemberDeclarationSyntax> members )
@@ -206,12 +195,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitClassDeclaration( ClassDeclarationSyntax node )
     {
-        if ( this.CanSkipTypeDeclaration( node ) )
-        {
-            return;
-        }
-
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterTypeDeclarationDefinition( node ) )
         {
             this.Visit( node.AttributeLists );
             this.Visit( node.BaseList );
@@ -222,12 +206,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitRecordDeclaration( RecordDeclarationSyntax node )
     {
-        if ( this.CanSkipTypeDeclaration( node ) )
-        {
-            return;
-        }
-
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterTypeDeclarationDefinition( node ) )
         {
             this.Visit( node.AttributeLists );
             this.Visit( node.BaseList );
@@ -244,12 +223,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitStructDeclaration( StructDeclarationSyntax node )
     {
-        if ( this.CanSkipTypeDeclaration( node ) )
-        {
-            return;
-        }
-
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterTypeDeclarationDefinition( node ) )
         {
             this.Visit( node.AttributeLists );
             this.Visit( node.BaseList );
@@ -260,12 +234,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitDelegateDeclaration( DelegateDeclarationSyntax node )
     {
-        if ( this.CanSkipTypeDeclaration( node ) )
-        {
-            return;
-        }
-
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterTypeDeclarationDefinition( node ) )
         {
             base.VisitDelegateDeclaration( node );
         }
@@ -273,12 +242,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitEnumDeclaration( EnumDeclarationSyntax node )
     {
-        if ( this.CanSkipTypeDeclaration( node ) )
-        {
-            return;
-        }
-
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterTypeDeclarationDefinition( node ) )
         {
             this.Visit( node.BaseList );
             this.Visit( node.AttributeLists );
@@ -295,7 +259,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.IndexMember<IMethodSymbol>( node, m => m.OverriddenMethod, m => m.ExplicitInterfaceImplementations );
 
@@ -318,7 +282,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.Visit( node.AttributeLists );
 
@@ -337,7 +301,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitEventDeclaration( EventDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.Visit( node.AttributeLists );
 
@@ -355,7 +319,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             var variable = node.Declaration.Variables[index];
 
-            using ( this.EnterDefinition( variable ) )
+            using ( this.EnterDeclaration( variable ) )
             {
                 if ( index == 0 )
                 {
@@ -368,7 +332,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
                 if ( variable.Initializer != null && this._options.MustDescendIntoImplementation() )
                 {
-                    using ( this.EnterDefinition( variable ) )
+                    using ( this.EnterDeclaration( variable ) )
                     {
                         this.Visit( variable.Initializer );
                     }
@@ -383,7 +347,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             var variable = node.Declaration.Variables[index];
 
-            using ( this.EnterDefinition( variable ) )
+            using ( this.EnterDeclaration( variable ) )
             {
                 if ( index == 0 )
                 {
@@ -396,7 +360,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
                 if ( variable.Initializer != null && this._options.MustDescendIntoImplementation() )
                 {
-                    using ( this.EnterDefinition( variable ) )
+                    using ( this.EnterDeclaration( variable ) )
                     {
                         this.Visit( variable.Initializer );
                     }
@@ -420,7 +384,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitOperatorDeclaration( OperatorDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.VisitTypeReference( node.ReturnType, ReferenceKinds.ReturnType );
 
@@ -441,7 +405,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.Visit( node.AttributeLists );
 
@@ -464,7 +428,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.Visit( node.AttributeLists );
             var baseClassIdentifier = GetTypeIdentifier( ((TypeDeclarationSyntax) node.Parent!).BaseList?.Types[0].Type );
@@ -480,6 +444,9 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                 if ( this._options.MustIndexReference( ReferenceKinds.BaseConstructor, baseClassIdentifier ) )
                 {
                     var symbol = this.SemanticModel.GetDeclaredSymbol( node );
+
+                    this._observer?.OnSymbolResolved( symbol );
+
                     var baseConstructorSymbol = symbol?.ContainingType.BaseType?.Constructors.FirstOrDefault( c => c.Parameters.Length == 0 );
 
                     if ( baseConstructorSymbol != null )
@@ -510,7 +477,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitDestructorDeclaration( DestructorDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.Visit( node.AttributeLists );
 
@@ -524,7 +491,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.VisitTypeReference( node.Type, ReferenceKinds.ReturnType );
 
@@ -545,7 +512,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
     public override void VisitIndexerDeclaration( IndexerDeclarationSyntax node )
     {
-        using ( this.EnterDefinition( node ) )
+        using ( this.EnterDeclaration( node ) )
         {
             this.VisitTypeReference( node.Type, ReferenceKinds.ReturnType );
 
@@ -586,6 +553,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         if ( this._options.MustIndexReferenceKind( ReferenceKinds.ArrayCreation | ReferenceKinds.ObjectCreation ) && this._currentDeclarationNode != null )
         {
             var expressionType = this.SemanticModel.GetTypeInfo( node ).ConvertedType;
+
+            this._observer?.OnSymbolResolved( expressionType );
 
             if ( expressionType is IArrayTypeSymbol arrayType )
             {
@@ -692,7 +661,9 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         {
             var symbol = this.SemanticModel.GetSymbolInfo( nodeForSymbol ).Symbol;
 
-            if ( symbol == null || !CanIndexSymbol( symbol ) )
+            this._observer?.OnSymbolResolved( symbol );
+
+            if ( symbol == null || !this.CanIndexSymbol( symbol ) )
             {
                 return;
             }
@@ -760,7 +731,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         return referenceKinds;
     }
 
-    private static bool CanIndexSymbol( ISymbol symbol )
+    private bool CanIndexSymbol( ISymbol symbol )
     {
         switch ( symbol.Kind )
         {
@@ -778,24 +749,60 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
             case SymbolKind.Property:
             case SymbolKind.TypeParameter:
             case SymbolKind.FunctionPointerType:
-                return true;
+                break;
 
             default:
-                // Not referenced.
                 return false;
         }
+
+        // Ignore any compile-time type declaration.
+        var currentType = this.CurrentDeclarationSymbol?.GetClosestContainingType();
+
+        if ( currentType != null && this._symbolClassifier.GetExecutionScope( currentType ) != ExecutionScope.RunTime )
+        {
+            return false;
+        }
+
+        return true;
     }
 
     // We are accepting nulls to be more resilient at design time.
     private ISymbol? CurrentDeclarationSymbol
-        => this._currentDeclarationSymbol ??= this._currentDeclarationNode != null
-            ? this.SemanticModel.GetDeclaredSymbol( this._currentDeclarationNode )
-            : null;
+    {
+        get
+        {
+            if ( this._currentDeclarationSymbol == null )
+            {
+                if ( this._currentDeclarationNode != null )
+                {
+                    this._currentDeclarationSymbol = this.SemanticModel.GetDeclaredSymbol( this._currentDeclarationNode );
+                    this._observer?.OnSymbolResolved( this._currentDeclarationSymbol );
+                }
+                else
+                {
+                    this._currentDeclarationSymbol = null;
+                }
+            }
+
+            return this._currentDeclarationSymbol;
+        }
+    }
 
     private SemanticModel SemanticModel
-        => this._semanticModel ??= this._semanticModelProvider.AssertNotNull().GetSemanticModel( this._syntaxTree.AssertNotNull(), true );
+    {
+        get
+        {
+            if ( this._semanticModel == null )
+            {
+                this._semanticModel = this._semanticModelProvider.AssertNotNull().GetSemanticModel( this._syntaxTree.AssertNotNull(), true );
+                this._observer?.OnSemanticModelResolved( this._semanticModel );
+            }
 
-    private DeclarationContextCookie EnterDefinition( SyntaxNode node )
+            return this._semanticModel;
+        }
+    }
+
+    private DeclarationContextCookie EnterDeclaration( SyntaxNode node )
     {
         var previousSymbol = this._currentDeclarationSymbol;
         var previousNode = this._currentDeclarationNode;
@@ -805,6 +812,8 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
 
         return new DeclarationContextCookie( this, previousSymbol, previousNode );
     }
+
+    private DeclarationContextCookie EnterTypeDeclarationDefinition( SyntaxNode node ) => this.EnterDeclaration( node );
 
     private void Visit<T>( SyntaxList<T> list )
         where T : SyntaxNode
