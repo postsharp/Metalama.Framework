@@ -317,20 +317,37 @@ namespace Metalama.Framework.Engine.Fabrics
 
         IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypes( bool includeNestedTypes ) => this.SelectTypes( includeNestedTypes );
 
+        IAspectReceiver<INamedType, TTag> IAspectReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IAspectReceiver<INamedType, TTag> IAspectReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom(
+            INamedType baseType,
+            DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
+
         IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
-            => this.SelectTypesDerivedFrom( baseType, options );
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( c => (INamedType) c.Factory.GetTypeByReflectionType( baseType ), options );
+
+        IAspectReceiver<INamedType> IAspectReceiver<TDeclaration>.SelectTypesDerivedFrom( INamedType baseType, DerivedTypesOptions options )
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
 
         IValidatorReceiver<INamedType, TTag> IValidatorReceiver<TDeclaration, TTag>.SelectTypesDerivedFrom(
-            Type baseType,
+            INamedType baseType,
             DerivedTypesOptions options )
-            => this.SelectTypesDerivedFrom( baseType, options );
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
 
         IValidatorReceiver<INamedType> IValidatorReceiver<TDeclaration>.SelectTypesDerivedFrom(
-            Type baseType,
+            INamedType baseType,
             DerivedTypesOptions options )
-            => this.SelectTypesDerivedFrom( baseType, options );
+            => this.SelectTypesDerivedFromCore( _ => baseType, options );
 
-        public IAspectReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options )
+        private IAspectReceiver<INamedType, TTag> SelectTypesDerivedFromCore( Func<CompilationModel, INamedType> getBaseType, DerivedTypesOptions options )
             => this.AddChild(
                 new ChildAspectReceiver<INamedType, TTag>(
                     this._containingDeclaration,
@@ -340,7 +357,9 @@ namespace Metalama.Framework.Engine.Fabrics
                         context,
                         ( declaration, tag, context2 ) =>
                         {
-                            if ( declaration is ICompilation compilation )
+                            var baseType = getBaseType( declaration.GetCompilationModel() );
+
+                            if ( declaration is CompilationModel compilation )
                             {
                                 var types = compilation.GetDerivedTypes( baseType, options );
 
@@ -352,7 +371,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             else if ( options != DerivedTypesOptions.Default )
                             {
                                 throw new NotImplementedException(
-                                    $"Non-default DerivedTypesOptions are only implemented for ICompilation but an have a {declaration.DeclarationKind.ToDisplayString()}." );
+                                    $"Non-default DerivedTypesOptions are only implemented for ICompilation but was used with a {declaration.DeclarationKind.ToDisplayString()}." );
                             }
                             else
                             {
@@ -566,7 +585,7 @@ namespace Metalama.Framework.Engine.Fabrics
                         context,
                         ( declaration, tag, context2 ) => action( selector( declaration, tag ), tag, context2 ) ) ) );
 
-        public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false )
+        public IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = true )
             => this.AddChild(
                 new ChildAspectReceiver<INamedType, TTag>(
                     this._containingDeclaration,

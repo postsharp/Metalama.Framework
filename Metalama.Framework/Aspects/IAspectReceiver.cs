@@ -114,7 +114,7 @@ namespace Metalama.Framework.Aspects
         /// </para> 
         /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
         /// </remarks>
-        new IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes = false );
+        new IAspectReceiver<INamedType> SelectTypes( bool includeNestedTypes = true );
 
         /// <summary>
         /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="Type"/>. 
@@ -123,6 +123,14 @@ namespace Metalama.Framework.Aspects
         /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
         /// </remarks>
         new IAspectReceiver<INamedType> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
+        
+        /// <summary>
+        /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="INamedType"/>. 
+        /// </summary>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+        /// </remarks>
+        new IAspectReceiver<INamedType> SelectTypesDerivedFrom( INamedType type, DerivedTypesOptions options = DerivedTypesOptions.Default );
 
         /// <summary>
         /// Filters the set of declarations based on a predicate.
@@ -247,7 +255,7 @@ namespace Metalama.Framework.Aspects
         /// </para> 
         /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
         /// </remarks>
-        new IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false );
+        new IAspectReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = true );
 
         /// <summary>
         /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="Type"/>. 
@@ -256,6 +264,14 @@ namespace Metalama.Framework.Aspects
         /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
         /// </remarks>
         new IAspectReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type baseType, DerivedTypesOptions options = DerivedTypesOptions.Default );
+        
+        /// <summary>
+        /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="Type"/>. 
+        /// </summary>
+        /// <remarks>
+        /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+        /// </remarks>
+        new IAspectReceiver<INamedType, TTag> SelectTypesDerivedFrom( INamedType baseType, DerivedTypesOptions options = DerivedTypesOptions.Default );
 
         /// <summary>
         /// Filters the set of declarations based on a predicate.

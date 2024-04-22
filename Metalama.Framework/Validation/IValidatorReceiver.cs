@@ -151,7 +151,7 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// </para> 
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
-    IValidatorReceiver<INamedType> SelectTypes( bool includeNestedTypes = false );
+    IValidatorReceiver<INamedType> SelectTypes( bool includeNestedTypes = true );
 
     /// <summary>
     /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="Type"/>. 
@@ -160,6 +160,14 @@ public interface IValidatorReceiver<out TDeclaration> : IValidatorReceiver
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
     IValidatorReceiver<INamedType> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
+    
+    /// <summary>
+    /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="INamedType"/>. 
+    /// </summary>
+    /// <remarks>
+    /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+    /// </remarks>
+    IValidatorReceiver<INamedType> SelectTypesDerivedFrom( INamedType type, DerivedTypesOptions options = DerivedTypesOptions.Default );
 
     /// <summary>
     /// Filters the set of declarations based on a predicate.
@@ -262,7 +270,7 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// </para> 
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
-    new IValidatorReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = false );
+    new IValidatorReceiver<INamedType, TTag> SelectTypes( bool includeNestedTypes = true );
 
     /// <summary>
     /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="Type"/>. 
@@ -271,6 +279,14 @@ public interface IValidatorReceiver<out TDeclaration, out TTag> : IValidatorRece
     /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
     /// </remarks>
     new IValidatorReceiver<INamedType, TTag> SelectTypesDerivedFrom( Type type, DerivedTypesOptions options = DerivedTypesOptions.Default );
+    
+    /// <summary>
+    /// Selects all types, among those enclosed in declarations of the current set, that derive from or implement a given <see cref="INamedType"/>. 
+    /// </summary>
+    /// <remarks>
+    /// <para>The query on the <i>right</i> part of <see cref="SelectTypes"/> is executed concurrently.</para>. 
+    /// </remarks>
+    new IValidatorReceiver<INamedType, TTag> SelectTypesDerivedFrom( INamedType type, DerivedTypesOptions options = DerivedTypesOptions.Default );
 
     /// <summary>
     /// Filters the set of declarations based on a predicate.
