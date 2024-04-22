@@ -3,12 +3,10 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
-using System.Collections.Generic;
+using Metalama.Framework.Engine.Utilities.Threading;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
@@ -21,9 +19,11 @@ internal sealed class FabricAspectSource : IAspectSource
 
     private readonly ImmutableArray<TypeFabricDriver> _drivers; // Note that this list is ordered.
     private readonly ImmutableArray<IAspectClass> _aspectClasses;
+    private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
     public FabricAspectSource( FabricManager fabricManager, ImmutableArray<TypeFabricDriver> drivers )
     {
+        this._concurrentTaskRunner = fabricManager.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
         this._fabricManager = fabricManager;
         this._drivers = drivers;
         this._aspectClasses = ImmutableArray.Create<IAspectClass>( fabricManager.AspectClasses[FabricTopLevelAspectClass.FabricAspectName] );
@@ -31,13 +31,11 @@ internal sealed class FabricAspectSource : IAspectSource
 
     ImmutableArray<IAspectClass> IAspectSource.AspectClasses => this._aspectClasses;
 
-    AspectSourceResult IAspectSource.GetAspectInstances(
-        CompilationModel compilation,
+    Task IAspectSource.CollectAspectInstancesAsync(
         IAspectClass aspectClass,
-        IDiagnosticAdder diagnosticAdder,
-        CancellationToken cancellationToken )
+        OutboundActionCollectionContext context )
     {
-        var aspectInstances = new List<AspectInstance>();
+        var compilation = context.Compilation;
 
         // Group drivers by their target declaration.
         var driversByTarget =
@@ -45,8 +43,10 @@ internal sealed class FabricAspectSource : IAspectSource
                 .Where( x => x.Target != null )
                 .GroupBy( x => x.Target );
 
+        return this._concurrentTaskRunner.RunConcurrentlyAsync( driversByTarget, ProcessDriver, context.CancellationToken );
+
         // Process target declarations.
-        foreach ( var driverGroup in driversByTarget )
+        void ProcessDriver( IGrouping<IDeclaration?, (TypeFabricDriver Driver, IDeclaration? Target)> driverGroup )
         {
             var target = driverGroup.Key!;
 
@@ -59,7 +59,7 @@ internal sealed class FabricAspectSource : IAspectSource
                         this._fabricManager.ServiceProvider,
                         x.Driver,
                         x.Driver.CompileTimeProject.TemplateReflectionContext ?? compilation.CompilationContext,
-                        diagnosticAdder,
+                        context.Collector,
                         null ) )
                 .ToImmutableArray();
 
@@ -82,9 +82,7 @@ internal sealed class FabricAspectSource : IAspectSource
             // Creates the aggregate AspectInstance for the target declaration.
             var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, default );
 
-            aspectInstances.Add( aggregateInstance );
+            context.Collector.AddAspectInstance( aggregateInstance );
         }
-
-        return new AspectSourceResult( aspectInstances );
     }
 }

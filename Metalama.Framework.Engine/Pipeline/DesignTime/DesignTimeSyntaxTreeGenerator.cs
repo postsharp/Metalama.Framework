@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            await taskScheduler.RunInParallelAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
 
             void ProcessTransformationsOnType( IGrouping<INamedType, ITransformation> transformationsOnType )
             {
@@ -275,54 +275,58 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             => type.TypeKind switch
             {
                 TypeKind.Class => ClassDeclaration(
-                    default,
+                    attributeLists: default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
                     CreateTypeParameters( type ),
                     baseList,
-                    default,
+                    constraintClauses: default,
                     members ),
                 TypeKind.RecordClass => RecordDeclaration(
-                        default,
-                        SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
-                        Token( SyntaxKind.RecordKeyword ),
-                        Identifier( type.Name ),
-                        CreateTypeParameters( type )!,
-                        null!,
-                        baseList!,
-                        default,
-                        members )
-                    .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ) )
-                    .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ) )
-                    .WithClassOrStructKeyword( Token( SyntaxKind.ClassKeyword ) ),
+                    SyntaxKind.RecordDeclaration,
+                    attributeLists: default,
+                    SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
+                    keyword: Token( SyntaxKind.RecordKeyword ),
+                    classOrStructKeyword: Token( SyntaxKind.ClassKeyword ),
+                    Identifier( type.Name ),
+                    CreateTypeParameters( type ),
+                    parameterList: null,
+                    baseList,
+                    constraintClauses: default,
+                    openBraceToken: Token( SyntaxKind.OpenBraceToken ),
+                    members,
+                    closeBraceToken: Token( SyntaxKind.CloseBraceToken ),
+                    semicolonToken: default ),
                 TypeKind.Struct => StructDeclaration(
-                    default,
+                    attributeLists: default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
                     CreateTypeParameters( type ),
                     baseList,
-                    default,
+                    constraintClauses: default,
                     members ),
                 TypeKind.RecordStruct => RecordDeclaration(
-                        default,
-                        SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
-                        Token( SyntaxKind.RecordKeyword ),
-                        Identifier( type.Name ),
-                        CreateTypeParameters( type )!,
-                        null!,
-                        baseList!,
-                        default,
-                        members )
-                    .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ) )
-                    .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ) )
-                    .WithClassOrStructKeyword( Token( SyntaxKind.StructKeyword ) ),
+                    SyntaxKind.RecordStructDeclaration,
+                    attributeLists: default,
+                    SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
+                    keyword: Token( SyntaxKind.RecordKeyword ),
+                    classOrStructKeyword: Token( SyntaxKind.StructKeyword ),
+                    Identifier( type.Name ),
+                    CreateTypeParameters( type ),
+                    parameterList: null,
+                    baseList,
+                    constraintClauses: default,
+                    openBraceToken: Token( SyntaxKind.OpenBraceToken ),
+                    members,
+                    closeBraceToken: Token( SyntaxKind.CloseBraceToken ),
+                    semicolonToken: default ),
                 TypeKind.Interface => InterfaceDeclaration(
-                    default,
+                    attributeLists: default,
                     SyntaxTokenList.Create( Token( SyntaxKind.PartialKeyword ) ),
                     Identifier( type.Name ),
                     CreateTypeParameters( type ),
                     baseList,
-                    default,
+                    constraintClauses: default,
                     members ),
                 _ => throw new AssertionFailedException( $"Unknown type kind: {type.TypeKind}." )
             };

@@ -24,8 +24,9 @@ internal struct RecursionGuard
 #endif
 
     private int _recursionDepth;
-    private ConcurrentStack<int>? _threadIdStack;
+
 #if DEBUG
+    private ConcurrentStack<int>? _threadIdStack;
     private volatile bool _failed;
 #endif
 

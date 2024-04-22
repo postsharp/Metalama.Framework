@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,11 +30,13 @@ internal abstract class PipelineStep
     /// Executes the step.
     /// </summary>
     /// <param name="compilation"></param>
+    /// <param name="diagnostics"></param>
     /// <param name="stepIndex"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public abstract Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        IUserDiagnosticSink diagnostics,
         int stepIndex,
         CancellationToken cancellationToken );
 

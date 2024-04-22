@@ -16,14 +16,13 @@ using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
 internal abstract partial class FabricDriver
 {
-    protected abstract class BaseAmender<T> : IAmender<T>, IAspectReceiverParent
+    protected abstract class BaseAmender<T> : AspectReceiver<T, int>, IAmender<T>, IAspectReceiverParent
         where T : class, IDeclaration
     {
         // The Target property is protected (and not exposed to the API) because
@@ -32,25 +31,32 @@ internal abstract partial class FabricDriver
         private Ref<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
-        private AspectReceiverSelector<T>? _declarationSelector;
+        private readonly IProject _project;
 
         protected BaseAmender(
             IProject project,
             FabricManager fabricManager,
             FabricInstance fabricInstance,
-            in Ref<T> targetDeclaration )
+            Ref<T> targetDeclaration ) : base(
+            fabricManager.ServiceProvider,
+            targetDeclaration,
+            CompilationModelVersion.Final,
+            ( action, context ) => action( targetDeclaration.GetTarget( context.Compilation ), 0, context ) )
         {
+            this._project = project;
             this._fabricInstance = fabricInstance;
             this.TargetDeclaration = targetDeclaration;
             this._fabricManager = fabricManager;
-            this.Project = project;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
-        private AspectReceiverSelector<T> GetAspectTargetSelector()
-            => this._declarationSelector ??= new AspectReceiverSelector<T>( this.TargetDeclaration, this, CompilationModelVersion.Initial );
+        protected override bool ShouldCache => false;
 
-        public IProject Project { get; }
+        protected override IAspectReceiverParent Parent => this;
+
+        IProject IAspectReceiverParent.Project => this._project;
+
+        public abstract string? Namespace { get; }
 
         public LicenseVerifier? LicenseVerifier { get; }
 
@@ -59,11 +65,6 @@ internal abstract partial class FabricDriver
         public abstract void AddValidatorSource( IValidatorSource validatorSource );
 
         public abstract void AddOptionsSource( IHierarchicalOptionsSource hierarchicalOptionsSource );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectTargetSelector().With( selector );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector )
-            => this.GetAspectTargetSelector().With( selector );
 
         ProjectServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 
@@ -85,7 +86,11 @@ internal abstract partial class FabricDriver
             => this._fabricInstance.ValidatorDriverFactory.GetDeclarationValidatorDriver( validate );
 
         [Memo]
-        public IAspectReceiver<T> Outbound => this.GetAspectTargetSelector().With( t => t );
+        public IAspectReceiver<T> Outbound
+            => new RootAspectReceiver<T>(
+                this.TargetDeclaration,
+                this,
+                CompilationModelVersion.Final );
 
         string IDiagnosticSource.DiagnosticSourceDescription => $"fabric {this._fabricInstance.Fabric.GetType().FullName}";
     }

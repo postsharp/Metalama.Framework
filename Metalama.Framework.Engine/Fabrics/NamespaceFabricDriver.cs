@@ -90,12 +90,10 @@ namespace Metalama.Framework.Engine.Fabrics
                 project,
                 fabricManager,
                 fabricInstance,
-                fabricInstance.TargetDeclaration.As<INamespace>() )
-            {
-                this.Namespace = ns;
-            }
+                fabricInstance.TargetDeclaration.As<INamespace>(),
+                ns ) { }
 
-            public string Namespace { get; }
+            string INamespaceAmender.Namespace => this.Namespace.AssertNotNull();
         }
     }
 }

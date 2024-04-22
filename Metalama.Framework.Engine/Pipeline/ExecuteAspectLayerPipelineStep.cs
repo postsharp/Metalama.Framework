@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -40,6 +41,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
 
     public override async Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        IUserDiagnosticSink diagnostics,
         int stepIndex,
         CancellationToken cancellationToken )
     {
@@ -57,9 +59,16 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
         var aspectInstancesOfSameType = new ConcurrentLinkedList<ImmutableArray<AspectInstance>>();
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
-        await this._concurrentTaskRunner.RunInParallelAsync(
+        await this._concurrentTaskRunner.RunConcurrentlyAsync(
             instancesByType,
-            t => this.ProcessType( t, compilation, stepIndex, observableTransformations.Enqueue, aspectInstancesOfSameType, cancellationToken ),
+            t => this.ProcessTypeAsync(
+                t,
+                compilation,
+                stepIndex,
+                observableTransformations.Enqueue,
+                aspectInstancesOfSameType,
+                diagnostics,
+                cancellationToken ),
             cancellationToken );
 
         var mergedAspectInstancesOfSameType = aspectInstancesOfSameType.Count > 0 ? aspectInstancesOfSameType.SelectMany( t => t ) : null;
@@ -70,12 +79,13 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
             $"After ExecuteAspectLayer({this.AspectLayer})" );
     }
 
-    private void ProcessType(
+    private async Task ProcessTypeAsync(
         IEnumerable<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)> aspects,
         CompilationModel compilation,
         int stepIndex,
         Action<ITransformation> addTransformation,
         ConcurrentLinkedList<ImmutableArray<AspectInstance>> aspectInstancesOfSameType,
+        IUserDiagnosticSink diagnostics,
         CancellationToken cancellationToken )
     {
         var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
@@ -96,7 +106,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
             var mutableCompilationForThisAspect = currentCompilation.CreateMutableClone( $"Temporary mutable clone for {this.AspectLayer}." );
 
             // Execute the aspect.
-            var aspectResult = aspectDriver.ExecuteAspect(
+            var aspectResult = await aspectDriver.ExecuteAspectAsync(
                 aspect.AspectInstance,
                 this.Id.AspectLayerId.LayerName,
                 currentCompilation,
@@ -121,7 +131,7 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     // Apply the changes done by the aspects.
                     this.Parent.AddAspectSources( aspectResult.AspectSources, true, cancellationToken );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );
-                    this.Parent.AddOptionsSources( aspectResult.OptionsSources );
+                    await this.Parent.AddOptionsSourcesAsync( aspectResult.OptionsSources, cancellationToken );
                     this.Parent.AddTransformations( aspectResult.Transformations );
 
                     foreach ( var transformation in aspectResult.Transformations )
@@ -133,10 +143,11 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     }
 
                     // Add children of the same aspect type.
-                    var newAspectInstances = this.Parent.ExecuteAspectSource(
+                    var newAspectInstances = await this.Parent.ExecuteAspectSourceAsync(
                         compilation,
                         this.AspectLayer.AspectClass,
                         aspectResult.AspectSources,
+                        diagnostics,
                         cancellationToken );
 
                     if ( !newAspectInstances.IsDefaultOrEmpty )

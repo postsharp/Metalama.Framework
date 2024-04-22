@@ -1,0 +1,1 @@
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'BaseType' in declaration 'DerivedClass' (SyntaxKind=IdentifierName).`

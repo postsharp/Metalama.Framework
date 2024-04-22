@@ -155,7 +155,7 @@ class MyAspect : TypeAspect
 
 class Fabric : ProjectFabric
 {
-    public override void AmendProject( IProjectAmender amender ) => amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
+    public override void AmendProject( IProjectAmender amender ) => amender.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
 } 
 ",
             ["target.cs"] = "class C {}"
@@ -190,8 +190,8 @@ class Fabric : ProjectFabric
                 {
                     public override void AmendProject( IProjectAmender amender )
                     {
-                        amender.Outbound.SetOptions<MyOptions>( o => new MyOptions { Value = "TheValue" } );
-                        amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
+                        amender.SetOptions<MyOptions>( o => new MyOptions { Value = "TheValue" } );
+                        amender.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
                     }
                 }
 
@@ -231,7 +231,7 @@ class C {
 
 class Fabric : TypeFabric
 {
-    public override void AmendType( ITypeAmender amender ) => amender.Outbound.AddAspect<MyAspect>();
+    public override void AmendType( ITypeAmender amender ) => amender.AddAspect<MyAspect>();
 } 
 
 }"
@@ -268,7 +268,7 @@ namespace Ns;
 
 class Fabric : NamespaceFabric
 {
-    public override void AmendNamespace( INamespaceAmender amender ) => amender.Outbound.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
+    public override void AmendNamespace( INamespaceAmender amender ) => amender.SelectMany( c=>c.Types ).AddAspect<MyAspect>();
 } 
 
 ",

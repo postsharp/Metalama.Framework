@@ -310,6 +310,18 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 _ => symbol.ContainingType
             };
 
+        public static ISymbol? GetClosestContainingMember( this ISymbol symbol )
+            => symbol switch
+            {
+                INamedTypeSymbol type => type,
+                IMethodSymbol method => method,
+                IFieldSymbol field => field,
+                IPropertySymbol property => property,
+                IEventSymbol @event => @event,
+                INamespaceSymbol => null,
+                _ => symbol.ContainingSymbol?.GetClosestContainingMember()
+            };
+
         internal static bool IsTaskConfigureAwait( this ISymbol? symbol )
             => symbol is IMethodSymbol
             {

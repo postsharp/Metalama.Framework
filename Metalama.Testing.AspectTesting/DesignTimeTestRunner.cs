@@ -3,15 +3,13 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
-using Metalama.Testing.AspectTesting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit.Abstractions;
 
-namespace Metalama.Framework.Tests.Integration.Runners
+namespace Metalama.Testing.AspectTesting
 {
     internal sealed class DesignTimeTestRunner : BaseTestRunner
     {
@@ -46,6 +44,20 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
 
                 await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
+
+                testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
+
+                if ( introducedSyntaxTree != null )
+                {
+                    var outputCompilation = testResult.InputCompilation!.AddSyntaxTrees( introducedSyntaxTree.GeneratedSyntaxTree );
+
+                    testResult.OutputCompilation = outputCompilation;
+                    testResult.OutputCompilationDiagnostics.Report( outputCompilation.GetDiagnostics() );
+                }
+                else
+                {
+                    testResult.OutputCompilation = testResult.InputCompilation;
+                }
             }
             else
             {

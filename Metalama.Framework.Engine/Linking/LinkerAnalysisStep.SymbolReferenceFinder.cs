@@ -63,7 +63,7 @@ internal sealed partial class LinkerAnalysisStep
             }
 
             var methodsToAnalyze = new List<(IMethodSymbol Method, HashSet<ISymbol> SymbolsToFind)>();
-            var symbolReferences = new ConcurrentBag<IntermediateSymbolSemanticReference>();
+            var symbolReferences = new ConcurrentQueue<IntermediateSymbolSemanticReference>();
 
             foreach ( var referencingType in referencingTypes )
             {
@@ -89,7 +89,7 @@ internal sealed partial class LinkerAnalysisStep
                 {
                     foreach ( var referencingIdentifierName in this.GetReferencingIdentifierNames( input.Method, symbolToFind ) )
                     {
-                        symbolReferences.Add(
+                        symbolReferences.Enqueue(
                             new IntermediateSymbolSemanticReference(
                                 input.Method.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                 symbolToFind.ToSemantic( IntermediateSymbolSemanticKind.Default ),
@@ -98,7 +98,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
 
             return symbolReferences.ToReadOnlyList();
         }
@@ -107,7 +107,7 @@ internal sealed partial class LinkerAnalysisStep
             IEnumerable<IMethodSymbol> methodsToAnalyze,
             CancellationToken cancellationToken )
         {
-            var symbolReferences = new ConcurrentBag<IntermediateSymbolSemanticReference>();
+            var symbolReferences = new ConcurrentQueue<IntermediateSymbolSemanticReference>();
 
             void ProcessMethod( IMethodSymbol method )
             {
@@ -129,7 +129,7 @@ internal sealed partial class LinkerAnalysisStep
                         continue;
                     }
 
-                    symbolReferences.Add(
+                    symbolReferences.Enqueue(
                         new IntermediateSymbolSemanticReference(
                             method.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
@@ -137,7 +137,7 @@ internal sealed partial class LinkerAnalysisStep
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( methodsToAnalyze, ProcessMethod, cancellationToken );
 
             return symbolReferences.ToReadOnlyList();
         }

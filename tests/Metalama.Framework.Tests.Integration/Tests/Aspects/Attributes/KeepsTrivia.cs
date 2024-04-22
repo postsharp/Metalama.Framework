@@ -20,7 +20,7 @@ public class MyFabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( c => c.Types.OfName( "C" ) ).AddAspect<MyAspect>();
+        amender.SelectMany( c => c.Types.OfName( "C" ) ).AddAspect<MyAspect>();
     }
 }
 

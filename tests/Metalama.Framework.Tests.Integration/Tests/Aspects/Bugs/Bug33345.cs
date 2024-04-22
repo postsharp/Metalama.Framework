@@ -12,73 +12,72 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug33345
 {
     namespace NotTests
     {
-        class Bar
+        internal class Bar
         {
-            void Valid()
+            private void Valid()
             {
                 new Foo();
             }
 
-            void Invalid()
+            private void Invalid()
             {
-                new Foo(false);
-                new Foo("name", false);
+                new Foo( false );
+                new Foo( "name", false );
             }
         }
     }
 
     namespace Tests
     {
-        class Bar
+        internal class Bar
         {
-            void Valid()
+            private void Valid()
             {
                 new Foo();
-                new Foo(true);
-                new Foo("name", true);
+                new Foo( true );
+                new Foo( "name", true );
             }
         }
     }
 
-    class Foo
+    internal class Foo
     {
         public string Name { get; }
+
         public bool IsTest { get; }
 
         [ForTestOnly]
-        public Foo(string name, bool isTest)
+        public Foo( string name, bool isTest )
         {
-            this.IsTest = isTest;
-            this.Name = name;
+            IsTest = isTest;
+            Name = name;
         }
 
         [ForTestOnly]
-        public Foo(bool isTest) : this("default", isTest) { }
+        public Foo( bool isTest ) : this( "default", isTest ) { }
 
-        public Foo(string name = "default") : this(false) { }
+        public Foo( string name = "default" ) : this( false ) { }
     }
 
-    class ForTestOnlyAttribute : Aspect, IAspect<IDeclaration>
+    internal class ForTestOnlyAttribute : Aspect, IAspect<IDeclaration>
     {
         private static readonly DiagnosticDefinition<IDeclaration> _warning = new(
             "DEMO02",
             Severity.Warning,
-            "'{0}' can be used only in a namespace whose name ends with '.Tests'");
+            "'{0}' can be used only in a namespace whose name ends with '.Tests'" );
 
-        public void BuildAspect(IAspectBuilder<IDeclaration> builder)
+        public void BuildAspect( IAspectBuilder<IDeclaration> builder )
         {
-            builder.Outbound.ValidateReferences(this.ValidateReference, ReferenceKinds.All);
+            builder.Outbound.ValidateOutboundReferences( ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
         }
 
-        public void BuildEligibility(IEligibilityBuilder<IDeclaration> builder)
-        {
-        }
+        public void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
 
-        private void ValidateReference(in ReferenceValidationContext context)
+        private void ValidateReference( ReferenceValidationContext context )
         {
-            if ( !context.ReferencingType.Is((INamedType)context.ReferencedDeclaration.ContainingDeclaration!) && !context.ReferencingType.Namespace.FullName.EndsWith(".Tests"))
+            if (!context.Origin.Type.Is( context.Destination.Type! ) && !context.Origin.Namespace.FullName.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report(_warning.WithArguments(context.ReferencedDeclaration));
+                context.Diagnostics.Report( _warning.WithArguments( context.Destination.Declaration ) );
             }
         }
     }

@@ -12,11 +12,11 @@ internal class Fabric : ProjectFabric
 {
     public override void AmendProject(IProjectAmender amender)
     {
-        amender.Outbound
+        amender
             .SelectMany(compilation => compilation.AllTypes)
             .AddAspectIfEligible<LogAttribute>();
 
-        amender.Outbound
+        amender
             .SelectMany(compilation => compilation.AllTypes)
             .SelectMany(type => type.Methods)
             .Where(method => method.Accessibility == Accessibility.Public && method.Name != "ToString")

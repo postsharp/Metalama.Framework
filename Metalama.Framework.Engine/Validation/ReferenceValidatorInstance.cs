@@ -2,14 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
-using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceValidatorProperties
+public class ReferenceValidatorInstance : ValidatorInstance
 {
     public ReferenceValidatorInstance(
         IDeclaration validatedDeclaration,
@@ -17,36 +16,31 @@ public sealed class ReferenceValidatorInstance : ValidatorInstance, IReferenceVa
         ValidatorImplementation implementation,
         ReferenceKinds referenceKinds,
         bool includeDerivedTypes,
-        string description ) : base( validatedDeclaration, driver, implementation, description )
+        string description,
+        ReferenceGranularity granularity ) : base( validatedDeclaration, driver, implementation, description )
     {
-        this.ReferenceKinds = referenceKinds;
-        this.IncludeDerivedTypes = includeDerivedTypes;
+        this.Properties = new ReferenceValidatorProperties( validatedDeclaration, referenceKinds, includeDerivedTypes );
+        this.Granularity = granularity;
     }
 
-    // Aspect or fabric.
+    public ReferenceGranularity Granularity { get; }
 
-    public ReferenceKinds ReferenceKinds { get; }
-
-    public bool IncludeDerivedTypes { get; }
-
-    public DeclarationKind ValidatedDeclarationKind => this.ValidatedDeclaration.DeclarationKind;
+    public IReferenceValidatorProperties Properties { get; }
 
     internal void Validate(
         IDeclaration referencingDeclaration,
-        in SyntaxNodeOrToken node,
-        ReferenceKinds referenceKind,
         IDiagnosticSink diagnosticAdder,
         UserCodeInvoker userCodeInvoker,
-        UserCodeExecutionContext userCodeExecutionContext )
+        UserCodeExecutionContext userCodeExecutionContext,
+        IEnumerable<ReferencingSymbolInfo> references )
     {
-        var validationContext = new ReferenceValidationContext(
+        var validationContext = new ReferenceValidationContextImpl(
+            this,
             this.ValidatedDeclaration,
             referencingDeclaration,
-            new SourceReference( node.AsNode() ?? (object) node.AsToken(), SourceReferenceImpl.Instance ),
             this.Implementation.State,
             diagnosticAdder,
-            this,
-            referenceKind );
+            references );
 
         ((ValidatorDriver<ReferenceValidationContext>) this.Driver).Validate(
             this.Implementation,

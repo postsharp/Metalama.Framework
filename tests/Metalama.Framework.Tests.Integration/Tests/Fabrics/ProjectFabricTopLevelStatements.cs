@@ -22,8 +22,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
             Console.WriteLine( "This is the overriding method." );
 
             return meta.Proceed();
-
-            ;
         }
     }
 
@@ -31,7 +29,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
     {
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.Outbound.SelectMany( p => p.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( m => new OverrideAttribute() );
+            amender.SelectMany( p => p.Types.SelectMany( t => t.Methods ) ).AddAspectIfEligible( m => new OverrideAttribute() );
         }
     }
 }

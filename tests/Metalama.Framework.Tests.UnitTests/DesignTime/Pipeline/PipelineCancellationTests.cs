@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline;
 
 public sealed class PipelineCancellationTests : UnitTestClass
 {
-    private const int _maxCancellationPoints = 22;
+    private const int _maxCancellationPoints = 24;
     private const int _getConfigurationMaxCancellationPoints = 2;
 
     public PipelineCancellationTests( ITestOutputHelper logger ) : base( logger ) { }
@@ -65,7 +65,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
             {
                 this.TestOutput.WriteLine( $"The correct value for {nameof(_maxCancellationPoints)} is {i - 1}." );
 #pragma warning disable xUnit2000
-                Assert.Equal( i - 1, _maxCancellationPoints );
+                Assert.Equal( _maxCancellationPoints, i - 1 );
 #pragma warning restore xUnit2000
             }
         }

@@ -13,16 +13,16 @@ public class MethodFabric : TransitiveProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( x => x.Types.SelectMany( t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ) ) )
+        amender.SelectMany( x => x.Types.SelectMany( t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ) ) )
             .AddAspect<OverrideAspect>();
 
-        amender.Outbound
+        amender
             .SelectMany(
                 x => x.Types.SelectMany(
                     t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ).Select( x => x.ReturnParameter ) ) )
             .AddAspect<ParameterContractAspect>();
 
-        amender.Outbound
+        amender
             .SelectMany(
                 x => x.Types.SelectMany(
                     t => t.Methods.Where( m => m.ReturnType != TypeFactory.GetType( SpecialType.Void ) ).SelectMany( x => x.Parameters ) ) )
@@ -34,7 +34,7 @@ public class TypeFabric : TransitiveProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
     {
-        amender.Outbound.SelectMany( x => x.Types ).Where( t => !t.IsStatic ).AddAspect<IntroductionAspect>();
+        amender.SelectMany( x => x.Types ).Where( t => !t.IsStatic ).AddAspect<IntroductionAspect>();
     }
 }
 

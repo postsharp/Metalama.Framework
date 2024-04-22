@@ -66,7 +66,7 @@ namespace Metalama.Framework.Project
         /// and have a default constructor. New instances will be initialized using <see cref="ProjectExtension.Initialize"/>.
         /// </summary>
         /// <typeparam name="T">The extension type, which must derive from <see cref="ProjectExtension"/> and have a default constructor.</typeparam>
-        [Obsolete( "Use IDeclaration.Enhancements().GetOptions<T> to get or amender.Outbound.Configure<T>(...) to set an option." )]
+        [Obsolete( "Use IDeclaration.Enhancements().GetOptions<T> to get or amender.Configure<T>(...) to set an option." )]
         T Extension<T>()
             where T : ProjectExtension, new();
 

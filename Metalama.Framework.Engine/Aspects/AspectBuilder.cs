@@ -19,7 +19,6 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
@@ -29,7 +28,6 @@ namespace Metalama.Framework.Engine.Aspects
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;
-        private AspectReceiverSelector<T>? _declarationSelector;
 
         public AspectBuilder(
             T target,
@@ -45,6 +43,9 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         public IProject Project => this.Target.Compilation.Project;
+
+        [Memo]
+        public string? Namespace => this.Target.GetNamespace()?.FullName;
 
         public IAspectInstance AspectInstance => this._aspectBuilderState.AspectInstance;
 
@@ -82,18 +83,13 @@ namespace Metalama.Framework.Engine.Aspects
         public T Target { get; }
 
         [Memo]
-        public IAspectReceiver<T> Outbound => this.GetAspectReceiverSelector().With( t => t );
+        public IAspectReceiver<T> Outbound
+            => new RootAspectReceiver<T>(
+                this.Target.ToTypedRef(),
+                this,
+                CompilationModelVersion.Current );
 
         IDeclaration IAspectBuilder.Target => this.Target;
-
-        private AspectReceiverSelector<T> GetAspectReceiverSelector()
-            => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this, CompilationModelVersion.Current );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector )
-            => this.GetAspectReceiverSelector().With( selector );
-
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector )
-            => this.GetAspectReceiverSelector().With( selector );
 
         IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 

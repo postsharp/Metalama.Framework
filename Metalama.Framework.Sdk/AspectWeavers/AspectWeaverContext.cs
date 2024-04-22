@@ -119,30 +119,30 @@ public sealed partial class AspectWeaverContext
 
         var taskScheduler = this.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-        var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentBag<SyntaxReference>>();
+        var nodesBySyntaxTree = new ConcurrentDictionary<SyntaxTree, ConcurrentQueue<SyntaxReference>>();
 
-        await taskScheduler.RunInParallelAsync( this.AspectInstances.Values, ProcessAspectInstance, cancellationToken );
+        await taskScheduler.RunConcurrentlyAsync( this.AspectInstances, ProcessAspectInstance, cancellationToken );
 
-        void ProcessAspectInstance( IAspectInstance aspectInstance )
+        void ProcessAspectInstance( KeyValuePair<ISymbol, IAspectInstance> aspectInstance )
         {
-            var symbol = aspectInstance.TargetDeclaration.GetSymbol( this._compilation.Compilation );
+            var symbol = aspectInstance.Value.TargetDeclaration.GetSymbol( this._compilation.Compilation );
 
             if ( symbol != null )
             {
                 foreach ( var syntaxReference in symbol.DeclaringSyntaxReferences )
                 {
                     nodesBySyntaxTree
-                        .GetOrAdd( syntaxReference.SyntaxTree, _ => new ConcurrentBag<SyntaxReference>() )
-                        .Add( syntaxReference );
+                        .GetOrAdd( syntaxReference.SyntaxTree, _ => new ConcurrentQueue<SyntaxReference>() )
+                        .Enqueue( syntaxReference );
                 }
             }
         }
 
         ConcurrentLinkedList<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
-        await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
+        await taskScheduler.RunConcurrentlyAsync( nodesBySyntaxTree, ProcessSyntaxTreeAsync, cancellationToken );
 
-        async Task ProcessSyntaxTreeAsync( KeyValuePair<SyntaxTree, ConcurrentBag<SyntaxReference>> group )
+        async Task ProcessSyntaxTreeAsync( KeyValuePair<SyntaxTree, ConcurrentQueue<SyntaxReference>> group )
         {
             cancellationToken.ThrowIfCancellationRequested();
 

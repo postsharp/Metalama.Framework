@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
@@ -123,4 +124,14 @@ public static class NamedTypeExtensions
             yield return m;
         }
     }
+
+    /// <summary>
+    /// Gets all nested types of the current type, and all recursively all nested types of those nested types, but not the current type.
+    /// </summary>
+    public static IEnumerable<INamedType> NestedTypes( this INamedType type ) => type.SelectManyRecursive( t => t.NestedTypes );
+
+    /// <summary>
+    /// Gets all nested types of the current type, and all recursively all nested types of those nested types, including the current type.
+    /// </summary>
+    public static IEnumerable<INamedType> NestedTypesAndSelf( this INamedType type ) => type.SelectManyRecursive( t => t.NestedTypes, true );
 }

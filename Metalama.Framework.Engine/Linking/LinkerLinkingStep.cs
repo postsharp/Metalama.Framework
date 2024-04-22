@@ -57,14 +57,14 @@ namespace Metalama.Framework.Engine.Linking
                 input.LateTransformationRegistry,
                 input.AnalysisRegistry );
 
-            ConcurrentBag<SyntaxTreeTransformation> transformations = new();
+            ConcurrentQueue<SyntaxTreeTransformation> transformations = new();
 
             async Task ProcessTransformationAsync( SyntaxTreeTransformation modifiedSyntaxTree )
             {
                 if ( modifiedSyntaxTree.Kind == SyntaxTreeTransformationKind.Add )
                 {
                     // This is an intermediate tree we added and we don't need it in the final compilation.
-                    transformations.Add( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.NewTree.AssertNotNull() ) );
+                    transformations.Enqueue( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.NewTree.AssertNotNull() ) );
                 }
                 else
                 {
@@ -90,11 +90,11 @@ namespace Metalama.Framework.Engine.Linking
 
                     var newSyntaxTree = syntaxTree.WithRootAndOptions( fixedRoot, syntaxTree.Options );
 
-                    transformations.Add( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
+                    transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
                 }
             }
 
-            await this._concurrentTaskRunner.RunInParallelAsync(
+            await this._concurrentTaskRunner.RunConcurrentlyAsync(
                 input.IntermediateCompilation.ModifiedSyntaxTrees.Values,
                 ProcessTransformationAsync,
                 cancellationToken );

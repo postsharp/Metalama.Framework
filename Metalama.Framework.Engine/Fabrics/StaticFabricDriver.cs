@@ -36,8 +36,13 @@ namespace Metalama.Framework.Engine.Fabrics
             private readonly List<IValidatorSource> _validatorSources = new();
             private readonly List<IHierarchicalOptionsSource> _optionsSources = new();
 
-            protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration ) :
-                base( project, fabricManager, fabricInstance, targetDeclaration ) { }
+            protected StaticAmender( IProject project, FabricManager fabricManager, FabricInstance fabricInstance, in Ref<T> targetDeclaration, string? ns ) :
+                base( project, fabricManager, fabricInstance, targetDeclaration )
+            {
+                this.Namespace = ns;
+            }
+
+            public override string? Namespace { get; }
 
             public sealed override void AddAspectSource( IAspectSource aspectSource ) => this._aspectSources.Add( aspectSource );
 

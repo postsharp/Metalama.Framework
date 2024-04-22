@@ -4,6 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
+using System;
 
 namespace Metalama.Framework.Fabrics
 {
@@ -21,12 +22,15 @@ namespace Metalama.Framework.Fabrics
     /// Base interface for the argument of <see cref="ProjectFabric.AmendProject"/>, <see cref="NamespaceFabric.AmendNamespace"/>
     /// or <see cref="TypeFabric.AmendType"/>. Allows to report diagnostics and add aspects to the target declaration of the fabric.
     /// </summary>
-    public interface IAmender<out T> : IAmender, IAspectReceiverSelector<T>
+    public interface IAmender<out T> : IAmender, IAspectReceiver<T>
         where T : class, IDeclaration
     {
+        new IProject Project { get; }
+        
         /// <summary>
         /// Gets an object that allows to add child advice and to validate code and code references.
         /// </summary>
+        [Obsolete("The Outbound interface is now directly implemented by IAmender<T>.")]
         IAspectReceiver<T> Outbound { get; }
     }
 }

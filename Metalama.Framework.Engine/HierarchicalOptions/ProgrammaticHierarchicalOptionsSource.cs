@@ -1,23 +1,22 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Fabrics;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.HierarchicalOptions;
 
 internal sealed class ProgrammaticHierarchicalOptionsSource : IHierarchicalOptionsSource
 {
-    private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<HierarchicalOptionsInstance>> _getInstances;
+    private readonly Func<OutboundActionCollectionContext, Task> _collectOptionsAction;
 
-    public ProgrammaticHierarchicalOptionsSource( Func<CompilationModel, IDiagnosticAdder, IEnumerable<HierarchicalOptionsInstance>> getInstances )
+    public ProgrammaticHierarchicalOptionsSource( Func<OutboundActionCollectionContext, Task> collectOptionsAction )
     {
-        this._getInstances = getInstances;
+        this._collectOptionsAction = collectOptionsAction;
     }
 
-    public IEnumerable<HierarchicalOptionsInstance> GetOptions( CompilationModel compilation, IUserDiagnosticSink diagnosticSink )
+    public Task CollectOptionsAsync( OutboundActionCollectionContext context )
     {
-        return this._getInstances( compilation, diagnosticSink );
+        return this._collectOptionsAction( context );
     }
 }

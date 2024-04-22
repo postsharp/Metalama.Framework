@@ -284,7 +284,7 @@ public interface I {}
                                           static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                           public override void AmendProject( IProjectAmender amender )
                                           {
-                                              amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                              amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                           }
                                       
                                           private void ValidateReference( in ReferenceValidationContext context )
@@ -573,7 +573,7 @@ public interface I {}
                                              static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                              public override void AmendProject( IProjectAmender amender )
                                              {
-                                                 amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                                 amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                              }
                                          
                                              private void ValidateReference( in ReferenceValidationContext context )
@@ -641,7 +641,7 @@ public interface I {}
                                              static DiagnosticDefinition<IDeclaration> _warning = new( "MY001", Severity.Warning, "Reference to {0}" );
                                              public override void AmendProject( IProjectAmender amender )
                                              {
-                                                 amender.Outbound.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
+                                                 amender.SelectMany( p => p.Types ).ValidateReferences( ValidateReference, ReferenceKinds.All );
                                              }
                                          
                                              private void ValidateReference( in ReferenceValidationContext context )
