@@ -24,18 +24,18 @@ public static class AspectReceiverExtensions
     /// <summary>
     /// Selects an <see cref="INamedType"/> in the current compilation or in a reference assembly given its reflection <see cref="Type"/>.
     /// </summary>
-    public static IAspectReceiver<INamedType> SelectType( this IAspectReceiver<ICompilation> receiver, Type type )
+    public static IAspectReceiver<INamedType> SelectReflectionType( this IAspectReceiver<ICompilation> receiver, Type type )
         => receiver.Select( c => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( type ) );
 
     /// <summary>
     /// Selects several <see cref="INamedType"/> in the current compilation or in a reference assembly given their reflection <see cref="Type"/>.
     /// </summary>
-    public static IAspectReceiver<INamedType> SelectTypes( this IAspectReceiver<ICompilation> receiver, IEnumerable<Type> types )
+    public static IAspectReceiver<INamedType> SelectReflectionTypes( this IAspectReceiver<ICompilation> receiver, IEnumerable<Type> types )
         => receiver.SelectMany( c => types.Select( t => (INamedType) ((ICompilationInternal) c).Factory.GetTypeByReflectionType( t ) ) );
 
     /// <summary>
     /// Selects several <see cref="INamedType"/> in the current compilation or in a reference assembly given their reflection <see cref="Type"/>.
     /// </summary>
-    public static IAspectReceiver<INamedType> SelectTypes( this IAspectReceiver<ICompilation> receiver, params Type[] types )
-        => receiver.SelectTypes( (IEnumerable<Type>) types );
+    public static IAspectReceiver<INamedType> SelectReflectionTypes( this IAspectReceiver<ICompilation> receiver, params Type[] types )
+        => receiver.SelectReflectionTypes( (IEnumerable<Type>) types );
 }
