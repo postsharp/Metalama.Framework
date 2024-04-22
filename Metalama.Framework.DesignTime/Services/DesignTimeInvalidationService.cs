@@ -3,13 +3,14 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc.Notifications;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Host;
+using System.Linq.Expressions;
 
 namespace Metalama.Framework.DesignTime.Services;
 
-internal class DesignTimeInvalidationService : IGlobalService
+internal sealed class DesignTimeInvalidationService : IGlobalService
 {
     private readonly WorkspaceProvider _workspaceProvider;
 
@@ -29,49 +30,54 @@ internal class DesignTimeInvalidationService : IGlobalService
             return;
         }
 
-        GetDiagnosticsRefresherInvoker( workspace )?.Invoke();
+        _diagnosticsRefreshAction?.Invoke( workspace.Services.HostServices );
     }
 
-    private static readonly WeakCache<Workspace, Action?> _diagnosticsRefresherInvokers = new();
+    private static readonly Action<HostServices>? _diagnosticsRefreshAction = GetDiagnosticsRefreshAction();
 
-    private static Action? GetDiagnosticsRefresherInvoker( Workspace workspace )
+    private static Action<HostServices>? GetDiagnosticsRefreshAction()
     {
-        return _diagnosticsRefresherInvokers.GetOrAdd( workspace, GetDiagnosticsRefresherInvokerCore );
+        var codeAnalysisFeaturesAssembly = typeof(Microsoft.CodeAnalysis.Completion.CompletionProvider).Assembly;
+        var iDiagnosticsRefresher = codeAnalysisFeaturesAssembly.GetType( "Microsoft.CodeAnalysis.Diagnostics.IDiagnosticsRefresher" );
+        var requestWorkspaceRefreshMethod = iDiagnosticsRefresher?.GetMethod( "RequestWorkspaceRefresh", Type.EmptyTypes );
 
-        static Action? GetDiagnosticsRefresherInvokerCore( Workspace workspace )
+        if ( iDiagnosticsRefresher == null || requestWorkspaceRefreshMethod == null )
         {
-            // This is equivalent to the following code that uses internal Roslyn types:
-            // ((IMefHostExportProvider)workspace.Services.HostServices).GetExports<IDiagnosticsRefresher>().SingleOrDefault()?.Value.RequestWorkspaceRefresh();
-
-            // In this whole code, nulls should only happen if Roslyn internals change.
-            // The one exception is lazyExport, which is null if there are no exports of IDiagnosticsRefresher, which happens when LanguageServer is not used (i.e. in VS and Rider).
-
-            var codeAnalysisFeaturesAssembly = typeof( Microsoft.CodeAnalysis.Completion.CompletionProvider ).Assembly;
-            var iDiagnosticsRefresher = codeAnalysisFeaturesAssembly.GetType( "Microsoft.CodeAnalysis.Diagnostics.IDiagnosticsRefresher" );
-            var requestWorkspaceRefresh = iDiagnosticsRefresher?.GetMethod( "RequestWorkspaceRefresh", Type.EmptyTypes );
-
-            if ( iDiagnosticsRefresher == null || requestWorkspaceRefresh == null )
-            {
-                return null;
-            }
-
-            var codeAnalysisWorkspacesAssembly = typeof( Workspace ).Assembly;
-            var iMefHostExportProvider = codeAnalysisWorkspacesAssembly.GetType( "Microsoft.CodeAnalysis.Host.Mef.IMefHostExportProvider" );
-            var getExports = iMefHostExportProvider?.GetMethods().SingleOrDefault( m => m.Name == "GetExports" && m.GetGenericArguments().Length == 1 && m.GetParameters().Length == 0 );
-            var getExportsOfDiagnosticRefresher = getExports?.MakeGenericMethod( iDiagnosticsRefresher );
-
-            var hostServices = workspace.Services.HostServices;
-
-            var exports = getExportsOfDiagnosticRefresher?.Invoke( hostServices, [] ) as IEnumerable<object>;
-            var lazyExport = exports?.SingleOrDefault();
-            var export = lazyExport?.GetType().GetProperty( "Value" )?.GetValue( lazyExport );
-
-            if ( export == null )
-            {
-                return null;
-            }
-
-            return () => requestWorkspaceRefresh.Invoke( export, [] );
+            return null;
         }
+
+        var codeAnalysisWorkspacesAssembly = typeof(Workspace).Assembly;
+        var iMefHostExportProvider = codeAnalysisWorkspacesAssembly.GetType( "Microsoft.CodeAnalysis.Host.Mef.IMefHostExportProvider" );
+
+        var getExports = iMefHostExportProvider?.GetMethods()
+            .SingleOrDefault( m => m.Name == "GetExports" && m.GetGenericArguments().Length == 1 && m.GetParameters().Length == 0 );
+
+        var getExportsOfDiagnosticRefresher = getExports?.MakeGenericMethod( iDiagnosticsRefresher );
+
+        if ( iMefHostExportProvider == null || getExportsOfDiagnosticRefresher == null )
+        {
+            return null;
+        }
+
+        // This is equivalent to the following code that uses internal Roslyn types:
+        // ((IMefHostExportProvider)hostServices).GetExports<IDiagnosticsRefresher>().SingleOrDefault()?.Value.RequestWorkspaceRefresh();
+        // Note that lazyExport is null if there are no exports of IDiagnosticsRefresher, which happens when LanguageServer is not used (i.e. in VS and Rider).
+
+        var hostServices = Expression.Parameter( typeof(HostServices), "hostServices" );
+        var castedHostServices = Expression.Convert( hostServices, iMefHostExportProvider );
+        var exports = Expression.Call( castedHostServices, getExportsOfDiagnosticRefresher );
+        var lazyExport = Expression.Call( typeof(Enumerable), "SingleOrDefault", [typeof(Lazy<>).MakeGenericType( iDiagnosticsRefresher )], exports );
+        var lazyExportVariable = Expression.Variable( lazyExport.Type, "lazyExport" );
+        var lazyExportAssignment = Expression.Assign( lazyExportVariable, lazyExport );
+        var export = Expression.Property( lazyExportVariable, "Value" );
+        var requestWorkspaceRefresh = Expression.Call( export, requestWorkspaceRefreshMethod );
+        var condition = Expression.NotEqual( lazyExportVariable, Expression.Constant( null, lazyExport.Type ) );
+        var ifStatement = Expression.IfThen( condition, requestWorkspaceRefresh );
+
+        var block = Expression.Block( [lazyExportVariable], lazyExportAssignment, ifStatement );
+
+        var lambda = Expression.Lambda<Action<HostServices>>( block, hostServices );
+
+        return lambda.Compile();
     }
 }
