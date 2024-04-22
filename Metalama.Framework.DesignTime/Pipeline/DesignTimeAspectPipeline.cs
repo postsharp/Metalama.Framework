@@ -336,7 +336,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
                 var notification = new CompilationResultChangedEventArgs(
                     this.ProjectKey,
                     true,
-                    this._currentState.CompileTimeSyntaxTrees.SelectAsImmutableArray( x => x.Key ) );
+                    this._currentState.CompileTimeSyntaxTrees.Keys.ToImmutableArray() );
 
                 this._eventHub.PublishCompilationResultChangedNotification( notification );
             }
@@ -871,8 +871,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     /// determine whether an error must displayed in the editor.  
     /// </summary>
     public bool IsCompileTimeSyntaxTreeOutdated( string name )
-        => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
-                                                                                   && syntaxTree == null;
+        => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees
+            && compileTimeSyntaxTrees.TryGetValue( name, out var isvalid )
+            && !isvalid;
 
     private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {
