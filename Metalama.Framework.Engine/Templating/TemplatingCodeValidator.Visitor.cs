@@ -256,7 +256,7 @@ namespace Metalama.Framework.Engine.Templating
             private void VerifyTypeDeclaration( BaseTypeDeclarationSyntax node, in Context context )
             {
                 // Report an error on aspect classes when the pipeline is paused.
-                if ( this._currentScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
+                if ( this._currentScope != TemplatingScope.RunTimeOnly && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(

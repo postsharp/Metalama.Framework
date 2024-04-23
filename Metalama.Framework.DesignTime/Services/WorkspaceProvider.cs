@@ -6,10 +6,11 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Services;
 
-internal abstract class WorkspaceProvider : IGlobalService, IDisposable
+public abstract class WorkspaceProvider : IGlobalService, IDisposable
 {
     private readonly TimeBasedCache<ProjectKey, ProjectId> _projectKeyToProjectIdMap = new( TimeSpan.FromMinutes( 10 ) );
 
@@ -21,6 +22,26 @@ internal abstract class WorkspaceProvider : IGlobalService, IDisposable
     }
 
     protected abstract Task<Workspace> GetWorkspaceAsync( CancellationToken cancellationToken = default );
+
+    public bool TryGetWorkspace( [NotNullWhen( true )] out Workspace? workspace )
+    {
+        var task = this.GetWorkspaceAsync( default );
+
+        if ( task.IsCompleted )
+        {
+#pragma warning disable VSTHRD002
+            workspace = task.Result;
+#pragma warning restore VSTHRD002
+
+            return true;
+        }
+        else
+        {
+            workspace = null;
+
+            return false;
+        }
+    }
 
     public async ValueTask<Microsoft.CodeAnalysis.Project?> GetProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
@@ -70,7 +91,7 @@ internal abstract class WorkspaceProvider : IGlobalService, IDisposable
         return default;
     }
 
-    public async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken = default )
+    internal async ValueTask<Compilation?> GetCompilationAsync( ProjectKey projectKey, CancellationToken cancellationToken = default )
     {
         var project = await this.GetProjectAsync( projectKey, cancellationToken );
 
