@@ -49,7 +49,7 @@ internal readonly ref struct AssertionFailedInterpolatedStringHandler
                     break;
 
                 default:
-                    this._builder.Append( value?.ToString() );
+                    this._builder.Append( value?.ToString() ?? "(null)" );
 
                     break;
             }
@@ -113,17 +113,22 @@ internal readonly ref struct AssertionFailedInterpolatedStringHandler
         {
             var firstLocation = locations.First();
 
-            if ( firstLocation.SourceTree != null )
-            {
-                var lineSpan = firstLocation.SourceTree.GetLineSpan( firstLocation.SourceSpan );
-                var filePath = Path.GetFileName( firstLocation.SourceTree.FilePath );
+            return FormatLocation(firstLocation, ":[", "]");
+        }
+    }
 
-                return $":[({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}]";
-            }
-            else
-            {
-                return $":[{firstLocation}]";
-            }
+    private static string FormatLocation( Location location, string prefix, string suffix )
+    {
+        if ( location.SourceTree != null )
+        {
+            var lineSpan = location.SourceTree.GetLineSpan( location.SourceSpan );
+            var filePath = Path.GetFileName( location.SourceTree.FilePath );
+
+            return $"{prefix}({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}{suffix}";
+        }
+        else
+        {
+            return $"{prefix}{location}{suffix}";
         }
     }
 
@@ -142,18 +147,7 @@ internal readonly ref struct AssertionFailedInterpolatedStringHandler
         var appendLeadingSpace = false;
 
         var rootLocation = rootNode.GetLocation();
-        string locationText;
-
-        if ( rootLocation.SourceTree != null )
-        {
-            var lineSpan = rootLocation.SourceTree.GetLineSpan( rootLocation.SourceSpan );
-            var filePath = Path.GetFileName( rootLocation.SourceTree.FilePath );
-            locationText = $":({lineSpan.StartLinePosition})-({lineSpan.EndLinePosition}){(filePath.Length > 0 ? $":{filePath}" : filePath)}";
-        }
-        else
-        {
-            locationText = $":{rootLocation}";
-        }
+        var locationText = FormatLocation(rootLocation, ":", "" );
 
         builder.AppendInvariant( $"[{rootNode.Kind()}{locationText}] " );
 
