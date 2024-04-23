@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.Linking
                         accessorList.OpenBraceToken.TrailingTrivia,
                         accessorList.CloseBraceToken.LeadingTrivia,
                         accessorList.CloseBraceToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException( $"Invalid accessor list at '{eventDeclaration.GetLocation()}'." )
+                    _ => throw new AssertionFailedException( $"Invalid accessor list at '{eventDeclaration}'." )
                 };
 
                 return eventDeclaration
@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Linking
                             (arrowToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
                              arrowToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
                              semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration: {accessorDeclaration}" )
                     };
 
                 return accessorDeclaration.PartialUpdate(
@@ -296,7 +296,7 @@ namespace Metalama.Framework.Engine.Linking
                                         {
                                             SyntaxKind.AddAccessorDeclaration => symbol.AddMethod.AssertNotNull(),
                                             SyntaxKind.RemoveAccessorDeclaration => symbol.RemoveMethod.AssertNotNull(),
-                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
+                                            _ => throw new AssertionFailedException( $"Unexpected kind: {a}" )
                                         } ) ) ) )
                     .WithSourceCodeAnnotation();
 
@@ -350,7 +350,7 @@ namespace Metalama.Framework.Engine.Linking
                                 {
                                     SyntaxKind.AddAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.AddMethod.AssertNotNull(), a ),
                                     SyntaxKind.RemoveAccessorDeclaration => this.FilterAttributesOnSpecialImpl( symbol.RemoveMethod.AssertNotNull(), a ),
-                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a.Kind()}" )
+                                    _ => throw new AssertionFailedException( $"Unexpected kind: {a}" )
                                 } ) ) );
 
             return

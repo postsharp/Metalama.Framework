@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking;
@@ -93,7 +92,7 @@ internal sealed class ResolvedAspectReference
     /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
     /// </summary>
     public ExpressionSyntax RootExpression
-        => this.RootNode as ExpressionSyntax ?? throw new AssertionFailedException( $"Root node {this.RootNode.Kind()} is not an expression." );
+        => this.RootNode as ExpressionSyntax ?? throw new AssertionFailedException( $"Root node not an expression {this.RootNode} is not an expression." );
 
     /// <summary>
     /// Gets the symbol source node. This node is the source of the symbol that is referenced.

@@ -153,7 +153,7 @@ internal sealed partial class LinkerRewritingDriver
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                     default:
-                        throw new AssertionFailedException( $"{node.Kind()} is not an expected output of the body substitution." );
+                        throw new AssertionFailedException( $"Unexpected output of the body substitution: {node}" );
                 }
             }
             else
@@ -184,7 +184,7 @@ internal sealed partial class LinkerRewritingDriver
                         return rewrittenBlock;
 
                     default:
-                        throw new AssertionFailedException( $"{node.Kind()} is not an expected output of the body substitution." );
+                        throw new AssertionFailedException( $"Unexpected output of the body substitution: {node}" );
                 }
             }
         }
@@ -281,32 +281,32 @@ internal sealed partial class LinkerRewritingDriver
                 case ConstructorDeclarationSyntax constructorDecl:
                     return (SyntaxNode?) constructorDecl.Body
                            ?? constructorDecl.ExpressionBody
-                           ?? throw new AssertionFailedException( "Constructor is expected to have body or expression body." );
+                           ?? throw new AssertionFailedException( $"Constructor is expected to have body or expression body: {constructorDecl}" );
 
                 case DestructorDeclarationSyntax destructorDecl:
                     return (SyntaxNode?) destructorDecl.Body
                            ?? destructorDecl.ExpressionBody
-                           ?? throw new AssertionFailedException( "Destructor is expected to have body or expression body." );
+                           ?? throw new AssertionFailedException( $"Destructor is expected to have body or expression body: {destructorDecl}" );
 
                 case MethodDeclarationSyntax methodDecl:
                     return (SyntaxNode?) methodDecl.Body
                            ?? methodDecl.ExpressionBody
-                           ?? throw new AssertionFailedException( "Method is expected to have body or expression body." );
+                           ?? throw new AssertionFailedException( $"Method is expected to have body or expression body: {methodDecl}" );
 
                 case ConversionOperatorDeclarationSyntax conversionOperatorDecl:
                     return (SyntaxNode?) conversionOperatorDecl.Body
                            ?? conversionOperatorDecl.ExpressionBody
-                           ?? throw new AssertionFailedException( "ConversionOperator is expected to have body or expression body." );
+                           ?? throw new AssertionFailedException( $"ConversionOperator is expected to have body or expression body: {conversionOperatorDecl}" );
 
                 case OperatorDeclarationSyntax operatorDecl:
                     return (SyntaxNode?) operatorDecl.Body
                            ?? operatorDecl.ExpressionBody
-                           ?? throw new AssertionFailedException( "Operator is expected to have body or expression body." );
+                           ?? throw new AssertionFailedException( $"Operator is expected to have body or expression body: {operatorDecl}" );
 
                 case AccessorDeclarationSyntax accessorDecl:
                     return (SyntaxNode?) accessorDecl.Body
                            ?? accessorDecl.ExpressionBody
-                           ?? throw new AssertionFailedException( "Operator is expected to have body or expression body." );
+                           ?? throw new AssertionFailedException( $"Operator is expected to have body or expression body: {accessorDecl}" );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected redirection: '{symbol}'." );
@@ -386,7 +386,7 @@ internal sealed partial class LinkerRewritingDriver
                             return rewrittenArrowClause;
 
                         default:
-                            throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
+                            throw new AssertionFailedException( $"Unexpected output of the body substitution: {rewrittenNode}" );
                     }
                 }
                 else
@@ -411,12 +411,12 @@ internal sealed partial class LinkerRewritingDriver
                             return rewrittenBlock;
 
                         default:
-                            throw new AssertionFailedException( $"{rewrittenNode.Kind()} is not an expected output of the body substitution." );
+                            throw new AssertionFailedException( $"Unexpected output of the body substitution: {rewrittenNode}" );
                     }
                 }
 
             default:
-                throw new AssertionFailedException( $"{bodyRootNode.Kind()} is not an expected kind of body root node." );
+                throw new AssertionFailedException( $"Unexpected  body root node: {bodyRootNode}" );
         }
     }
 
@@ -527,12 +527,12 @@ internal sealed partial class LinkerRewritingDriver
                 {
                     EventDeclarationSyntax eventSyntax => this.RewriteEvent( eventSyntax, eventSymbol ),
                     EventFieldDeclarationSyntax eventFieldSyntax => this.RewriteEventField( eventFieldSyntax, eventSymbol ),
-                    _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax.Kind()}" )
+                    _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax}" )
                 };
 
             default:
                 // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
+                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol}" );
         }
     }
 
@@ -568,7 +568,7 @@ internal sealed partial class LinkerRewritingDriver
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
+                    throw new AssertionFailedException( $"Unsupported symbol kind: {symbol}" );
             }
         }
         else if ( this.InjectionRegistry.IsIntroduced( semantic.Symbol ) )
@@ -604,7 +604,7 @@ internal sealed partial class LinkerRewritingDriver
                                                                                  ?? conversionOperatorDeclaration.ExpressionBody,
             OperatorDeclarationSyntax operatorDeclaration => (SyntaxNode?) operatorDeclaration.Body ?? operatorDeclaration.ExpressionBody,
             ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
-            var declaration => throw new AssertionFailedException( $"{declaration.Kind()} is not expected primary declaration." )
+            var declaration => throw new AssertionFailedException( $"Unexpected primary declaration: {declaration}" )
         };
     }
 
@@ -679,7 +679,7 @@ internal sealed partial class LinkerRewritingDriver
 
             default:
                 // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
+                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol}" );
         }
 
         static string CreateName( ISymbol symbol, string name, string suffix )
@@ -726,7 +726,7 @@ internal sealed partial class LinkerRewritingDriver
 
             default:
                 // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol?.Kind.ToString() ?? "(null)"}" );
+                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol}" );
         }
 
         var firstPropertyLetter = name.Substring( 0, 1 );

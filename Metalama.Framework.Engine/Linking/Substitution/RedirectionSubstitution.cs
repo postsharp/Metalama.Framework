@@ -35,7 +35,7 @@ internal sealed class RedirectionSubstitution : SyntaxNodeSubstitution
                 return currentNode;
 
             default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
     }
 }
