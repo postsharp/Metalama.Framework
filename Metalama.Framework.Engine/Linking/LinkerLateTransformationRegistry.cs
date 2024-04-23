@@ -53,7 +53,7 @@ internal sealed class LinkerLateTransformationRegistry
 
                     switch ( symbol )
                     {
-                        case IFieldSymbol fieldSymbol:
+                        case IFieldSymbol { IsStatic: false } fieldSymbol:
                             var declarator = (VariableDeclaratorSyntax) fieldSymbol.GetPrimaryDeclaration().AssertNotNull();
 
                             if ( declarator.Initializer == null )
@@ -65,7 +65,7 @@ internal sealed class LinkerLateTransformationRegistry
 
                             break;
 
-                        case IPropertySymbol propertySymbol:
+                        case IPropertySymbol { IsStatic: false } propertySymbol:
                             var primaryDeclaration = propertySymbol.GetPrimaryDeclaration().AssertNotNull();
 
                             switch ( primaryDeclaration )
@@ -88,7 +88,7 @@ internal sealed class LinkerLateTransformationRegistry
 
                             break;
 
-                        case IEventSymbol eventSymbol:
+                        case IEventSymbol { IsStatic: false } eventSymbol:
                             var eventDeclaration = eventSymbol.GetPrimaryDeclaration().AssertNotNull();
 
                             if ( eventDeclaration is VariableDeclaratorSyntax eventFieldDeclarator )
