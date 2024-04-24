@@ -7,6 +7,8 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal interface INamedTypeImpl : INamedType, ITypeImpl, IGenericInternal, IMemberOrNamedTypeImpl
 {
+    new CompilationModel Compilation { get; }
+
     /// <summary>
     /// Gets the set of methods that override a given member of a base type or interface. In case of
     /// a generic interface, this method can return several members. 

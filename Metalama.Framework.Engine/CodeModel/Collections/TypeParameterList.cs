@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         private TypeParameterList() { }
 
-        public TypeParameterList( NamedType declaringType, IReadOnlyList<Ref<ITypeParameter>> sourceItems ) : base(
+        public TypeParameterList( INamedType declaringType, IReadOnlyList<Ref<ITypeParameter>> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
 

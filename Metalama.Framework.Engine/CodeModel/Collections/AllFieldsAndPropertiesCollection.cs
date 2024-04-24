@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal sealed class AllFieldsAndPropertiesCollection : AllMembersCollection<IFieldOrProperty>, IFieldOrPropertyCollection
 {
-    public AllFieldsAndPropertiesCollection( NamedType declaringType ) : base( declaringType ) { }
+    public AllFieldsAndPropertiesCollection( INamedTypeImpl declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IFieldOrProperty> GetMembers( INamedType namedType ) => namedType.FieldsAndProperties;
 

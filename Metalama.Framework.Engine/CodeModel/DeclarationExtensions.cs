@@ -94,7 +94,12 @@ public static class DeclarationExtensions
         => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
-        => compilationContext.SymbolTranslator.Translate( declaration.GetSymbol().AssertNotNull(), declaration.GetCompilationModel().RoslynCompilation );
+        => declaration.GetSymbol() is ISymbol symbol
+           ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
+           : null;
+
+    internal static ISymbol GetSymbol( this SymbolBasedDeclaration declaration, CompilationContext compilationContext )
+        => compilationContext.SymbolTranslator.Translate( declaration.Symbol, declaration.GetCompilationModel().RoslynCompilation ).AssertNotNull();
 
     internal static MemberRef<T> ToMemberRef<T>( this T member )
         where T : class, IMemberOrNamedType

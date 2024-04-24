@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -11,13 +12,33 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUniquelyNamedUpdatableCollection<T>
     where T : class, IMemberOrNamedType
 {
-    protected override IEnumerable<ISymbol> GetSymbolsOfName( string name )
-        // TODO (TypeBuilder): Remove GetSymbol.
-        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol( this.Compilation.RoslynCompilation )).GetMembers( name ).Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+    protected override ImmutableArray<MemberRef<T>> GetMemberRefsOfName( string name )
+    => this.DeclaringTypeOrNamespace.Target switch
+    {
+        INamedTypeSymbol symbol =>
+            symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers( name )
+            .Where( x => this.IsSymbolIncluded(x ) && SymbolValidator.Instance.Visit( x ) )
+            .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+            .ToImmutableArray(),
+        INamespaceOrNamedType namespaceOrNamedType =>
+            // TODO: should return initial members of the builder.
+            ImmutableArray<MemberRef<T>>.Empty,
+        _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+    };
 
-    protected override IEnumerable<ISymbol> GetSymbols()
-        // TODO (TypeBuilder): Remove GetSymbol.
-        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol( this.Compilation.RoslynCompilation )).GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+    protected override ImmutableArray<MemberRef<T>> GetMemberRefs()
+        => this.DeclaringTypeOrNamespace.Target switch
+        {
+            INamedTypeSymbol symbol =>
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers()
+                .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+                .ToImmutableArray(),
+            INamespaceOrNamedType namespaceOrNamedType =>
+                // TODO: should return initial members of the builder.
+                ImmutableArray<MemberRef<T>>.Empty,
+            _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+        };
 
     protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType )
         : base( compilation, declaringType ) { }

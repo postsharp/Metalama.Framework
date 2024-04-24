@@ -2,4 +2,4 @@
 
 namespace Metalama.Framework.Code.DeclarationBuilders;
 
-public interface INamedTypeBuilder : INamedType;
+public interface INamedTypeBuilder : IMemberOrNamedTypeBuilder, INamedType;

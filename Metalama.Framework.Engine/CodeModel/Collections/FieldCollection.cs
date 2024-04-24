@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class FieldCollection : MemberCollection<IField>, IFieldCollection
     {
-        public FieldCollection( NamedType declaringType, FieldUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
+        public FieldCollection( INamedType declaringType, FieldUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 
         public IField this[ string name ] => this.OfName( name ).Single();
     }

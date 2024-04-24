@@ -8,5 +8,5 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal sealed class IndexerCollection : MemberCollection<IIndexer>, IIndexerCollection
 {
-    public IndexerCollection( NamedType declaringType, IndexerUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
+    public IndexerCollection( INamedType declaringType, IndexerUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 }

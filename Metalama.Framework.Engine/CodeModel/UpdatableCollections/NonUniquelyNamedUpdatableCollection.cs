@@ -15,7 +15,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
 {
     private ImmutableDictionary<string, UpdatableMemberRefArray<T>>? _byNameDictionary;
 
-    protected NonUniquelyNamedUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation, declaringType ) { }
+    protected NonUniquelyNamedUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringNamespaceOrType ) : base( compilation, declaringNamespaceOrType ) { }
 
     private ImmutableDictionary<string, UpdatableMemberRefArray<T>> GetInitializedByNameDictionary()
         => this._byNameDictionary ??= ImmutableDictionary<string, UpdatableMemberRefArray<T>>.Empty.WithComparers( StringComparer.Ordinal );
@@ -61,14 +61,12 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         }
 
         // Discover from source.
-        foreach ( var symbol in this.GetSymbols() )
+        foreach ( var memberRef in this.GetMemberRefs() )
         {
             // We intentionally look in the initial dictionary (not the builder). If there is no value for this name, it means
             // that the collection was not built for that name, and we need to create it now.
-            if ( !byNameDictionary.ContainsKey( symbol.Name ) )
+            if ( !byNameDictionary.ContainsKey( memberRef.Name ) )
             {
-                var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
-
                 action( memberRef.ToRef() );
 
                 if ( !byNameDictionaryBuilder.TryGetValue( memberRef.Name, out var members ) )
@@ -182,12 +180,8 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         this.RemoveItem( member.ToRef() );
     }
 
-    protected abstract IEnumerable<ISymbol> GetSymbolsOfName( string name );
+    // TODO: Return IEnumerable?
+    protected abstract ImmutableArray<MemberRef<T>> GetMemberRefsOfName( string name );
 
-    protected abstract IEnumerable<ISymbol> GetSymbols();
-
-    private ImmutableArray<MemberRef<T>> GetMemberRefsOfName( string name )
-        => this.GetSymbolsOfName( name )
-            .Select( x => new MemberRef<T>( x, this.Compilation.CompilationContext ) )
-            .ToImmutableArray();
+    protected abstract ImmutableArray<MemberRef<T>> GetMemberRefs();
 }

@@ -8,7 +8,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.Advice.IntroduceType(builder.Target, "TestNestedType");
+        builder.Advice.IntroduceType(builder.Target, "TestNestedType", TypeKind.Class);
     }
 }
 
