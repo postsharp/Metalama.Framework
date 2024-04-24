@@ -1,1 +1,10 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+[IntroductionAttribute]
+public class TargetType
+{
+  class TestNestedType
+  {
+    public void Method()
+    {
+    }
+  }
+}

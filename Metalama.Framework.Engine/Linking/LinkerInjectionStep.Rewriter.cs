@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -348,10 +349,10 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ) );
+                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ), members.Add );
             }
 
-            AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
+            AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ), members.Add );
 
             // If the type has no braces, add them.
             if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
@@ -403,7 +404,7 @@ internal sealed partial class LinkerInjectionStep
             return node;
 
             // TODO: Try to avoid closure allocation.
-            void AddInjectionsOnPosition( InsertPosition position )
+            void AddInjectionsOnPosition( InsertPosition position, Action<MemberDeclarationSyntax> addAction )
             {
                 var injectedMembersAtPosition = this._transformationCollection.GetInjectedMembersOnPosition( position );
 
@@ -484,9 +485,22 @@ internal sealed partial class LinkerInjectionStep
 
                                 break;
                             }
+
+                        case TypeDeclarationSyntax typeDeclaration:
+
+                            var typeBuilder = (NamedTypeBuilder)injectedMember.DeclarationBuilder.AssertNotNull();
+                            var injectedTypeMembers = new List<MemberDeclarationSyntax>();
+
+                            AddInjectionsOnPosition(
+                                new InsertPosition( InsertPositionRelation.Within, typeBuilder ),
+                                injectedTypeMembers.Add );
+
+                            injectedNode = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
+
+                            break;
                     }
 
-                    members.Add( injectedNode );
+                    addAction( injectedNode );
                 }
             }
         }

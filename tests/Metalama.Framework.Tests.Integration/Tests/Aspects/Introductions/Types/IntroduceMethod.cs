@@ -2,7 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.IntroduceField;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.IntroduceMethod;
 
 public class IntroductionAttribute : TypeAspect
 {
@@ -10,11 +10,11 @@ public class IntroductionAttribute : TypeAspect
     {
         var result = builder.Advice.IntroduceType(builder.Target, "TestNestedType", TypeKind.Class);
 
-        builder.Advice.IntroduceMethod(result.Declaration.ForCompilation(builder.Advice.MutableCompilation), nameof(MethodTemplate) );
+        builder.Advice.IntroduceMethod(result.Declaration.ForCompilation(builder.Advice.MutableCompilation), nameof(Method) );
     }
 
     [Template]
-    public void MethodTemplate()
+    public void Method()
     {
     }
 }

@@ -535,7 +535,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         {
             { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
             { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
-            { Relation: InsertPositionRelation.Within, TypeBuilder.ContainingDeclaration: INamedType { } containingType }
+            { Relation: InsertPositionRelation.Within, TypeBuilder.ContainingDeclaration: SymbolBasedDeclaration and INamedType { } containingType }
                 => ((BaseTypeDeclarationSyntax) containingType.GetPrimaryDeclarationSyntax().AssertNotNull()).CloseBraceToken.Span.Start - 1,
             _ => 0
         };

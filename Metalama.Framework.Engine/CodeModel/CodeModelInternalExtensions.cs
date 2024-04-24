@@ -58,6 +58,9 @@ internal static class CodeModelInternalExtensions
             case NamedTypeBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
                 return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
 
+            case NamedTypeBuilder { DeclaringType: BuiltNamedType builtNamedType }:
+                return new InsertPosition( InsertPositionRelation.Within, builtNamedType.TypeBuilder );
+
             case NamedTypeBuilder { DeclaringType: { } declaringType }:
                 return new InsertPosition(
                     InsertPositionRelation.Within,
