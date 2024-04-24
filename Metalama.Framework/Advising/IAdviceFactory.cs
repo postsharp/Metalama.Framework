@@ -20,7 +20,6 @@ namespace Metalama.Framework.Advising
     [InternalImplement]
     [CompileTime]
     [PublicAPI]
-    [Obsolete]
     public interface IAdviceFactory
     {
         /// <summary>
