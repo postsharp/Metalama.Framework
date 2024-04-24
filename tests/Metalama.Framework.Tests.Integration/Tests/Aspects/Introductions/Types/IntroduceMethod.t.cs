@@ -1,8 +1,8 @@
 [IntroductionAttribute]
 public class TargetType
 {
-  class TestNestedType
-  {
+  class TestNestedType : global::System.Object
+    {
     public void Method()
     {
     }

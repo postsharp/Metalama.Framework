@@ -4,16 +4,15 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Reflection.Emit;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTransformation<NamedTypeBuilder>
+internal sealed class IntroduceNamedTypeTransformation : IntroduceMemberOrNamedTypeTransformation<NamedTypeBuilder>
 {
-    public IntroduceTypeTransformation( Advice advice, NamedTypeBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
+    public IntroduceNamedTypeTransformation( Advice advice, NamedTypeBuilder introducedDeclaration ) : base( advice, introducedDeclaration ) { }
 
     public override TransformationObservability Observability => TransformationObservability.Always;
 
@@ -21,8 +20,9 @@ internal sealed class IntroduceTypeTransformation : IntroduceMemberOrNamedTypeTr
     {
         var type =
             ClassDeclaration( this.IntroducedDeclaration.Name )
+                .WithBaseList( BaseList( SingletonSeparatedList<BaseTypeSyntax>( SimpleBaseType( context.SyntaxGenerator.Type( this.IntroducedDeclaration.BaseType.AssertNotNull().GetSymbol().AssertNotNull() ) ) ) ) )
                 .WithModifiers( this.IntroducedDeclaration.GetSyntaxModifierList() )
-                .NormalizeWhitespaceIfNecessary(context.SyntaxGenerationContext);
+                .NormalizeWhitespaceIfNecessary( context.SyntaxGenerationContext );
 
         return new[]
         {

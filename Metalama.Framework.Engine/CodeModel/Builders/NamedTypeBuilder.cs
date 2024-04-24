@@ -27,6 +27,8 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
             INamedType namedType => namedType.Namespace,
             _ => throw new AssertionFailedException($"Unsupported: {declaringNamespaceOrType}"),
         };
+
+        this.BaseType = ((CompilationModel) this.Namespace.Compilation).Factory.GetSpecialType( Code.SpecialType.Object );
     }
 
     public override IDeclaration ContainingDeclaration => (IDeclaration?) this.DeclaringType ?? this.Namespace;
@@ -35,8 +37,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public bool HasDefaultConstructor => true;
 
-    [Memo]
-    public INamedType? BaseType => ((CompilationModel) this.Namespace.Compilation).Factory.GetSpecialType( Code.SpecialType.Object );
+    public INamedType? BaseType { get; set; }
 
     INamedType? INamedType.BaseType => this.BaseType;
 
@@ -175,7 +176,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
-    public IntroduceTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
+    public IntroduceNamedTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
     {
