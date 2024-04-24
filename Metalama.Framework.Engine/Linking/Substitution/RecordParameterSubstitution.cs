@@ -71,7 +71,7 @@ internal sealed class RecordParameterSubstitution : SyntaxNodeSubstitution
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             default:
-                throw new AssertionFailedException( $"({currentNode.Kind()}, {this._targetAccessor.MethodKind}) are not supported." );
+                throw new AssertionFailedException( $"Unsupported combination: {currentNode}, {this._targetAccessor}" );
         }
 
         ExpressionSyntax CreateFieldAccessExpression()

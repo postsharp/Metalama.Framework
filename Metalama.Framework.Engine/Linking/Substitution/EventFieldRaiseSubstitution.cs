@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -41,7 +40,7 @@ internal sealed class EventFieldRaiseSubstitution : SyntaxNodeSubstitution
                     memberAccess.WithName( IdentifierName( targetName ) );
 
             default:
-                throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
     }
 }

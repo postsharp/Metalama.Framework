@@ -125,21 +125,21 @@ internal sealed partial class LinkerRewritingDriver
             }
             else
             {
-                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
+                throw new AssertionFailedException( $"Non-inlined constructors are not supported: {lastOverride}" );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
                  && this.ShouldGenerateSourceMember( symbol ) )
             {
-                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
+                throw new AssertionFailedException( $"Non-inlined constructors are not supported: {lastOverride}" );
             }
 
             if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
                  && this.ShouldGenerateEmptyMember( symbol ) )
             {
-                throw new AssertionFailedException( "Non-inlined constructors are not supported." );
+                throw new AssertionFailedException( $"Non-inlined constructors are not supported: {lastOverride}" );
             }
         }
         else if ( this.InjectionRegistry.IsOverride( symbol ) )
@@ -249,7 +249,7 @@ internal sealed partial class LinkerRewritingDriver
                                     break;
 
                                 default:
-                                    throw new AssertionFailedException( $"Unsupported: {primaryDeclaration.Kind()}" );
+                                    throw new AssertionFailedException( $"Unsupported: {primaryDeclaration}" );
                             }
 
                             break;

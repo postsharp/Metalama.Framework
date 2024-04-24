@@ -39,7 +39,7 @@ internal static class SymbolExtensions
                 return default;
 
             default:
-                throw new AssertionFailedException( $"Unexpected declaration syntax for '{symbol}'." );
+                throw new AssertionFailedException( $"Unexpected declaration syntax for '{symbol}': {declaration}" );
         }
     }
 

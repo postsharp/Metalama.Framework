@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Linking
                         expressionBody.ArrowToken.TrailingTrivia,
                         indexerDeclaration.SemicolonToken.LeadingTrivia,
                         indexerDeclaration.SemicolonToken.TrailingTrivia),
-                    _ => throw new AssertionFailedException( $"Unexpected property declaration at '{indexerDeclaration.GetLocation()}'." )
+                    _ => throw new AssertionFailedException( $"Unexpected property declaration: {indexerDeclaration}" )
                 };
 
                 accessorListLeadingTrivia =
@@ -204,7 +204,7 @@ namespace Metalama.Framework.Engine.Linking
                             semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ),
                             semicolonToken.TrailingTrivia.AddOptionalLineFeed( generationContext ),
                             generationContext.ElasticEndOfLineTriviaList, generationContext.ElasticEndOfLineTriviaList),
-                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration at '{accessorDeclaration.GetLocation()}'." )
+                        _ => throw new AssertionFailedException( $"Unexpected accessor declaration: {accessorDeclaration}" )
                     };
 
                 return accessorDeclaration.PartialUpdate(
@@ -268,7 +268,7 @@ namespace Metalama.Framework.Engine.Linking
                                         {
                                             SyntaxKind.GetAccessorDeclaration => symbol.GetMethod.AssertNotNull(),
                                             SyntaxKind.SetAccessorDeclaration or SyntaxKind.InitAccessorDeclaration => symbol.SetMethod.AssertNotNull(),
-                                            _ => throw new AssertionFailedException( $"Unexpected kind:{a.Kind()}" )
+                                            _ => throw new AssertionFailedException( $"Unexpected kind: {a}" )
                                         } ) ) ) )
                     .WithSourceCodeAnnotation();
 

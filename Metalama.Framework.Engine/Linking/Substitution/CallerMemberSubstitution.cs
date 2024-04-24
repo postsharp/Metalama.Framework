@@ -59,7 +59,7 @@ internal sealed class CallerMemberSubstitution : SyntaxNodeSubstitution
                             invocationExpression.ArgumentList.WithArguments( invocationExpression.ArgumentList.Arguments.AddRange( additionalArguments ) ) );
 
             default:
-                throw new AssertionFailedException( $"Unsupported syntax: {currentNode.Kind()}" );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
     }
 

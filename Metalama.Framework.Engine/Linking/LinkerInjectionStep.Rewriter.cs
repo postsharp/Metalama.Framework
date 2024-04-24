@@ -339,7 +339,7 @@ internal sealed partial class LinkerInjectionStep
                 ref baseList,
                 ref parameterList );
 
-                // Process the type members.
+            // Process the type members.
             foreach ( var member in node.Members )
             {
                 foreach ( var visitedMember in this.VisitMember( member ) )
@@ -600,7 +600,7 @@ internal sealed partial class LinkerInjectionStep
                                                                 exitStatements,
                                                                 expressionBody.Expression,
                                                                 a.Kind() is not SyntaxKind.GetAccessorDeclaration ) ),
-                                                    _ => throw new AssertionFailedException( $"Not supported: {a.Kind()}" )
+                                                    _ => throw new AssertionFailedException( $"Not supported: {a}" )
                                                 }
                                                 : a ) ) ) );
 
@@ -616,7 +616,7 @@ internal sealed partial class LinkerInjectionStep
                     }
 
                 default:
-                    throw new AssertionFailedException( $"Not supported: {currentNode.Kind()}" );
+                    throw new AssertionFailedException( $"Not supported: {currentNode}" );
             }
 
             static BlockSyntax ReplaceBlock(
@@ -814,7 +814,7 @@ internal sealed partial class LinkerInjectionStep
                         break;
 
                     default:
-                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax.Kind()}" );
+                        throw new AssertionFailedException( $"Unexpected base type: {baseTypeSyntax}" );
                 }
 
                 // TODO: This may be slower than replacing specific index.
