@@ -480,7 +480,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
-            var templateMemberRef = AdviceFactory.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, required: true )!.Value;
+            var templateMemberRef = TemplateNameValidator.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, required: true )!.Value;
 
             var templateMember = templateMemberRef.GetTemplateMember<IMethod>(
                 this.Compilation.GetCompilationModel(),

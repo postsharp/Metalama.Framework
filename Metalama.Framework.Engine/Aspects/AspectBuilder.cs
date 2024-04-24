@@ -28,11 +28,12 @@ namespace Metalama.Framework.Engine.Aspects
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;
+        private T _declaration;
 
         public AspectBuilder(
             T target,
             AspectBuilderState aspectBuilderState,
-            AdviceFactory adviceFactory,
+            AdviceFactory<T> adviceFactory,
             AspectPredecessor? aspectPredecessor = null )
         {
             this.Target = target;
@@ -66,7 +67,12 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ProjectServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
 
-        public AdviceFactory AdviceFactory { get; }
+        [Obsolete]
+        IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
+
+        IAdviceFactoryInternal IAdvisableInternal.AdviceFactory => this.AdviceFactory;
+
+        public AdviceFactory<T> AdviceFactory { get; }
 
         public DisposeAction WithPredecessor( in AspectPredecessor predecessor )
         {
@@ -90,8 +96,6 @@ namespace Metalama.Framework.Engine.Aspects
                 CompilationModelVersion.Current );
 
         IDeclaration IAspectBuilder.Target => this.Target;
-
-        IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 
         public void SkipAspect() => this._aspectBuilderState.AspectInstance.Skip();
 
@@ -149,7 +153,11 @@ namespace Metalama.Framework.Engine.Aspects
             }
             else
             {
-                return new AspectBuilder<TNewTarget>( newTarget, this._aspectBuilderState, this.AdviceFactory, this.AspectPredecessor );
+                return new AspectBuilder<TNewTarget>(
+                    newTarget,
+                    this._aspectBuilderState,
+                    this.AdviceFactory.WithDeclaration( newTarget ),
+                    this.AspectPredecessor );
             }
         }
 
@@ -175,5 +183,9 @@ namespace Metalama.Framework.Engine.Aspects
         public LicenseVerifier? LicenseVerifier { get; }
 
         string IDiagnosticSource.DiagnosticSourceDescription => ((IAspectInstanceInternal) this.AspectInstance).DiagnosticSourceDescription;
+
+        T IAdvisable<T>.Target => this._declaration;
+
+        IAdvisable<TNewDeclaration> IAdvisable<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => throw new NotImplementedException();
     }
 }

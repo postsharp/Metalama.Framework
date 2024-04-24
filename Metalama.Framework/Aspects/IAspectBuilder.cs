@@ -6,6 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
+using System;
 using System.Threading;
 
 namespace Metalama.Framework.Aspects
@@ -41,6 +42,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets an object that allows to create advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
+        [Obsolete( "The use the advising extension methods on the IAspectBuilder<T> object." )]
         IAdviceFactory Advice { get; }
 
         /// <summary>
@@ -90,7 +92,7 @@ namespace Metalama.Framework.Aspects
     /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is a strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
-    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder
+    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder, IAdvisable<TAspectTarget>
         where TAspectTarget : class, IDeclaration
     {
         /// <summary>

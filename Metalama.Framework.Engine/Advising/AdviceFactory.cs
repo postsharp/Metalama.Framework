@@ -24,7 +24,11 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class AdviceFactory : IAdviceFactory
+#pragma warning disable CS0612 // Type or member is obsolete
+
+// ReSharper disable once PossibleInterfaceMemberAmbiguity
+internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
+    where T : IDeclaration
 {
     private readonly string? _layerName;
 
@@ -36,8 +40,9 @@ internal sealed class AdviceFactory : IAdviceFactory
     private readonly ObjectReaderFactory _objectReaderFactory;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
 
-    public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
+    public AdviceFactory( T target, AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
     {
+        this.Target = target;
         this._state = state;
         this._templateInstance = templateInstance;
         this._layerName = layerName;
@@ -55,7 +60,11 @@ internal sealed class AdviceFactory : IAdviceFactory
 
     private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();
 
-    public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this._state, templateClassInstance, this._layerName );
+    public AdviceFactory<T> WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
+        => new( this.Target, this._state, templateClassInstance, this._layerName );
+
+    IAdviceFactoryImpl IAdviceFactoryImpl.WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
+        => this.WithTemplateClassInstance( templateClassInstance );
 
     public IAdviceFactory WithTemplateProvider( TemplateProvider templateProvider )
         => this.WithTemplateClassInstance(
@@ -90,53 +99,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
         }
 
-        return ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
-    }
-
-    public static TemplateMemberRef? ValidateTemplateName(
-        TemplateClass templateClass,
-        string templateName,
-        TemplateKind templateKind,
-        bool required = false,
-        bool ignoreMissing = false )
-    {
-        Invariant.Assert( !(required && ignoreMissing) );
-
-        if ( templateClass.Members.TryGetValue( templateName, out var template ) )
-        {
-            if ( template.TemplateInfo.IsNone )
-            {
-                // It is possible that the aspect has a member of the required name, but the user did not use the custom attribute. In this case,
-                // we want a proper error message.
-
-                throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException( (template.TemplateClass.FullName, templateName) );
-            }
-
-            if ( template.TemplateInfo.IsAbstract )
-            {
-                if ( !required )
-                {
-                    return null;
-                }
-                else
-                {
-                    throw new AssertionFailedException( "A non-abstract template was expected." );
-                }
-            }
-
-            return new TemplateMemberRef( template, templateKind );
-        }
-        else
-        {
-            if ( ignoreMissing )
-            {
-                return null;
-            }
-            else
-            {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (templateClass.ShortName, templateName) );
-            }
-        }
+        return TemplateNameValidator.ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
     }
 
     private TemplateMemberRef SelectMethodTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
@@ -241,8 +204,8 @@ internal sealed class AdviceFactory : IAdviceFactory
         return selectedTemplate.InterpretedAs( interpretedKind );
     }
 
-    private AdviceResult<T> ExecuteAdvice<T>( Advice advice )
-        where T : class, IDeclaration
+    private AdviceResult<TDeclaration> ExecuteAdvice<TDeclaration>( Advice advice )
+        where TDeclaration : class, IDeclaration
     {
         List<ITransformation> transformations = new();
 
@@ -290,8 +253,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 break;
         }
 
-        return new AdviceResult<T>(
-            result.NewDeclaration.As<IDeclaration, T>(),
+        return new AdviceResult<TDeclaration>(
+            result.NewDeclaration.As<IDeclaration, TDeclaration>(),
             this._state.CurrentCompilation,
             result.Outcome,
             this._state.AspectBuilder.AssertNotNull(),
@@ -330,6 +293,12 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         return selectedTemplate;
     }
+
+    IAdvisable<TNewDeclaration> IAdvisable<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => this.WithDeclaration( target );
+
+    public AdviceFactory<TNewTarget> WithDeclaration<TNewTarget>( TNewTarget target )
+        where TNewTarget : IDeclaration
+        => new( target, this._state, this._templateInstance, this._layerName );
 
     public ICompilation MutableCompilation => this._state.CurrentCompilation;
 
@@ -1629,13 +1598,13 @@ internal sealed class AdviceFactory : IAdviceFactory
         object? args = null )
         => this.AddContractImpl<IPropertyOrIndexer>( targetMember, template, kind, tags, args );
 
-    private AdviceResult<T> AddContractImpl<T>(
+    private AdviceResult<TContract> AddContractImpl<TContract>(
         IDeclaration targetDeclaration,
         string template,
         ContractDirection direction,
         object? tags,
         object? args )
-        where T : class, IDeclaration
+        where TContract : class, IDeclaration
     {
         if ( this._templateInstance == null )
         {
@@ -1644,7 +1613,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         if ( direction == ContractDirection.None )
         {
-            return new AdviceResult<T>(
+            return new AdviceResult<TContract>(
                 null,
                 this._state.CurrentCompilation,
                 AdviceOutcome.Ignore,
@@ -1672,7 +1641,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             this.GetObjectReader( tags ),
             this.GetObjectReader( args ) );
 
-        var result = this.ExecuteAdvice<T>( advice );
+        var result = this.ExecuteAdvice<TContract>( advice );
 
         return result;
     }
@@ -1777,4 +1746,6 @@ internal sealed class AdviceFactory : IAdviceFactory
             this.ExecuteAdvice<IDeclaration>( advice );
         }
     }
+
+    public T Target { get; }
 }
