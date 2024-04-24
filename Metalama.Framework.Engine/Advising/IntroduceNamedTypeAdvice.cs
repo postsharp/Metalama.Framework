@@ -12,11 +12,11 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class IntroduceTypeAdvice : IntroduceMemberOrNamedTypeAdvice<INamedType, NamedTypeBuilder>
+    internal class IntroduceNamedTypeAdvice : IntroduceMemberOrNamedTypeAdvice<INamedType, NamedTypeBuilder>
     {
         public override AdviceKind AdviceKind => AdviceKind.IntroduceType;
 
-        public IntroduceTypeAdvice(
+        public IntroduceNamedTypeAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamespaceOrNamedType? targetNamespaceOrType,
@@ -31,6 +31,8 @@ namespace Metalama.Framework.Engine.Advising
         public override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
+
+            this.BuildAction?.Invoke( this.Builder );
         }
 
         public override AdviceImplementationResult Implement( ProjectServiceProvider serviceProvider, CompilationModel compilation, Action<ITransformation> addTransformation )

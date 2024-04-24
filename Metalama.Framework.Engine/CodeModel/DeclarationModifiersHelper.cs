@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -41,6 +42,9 @@ internal static class DeclarationModifiersHelper
 
             case IFieldImpl field:
                 return GetMemberSyntaxModifierList( field, categories );
+
+            case INamedTypeImpl namedType:
+                return GetTypeSyntaxModifierList( namedType, categories );
 
             default:
                 throw new AssertionFailedException( $"Unexpected declaration kind: {declaration.DeclarationKind}." );
@@ -142,6 +146,46 @@ internal static class DeclarationModifiersHelper
         if ( (categories & ModifierCategories.Async) != 0 && member.IsAsync )
         {
             AddToken( SyntaxKind.AsyncKeyword );
+        }
+
+        return TokenList( tokens );
+    }
+
+    private static SyntaxTokenList GetTypeSyntaxModifierList( INamedTypeImpl namedType, ModifierCategories categories )
+    {
+        var tokens = new List<SyntaxToken>();
+
+        void AddToken( SyntaxKind syntaxKind )
+        {
+            tokens.Add( SyntaxFactoryEx.TokenWithTrailingSpace( syntaxKind ) );
+        }
+
+        if ( (categories & ModifierCategories.Accessibility) != 0 )
+        {
+            AddAccessibilityTokens( namedType, tokens );
+        }
+
+        if ( namedType.IsStatic && (categories & ModifierCategories.Static) != 0 )
+        {
+            AddToken( SyntaxKind.StaticKeyword );
+        }
+
+        if ( (categories & ModifierCategories.Inheritance) != 0 )
+        {
+            if ( namedType.HasNewKeyword == true )
+            {
+                AddToken( SyntaxKind.NewKeyword );
+            }
+            
+            if ( namedType.IsAbstract )
+            {
+                AddToken( SyntaxKind.AbstractKeyword );
+            }
+
+            if ( namedType.IsSealed )
+            {
+                AddToken( SyntaxKind.SealedKeyword );
+            }
         }
 
         return TokenList( tokens );

@@ -5,11 +5,10 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType, ISdkType, ISdkDeclaration
+internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, ISdkType, ISdkDeclaration
 {
     public NamedTypeBuilder TypeBuilder { get; set; }
 
@@ -125,5 +124,25 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedType, ISdkT
     {
         implementationMember = null;
         return false;
+    }
+
+    IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
+    {
+        throw new NotImplementedException();
+    }
+
+    bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
+    {
+        throw new NotImplementedException();
+    }
+
+    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )
+    {
+        throw new NotImplementedException();
+    }
+
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
+    {
+        throw new NotImplementedException();
     }
 }

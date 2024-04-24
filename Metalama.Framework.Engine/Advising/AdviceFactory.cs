@@ -578,7 +578,7 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         using ( this.WithNonUserCode() )
         {
-            var advice = new IntroduceTypeAdvice(
+            var advice = new IntroduceNamedTypeAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetNamespaceOrType,

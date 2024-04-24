@@ -9,7 +9,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType", TypeKind.Class);
+        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType", TypeKind.Class, buildType: t => { t.Accessibility = Accessibility.Public; });
 
         builder.Advice.IntroduceMethod(
             builder.Target.ForCompilation(builder.Advice.MutableCompilation), 

@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, ISdkType, ISdkDeclaration
+internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, INamedTypeImpl, ISdkType, ISdkDeclaration
 {
     public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base( advice, declaringNamespaceOrType as INamedType, name )
     {
@@ -177,6 +177,26 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public IntroduceTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
 
+    IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
+    {
+        throw new NotImplementedException();
+    }
+
+    bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
+    {
+        throw new NotImplementedException();
+    }
+
+    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )
+    {
+        throw new NotImplementedException();
+    }
+
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
+    {
+        throw new NotImplementedException();
+    }
+
 #pragma warning disable RS1009 // Only internal implementations of this interface are allowed
     private class RoslynSymbol : INamedTypeSymbol
 #pragma warning restore RS1009 // Only internal implementations of this interface are allowed
@@ -289,7 +309,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
         public IModuleSymbol ContainingModule => this._builder.ContainingDeclaration.GetSymbol().AssertNotNull().ContainingModule;
 
-        public INamedTypeSymbol ContainingType => this._builder.ContainingDeclaration.GetSymbol().AssertNotNull().ContainingType;
+        public INamedTypeSymbol ContainingType => (INamedTypeSymbol) this._builder.ContainingDeclaration.GetSymbol().AssertNotNull();
 
         public INamespaceSymbol ContainingNamespace => this._builder.ContainingDeclaration.GetSymbol().AssertNotNull().ContainingNamespace;
 
@@ -336,7 +356,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
         public INamedTypeSymbol ConstructUnboundGenericType() => throw new NotImplementedException();
 
-        public bool Equals( [NotNullWhen( true )] ISymbol? other, SymbolEqualityComparer equalityComparer ) => equalityComparer.Equals( this, other );
+        public bool Equals( [NotNullWhen( true )] ISymbol? other, SymbolEqualityComparer equalityComparer ) => this == other.OriginalDefinition;
 
         public bool Equals( ISymbol? other ) => this == other;
 
