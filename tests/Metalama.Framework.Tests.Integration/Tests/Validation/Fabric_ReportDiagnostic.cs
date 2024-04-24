@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.Fabric_ReportDiagnosti
 
         public override void AmendProject( IProjectAmender amender )
         {
-            amender.Outbound.SelectMany( x => x.Types.SelectMany( t => t.Methods ) ).ReportDiagnostic( t => _warning.WithArguments( t ) );
+            amender.SelectMany( x => x.Types.SelectMany( t => t.Methods ) ).ReportDiagnostic( t => _warning.WithArguments( t ) );
         }
     }
 

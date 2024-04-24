@@ -89,40 +89,19 @@ internal abstract partial class BaseTestRunner
 
         try
         {
-            try
-            {
-                await this.RunAndAssertCoreAsync( testInput, testContextOptions );
-            }
-            finally
-            {
-                // This is a trick to make the current task, on the heap, stop having a reference to the previous
-                // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
-                // have references to the objects that are in the scope of the test.
-                await Task.Yield();
-            }
-        }
-        catch ( Exception ex1 )
-        {
-            // If the test throws an exception due to a bug, it may also prevent unloading.
-            // In that case, throw both the exception from the test and the unloading exception, wrapped in AggregateException.
-            try
-            {
-                collectibleExecutionContext?.Dispose();
-                collectibleExecutionContext = null;
-            }
-            catch ( Exception ex2 )
-            {
-                collectibleExecutionContext = null;
-
-                throw new AggregateException( ex1, ex2 );
-            }
-
-            throw;
+            await this.RunAndAssertCoreAsync( testInput, testContextOptions );
         }
         finally
         {
-            collectibleExecutionContext?.Dispose();
+            // This is a trick to make the current task, on the heap, stop having a reference to the previous
+            // task. This allows TestExecutionContext.Dispose to perform a full GC. Without Task.Yield, we will
+            // have references to the objects that are in the scope of the test.
+            await Task.Yield();
         }
+
+        // We intentionally do not check memory leaks (which is done by the following line) when we have an unhandled
+        // exception here because the exception may hold a reference to the domain context we want to unload.
+        collectibleExecutionContext?.Dispose();
     }
 
     protected virtual TestResult CreateTestResult() => new();

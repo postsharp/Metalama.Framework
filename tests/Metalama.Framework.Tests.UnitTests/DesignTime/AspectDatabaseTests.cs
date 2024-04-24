@@ -61,7 +61,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
             {
                 public override void AmendProject(IProjectAmender amender)
                 {
-                    amender.Outbound
+                    amender
                         .Select(compilation => compilation.Types.OfName(nameof(FabricTarget)).Single())
                         .AddAspect<Aspect>();
                 }

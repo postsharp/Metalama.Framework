@@ -12,4 +12,6 @@ public interface IReferenceValidatorProperties
     bool IncludeDerivedTypes { get; }
 
     DeclarationKind ValidatedDeclarationKind { get; }
+
+    string? ValidatedIdentifier { get; }
 }

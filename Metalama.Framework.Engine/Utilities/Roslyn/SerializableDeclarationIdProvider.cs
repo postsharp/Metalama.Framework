@@ -179,6 +179,11 @@ public static class SerializableDeclarationIdProvider
         }
     }
 
+    /// <summary>Gets the <see cref="SerializableDeclarationId"/> for the declaration as it appears in the unmodified source code.</summary>
+    /// <remarks>This is relevant in the case of constructor parameter introduction, which alter the serializable ID of the constructor.</remarks>
+    public static SerializableDeclarationId GetSourceSerializableId( this IDeclaration declaration )
+        => declaration.GetSymbol()?.GetSerializableId() ?? declaration.ToSerializableId();
+
     [PublicAPI]
     public static ISymbol ResolveToSymbol( this SerializableDeclarationId id, Compilation compilation )
     {

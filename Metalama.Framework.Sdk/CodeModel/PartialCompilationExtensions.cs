@@ -108,8 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( newRoot != oldRoot )
                 {
-                    modifiedSyntaxTrees.Enqueue(
-                        SyntaxTreeTransformation.ReplaceTree( tree.Value, tree.Value.WithRootAndOptions( newRoot, tree.Value.Options ) ) );
+                    modifiedSyntaxTrees.Enqueue( SyntaxTreeTransformation.ReplaceTree( tree.Value, tree.Value.WithRootAndOptions( newRoot, tree.Value.Options ) ) );
                 }
             }
 

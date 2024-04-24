@@ -84,7 +84,7 @@ internal sealed class BlockWithReturnBeforeUsingLocalSubstitution : SyntaxNodeSu
                 }
 
             default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
 
         UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, IEnumerable<StatementSyntax> statements )

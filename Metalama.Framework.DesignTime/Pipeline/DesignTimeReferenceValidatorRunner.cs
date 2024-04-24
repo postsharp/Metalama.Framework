@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -31,15 +32,13 @@ internal static class DesignTimeReferenceValidatorRunner
                     aspectRepository: new PipelineResultBasedAspectRepository( aspectPipelineResultAndState.Result ) ) );
 
             var userDiagnosticSink = new UserDiagnosticSink( aspectPipelineResultAndState.Configuration.ClosureDiagnosticManifest );
+            var validatorProvider = new ValidatorProvider( aspectPipelineResultAndState.Result.ReferenceValidators, compilationModel );
+            var taskRunner = serviceProvider.Global.GetRequiredService<ITaskRunner>();
+            var referenceRunner = new ReferenceValidatorRunner( serviceProvider );
 
-            using var visitor = new ReferenceValidationVisitor(
-                serviceProvider,
-                userDiagnosticSink,
-                new ValidatorProvider( aspectPipelineResultAndState.Result.ReferenceValidators, compilationModel ),
-                compilationModel,
+            taskRunner.RunSynchronously(
+                () => referenceRunner.RunReferenceValidatorsAsync( compilationModel, model, userDiagnosticSink, validatorProvider, cancellationToken ),
                 cancellationToken );
-
-            visitor.Visit( model );
 
             return userDiagnosticSink.ToImmutable();
         }
@@ -61,7 +60,7 @@ internal static class DesignTimeReferenceValidatorRunner
             this._compilationModel = compilationModel;
         }
 
-        public ReferenceValidatorCollectionProperties Properties => this._validators.Properties;
+        public ReferenceIndexerOptions Options => this._validators.Options;
 
         public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol )
             => this._validatorCache.GetOrAdd(

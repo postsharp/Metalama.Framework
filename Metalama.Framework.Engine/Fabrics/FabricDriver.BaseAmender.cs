@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 
 internal abstract partial class FabricDriver
 {
-    protected abstract class BaseAmender<T> : IAmender<T>, IAspectReceiverParent
+    protected abstract class BaseAmender<T> : AspectReceiver<T, int>, IAmender<T>, IAspectReceiverParent
         where T : class, IDeclaration
     {
         // The Target property is protected (and not exposed to the API) because
@@ -31,21 +31,30 @@ internal abstract partial class FabricDriver
         private Ref<T> TargetDeclaration { get; }
 
         private readonly FabricManager _fabricManager;
+        private readonly IProject _project;
 
         protected BaseAmender(
             IProject project,
             FabricManager fabricManager,
             FabricInstance fabricInstance,
-            in Ref<T> targetDeclaration )
+            Ref<T> targetDeclaration ) : base(
+            fabricManager.ServiceProvider,
+            targetDeclaration,
+            CompilationModelVersion.Final,
+            ( action, context ) => action( targetDeclaration.GetTarget( context.Compilation ), 0, context ) )
         {
+            this._project = project;
             this._fabricInstance = fabricInstance;
             this.TargetDeclaration = targetDeclaration;
             this._fabricManager = fabricManager;
-            this.Project = project;
             this.LicenseVerifier = this._fabricManager.ServiceProvider.GetService<LicenseVerifier>();
         }
 
-        public IProject Project { get; }
+        protected override bool ShouldCache => false;
+
+        protected override IAspectReceiverParent Parent => this;
+
+        IProject IAspectReceiverParent.Project => this._project;
 
         public abstract string? Namespace { get; }
 

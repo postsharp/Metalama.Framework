@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Substitution;
@@ -27,7 +26,7 @@ internal sealed class EmptyVoidPartialMethodSubstitution : SyntaxNodeSubstitutio
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
             default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+                throw new AssertionFailedException( $"Unsupported syntax: {currentNode}" );
         }
     }
 }

@@ -408,11 +408,12 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             {
                 var designTimeValidator = new DesignTimeReferenceValidatorInstance(
                     validatedDeclarationSymbol,
-                    validator.ReferenceKinds,
-                    validator.IncludeDerivedTypes,
+                    validator.Properties.ReferenceKinds,
+                    validator.Properties.IncludeDerivedTypes,
                     validator.Driver,
                     validator.Implementation,
-                    validator.DiagnosticSourceDescription );
+                    validator.DiagnosticSourceDescription,
+                    validator.Granularity );
 
                 if ( resultBuilders.TryGetValue( filePath, out var builder ) )
                 {

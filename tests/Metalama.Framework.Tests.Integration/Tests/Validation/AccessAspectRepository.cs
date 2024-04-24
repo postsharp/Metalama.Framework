@@ -15,12 +15,12 @@ public class TheAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Outbound.ValidateReferences( ValidateReference, ReferenceKinds.All );
+        builder.Outbound.ValidateOutboundReferences( ValidateReference, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All );
     }
 
-    private void ValidateReference( in ReferenceValidationContext context )
+    private void ValidateReference( ReferenceValidationContext context )
     {
-        if (!( (INamedType)context.ReferencedDeclaration ).Enhancements().HasAspect<TheAspect>())
+        if (!( (INamedType)context.Destination.Declaration ).Enhancements().HasAspect<TheAspect>())
         {
             throw new InvalidOperationException();
         }

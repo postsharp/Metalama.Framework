@@ -15,13 +15,17 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
 {
     internal TransitiveValidatorInstance( ReferenceValidatorInstance instance )
     {
+        var implementation = instance.Implementation;
+        var properties = instance.Properties;
+
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToTypedRef();
-        this.ReferenceKinds = instance.ReferenceKinds;
-        this.IncludeDerivedTypes = instance.IncludeDerivedTypes;
+        this.ReferenceKinds = properties.ReferenceKinds;
+        this.IncludeDerivedTypes = properties.IncludeDerivedTypes;
         this.MethodName = instance.Driver.MethodName;
-        this.Object = instance.Implementation.Implementation;
-        this.State = instance.Implementation.State;
+        this.Object = implementation.Implementation;
+        this.State = implementation.State;
         this.DiagnosticSourceDescription = instance.DiagnosticSourceDescription;
+        this.Granularity = instance.Granularity;
     }
 
     public TransitiveValidatorInstance(
@@ -31,7 +35,8 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         object obj,
         IAspectState? state,
         string? methodName,
-        string diagnosticSourceDescription )
+        string diagnosticSourceDescription,
+        ReferenceGranularity granularity )
     {
         this.ValidatedDeclaration = validatedDeclaration;
         this.IncludeDerivedTypes = includeDerivedTypes;
@@ -40,6 +45,7 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
         this.State = state;
         this.MethodName = methodName;
         this.DiagnosticSourceDescription = diagnosticSourceDescription;
+        this.Granularity = granularity;
     }
 
     private TransitiveValidatorInstance()
@@ -65,6 +71,11 @@ public sealed class TransitiveValidatorInstance : ICompileTimeSerializable
     public string? MethodName { get; private set; }
 
     internal string DiagnosticSourceDescription { get; }
+
+#pragma warning disable CS0612 // Type or member is obsolete
+    public ReferenceGranularity Granularity { get; private set; } =
+        ReferenceGranularity.SyntaxNode; // Default value for backward compatibility with serialized values.
+#pragma warning restore CS0612           // Type or member is obsolete
 
     internal ValidatorDriver GetReferenceValidatorDriver()
     {

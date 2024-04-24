@@ -32,7 +32,7 @@ internal class C
     {
         public override void AmendType( ITypeAmender amender )
         {
-            amender.Outbound.SelectMany( t=>t.Methods ).AddAspect<MyAspect>( _ => new MyAspect( "Fabric" ));
+            amender.SelectMany( t=>t.Methods ).AddAspect<MyAspect>( _ => new MyAspect( "Fabric" ));
         }
     }
 }

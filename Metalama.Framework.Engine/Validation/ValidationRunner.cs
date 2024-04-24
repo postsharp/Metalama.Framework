@@ -26,6 +26,7 @@ internal sealed class ValidationRunner
     private readonly ProjectServiceProvider _serviceProvider;
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+    private readonly ReferenceValidatorRunner _referenceValidatorRunner;
 
     public ValidationRunner( AspectPipelineConfiguration configuration, ImmutableArray<IValidatorSource> sources )
     {
@@ -34,6 +35,7 @@ internal sealed class ValidationRunner
         this._serviceProvider = configuration.ServiceProvider;
         this._userCodeInvoker = this._serviceProvider.GetRequiredService<UserCodeInvoker>();
         this._concurrentTaskRunner = this._serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
+        this._referenceValidatorRunner = new ReferenceValidatorRunner( this._serviceProvider );
     }
 
     /// <summary>
@@ -170,19 +172,11 @@ internal sealed class ValidationRunner
             return ImmutableArray<ReferenceValidatorInstance>.Empty;
         }
 
-        var referenceValidatorProvider = new ValidatorProvider( validatorsBySymbol );
+        var validatorProvider = new ValidatorProvider( validatorsBySymbol );
 
-        await this._concurrentTaskRunner.RunConcurrentlyAsync(
-            initialCompilation.PartialCompilation.SyntaxTrees.Values,
-            ( syntaxTree, visitor ) => visitor.Visit( syntaxTree ),
-            () => new ReferenceValidationVisitor(
-                this._serviceProvider,
-                diagnosticAdder,
-                referenceValidatorProvider,
-                initialCompilation,
-                cancellationToken ),
-            cancellationToken );
+        await this._referenceValidatorRunner.RunReferenceValidatorsAsync( initialCompilation, diagnosticAdder, validatorProvider, cancellationToken );
 
+        // Return the validators because some of them need to be added to the transitive manifest.
         return validatorsBySymbol.Where( s => s.Key.GetResultingAccessibility() != AccessibilityFlags.SameType )
             .SelectMany( s => s )
             .ToImmutableArray();
@@ -210,10 +204,10 @@ internal sealed class ValidationRunner
         public ValidatorProvider( ImmutableDictionaryOfArray<ISymbol, ReferenceValidatorInstance> validatorsBySymbol )
         {
             this._validatorsBySymbol = validatorsBySymbol;
-            this.Properties = new ReferenceValidatorCollectionProperties( validatorsBySymbol.SelectMany( x => x ) );
+            this.Options = new ReferenceIndexerOptions( validatorsBySymbol.SelectMany( x => x ).Select( x => x.Properties ) );
         }
 
-        public ReferenceValidatorCollectionProperties Properties { get; }
+        public ReferenceIndexerOptions Options { get; }
 
         public ImmutableArray<ReferenceValidatorInstance> GetValidators( ISymbol symbol ) => this._validatorsBySymbol[symbol];
     }

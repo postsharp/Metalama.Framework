@@ -20,6 +20,8 @@ namespace Metalama.Framework.Validation
         private readonly IDiagnosticSink _diagnosticSink;
         private readonly IDiagnosticSource _diagnosticSource;
 
+        internal object? Tag { get; }
+
         /// <summary>
         /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
         /// property of the <see cref="IAspectBuilder"/> interface. 
@@ -40,11 +42,13 @@ namespace Metalama.Framework.Validation
             IDeclaration declaration,
             IAspectState? aspectState,
             IDiagnosticSink diagnosticSink,
-            IDiagnosticSource diagnosticSource )
+            IDiagnosticSource diagnosticSource,
+            object? tag )
         {
             this.AspectState = aspectState;
             this._diagnosticSink = diagnosticSink;
             this._diagnosticSource = diagnosticSource;
+            this.Tag = tag;
             this.Declaration = declaration;
         }
     }

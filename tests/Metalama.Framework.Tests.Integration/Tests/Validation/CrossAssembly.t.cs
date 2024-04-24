@@ -1,11 +1,11 @@
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'BaseType' in declaration 'DerivedClass'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'MemberType' in declaration 'DerivedClass._field1'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'DerivedClass._field2'.`
-// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ReturnType, NullableType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
-// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ParameterType, ArrayType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param1'.`
-// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeArgument, ParameterType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param2'.`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ReturnType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)'.`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'ArrayElementType' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param1'.`
+// Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeArgument' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)/param2'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClass.Method()'.`
-// Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.Method()'.`
+// Warning MY001 on `Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.Method()'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.Method()'.`
 using System;
 using System.Collections.Generic;

@@ -170,7 +170,7 @@ internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvide
 
             if ( syntaxNode is LocalFunctionStatementSyntax && typeDeclarationSyntax == null )
             {
-                throw new AssertionFailedException( "Top-level local functions are not supported." );
+                throw new AssertionFailedException( "Top-level local functions are not supported: {syntaxNode}" );
             }
 
             var builder = this.GetIdentifiersInTypeScope( typeDeclarationSyntax.AssertNotNull() ).ToBuilder();

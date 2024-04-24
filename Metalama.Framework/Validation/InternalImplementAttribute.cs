@@ -18,15 +18,16 @@ namespace Metalama.Framework.Validation
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Outbound.ValidateReferences( Validate, ReferenceKinds.BaseType );
+            builder.Outbound.ValidateOutboundReferences( Validate, ReferenceGranularity.Compilation, ReferenceKinds.BaseType );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
-            if ( context.ReferencingDeclaration.Compilation != context.ReferencedDeclaration.Compilation )
+            if ( context.Origin.Assembly != context.Destination.Assembly )
             {
                 context.Diagnostics.Report(
-                    FrameworkDiagnosticDescriptors.InternalImplementConstraint.WithArguments( (context.ReferencedDeclaration, context.ReferencingType) ) );
+                    r => FrameworkDiagnosticDescriptors.InternalImplementConstraint.WithArguments(
+                        (context.Destination.ParameterOrAttribute, (INamedType) r.ReferencingDeclaration) ) );
             }
         }
     }

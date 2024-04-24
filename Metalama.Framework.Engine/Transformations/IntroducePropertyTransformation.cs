@@ -134,10 +134,12 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                     Token( SyntaxKind.GetKeyword ),
                     propertyBuilder.IsAutoPropertyOrField
                         ? null
-                        : context.SyntaxGenerator.FormattedBlock(
+                        : syntaxGenerator.FormattedBlock(
                             ReturnStatement(
-                                Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
+                                SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
+                                syntaxGenerator.SuppressNullableWarningExpression(
+                                    DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
+                                    propertyBuilder.Type.GetSymbol().IsValueType ? propertyBuilder.Type.GetSymbol() : propertyBuilder.Type.ToNullableType().GetSymbol() ),
                                 Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) ),
                     null,
                     propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
@@ -162,7 +164,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                         : Token( TriviaList(), SyntaxKind.SetKeyword, TriviaList( ElasticSpace ) ),
                     propertyBuilder.IsAutoPropertyOrField
                         ? null
-                        : context.SyntaxGenerator.FormattedBlock(),
+                        : syntaxGenerator.FormattedBlock(),
                     null,
                     propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
         }

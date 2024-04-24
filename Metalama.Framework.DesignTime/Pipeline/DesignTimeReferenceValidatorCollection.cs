@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal sealed class DesignTimeReferenceValidatorCollection
 {
-    private readonly ReferenceValidatorCollectionProperties _ownProperties;
+    private readonly ReferenceIndexerOptions _ownOptions;
     private readonly ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _ownValidators;
     private readonly ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> _allValidators;
     private readonly HashSet<DesignTimeReferenceValidatorCollection> _validatorCollectionsFromProjectReferences;
@@ -21,18 +21,18 @@ internal sealed class DesignTimeReferenceValidatorCollection
 
     public static DesignTimeReferenceValidatorCollection Empty { get; } =
         new(
-            ReferenceValidatorCollectionProperties.Empty,
+            ReferenceIndexerOptions.Empty,
             ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance>.Empty,
             ImmutableArray<DesignTimeReferenceValidatorCollection>.Empty );
 
-    public ReferenceValidatorCollectionProperties Properties { get; }
+    public ReferenceIndexerOptions Options { get; }
 
     private DesignTimeReferenceValidatorCollection(
-        ReferenceValidatorCollectionProperties ownProperties,
+        ReferenceIndexerOptions ownOptions,
         ImmutableDictionaryOfArray<SymbolDictionaryKey, DesignTimeReferenceValidatorInstance> ownValidators,
         IEnumerable<DesignTimeReferenceValidatorCollection> validatorsFromProjectReferences )
     {
-        this._ownProperties = ownProperties;
+        this._ownOptions = ownOptions;
         this._ownValidators = ownValidators;
 
         // The reason of the structure of this class is to cope with project graphs, especially diamond-shared projects graphs, where we need to avoid duplicates
@@ -44,12 +44,11 @@ internal sealed class DesignTimeReferenceValidatorCollection
 
         this._allValidators = this._ownValidators.Merge( this._validatorCollectionsFromProjectReferences.Select( x => x._ownValidators ) );
 
-        this.Properties = new ReferenceValidatorCollectionProperties(
-            this._validatorCollectionsFromProjectReferences.Select( x => x.Properties ).Concat( this._ownProperties ) );
+        this.Options = new ReferenceIndexerOptions( this._validatorCollectionsFromProjectReferences.Select( x => x.Options ).Concat( this._ownOptions ) );
     }
 
     public DesignTimeReferenceValidatorCollection WithChildCollections( IEnumerable<DesignTimeReferenceValidatorCollection> childCollections )
-        => new( this._ownProperties, this._ownValidators, childCollections );
+        => new( this._ownOptions, this._ownValidators, childCollections );
 
     internal IReadOnlyCollection<DesignTimeReferenceValidatorInstance> GetValidatorsForSymbol( ISymbol symbol )
     {
@@ -108,7 +107,7 @@ internal sealed class DesignTimeReferenceValidatorCollection
             var ownValidators = this._builder.ToImmutable();
 
             return new DesignTimeReferenceValidatorCollection(
-                new ReferenceValidatorCollectionProperties( ownValidators.SelectMany( x => x ) ),
+                new ReferenceIndexerOptions( ownValidators.SelectMany( x => x ) ),
                 ownValidators,
                 childCollections );
         }

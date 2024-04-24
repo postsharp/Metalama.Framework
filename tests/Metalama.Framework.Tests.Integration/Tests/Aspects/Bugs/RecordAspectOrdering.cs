@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.RecordAspectOrdering;
 internal class Fabric : ProjectFabric
 {
     public override void AmendProject(IProjectAmender amender)
-        => amender.Outbound
+        => amender
             .SelectMany(compilation => compilation.AllTypes)
             .SelectMany(type => type.Methods)
             .AddAspectIfEligible<LogAttribute>();

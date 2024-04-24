@@ -417,7 +417,13 @@ internal sealed partial class CompileTimeCompilationBuilder
 
                 RetryHelper.RetryWithLockDetection(
                     path,
-                    p => File.WriteAllBytes( p, bytes ),
+                    p =>
+                    {
+                        File.WriteAllBytes( p, bytes );
+                        
+                        // Set the file as read only to we have no temptation to edit it.
+                        File.SetAttributes( p, FileAttributes.ReadOnly );
+                    },
                     this._serviceProvider.Underlying,
                     logger: this._logger );
 

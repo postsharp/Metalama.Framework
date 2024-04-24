@@ -30,7 +30,7 @@ public sealed class ScopedSuppression : IScopedSuppression
 
     public bool Matches( Diagnostic diagnostic, Compilation compilation, Func<Func<bool>, bool> codeInvoker )
     {
-        var symbolId = this.Declaration.GetSerializableId();
+        var symbolId = this.Declaration.GetSourceSerializableId();
 
         return this.Matches( diagnostic, compilation, codeInvoker, symbolId );
     }
@@ -47,6 +47,11 @@ public sealed class ScopedSuppression : IScopedSuppression
         var node = location.SourceTree.GetRoot().FindNode( location.SourceSpan ).FindSymbolDeclaringNode();
 
         if ( node == null )
+        {
+            return false;
+        }
+
+        if ( !compilation.ContainsSyntaxTree( location.SourceTree ) )
         {
             return false;
         }

@@ -24,15 +24,16 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         {
             builder
                 .Outbound
-                .ValidateReferences( Validate, ReferenceKinds.All );
+                .ValidateOutboundReferences( Validate, ReferenceGranularity.Member, ReferenceKinds.All );
         }
 
-        private static void Validate( in ReferenceValidationContext context )
+        private static void Validate( ReferenceValidationContext context )
         {
             context.Diagnostics.Report(
-                _warning.WithArguments(
-                    ( context.ReferenceKinds, context.ReferencingDeclaration.DeclarationKind, context.ReferencingDeclaration,
-                      context.ReferencedDeclaration.DeclarationKind, context.ReferencedDeclaration, context.Source.Kind ) ) );
+                x =>
+                    _warning.WithArguments(
+                        ( x.ReferenceKind, x.ReferencingDeclaration.DeclarationKind, x.ReferencingDeclaration,
+                          context.Destination.Declaration.DeclarationKind, context.Destination.Declaration, x.Source.Kind ) ) );
         }
     }
 
@@ -49,6 +50,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         public ValidatedClass() { }
 
         public ValidatedClass( int x ) { }
+
+        public virtual int Property { get; set; }
+
+        public virtual event Action TheEvent
+        {
+            add { }
+            remove { }
+        }
     }
 
     [Aspect]
@@ -56,6 +65,32 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
     [Aspect]
     internal delegate void ValidatedDelegate();
+
+    [Aspect]
+    internal interface IValidatedInterface
+    {
+        void InterfaceMethod();
+
+        int InterfaceProperty { get; set; }
+
+        event Action InterfaceEvent;
+    }
+
+    internal class ExplicitInterfaceImplementation : IValidatedInterface
+    {
+        void IValidatedInterface.InterfaceMethod() { }
+
+        int IValidatedInterface.InterfaceProperty { get; set; }
+
+        event Action IValidatedInterface.InterfaceEvent
+        {
+            add { }
+            remove { }
+        }
+    }
+
+    [ValidatedClass]
+    internal class ValidatedList : List<int>;
 
     // <target>
     [ValidatedClass]
@@ -75,7 +110,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         public DerivedClass( int x ) : base( 5 ) { }
 
-        // Override.
+        // Override method.
         public override void VirtualMethod()
         {
             // Base method call.
@@ -85,22 +120,55 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         // Parameters, return values.
         private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
         {
+            // ObjectCreation
             ValidatedClass variable = new();
             var x = new ValidatedClass();
+
+            // Default access
             _ = x.InstanceField;
+
+            // Assignments
             x.InstanceField = 5;
             x.InstanceField += 5;
             StaticField = 5;
+
+            // Invoke, typeof
             Method( typeof(ValidatedClass) );
 
+            // nameof
             var y = nameof(ValidatedClass);
             var z = nameof(InstanceField);
+
+            // Invoke event.
+            FieldLikeEvent();
+            FieldLikeEvent.Invoke(); // This is a normal access.
+
+            // Event assignment
+            TheEvent += () => { };
+            TheEvent -= () => { };
+            FieldLikeEvent += () => { };
+            FieldLikeEvent -= () => { };
+
+            // Collection expressions.
+            var p = new ValidatedClass[] { };
+            ValidatedClass[] q = [new DerivedClass()]; // array creation
+            ValidatedList r = [6];                     // 
 
             return null;
         }
 
-        // Property.
-        public ValidatedClass? Property { get; set; }
+        // Automatic property.
+        public ValidatedClass? AutomaticProperty { get; set; }
+
+        // Override property.
+        public override int Property
+        {
+            // Base property read.
+            get => base.Property;
+
+            // Base property assignment.
+            set => base.Property = value;
+        }
 
         // Events
         public event ValidatedDelegate? FieldLikeEvent;
@@ -109,6 +177,18 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
         {
             add { }
             remove { }
+        }
+
+        public override event Action TheEvent
+        {
+            add
+            {
+                base.TheEvent += value;
+            }
+            remove
+            {
+                base.TheEvent += value;
+            }
         }
     }
 

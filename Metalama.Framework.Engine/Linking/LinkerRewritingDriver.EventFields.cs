@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.InjectionRegistry.IsOverride( symbol ) )
             {
-                throw new AssertionFailedException( "Event field cannot be an override." );
+                throw new AssertionFailedException( $"Event field cannot be an override: {symbol}" );
             }
             else
             {

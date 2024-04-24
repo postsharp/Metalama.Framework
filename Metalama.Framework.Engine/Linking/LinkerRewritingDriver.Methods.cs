@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
                             (semicolonToken.LeadingTrivia.AddOptionalLineFeed( generationContext ), generationContext.ElasticEndOfLineTriviaList,
                              generationContext.ElasticEndOfLineTriviaList,
                              semicolonToken.TrailingTrivia),
-                        _ => throw new AssertionFailedException( $"Unexpected method declaration at '{methodDeclaration.GetLocation()}'." )
+                        _ => throw new AssertionFailedException( $"Unexpected method declaration: {methodDeclaration}" )
                     };
 
                 var ret = methodDeclaration

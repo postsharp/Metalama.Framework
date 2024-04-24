@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Utilities;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
@@ -329,29 +328,17 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
     private async ValueTask ResumeCoreAsync( AsyncExecutionContext executionContext )
     {
-        // Touch the modified compile-time files so that they are analyzed again by Roslyn, and our "edit in progress" diagnostic
-        // is removed.
+        // Notify the IDE that errors have been removed on compile-time syntax trees.
         if ( this.MustReportPausedPipelineAsErrors )
         {
             if ( this._currentState.CompileTimeSyntaxTrees != null )
             {
-                foreach ( var file in this._currentState.CompileTimeSyntaxTrees )
-                {
-                    if ( file.Value == null )
-                    {
-                        this.Logger.Trace?.Log( $"Touching file '{file.Key}'." );
+                var notification = new CompilationResultChangedEventArgs(
+                    this.ProjectKey,
+                    true,
+                    this._currentState.CompileTimeSyntaxTrees.Keys.ToImmutableArray() );
 
-                        RetryHelper.Retry(
-                            () =>
-                            {
-                                if ( File.Exists( file.Key ) )
-                                {
-                                    File.SetLastWriteTimeUtc( file.Key, DateTime.UtcNow );
-                                }
-                            },
-                            logger: this.Logger );
-                    }
-                }
+                this._eventHub.PublishCompilationResultChangedNotification( notification );
             }
         }
 
@@ -884,8 +871,9 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     /// determine whether an error must displayed in the editor.  
     /// </summary>
     public bool IsCompileTimeSyntaxTreeOutdated( string name )
-        => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
-                                                                                   && syntaxTree == null;
+        => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees
+            && compileTimeSyntaxTrees.TryGetValue( name, out var isvalid )
+            && !isvalid;
 
     private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {

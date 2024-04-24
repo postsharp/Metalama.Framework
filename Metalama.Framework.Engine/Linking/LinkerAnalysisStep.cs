@@ -571,7 +571,7 @@ namespace Metalama.Framework.Engine.Linking
                                             IEventSymbol => null,
                                             IFieldSymbol => null,
                                             INamedTypeSymbol => null,
-                                            _ => throw new AssertionFailedException( $"Symbol not supported: {member.Kind}." )
+                                            _ => throw new AssertionFailedException( $"Symbol not supported: {member}." )
                                         } )
                                 .OfType<IMethodSymbol>() )
                     .Where( m => !injectionRegistry.IsOverride( m ) );

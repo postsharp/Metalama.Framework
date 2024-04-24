@@ -34,7 +34,7 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
             {
                 InvocationExpressionSyntax { ArgumentList: { Arguments.Count: 1 } argumentList } =>
                     argumentList.Arguments[0].Expression,
-                _ => throw new AssertionFailedException( $"{this.AspectReference.RootNode.Kind()} is not in a supported form." )
+                _ => throw new AssertionFailedException( $"Unsupported form: {this.AspectReference.RootNode}" )
             };
         }
 
@@ -67,7 +67,7 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
                 return this.SubstituteConditionalAccess( conditionalAccessExpression );
 
             default:
-                throw new AssertionFailedException( $"{currentNode.Kind()} is not supported." );
+                throw new AssertionFailedException( $"Unsupported: {currentNode}" );
         }
     }
 
@@ -120,7 +120,7 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
         }
         else if ( this.CompilationContext.SymbolComparer.Is( targetSymbol.ContainingType, this.AspectReference.ContainingSemantic.Symbol.ContainingType ) )
         {
-            throw new AssertionFailedException( $"Resolved symbol {this.AspectReference.ContainingSemantic.Symbol} is declared in a derived class." );
+            throw new AssertionFailedException( $"Resolved symbol '{this.AspectReference.ContainingSemantic.Symbol}' is declared in a derived class." );
         }
         else
         {
@@ -135,6 +135,6 @@ internal abstract partial class AspectReferenceRenamingSubstitution : SyntaxNode
         {
             GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
             IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-            _ => throw new AssertionFailedException( $"{name.Kind()} is not a supported name." )
+            _ => throw new AssertionFailedException( $"Unsupported name: {name}" )
         };
 }

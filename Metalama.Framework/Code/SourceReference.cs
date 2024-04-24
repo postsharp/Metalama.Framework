@@ -2,11 +2,12 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Diagnostics;
+using System;
 
 namespace Metalama.Framework.Code;
 
 /// <summary>
-/// Represents a syntax node in source code. 
+/// Represents a syntax node in source code. Using <c>Metalama.Framework.Sdk</c> you can use <c>ToSyntaxNodeOrToken</c> to convert it to a Roslyn object.
 /// </summary>
 [CompileTime]
 public readonly struct SourceReference
@@ -15,7 +16,7 @@ public readonly struct SourceReference
 
     internal SourceReference( object nodeOrToken, ISourceReferenceImpl sourceReferenceImpl )
     {
-        this.NodeOrToken = nodeOrToken;
+        this.NodeOrTokenInternal = nodeOrToken;
         this._sourceReferenceImpl = sourceReferenceImpl;
     }
 
@@ -23,7 +24,10 @@ public readonly struct SourceReference
     /// Gets the Roslyn <c>SyntaxNode</c>, <c>SyntaxToken</c>.
     /// This property can be used by SDK-based plugins. 
     /// </summary>
-    public object NodeOrToken { get; }
+    [Obsolete( "Use ToSyntaxNodeOrToken() from Metalama.Framework.Sdk." )]
+    public object NodeOrToken => this.NodeOrTokenInternal;
+
+    internal object NodeOrTokenInternal { get; }
 
     /// <summary>
     /// Gets the <c>SyntaxKind</c> of the node or token.
@@ -57,5 +61,5 @@ public readonly struct SourceReference
     /// <summary>
     /// Gets the content of the node or token (without trivia).
     /// </summary>
-    public override string ToString() => this.NodeOrToken?.ToString() ?? "null";
+    public override string ToString() => this.NodeOrTokenInternal?.ToString() ?? "null";
 }

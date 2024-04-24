@@ -39,7 +39,7 @@ internal sealed class ClassBasedReferenceValidatorDriver : ValidatorDriver<Refer
 
         public static bool Validate( ref InvokePayload payload )
         {
-            ((ReferenceValidator) payload._implementation.Implementation).Validate( payload._context );
+            ((OutboundReferenceValidator) payload._implementation.Implementation).ValidateReferences( payload._context );
 
             return true;
         }

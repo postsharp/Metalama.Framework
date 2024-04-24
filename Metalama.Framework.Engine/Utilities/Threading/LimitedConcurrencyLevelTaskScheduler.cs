@@ -15,10 +15,10 @@ internal sealed class LimitedConcurrencyLevelTaskScheduler : TaskScheduler, IDis
     private readonly ThreadLocal<bool> _currentThreadIsProcessingItems = new();
 
     // The list of tasks to be executed
-    private readonly LinkedList<Task> _tasks = new(); // protected by lock(_tasks)
+    private readonly LinkedList<Task> _tasks = []; // protected by lock(_tasks)
 
-    // The maximum concurrency level allowed by this scheduler.
-
+    public int PendingTasksCount => this._tasks.Count;
+    
     // Indicates whether the scheduler is currently processing work items.
     private int _delegatesQueuedOrRunning;
 

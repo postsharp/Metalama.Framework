@@ -12,7 +12,7 @@ public class Fabric : NamespaceFabric
 {
     public override void AmendNamespace( INamespaceAmender amender )
     {
-        amender.Outbound.AddAspect<MyNamespaceAspect>();
+        amender.AddAspect<MyNamespaceAspect>();
     }
 }
 
