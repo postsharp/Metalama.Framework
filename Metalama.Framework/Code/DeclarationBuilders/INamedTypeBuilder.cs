@@ -8,4 +8,11 @@ public interface INamedTypeBuilder : IMemberOrNamedTypeBuilder, INamedType
     /// Gets or sets the type from which the current type derives.
     /// </summary>
     new INamedType? BaseType { get; set; }
+
+    /// <summary>
+    /// Adds a generic parameter to the type.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns>An <see cref="ITypeParameterBuilder"/> that allows you to further build the new parameter.</returns>
+    ITypeParameterBuilder AddTypeParameter( string name );
 }

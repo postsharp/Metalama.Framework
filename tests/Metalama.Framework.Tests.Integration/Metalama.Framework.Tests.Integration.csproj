@@ -46,6 +46,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Introductions\Types\BaseType_Trivial - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Types\IntroduceField - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Types\IntroduceMethod - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Types\Simple - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
@@ -54,6 +61,25 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Introductions\Types\BaseType_Generic.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>BaseType_Generic.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Types\AddTypeParameter.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>AddTypeParameter.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Types\IntroduceProperty.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>IntroduceProperty.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Types\IntroduceField.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>IntroduceField.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

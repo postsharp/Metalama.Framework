@@ -65,6 +65,13 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
         this.Name = name;
     }
 
+    public TypeParameterBuilder( NamedTypeBuilder containingType, int index, string name ) : base( containingType.ParentAdvice )
+    {
+        this.ContainingDeclaration = containingType;
+        this.Index = index;
+        this.Name = name;
+    }
+
     // TODO: How to implement this?
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
     {

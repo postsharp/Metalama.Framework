@@ -3,8 +3,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -79,9 +82,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public INamedType UnderlyingType => this.TypeBuilder.UnderlyingType;
 
-    public TypeKind TypeKind => this.TypeBuilder.TypeKind;
+    public Code.TypeKind TypeKind => this.TypeBuilder.TypeKind;
 
-    public SpecialType SpecialType => this.TypeBuilder.SpecialType;
+    public Code.SpecialType SpecialType => this.TypeBuilder.SpecialType;
 
     public bool? IsReferenceType => this.TypeBuilder.IsReferenceType;
 
@@ -101,7 +104,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public Microsoft.CodeAnalysis.ISymbol Symbol => this.TypeSymbol;
 
-    public bool Equals( SpecialType specialType ) => false;
+    public bool Equals( Code.SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
@@ -111,7 +114,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default ) => Array.Empty<IDeclaration>();
 
-    public bool IsSubclassOf( INamedType type ) => type.SpecialType == SpecialType.Object;
+    public bool IsSubclassOf( INamedType type ) => type.SpecialType == Code.SpecialType.Object;
 
     public Type ToType()
     {
@@ -143,6 +146,6 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        throw new NotImplementedException();
+        return new NamedType( ( (INamedTypeSymbol) this.Builder.GetSymbol()).Construct( typeArguments.Select( x => x.GetSymbol() ).ToArray() ), this.Compilation );
     }
 }
