@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private bool IsExternal => this._symbol.ContainingAssembly != this.Compilation.RoslynCompilation.Assembly;
 
-        public override IDeclaration ContainingDeclaration
+        public override IDeclaration? ContainingDeclaration
         {
             get
             {
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     if ( this.IsExternal )
                     {
-                        return this.DeclaringAssembly;
+                        return this._symbol.ContainingAssembly == null ? null : this.DeclaringAssembly;
                     }
                     else
                     {

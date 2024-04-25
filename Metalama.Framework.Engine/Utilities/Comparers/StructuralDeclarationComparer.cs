@@ -1,103 +1,67 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Utilities.Comparers;
 
 /// <summary>
-/// Compares symbols, possibly from different compilations.
+/// Compares declarations, possibly from different compilations.
 /// </summary>
-internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, IComparer<ISymbol>
+internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompilationElement>, IComparer<ICompilationElement>
 {
     // ReSharper disable UnusedMember.Global
 
-    public static readonly StructuralSymbolComparer Default =
-        new(
-            StructuralComparerOptions.ContainingDeclaration |
-            StructuralComparerOptions.Name |
-            StructuralComparerOptions.GenericParameterCount |
-            StructuralComparerOptions.GenericArguments |
-            StructuralComparerOptions.ParameterTypes |
-            StructuralComparerOptions.ParameterModifiers );
+    public static readonly StructuralDeclarationComparer Default = new( StructuralSymbolComparer.Default );
 
-    public static readonly StructuralSymbolComparer IncludeAssembly =
-        new(
-            StructuralComparerOptions.ContainingDeclaration |
-            StructuralComparerOptions.Name |
-            StructuralComparerOptions.GenericParameterCount |
-            StructuralComparerOptions.GenericArguments |
-            StructuralComparerOptions.ParameterTypes |
-            StructuralComparerOptions.ParameterModifiers |
-            StructuralComparerOptions.ContainingAssembly );
+    public static readonly StructuralDeclarationComparer IncludeAssembly = new( StructuralSymbolComparer.IncludeAssembly );
 
-    public static readonly StructuralSymbolComparer IncludeNullability =
-        new(
-            StructuralComparerOptions.ContainingDeclaration |
-            StructuralComparerOptions.Name |
-            StructuralComparerOptions.GenericParameterCount |
-            StructuralComparerOptions.GenericArguments |
-            StructuralComparerOptions.ParameterTypes |
-            StructuralComparerOptions.ParameterModifiers |
-            StructuralComparerOptions.Nullability );
+    public static readonly StructuralDeclarationComparer IncludeNullability = new( StructuralSymbolComparer.IncludeNullability );
 
-    public static readonly StructuralSymbolComparer IncludeAssemblyAndNullability =
-        new(
-            StructuralComparerOptions.ContainingDeclaration |
-            StructuralComparerOptions.Name |
-            StructuralComparerOptions.GenericParameterCount |
-            StructuralComparerOptions.GenericArguments |
-            StructuralComparerOptions.ParameterTypes |
-            StructuralComparerOptions.ParameterModifiers |
-            StructuralComparerOptions.Nullability |
-            StructuralComparerOptions.ContainingAssembly );
+    public static readonly StructuralDeclarationComparer IncludeAssemblyAndNullability = new( StructuralSymbolComparer.IncludeAssemblyAndNullability );
 
-    public static readonly StructuralSymbolComparer ContainingDeclarationOblivious =
-        new(
-            StructuralComparerOptions.Name |
-            StructuralComparerOptions.GenericParameterCount |
-            StructuralComparerOptions.GenericArguments |
-            StructuralComparerOptions.ParameterTypes |
-            StructuralComparerOptions.ParameterModifiers );
+    public static readonly StructuralDeclarationComparer ContainingDeclarationOblivious = new( StructuralSymbolComparer.ContainingDeclarationOblivious );
 
-    public static readonly StructuralSymbolComparer Signature =
-        new(
-            StructuralComparerOptions.Name |
-            StructuralComparerOptions.GenericParameterCount |
-            StructuralComparerOptions.ParameterTypes |
-            StructuralComparerOptions.ParameterModifiers );
+    public static readonly StructuralDeclarationComparer Signature = new( StructuralSymbolComparer.Signature );
 
-    internal static readonly StructuralSymbolComparer NameOblivious = new(
-        StructuralComparerOptions.GenericArguments |
-        StructuralComparerOptions.GenericParameterCount |
-        StructuralComparerOptions.ParameterModifiers |
-        StructuralComparerOptions.ParameterTypes );
+    internal static readonly StructuralDeclarationComparer NameOblivious = new( StructuralSymbolComparer.NameOblivious );
 
     // ReSharper enable UnusedMember.Global
 
-    internal static readonly StructuralSymbolComparer NonRecursive = new(
-        StructuralComparerOptions.Name |
-        StructuralComparerOptions.GenericParameterCount |
-        StructuralComparerOptions.ParameterModifiers );
+    // used for testing
+    internal static readonly StructuralDeclarationComparer BypassSymbols = new( StructuralSymbolComparer.Default, bypassSymbols: true );
 
-    internal StructuralComparerOptions Options { get; }
+    private static readonly StructuralDeclarationComparer _nonRecursive = new( StructuralSymbolComparer.NonRecursive );
 
-    private StructuralSymbolComparer( StructuralComparerOptions options )
+    private readonly StructuralComparerOptions _options;
+    private readonly StructuralSymbolComparer? _symbolComparer;
+
+    private StructuralDeclarationComparer( StructuralSymbolComparer symbolComparer, bool bypassSymbols = false )
     {
+        var options = symbolComparer.Options;
+
         // Assumed by the implementation of GetHashCode.
         Invariant.Implies(
             options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ),
             options.HasFlagFast(
                 StructuralComparerOptions.Name | StructuralComparerOptions.GenericParameterCount | StructuralComparerOptions.ParameterTypes ) );
 
-        this.Options = options;
+        this._options = options;
+
+        if ( !bypassSymbols )
+        {
+            this._symbolComparer = symbolComparer;
+        }
     }
 
-    public bool Equals( ISymbol? x, ISymbol? y ) => this.Compare( x, y ) == 0;
+    public bool Equals( ICompilationElement? x, ICompilationElement? y ) => this.Compare( x, y ) == 0;
 
-    public int Compare( ISymbol? x, ISymbol? y )
+    public int Compare( ICompilationElement? x, ICompilationElement? y )
     {
         if ( ReferenceEquals( x, y ) )
         {
@@ -112,8 +76,39 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             return 1;
         }
 
+        int result;
+
         // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
-        var result = Comparer<int>.Default.Compare( (int) x.Kind, (int) y.Kind );
+        if ( x is IType xType && y is IType yType )
+        {
+            if ( xType.GetSymbol() is { } xSymbol && yType.GetSymbol() is { } ySymbol && this._symbolComparer != null )
+            {
+                return this._symbolComparer.Compare( xSymbol, ySymbol );
+            }
+
+            result = ((int) xType.TypeKind).CompareTo( (int) yType.TypeKind );
+        }
+        else if ( x is IDeclaration xDeclaration && y is IDeclaration yDeclaration )
+        {
+            if ( xDeclaration.GetSymbol() is { } xSymbol && yDeclaration.GetSymbol() is { } ySymbol && this._symbolComparer != null )
+            {
+                return this._symbolComparer.Compare( xSymbol, ySymbol );
+            }
+
+            result = ((int) xDeclaration.DeclarationKind).CompareTo( (int) yDeclaration.DeclarationKind );
+        }
+        else if ( x is IType && y is IDeclaration )
+        {
+            return -1;
+        }
+        else if ( x is IDeclaration && y is IType )
+        {
+            return 1;
+        }
+        else
+        {
+            throw new NotImplementedException( $"Unsupported declarations: {x.GetType()} and {y.GetType()}." );
+        }
 
         if ( result != 0 )
         {
@@ -123,8 +118,8 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
         switch (x, y)
         {
-            case (IMethodSymbol methodX, IMethodSymbol methodY):
-                result = this.CompareMethods( methodX, methodY, this.Options );
+            case (IMethod methodX, IMethod methodY ):
+                result = this.CompareMethods( methodX, methodY, this._options );
 
                 if ( result != 0 )
                 {
@@ -133,18 +128,8 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case (IParameterSymbol parameterX, IParameterSymbol parameterY):
-                result = this.Compare( parameterX.ContainingSymbol, parameterY.ContainingSymbol );
-
-                if ( result != 0 )
-                {
-                    return result;
-                }
-
-                return parameterX.Ordinal.CompareTo( parameterY.Ordinal );
-
-            case (IPropertySymbol propertyX, IPropertySymbol propertyY):
-                result = this.CompareProperties( propertyX, propertyY, this.Options );
+            case (IConstructor constructorX, IConstructor constructorY ):
+                result = this.CompareConstructors( constructorX, constructorY, this._options );
 
                 if ( result != 0 )
                 {
@@ -153,8 +138,19 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case (IEventSymbol eventX, IEventSymbol eventY):
-                result = CompareEvents( eventX, eventY, this.Options );
+            case (IParameter parameterX, IParameter parameterY):
+                result = this.Compare( parameterX.ContainingDeclaration, parameterY.ContainingDeclaration );
+
+                if ( result != 0 )
+                {
+                    return result;
+                }
+
+                return parameterX.Index.CompareTo( parameterY.Index );
+
+            case (IProperty propertyX, IProperty propertyY):
+
+                result = CompareProperties( propertyX, propertyY, this._options );
 
                 if ( result != 0 )
                 {
@@ -163,8 +159,8 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case (IFieldSymbol fieldX, IFieldSymbol fieldY):
-                result = CompareFields( fieldX, fieldY, this.Options );
+            case (IIndexer indexerX, IIndexer indexerY ):
+                result = this.CompareIndexers( indexerX, indexerY, this._options );
 
                 if ( result != 0 )
                 {
@@ -173,7 +169,27 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case (ITypeSymbol typeX, ITypeSymbol typeY):
+            case (IEvent eventX, IEvent eventY):
+                result = CompareEvents( eventX, eventY, this._options );
+
+                if ( result != 0 )
+                {
+                    return result;
+                }
+
+                break;
+
+            case (IField fieldX, IField fieldY):
+                result = CompareFields( fieldX, fieldY, this._options );
+
+                if ( result != 0 )
+                {
+                    return result;
+                }
+
+                break;
+
+            case (IType typeX, IType typeY):
                 result = this.CompareTypes( typeX, typeY );
 
                 if ( result != 0 )
@@ -183,7 +199,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
+            case (INamespace namespaceX, INamespace namespaceY):
                 result = this.CompareNamespaces( namespaceX, namespaceY );
 
                 if ( result != 0 )
@@ -193,27 +209,17 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case (IAssemblySymbol assemblyX, IAssemblySymbol assemblyY):
+            case (IAssembly assemblyX, IAssembly assemblyY):
                 return CompareAssemblies( assemblyX, assemblyY );
 
-            case (ILocalSymbol localSymbolX, ILocalSymbol localSymbolY):
-                // TODO: Is this correct in all options?
-                result = StringComparer.Ordinal.Compare( localSymbolX.Name, localSymbolY.Name );
-
-                if ( result != 0 )
-                {
-                    return result;
-                }
-
-                break;
-
             default:
-                throw new NotImplementedException( $"{x.Kind}" );
+                throw new NotImplementedException( $"Unexpected declarations: {x.GetType()}, {y.GetType()}." );
         }
 
-        if ( this.Options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
+        if ( this._options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
         {
-            result = this.CompareContainingDeclarations( x.ContainingSymbol, y.ContainingSymbol );
+            result = this.CompareContainingDeclarations(
+                (x as IDeclaration)?.GetContainingDeclarationOrNamespace(), (y as IDeclaration)?.GetContainingDeclarationOrNamespace() );
 
             if ( result != 0 )
             {
@@ -221,9 +227,9 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             }
         }
 
-        if ( this.Options.HasFlagFast( StructuralComparerOptions.ContainingAssembly ) )
+        if ( this._options.HasFlagFast( StructuralComparerOptions.ContainingAssembly ) )
         {
-            result = CompareContainingModules( x.ContainingModule, y.ContainingModule );
+            result = CompareAssemblies( (x as IDeclaration)?.DeclaringAssembly, (y as IDeclaration)?.DeclaringAssembly );
 
             if ( result != 0 )
             {
@@ -234,8 +240,23 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         return 0;
     }
 
-    private static int CompareAssemblies( IAssemblySymbol assemblyX, IAssemblySymbol assemblyY )
+    private static int CompareAssemblies( IAssembly? assemblyX, IAssembly? assemblyY )
     {
+        if ( ReferenceEquals( assemblyX, assemblyY ) )
+        {
+            return 0;
+        }
+
+        if ( assemblyX == null )
+        {
+            return -1;
+        }
+
+        if ( assemblyY == null )
+        {
+            return 1;
+        }
+
         var identityX = assemblyX.Identity;
         var identityY = assemblyY.Identity;
 
@@ -251,13 +272,13 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         // Ignore culture and public key, since they shouldn't be relevant.
     }
 
-    private int CompareNamespaces( INamespaceSymbol nsX, INamespaceSymbol nsY )
+    private int CompareNamespaces( INamespace nsX, INamespace nsY )
     {
         int result;
 
-        if ( this.Options.HasFlagFast( StructuralComparerOptions.ContainingAssembly ) )
+        if ( this._options.HasFlagFast( StructuralComparerOptions.ContainingAssembly ) )
         {
-            result = CompareContainingModules( nsX.ContainingModule, nsY.ContainingModule );
+            result = CompareAssemblies( nsX.DeclaringAssembly, nsY.DeclaringAssembly );
 
             if ( result != 0 )
             {
@@ -265,8 +286,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             }
         }
 
-        // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
-        result = Comparer<int>.Default.Compare( (int) nsX.NamespaceKind, (int) nsY.NamespaceKind );
+        result = Comparer<bool>.Default.Compare( nsX.IsPartial, nsY.IsPartial );
 
         if ( result != 0 )
         {
@@ -292,10 +312,10 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             return 0;
         }
 
-        return this.CompareNamespaces( nsX.ContainingNamespace, nsY.ContainingNamespace );
+        return this.CompareNamespaces( nsX.ParentNamespace!, nsY.ParentNamespace! );
     }
 
-    private int CompareNamedTypes( INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY, StructuralComparerOptions options )
+    private int CompareNamedTypes( INamedType namedTypeX, INamedType namedTypeY, StructuralComparerOptions options )
     {
         int result;
 
@@ -308,9 +328,9 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
                 return result;
             }
 
-            if ( namedTypeX.ContainingType == null && namedTypeY.ContainingType == null )
+            if ( namedTypeX.ContainingDeclaration is not INamedType && namedTypeY.ContainingDeclaration is not INamedType )
             {
-                result = this.CompareNamespaces( namedTypeX.ContainingNamespace, namedTypeY.ContainingNamespace );
+                result = this.CompareNamespaces( namedTypeX.Namespace, namedTypeY.Namespace );
 
                 if ( result != 0 )
                 {
@@ -321,8 +341,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
         if ( options.HasFlagFast( StructuralComparerOptions.Nullability ) )
         {
-            // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
-            result = Comparer<byte>.Default.Compare( (byte) namedTypeX.NullableAnnotation, (byte) namedTypeY.NullableAnnotation );
+            result = Comparer<bool?>.Default.Compare( namedTypeX.IsNullable, namedTypeY.IsNullable );
 
             if ( result != 0 )
             {
@@ -332,7 +351,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
         if ( options.HasFlagFast( StructuralComparerOptions.GenericParameterCount ) )
         {
-            result = namedTypeX.Arity.CompareTo( namedTypeY.Arity );
+            result = namedTypeX.TypeParameters.Count.CompareTo( namedTypeY.TypeParameters.Count );
 
             if ( result != 0 )
             {
@@ -344,7 +363,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         {
             Invariant.Assert( options.HasFlagFast( StructuralComparerOptions.GenericParameterCount ) );
 
-            for ( var i = 0; i < namedTypeX.TypeArguments.Length; i++ )
+            for ( var i = 0; i < namedTypeX.TypeArguments.Count; i++ )
             {
                 var typeArgumentX = namedTypeX.TypeArguments[i];
                 var typeArgumentY = namedTypeY.TypeArguments[i];
@@ -358,10 +377,10 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             }
         }
 
-        return this.CompareTypes( namedTypeX.ContainingType, namedTypeY.ContainingType );
+        return this.CompareTypes( namedTypeX.DeclaringType, namedTypeY.DeclaringType );
     }
 
-    private int CompareMethods( IMethodSymbol methodX, IMethodSymbol methodY, StructuralComparerOptions options )
+    private int CompareMethods( IMethod methodX, IMethod methodY, StructuralComparerOptions options )
     {
         if ( ReferenceEquals( methodX, methodY ) )
         {
@@ -382,7 +401,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
         if ( options.HasFlagFast( StructuralComparerOptions.GenericParameterCount ) )
         {
-            result = methodX.Arity.CompareTo( methodY.Arity );
+            result = methodX.TypeParameters.Count.CompareTo( methodY.TypeParameters.Count );
 
             if ( result != 0 )
             {
@@ -394,7 +413,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         {
             Invariant.Assert( options.HasFlagFast( StructuralComparerOptions.GenericParameterCount ) );
 
-            for ( var i = 0; i < methodX.TypeArguments.Length; i++ )
+            for ( var i = 0; i < methodX.TypeArguments.Count; i++ )
             {
                 var typeArgumentX = methodX.TypeArguments[i];
                 var typeArgumentY = methodY.TypeArguments[i];
@@ -411,7 +430,17 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         return this.CompareParameters( methodX.Parameters, methodY.Parameters, methodX.ReturnType, methodY.ReturnType, options );
     }
 
-    private int CompareProperties( IPropertySymbol propertyX, IPropertySymbol propertyY, StructuralComparerOptions options )
+    private int CompareConstructors( IConstructor constructorX, IConstructor constructorY, StructuralComparerOptions options )
+    {
+        if ( ReferenceEquals( constructorX, constructorY ) )
+        {
+            return 0;
+        }
+
+        return this.CompareParameters( constructorX.Parameters, constructorY.Parameters, null, null, options );
+    }
+
+    private static int CompareProperties( IProperty propertyX, IProperty propertyY, StructuralComparerOptions options )
     {
         if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
         {
@@ -423,20 +452,35 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             }
         }
 
-        return this.CompareParameters( propertyX.Parameters, propertyY.Parameters, null, null, options );
+        return 0;
+    }
+
+    private int CompareIndexers( IIndexer indexerX, IIndexer indexerY, StructuralComparerOptions options )
+    {
+        if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
+        {
+            var result = StringComparer.Ordinal.Compare( indexerX.Name, indexerY.Name );
+
+            if ( result != 0 )
+            {
+                return result;
+            }
+        }
+
+        return this.CompareParameters( indexerX.Parameters, indexerY.Parameters, null, null, options );
     }
 
     private int CompareParameters(
-        ImmutableArray<IParameterSymbol> methodXParameters,
-        ImmutableArray<IParameterSymbol> methodYParameters,
-        ITypeSymbol? methodXReturnType,
-        ITypeSymbol? methodYReturnType,
+        IParameterList methodXParameters,
+        IParameterList methodYParameters,
+        IType? methodXReturnType,
+        IType? methodYReturnType,
         StructuralComparerOptions options )
     {
-        int CompareParameterTypes( ITypeSymbol? parameterTypeX, ITypeSymbol? parameterTypeY )
+        int CompareParameterTypes( IType? parameterTypeX, IType? parameterTypeY )
         {
             // Prevent infinite recursion.
-            var comparer = parameterTypeX?.ContainingSymbol is IMethodSymbol && parameterTypeY?.ContainingSymbol is IMethodSymbol ? NonRecursive : this;
+            var comparer = parameterTypeX is ITypeParameter { ContainingDeclaration: IMethod } && parameterTypeY is ITypeParameter { ContainingDeclaration: IMethod } ? _nonRecursive : this;
 
             return comparer.Compare( parameterTypeX, parameterTypeY );
         }
@@ -444,14 +488,14 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         if ( options.HasFlagFast( StructuralComparerOptions.ParameterTypes )
              || options.HasFlagFast( StructuralComparerOptions.ParameterModifiers ) )
         {
-            var result = methodXParameters.Length.CompareTo( methodYParameters.Length );
+            var result = methodXParameters.Count.CompareTo( methodYParameters.Count );
 
             if ( result != 0 )
             {
                 return result;
             }
 
-            for ( var i = 0; i < methodXParameters.Length; i++ )
+            for ( var i = 0; i < methodXParameters.Count; i++ )
             {
                 var parameterX = methodXParameters[i];
                 var parameterY = methodYParameters[i];
@@ -490,7 +534,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         return 0;
     }
 
-    private static int CompareEvents( IEventSymbol eventX, IEventSymbol eventY, StructuralComparerOptions options )
+    private static int CompareEvents( IEvent eventX, IEvent eventY, StructuralComparerOptions options )
     {
         if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
         {
@@ -500,7 +544,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         return 0;
     }
 
-    private static int CompareFields( IFieldSymbol fieldX, IFieldSymbol fieldY, StructuralComparerOptions options )
+    private static int CompareFields( IField fieldX, IField fieldY, StructuralComparerOptions options )
     {
         if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
         {
@@ -510,7 +554,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
         return 0;
     }
 
-    private int CompareTypes( ITypeSymbol? typeX, ITypeSymbol? typeY )
+    private int CompareTypes( IType? typeX, IType? typeY )
     {
         if ( ReferenceEquals( typeX, typeY ) )
         {
@@ -536,10 +580,9 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             return result;
         }
 
-        if ( this.Options.HasFlagFast( StructuralComparerOptions.Nullability ) )
+        if ( this._options.HasFlagFast( StructuralComparerOptions.Nullability ) )
         {
-            // PERF: Cast enum to byte otherwise it will be boxed on .NET Framework.
-            result = Comparer<byte>.Default.Compare( (byte) typeX.NullableAnnotation, (byte) typeY.NullableAnnotation );
+            result = Comparer<bool?>.Default.Compare( typeX.IsNullable, typeY.IsNullable );
 
             if ( result != 0 )
             {
@@ -549,7 +592,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
         switch (typeX, typeY)
         {
-            case (ITypeParameterSymbol typeParamX, ITypeParameterSymbol typeParamY):
+            case (ITypeParameter typeParamX, ITypeParameter typeParamY):
                 result = StringComparer.Ordinal.Compare( typeParamX.Name, typeParamY.Name );
 
                 if ( result != 0 )
@@ -557,17 +600,17 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
                     return result;
                 }
 
-                if ( this.Options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
+                if ( this._options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
                 {
-                    result = NonRecursive.Compare( typeParamX.ContainingSymbol, typeParamY.ContainingSymbol );
+                    result = _nonRecursive.Compare( typeParamX.ContainingDeclaration, typeParamY.ContainingDeclaration );
                 }
 
                 return result;
 
-            case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
-                return this.CompareNamedTypes( namedTypeX, namedTypeY, this.Options );
+            case (INamedType namedTypeX, INamedType namedTypeY):
+                return this.CompareNamedTypes( namedTypeX, namedTypeY, this._options );
 
-            case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY):
+            case (IArrayType arrayTypeX, IArrayType arrayTypeY):
                 result = arrayTypeX.Rank.CompareTo( arrayTypeY.Rank );
 
                 if ( result != 0 )
@@ -577,24 +620,19 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 return this.CompareTypes( arrayTypeX.ElementType, arrayTypeY.ElementType );
 
-            case (IDynamicTypeSymbol, IDynamicTypeSymbol):
+            case (IDynamicType, IDynamicType):
                 return 0;
 
-            case (IPointerTypeSymbol xPointerType, IPointerTypeSymbol yPointerType):
+            case (IPointerType xPointerType, IPointerType yPointerType):
                 return this.CompareTypes( xPointerType.PointedAtType, yPointerType.PointedAtType );
 
-            case (IFunctionPointerTypeSymbol xFunctionPointerType, IFunctionPointerTypeSymbol yFunctionPointerType):
-                return this.CompareMethods(
-                    xFunctionPointerType.Signature,
-                    yFunctionPointerType.Signature,
-                    StructuralComparerOptions.FunctionPointer );
-
+            case (IFunctionPointerType, IFunctionPointerType):
             default:
-                throw new NotImplementedException( $"{typeX.Kind}" );
+                throw new NotImplementedException( $"Unexpected type kind {typeX.TypeKind}." );
         }
     }
 
-    private int CompareContainingDeclarations( ISymbol? x, ISymbol? y )
+    private int CompareContainingDeclarations( IDeclaration? x, IDeclaration? y )
     {
         var currentX = x;
         var currentY = y;
@@ -617,7 +655,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
             }
 
             // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
-            var result = Comparer<int>.Default.Compare( (int) currentX.Kind, (int) currentY.Kind );
+            var result = Comparer<int>.Default.Compare( (int) currentX.DeclarationKind, (int) currentY.DeclarationKind );
 
             if ( result != 0 )
             {
@@ -626,7 +664,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
             switch (currentX, currentY)
             {
-                case (IMethodSymbol methodX, IMethodSymbol methodY):
+                case (IMethod methodX, IMethod methodY):
                     result = this.CompareMethods( methodX, methodY, StructuralComparerOptions.MethodSignature );
 
                     if ( result != 0 )
@@ -636,7 +674,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                     break;
 
-                case (INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY):
+                case (INamedType namedTypeX, INamedType namedTypeY):
                     result = this.CompareNamedTypes( namedTypeX, namedTypeY, StructuralComparerOptions.Type );
 
                     if ( result != 0 )
@@ -646,7 +684,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                     break;
 
-                case (INamespaceSymbol namespaceX, INamespaceSymbol namespaceY):
+                case (INamespace namespaceX, INamespace namespaceY):
                     result = StringComparer.Ordinal.Compare( namespaceX.Name, namespaceY.Name );
 
                     if ( result != 0 )
@@ -656,66 +694,51 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                     break;
 
-                case (IModuleSymbol _, IModuleSymbol _):
+                case (IAssembly, IAssembly):
                     return 0;
 
                 default:
-                    throw new NotImplementedException( $"{currentX.Kind}" );
+                    throw new NotImplementedException( $"Unexpected declaration kind {currentX.DeclarationKind}." );
             }
 
-            currentX = currentX.ContainingSymbol;
-            currentY = currentY.ContainingSymbol;
+            currentX = currentX.GetContainingDeclarationOrNamespace();
+            currentY = currentY.GetContainingDeclarationOrNamespace();
         }
     }
 
-    private static int CompareContainingModules( IModuleSymbol? moduleX, IModuleSymbol? moduleY )
-    {
-        if ( ReferenceEquals( moduleX, moduleY ) )
-        {
-            return 0;
-        }
-
-        if ( moduleX == null )
-        {
-            return -1;
-        }
-
-        if ( moduleY == null )
-        {
-            return 1;
-        }
-
-        var result = StringComparer.Ordinal.Compare( moduleX.Name, moduleY.Name );
-
-        if ( result != 0 )
-        {
-            return result;
-        }
-
-        return CompareAssemblies( moduleX.ContainingAssembly, moduleY.ContainingAssembly );
-    }
-
-    public int GetHashCode( ISymbol symbol ) => GetHashCode( symbol, this.Options );
+    public int GetHashCode( ICompilationElement compilationElement ) => GetHashCode( compilationElement, this._options );
 
     // For performance reasons, GetHashCode should use a limited subset of properties where collisions are likely.
-    private static int GetHashCode( ISymbol symbol, StructuralComparerOptions options )
+    private static int GetHashCode( ICompilationElement compilationElement, StructuralComparerOptions options )
     {
         var h = 701_142_619; // Random prime.
 
-        // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
-        h = HashCode.Combine( h, (int) symbol.Kind );
+        if ( compilationElement is IDeclaration declaration )
+        {
+            h = HashCode.Combine( h, true );
 
-        switch ( symbol )
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            h = HashCode.Combine( h, (int) declaration.DeclarationKind );
+        }
+        else if ( compilationElement is IType type )
+        {
+            h = HashCode.Combine( h, false );
+
+            // PERF: Cast enum to int otherwise it will be boxed on .NET Framework.
+            h = HashCode.Combine( h, (int) type.TypeKind );
+        }
+
+        switch ( compilationElement )
         {
             case null:
-                throw new ArgumentNullException( nameof(symbol) );
+                throw new ArgumentNullException( nameof( compilationElement ) );
 
-            case IParameterSymbol parameter:
-                h = HashCode.Combine( h, GetHashCode( symbol.ContainingSymbol, options ), parameter.Ordinal );
+            case IParameter parameter:
+                h = HashCode.Combine( h, GetHashCode( parameter.ContainingDeclaration!, options ), parameter.Index );
 
                 break;
 
-            case INamedTypeSymbol type:
+            case INamedType type:
                 if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
                 {
                     h = HashCode.Combine( h, type.Name );
@@ -723,12 +746,12 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 if ( options.HasFlagFast( StructuralComparerOptions.GenericParameterCount ) )
                 {
-                    h = HashCode.Combine( h, type.Arity );
+                    h = HashCode.Combine( h, type.TypeParameters.Count );
                 }
 
                 break;
 
-            case IMethodSymbol method:
+            case IMethodBase method:
                 if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
                 {
                     h = HashCode.Combine( h, method.Name );
@@ -737,7 +760,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
                 if ( options.HasFlagFast( StructuralComparerOptions.ParameterTypes )
                      || options.HasFlagFast( StructuralComparerOptions.ParameterModifiers ) )
                 {
-                    h = HashCode.Combine( h, method.Parameters.Length );
+                    h = HashCode.Combine( h, method.Parameters.Count );
 
                     foreach ( var parameter in method.Parameters )
                     {
@@ -756,18 +779,26 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case IPropertySymbol property:
+            case IProperty property:
                 if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
                 {
                     h = HashCode.Combine( h, property.Name );
                 }
 
-                if ( options.HasFlagFast( StructuralComparerOptions.ParameterTypes )
-                     || options.HasFlagFast( StructuralComparerOptions.ParameterModifiers ) )
-                {
-                    h = HashCode.Combine( h, property.Parameters.Length );
+                break;
 
-                    foreach ( var parameter in property.Parameters )
+            case IIndexer indexer:
+                if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
+                {
+                    h = HashCode.Combine( h, indexer.Name );
+                }
+
+                if ( options.HasFlagFast( StructuralComparerOptions.ParameterTypes )
+                                        || options.HasFlagFast( StructuralComparerOptions.ParameterModifiers ) )
+                {
+                    h = HashCode.Combine( h, indexer.Parameters.Count );
+
+                    foreach ( var parameter in indexer.Parameters )
                     {
                         if ( options.HasFlagFast( StructuralComparerOptions.ParameterTypes ) )
                         {
@@ -783,7 +814,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case IFieldSymbol field:
+            case IField field:
                 if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
                 {
                     h = HashCode.Combine( h, field.Name );
@@ -791,7 +822,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case IEventSymbol @event:
+            case IEvent @event:
                 if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
                 {
                     h = HashCode.Combine( h, @event.Name );
@@ -799,7 +830,7 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case INamespaceSymbol @namespace:
+            case INamespace @namespace:
                 if ( options.HasFlagFast( StructuralComparerOptions.Name ) )
                 {
                     h = HashCode.Combine( h, @namespace.Name );
@@ -807,65 +838,57 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                 break;
 
-            case IModuleSymbol _:
-                break;
-
-            case ITypeParameterSymbol typeParameter:
-                h = HashCode.Combine( h, typeParameter.Ordinal );
+            case ITypeParameter typeParameter:
+                h = HashCode.Combine( h, typeParameter.Index );
 
                 break;
 
-            case IArrayTypeSymbol arrayType:
+            case IArrayType arrayType:
                 h = HashCode.Combine( h, arrayType.Rank, GetHashCode( arrayType.ElementType, StructuralComparerOptions.Type ) );
 
                 break;
 
-            case IDynamicTypeSymbol:
+            case IDynamicType:
                 h = 41574;
 
                 break;
 
-            case IAssemblySymbol assembly:
+            case IAssembly assembly:
                 return HashCode.Combine( h, AssemblyIdentityComparer.SimpleNameComparer.GetHashCode( assembly.Identity.Name ), assembly.Identity.Version );
 
-            case IPointerTypeSymbol pointerType:
+            case IPointerType pointerType:
                 return GetHashCode( pointerType.PointedAtType, StructuralComparerOptions.Type );
 
-            case IFunctionPointerTypeSymbol functionPointerType:
-                return GetHashCode( functionPointerType.Signature, StructuralComparerOptions.FunctionPointer );
-
-            case ILocalSymbol local:
-                // TODO: Is this correct in all options?
-                h = HashCode.Combine( h, local.Name );
-
+            case IFunctionPointerType:
+                h = 173808215;
                 break;
 
             default:
-                throw new NotImplementedException( $"{symbol.Kind}" );
+                throw new NotImplementedException( $"Unexpected type {compilationElement?.GetType()}." );
         }
 
         if ( options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
         {
-            var current = symbol.ContainingSymbol;
+            var current = (compilationElement as IDeclaration)?.GetContainingDeclarationOrNamespace();
 
             while ( current != null )
             {
                 switch ( current )
                 {
-                    case INamedTypeSymbol namedType:
-                        h = HashCode.Combine( h, namedType.Name, namedType.Arity );
+                    case INamedType namedType:
+                        h = HashCode.Combine( h, namedType.Name, namedType.TypeParameters.Count );
 
                         break;
 
-                    case INamespaceSymbol @namespace:
+                    case INamespace @namespace:
                         h = HashCode.Combine( h, @namespace.Name );
 
                         break;
 
-                    case IMethodSymbol method:
-                        h = HashCode.Combine( h, method.Name, method.Arity, method.Parameters.Length );
+                    case IMethod method:
+                        h = HashCode.Combine( h, method.Name, method.TypeParameters.Count, method.Parameters.Count );
 
-                        // This runs only if the original symbol was a local function.
+                        // This runs only if the original declaration was a local function.
                         foreach ( var parameter in method.Parameters )
                         {
                             h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralComparerOptions.Type ) );
@@ -873,34 +896,38 @@ internal sealed class StructuralSymbolComparer : IEqualityComparer<ISymbol>, ICo
 
                         break;
 
-                    case IPropertySymbol property:
-                        h = HashCode.Combine( h, property.Name, property.Parameters.Length );
+                    case IProperty property:
+                        h = HashCode.Combine( h, property.Name );
 
-                        // This runs only if the original symbol was a local function.
-                        foreach ( var parameter in property.Parameters )
+                        break;
+
+                    case IIndexer indexer:
+                        h = HashCode.Combine( h, indexer.Name, indexer.Parameters.Count );
+
+                        // This runs only if the original declaration was a local function.
+                        foreach ( var parameter in indexer.Parameters )
                         {
                             h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralComparerOptions.Type ) );
                         }
 
                         break;
 
-                    case IAssemblySymbol:
-                    case IModuleSymbol:
-                        // These are included below if required.
+                    case IAssembly:
+                        // This is included below if required.
                         break;
 
                     default:
-                        throw new NotImplementedException( $"{current.Kind}" );
+                        throw new NotImplementedException( $"Unexpected declaration kind {current.DeclarationKind}." );
                 }
 
-                current = current.ContainingSymbol;
+                current = current.GetContainingDeclarationOrNamespace();
             }
         }
 
         if ( options.HasFlagFast( StructuralComparerOptions.ContainingAssembly ) )
         {
             // Version should not differ often.
-            h = HashCode.Combine( h, symbol.ContainingModule?.Name, symbol.ContainingAssembly?.Name );
+            h = HashCode.Combine( h, (compilationElement as IDeclaration)?.DeclaringAssembly.Identity.Name );
         }
 
         return h;

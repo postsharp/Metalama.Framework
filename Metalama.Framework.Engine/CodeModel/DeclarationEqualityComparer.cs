@@ -32,14 +32,14 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
     public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToTypedRef() );
 
     public bool Equals( IType? x, IType? y )
-        => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralSymbolComparer.Equals( x.GetSymbol(), y.GetSymbol() ));
+        => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralDeclarationComparer.Equals( x, y ));
 
     public bool Equals( INamedType? x, INamedType? y )
-        => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralSymbolComparer.Equals( x.GetSymbol(), y.GetSymbol() ));
+        => (x == null && y == null) || (x != null && y != null && this._innerComparer.StructuralDeclarationComparer.Equals( x, y ));
 
-    public int GetHashCode( IType obj ) => this._innerComparer.StructuralSymbolComparer.GetHashCode( obj.GetSymbol() );
+    public int GetHashCode( IType obj ) => this._innerComparer.StructuralDeclarationComparer.GetHashCode( obj );
 
-    public int GetHashCode( INamedType obj ) => this._innerComparer.StructuralSymbolComparer.GetHashCode( obj.GetSymbol() );
+    public int GetHashCode( INamedType obj ) => this._innerComparer.StructuralDeclarationComparer.GetHashCode( obj );
 
     public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left.GetSymbol(), right.GetSymbol(), kind );
 
