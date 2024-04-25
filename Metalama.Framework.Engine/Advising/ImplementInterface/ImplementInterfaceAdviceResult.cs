@@ -11,8 +11,6 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfaceAdviceResult
 {
-    private readonly IReadOnlyCollection<IInterfaceMemberImplementationResult>? _interfaceMembers;
-    private readonly IReadOnlyCollection<IInterfaceImplementationResult>? _interfaces;
     private readonly IRef<INamedType>? _target;
 
     public ImplementInterfaceAdviceResult() { }
@@ -22,12 +20,12 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
         IRef<INamedType>? target,
         ImmutableArray<Diagnostic> diagnostics,
         IReadOnlyCollection<IInterfaceImplementationResult>? interfaces,
-        IReadOnlyCollection<IInterfaceMemberImplementationResult>? interfaceMembers ) 
+        IReadOnlyCollection<IInterfaceMemberImplementationResult>? interfaceMembers )
     {
         this.AdviceKind = AdviceKind.ImplementInterface;
         this.Outcome = outcome;
-        this._interfaceMembers = interfaceMembers;
-        this._interfaces = interfaces;
+        this.InterfaceMembers = interfaceMembers ?? Array.Empty<IInterfaceMemberImplementationResult>();
+        this.Interfaces = interfaces ?? Array.Empty<IInterfaceImplementationResult>();
         this._target = target;
         this.Diagnostics = diagnostics;
     }
@@ -38,9 +36,9 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
         where TNewDeclaration : IDeclaration
         => throw new NotImplementedException();
 
-    public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces => this._interfaces ?? throw new InvalidOperationException();
+    public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; } = Array.Empty<IInterfaceImplementationResult>();
 
-    public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers => this._interfaceMembers ?? throw new InvalidOperationException();
+    public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
 
     public IAdvisable<INamedType> WithExplicitImplementation() => throw new NotImplementedException();
 }

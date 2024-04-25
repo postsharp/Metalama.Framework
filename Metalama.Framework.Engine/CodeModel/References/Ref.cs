@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
@@ -138,6 +139,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
     {
         // The compilation for which the symbol (stored in Target) is valid.
         private readonly CompilationContext? _compilationContext;
+
+        static Ref()
+        {
+            if ( !typeof(T).IsInterface )
+            {
+                throw new ArgumentException( "The type argument must be an interface." );
+            }
+        }
 
         internal Ref( ISymbol symbol, CompilationContext compilationContext, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {

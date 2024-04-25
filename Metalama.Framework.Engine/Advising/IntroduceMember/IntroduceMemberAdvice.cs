@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice<IntroduceMemberAdviceResult<TMember>>
     where TMember : class, IMember
-    where TBuilder : MemberBuilder
+    where TBuilder : MemberBuilder, TMember
 {
     private readonly Action<TBuilder>? _buildAction;
     private readonly IntroductionScope _scope;
@@ -197,7 +197,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice<Introd
 
     protected IntroduceMemberAdviceResult<TMember> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, IDeclaration? member = null )
     {
-        var memberRef = member != null ? member.ToTypedRef().As<TMember>() : (IRef<TMember>) this.Builder;
+        var memberRef = member != null ? member.ToTypedRef().As<TMember>() : this.Builder.ToTypedRef<TMember>();
 
         return new IntroduceMemberAdviceResult<TMember>( this.AdviceKind, outcome, memberRef, null );
     }

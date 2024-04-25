@@ -105,7 +105,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
 
-        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToTypedRef() );
+        return new IntroduceConstructorParameterAdviceResult( parameterBuilder.ToTypedRef<IParameter>() );
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
