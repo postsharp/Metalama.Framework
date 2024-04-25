@@ -7,12 +7,12 @@ using System;
 
 namespace Metalama.Framework.Advising;
 
-public static class AdvisableExtensions
+public static class AdviserExtensions
 {
     /// <summary>
     /// Overrides the implementation of a method.
     /// </summary>
-    /// <param name="targetMethod">The method to override.</param>
+    /// <param name="adviser">The advisable method.</param>
     /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
     ///     This property must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
     ///     (such as async or iterator methods), use the constructor of the <see cref="MethodTemplateSelector"/> type. To specify a single
@@ -22,16 +22,16 @@ public static class AdvisableExtensions
     ///     of the <see cref="meta"/> API.</param>
     /// <seealso href="@overriding-methods"/>
     public static IOverrideAdviceResult<IMethod> Override(
-        this IAdvisable<IMethod> adviceFactory,
+        this IAdviser<IMethod> adviser,
         in MethodTemplateSelector template,
         object? args = null,
         object? tags = null )
-        => ((IAdvisableInternal) adviceFactory).AdviceFactory.Override( adviceFactory.Target, template, args, tags );
+        => ((IAdvisableInternal) adviser).AdviceFactory.Override( adviser.Target, template, args, tags );
 
     /// <summary>
     /// Introduces a new method or overrides the implementation of the existing one.
     /// </summary>
-    /// <param name="targetType">The type into which the method must be introduced.</param>
+    /// <param name="adviser">An adviser for a member or named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
     ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
     ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
@@ -48,15 +48,15 @@ public static class AdvisableExtensions
     /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IMethod> IntroduceMethod(
-        this IAdvisable<IMemberOrNamedType> adviceFactory,
+        this IAdviser<IMemberOrNamedType> adviser,
         string template,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IMethodBuilder>? buildMethod = null,
         object? args = null,
         object? tags = null )
-        => ((IAdvisableInternal) adviceFactory).AdviceFactory.IntroduceMethod(
-            adviceFactory.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+        => ((IAdvisableInternal) adviser).AdviceFactory.IntroduceMethod(
+            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
             template,
             scope,
             whenExists,

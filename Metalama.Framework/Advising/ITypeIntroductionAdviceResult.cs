@@ -4,4 +4,4 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Advising;
 
-public interface ITypeIntroductionAdviceResult : IIntroductionAdviceResult<INamedType>, IAdvisable<INamedType> { }
+public interface ITypeIntroductionAdviceResult : IIntroductionAdviceResult<INamedType>, IAdviser<INamedType> { }

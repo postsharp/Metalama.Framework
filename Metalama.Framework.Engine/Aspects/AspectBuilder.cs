@@ -183,8 +183,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         string IDiagnosticSource.DiagnosticSourceDescription => ((IAspectInstanceInternal) this.AspectInstance).DiagnosticSourceDescription;
 
-        T IAdvisable<T>.Target => this.Target;
+        T IAdviser<T>.Target => this.Target;
 
-        IAdvisable<TNewDeclaration> IAdvisable<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => throw new NotImplementedException();
+        IAdviser<TNewDeclaration> IAdviser<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => throw new NotImplementedException();
     }
 }

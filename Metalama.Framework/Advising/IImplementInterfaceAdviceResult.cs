@@ -8,10 +8,10 @@ namespace Metalama.Framework.Advising;
 
 /// <summary>
 /// Represents the result of the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
-/// method. The result can be used to introduce interface members using the extension methods in <see cref="AdvisableExtensions"/>.
+/// method. The result can be used to introduce interface members using the extension methods in <see cref="AdviserExtensions"/>.
 /// </summary>
 [CompileTime]
-public interface IImplementInterfaceAdviceResult : IAdviceResult, IAdvisable<INamedType>
+public interface IImplementInterfaceAdviceResult : IAdviceResult, IAdviser<INamedType>
 {
     /// <summary>
     /// Gets a list of interfaces that were considered when implementing the given interface.
@@ -30,8 +30,8 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult, IAdvisable<INa
     IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
     /// <summary>
-    /// Returns an <see cref="IAdvisable{T}"/> allowing to introduce explicit members.
+    /// Returns an <see cref="IAdviser{T}"/> allowing to introduce explicit members.
     /// </summary>
     /// <returns></returns>
-    IAdvisable<INamedType> WithExplicitImplementation();
+    IAdviser<INamedType> WithExplicitImplementation();
 }

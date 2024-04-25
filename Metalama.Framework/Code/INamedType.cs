@@ -6,11 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
-    public interface INamedTypeOrNamespace : INamedDeclaration
-    {
-        
-    }
-    
     /// <summary>
     /// Represents a class, struct, interface, enum, or delegate.
     /// </summary>

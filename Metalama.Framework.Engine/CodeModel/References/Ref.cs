@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 

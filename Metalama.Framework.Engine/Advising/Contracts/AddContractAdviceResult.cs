@@ -3,17 +3,17 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
-using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class AddContractAdviceResult<T> : AdviceResult, IAddContractAdviceResult<T> where T : class, IDeclaration
+internal class AddContractAdviceResult<T> : AdviceResult, IAddContractAdviceResult<T>
+    where T : class, IDeclaration
 {
     private readonly IRef<T>? _declaration;
 
     public AddContractAdviceResult() { }
 
-    public AddContractAdviceResult( IRef<T>? declaration ) 
+    public AddContractAdviceResult( IRef<T>? declaration )
     {
         this._declaration = declaration;
         this.AdviceKind = AdviceKind.AddContract;

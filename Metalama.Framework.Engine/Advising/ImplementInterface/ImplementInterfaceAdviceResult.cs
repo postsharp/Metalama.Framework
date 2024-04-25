@@ -32,7 +32,7 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
 
     public INamedType Target => this.Resolve( this._target );
 
-    public IAdvisable<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
+    public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
         where TNewDeclaration : IDeclaration
         => throw new NotImplementedException();
 
@@ -40,5 +40,5 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
 
-    public IAdvisable<INamedType> WithExplicitImplementation() => throw new NotImplementedException();
+    public IAdviser<INamedType> WithExplicitImplementation() => throw new NotImplementedException();
 }

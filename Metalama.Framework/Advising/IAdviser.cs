@@ -10,10 +10,10 @@ namespace Metalama.Framework.Advising;
 [InternalImplement]
 [CompileTime]
 [PublicAPI]
-public interface IAdvisable<out T>
+public interface IAdviser<out T>
 {
     T Target { get; }
 
-    IAdvisable<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
+    IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
         where TNewDeclaration : IDeclaration;
 }

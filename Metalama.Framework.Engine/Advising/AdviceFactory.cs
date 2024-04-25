@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -26,7 +25,7 @@ namespace Metalama.Framework.Engine.Advising;
 #pragma warning disable CS0612 // Type or member is obsolete
 
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
-internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
+internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     where T : IDeclaration
 {
     private readonly string? _layerName;
@@ -234,7 +233,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
         return selectedTemplate;
     }
 
-    IAdvisable<TNewDeclaration> IAdvisable<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => this.WithDeclaration( target );
+    IAdviser<TNewDeclaration> IAdviser<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => this.WithDeclaration( target );
 
     public AdviceFactory<TNewTarget> WithDeclaration<TNewTarget>( TNewTarget target )
         where TNewTarget : IDeclaration
@@ -429,8 +428,6 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                                         this.GetObjectReader( tags ) )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.SetMethod );
-
-                                break;
 
                             case IIndexer indexer:
                                 return new OverrideIndexerAdvice(
@@ -1497,16 +1494,6 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
         }
     }
 
-    private static void ThrowOnErrors( DiagnosticBag diagnosticBag )
-    {
-        if ( diagnosticBag.HasError() )
-        {
-            throw new DiagnosticException(
-                "Errors have occured while creating advice.",
-                diagnosticBag.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
-        }
-    }
-
     public IAddContractAdviceResult<IParameter> AddContract(
         IParameter targetParameter,
         string template,
@@ -1571,7 +1558,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
 
             var advice = new FieldOrPropertyOrIndexerContractAdvice(
                 this._state.AspectInstance,
-                this._templateInstance,
+                this._templateInstance.AssertNotNull(),
                 targetMember,
                 this._compilation,
                 boundTemplate,

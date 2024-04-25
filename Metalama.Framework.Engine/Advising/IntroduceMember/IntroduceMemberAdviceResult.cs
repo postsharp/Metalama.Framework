@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
-using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -17,15 +16,13 @@ internal class IntroduceMemberAdviceResult<T> : AdviceResult, IIntroductionAdvic
         AdviceKind adviceKind,
         AdviceOutcome outcome,
         IRef<T>? declaration,
-        IRef<IMember>? conflictingMember ) 
+        IRef<IMember>? conflictingMember )
     {
         this.Outcome = outcome;
         this.AdviceKind = adviceKind;
         this._declaration = declaration;
         this._conflictingMember = conflictingMember;
     }
-
-    
 
     public IntroduceMemberAdviceResult() { }
 
@@ -34,5 +31,4 @@ internal class IntroduceMemberAdviceResult<T> : AdviceResult, IIntroductionAdvic
 
     [Memo]
     public IMember ConflictingMember => this.Resolve( this._conflictingMember );
-
 }

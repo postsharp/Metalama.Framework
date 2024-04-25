@@ -15,7 +15,6 @@ namespace Metalama.Framework.Engine.Advising;
 /// <summary>
 /// Represents the result of a method of <see cref="IAdviceFactory"/>. We use a single class to implement all supported interfaces.
 /// </summary>
-/// <typeparam name="T">The type of declaration returned by the advice method.</typeparam>
 internal abstract class AdviceResult : IAdviceResult
 {
     public AdviceKind AdviceKind { get; init; }
@@ -26,10 +25,10 @@ internal abstract class AdviceResult : IAdviceResult
 
     // This property is used only by the introspection API.
     public ImmutableArray<ITransformation> Transformations { get; internal set; } = ImmutableArray<ITransformation>.Empty;
-    
+
     public CompilationModel? Compilation { get; set; }
-    
-    protected T Resolve<T>( IRef<T>? reference, [CallerMemberName] string? caller = null ) 
+
+    protected T Resolve<T>( IRef<T>? reference, [CallerMemberName] string? caller = null )
         where T : class, ICompilationElement
     {
         if ( reference == null )
@@ -40,9 +39,7 @@ internal abstract class AdviceResult : IAdviceResult
         return reference.GetTarget( this.Compilation.AssertNotNull(), ReferenceResolutionOptions.CanBeMissing )
             .Assert( d => d is not IDeclarationBuilder );
     }
-    
 
     protected InvalidOperationException CreateException( [CallerMemberName] string? caller = null )
-        => new InvalidOperationException( $"Cannot get {caller} when the outcome is {this.Outcome}." );
-
+        => new( $"Cannot get {caller} when the outcome is {this.Outcome}." );
 }
