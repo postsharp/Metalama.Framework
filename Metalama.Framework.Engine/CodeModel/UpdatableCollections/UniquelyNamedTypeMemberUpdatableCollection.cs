@@ -2,8 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
@@ -14,13 +16,33 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
     // Private members in referenced assemblies are not included because they are also not included in the "ref assembly" and this
     // would cause inconsistent behaviors between design time and compile time.
 
-    protected override ISymbol? GetMember( string name )
-        // TODO (TypeBuilder): Remove GetSymbol.
-        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol(this.Compilation.RoslynCompilation)).GetMembers( name ).FirstOrDefault( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+    protected override MemberRef<T>? GetMemberRef( string name ) 
+        => this.DeclaringTypeOrNamespace.Target switch
+    {
+        INamedTypeSymbol symbol =>
+            symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers( name )
+            .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+            .Select( s => (MemberRef<T>?) new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+            .FirstOrDefault(),
+        INamespaceOrNamedType namespaceOrNamedType =>
+            // TODO: should return initial member of the builder.
+            null,
+        _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+    };
 
-    protected override IEnumerable<ISymbol> GetMembers()
-        // TODO (TypeBuilder): Remove GetSymbol.
-        => ((INamespaceOrTypeSymbol) this.DeclaringTypeOrNamespace.GetSymbol( this.Compilation.RoslynCompilation )).GetMembers().Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) );
+    protected override IEnumerable<MemberRef<T>> GetMemberRefs() 
+        => this.DeclaringTypeOrNamespace.Target switch
+        {
+            INamedTypeSymbol symbol =>
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers()
+                .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+                .ToImmutableArray(),
+            INamespaceOrNamedType namespaceOrNamedType =>
+                // TODO: should return initial members of the builder.
+                ImmutableArray<MemberRef<T>>.Empty,
+            _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+        };
 
     protected UniquelyNamedTypeMemberUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base(
         compilation,
