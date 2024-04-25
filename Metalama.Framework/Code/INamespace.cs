@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <remarks>
     /// At design time, namespaces of the current compilation can be partial, or incomplete. See <see cref="IsPartial"/> for details.
     /// </remarks>
-    public interface INamespace : INamedDeclaration
+    public interface INamespace : INamedTypeOrNamespace
     {
         /// <summary>
         /// Gets the full name of the namespace, or an empty string if this is the global namespace.

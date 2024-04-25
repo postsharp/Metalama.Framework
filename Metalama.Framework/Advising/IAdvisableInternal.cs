@@ -4,5 +4,5 @@ namespace Metalama.Framework.Advising;
 
 internal interface IAdvisableInternal
 {
-    IAdviceFactoryInternal AdviceFactory { get; }
+    IAdviceFactory AdviceFactory { get; }
 }

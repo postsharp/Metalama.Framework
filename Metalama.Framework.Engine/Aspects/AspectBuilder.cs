@@ -28,7 +28,6 @@ namespace Metalama.Framework.Engine.Aspects
         where T : class, IDeclaration
     {
         private readonly AspectBuilderState _aspectBuilderState;
-        private T _declaration;
 
         public AspectBuilder(
             T target,
@@ -70,7 +69,7 @@ namespace Metalama.Framework.Engine.Aspects
         [Obsolete]
         IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 
-        IAdviceFactoryInternal IAdvisableInternal.AdviceFactory => this.AdviceFactory;
+        IAdviceFactory IAdvisableInternal.AdviceFactory => this.AdviceFactory;
 
         public AdviceFactory<T> AdviceFactory { get; }
 
@@ -184,7 +183,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         string IDiagnosticSource.DiagnosticSourceDescription => ((IAspectInstanceInternal) this.AspectInstance).DiagnosticSourceDescription;
 
-        T IAdvisable<T>.Target => this._declaration;
+        T IAdvisable<T>.Target => this.Target;
 
         IAdvisable<TNewDeclaration> IAdvisable<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => throw new NotImplementedException();
     }

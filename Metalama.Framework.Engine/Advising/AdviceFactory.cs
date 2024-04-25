@@ -1427,6 +1427,14 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
 
     public IImplementInterfaceAdviceResult ImplementInterface(
         INamedType targetType,
+        INamedType interfaceType,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IInterfaceImplementationBuilder>? implementInterface = null,
+        object? tags = null )
+        => throw new NotImplementedException();
+
+    public IImplementInterfaceAdviceResult ImplementInterface(
+        INamedType targetType,
         Type interfaceType,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         object? tags = null )
@@ -1435,6 +1443,14 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
             (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
             whenExists,
             tags );
+
+    public IImplementInterfaceAdviceResult ImplementInterface(
+        INamedType targetType,
+        Type interfaceType,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IInterfaceImplementationBuilder>? implementInterface = null,
+        object? tags = null )
+        => throw new NotImplementedException();
 
     public IAddInitializerAdviceResult AddInitializer(
         INamedType targetType,
@@ -1725,6 +1741,9 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
             defaultValue,
             pullAction,
             attributes );
+
+    public ITypeIntroductionAdviceResult IntroduceClass( INamedTypeOrNamespace containingTypeOrNamespace, string name, Action<INamedTypeBuilder>? buildType = null ) 
+        => throw new NotImplementedException();
 
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration

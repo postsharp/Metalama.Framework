@@ -747,6 +747,8 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
+        ITypeIntroductionAdviceResult IntroduceClass( INamedTypeOrNamespace containingTypeOrNamespace, string name, Action<INamedTypeBuilder>? buildType = null );
+        
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
         /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.

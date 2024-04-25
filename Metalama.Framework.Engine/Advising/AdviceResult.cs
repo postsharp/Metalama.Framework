@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.Advising;
 
 /// <summary>
-/// Represents the result of a method of <see cref="IAdviceFactory"/>.
+/// Represents the result of a method of <see cref="IAdviceFactory"/>. We use a single class to implement all supported interfaces.
 /// </summary>
 /// <typeparam name="T">The type of declaration returned by the advice method.</typeparam>
 internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceResult<T>, IImplementInterfaceAdviceResult, IAddContractAdviceResult<T>,
@@ -43,6 +43,8 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
+    public IAdvisable<INamedType> WithExplicitImplementation() => throw new NotImplementedException();
+
     internal AdviceResult(
         IRef<T>? declaration,
         CompilationModel compilation,
@@ -60,4 +62,8 @@ internal sealed class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideA
         this.Interfaces = interfaces;
         this.InterfaceMembers = interfaceMembers;
     }
+
+    public INamedType Target => throw new NotImplementedException();
+
+    public IAdvisable<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target ) where TNewDeclaration : IDeclaration => throw new NotImplementedException();
 }
