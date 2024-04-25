@@ -33,5 +33,6 @@ namespace Metalama.Framework.Code
         /// a generic type instance, this returns the constructor in the generic type definition. Otherwise, it returns the current instance.
         /// </summary>
         new IConstructor Definition { get; }
+
     }
 }

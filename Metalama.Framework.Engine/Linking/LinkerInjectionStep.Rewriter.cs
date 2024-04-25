@@ -226,7 +226,8 @@ internal sealed partial class LinkerInjectionStep
                     var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
                         .WithOptionalTrailingLineFeed( syntaxGenerationContext )
                         .WithAdditionalAnnotations(
-                            attributeBuilder.ParentAdvice?.Aspect.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                            attributeBuilder.ParentAdvice?.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                            ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     if ( targetKind != SyntaxKind.None )
                     {
@@ -464,7 +465,7 @@ internal sealed partial class LinkerInjectionStep
                     injectedNode = injectedNode
                         .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
                         .WithGeneratedCodeAnnotation(
-                            injectedMember.Transformation?.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation
+                            injectedMember.Transformation?.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation
                             ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                     switch ( injectedNode )

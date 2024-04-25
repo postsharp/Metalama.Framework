@@ -46,7 +46,7 @@ internal sealed class TemplateBasedInitializationTransformation : BaseTransforma
                 this.Tags,
                 this.ParentAdvice.AspectLayerId,
                 context.SyntaxGenerationContext,
-                this.ParentAdvice.Aspect,
+                this.ParentAdvice.AspectInstance,
                 context.ServiceProvider,
                 this._targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
 

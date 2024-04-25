@@ -22,7 +22,7 @@ internal abstract class BaseTransformation : ITransformation
     /// </summary>
     public abstract IDeclaration TargetDeclaration { get; }
 
-    IAspectClass ITransformationBase.AspectClass => this.ParentAdvice.Aspect.AspectClass;
+    IAspectClass ITransformationBase.AspectClass => this.ParentAdvice.AspectInstance.AspectClass;
 
     public virtual SyntaxTree TransformedSyntaxTree => this.TargetDeclaration.GetPrimarySyntaxTree().AssertNotNull();
 

@@ -15,14 +15,14 @@ namespace Metalama.Framework.Engine.Advising
         private readonly IObjectReader _tags;
 
         public TemplateBasedInitializeAdvice(
-            IAspectInstanceInternal aspect,
+            IAspectInstanceInternal aspectInstance,
             TemplateClassInstance templateInstance,
             IMemberOrNamedType targetDeclaration,
             ICompilation sourceCompilation,
             BoundTemplateMethod boundTemplate,
             InitializerKind kind,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, kind, layerName )
+            IObjectReader tags ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, kind, layerName )
         {
             this._boundTemplate = boundTemplate;
             this._tags = tags;

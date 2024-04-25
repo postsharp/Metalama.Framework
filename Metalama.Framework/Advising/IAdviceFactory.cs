@@ -166,7 +166,7 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-fields-or-properties"/>
-        IOverrideAdviceResult<IProperty> OverrideAccessors(
+        IOverrideAdviceResult<IPropertyOrIndexer> OverrideAccessors(
             IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
@@ -665,7 +665,7 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
-        IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
+        IAddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
             ContractDirection direction = ContractDirection.Default,
@@ -747,8 +747,11 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
-        ITypeIntroductionAdviceResult IntroduceClass( INamedTypeOrNamespace containingTypeOrNamespace, string name, Action<INamedTypeBuilder>? buildType = null );
-        
+        ITypeIntroductionAdviceResult IntroduceClass(
+            INamedTypeOrNamespace containingTypeOrNamespace,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
+
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
         /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.

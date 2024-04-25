@@ -15,13 +15,13 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
     private readonly IStatement _statement;
 
     public SyntaxBasedInitializeAdvice(
-        IAspectInstanceInternal aspect,
+        IAspectInstanceInternal aspectInstance,
         TemplateClassInstance templateInstance,
         IMemberOrNamedType targetDeclaration,
         ICompilation sourceCompilation,
         IStatement statement,
         InitializerKind kind,
-        string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, kind, layerName )
+        string? layerName ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, kind, layerName )
     {
         this._statement = statement;
     }

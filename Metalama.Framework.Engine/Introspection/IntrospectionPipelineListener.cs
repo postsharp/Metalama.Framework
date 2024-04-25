@@ -19,7 +19,7 @@ internal sealed class IntrospectionPipelineListener : IProjectService
         this._introspectionFactory = serviceProvider.GetRequiredService<IntrospectionFactory>();
     }
 
-    public void AddAdviceResult( IAspectInstance aspectInstance, Advice advice, AdviceImplementationResult result, ICompilation compilation )
+    public void AddAdviceResult( IAspectInstance aspectInstance, Advice advice, AdviceResult result, ICompilation compilation )
     {
         var introspectionAdviceInstance = this._introspectionFactory.GetIntrospectionAspectInstance( aspectInstance );
         introspectionAdviceInstance.Advice.Add( new IntrospectionAdvice( advice, result, compilation, this._introspectionFactory ) );

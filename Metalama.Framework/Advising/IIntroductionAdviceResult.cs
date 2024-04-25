@@ -14,4 +14,9 @@ public interface IIntroductionAdviceResult<out T> : IAdviceResult
     /// Gets the introduced or overridden declaration.
     /// </summary>
     T Declaration { get; }
+
+    /// <summary>
+    /// Gets the member that was in conflict, if the outcome is <see cref="AdviceOutcome.Error"/>. The member may be of a different kind that <see cref="Declaration"/>. 
+    /// </summary>
+    IMember ConflictingMember { get; }
 }

@@ -8,9 +8,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -202,65 +200,6 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
         }
 
         return selectedTemplate.InterpretedAs( interpretedKind );
-    }
-
-    private AdviceResult<TDeclaration> ExecuteAdvice<TDeclaration>( Advice advice )
-        where TDeclaration : class, IDeclaration
-    {
-        List<ITransformation> transformations = new();
-
-        // Initialize the advice. It should report errors for any situation that does not depend on the target declaration.
-        // These errors are reported as exceptions.
-        var initializationDiagnostics = new DiagnosticBag();
-        advice.Initialize( this._state.ServiceProvider, initializationDiagnostics );
-
-        ThrowOnErrors( initializationDiagnostics );
-        this._state.Diagnostics.Report( initializationDiagnostics );
-
-        // Implement the advice. This should report errors for any situation that does depend on the target declaration.
-        // These errors are reported as diagnostics.
-        var result = advice.Implement(
-            this._state.ServiceProvider,
-            this._state.CurrentCompilation,
-            t =>
-            {
-                this._state.SetOrders( t );
-                transformations.Add( t );
-            } );
-
-        this._state.Diagnostics.Report( result.Diagnostics );
-
-        this._state.IntrospectionListener?.AddAdviceResult( this._state.AspectInstance, advice, result, this._state.CurrentCompilation );
-
-        switch ( result.Outcome )
-        {
-            case AdviceOutcome.Error:
-                this._state.AspectInstance.Skip();
-
-                break;
-
-            case AdviceOutcome.Ignore:
-                break;
-
-            default:
-                this._state.AddTransformations( transformations );
-
-                if ( this._state.IntrospectionListener != null )
-                {
-                    result.Transformations = transformations.ToImmutableArray();
-                }
-
-                break;
-        }
-
-        return new AdviceResult<TDeclaration>(
-            result.NewDeclaration.As<IDeclaration, TDeclaration>(),
-            this._state.CurrentCompilation,
-            result.Outcome,
-            this._state.AspectBuilder.AssertNotNull(),
-            advice.AdviceKind,
-            result.Interfaces,
-            result.InterfaceMembers );
     }
 
     private TemplateMemberRef? SelectGetterTemplate(
@@ -534,7 +473,10 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                     }
             }
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            var result = advice.Execute( this._state );
+
+            // TODO: Needs to be converted to the target type.
+            return (IOverrideAdviceResult<IMethod>) result;
         }
     }
 
@@ -572,7 +514,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -605,7 +547,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -653,7 +595,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -702,7 +644,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -746,7 +688,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -779,7 +721,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -823,11 +765,11 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
-    public IOverrideAdviceResult<IProperty> OverrideAccessors(
+    public IOverrideAdviceResult<IPropertyOrIndexer> OverrideAccessors(
         IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
         in GetterTemplateSelector getTemplateSelector,
         string? setTemplate = null,
@@ -875,7 +817,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                             this._layerName,
                             this.GetObjectReader( tags ) );
 
-                        return this.ExecuteAdvice<IProperty>( advice );
+                        return advice.Execute( this._state );
                     }
 
                 case IIndexer targetIndexer:
@@ -890,7 +832,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                             this._layerName,
                             this.GetObjectReader( tags ) );
 
-                        return this.ExecuteAdvice<IProperty>( advice );
+                        return advice.Execute( this._state );
                     }
 
                 default:
@@ -932,7 +874,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IField>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -971,7 +913,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IField>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1026,7 +968,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1085,7 +1027,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1138,7 +1080,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1252,7 +1194,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IIndexer>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1303,7 +1245,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IEvent>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1344,7 +1286,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IEvent>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1392,7 +1334,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IEvent>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1421,7 +1363,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<INamedType>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1481,7 +1423,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<INamedType>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1508,7 +1450,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 kind,
                 this._layerName );
 
-            return this.ExecuteAdvice<INamedType>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1536,7 +1478,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1560,7 +1502,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 InitializerKind.BeforeInstanceConstructor,
                 this._layerName );
 
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1602,20 +1544,20 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                         MetalamaStringFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
             }
 
-            return this.AddContractImpl<IParameter>( targetParameter, template, kind, tags, args );
+            return this.AddContractImpl( targetParameter, template, kind, tags, args );
         }
     }
 
-    public IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
+    public IAddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContract(
         IFieldOrPropertyOrIndexer targetMember,
         string template,
         ContractDirection kind = ContractDirection.Default,
         object? tags = null,
         object? args = null )
-        => this.AddContractImpl<IPropertyOrIndexer>( targetMember, template, kind, tags, args );
+        => this.AddContractImpl( targetMember, template, kind, tags, args );
 
-    private AdviceResult<TContract> AddContractImpl<TContract>(
-        IDeclaration targetDeclaration,
+    private AddContractAdviceResult<TContract> AddContractImpl<TContract>(
+        TContract targetDeclaration,
         string template,
         ContractDirection direction,
         object? tags,
@@ -1629,14 +1571,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
 
         if ( direction == ContractDirection.None )
         {
-            return new AdviceResult<TContract>(
-                null,
-                this._state.CurrentCompilation,
-                AdviceOutcome.Ignore,
-                this._state.AspectBuilder.AssertNotNull(),
-                AdviceKind.AddContract,
-                Array.Empty<IInterfaceImplementationResult>(),
-                Array.Empty<IInterfaceMemberImplementationResult>() );
+            return AddContractAdviceResult<TContract>.Ignored;
         }
 
         this.CheckContractEligibility( targetDeclaration, direction );
@@ -1646,7 +1581,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
         var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
             .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-        var advice = new ContractAdvice(
+        var advice = new ContractAdvice<TContract>(
             this._state.AspectInstance,
             this._templateInstance,
             targetDeclaration,
@@ -1657,7 +1592,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
             this.GetObjectReader( tags ),
             this.GetObjectReader( args ) );
 
-        var result = this.ExecuteAdvice<TContract>( advice );
+        var result = advice.Execute( this._state );
 
         return result;
     }
@@ -1666,28 +1601,27 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
         IDeclaration targetDeclaration,
         IAttributeData attribute,
         OverrideStrategy whenExists = OverrideStrategy.Default )
-        => this.ExecuteAdvice<IAttribute>(
-            new AddAttributeAdvice(
-                this._state.AspectInstance,
-                this._templateInstance!,
-                targetDeclaration,
-                this._compilation,
-                attribute,
-                whenExists,
-                this._layerName ) );
+        => new AddAttributeAdvice(
+            this._state.AspectInstance,
+            this._templateInstance!,
+            targetDeclaration,
+            this._compilation,
+            attribute,
+            whenExists,
+            this._layerName ).Execute( this._state );
 
     public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
     {
         using ( this.WithNonUserCode() )
         {
-            return this.ExecuteAdvice<IDeclaration>(
+            return
                 new RemoveAttributesAdvice(
                     this._state.AspectInstance,
                     this._templateInstance!,
                     targetDeclaration,
                     this._compilation,
                     attributeType,
-                    this._layerName ) );
+                    this._layerName ).Execute( this._state );
         }
     }
 
@@ -1723,7 +1657,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 pullAction,
                 defaultValue );
 
-            return this.ExecuteAdvice<IParameter>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1742,7 +1676,10 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
             pullAction,
             attributes );
 
-    public ITypeIntroductionAdviceResult IntroduceClass( INamedTypeOrNamespace containingTypeOrNamespace, string name, Action<INamedTypeBuilder>? buildType = null ) 
+    public ITypeIntroductionAdviceResult IntroduceClass(
+        INamedTypeOrNamespace containingTypeOrNamespace,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
         => throw new NotImplementedException();
 
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
@@ -1762,7 +1699,7 @@ internal sealed class AdviceFactory<T> : IAdvisable<T>, IAdviceFactoryImpl
                 this._compilation,
                 new AnnotationInstance( annotation, export, declaration.ToTypedRef<IDeclaration>() ) );
 
-            this.ExecuteAdvice<IDeclaration>( advice );
+            advice.Execute( this._state );
         }
     }
 

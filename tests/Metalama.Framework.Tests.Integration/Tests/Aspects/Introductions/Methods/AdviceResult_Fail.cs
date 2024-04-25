@@ -1,6 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
+using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -8,23 +9,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceMethod(builder.Target, nameof(Method), whenExists: OverrideStrategy.Fail);
+            var result = builder.Advice.IntroduceMethod( builder.Target, nameof(Method), whenExists: OverrideStrategy.Fail );
 
-            if (result.Outcome != Advising.AdviceOutcome.Error)
+            if (result.Outcome != AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Error.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Error." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceMethod)
+            if (result.AdviceKind != AdviceKind.IntroduceMethod)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceMethod.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceMethod." );
             }
 
             // TODO: #33060
