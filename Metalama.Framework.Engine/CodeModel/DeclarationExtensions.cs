@@ -583,4 +583,13 @@ public static class DeclarationExtensions
         => declaration.Compilation == newCompilation
             ? declaration
             : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+
+    /// <summary>
+    /// Version of <see cref="IDeclaration.ContainingDeclaration"/> that behaves like <see cref="ISymbol.ContainingSymbol"/>,
+    /// i.e. returns containing namespace for top-level types.
+    /// </summary>
+    internal static IDeclaration? GetContainingDeclarationOrNamespace( this IDeclaration declaration )
+        => declaration.ContainingDeclaration is IAssembly && declaration is INamedType namedType
+            ? namedType.Namespace
+            : declaration.ContainingDeclaration;
 }
