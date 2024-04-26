@@ -3,10 +3,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -30,43 +30,80 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public INamedType? BaseType => this.TypeBuilder.BaseType;
 
-    public IImplementedInterfaceCollection AllImplementedInterfaces => this.TypeBuilder.AllImplementedInterfaces;
+    public IImplementedInterfaceCollection AllImplementedInterfaces
+        => new AllImplementedInterfacesCollection(
+            this,
+            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
 
-    public IImplementedInterfaceCollection ImplementedInterfaces => this.TypeBuilder.ImplementedInterfaces;
+    public IImplementedInterfaceCollection ImplementedInterfaces
+        => new ImplementedInterfacesCollection(
+            this,
+            this.Compilation.GetInterfaceImplementationCollection( this.TypeBuilder.ToRef().As<INamedType>(), false ) );
 
     public INamespace Namespace => this.TypeBuilder.Namespace;
 
     public string FullName => this.TypeBuilder.FullName;
 
-    public INamedTypeCollection NestedTypes => this.TypeBuilder.NestedTypes;
+    [Memo]
+    public INamedTypeCollection NestedTypes
+        => new NamedTypeCollection(
+            this,
+            this.Compilation.GetNamedTypeCollection( this.TypeBuilder.ToRef().As<INamespaceOrNamedType>() ) );
 
-    public IPropertyCollection Properties => this.TypeBuilder.Properties;
+    [Memo]
+    public IPropertyCollection Properties
+        => new PropertyCollection(
+            this,
+            this.Compilation.GetPropertyCollection( this.TypeBuilder.ToRef().As<INamedType>() ) );
 
-    public IPropertyCollection AllProperties => this.TypeBuilder.AllProperties;
+    [Memo]
+    public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
 
-    public IIndexerCollection Indexers => this.TypeBuilder.Indexers;
+    [Memo]
+    public IIndexerCollection Indexers
+        => new IndexerCollection(
+            this,
+            this.Compilation.GetIndexerCollection( this.Builder.ToRef().As<INamedType>() ) );
 
-    public IIndexerCollection AllIndexers => this.TypeBuilder.AllIndexers;
+    [Memo]
+    public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
 
-    public IFieldCollection Fields => this.TypeBuilder.Fields;
+    [Memo]
+    public IFieldCollection Fields
+        => new FieldCollection(
+            this,
+            this.Compilation.GetFieldCollection( this.Builder.ToRef().As<INamedType>() ) );
 
-    public IFieldCollection AllFields => this.TypeBuilder.AllFields;
+    [Memo]
+    public IFieldCollection AllFields => new AllFieldsCollection( this );
 
-    public IFieldOrPropertyCollection FieldsAndProperties => this.TypeBuilder.FieldsAndProperties;
+    [Memo]
+    public IFieldOrPropertyCollection FieldsAndProperties => new FieldAndPropertiesCollection( this.Fields, this.Properties );
 
-    public IFieldOrPropertyCollection AllFieldsAndProperties => this.TypeBuilder.AllFieldsAndProperties;
+    public IFieldOrPropertyCollection AllFieldsAndProperties => new AllFieldsAndPropertiesCollection( this );
 
-    public IEventCollection Events => this.TypeBuilder.Events;
+    [Memo]
+    public IEventCollection Events
+        => new EventCollection(
+            this,
+            this.Compilation.GetEventCollection( this.Builder.ToRef().As<INamedType>() ) );
 
-    public IEventCollection AllEvents => this.TypeBuilder.AllEvents;
+    [Memo]
+    public IEventCollection AllEvents => new AllEventsCollection( this );
 
-    public IMethodCollection Methods => this.TypeBuilder.Methods;
+    public IMethodCollection Methods
+        => new MethodCollection(
+            this,
+            this.Compilation.GetMethodCollection( this.Builder.ToRef().As<INamedType>() ) );
 
-    public IMethodCollection AllMethods => this.TypeBuilder.AllMethods;
+    public IMethodCollection AllMethods => new AllMethodsCollection( this );
 
     public IConstructor? PrimaryConstructor => this.TypeBuilder.PrimaryConstructor;
 
-    public IConstructorCollection Constructors => this.TypeBuilder.Constructors;
+    public IConstructorCollection Constructors
+        => new ConstructorCollection(
+            this,
+            this.Compilation.GetConstructorCollection( this.Builder.ToRef().As<INamedType>() ) );
 
     public IConstructor? StaticConstructor => this.TypeBuilder.StaticConstructor;
 
@@ -82,9 +119,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public INamedType UnderlyingType => this.TypeBuilder.UnderlyingType;
 
-    public Code.TypeKind TypeKind => this.TypeBuilder.TypeKind;
+    public TypeKind TypeKind => this.TypeBuilder.TypeKind;
 
-    public Code.SpecialType SpecialType => this.TypeBuilder.SpecialType;
+    public SpecialType SpecialType => this.TypeBuilder.SpecialType;
 
     public bool? IsReferenceType => this.TypeBuilder.IsReferenceType;
 
@@ -104,7 +141,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public Microsoft.CodeAnalysis.ISymbol Symbol => this.TypeSymbol;
 
-    public bool Equals( Code.SpecialType specialType ) => false;
+    public bool Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
@@ -146,6 +183,6 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        return new NamedType( ( (INamedTypeSymbol) this.Builder.GetSymbol()).Construct( typeArguments.Select( x => x.GetSymbol() ).ToArray() ), this.Compilation );
+        return new NamedType( ( (Microsoft.CodeAnalysis.INamedTypeSymbol) this.Builder.GetSymbol()).Construct( typeArguments.Select( x => x.GetSymbol() ).ToArray() ), this.Compilation );
     }
 }

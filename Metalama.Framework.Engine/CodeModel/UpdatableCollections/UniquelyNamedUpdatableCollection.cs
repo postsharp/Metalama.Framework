@@ -87,10 +87,10 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         else
         {
             // The dictionary was not yet populated.
-            if ( this.GetMemberRef( member.Name ).HasValue )
+            if ( !this.GetMemberRef( member.Name ).HasValue )
             {
-                // Duplicate key.
-                throw new AssertionFailedException( $"Duplicate item: '{member}'." );
+                // Missing key.
+                throw new AssertionFailedException( $"Missing item: '{member}'." );
             }
             else
             {

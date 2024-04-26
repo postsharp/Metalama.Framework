@@ -19,8 +19,8 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
     protected override MemberRef<T>? GetMemberRef( string name ) 
         => this.DeclaringTypeOrNamespace.Target switch
     {
-        INamedTypeSymbol symbol =>
-            symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers( name )
+        INamespaceOrTypeSymbol symbol =>
+            symbol.GetMembers( name )
             .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
             .Select( s => (MemberRef<T>?) new MemberRef<T>( s, this.Compilation.CompilationContext ) )
             .FirstOrDefault(),
@@ -33,8 +33,8 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
     protected override IEnumerable<MemberRef<T>> GetMemberRefs() 
         => this.DeclaringTypeOrNamespace.Target switch
         {
-            INamedTypeSymbol symbol =>
-                symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers()
+            INamespaceOrTypeSymbol symbol =>
+                symbol.GetMembers()
                 .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
                 .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                 .ToImmutableArray(),

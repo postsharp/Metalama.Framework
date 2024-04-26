@@ -212,7 +212,7 @@ internal static class AspectLayerSorter
                 }
 
                 // At this stage, all aspects should be ordered.
-                throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and 'unsortedAspectLayers[j]' are not sorted." );
+                throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and '{unsortedAspectLayers[j]}' are not sorted." );
             } );
 
         // Build the ordered list of aspects and assign the distance.
