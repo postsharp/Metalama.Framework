@@ -8,61 +8,60 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntrodu
 
 [assembly: AspectOrder( typeof(AddAttributeAspect), typeof(IntroducingAspect) )]
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroduced
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroduced;
+
+internal class IntroducingAspect : TypeAspect
 {
-    internal class IntroducingAspect : TypeAspect
+    [Introduce]
+    private int _field;
+
+    [Introduce]
+    private string? Property { get; set; }
+
+    [Introduce]
+    private long Method( string p ) => 0;
+
+    [Introduce]
+    public event EventHandler? Event;
+}
+
+internal class AddAttributeAspect : TypeAspect
+{
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        [Introduce]
-        private int _field;
+        var attribute = AttributeConstruction.Create( typeof(MyAttribute) );
 
-        [Introduce]
-        private string? Property { get; set; }
-
-        [Introduce]
-        private long Method( string p ) => 0;
-
-        [Introduce]
-        public event EventHandler? Event;
-    }
-
-    internal class AddAttributeAspect : TypeAspect
-    {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        foreach (var field in builder.Target.Fields)
         {
-            var attribute = AttributeConstruction.Create( typeof(MyAttribute) );
+            builder.Advice.IntroduceAttribute( field, attribute );
+        }
 
-            foreach (var field in builder.Target.Fields)
+        foreach (var property in builder.Target.Properties)
+        {
+            builder.Advice.IntroduceAttribute( property, attribute );
+        }
+
+        foreach (var @event in builder.Target.Events)
+        {
+            builder.Advice.IntroduceAttribute( @event, attribute );
+        }
+
+        foreach (var method in builder.Target.Methods)
+        {
+            builder.Advice.IntroduceAttribute( method, attribute );
+            builder.Advice.IntroduceAttribute( method.ReturnParameter, attribute );
+
+            foreach (var parameter in method.Parameters)
             {
-                builder.Advice.IntroduceAttribute( field, attribute );
-            }
-
-            foreach (var property in builder.Target.Properties)
-            {
-                builder.Advice.IntroduceAttribute( property, attribute );
-            }
-
-            foreach (var @event in builder.Target.Events)
-            {
-                builder.Advice.IntroduceAttribute( @event, attribute );
-            }
-
-            foreach (var method in builder.Target.Methods)
-            {
-                builder.Advice.IntroduceAttribute( method, attribute );
-                builder.Advice.IntroduceAttribute( method.ReturnParameter, attribute );
-
-                foreach (var parameter in method.Parameters)
-                {
-                    builder.Advice.IntroduceAttribute( parameter, attribute );
-                }
+                builder.Advice.IntroduceAttribute( parameter, attribute );
             }
         }
     }
-
-    internal class MyAttribute : Attribute { }
-
-    // <target>
-    [IntroducingAspect]
-    [AddAttributeAspect]
-    internal class C { }
 }
+
+internal class MyAttribute : Attribute { }
+
+// <target>
+[IntroducingAspect]
+[AddAttributeAspect]
+internal class C { }

@@ -46,10 +46,6 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
 
     public bool? IsNullable => this.IsNullableImpl();
 
-    bool IType.Equals( SpecialType specialType ) => false;
-
-    bool IType.Equals( IType? otherType, TypeComparison typeComparison ) => throw new NotSupportedException();
-
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     public override IDeclaration ContainingDeclaration { get; }
@@ -78,7 +74,13 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
         return this.Name;
     }
 
-    bool IEquatable<IType>.Equals( IType? other ) => throw new NotSupportedException();
+    bool IType.Equals( SpecialType specialType ) => false;
 
-    public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported." );
+    bool IEquatable<IType>.Equals( IType? other )
+        => this.Equals( other, TypeComparison.Default );
+
+    public bool Equals( IType? otherType, TypeComparison typeComparison )
+        => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+
+    public ITypeSymbol? TypeSymbol => null;
 }

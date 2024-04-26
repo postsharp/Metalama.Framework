@@ -191,9 +191,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
-        implementationMember = null;
-
-        return false;
+        throw new NotSupportedException( "This method is not supported on the builder." );
     }
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
@@ -202,17 +200,17 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException( "This method is not supported on the builder." );
     }
 
     bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException("This method is not supported on the builder.");
     }
 
     ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )
     {
-        throw new NotImplementedException();
+        return visitor.Visit( this );
     }
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )

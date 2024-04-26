@@ -155,7 +155,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public Type ToType()
     {
-        throw new NotSupportedException();
+        throw new NotImplementedException();
     }
 
     protected override Microsoft.CodeAnalysis.ISymbol? GetSymbol() => this.TypeSymbol;
