@@ -65,7 +65,7 @@ public sealed class ReflectionHelperTests : UnitTestClass
     [MemberData( nameof(Types) )]
     public void GetDeclarationReflectionNameTest( Type type )
     {
-        var testContext = this.CreateTestContext();
+        using var testContext = this.CreateTestContext();
 
         var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null )
             .AddReferences( MetadataReference.CreateFromFile( typeof( ReflectionHelperTests ).Assembly.Location ) );
@@ -77,8 +77,8 @@ public sealed class ReflectionHelperTests : UnitTestClass
         var typeSymbol = reflectionMapper.GetTypeSymbol( type );
         var iType = compilationModel.Factory.GetIType( typeSymbol );
 
-        Assert.Equal( RemoveAssemblyQualification( type.FullName! ), iType.GetReflectionFullName() );
-        Assert.Equal( type.Name, iType.GetReflectionName() );
+        Assert.Equal( RemoveAssemblyQualification( type.FullName! ), iType.GetReflectionFullName( bypassSymbols: true ) );
+        Assert.Equal( type.Name, iType.GetReflectionName( bypassSymbols: true ) );
     }
 
     public class Outer<T1, T2>

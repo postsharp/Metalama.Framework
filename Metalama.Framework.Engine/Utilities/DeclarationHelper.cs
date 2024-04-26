@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Caching;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -27,17 +28,33 @@ internal static class DeclarationHelper
     /// <summary>
     /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
     /// </summary>
-    internal static string GetReflectionName( this IType type )
-        => _reflectionNameCache.GetOrAdd( type, x => x.GetReflectionName( TypeNameKind.Name ) );
+    /// <param name="bypassSymbols">Does not use the symbol-based implemetation, even when available. Used for testing.</param>
+    internal static string GetReflectionName( this IType type, bool bypassSymbols = false )
+        => bypassSymbols
+            ? type.GetReflectionName( TypeNameKind.Name, bypassSymbols: true )
+            : _reflectionNameCache.GetOrAdd( type, x => x.GetReflectionName( TypeNameKind.Name ) );
 
     /// <summary>
     /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
     /// </summary>
-    internal static string GetReflectionFullName( this IType type )
-        => _reflectionFullNameCache.GetOrAdd( type, x => x.GetReflectionName( TypeNameKind.FullName ) );
+    /// <param name="bypassSymbols">Does not use the symbol-based implemetation, even when available. Used for testing.</param>
+    internal static string GetReflectionFullName( this IType type, bool bypassSymbols = false )
+        => bypassSymbols
+            ? type.GetReflectionName( TypeNameKind.FullName, bypassSymbols: true )
+            : _reflectionFullNameCache.GetOrAdd( type, x => x.GetReflectionName( TypeNameKind.FullName ) );
 
-    private static string GetReflectionName( this IType declaration, TypeNameKind kind )
+    private static string GetReflectionName( this IType declaration, TypeNameKind kind, bool bypassSymbols = false )
     {
+        if ( declaration.GetSymbol() is { } symbol && !bypassSymbols )
+        {
+            return kind switch
+            {
+                TypeNameKind.Name => symbol.GetReflectionName(),
+                TypeNameKind.FullName => symbol.GetReflectionFullName(),
+                _ => throw new AssertionFailedException( $"Unexpected TypeNameKind value: {kind}." ),
+            };
+        }
+
         if ( declaration is ITypeParameter typeParameter )
         {
             return typeParameter.Name;
