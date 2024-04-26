@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxGeneration;
 
 namespace Metalama.Framework.Engine.Advising;
@@ -23,9 +22,8 @@ internal sealed class TemplateTypeArgumentFactory
 
     public static TemplateTypeArgument Create( IType type, string name, SyntaxGenerationContext context )
     {
-        var symbol = type.GetSymbol();
-        var syntax = context.SyntaxGenerator.Type( symbol ).AssertNotNull();
-        var syntaxForTypeOf = context.SyntaxGenerator.TypeOfExpression( symbol ).Type;
+        var syntax = context.SyntaxGenerator.Type( type ).AssertNotNull();
+        var syntaxForTypeOf = context.SyntaxGenerator.TypeOfExpression( type ).Type;
 
         return new TemplateTypeArgument( name, type, syntax, syntaxForTypeOf );
     }

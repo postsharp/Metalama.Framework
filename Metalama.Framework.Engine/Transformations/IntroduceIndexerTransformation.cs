@@ -25,10 +25,10 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
             IndexerDeclaration(
                 indexerBuilder.GetAttributeLists( context ),
                 indexerBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                syntaxGenerator.Type( indexerBuilder.Type ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 indexerBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
-                        (NameSyntax) syntaxGenerator.Type( indexerBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        (NameSyntax) syntaxGenerator.Type( indexerBuilder.ExplicitInterfaceImplementations[0].DeclaringType ) )
                     : null,
                 Token( SyntaxKind.ThisKeyword ),
                 context.SyntaxGenerator.ParameterList( indexerBuilder, context.Compilation ),
@@ -84,7 +84,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
                     syntaxGenerator.FormattedBlock(
                         ReturnStatement(
                             Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                            DefaultExpression( syntaxGenerator.Type( indexerBuilder.Type.GetSymbol() ) ),
+                            DefaultExpression( syntaxGenerator.Type( indexerBuilder.Type ) ),
                             Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) ),
                     null,
                     default );

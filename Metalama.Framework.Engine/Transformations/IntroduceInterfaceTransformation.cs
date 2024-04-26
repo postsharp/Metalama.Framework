@@ -45,7 +45,7 @@ internal sealed class IntroduceInterfaceTransformation : BaseTransformation, IIn
                 targetSyntax.Span.Start );
 
         // The type already implements the interface members itself.
-        return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
+        return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType ) );
     }
 
     public override IDeclaration TargetDeclaration => this.TargetType;

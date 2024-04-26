@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         }
 
         protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
-            => syntaxSerializationContext.SyntaxGenerator.Type( this._type.GetSymbol() );
+            => syntaxSerializationContext.SyntaxGenerator.Type( this._type );
 
         public override IType Type => this._type;
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             => new(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ),
+                        TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type( this._type ),
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
                 TemplateExpansionContext.CurrentSyntaxGenerationContext );

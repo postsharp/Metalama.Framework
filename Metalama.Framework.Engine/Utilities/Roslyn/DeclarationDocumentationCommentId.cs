@@ -48,6 +48,40 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         }
 
         /// <summary>
+        /// Creates an id string used to reference type symbols (not strictly declarations, includes
+        /// arrays, pointers, type parameters, etc.)
+        /// </summary>
+        public static string CreateReferenceId( IType type )
+        {
+            if ( type == null )
+            {
+                throw new ArgumentNullException( nameof(type) );
+            }
+
+            var builder = new StringBuilder();
+            var generator = new ReferenceGenerator( builder, typeParameterContext: null );
+            generator.Visit( type );
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Creates an id string used to reference type symbols (not strictly declarations, includes
+        /// arrays, pointers, type parameters, etc.)
+        /// </summary>
+        public static string CreateReferenceId( INamespace ns )
+        {
+            if ( ns == null )
+            {
+                throw new ArgumentNullException( nameof(ns) );
+            }
+
+            var builder = new StringBuilder();
+            var generator = new ReferenceGenerator( builder, typeParameterContext: null );
+            generator.Visit( ns );
+            return builder.ToString();
+        }
+
+        /// <summary>
         /// Gets the first declaration that matches the declaration id string, order undefined.
         /// </summary>
         public static IDeclaration? GetFirstDeclarationForDeclarationId( string id, CompilationModel compilation )
@@ -360,7 +394,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 this._builder.Append( EncodeName( ns.Name ) );
             }
 
-            private bool Visit( INamespace ns )
+            public bool Visit( INamespace ns )
             {
                 if ( ns.IsGlobalNamespace )
                 {

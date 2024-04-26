@@ -45,10 +45,10 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
             PropertyDeclaration(
                 propertyBuilder.GetAttributeLists( context, Ref.FromBuilder( this.IntroducedDeclaration ) ).AddRange( GetAdditionalAttributeLists() ),
                 propertyBuilder.GetSyntaxModifierList(),
-                syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
+                syntaxGenerator.Type( propertyBuilder.Type ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
-                        (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                        (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType ) )
                     : null,
                 propertyBuilder.GetCleanName(),
                 GenerateAccessorList(),
@@ -138,8 +138,8 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                             ReturnStatement(
                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                                 syntaxGenerator.SuppressNullableWarningExpression(
-                                    DefaultExpression( syntaxGenerator.Type( propertyBuilder.Type.GetSymbol() ) ),
-                                    propertyBuilder.Type.GetSymbol().IsValueType ? propertyBuilder.Type.GetSymbol() : propertyBuilder.Type.ToNullableType().GetSymbol() ),
+                                    syntaxGenerator.DefaultExpression( propertyBuilder.Type ),
+                                    propertyBuilder.Type.IsReferenceType == false ? propertyBuilder.Type : propertyBuilder.Type.ToNullableType() ),
                                 Token( TriviaList(), SyntaxKind.SemicolonToken, context.SyntaxGenerationContext.ElasticEndOfLineTriviaList ) ) ),
                     null,
                     propertyBuilder.IsAutoPropertyOrField ? Token( SyntaxKind.SemicolonToken ) : default );
