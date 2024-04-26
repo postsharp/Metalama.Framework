@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 }
 
                 // Otherwise, annotation takes priority over constraint.
-                // E.g. in void M<T>(T? t) where T : notnull, the type of t is ItypeParameterSymbol with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
+                // E.g. in void M<T>(T? t) where T : notnull, the type of t is ITypeParameterSymbol with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
                 return typeParameterSymbol.NullableAnnotation.ToIsAnnotated();
             }
 

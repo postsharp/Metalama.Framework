@@ -5,7 +5,7 @@ using System;
 namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     [Flags]
-    internal enum StructuralSymbolComparerOptions
+    internal enum StructuralComparerOptions
     {
         ContainingAssembly = 1 << 0,
         ContainingDeclaration = 1 << 1,
