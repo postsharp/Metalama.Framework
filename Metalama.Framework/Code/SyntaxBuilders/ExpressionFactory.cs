@@ -154,4 +154,19 @@ public static class ExpressionFactory
     /// </summary>
     /// <param name="type">A type.</param>
     public static IExpression This( INamedType type ) => SyntaxBuilder.CurrentImplementation.ThisExpression( type );
+
+    /// <summary>
+    /// Returns the same expression, but assuming it has a different type <see cref="IHasType.Type"/>. This method does not generate
+    /// any cast (unlike <see cref="CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>) and should only
+    /// be used when the of the type given expression is wrongly infered.
+    /// </summary>
+    public static IExpression AssumeType( this IExpression expression, IType type ) => SyntaxBuilder.CurrentImplementation.AssumeType( expression, type );
+
+    /// <summary>
+    /// Returns the same expression, but assuming it has a different nullability. This method does not generate
+    /// any cast (unlike <see cref="CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>) and should only
+    /// be used when the of the nullability given expression is wrongly infered.
+    /// </summary>
+    public static IExpression AssumeNullability( this IExpression expression, bool isNullable )
+        => expression.AssumeType( isNullable ? expression.Type.ToNullableType() : expression.Type.ToNonNullableType() );
 }

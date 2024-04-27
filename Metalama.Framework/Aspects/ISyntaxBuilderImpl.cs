@@ -45,4 +45,6 @@ internal interface ISyntaxBuilderImpl
     IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance );
 
     IExpression ToExpression( IParameter parameter );
+
+    IExpression AssumeType( IExpression expression, IType type );
 }
