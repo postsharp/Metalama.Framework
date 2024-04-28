@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
@@ -28,6 +29,8 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
 
     protected override void AddTransformation( IMemberOrNamedType targetDeclaration, IConstructor targetCtor, Action<ITransformation> addTransformation )
     {
-        addTransformation( new SyntaxBasedInitializationTransformation( this, targetDeclaration, targetCtor, _ => ((UserStatement) this._statement).Syntax ) );
+        // TODO: The statement can now be more complex, including invoking a template. For this we need to pass a TemplateSyntaxFactoryImpl.
+        addTransformation(
+            new SyntaxBasedInitializationTransformation( this, targetDeclaration, targetCtor, _ => ((IStatementImpl) this._statement).GetSyntax( null ) ) );
     }
 }

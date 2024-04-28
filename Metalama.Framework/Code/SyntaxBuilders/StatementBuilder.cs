@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Code.SyntaxBuilders
 {
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
 
         public override void AppendVerbatim( string rawCode )
         {
-            if ( this._indentLevel > 0 && this.StringBuilder[this.StringBuilder.Length - 1] is '\n' or '\r' )
+            if ( this._indentLevel > 0 && this.StringBuilder[^1] is '\n' or '\r' )
             {
                 this.StringBuilder.Append( ' ', this._indentLevel * 4 );
             }

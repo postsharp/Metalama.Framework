@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Code.SyntaxBuilders;
 
@@ -19,4 +20,7 @@ public static class StatementFactory
     public static IStatement Parse( string code ) => SyntaxBuilder.CurrentImplementation.ParseStatement( code );
 
     public static IStatement FromExpression( IExpression expression ) => SyntaxBuilder.CurrentImplementation.CreateExpressionStatement( expression );
+
+    public static IStatement FromTemplate( TemplateInvocation templateInvocation, string? args = null )
+        => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( templateInvocation, args );
 }

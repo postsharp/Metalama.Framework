@@ -56,7 +56,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         public ITestCase Deserialize( string value )
         {
-            return new TestCase( this._factory, value );
+            return new TestSwitchSection( this._factory, value );
         }
 
         void ITestFrameworkExecutor.RunAll(
