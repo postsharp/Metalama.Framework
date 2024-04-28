@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Templating
                 return node;
             }
 
-            var existingAnnotation = node.GetAnnotations( ExpressionTypeAnnotationKind ).FirstOrDefault();
+            var existingAnnotation = node.GetAnnotations( ExpressionTypeAnnotationKind ).SingleOrDefault();
 
             if ( existingAnnotation != null && SymbolEqualityComparer.IncludeNullability.Equals( GetSymbolFromAnnotation( existingAnnotation ), type ) )
             {

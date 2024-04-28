@@ -176,5 +176,5 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
 
-    public IExpression AssumeType( IExpression expression, IType type ) => new AssumeTypeExpression( expression, type );
+    public IExpression WithType( IExpression expression, IType type ) => new OverrideTypeUserExpression( expression, type );
 }

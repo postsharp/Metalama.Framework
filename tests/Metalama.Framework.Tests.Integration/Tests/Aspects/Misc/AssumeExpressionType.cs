@@ -14,11 +14,10 @@ public class MyAspect : TypeAspect
         meta.InsertComment( "With original nullability" );
         _ = nullableExpression.Value!.ToString();
         _ = nonNullableExpression.Value!.ToString();
-        
-        meta.InsertComment( "With inverse nullability" );
-        _ = nullableExpression.AssumeNullability( false).Value!.ToString();
-        _ = nonNullableExpression.AssumeNullability( true).Value!.ToString();
 
+        meta.InsertComment( "With inverse nullability" );
+        _ = nullableExpression.WithNullability( false ).Value!.ToString();
+        _ = nonNullableExpression.WithNullability( true ).Value!.ToString();
     }
 }
 

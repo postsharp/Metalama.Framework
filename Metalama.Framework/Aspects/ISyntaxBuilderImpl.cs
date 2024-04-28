@@ -46,5 +46,5 @@ internal interface ISyntaxBuilderImpl
 
     IExpression ToExpression( IParameter parameter );
 
-    IExpression AssumeType( IExpression expression, IType type );
+    IExpression WithType( IExpression expression, IType type );
 }
