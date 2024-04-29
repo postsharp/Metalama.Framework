@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 
@@ -52,7 +51,11 @@ internal interface ISyntaxBuilderImpl
 
     IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, string? args );
 
-    IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchSection> cases );
+    IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases );
 
-    IStatement CreateBlock( ImmutableArray<IStatement> statements );
+    IStatementList UnwrapBlock( IStatement statement );
+
+    IStatementList CreateStatementList( ImmutableArray<object> items );
+
+    IStatement CreateBlock( IStatementList statements );
 }

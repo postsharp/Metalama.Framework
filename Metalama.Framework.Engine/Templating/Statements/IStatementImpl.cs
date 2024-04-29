@@ -2,10 +2,16 @@
 
 using Metalama.Framework.Code.SyntaxBuilders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
 internal interface IStatementImpl : IStatement
 {
     StatementSyntax GetSyntax( TemplateSyntaxFactoryImpl? templateSyntaxFactory );
+}
+
+internal interface IStatementListImpl : IStatementList
+{
+    public IReadOnlyList<StatementSyntax> GetSyntaxes( TemplateSyntaxFactoryImpl? templateSyntaxFactory );
 }

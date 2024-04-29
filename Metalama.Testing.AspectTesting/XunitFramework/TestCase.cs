@@ -8,12 +8,12 @@ using Xunit.Abstractions;
 
 namespace Metalama.Testing.AspectTesting.XunitFramework
 {
-    internal sealed class TestSwitchSection : LongLivedMarshalByRefObject, ITestCase, ISourceInformation
+    internal sealed class TestCase : LongLivedMarshalByRefObject, ITestCase, ISourceInformation
     {
         private TestFactory _factory;
         private string _relativePath;
 
-        public TestSwitchSection( TestFactory factory, string relativePath )
+        public TestCase( TestFactory factory, string relativePath )
         {
             this._factory = factory;
             this._relativePath = relativePath;

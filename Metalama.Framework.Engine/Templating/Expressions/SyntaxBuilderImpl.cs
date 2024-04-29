@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;

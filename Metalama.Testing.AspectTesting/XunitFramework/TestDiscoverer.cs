@@ -79,16 +79,16 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
                 metadata.License );
         }
 
-        public List<TestSwitchSection> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
+        public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )
         {
-            List<TestSwitchSection> testCases = new();
+            List<TestCase> testCases = new();
             this.Discover( c => testCases.Add( c ), subDirectory, false, excludedDirectories );
 
             return testCases;
         }
 
         private void Discover(
-            Action<TestSwitchSection> onTestCaseDiscovered,
+            Action<TestCase> onTestCaseDiscovered,
             string? subDirectory,
             bool isXUnitFrameworkDiscovery,
             ImmutableHashSet<string> excludedSubdirectories )
@@ -155,7 +155,7 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
                         this._messageSink?.Trace( $"Including the file '{testPath}'" );
 
-                        var testCase = new TestSwitchSection( factory, this.FileSystem.GetRelativePath( projectProperties.SourceDirectory, testPath ) );
+                        var testCase = new TestCase( factory, this.FileSystem.GetRelativePath( projectProperties.SourceDirectory, testPath ) );
 
                         this._messageSink?.Trace(
                             $"    {((ITestCase) testCase).TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name} " +

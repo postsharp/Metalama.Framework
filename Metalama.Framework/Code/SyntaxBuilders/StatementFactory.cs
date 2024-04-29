@@ -1,7 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Code.SyntaxBuilders;
 
@@ -23,4 +24,27 @@ public static class StatementFactory
 
     public static IStatement FromTemplate( TemplateInvocation templateInvocation, string? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( templateInvocation, args );
+
+    public static IStatement FromTemplate( string templateName, string? args = null )
+        => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName ), args );
+
+    public static IStatement FromTemplate( string templateName, ITemplateProvider? templateProvider, string? args = null )
+        => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName, templateProvider ), args );
+
+    public static IStatement FromTemplate( string templateName, TemplateProvider templateProvider, string? args = null )
+        => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName, templateProvider ), args );
+
+    public static IStatement Block( params IStatement[] statements ) => SyntaxBuilder.CurrentImplementation.CreateBlock( List( statements ) );
+
+    public static IStatement Block( IEnumerable<IStatement> statements ) => SyntaxBuilder.CurrentImplementation.CreateBlock( List( statements ) );
+
+    public static IStatement Block( IStatementList list ) => SyntaxBuilder.CurrentImplementation.CreateBlock( list );
+
+    public static IStatementList UnwrapBlock( IStatement statement ) => SyntaxBuilder.CurrentImplementation.UnwrapBlock( statement );
+
+    public static IStatementList List( params IStatement[] statements )
+        => SyntaxBuilder.CurrentImplementation.CreateStatementList( statements.ToImmutableArray<object>() );
+
+    public static IStatementList List( IEnumerable<IStatement> statements )
+        => SyntaxBuilder.CurrentImplementation.CreateStatementList( statements.ToImmutableArray<object>() );
 }

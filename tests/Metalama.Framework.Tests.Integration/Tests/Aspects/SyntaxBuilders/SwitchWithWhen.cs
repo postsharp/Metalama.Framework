@@ -2,12 +2,12 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.SyntaxBuilders.Switch;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.SyntaxBuilders.SwitchWithWhen;
 
 public class TheAspect : TypeAspect
 {
     [Introduce]
-    public void TheMethod( string propertyName )
+    public void TheMethod( string propertyName, string otherName )
     {
         var switchBuilder = new SwitchStatementBuilder( ExpressionFactory.Capture( propertyName ) );
 
@@ -18,7 +18,11 @@ public class TheAspect : TypeAspect
             statementBuilder.AppendVerbatim( ".WriteLine(" );
             statementBuilder.AppendLiteral( property.Name );
             statementBuilder.AppendVerbatim( ");" );
-            switchBuilder.AddCase( new SwitchStatementLabel( property.Name ), statementBuilder.ToStatement().AsList() );
+
+            switchBuilder.AddCase(
+                new SwitchStatementLabel( property.Name ),
+                ExpressionFactory.Capture( otherName == "xxx" ),
+                statementBuilder.ToStatement().AsList() );
         }
 
         switchBuilder.AddDefault( StatementFactory.Parse( "return;" ).AsList(), false );

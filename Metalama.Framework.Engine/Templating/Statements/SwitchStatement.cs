@@ -3,22 +3,22 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.SyntaxGeneration;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Templating.Statements;
 
 internal class SwitchStatement : IStatementImpl
 {
     private readonly IExpression _expression;
-    private readonly ImmutableArray<SwitchSection> _sections;
+    private readonly ImmutableArray<SwitchStatementSection> _sections;
 
-    public SwitchStatement( IExpression expression, ImmutableArray<SwitchSection> sections )
+    public SwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> sections )
     {
         this._expression = expression;
         this._sections = sections;
@@ -36,31 +36,73 @@ internal class SwitchStatement : IStatementImpl
         foreach ( var switchCase in this._sections )
         {
             SwitchLabelSyntax label;
+            WhenClauseSyntax? when;
 
-            if ( switchCase.Label != null )
+            if ( switchCase.When != null )
             {
-                label = SyntaxFactory.CaseSwitchLabel(
-                    ((IUserExpression) switchCase.Label!).ToTypedExpressionSyntax( templateSyntaxFactory.SyntaxSerializationContext ) );
+                when = WhenClause( ((IUserExpression) switchCase.When).ToTypedExpressionSyntax( templateSyntaxFactory.SyntaxSerializationContext ) );
             }
             else
             {
-                label = SyntaxFactory.DefaultSwitchLabel();
+                when = null;
             }
 
-            var statement = SyntaxFactory.SingletonList( ((IStatementImpl) switchCase.Statement).GetSyntax( templateSyntaxFactory ) );
+            if ( switchCase.Label != null )
+            {
+                var tupleValues =
+                    switchCase.Label.Values.SelectAsReadOnlyList( x => templateSyntaxFactory.SyntaxSerializationContext.SyntaxGenerator.TypedConstant( x ) );
+
+                if ( tupleValues.Count == 1 )
+                {
+                    if ( when == null )
+                    {
+                        label = CaseSwitchLabel( tupleValues[0] );
+                    }
+                    else
+                    {
+                        label = CasePatternSwitchLabel(
+                            ConstantPattern( tupleValues[0] ),
+                            when,
+                            Token( SyntaxKind.ColonToken ) );
+                    }
+                }
+                else
+                {
+                    var list = SeparatedList( tupleValues.SelectAsReadOnlyCollection( x => Subpattern( ConstantPattern( x ) ) ) );
+
+                    var recursivePattern = RecursivePattern()
+                        .WithPositionalPatternClause( PositionalPatternClause( list ) );
+
+                    label = CasePatternSwitchLabel( recursivePattern, Token( SyntaxKind.ColonToken ) ).WithWhenClause( when );
+                }
+            }
+            else
+            {
+                label = DefaultSwitchLabel();
+            }
+
+            var statements = ((IStatementListImpl) switchCase.Statements).GetSyntaxes( templateSyntaxFactory ).ToMutableList();
 
             if ( switchCase.EndWithBreak )
             {
-                statement = statement.Add( SyntaxFactory.BreakStatement() );
+                statements.Add( BreakStatement() );
             }
 
-            var section = SyntaxFactory.SwitchSection( SyntaxFactory.SingletonList( label ), statement );
+            var section = SwitchSection( SingletonList( label ), List( statements ) );
 
             sections.Add( section );
         }
 
-        return SyntaxFactory.SwitchStatement(
-            ((IUserExpression) this._expression).ToTypedExpressionSyntax( templateSyntaxFactory.SyntaxSerializationContext ).Syntax,
-            SyntaxFactory.List( sections ) );
+        var switchExpression = ((IUserExpression) this._expression).ToTypedExpressionSyntax( templateSyntaxFactory.SyntaxSerializationContext ).Syntax;
+
+        if ( switchExpression is TupleExpressionSyntax tuple )
+        {
+            // Remove names
+            switchExpression = tuple.WithArguments( SeparatedList( tuple.Arguments.SelectAsReadOnlyCollection( a => a.WithNameColon( null ) ) ) );
+        }
+
+        return SwitchStatement(
+            switchExpression,
+            List( sections ) );
     }
 }

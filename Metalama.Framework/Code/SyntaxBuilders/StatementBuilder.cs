@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Code.SyntaxBuilders
 {
@@ -12,7 +11,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// </summary>
     [CompileTime]
     [PublicAPI]
-    public sealed class StatementBuilder : SyntaxBuilder
+    public sealed class StatementBuilder : SyntaxBuilder, IStatementBuilder
     {
         private int _indentLevel;
 
