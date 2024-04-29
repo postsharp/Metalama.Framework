@@ -28,7 +28,7 @@ public static class StatementFactory
     public static IStatement FromTemplate( string templateName, string? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName ), args );
 
-    public static IStatement FromTemplate( string templateName, ITemplateProvider? templateProvider, string? args = null )
+    public static IStatement FromTemplate( string templateName, ITemplateProvider templateProvider, string? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName, templateProvider ), args );
 
     public static IStatement FromTemplate( string templateName, TemplateProvider templateProvider, string? args = null )
