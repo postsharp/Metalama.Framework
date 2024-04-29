@@ -45,7 +45,7 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
     /// Add a <c>default</c> switch section.
     /// </summary>
     /// <param name="statements">The statements to execute.</param>
-    /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statements"/>. The value is <c>true</c>.</param>
+    /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statements"/>. The default value is <c>true</c>.</param>
     public void AddDefault( IStatementList statements, bool appendBreak = true )
     {
         this._cases.Add( new SwitchStatementSection( null, null, statements, appendBreak ) );
