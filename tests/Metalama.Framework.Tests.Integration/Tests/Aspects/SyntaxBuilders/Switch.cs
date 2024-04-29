@@ -18,7 +18,7 @@ public class TheAspect : TypeAspect
             statementBuilder.AppendVerbatim( ".WriteLine(" );
             statementBuilder.AppendLiteral( property.Name );
             statementBuilder.AppendVerbatim( ");" );
-            switchBuilder.AddCase( new SwitchStatementLabel( property.Name ), statementBuilder.ToStatement().AsList() );
+            switchBuilder.AddCase( SwitchStatementLabel.CreateLiteral( property.Name ), statementBuilder.ToStatement().AsList() );
         }
 
         switchBuilder.AddDefault( StatementFactory.Parse( "return;" ).AsList(), false );

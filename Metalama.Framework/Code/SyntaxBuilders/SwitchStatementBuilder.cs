@@ -36,6 +36,13 @@ public sealed class SwitchStatementBuilder : IStatementBuilder
         this._cases.Add( new SwitchStatementSection( label, null, statements, appendBreak ) );
     }
 
+    /// <summary>
+    /// Add a <c>case</c> switch section with a <c>when</c> expression.
+    /// </summary>
+    /// <param name="label">The label, i.e. the value to match.</param>
+    /// <param name="when">The <c>when</c> expression.</param>
+    /// <param name="statements">The statements to execute.</param>
+    /// <param name="appendBreak">Value indicating whether a <c>break;</c> statement should be appended to <paramref name="statements"/>. The value is <c>true</c>.</param>
     public void AddCase( SwitchStatementLabel label, IExpression? when, IStatementList statements, bool appendBreak = true )
     {
         this._cases.Add( new SwitchStatementSection( label, when, statements, appendBreak ) );

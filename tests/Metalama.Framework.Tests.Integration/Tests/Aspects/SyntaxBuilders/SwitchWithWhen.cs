@@ -20,7 +20,7 @@ public class TheAspect : TypeAspect
             statementBuilder.AppendVerbatim( ");" );
 
             switchBuilder.AddCase(
-                new SwitchStatementLabel( property.Name ),
+                SwitchStatementLabel.CreateLiteral( property.Name ),
                 ExpressionFactory.Capture( otherName == "xxx" ),
                 statementBuilder.ToStatement().AsList() );
         }

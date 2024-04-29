@@ -19,27 +19,22 @@ public sealed class SwitchStatementLabel
     /// </summary>
     public IReadOnlyList<TypedConstant> Values { get; }
 
-    public SwitchStatementLabel( params object[] values )
-    {
-        if ( values.Length == 0 )
-        {
-            throw new ArgumentOutOfRangeException( nameof(values), "At least one value is required." );
-        }
+    /// <summary>
+    /// Creates a literal <see cref="SwitchStatementLabel"/> by giving the literals as intrinsic values (<see cref="string"/>, <see cref="int"/>, ...).
+    /// </summary>
+    public static SwitchStatementLabel CreateLiteral( params object[] values ) => new( values.Select( TypedConstant.Create ).ToList() );
 
-        this.Values = values.Select( TypedConstant.Create ).ToList();
-    }
+    /// <summary>
+    /// Creates a literal <see cref="SwitchStatementLabel"/> by giving the literals as <see cref="TypedConstant"/> values.
+    /// </summary>
+    public static SwitchStatementLabel CreateLiteral( params TypedConstant[] values ) => new( values );
 
-    public SwitchStatementLabel( params TypedConstant[] values )
-    {
-        if ( values.Length == 0 )
-        {
-            throw new ArgumentOutOfRangeException( nameof(values), "At least one value is required." );
-        }
+    /// <summary>
+    /// Creates a literal <see cref="SwitchStatementLabel"/> by giving the literals as <see cref="TypedConstant"/> values.
+    /// </summary>
+    public static SwitchStatementLabel CreateLiteral( IReadOnlyList<TypedConstant> values ) => new( values );
 
-        this.Values = values;
-    }
-
-    public SwitchStatementLabel( IReadOnlyList<TypedConstant> values )
+    private SwitchStatementLabel( IReadOnlyList<TypedConstant> values )
     {
         if ( values.Count == 0 )
         {
