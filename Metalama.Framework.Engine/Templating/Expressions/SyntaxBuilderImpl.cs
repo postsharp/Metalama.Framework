@@ -180,7 +180,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression WithType( IExpression expression, IType type ) => new OverrideTypeUserExpression( expression, type );
 
-    public IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, string? args )
+    public IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, object? args )
         => new TemplateInvocationStatement( templateInvocation, args );
 
     public IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases ) => new SwitchStatement( expression, cases );

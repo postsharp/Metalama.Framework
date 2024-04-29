@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.Templating.Statements;
 internal class TemplateInvocationStatement : IStatementImpl
 {
     private readonly TemplateInvocation _templateInvocation;
-    private readonly string? _args;
+    private readonly object? _args;
 
-    public TemplateInvocationStatement( TemplateInvocation templateInvocation, string? args )
+    public TemplateInvocationStatement( TemplateInvocation templateInvocation, object? args )
     {
         this._templateInvocation = templateInvocation;
         this._args = args;

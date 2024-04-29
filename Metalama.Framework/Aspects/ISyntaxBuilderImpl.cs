@@ -49,7 +49,7 @@ internal interface ISyntaxBuilderImpl
 
     IExpression WithType( IExpression expression, IType type );
 
-    IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, string? args );
+    IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, object? args );
 
     IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases );
 
