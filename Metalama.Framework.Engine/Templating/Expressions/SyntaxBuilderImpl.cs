@@ -184,7 +184,11 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, string? args )
         => new TemplateInvocationStatement( templateInvocation, args );
 
-    public IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchSection> cases ) => new SwitchStatement( expression, cases );
+    public IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases ) => new SwitchStatement( expression, cases );
 
-    public IStatement CreateBlock( ImmutableArray<IStatement> statements ) => new BlockStatement( statements );
+    public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
+
+    public IStatementList UnwrapBlock( IStatement statement ) => new UnwrappedBlockStatementList( statement );
+
+    public IStatementList CreateStatementList( ImmutableArray<object> items ) => new StatementList( items );
 }
