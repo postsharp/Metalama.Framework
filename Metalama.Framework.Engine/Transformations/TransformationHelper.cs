@@ -1,8 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
@@ -95,5 +98,44 @@ internal static class TransformationHelper
         var overriddenByParameterType = additionalParameterType;
 
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
+    }
+
+    public static SyntaxGenerationContext GetSyntaxGenerationContext(this CompilationContext compilationContext, SyntaxGenerationOptions options, IDeclaration declaration )
+    {
+        switch ( declaration )
+        {
+            case SymbolBasedDeclaration symbolBasedDeclaration:
+                var primaryDeclaration = symbolBasedDeclaration.GetPrimaryDeclarationSyntax().AssertNotNull();
+
+                return compilationContext.GetSyntaxGenerationContext(options, primaryDeclaration );
+
+            case BuiltDeclaration builtDeclaration:
+                return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.Builder );
+
+            case IDeclarationBuilder builder:
+                var insertPosition = builder.ToInsertPosition();
+
+                return GetSyntaxGenerationContext( compilationContext, options, insertPosition );
+
+            default:
+                throw new AssertionFailedException( $"Unexpected declaration: {declaration}" );
+        }
+    }
+
+    public static SyntaxGenerationContext GetSyntaxGenerationContext( this CompilationContext compilationContext, SyntaxGenerationOptions options, InsertPosition insertPosition )
+    {
+        if ( insertPosition is { Relation: InsertPositionRelation.Within, TypeBuilder: IDeclarationBuilder containingBuilder } )
+        {
+            return GetSyntaxGenerationContext( compilationContext, options, containingBuilder );
+        }
+
+        var insertOffset = insertPosition switch
+        {
+            { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
+            _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." ),
+        };
+
+        return compilationContext.GetSyntaxGenerationContext( options, insertPosition.SyntaxTree, insertOffset );
     }
 }

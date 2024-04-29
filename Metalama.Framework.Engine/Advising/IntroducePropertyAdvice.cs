@@ -18,7 +18,7 @@ using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
+internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, IProperty, PropertyBuilder>
 {
     private readonly PartiallyBoundTemplateMethod? _getTemplate;
     private readonly PartiallyBoundTemplateMethod? _setTemplate;

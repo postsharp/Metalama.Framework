@@ -36,7 +36,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
-    public ConstructorBuilder( INamedType targetType, Advice advice )
+    public ConstructorBuilder( Advice advice, INamedType targetType )
         : base( advice, targetType, null! ) { }
 
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );

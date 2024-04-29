@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, IndexerBuilder>
+    internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, IIndexer, IndexerBuilder>
     {
         private readonly PartiallyBoundTemplateMethod? _getTemplate;
         private readonly PartiallyBoundTemplateMethod? _setTemplate;

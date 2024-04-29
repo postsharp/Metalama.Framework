@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Advising
             if ( targetCtor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.
-                var builder = new ConstructorBuilder( targetCtor.DeclaringType, this );
+                var builder = new ConstructorBuilder( this, targetCtor.DeclaringType );
                 addTransformation( builder.ToTransformation() );
                 targetCtor = builder;
             }

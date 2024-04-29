@@ -36,16 +36,13 @@ internal sealed class IntroduceInterfaceTransformation : BaseTransformation, IIn
 
     public BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options )
     {
-        var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
-
-        var generationContext = this.TargetType.GetCompilationModel()
-            .CompilationContext.GetSyntaxGenerationContext(
+        var syntaxGenerationContext = 
+            this.TargetType.GetCompilationModel().CompilationContext.GetSyntaxGenerationContext(
                 options,
-                targetSyntax.SyntaxTree,
-                targetSyntax.Span.Start );
+                this.TargetType );
 
         // The type already implements the interface members itself.
-        return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
+        return SimpleBaseType( syntaxGenerationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
     }
 
     public override IDeclaration TargetDeclaration => this.TargetType;

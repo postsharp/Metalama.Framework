@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -30,6 +31,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentQueue<InjectedMember> _injectedMembers;
         private readonly ConcurrentDictionary<InsertPosition, List<InjectedMember>> _injectedMembersByInsertPosition;
         private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeDeclaration;
+        private readonly ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeBuilder;
         private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
@@ -65,6 +67,7 @@ internal sealed partial class LinkerInjectionStep
             this._injectedMembers = new ConcurrentQueue<InjectedMember>();
             this._injectedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, List<InjectedMember>>();
             this._injectedInterfacesByTargetTypeDeclaration = new ConcurrentDictionary<BaseTypeDeclarationSyntax, List<LinkerInjectedInterface>>();
+            this._injectedInterfacesByTargetTypeBuilder = new ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>>();
             this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
@@ -119,21 +122,29 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInjectedInterface( IInjectInterfaceTransformation injectInterfaceTransformation, BaseTypeSyntax injectedInterface )
+        public void AddInjectedInterface( BaseTypeDeclarationSyntax targetType, LinkerInjectedInterface injectedInterface )
         {
-            var targetTypeSymbol = ((INamedType) injectInterfaceTransformation.TargetDeclaration).GetSymbol();
-
-            // Heuristic: select the file with the shortest path.
-            var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
-
             var interfaceList =
                 this._injectedInterfacesByTargetTypeDeclaration.GetOrAdd(
-                    targetTypeDecl,
+                    targetType,
                     _ => new List<LinkerInjectedInterface>() );
 
             lock ( interfaceList )
             {
-                interfaceList.Add( new LinkerInjectedInterface( injectInterfaceTransformation, injectedInterface ) );
+                interfaceList.Add( injectedInterface );
+            }
+        }
+
+        public void AddInjectedInterface( INamedTypeBuilder targetTypeBuilder, LinkerInjectedInterface injectedInterface )
+        {
+            var interfaceList =
+                this._injectedInterfacesByTargetTypeBuilder.GetOrAdd(
+                    targetTypeBuilder,
+                    _ => new List<LinkerInjectedInterface>() );
+
+            lock ( interfaceList )
+            {
+                interfaceList.Add( injectedInterface );
             }
         }
 
@@ -233,6 +244,18 @@ internal sealed partial class LinkerInjectionStep
         public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
         {
             if ( this._injectedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
+            {
+                interfaceList.Sort( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
+
+                return interfaceList;
+            }
+
+            return Array.Empty<LinkerInjectedInterface>();
+        }
+
+        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeBuilder( INamedTypeBuilder typeBuilder)
+        {
+            if ( this._injectedInterfacesByTargetTypeBuilder.TryGetValue( typeBuilder, out var interfaceList ) )
             {
                 interfaceList.Sort( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
 

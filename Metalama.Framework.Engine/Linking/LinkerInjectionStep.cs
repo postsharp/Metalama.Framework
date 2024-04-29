@@ -25,6 +25,8 @@ using System.Threading.Tasks;
 using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using System.Security.AccessControl;
+
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
@@ -448,12 +450,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxTree );
 
                 // Create the SyntaxGenerationContext for the insertion point.
-                var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
-
                 var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                     this._syntaxGenerationOptions,
-                    injectMemberTransformation.TransformedSyntaxTree,
-                    positionInSyntaxTree );
+                    injectMemberTransformation.InsertPosition );
 
                 // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
                 //       For introduction, this should be a compilation that INCLUDES the builder.
@@ -479,8 +478,26 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 break;
 
             case IInjectInterfaceTransformation injectInterfaceTransformation:
-                var introducedInterface = injectInterfaceTransformation.GetSyntax( this._syntaxGenerationOptions );
-                transformationCollection.AddInjectedInterface( injectInterfaceTransformation, introducedInterface );
+                var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( this._syntaxGenerationOptions );
+                var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
+
+                switch ( injectInterfaceTransformation.TargetDeclaration )
+                {
+                    case NamedType sourceType:
+                        transformationCollection.AddInjectedInterface( (BaseTypeDeclarationSyntax)sourceType.GetPrimaryDeclarationSyntax().AssertNotNull(), introducedInterface );
+                        break;
+
+                    case BuiltNamedType builtType:
+                        transformationCollection.AddInjectedInterface( builtType.TypeBuilder, introducedInterface );
+                        break;
+
+                    case NamedTypeBuilder typeBuilder:
+                        transformationCollection.AddInjectedInterface( typeBuilder, introducedInterface );
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unsupported: {injectInterfaceTransformation.TargetDeclaration}" );
+                }
 
                 break;
         }
@@ -529,16 +546,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             return injectedMembers;
         }
     }
-
-    private static int GetSyntaxTreePosition( InsertPosition insertPosition )
-        => insertPosition switch
-        {
-            { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
-            { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
-            { Relation: InsertPositionRelation.Within, TypeBuilder.ContainingDeclaration: SymbolBasedDeclaration and INamedType { } containingType }
-                => ((BaseTypeDeclarationSyntax) containingType.GetPrimaryDeclarationSyntax().AssertNotNull()).CloseBraceToken.Span.Start - 1,
-            _ => 0
-        };
 
     private static void IndexOverrideTransformation(
         ITransformation transformation,
@@ -663,12 +670,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                                            ?? (PropertyOrIndexerBuilder) ((BuiltPropertyOrIndexer) insertStatementTransformation.TargetMember)
                                                            .Builder;
 
-                            var positionInSyntaxTree = GetSyntaxTreePosition( propertyOrIndexerBuilder.ToInsertPosition() );
-
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                                 this._syntaxGenerationOptions,
-                                propertyOrIndexerBuilder.PrimarySyntaxTree.AssertNotNull(),
-                                positionInSyntaxTree );
+                                propertyOrIndexerBuilder );
 
                             propertyOrIndexer = propertyOrIndexerBuilder;
 
@@ -722,12 +726,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             var methodBaseBuilder = methodBase as MethodBaseBuilder
                                                     ?? (MethodBaseBuilder) ((BuiltMethodBase) insertStatementTransformation.TargetMember).Builder;
 
-                            var positionInSyntaxTree = GetSyntaxTreePosition( methodBaseBuilder.ToInsertPosition() );
-
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                                 this._syntaxGenerationOptions,
-                                methodBaseBuilder.PrimarySyntaxTree.AssertNotNull(),
-                                positionInSyntaxTree );
+                                methodBaseBuilder );
 
                             methodBase = methodBaseBuilder;
 

@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
+    internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, IMethod, MethodBuilder>
     {
         private readonly PartiallyBoundTemplateMethod _template;
 

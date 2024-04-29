@@ -57,7 +57,7 @@ internal abstract class InitializeAdvice : Advice
 
             if ( staticConstructor == null || staticConstructor.IsImplicitlyDeclared )
             {
-                var staticConstructorBuilder = new ConstructorBuilder( containingType, this ) { IsStatic = true };
+                var staticConstructorBuilder = new ConstructorBuilder( this, containingType ) { IsStatic = true };
                 staticConstructor = staticConstructorBuilder;
                 addTransformation( staticConstructorBuilder.ToTransformation() );
             }
@@ -90,7 +90,7 @@ internal abstract class InitializeAdvice : Advice
             if ( ctor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.
-                var builder = new ConstructorBuilder( ctor.DeclaringType, this );
+                var builder = new ConstructorBuilder( this, ctor.DeclaringType );
                 addTransformation( builder.ToTransformation() );
                 targetCtor = builder;
             }
