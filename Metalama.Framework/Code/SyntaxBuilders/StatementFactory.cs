@@ -26,25 +26,25 @@ public static class StatementFactory
     public static IStatement FromExpression( IExpression expression ) => SyntaxBuilder.CurrentImplementation.CreateExpressionStatement( expression );
 
     /// <summary>
-    /// Creates an <see cref="IStatement"/> obtained by invoking a templated specified by a <see cref="TemplateInvocation"/>.
+    /// Creates an <see cref="IStatement"/> obtained by invoking a template specified by a <see cref="TemplateInvocation"/>.
     /// </summary>
     public static IStatement FromTemplate( TemplateInvocation templateInvocation, object? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( templateInvocation, args );
 
     /// <summary>
-    /// Creates an <see cref="IStatement"/> obtained by invoking a templated specified by its name and optional arguments.
+    /// Creates an <see cref="IStatement"/> obtained by invoking a template specified by its name and optional arguments.
     /// </summary>
     public static IStatement FromTemplate( string templateName, object? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName ), args );
 
     /// <summary>
-    /// Creates an <see cref="IStatement"/> obtained by invoking a templated specified by its name, an <see cref="ITemplateProvider"/>, and optional arguments.
+    /// Creates an <see cref="IStatement"/> obtained by invoking a template specified by its name, an <see cref="ITemplateProvider"/>, and optional arguments.
     /// </summary>
     public static IStatement FromTemplate( string templateName, ITemplateProvider templateProvider, object? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName, templateProvider ), args );
 
     /// <summary>
-    /// Creates an <see cref="IStatement"/> obtained by invoking a templated specified by its name, a <see cref="TemplateProvider"/>, and optional arguments.
+    /// Creates an <see cref="IStatement"/> obtained by invoking a template specified by its name, a <see cref="TemplateProvider"/>, and optional arguments.
     /// </summary>
     public static IStatement FromTemplate( string templateName, TemplateProvider templateProvider, object? args = null )
         => SyntaxBuilder.CurrentImplementation.CreateTemplateStatement( new TemplateInvocation( templateName, templateProvider ), args );
