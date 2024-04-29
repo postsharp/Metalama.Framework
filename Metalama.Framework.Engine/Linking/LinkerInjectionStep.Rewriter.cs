@@ -843,19 +843,19 @@ internal sealed partial class LinkerInjectionStep
                 StatementSyntax statement =
                     targetExpression switch
                     {
-                        ThrowExpressionSyntax throwExpression => 
-                            ThrowStatement( 
-                                throwExpression.ThrowKeyword, 
-                                throwExpression.Expression, 
-                                Token(SyntaxKind.SemicolonToken) )
+                        ThrowExpressionSyntax throwExpression =>
+                            ThrowStatement(
+                                    throwExpression.ThrowKeyword,
+                                    throwExpression.Expression,
+                                    Token( SyntaxKind.SemicolonToken ) )
                                 .WithSourceCodeAnnotationIfNotGenerated(),
                         _ =>
                             returnsVoid
-                            ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
-                            : ReturnStatement(
-                                Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
-                                Token( SyntaxKind.SemicolonToken ) ),
+                                ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
+                                : ReturnStatement(
+                                    Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                    targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
+                                    Token( SyntaxKind.SemicolonToken ) ),
                     };
 
                 return
