@@ -80,7 +80,7 @@ internal sealed class FabricAspectSource : IAspectSource
             };
 
             // Creates the aggregate AspectInstance for the target declaration.
-            var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, default );
+            var aggregateInstance = new AspectInstance( aspect, target, aggregateClass, templateInstances, ImmutableArray<AspectPredecessor>.Empty );
 
             aspectInstances.Add( aggregateInstance );
         }
