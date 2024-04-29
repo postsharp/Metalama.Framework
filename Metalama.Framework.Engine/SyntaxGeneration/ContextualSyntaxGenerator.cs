@@ -408,7 +408,23 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public AttributeSyntax Attribute( IAttributeData attribute )
     {
-        var constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
+        var lastParameter = attribute.Constructor.Parameters.LastOrDefault();
+
+        IEnumerable<AttributeArgumentSyntax> constructorArguments;
+
+        if ( lastParameter is { IsParams: true } )
+        {
+            // Use the more compact syntax.
+            var constructorArgumentValues = attribute.ConstructorArguments.ToMutableList();
+            var lastArray = constructorArgumentValues[^1];
+            constructorArgumentValues.RemoveAt( constructorArgumentValues.Count - 1 );
+            constructorArgumentValues.AddRange( lastArray.Values );
+            constructorArguments = constructorArgumentValues.SelectAsReadOnlyCollection( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
+        }
+        else
+        {
+            constructorArguments = attribute.ConstructorArguments.Select( a => AttributeArgument( this.AttributeValueExpression( a ) ) );
+        }
 
         var namedArguments = attribute.NamedArguments.SelectAsImmutableArray(
             a => AttributeArgument(
