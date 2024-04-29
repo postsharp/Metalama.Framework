@@ -36,6 +36,7 @@ public sealed class SerializableTypeIdTests : UnitTestClass
     [InlineData( typeof(List<decimal>) )]
     [InlineData( typeof(List<int[]>) )]
     [InlineData( typeof(List<>) )]
+    [InlineData( typeof((int, string)) )]
     [InlineData( typeof(Dictionary<,>) )]
     [InlineData( typeof(Dictionary<List<string>, List<int>>) )]
     public void TestTypeOf( Type type )
@@ -65,7 +66,7 @@ public sealed class SerializableTypeIdTests : UnitTestClass
         var roundloop = compilation.GetCompilationModel().CompilationContext.SerializableTypeIdResolver.ResolveId( typeId );
         Assert.Equal( typeModel.GetSymbol(), roundloop, SymbolEqualityComparer.IncludeNullability );
     }
-    
+
     [Theory]
     [InlineData( "X:x" )]
     [InlineData( "Y:x" )]
