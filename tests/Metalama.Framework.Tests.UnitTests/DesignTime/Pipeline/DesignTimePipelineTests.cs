@@ -1543,4 +1543,27 @@ class D{version}
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
     }
+
+    [Fact]
+    public void FabricTest()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = """
+            using Metalama.Framework.Fabrics;
+
+            public class TargetClass
+            {
+                class Fabric : TypeFabric
+                {
+                }
+            }
+            """;
+
+        var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+    }
 }
