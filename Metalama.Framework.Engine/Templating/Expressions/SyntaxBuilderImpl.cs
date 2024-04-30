@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -15,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using System;
+using System.Collections.Immutable;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -175,4 +177,17 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     }
 
     public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
+
+    public IExpression WithType( IExpression expression, IType type ) => new OverrideTypeUserExpression( expression, type );
+
+    public IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, object? args )
+        => new TemplateInvocationStatement( templateInvocation, args );
+
+    public IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases ) => new SwitchStatement( expression, cases );
+
+    public IStatement CreateBlock( IStatementList statements ) => new BlockStatement( statements );
+
+    public IStatementList UnwrapBlock( IStatement statement ) => new UnwrappedBlockStatementList( statement );
+
+    public IStatementList CreateStatementList( ImmutableArray<object> items ) => new StatementList( items );
 }

@@ -346,6 +346,18 @@ public sealed class SerializableTypeIdResolver
 
         public override ResolverResult VisitIdentifierName( IdentifierNameSyntax node ) => this.LookupName( node );
 
+        public override ResolverResult VisitTupleType( TupleTypeSyntax node )
+        {
+            var results = node.Elements.SelectAsMutableList( e => this.Visit( e.Type ) );
+
+            if ( results.Any( r => !r.IsSuccess ) )
+            {
+                return results.FirstOrDefault( r => !r.IsSuccess );
+            }
+
+            return ResolverResult.Success( this._compilation.CreateTupleTypeSymbol( results.SelectAsImmutableArray( x => x.TypeSymbol ) ) );
+        }
+
         public override ResolverResult DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
 
         public override ResolverResult VisitPredefinedType( PredefinedTypeSyntax node )

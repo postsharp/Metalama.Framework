@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAttributeAsPredecessor
+internal sealed class IntrospectionAttributeAsPredecessor : IIntrospectionAspectPredecessorInternal
 {
     private readonly IntrospectionFactory _factory;
     private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
