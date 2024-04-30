@@ -23,6 +23,26 @@ internal sealed class TestProjectOptions : DefaultProjectOptions, IDisposable
     private readonly Lazy<string> _projectDirectory;
     private int _fileLockers;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestProjectOptions"/> class from
+    /// a prototype <see cref="TestContextOptions"/>, allowing to override some properties.
+    /// </summary>
+    public TestProjectOptions( TestProjectOptions prototype, CodeFormattingOptions? codeFormattingOptions = null )
+    {
+        this.ProjectName = prototype.ProjectName;
+        this._properties = prototype._properties;
+        this._baseDirectory = prototype._baseDirectory;
+        this._projectDirectory = prototype._projectDirectory;
+        this.CodeFormattingOptions = codeFormattingOptions ?? prototype.CodeFormattingOptions;
+        this.FormatCompileTimeCode = prototype.FormatCompileTimeCode;
+        this.AdditionalAssemblies = prototype.AdditionalAssemblies;
+        this.RequireOrderedAspects = prototype.RequireOrderedAspects;
+        this.RoslynIsCompileTimeOnly = prototype.RoslynIsCompileTimeOnly;
+        this.SourceGeneratorTouchFile = prototype.SourceGeneratorTouchFile;
+        this.BuildTouchFile = prototype.BuildTouchFile;
+        this.DomainObserver = new DomainObserverImpl( this );
+    }
+
     public TestProjectOptions( TestContextOptions contextOptions )
     {
         this.ProjectName = contextOptions.ProjectName;
