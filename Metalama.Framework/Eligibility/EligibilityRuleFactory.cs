@@ -152,6 +152,7 @@ public static partial class EligibilityRuleFactory
             AdviceKind.IntroduceEvent => _introduceRule,
             AdviceKind.IntroduceProperty => _introduceRule,
             AdviceKind.IntroduceIndexer => _introduceRule,
+            AdviceKind.IntroduceConstructor => _introduceRule,
             AdviceKind.ImplementInterface => _implementInterfaceRule,
             AdviceKind.AddInitializer => _addInitializerRule,
             AdviceKind.IntroduceParameter => _introduceParameterRule,

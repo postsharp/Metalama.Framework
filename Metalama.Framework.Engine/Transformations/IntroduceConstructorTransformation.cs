@@ -16,17 +16,18 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal sealed class ReplaceDefaultConstructorTransformation
+internal sealed class IntroduceConstructorTransformation
     : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation, IInsertStatementTransformation
 {
-    public ReplaceDefaultConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
+    public IntroduceConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
     {
         Invariant.Assert( !introducedDeclaration.IsStatic );
         Invariant.Assert( !introducedDeclaration.IsRecordCopyConstructor() );
 
         var targetType = introducedDeclaration.DeclaringType;
 
-        if ( targetType.Constructors.Any( c => c.GetSymbol() is { Parameters: [] } symbol && symbol.GetPrimarySyntaxReference() == null ) )
+        if ( targetType.Constructors.Any( c => c.GetSymbol() is { Parameters: [] } symbol && symbol.GetPrimarySyntaxReference() == null )
+             && this.IntroducedDeclaration.Parameters.Count == 0)
         {
             this.ReplacedMember = targetType.Constructors.OfExactSignature( Array.Empty<IType>() ).AssertNotNull().ToMemberRef<IMember>();
         }
@@ -42,8 +43,8 @@ internal sealed class ReplaceDefaultConstructorTransformation
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
                 TokenList( Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( Space ) ) ),
-                ((TypeDeclarationSyntax) constructorBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
-                ParameterList(),
+                Identifier(constructorBuilder.DeclaringType.Name),
+                context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
                 null,
                 context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock( statements )
                     .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
@@ -62,7 +63,10 @@ internal sealed class ReplaceDefaultConstructorTransformation
 
     public MemberRef<IMember> ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition => this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition();
+    public override InsertPosition InsertPosition =>
+        this.ReplacedMember.Target != null
+        ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
+        : this.IntroducedDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 

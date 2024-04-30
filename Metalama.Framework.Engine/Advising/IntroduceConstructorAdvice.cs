@@ -105,12 +105,12 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
-            var overriddenMethod = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+            var overriddenConstructor = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
             this.Builder.IsOverride = false;
             this.Builder.HasNewKeyword = this.Builder.IsNew = false;
 
             addTransformation( this.Builder.ToTransformation() );
-            addTransformation( overriddenMethod );
+            addTransformation( overriddenConstructor );
 
             return AdviceImplementationResult.Success( this.Builder );
         }

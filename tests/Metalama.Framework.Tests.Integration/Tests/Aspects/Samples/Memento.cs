@@ -16,8 +16,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
             var result = builder.Advice.IntroduceType(builder.Target, "Memento", TypeKind.Class, buildType: b => { b.Accessibility = Accessibility.Public; });
 
             var mementoFields = new List<IField>();
+            var mementoFieldRefs = new List<IRef<IDeclaration>>();
 
-            foreach(var fieldOrProperty in builder.Target.FieldsAndProperties)
+            foreach (var fieldOrProperty in builder.Target.FieldsAndProperties)
             {
                 if (fieldOrProperty is not { IsAutoPropertyOrField: true, IsImplicitlyDeclared: false })
                 {
@@ -35,6 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                     });
 
                 mementoFields.Add(fieldResult.Declaration);
+                mementoFieldRefs.Add(fieldResult.Declaration.ToRef());
             }
 
             builder.Advice.ImplementInterface(result.Declaration, typeof(IMemento));
@@ -49,7 +51,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                         b.AddParameter(mementoField.Name, mementoField.Type);
                     }
                 },
-                args: new { mementoField = mementoFields.Select(f => f.ToTypedRef<IField>()).ToArray() });
+                args: new { fields = mementoFieldRefs });
 
             builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator));
         }
@@ -63,7 +65,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
             var mementoType = meta.Target.Type.NestedTypes.Single();
 
             ExpressionBuilder expressionBuilder = new ExpressionBuilder();
-            expressionBuilder.AppendVerbatim("return new");
+            expressionBuilder.AppendVerbatim("return new ");
             expressionBuilder.AppendTypeName(mementoType);
             expressionBuilder.AppendVerbatim("(");
 
@@ -86,16 +88,19 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
             {
                 var mementoField = mementoType.FieldsAndProperties.OfName(fieldOrProperty.Name).Single();
 
-                fieldOrProperty.Value = mementoField.With(meta.Cast(mementoType, memento)).Value;
+                fieldOrProperty.Value = mementoField.With((IExpression)meta.Cast(mementoType, memento)).Value;
             }
         }
 
         [Template]
-        public void MementoConstructorTemplate([CompileTime] List<Ref<IField>> fields)
+        public void MementoConstructorTemplate([CompileTime] List<IRef<IDeclaration>> fields)
         {
-            for (int i = 0; i < meta.Target.Constructor.Parameters.Count; i++)
+            int i = meta.CompileTime(0);
+
+            foreach (var parameter in meta.Target.Constructor.Parameters)
             {
-                fields[i].GetTarget(ReferenceResolutionOptions.Default).Value = meta.Target.Constructor.Parameters[i];
+                ((IFieldOrProperty)fields[i].GetTarget(ReferenceResolutionOptions.Default)).Value = parameter;
+                i++;
             }
         }
     }

@@ -317,7 +317,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
 
             void AddTransformationNoDuplicates( ITransformation transformation )
             {
-                if ( transformation is ReplaceDefaultConstructorTransformation )
+                if ( transformation is IntroduceConstructorTransformation )
                 {
                     if ( !replaceDefaultConstructorAdded )
                     {
