@@ -32,7 +32,7 @@ internal sealed partial class ContextualSyntaxGenerator
     private static readonly SyntaxGenerator _roslynSyntaxGenerator = SyntaxGeneratorForIType.RoslynSyntaxGenerator;
 
     private readonly SyntaxGenerationContext _context;
-    private readonly SyntaxGeneratorForIType _declarationSyntaxGenerator;
+    private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
     private readonly ConcurrentDictionary<IType, TypeSyntax> _typeSyntaxCache;
     private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSymbolSyntaxCache;
 
@@ -41,7 +41,7 @@ internal sealed partial class ContextualSyntaxGenerator
     internal ContextualSyntaxGenerator( SyntaxGenerationContext context, bool nullAware )
     {
         this._context = context;
-        this._declarationSyntaxGenerator = new( context.Options );
+        this._syntaxGeneratorForIType = new( context.Options );
         this._typeSyntaxCache = [];
         this._typeSymbolSyntaxCache = new( SymbolEqualityComparer.IncludeNullability );
         this.IsNullAware = nullAware;
@@ -462,7 +462,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     private TypeSyntax TypeCore( IType type )
     {
-        var typeSyntax = this._declarationSyntaxGenerator.TypeExpression( type ).WithSimplifierAnnotationIfNecessary( this._context );
+        var typeSyntax = this._syntaxGeneratorForIType.TypeExpression( type ).WithSimplifierAnnotationIfNecessary( this._context );
 
         if ( !this.IsNullAware )
         {

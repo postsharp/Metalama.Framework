@@ -20,11 +20,11 @@ internal partial class SyntaxGeneratorForIType
     // Based on Roslyn TypeSyntaxGeneratorVisitor.
     private class TypeSyntaxGeneratorVisitor : TypeVisitor<TypeSyntax>
     {
-        private readonly SyntaxGeneratorForIType _declarationSyntaxGenerator;
+        private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
 
-        public TypeSyntaxGeneratorVisitor( SyntaxGeneratorForIType declarationSyntaxGenerator )
+        public TypeSyntaxGeneratorVisitor( SyntaxGeneratorForIType syntaxGeneratorForIType )
         {
-            this._declarationSyntaxGenerator = declarationSyntaxGenerator;
+            this._syntaxGeneratorForIType = syntaxGeneratorForIType;
         }
 
         public override TypeSyntax DefaultVisit( IType type ) => throw new AssertionFailedException();
@@ -32,7 +32,7 @@ internal partial class SyntaxGeneratorForIType
         private TTypeSyntax AddInformationTo<TTypeSyntax>( TTypeSyntax syntax, IType type )
             where TTypeSyntax : TypeSyntax
         {
-            var generationOptions = this._declarationSyntaxGenerator._generationOptions;
+            var generationOptions = this._syntaxGeneratorForIType._generationOptions;
 
             if ( generationOptions.TriviaMatters )
             {
@@ -41,7 +41,10 @@ internal partial class SyntaxGeneratorForIType
                     .WithRequiredTrailingTrivia( syntax.GetTrailingTrivia().Add( SyntaxFactory.ElasticMarker ) );
             }
 
-            syntax = syntax.WithAdditionalAnnotations( SymbolAnnotation.Create( type ) );
+            if ( generationOptions.AddFormattingAnnotations )
+            {
+                syntax = syntax.WithAdditionalAnnotations( SymbolAnnotation.Create( type ) );
+            }
 
             return syntax;
         }
@@ -49,7 +52,7 @@ internal partial class SyntaxGeneratorForIType
         private TTypeSyntax AddInformationTo<TTypeSyntax>( TTypeSyntax syntax, INamespace ns )
             where TTypeSyntax : TypeSyntax
         {
-            var generationOptions = this._declarationSyntaxGenerator._generationOptions;
+            var generationOptions = this._syntaxGeneratorForIType._generationOptions;
 
             if ( generationOptions.TriviaMatters )
             {
@@ -93,7 +96,7 @@ internal partial class SyntaxGeneratorForIType
                 }
             }
 
-            var elementTypeSyntax = this._declarationSyntaxGenerator.TypeExpression( underlyingType );
+            var elementTypeSyntax = this._syntaxGeneratorForIType.TypeExpression( underlyingType );
             var ranks = new List<ArrayRankSpecifierSyntax>();
 
             var arrayType = type;
@@ -143,9 +146,7 @@ internal partial class SyntaxGeneratorForIType
                 return ToIdentifierName( type.Name );
             }
 
-            var typeArguments = type.IsCanonicalGenericInstance
-                ? Enumerable.Repeat( (TypeSyntax) SyntaxFactory.OmittedTypeArgument(), type.TypeArguments.Count )
-                : type.TypeArguments.SelectAsArray( this._declarationSyntaxGenerator.TypeExpression );
+            var typeArguments = type.TypeArguments.SelectAsArray( this._syntaxGeneratorForIType.TypeExpression );
 
             return SyntaxFactory.GenericName(
                 ToIdentifierName( type.Name ).Identifier,
@@ -177,7 +178,7 @@ internal partial class SyntaxGeneratorForIType
                 var innerType = type.TypeArguments.First();
                 if ( innerType.TypeKind != TypeKind.Pointer )
                 {
-                    return this.AddInformationTo( SyntaxFactory.NullableType( this._declarationSyntaxGenerator.TypeExpression( innerType ) ), type );
+                    return this.AddInformationTo( SyntaxFactory.NullableType( this._syntaxGeneratorForIType.TypeExpression( innerType ) ), type );
                 }
             }
 
@@ -270,7 +271,7 @@ internal partial class SyntaxGeneratorForIType
 
         public override TypeSyntax VisitPointerType( IPointerType type )
         {
-            return this.AddInformationTo( SyntaxFactory.PointerType( this._declarationSyntaxGenerator.TypeExpression( type.PointedAtType ) ), type );
+            return this.AddInformationTo( SyntaxFactory.PointerType( this._syntaxGeneratorForIType.TypeExpression( type.PointedAtType ) ), type );
         }
 
         public override TypeSyntax VisitTypeParameter( ITypeParameter type )
