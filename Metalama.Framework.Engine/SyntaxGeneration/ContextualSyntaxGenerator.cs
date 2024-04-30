@@ -395,11 +395,8 @@ internal sealed partial class ContextualSyntaxGenerator
             typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax ).AssertNotNull();
         }
 
-        if ( this.Options.TriviaMatters )
-        {
-            // Just calling NormalizeWhitespaceIfNecessary here produces ugly whitespace, e.g. "typeof(global::System.Int32[, ])".
-            typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this._context.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
-        }
+        // We always need to normalize whitespace in tuples to workaround a Roslyn bug.
+        typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this._context.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
 
         return typeSyntax;
     }
