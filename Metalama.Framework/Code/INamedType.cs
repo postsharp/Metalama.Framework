@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code.Collections;
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
