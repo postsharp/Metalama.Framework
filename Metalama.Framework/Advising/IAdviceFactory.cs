@@ -55,10 +55,6 @@ namespace Metalama.Framework.Advising
 
         IIntroductionAdviceResult<INamedType> IntroduceType( string targetNamespace, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
 
-        //IIntroductionAdviceResult<INamedType> IntroduceEnum( INamespaceOrNamedType targetNamespaceOrType, string typeName, INamedType? baseType, Action<IEnumTypeBuilder>? buildType = null );
-
-        //IIntroductionAdviceResult<INamedType> IntroduceDelegateType( INamespaceOrNamedType targetNamespaceOrType, string typeName, Action<IDelegateTypeBuilder>? buildType = null );
-
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
         /// </summary>

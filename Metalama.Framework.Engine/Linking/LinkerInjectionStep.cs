@@ -25,8 +25,6 @@ using System.Threading.Tasks;
 using MethodBase = Metalama.Framework.Engine.CodeModel.MethodBase;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
-using System.Security.AccessControl;
-
 
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;

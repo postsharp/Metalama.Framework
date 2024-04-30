@@ -11,9 +11,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -57,22 +55,6 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         IDiagnosticAdder diagnosticAdder,
         TemplateAttributeProperties? templateAttributeProperties )
     {
-        var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
-
-        switch ( this.OverrideStrategy )
-        {
-            case OverrideStrategy.New:
-                diagnosticAdder.Report(
-                    AdviceDiagnosticDescriptors.CannotUseNewOverrideStrategyWithFinalizers.CreateRoslynDiagnostic(
-                        targetDeclaration.GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, targetDeclaration, this.OverrideStrategy),
-                        this ) );
-
-                break;
-        }
-
-        // TODO: The base implementation may take more than needed from the template. Most would be ignored by the transformation, but
-        //       the user may see it in the code model.
         base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
     }
 

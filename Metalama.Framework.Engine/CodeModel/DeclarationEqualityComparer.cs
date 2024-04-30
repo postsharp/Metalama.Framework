@@ -70,7 +70,7 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         return false;
     }
 
-    public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ), kind );
+    public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol().AssertSymbolNotNull(), this._reflectionMapper.GetTypeSymbol( right ), kind );
 
     internal bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {

@@ -132,7 +132,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
         this.ValidateBuilder( targetDeclaration, diagnosticAdder );
     }
 
-    protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    protected override void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
     {
         // Check that static member is not virtual.
         if ( this.Builder is { IsStatic: true, IsVirtual: true } )

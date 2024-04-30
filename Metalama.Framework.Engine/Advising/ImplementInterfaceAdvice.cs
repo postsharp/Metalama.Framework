@@ -174,8 +174,8 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
                     GetAspectInterfaceMethod,
                     templateMethod =>
                         SignatureTypeSymbolComparer.Instance.Equals(
-                            interfaceMethod.ReturnParameter.Type.GetSymbol().AssertNotNull(),
-                            templateMethod.ReturnParameter.Type.GetSymbol().AssertNotNull() )
+                            interfaceMethod.ReturnParameter.Type.GetSymbol().AssertSymbolNotNull(),
+                            templateMethod.ReturnParameter.Type.GetSymbol().AssertSymbolNotNull() )
                         && interfaceMethod.ReturnParameter.RefKind == templateMethod.ReturnParameter.RefKind );
             }
 
@@ -249,7 +249,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice
             [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
         {
             return this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
-                member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
+                member.GetSymbol().AssertSymbolNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
                 out templateClassMember );
         }
     }

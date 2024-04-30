@@ -164,7 +164,7 @@ internal sealed class ValidationRunner
 
         var validatorsBySymbol = validators
             .ToMultiValueDictionary(
-                v => v.ValidatedDeclaration.GetSymbol().AssertNotNull(),
+                v => v.ValidatedDeclaration.GetSymbol().AssertSymbolNotNull( false ),
                 v => v );
 
         if ( validatorsBySymbol.IsEmpty )

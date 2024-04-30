@@ -144,7 +144,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.SetAccessorAccessibility;
                 }
 
-                if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
+                if ( this.Template.Declaration.GetSymbol().AssertSymbolNotNull( false ).GetBackingField() is { } backingField )
                 {
                     var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 

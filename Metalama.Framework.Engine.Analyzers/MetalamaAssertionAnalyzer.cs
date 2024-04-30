@@ -7,9 +7,6 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Operations;
 using System;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Analyzers;
@@ -18,9 +15,9 @@ namespace Metalama.Framework.Engine.Analyzers;
 [UsedImplicitly]
 public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
 {
-    // Range: 9000-9009
+    // Range: 0840-0849
     internal static readonly DiagnosticDescriptor AssertNotNullShouldNotBeUsedOnSymbols = new(
-        "LAMA9000",
+        "LAMA0840",
         "AssertNotNull should not be used to assert ISymbol.",
         "The AssertNotNull method does not provide the user the information about introduced type not being yet supported in this particular scenario.",
         "Metalama",
@@ -40,8 +37,10 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
     private static void InitializeCompilation( CompilationStartAnalysisContext context )
     {
         string[] ignoredNamespaces = [
+            "Metalama.Framework.Engine.Aspects",
             "Metalama.Framework.Engine.CompileTime",
-            "Metalama.Framework.Engine.DesignTime"
+            "Metalama.Framework.Engine.DesignTime",
+            "Metalama.Framework.Engine.Linking",
             ];
 
         var invariantSymbol =

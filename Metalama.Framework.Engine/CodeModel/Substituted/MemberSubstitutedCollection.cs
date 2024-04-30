@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
-using Microsoft.CodeAnalysis;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -45,7 +44,7 @@ internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T
 
     private Ref<T> Substitute( Ref<T> sourceRef ) 
         // TODO (TypeBuilder): Should not call GetSymbol.
-        => SubstitutedMemberFactory.Substitute( sourceRef.GetTarget( this.Compilation ), this._substitutedType.GetTarget( this.Compilation ).GetSymbol() );
+        => SubstitutedMemberFactory.Substitute( sourceRef.GetTarget( this.Compilation ), this._substitutedType.GetTarget( this.Compilation ).GetSymbol().AssertSymbolNotNull() );
 
     ISourceDeclarationCollection<T, Ref<T>> ISourceDeclarationCollection<T, Ref<T>>.Clone( CompilationModel compilation )
         => new MemberSubstitutedCollection<T>(
