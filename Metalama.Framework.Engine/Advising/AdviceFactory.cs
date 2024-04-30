@@ -634,6 +634,44 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
+    public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+            INamedType targetType,
+            string defaultTemplate,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IConstructorBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            this.CheckEligibility( targetType, AdviceKind.IntroduceConstructor );
+
+            var template =
+                this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+            var advice = new IntroduceConstructorAdvice(
+                this._state.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._state.CurrentCompilation,
+                template.PartialForIntroduction( this.GetObjectReader( args ) ),
+                scope,
+                whenExists,
+                buildAction,
+                this._layerName,
+                this.GetObjectReader( tags ) );
+
+            return this.ExecuteAdvice<IConstructor>( advice );
+        }
+    }
+
     public IIntroductionAdviceResult<IMethod> IntroduceFinalizer(
         INamedType targetType,
         string defaultTemplate,

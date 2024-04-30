@@ -18,7 +18,7 @@ using Attribute = Metalama.Framework.Engine.CodeModel.Attribute;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
+internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, IProperty, PropertyBuilder>
 {
     private readonly PartiallyBoundTemplateMethod? _getTemplate;
     private readonly PartiallyBoundTemplateMethod? _setTemplate;
@@ -144,7 +144,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
                     this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.SetAccessorAccessibility;
                 }
 
-                if ( this.Template.Declaration.GetSymbol().AssertNotNull().GetBackingField() is { } backingField )
+                if ( this.Template.Declaration.GetSymbol().AssertSymbolNotNull( false ).GetBackingField() is { } backingField )
                 {
                     var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 

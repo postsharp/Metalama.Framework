@@ -33,7 +33,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
             this,
-            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
+            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeBuilder.ToTypedRef<INamedType>(), false ) );
 
     public IImplementedInterfaceCollection ImplementedInterfaces
         => new ImplementedInterfacesCollection(

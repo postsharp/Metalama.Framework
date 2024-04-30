@@ -71,10 +71,12 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
                 ProcessType( type );
             }
 
+#pragma warning disable CS0618 // Type or member is obsolete
             return 
                 types
                 .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
                 .ToImmutableArray();
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 

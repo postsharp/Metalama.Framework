@@ -34,8 +34,8 @@ namespace Metalama.Framework.Engine.Advising
                        .All(
                            amp =>
                                SignatureTypeSymbolComparer.Instance.Equals(
-                                   amp.p.Type.GetSymbol().AssertNotNull(),
-                                   other.Parameters[amp.i].Type.GetSymbol().AssertNotNull() )
+                                   amp.p.Type.GetSymbol().AssertSymbolNotNull(),
+                                   other.Parameters[amp.i].Type.GetSymbol().AssertSymbolNotNull() )
                                && amp.p.RefKind == other.Parameters[amp.i].RefKind );
         }
 
@@ -67,8 +67,8 @@ namespace Metalama.Framework.Engine.Advising
                        .All(
                            amp =>
                                SignatureTypeSymbolComparer.Instance.Equals(
-                                   amp.p.Type.GetSymbol().AssertNotNull(),
-                                   other.Parameters[amp.i].Type.GetSymbol().AssertNotNull() )
+                                   amp.p.Type.GetSymbol().AssertSymbolNotNull(),
+                                   other.Parameters[amp.i].Type.GetSymbol().AssertSymbolNotNull() )
                                && amp.p.RefKind == other.Parameters[amp.i].RefKind );
         }
 

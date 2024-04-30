@@ -44,11 +44,16 @@ namespace Metalama.Framework.Advising
 
         IIntroductionAdviceResult<INamedType> IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
 
+        IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+            INamedType targetType,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IConstructorBuilder>? buildConstructor = null,
+            object? args = null,
+            object? tags = null );
+
         IIntroductionAdviceResult<INamedType> IntroduceType( string targetNamespace, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
-        //IIntroductionAdviceResult<INamedType> IntroduceEnum( INamespaceOrNamedType targetNamespaceOrType, string typeName, INamedType? baseType, Action<IEnumTypeBuilder>? buildType = null );
-
-        //IIntroductionAdviceResult<INamedType> IntroduceDelegateType( INamespaceOrNamedType targetNamespaceOrType, string typeName, Action<IDelegateTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -781,19 +786,5 @@ namespace Metalama.Framework.Advising
         /// <param name="templateProvider">An <see cref="ITemplateProvider"/>.</param>
         /// <returns>An <see cref="IAdviceFactory"/>.</returns>
         IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
-
-        // void Override(
-        //     IConstructor targetConstructor,
-        //     string template,
-        //     object? args = null,
-        //     object? tags = null );
-
-        // void IntroduceConstructor(
-        //     INamedType targetType,
-        //     string template,
-        //     IntroductionScope scope = IntroductionScope.Default,
-        //     OverrideStrategy whenExists = OverrideStrategy.Default,
-        //     object? args = null,
-        //     object? tags = null );
     }
 }

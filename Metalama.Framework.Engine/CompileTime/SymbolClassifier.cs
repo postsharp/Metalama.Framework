@@ -136,10 +136,10 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         if ( hasMetalamaReference )
         {
-            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertNotNull();
+            this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertSymbolNotNull();
 
             this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
-                .AssertNotNull();
+                .AssertSymbolNotNull();
         }
     }
 

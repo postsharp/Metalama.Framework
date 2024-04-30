@@ -345,5 +345,34 @@ namespace Metalama.Framework.Engine
             return items;
 #endif
         }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static TSymbol AssertSymbolNotNull<TSymbol>(
+            this TSymbol? symbol,
+            bool notImplemented = true,
+            string? justification = null )
+            where TSymbol : Microsoft.CodeAnalysis.ISymbol
+        {
+            if (symbol == null)
+            {
+                throw new AssertionFailedException( justification ?? $"The reference to {typeof( TSymbol ).Name} must not be null.{(notImplemented ? " Introduced declarations are not supported yet." : "")}" );
+            }
+
+            return symbol;
+        }
+
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        public static TSymbol AssertSymbolNotNull<TSymbol>(
+            this TSymbol? symbol,
+            string justification)
+            where TSymbol : Microsoft.CodeAnalysis.ISymbol
+        {
+            if ( symbol == null )
+            {
+                throw new AssertionFailedException( justification );
+            }
+
+            return symbol;
+        }
     }
 }

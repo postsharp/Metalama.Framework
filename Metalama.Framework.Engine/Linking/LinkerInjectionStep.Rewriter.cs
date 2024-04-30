@@ -494,7 +494,16 @@ internal sealed partial class LinkerInjectionStep
                                 new InsertPosition( InsertPositionRelation.Within, typeBuilder ),
                                 injectedTypeMembers.Add );
 
-                            injectedNode = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
+                            typeDeclaration = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
+
+                            var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
+
+                            if (injectedInterfaces.Count > 0)
+                            {
+                                typeDeclaration = (TypeDeclarationSyntax) typeDeclaration.AddBaseListTypes( injectedInterfaces.SelectAsArray( i => i.Syntax ) );
+                            }
+
+                            injectedNode = typeDeclaration;
 
                             break;
                     }

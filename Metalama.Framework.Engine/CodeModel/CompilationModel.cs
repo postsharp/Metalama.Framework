@@ -391,7 +391,17 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
-            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
+            switch ( baseType )
+            {
+                case NamedType namedType:
+                    // TODO: This should include derived types that were introduced.
+                    return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
+                case BuiltNamedType or NamedTypeBuilder:
+                    // TODO: This should should be built for named types that were introduced.
+                    return ImmutableArray<INamedType>.Empty;
+                default:
+                    throw new AssertionFailedException( $"Unsupported: {baseType}" );
+            }
         }
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )

@@ -14,7 +14,8 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : IntroduceMemberOrNamedTypeAdvice<TMember, TBuilder>
+internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : IntroduceMemberOrNamedTypeAdvice<TMember, TBuilder>
+    where TTemplate : class, IMember
     where TMember : class, IMember
     where TBuilder : MemberBuilder
 {
@@ -25,7 +26,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : IntroduceMemb
 
     protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
-    protected TemplateMember<TMember>? Template { get; }
+    protected TemplateMember<TTemplate>? Template { get; }
 
     protected string MemberName { get; }
 
@@ -37,7 +38,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : IntroduceMemb
         INamedType targetDeclaration,
         ICompilation sourceCompilation,
         string? explicitName,
-        TemplateMember<TMember>? template,
+        TemplateMember<TTemplate>? template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
@@ -131,7 +132,7 @@ internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : IntroduceMemb
         this.ValidateBuilder( targetDeclaration, diagnosticAdder );
     }
 
-    protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    protected override void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
     {
         // Check that static member is not virtual.
         if ( this.Builder is { IsStatic: true, IsVirtual: true } )

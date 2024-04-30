@@ -354,10 +354,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 DeclarationRefTargetKind.NamedType when symbol is INamedTypeSymbol => symbol,
                 DeclarationRefTargetKind.Default => symbol,
                 DeclarationRefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
-                DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertNotNull(),
+                DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertSymbolNotNull( false ),
                 DeclarationRefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException(
                     "Cannot get the underlying field of an event." ),
-                DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertNotNull().Parameters[0],
+                DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertSymbolNotNull( false ).Parameters[0],
                 DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
                 DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
                     .OfType<IPropertySymbol>()

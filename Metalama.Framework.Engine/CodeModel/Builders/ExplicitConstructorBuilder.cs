@@ -13,7 +13,7 @@ internal sealed class ExplicitConstructorBuilder : ConstructorBuilder
 
     public override Ref<IDeclaration> ToRef() => this._originalConstructor.ToRef();
 
-    public ExplicitConstructorBuilder( INamedType targetType, Advice advice ) : base( targetType, advice )
+    public ExplicitConstructorBuilder( INamedType targetType, Advice advice ) : base( advice, targetType )
     {
         Invariant.Assert( targetType.Constructors.All( c => c.IsImplicitlyDeclared ) );
 
