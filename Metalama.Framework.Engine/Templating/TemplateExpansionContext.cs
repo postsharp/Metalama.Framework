@@ -369,7 +369,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         this.SyntaxGenerator.CastExpression(
-                                returnType.GetSymbol(),
+                                returnType,
                                 awaitResult
                                     ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
                                     : returnExpression )

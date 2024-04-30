@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -171,4 +172,25 @@ internal static class DeclarationHelper
         => declaration is IGeneric { TypeArguments.Count: > 0 and var count }
             ? $"{declaration.Name}`{count}"
             : declaration.Name;
+
+    internal static bool? BelongsToCompilation( this IType type, CompilationContext compilationContext )
+    {
+        var assembly = (type as IDeclaration)?.DeclaringAssembly;
+
+        if ( assembly == null )
+        {
+            return null;
+        }
+
+        if ( !compilationContext.Assemblies.TryGetValue( ((AssemblyIdentityModel) assembly.Identity).Identity, out var thisCompilationAssembly ) )
+        {
+            // If we cannot find the assembly, we cannot make any decision whether this is or not a legit symbol.
+            // It can happen that a referenced assembly has symbols to another referenced assembly that is not directly
+            // referenced by our compilation.
+
+            return null;
+        }
+
+        return assembly.Equals( thisCompilationAssembly );
+    }
 }

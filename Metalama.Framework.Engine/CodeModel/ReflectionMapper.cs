@@ -79,8 +79,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets a <see cref="ITypeSymbol"/> given a reflection <see cref="Type"/>.
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         public ITypeSymbol GetTypeSymbol( Type type )
         {
             switch ( type )

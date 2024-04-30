@@ -53,9 +53,9 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
                     ? (ExpressionSyntax) InvocationExpression(
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
+                            serializationContext.SyntaxGenerator.TypeOfExpression( p.Type ),
                             IdentifierName( "MakeByRefType" ) ) )
-                    : serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) );
+                    : serializationContext.SyntaxGenerator.TypeOfExpression( p.Type ) );
 
             parameterTypeArray = ImplicitArrayCreationExpression(
                 InitializerExpression(

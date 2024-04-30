@@ -217,7 +217,7 @@ public static class DeclarationExtensions
     {
         if ( declaration.IsStatic )
         {
-            return generationContext.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() );
+            return generationContext.SyntaxGenerator.Type( declaration.DeclaringType );
         }
 
         var definition = declaration.Definition;
@@ -227,7 +227,7 @@ public static class DeclarationExtensions
             return
                 SyntaxFactory.ParenthesizedExpression(
                     SyntaxFactory.CastExpression(
-                        generationContext.SyntaxGenerator.Type( definition.GetExplicitInterfaceImplementation().DeclaringType.GetSymbol() ),
+                        generationContext.SyntaxGenerator.Type( definition.GetExplicitInterfaceImplementation().DeclaringType ),
                         instance.Syntax ) );
         }
 
@@ -592,4 +592,7 @@ public static class DeclarationExtensions
         => declaration.ContainingDeclaration is IAssembly && declaration is INamedType namedType
             ? namedType.Namespace
             : declaration.ContainingDeclaration;
+
+    internal static bool IsNullableReferenceType( this IType type )
+        => type.IsNullable == true && type.IsReferenceType != false;
 }

@@ -172,7 +172,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         /// <returns></returns>
         public TypedExpressionSyntaxImpl Convert( IType targetType, SyntaxGenerationContext generationContext )
         {
-            var targetTypeSymbol = targetType.GetSymbol();
             var compilation = targetType.GetCompilationModel().RoslynCompilation;
 
             if ( this.ExpressionType != null )
@@ -186,7 +185,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             }
 
             // We may need a cast. We are not sure, but we cannot do more. This could be removed later in the simplification step.
-            var cast = (ExpressionSyntax) generationContext.SyntaxGenerator.CastExpression( targetTypeSymbol, this.Syntax );
+            var cast = (ExpressionSyntax) generationContext.SyntaxGenerator.CastExpression( targetType, this.Syntax );
 
             var expression = SyntaxFactory.ParenthesizedExpression( cast ).WithSimplifierAnnotationIfNecessary( generationContext );
 

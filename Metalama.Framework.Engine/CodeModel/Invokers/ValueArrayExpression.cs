@@ -32,7 +32,7 @@ internal sealed class ValueArrayExpression : UserExpression
                 p =>
                     p.RefKind.IsReadable()
                         ? SyntaxFactory.IdentifierName( p.Name )
-                        : (SyntaxNode) syntaxGenerator.DefaultExpression( p.Type.GetSymbol() ) ) );
+                        : (SyntaxNode) syntaxGenerator.DefaultExpression( p.Type ) ) );
     }
 
     public override IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );

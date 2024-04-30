@@ -163,8 +163,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Determines whether the type if subclass of the given class or interface.
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         bool IsSubclassOf( INamedType type );
 
         /// <summary>
