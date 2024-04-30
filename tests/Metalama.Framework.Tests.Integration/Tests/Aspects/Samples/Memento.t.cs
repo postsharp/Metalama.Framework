@@ -1,22 +1,25 @@
-internal class TargetClass
+[Memento]
+internal class TargetClass : global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IOriginator
 {
-  [Log]
-  public static int Add(int a, int b)
+  private int _state1;
+  private int State2 { get; set; }
+  public void Restore(global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento memento)
   {
-    global::System.Console.WriteLine("TargetClass.Add(int, int) started.");
-    try
+    this._state1 = ((global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento)((global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento)memento))._state1;
+    this.State2 = ((global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento)((global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento)memento)).State2;
+  }
+  public global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento Save()
+  {
+    return (global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento)new global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento(this._state1, this.State2);
+  }
+  public class Memento : global::System.Object, global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.IMemento
+  {
+    public global::System.Int32 State2;
+    public global::System.Int32 _state1;
+    public Memento(global::System.Int32 _state1, global::System.Int32 State2)
     {
-      global::System.Int32 result;
-      if (a == 0)
-        throw new ArgumentOutOfRangeException(nameof(a));
-      result = a + b;
-      global::System.Console.WriteLine("TargetClass.Add(int, int) succeeded.");
-      return (global::System.Int32)result;
-    }
-    catch (global::System.Exception e)
-    {
-      global::System.Console.WriteLine("TargetClass.Add(int, int) failed: " + e.Message);
-      throw;
+      ((global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento)this)._state1 = _state1;
+      ((global::Metalama.Framework.Tests.Integration.Aspects.Samples.Memento.TargetClass.Memento)this).State2 = State2;
     }
   }
 }

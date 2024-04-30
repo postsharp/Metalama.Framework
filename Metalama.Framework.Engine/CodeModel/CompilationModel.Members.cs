@@ -510,7 +510,6 @@ public sealed partial class CompilationModel
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 
         var targetType = (INamedType) introduceInterface.ContainingDeclaration;
-        var targetTypeSymbol = targetType.GetSymbol().AssertNotNull();
 
         var interfaces = this.GetInterfaceImplementationCollection( targetType.ToTypedRef(), true );
 

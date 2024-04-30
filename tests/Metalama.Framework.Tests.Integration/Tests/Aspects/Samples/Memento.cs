@@ -64,19 +64,39 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         {
             var mementoType = meta.Target.Type.NestedTypes.Single();
 
+            return 
+                BuildNewExpression(
+                    mementoType, 
+                    meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
+                .Value;
+        }
+
+        public IExpression BuildNewExpression(INamedType mementoType, IEnumerable<IFieldOrProperty> fieldsOrProperties)
+        {
             ExpressionBuilder expressionBuilder = new ExpressionBuilder();
-            expressionBuilder.AppendVerbatim("return new ");
+            expressionBuilder.AppendVerbatim("new ");
             expressionBuilder.AppendTypeName(mementoType);
             expressionBuilder.AppendVerbatim("(");
 
-            foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
+            bool first = true;
+
+            foreach (var fieldOrProperty in fieldsOrProperties)
             {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    expressionBuilder.AppendVerbatim(",");
+                }
+
                 expressionBuilder.AppendExpression(fieldOrProperty);
             }
 
             expressionBuilder.AppendVerbatim(")");
 
-            return expressionBuilder.ToExpression().Value;
+            return expressionBuilder.ToExpression();
         }
 
         [InterfaceMember]
@@ -120,6 +140,6 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
     {
         private int _state1;
 
-        private int State2 { get; }
+        private int State2 { get; set; }
     }
 }

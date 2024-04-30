@@ -41,7 +41,34 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
     public int GetHashCode( INamedType obj ) => this._innerComparer.StructuralDeclarationComparer.GetHashCode( obj );
 
-    public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left.GetSymbol(), right.GetSymbol(), kind );
+    public bool Is( IType left, IType right, ConversionKind kind )
+    {
+        if ( left.GetSymbol() is { } leftSymbol && right.GetSymbol() is { } rightSymbol )
+        {
+            return this.Is( leftSymbol, rightSymbol, kind );
+        }
+
+        if ( kind is not ConversionKind.Reference and not ConversionKind.Default || left is not INamedType || right is not INamedType
+            || right is INamedType { IsGeneric: true } || right is INamedType { TypeKind: Code.TypeKind.Interface } )
+        {
+            // TODO: Implement.
+            throw new NotSupportedException( "Not yet supported on introduced types." );
+        }
+
+        var current = (INamedType) left;
+
+        while ( current != null )
+        {
+            if ( this._innerComparer.StructuralDeclarationComparer.Equals( current, right ) )
+            {
+                return true;
+            }
+
+            current = current.BaseType;
+        }
+
+        return false;
+    }
 
     public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol(), this._reflectionMapper.GetTypeSymbol( right ), kind );
 
