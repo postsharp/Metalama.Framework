@@ -7,6 +7,8 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+#pragma warning disable CS0414
+
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.PrimaryClass_Members;
 
 /*
