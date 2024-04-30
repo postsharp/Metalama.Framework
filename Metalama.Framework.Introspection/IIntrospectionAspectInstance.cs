@@ -10,7 +10,7 @@ namespace Metalama.Framework.Introspection;
 ///  Represents an instance of an aspect, as well as the results of the aspect instance.
 /// </summary>
 [PublicAPI]
-public interface IIntrospectionAspectInstance : IIntrospectionAspectPredecessorInternal
+public interface IIntrospectionAspectInstance : IIntrospectionAspectPredecessor
 {
     /// <summary>
     /// Gets the list of diagnostics produced by the aspect.

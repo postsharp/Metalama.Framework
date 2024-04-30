@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -747,16 +746,29 @@ internal sealed partial class LinkerInjectionStep
                 // Auxiliary bodies that may receive exit statements are never expression bodies.
                 Invariant.Assert( exitStatements.Count == 0 );
 
+                StatementSyntax statement =
+                    targetExpression switch
+                    {
+                        ThrowExpressionSyntax throwExpression =>
+                            ThrowStatement(
+                                    throwExpression.ThrowKeyword,
+                                    throwExpression.Expression,
+                                    Token( SyntaxKind.SemicolonToken ) )
+                                .WithSourceCodeAnnotationIfNotGenerated(),
+                        _ =>
+                            returnsVoid
+                                ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
+                                : ReturnStatement(
+                                    Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                    targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
+                                    Token( SyntaxKind.SemicolonToken ) ),
+                    };
+
                 return
                     Block(
                         Block( List( entryStatements ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                        returnsVoid
-                            ? ExpressionStatement( targetExpression.WithSourceCodeAnnotationIfNotGenerated() )
-                            : ReturnStatement(
-                                Token( default, SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                targetExpression.WithSourceCodeAnnotationIfNotGenerated(),
-                                Token( SyntaxKind.SemicolonToken ) ) );
+                        statement );
             }
         }
 

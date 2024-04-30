@@ -148,7 +148,11 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         AspectLayerId aspectLayerId ) : base(
         serviceProvider,
         metaApi.Diagnostics,
-        UserCodeDescription.Create( "executing the template method {0}", template?.TemplateMember.Declaration.GetSymbol() ),
+        UserCodeDescription.Create(
+            "executing the template method '{0}' in the context of the aspect '{1}' applied to '{2}'",
+            template?.TemplateMember.Declaration.GetSymbol(),
+            metaApi.AspectInstance?.AspectClass.FullName,
+            metaApi.AspectInstance?.TargetDeclaration ),
         aspectLayerId,
         (CompilationModel?) metaApi.Compilation,
         metaApi.Target.Declaration,
@@ -369,7 +373,7 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                         this.SyntaxGenerator.CastExpression(
-                                returnType.GetSymbol(),
+                                returnType,
                                 awaitResult
                                     ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
                                     : returnExpression )

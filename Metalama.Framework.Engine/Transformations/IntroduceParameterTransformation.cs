@@ -29,7 +29,7 @@ internal sealed class IntroduceParameterTransformation : BaseTransformation, IMe
         var syntax = SyntaxFactory.Parameter(
             default,
             default,
-            syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type.GetSymbol() )
+            syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type )
                 .WithOptionalTrailingTrivia( SyntaxFactory.ElasticSpace, syntaxGenerationContext.Options ),
             SyntaxFactory.Identifier( this.Parameter.Name ),
             null );

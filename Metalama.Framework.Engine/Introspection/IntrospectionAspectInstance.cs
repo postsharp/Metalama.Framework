@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Introspection;
 
-internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance
+internal sealed class IntrospectionAspectInstance : IIntrospectionAspectInstance, IIntrospectionAspectPredecessorInternal
 {
     private readonly ConcurrentLinkedList<AspectPredecessor> _successors = new();
     private readonly IAspectInstance _aspectInstance;

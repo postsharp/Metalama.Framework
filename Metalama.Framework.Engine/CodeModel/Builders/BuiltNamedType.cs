@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -137,9 +137,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public ExecutionScope ExecutionScope => this.TypeBuilder.ExecutionScope;
 
-    public Microsoft.CodeAnalysis.ITypeSymbol TypeSymbol => this.TypeBuilder.TypeSymbol;
+    public Microsoft.CodeAnalysis.ITypeSymbol? TypeSymbol => null;
 
-    public Microsoft.CodeAnalysis.ISymbol Symbol => this.TypeSymbol;
+    public Microsoft.CodeAnalysis.ISymbol? Symbol => null;
 
     public bool Equals( SpecialType specialType ) => false;
 
@@ -155,34 +155,33 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public Type ToType()
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException( "Reflection types on introduced types are not yet supported." );
     }
 
     protected override Microsoft.CodeAnalysis.ISymbol? GetSymbol() => this.TypeSymbol;
 
-    public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, out IMember? implementationMember )
+    public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
-        implementationMember = null;
-        return false;
+        throw new NotSupportedException( "TryFindImplementationForInterfaceMember on introduced types is not yet supported." );
     }
 
     IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException( "GetOverridingMembers on introduced types is not yet supported." );
     }
 
     bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
     {
-        throw new NotImplementedException();
+        throw new NotSupportedException( "IsImplementationOfInterfaceMember on introduced types is not yet supported." );
     }
 
     ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )
     {
-        throw new NotImplementedException();
+        return visitor.Visit( this );
     }
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        return new NamedType( ( (Microsoft.CodeAnalysis.INamedTypeSymbol) this.Builder.GetSymbol()).Construct( typeArguments.Select( x => x.GetSymbol() ).ToArray() ), this.Compilation );
+        throw new NotSupportedException( "ConstructGenericInstance on introduced types is not yet supported." );
     }
 }

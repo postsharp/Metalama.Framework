@@ -1,5 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.Types;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,11 +13,11 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
 {
     internal partial class ContextualSyntaxGenerator
     {
-        private sealed class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
+        private sealed class RemoveReferenceNullableAnnotationsRewriterForSymbol : SafeSyntaxRewriter
         {
             private ITypeSymbol _type;
 
-            public RemoveReferenceNullableAnnotationsRewriter( ITypeSymbol type )
+            public RemoveReferenceNullableAnnotationsRewriterForSymbol( ITypeSymbol type )
             {
                 this._type = type;
             }
@@ -127,10 +130,10 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
 
             private readonly struct WithTypeCookie : IDisposable
             {
-                private readonly RemoveReferenceNullableAnnotationsRewriter _parent;
+                private readonly RemoveReferenceNullableAnnotationsRewriterForSymbol _parent;
                 private readonly ITypeSymbol _oldType;
 
-                public WithTypeCookie( RemoveReferenceNullableAnnotationsRewriter parent, ITypeSymbol oldType )
+                public WithTypeCookie( RemoveReferenceNullableAnnotationsRewriterForSymbol parent, ITypeSymbol oldType )
                 {
                     this._parent = parent;
                     this._oldType = oldType;
@@ -142,5 +145,112 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
                 }
             }
         }
+
+        private sealed class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
+        {
+            private IType _type;
+
+            public RemoveReferenceNullableAnnotationsRewriter( IType type )
+            {
+                this._type = type;
+            }
+
+            private INamedType GetExactTypeInNestedType( string name )
+            {
+                for ( var t = (INamedType) this._type; t != null!; t = t.DeclaringType )
+                {
+                    if ( t.Name == name )
+                    {
+                        return t;
+                    }
+                }
+
+                throw new AssertionFailedException( $"Cannot find type '{name}' in '{this._type}'" );
+            }
+
+            public override SyntaxNode VisitGenericName( GenericNameSyntax node )
+            {
+                var type = this.GetExactTypeInNestedType( node.Identifier.Text );
+
+                var argumentsCount = node.TypeArgumentList.Arguments.Count;
+                var typeArguments = new TypeSyntax[argumentsCount];
+
+                for ( var i = 0; i < argumentsCount; i++ )
+                {
+                    using ( this.WithType( type.TypeArguments[i] ) )
+                    {
+                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] )!;
+                    }
+                }
+
+                return node.WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) );
+            }
+
+            public override SyntaxNode? VisitArrayType( ArrayTypeSyntax node )
+            {
+                var type = (IArrayType) this._type;
+
+                using ( this.WithType( type.ElementType ) )
+                {
+                    return base.VisitArrayType( node );
+                }
+            }
+
+            public override SyntaxNode VisitTupleType( TupleTypeSyntax node )
+            {
+                // tuple elements are not representable as IType
+                var typeSymbol = this._type.GetSymbol().AssertNotNull();
+
+                return new RemoveReferenceNullableAnnotationsRewriterForSymbol( typeSymbol ).Visit( node )!;
+            }
+
+            public override SyntaxNode VisitFunctionPointerType( FunctionPointerTypeSyntax node )
+            {
+                // function pointer types are basically not representable as IType
+                var typeSymbol = this._type.GetSymbol().AssertNotNull();
+
+                return new RemoveReferenceNullableAnnotationsRewriterForSymbol( typeSymbol ).Visit( node )!;
+            }
+
+            public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )
+            {
+                if ( this._type.IsReferenceType == true )
+                {
+                    // Skip the annotation.
+                    return this.Visit( node.ElementType );
+                }
+                else
+                {
+                    // Keep it.
+                    return base.VisitNullableType( node );
+                }
+            }
+
+            private WithTypeCookie WithType( IType type )
+            {
+                var cookie = new WithTypeCookie( this, this._type );
+                this._type = type;
+
+                return cookie;
+            }
+
+            private readonly struct WithTypeCookie : IDisposable
+            {
+                private readonly RemoveReferenceNullableAnnotationsRewriter _parent;
+                private readonly IType _oldType;
+
+                public WithTypeCookie( RemoveReferenceNullableAnnotationsRewriter parent, IType oldType )
+                {
+                    this._parent = parent;
+                    this._oldType = oldType;
+                }
+
+                public void Dispose()
+                {
+                    this._parent._type = this._oldType;
+                }
+            }
+        }
+
     }
 }

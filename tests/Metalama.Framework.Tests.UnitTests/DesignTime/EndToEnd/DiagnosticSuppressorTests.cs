@@ -170,4 +170,36 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
 
         Assert.Equal( "code.cs(23,12): warning CS8618: Non-nullable field 'o1' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.", suppression.SuppressedDiagnostic.ToString() );
     }
+
+    [Fact]
+    public async Task SuppressOuterScope()
+    {
+        const string code = """
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Diagnostics;
+            
+            public class SuppressWarningAttribute : TypeAspect
+            {
+                private static readonly SuppressionDefinition _suppression1 = new( "CS0169" );
+            
+                public override void BuildAspect( IAspectBuilder<INamedType> builder )
+                {
+                    builder.Diagnostics.Suppress( _suppression1, builder.Target );
+                }
+            }
+            
+            [SuppressWarning]
+            internal class TargetClass
+            {
+                int _field;
+            }
+            """;
+
+        var suppressions = await this.ExecuteSuppressorAsync( code, "CS0169" );
+
+        var suppression = Assert.Single( suppressions );
+
+        Assert.Equal( "code.cs(18,9): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
+    }
 }

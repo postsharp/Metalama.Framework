@@ -75,8 +75,7 @@ namespace Metalama.Framework.DesignTime
             ISuppressionAnalysisContext context,
             ImmutableDictionary<string, SuppressionDescriptor> supportedSuppressionDescriptors )
         {
-            if ( MetalamaCompilerInfo.IsActive ||
-                 context.Compilation is not CSharpCompilation compilation )
+            if ( MetalamaCompilerInfo.IsActive || context.Compilation is not CSharpCompilation compilation )
             {
                 return;
             }
@@ -147,58 +146,50 @@ namespace Metalama.Framework.DesignTime
 
                     foreach ( var diagnostic in diagnosticGroup )
                     {
-                        var diagnosticNode = syntaxTree.GetRoot().FindNode( diagnostic.Location.SourceSpan );
+                        var diagnosticNode = syntaxTree.GetRoot().FindNode( diagnostic.Location.SourceSpan, getInnermostNodeForTie: true );
 
-                        // Get the node that declares the ISymbol.
                         var memberNode = diagnosticNode.FindSymbolDeclaringNode();
 
-                        if ( memberNode == null )
+                        for ( var node = memberNode; node != null; node = node.Parent )
                         {
-                            continue;
-                        }
+                            var symbol = semanticModel.GetDeclaredSymbol( node );
 
-                        var symbol = semanticModel.GetDeclaredSymbol( memberNode );
-
-                        if ( symbol == null )
-                        {
-                            continue;
-                        }
-
-                        if ( !symbol.TryGetSerializableId( out var symbolId ) )
-                        {
-                            continue;
-                        }
-
-                        foreach ( var suppression in suppressionsBySymbol[symbolId]
-                                     .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
-                        {
-                            if ( suppression.Filter is { } filter )
+                            if ( symbol == null || !symbol.TryGetSerializableId( out var symbolId ) )
                             {
-                                var executionContext = new UserCodeExecutionContext(
-                                    pipeline.ServiceProvider,
-                                    UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
+                                continue;
+                            }
 
-                                var filterPassed = this._userCodeInvoker.Invoke(
-                                    () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ),
-                                    executionContext );
-
-                                if ( !filterPassed )
+                            foreach ( var suppression in suppressionsBySymbol[symbolId]
+                                         .Where( s => string.Equals( s.Definition.SuppressedDiagnosticId, diagnostic.Id, StringComparison.OrdinalIgnoreCase ) ) )
+                            {
+                                if ( suppression.Filter is { } filter )
                                 {
-                                    continue;
+                                    var executionContext = new UserCodeExecutionContext(
+                                        pipeline.ServiceProvider,
+                                        UserCodeDescription.Create( "evaluating suppression filter for {0} on {1}", suppression.Definition, symbolId ) );
+
+                                    var filterPassed = this._userCodeInvoker.Invoke(
+                                        () => filter( SuppressionFactories.CreateDiagnostic( diagnostic ) ),
+                                        executionContext );
+
+                                    if ( !filterPassed )
+                                    {
+                                        continue;
+                                    }
                                 }
-                            }
 
-                            suppressionsCount++;
+                                suppressionsCount++;
 
-                            if ( supportedSuppressionDescriptors.TryGetValue(
-                                    suppression.Definition.SuppressedDiagnosticId,
-                                    out var suppressionDescriptor ) )
-                            {
-                                context.ReportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
-                            }
-                            else
-                            {
-                                // We can't report a warning here, but our design-time analyzer does it.
+                                if ( supportedSuppressionDescriptors.TryGetValue(
+                                        suppression.Definition.SuppressedDiagnosticId,
+                                        out var suppressionDescriptor ) )
+                                {
+                                    context.ReportSuppression( Suppression.Create( suppressionDescriptor, diagnostic ) );
+                                }
+                                else
+                                {
+                                    // We can't report a warning here, but our design-time analyzer does it.
+                                }
                             }
                         }
                     }

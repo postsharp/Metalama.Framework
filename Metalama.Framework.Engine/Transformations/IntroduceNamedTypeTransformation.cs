@@ -36,7 +36,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceMemberOrNamedT
                         SingletonSeparatedList<BaseTypeSyntax>(
                             SimpleBaseType(
                                 context.SyntaxGenerator.Type(
-                                    this.IntroducedDeclaration.BaseType.AssertNotNull().GetSymbol().AssertNotNull() ) ) ) ),
+                                    this.IntroducedDeclaration.BaseType.AssertNotNull() ) ) ) ),
                 List<TypeParameterConstraintClauseSyntax>(),
                 List<MemberDeclarationSyntax>() )
             .NormalizeWhitespaceIfNecessary( context.SyntaxGenerationContext );

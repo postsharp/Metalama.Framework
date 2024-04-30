@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace Metalama.Framework.Aspects;
@@ -45,4 +46,16 @@ internal interface ISyntaxBuilderImpl
     IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance );
 
     IExpression ToExpression( IParameter parameter );
+
+    IExpression WithType( IExpression expression, IType type );
+
+    IStatement CreateTemplateStatement( TemplateInvocation templateInvocation, object? args );
+
+    IStatement CreateSwitchStatement( IExpression expression, ImmutableArray<SwitchStatementSection> cases );
+
+    IStatementList UnwrapBlock( IStatement statement );
+
+    IStatementList CreateStatementList( ImmutableArray<object> items );
+
+    IStatement CreateBlock( IStatementList statements );
 }

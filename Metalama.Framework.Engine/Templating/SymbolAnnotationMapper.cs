@@ -52,31 +52,37 @@ namespace Metalama.Framework.Engine.Templating
 
         public static ExpressionSyntax AddExpressionTypeAnnotation( ExpressionSyntax node, ITypeSymbol? type )
         {
-            if ( type != null && !node.GetAnnotations( ExpressionTypeAnnotationKind ).Any() )
-            {
-                var syntaxAnnotation = GetOrCreateAnnotation(
-                    ExpressionTypeAnnotationKind,
-                    type );
-
-                ExpressionSyntax AddAnnotationRecursive( ExpressionSyntax n )
-                {
-                    if ( n is ParenthesizedExpressionSyntax parenthesizedExpression )
-                    {
-                        return parenthesizedExpression.WithExpression( AddAnnotationRecursive( parenthesizedExpression.Expression ) )
-                            .WithAdditionalAnnotations( syntaxAnnotation );
-                    }
-                    else
-                    {
-                        return n.WithAdditionalAnnotations( syntaxAnnotation );
-                    }
-                }
-
-                return AddAnnotationRecursive( node );
-            }
-            else
+            if ( type == null )
             {
                 return node;
             }
+
+            var existingAnnotation = node.GetAnnotations( ExpressionTypeAnnotationKind ).SingleOrDefault();
+
+            if ( existingAnnotation != null && SymbolEqualityComparer.IncludeNullability.Equals( GetSymbolFromAnnotation( existingAnnotation ), type ) )
+            {
+                return node;
+            }
+            
+            var syntaxAnnotation = GetOrCreateAnnotation( ExpressionTypeAnnotationKind, type );
+
+            Invariant.Assert( SymbolEqualityComparer.IncludeNullability.Equals( GetSymbolFromAnnotation( syntaxAnnotation ), type ) );
+
+            ExpressionSyntax AddAnnotationRecursive( ExpressionSyntax n )
+            {
+                if ( n is ParenthesizedExpressionSyntax parenthesizedExpression )
+                {
+                    return parenthesizedExpression.WithExpression( AddAnnotationRecursive( parenthesizedExpression.Expression ) )
+                        .WithoutAnnotations( ExpressionTypeAnnotationKind )
+                        .WithAdditionalAnnotations( syntaxAnnotation );
+                }
+                else
+                {
+                    return n.WithoutAnnotations( ExpressionTypeAnnotationKind ).WithAdditionalAnnotations( syntaxAnnotation );
+                }
+            }
+
+            return AddAnnotationRecursive( node );
         }
 
         public static bool TryFindExpressionTypeFromAnnotation(

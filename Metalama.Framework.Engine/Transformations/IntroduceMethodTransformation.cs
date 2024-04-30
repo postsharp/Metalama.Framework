@@ -49,11 +49,11 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                             Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( ElasticSpace ) ) ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
-                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() )
+                        context.SyntaxGenerator.Type( methodBuilder.ReturnType )
                             .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
-                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
+                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType ) ),
                         Token( SyntaxKind.SemicolonToken ) );
 
                 return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
@@ -68,13 +68,13 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         TokenList(
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PublicKeyword ),
                             SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
-                        context.SyntaxGenerator.Type( methodBuilder.ReturnType.GetSymbol().AssertNotNull() )
+                        context.SyntaxGenerator.Type( methodBuilder.ReturnType )
                             .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.OperatorKeyword ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( methodBuilder.OperatorKind.ToOperatorKeyword() ),
                         context.SyntaxGenerator.ParameterList( methodBuilder, context.Compilation ),
                         null,
-                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType.GetSymbol().AssertNotNull() ) ),
+                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( methodBuilder.ReturnType ) ),
                         Token( SyntaxKind.SemicolonToken ) );
 
                 return new[] { new InjectedMember( this, syntax, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, methodBuilder ) };
@@ -105,7 +105,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                         [
                             ReturnStatement(
                                 SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
-                                DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type.GetSymbol() ) ),
+                                DefaultExpression( syntaxGenerator.Type( methodBuilder.ReturnParameter.Type ) ),
                                 Token( SyntaxKind.SemicolonToken ) )
                         ]
                     : [] );
@@ -119,7 +119,7 @@ internal sealed class IntroduceMethodTransformation : IntroduceMemberTransformat
                     context.SyntaxGenerator.ReturnType( methodBuilder ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     methodBuilder.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier(
-                            (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            (NameSyntax) syntaxGenerator.Type( methodBuilder.ExplicitInterfaceImplementations[0].DeclaringType ) )
                         : null,
                     methodBuilder.GetCleanName(),
                     context.SyntaxGenerator.TypeParameterList( methodBuilder, context.Compilation ),
