@@ -6,11 +6,11 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
@@ -28,7 +28,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         {
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
-            var textAccumulator = new StringBuilder();
+            using var stringBuilderHandle = StringBuilderPool.Default.Allocate();
+            var textAccumulator = stringBuilderHandle.Value;
 
             void FlushTextToken()
             {

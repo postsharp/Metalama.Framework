@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -12,6 +13,10 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
     {
         private sealed class RemoveTypeArgumentsRewriter : SafeSyntaxRewriter
         {
+            private RemoveTypeArgumentsRewriter() { }
+
+            public static RecyclableObjectPool<RemoveTypeArgumentsRewriter> Pool { get; } = new( () => new RemoveTypeArgumentsRewriter() );
+
             public override SyntaxNode VisitGenericName( GenericNameSyntax node )
             {
                 // We intentionally don't visit type arguments, because we don't want remove the nested type arguments.

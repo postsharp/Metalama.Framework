@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 /// when an unhandled exception is detected while processing a node. 
 /// </summary>
 [PublicAPI]
-public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
+public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter, IRecyclable
 {
     private RecursionGuard _recursionGuard;
 
@@ -45,4 +46,8 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
     {
         return base.Visit( node );
     }
+
+    void IRecyclable.CleanUp() => this._recursionGuard = default;
+
+    void IRecyclable.Recycle() => this._recursionGuard = new RecursionGuard( this );
 }
