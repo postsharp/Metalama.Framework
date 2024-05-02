@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 var referencedSymbol = this._semanticModel.GetSymbolInfo( node ).Symbol;
 
-                if ( referencedSymbol is { } and not ITypeParameterSymbol )
+                if ( referencedSymbol is not null and not ITypeParameterSymbol )
                 {
                     var referencedScope = this._classifier.GetTemplatingScope( referencedSymbol );
 
@@ -446,7 +446,7 @@ namespace Metalama.Framework.Engine.Templating
                 // so we have to handle it manually.
                 if ( node.Parent is PropertyDeclarationSyntax propertyDeclaration )
                 {
-                    var getMethod = this._semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertNotNull().GetMethod;
+                    var getMethod = this._semanticModel.GetDeclaredSymbol( propertyDeclaration ).AssertSymbolNotNull().GetMethod;
                     this.VisitBaseMethodOrAccessor( node, default, base.VisitArrowExpressionClause, getMethod );
                 }
                 else
@@ -571,15 +571,14 @@ namespace Metalama.Framework.Engine.Templating
                 if ( declaredSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol } )
                 {
                     var adviceAttribute = declaredSymbol.GetAttributes()
-                        .FirstOrDefault(
-                            a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
+                        .FirstOrDefault( a => this._compilationContext.SourceCompilation.HasImplicitConversion( a.AttributeClass, this._iAdviceAttributeType ) );
 
                     if ( adviceAttribute != null )
                     {
                         this.Report(
                             TemplatingDiagnosticDescriptors.AdviceAttributeOnAccessor.CreateRoslynDiagnostic(
                                 declaredSymbol.GetDiagnosticLocation(),
-                                (declaredSymbol, adviceAttribute.AttributeClass.AssertNotNull(), associatedSymbol.Kind.ToDisplayName()) ) );
+                                (declaredSymbol, adviceAttribute.AttributeClass.AssertSymbolNotNull(), associatedSymbol.Kind.ToDisplayName()) ) );
                     }
                 }
 
@@ -616,12 +615,20 @@ namespace Metalama.Framework.Engine.Templating
                 var compilation = this._compilationContext.SourceCompilation;
                 var reflectionMapper = this._compilationContext.ReflectionMapper;
 
-                bool IsAspect( INamedTypeSymbol symbol ) => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) );
+                bool IsAspect( INamedTypeSymbol symbol )
+                {
+                    return compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(IAspect) ) );
+                }
 
-                bool IsFabric( INamedTypeSymbol symbol ) => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) );
+                bool IsFabric( INamedTypeSymbol symbol )
+                {
+                    return compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(Fabric) ) );
+                }
 
                 bool IsTemplateProvider( INamedTypeSymbol symbol )
-                    => compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(ITemplateProvider) ) );
+                {
+                    return compilation.HasImplicitConversion( symbol, reflectionMapper.GetTypeSymbol( typeof(ITemplateProvider) ) );
+                }
 
                 // Report an error for struct aspect.
                 if ( declaredSymbol is INamedTypeSymbol { IsValueType: true } typeSymbol && IsAspect( typeSymbol ) )

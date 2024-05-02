@@ -50,7 +50,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
         return
             this._typeResolver.GetCompileTimeType(
-                    type.GetSymbol().AssertNotNull(),
+                    type.GetSymbol().AssertSymbolNotNull(),
                     false )
                 .AssertNotNull();
     }

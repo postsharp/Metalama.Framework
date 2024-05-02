@@ -133,7 +133,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public INamedTypeCollection NestedTypes
         => new NamedTypeCollection(
             this._facade,
-            this.Compilation.GetNamedTypeCollection( this.TypeSymbol.ToTypedRef<INamespaceOrNamedType>(this.Compilation.CompilationContext ) ) );
+            this.Compilation.GetNamedTypeCollection( this.TypeSymbol.ToTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IPropertyCollection Properties
@@ -314,17 +314,22 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     [Memo]
     public IImplementedInterfaceCollection AllImplementedInterfaces
-        => new AllImplementedInterfacesCollection( this._facade, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
+        => new AllImplementedInterfacesCollection(
+            this._facade,
+            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
 
     [Memo]
     public IImplementedInterfaceCollection ImplementedInterfaces
-        => new ImplementedInterfacesCollection( this._facade, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
+        => new ImplementedInterfacesCollection(
+            this._facade,
+            this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols = typeArguments.SelectAsArray( a => a.GetSymbol() );
+        var typeArgumentSymbols =
+            typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
 
         var typeSymbol = this.TypeSymbol;
         var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );
@@ -456,7 +461,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
         // TODO: Type introductions.
-        var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
+        var symbolInterfaceMemberImplementationSymbol =
+            this.TypeSymbol.FindImplementationForInterfaceMember(
+                interfaceMember.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ) );
 
         var symbolInterfaceMemberImplementation =
             symbolInterfaceMemberImplementationSymbol != null

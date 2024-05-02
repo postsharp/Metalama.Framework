@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             => new( Ref.FromTypeId<IType>( typeId ), metadata );
 
         // For test only.
-        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol(), type.GetCompilationModel().CompilationContext );
+        internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetCompilationModel().CompilationContext );
 
         // For test only.
         private static CompileTimeType Create( ITypeSymbol typeSymbol, CompilationContext compilation )
@@ -184,7 +184,9 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             var compilation = ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel;
 
             return CompileTimeMocksHelper.ToTypedExpressionSyntax(
-                this.Target.GetSymbol( compilation.RoslynCompilation ).AssertCast<ITypeSymbol>().AssertNotNull(),
+                this.Target.GetSymbol( compilation.RoslynCompilation )
+                    .AssertCast<ITypeSymbol>()
+                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ),
                 this.ReflectionType,
                 TypeSerializationHelper.SerializeTypeSymbolRecursive,
                 syntaxGenerationContext );

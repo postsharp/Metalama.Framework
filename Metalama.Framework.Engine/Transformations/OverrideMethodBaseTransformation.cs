@@ -67,7 +67,7 @@ internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransfo
             }
         }
 
-        returnType ??= context.SyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType.GetSymbol() );
+        returnType ??= context.SyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType );
 
         var introducedMethod = MethodDeclaration(
             List<AttributeListSyntax>(),

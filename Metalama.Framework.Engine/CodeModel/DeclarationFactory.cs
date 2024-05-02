@@ -80,15 +80,16 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     internal INamespace GetNamespace( INamespaceSymbol namespaceSymbol )
         => (INamespace) this._defaultCache.GetOrAdd(
             namespaceSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( l, c ) => new Namespace( (INamespaceSymbol) l.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( l, c ) => new Namespace( (INamespaceSymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
         => (IAssembly) this._defaultCache.GetOrAdd(
             assemblySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( l, c ) => !((IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertNotNull()).Identity.Equals( c.RoslynCompilation.Assembly.Identity )
-                ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c )
-                : c,
+            static ( l, c )
+                => !((IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull()).Identity.Equals( c.RoslynCompilation.Assembly.Identity )
+                    ? new ExternalAssembly( (IAssemblySymbol) l.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c )
+                    : c,
             this._compilationModel );
 
     public IType GetIType( ITypeSymbol typeSymbol )
@@ -142,7 +143,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
         => (TypeParameter) this._defaultCache.GetOrAdd(
             typeParameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
@@ -152,26 +153,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IMethod) this._defaultCache.GetOrAdd(
             methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
     }
 
     public IProperty GetProperty( IPropertySymbol propertySymbol )
         => (IProperty) this._defaultCache.GetOrAdd(
             propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Property( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Property( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IIndexer GetIndexer( IPropertySymbol propertySymbol )
         => (IIndexer) this._defaultCache.GetOrAdd(
             propertySymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Indexer( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Indexer( (IPropertySymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IField GetField( IFieldSymbol fieldSymbol )
         => (IField) this._defaultCache.GetOrAdd(
             fieldSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Field( (IFieldSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Field( (IFieldSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IConstructor GetConstructor( IMethodSymbol methodSymbol, bool translateToCurrentCompilation = false )
@@ -183,26 +184,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IConstructor) this._defaultCache.GetOrAdd(
             methodSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Constructor( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Constructor( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
     }
 
     public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
         => (IMethod) this._defaultCache.GetOrAdd(
             finalizerSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Method( (IMethodSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IParameter GetParameter( IParameterSymbol parameterSymbol )
         => (IParameter) this._defaultCache.GetOrAdd(
             parameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Parameter( (IParameterSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Parameter( (IParameterSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public IEvent GetEvent( IEventSymbol @event )
         => (IEvent) this._defaultCache.GetOrAdd(
             @event.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( ms, c ) => new Event( (IEventSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertNotNull(), c ),
+            static ( ms, c ) => new Event( (IEventSymbol) ms.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
             this._compilationModel );
 
     public bool TryGetDeclaration( ISymbol symbol, [NotNullWhen( true )] out IDeclaration? declaration )
@@ -216,7 +217,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     internal IDeclaration? GetDeclarationOrNull( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         => this.GetCompilationElement( symbol, kind ) as IDeclaration;
 
-    public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertNotNull() );
+    public IDeclaration GetDeclaration( SymbolDictionaryKey key ) => this.GetDeclaration( key.GetSymbolId().Resolve( this.Compilation ).AssertSymbolNotNull() );
 
     public IDeclaration GetDeclaration( ISymbol symbol ) => this.GetDeclaration( symbol, DeclarationRefTargetKind.Default );
 
@@ -354,10 +355,15 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
-        => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ISdkType) elementType).TypeSymbol.AssertNotNull(), rank ) );
+        => (IArrayType) this.GetIType(
+            this.RoslynCompilation.CreateArrayTypeSymbol(
+                ((ISdkType) elementType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ),
+                rank ) );
 
     IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
-        => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ISdkType) pointedType).TypeSymbol.AssertNotNull() ) );
+        => (IPointerType) this.GetIType(
+            this.RoslynCompilation.CreatePointerTypeSymbol(
+                ((ISdkType) pointedType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) ) );
 
     public IType ConstructNullable( IType type, bool isNullable )
     {
@@ -371,7 +377,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( type.IsReferenceType ?? true )
         {
-            newTypeSymbol = typeSymbol.AssertNotNull()
+            newTypeSymbol = typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution )
                 .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
         }
         else
@@ -379,7 +385,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             if ( isNullable )
             {
                 newTypeSymbol = this._compilationModel.RoslynCompilation.GetSpecialType( Microsoft.CodeAnalysis.SpecialType.System_Nullable_T )
-                    .Construct( typeSymbol );
+                    .Construct( typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
             }
             else
             {
@@ -458,7 +464,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                     return declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
 
                 case IType type:
-                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate( type.GetSymbol() );
+                    var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
+                        type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
 
                     if ( translatedSymbol == null )
                     {
@@ -532,7 +539,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                     original.SourceMethod,
                     Ref.FromSymbol( original.SubstitutedType, original.GetCompilationModel().CompilationContext )
                         .GetSymbol( c.RoslynCompilation )
-                        .AssertNotNull()
+                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution )
                         .AssertCast<INamedTypeSymbol>() );
             },
             this._compilationModel );
@@ -681,11 +688,11 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( type is ITypeImpl typeInternal )
         {
-            return this.GetIType( typeInternal.TypeSymbol.AssertNotNull() );
+            return this.GetIType( typeInternal.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
         }
 
         // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertNotNull() );
+        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
     }
 
     [return: NotNullIfNotNull( "declaration" )]

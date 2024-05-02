@@ -223,7 +223,7 @@ internal static class ProceedHelper
                     SyntaxKind.SimpleMemberAccessExpression,
                     ParenthesizedExpression(
                         generationContext.SyntaxGenerator.SafeCastExpression(
-                            generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                            generationContext.SyntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
                             ThisExpression() ) ),
                     memberName );
             }
@@ -240,7 +240,7 @@ internal static class ProceedHelper
             expression =
                 MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    generationContext.SyntaxGenerator.Type( targetMember.DeclaringType.GetSymbol() ),
+                    generationContext.SyntaxGenerator.Type( targetMember.DeclaringType ),
                     memberName );
         }
 

@@ -150,7 +150,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                 var errorsDocument = new FlowDocument();
 
-                var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
+                var testSyntaxTree = testResult?.SyntaxTrees.FirstOrDefault();
 
                 if ( testSyntaxTree != null )
                 {

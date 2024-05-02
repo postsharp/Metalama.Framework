@@ -22,7 +22,10 @@ internal sealed class CompileTimeEventInfoSerializer : ObjectSerializer<CompileT
     {
         var eventName = @event.Name;
 
-        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( @event.DeclaringType.GetSymbol(), serializationContext );
+        var typeCreation =
+            TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                @event.DeclaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers ),
+                serializationContext );
 
         ExpressionSyntax result = InvocationExpression(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, typeCreation, IdentifierName( "GetEvent" ) ),

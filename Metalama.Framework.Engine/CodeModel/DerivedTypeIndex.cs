@@ -36,8 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => this._compilationContext.SymbolComparer.Equals( this._compilationContext.Compilation.Assembly, type.ContainingAssembly );
 
         internal IEnumerable<INamedTypeSymbol> GetDerivedTypesInCurrentCompilation( INamedTypeSymbol baseType, DerivedTypesOptions options )
-        {
-            return options switch
+            => options switch
             {
                 DerivedTypesOptions.All => this.GetAllDerivedTypesCore( baseType ),
                 DerivedTypesOptions.DirectOnly => this.GetDirectlyDerivedTypesCore( baseType ),
@@ -45,7 +44,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 DerivedTypesOptions.IncludingExternalTypesDangerous => this.GetDerivedTypes( baseType ),
                 _ => throw new ArgumentOutOfRangeException( nameof(options), $"Unexpected value '{options}'." )
             };
-        }
 
         internal IEnumerable<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType )
             => this._relationships[baseType]
@@ -97,7 +95,8 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 builder ??= new Builder( this );
 
-                var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
+                var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol()
+                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation );
 
                 if ( !introducedInterfaceSymbol.ContainingAssembly.Equals( this._compilationContext.Compilation.Assembly ) )
                 {
@@ -105,7 +104,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     builder.AnalyzeType( introducedInterfaceSymbol );
                 }
 
-                builder.AddDerivedType( introducedInterfaceSymbol, introducedInterface.TargetType.GetSymbol().AssertNotNull() );
+                builder.AddDerivedType(
+                    introducedInterfaceSymbol,
+                    introducedInterface.TargetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ) );
             }
 
             if ( builder != null )

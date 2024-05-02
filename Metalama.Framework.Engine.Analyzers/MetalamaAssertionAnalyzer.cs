@@ -18,8 +18,17 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
     // Range: 0840-0849
     internal static readonly DiagnosticDescriptor AssertNotNullShouldNotBeUsedOnSymbols = new(
         "LAMA0840",
-        "AssertNotNull should not be used to assert ISymbol.",
-        "The AssertNotNull method does not provide the user the information about introduced type not being yet supported in this particular scenario.",
+        "AssertNotNull should not be used to assert ISymbol. Use AssertSymbolNotNull or AssertSymbolNullNotImplemented.",
+        "The AssertNotNull method does not provide the user the information about introduced type not being yet supported in this particular scenario. Use AssertSymbolNotNull or AssertSymbolNullNotImplemented.",
+        "Metalama",
+        DiagnosticSeverity.Warning,
+        true );
+
+    // TODO: Not Implemented yet.
+    internal static readonly DiagnosticDescriptor AssertNotNullShouldNotBeUsedOnNonNullable = new(
+        "LAMA0841",
+        "Method should not be used to assert non-nullable type.",
+        "{0} method is indended to assert nullable type not being null and should not be used on non-nullable type. Check the call site and remove the assertion.",
         "Metalama",
         DiagnosticSeverity.Warning,
         true );
@@ -36,12 +45,13 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
 
     private static void InitializeCompilation( CompilationStartAnalysisContext context )
     {
-        string[] ignoredNamespaces = [
-            "Metalama.Framework.Engine.Aspects",
-            "Metalama.Framework.Engine.CompileTime",
-            "Metalama.Framework.Engine.DesignTime",
-            "Metalama.Framework.Engine.Linking",
-            ];
+        string[] ignoredNamespaces =
+        [
+            "Metalama.Framework.Engine.Aspects",     // Aspects are always backed by a symbol.
+            "Metalama.Framework.Engine.CompileTime", // Compile time types are always backed by a symbol
+            "Metalama.Framework.Engine.DesignTime",  // Design time always works with symbols.
+            "Metalama.Framework.Engine.Linking"      // Linker almost always works with intermediate compilation symbols.
+        ];
 
         var invariantSymbol =
             context.Compilation.GetTypeByMetadataName( "Metalama.Framework.Engine.Invariant" )!;
@@ -49,23 +59,32 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
         var iSymbolSymbol =
             context.Compilation.GetTypeByMetadataName( "Microsoft.CodeAnalysis.ISymbol" )!;
 
-        context.RegisterOperationAction( context => AnalyzeInvariant(context, invariantSymbol, iSymbolSymbol, ignoredNamespaces ), OperationKind.Invocation, OperationKind.MethodReference );
+        context.RegisterOperationAction(
+            context => AnalyzeInvariant( context, invariantSymbol, iSymbolSymbol, ignoredNamespaces ),
+            OperationKind.Invocation,
+            OperationKind.MethodReference );
     }
 
-    private static void AnalyzeInvariant( OperationAnalysisContext context, INamedTypeSymbol invariantTypeSymbol, INamedTypeSymbol iSymbolSymbol, string[]  namespaces)
+    private static void AnalyzeInvariant(
+        OperationAnalysisContext context,
+        INamedTypeSymbol invariantTypeSymbol,
+        INamedTypeSymbol iSymbolSymbol,
+        string[] namespaces )
     {
-        var method = context.Operation switch
+        var (method, arguments) = context.Operation switch
         {
-            IInvocationOperation invocation => invocation.TargetMethod,
-            IMethodReferenceOperation methodReference => methodReference.Method,
+            IInvocationOperation invocation => (invocation.TargetMethod, invocation.Arguments),
+            IMethodReferenceOperation methodReference => (methodReference.Method, ImmutableArray<IArgumentOperation>.Empty),
             _ => throw new InvalidOperationException( $"Unexpected operation type '{context.Operation.GetType()}'." )
         };
 
         var containingNamespace = context.ContainingSymbol.ContainingNamespace.ToString();
 
-        if ( SymbolEqualityComparer.Default.Equals( invariantTypeSymbol, method.ContainingType) 
-             && method.Name == "AssertNotNull" && method.TypeArguments.Length > 0
-             && namespaces.All( n => !containingNamespace.StartsWith(n, StringComparison.Ordinal)))
+        var hasJustification = arguments is [_, IArgumentOperation { ArgumentKind: not ArgumentKind.DefaultValue }];
+
+        if ( SymbolEqualityComparer.Default.Equals( invariantTypeSymbol, method.ContainingType )
+             && method.Name == "AssertNotNull" && method.TypeArguments.Length > 0 && !hasJustification
+             && namespaces.All( n => !containingNamespace.StartsWith( n, StringComparison.Ordinal ) ) )
         {
             var typeArgument = method.TypeArguments[0];
 

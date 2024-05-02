@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TESTOPTIONS
+// Skipped(constructed generics not supported)
+# endif
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

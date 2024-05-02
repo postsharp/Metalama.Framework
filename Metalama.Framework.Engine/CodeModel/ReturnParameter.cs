@@ -12,70 +12,69 @@ using RefKind = Microsoft.CodeAnalysis.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
-namespace Metalama.Framework.Engine.CodeModel
+namespace Metalama.Framework.Engine.CodeModel;
+
+internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
 {
-    internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
-    {
-        protected abstract RefKind SymbolRefKind { get; }
+    protected abstract RefKind SymbolRefKind { get; }
 
-        public Code.RefKind RefKind => this.SymbolRefKind.ToOurRefKind();
+    public Code.RefKind RefKind => this.SymbolRefKind.ToOurRefKind();
 
-        public abstract IType Type { get; }
+    public abstract IType Type { get; }
 
-        public string Name => "<return>";
+    public string Name => "<return>";
 
-        public int Index => -1;
+    public int Index => -1;
 
-        TypedConstant? IParameter.DefaultValue => default;
+    TypedConstant? IParameter.DefaultValue => default;
 
-        public bool IsParams => false;
+    public bool IsParams => false;
 
-        public abstract IHasParameters DeclaringMember { get; }
+    public abstract IHasParameters DeclaringMember { get; }
 
-        public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
+    public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 
-        public virtual bool IsReturnParameter => true;
+    public virtual bool IsReturnParameter => true;
 
-        internal override Ref<IDeclaration> ToRef()
-            => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertNotNull(), this.GetCompilationModel().CompilationContext );
+    internal override Ref<IDeclaration> ToRef()
+        => Ref.ReturnParameter( (IMethodSymbol) this.DeclaringMember.GetSymbol().AssertSymbolNotNull(), this.GetCompilationModel().CompilationContext );
 
-        public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
+    public override IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
 
-        IDeclarationOrigin IDeclaration.Origin => this.DeclaringMember.Origin;
+    IDeclarationOrigin IDeclaration.Origin => this.DeclaringMember.Origin;
 
-        public override IDeclaration ContainingDeclaration => this.DeclaringMember;
+    public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+    public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public override CompilationModel Compilation => this.ContainingDeclaration.AssertNotNull().GetCompilationModel();
+    public override CompilationModel Compilation => this.ContainingDeclaration.AssertNotNull().GetCompilationModel();
 
-        public override bool Equals( IDeclaration? other )
-            => other is ReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );
+    public override bool Equals( IDeclaration? other )
+        => other is ReturnParameter returnParameter && this.DeclaringMember.Equals( returnParameter.DeclaringMember );
 
-        public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+    public override Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
 
-        public abstract ISymbol? Symbol { get; }
+    public abstract ISymbol? Symbol { get; }
 
-        public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
+    public override ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ((IDeclarationImpl) this.DeclaringMember).DeclaringSyntaxReferences;
 
-        public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
+    public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
 
-        public override string ToString() => this.DeclaringMember + "/" + this.Name;
+    public override string ToString() => this.DeclaringMember + "/" + this.Name;
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
+    public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
-        public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
+    public override IDeclarationOrigin Origin => this.DeclaringMember.Origin;
 
-        protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
+    protected override int GetHashCodeCore() => this.DeclaringMember.GetHashCode() + 7;
 
-        bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
+    bool IExpression.IsAssignable => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
-        public ref object? Value => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
+    public ref object? Value => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
-        public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
-            => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
+    public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
+        => throw new NotSupportedException( "Cannot use the return parameter as an expression." );
 
-        public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
-    }
+    public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;
 }

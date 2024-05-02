@@ -45,7 +45,7 @@ public sealed class SerializableTypeIdResolver
         }
         else
         {
-            return result.TypeSymbol.AssertNotNull();
+            return result.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization );
         }
     }
 
@@ -94,7 +94,7 @@ public sealed class SerializableTypeIdResolver
                 idString = idString[..^1];
             }
 
-            var resolver = new Resolver( this._compilation, genericArguments, isNullOblivious: nullOblivious );
+            var resolver = new Resolver( this._compilation, genericArguments, nullOblivious );
 
             TypeSyntax type;
 
@@ -201,7 +201,7 @@ public sealed class SerializableTypeIdResolver
                 return elementTypeResult;
             }
 
-            var elementType = elementTypeResult.TypeSymbol.AssertNotNull();
+            var elementType = elementTypeResult.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization );
 
             return ResolverResult.Success(
                 elementType.IsValueType
@@ -220,7 +220,7 @@ public sealed class SerializableTypeIdResolver
             {
                 if ( this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
                 {
-                    return ResolverResult.Success( type.GetSymbol() );
+                    return ResolverResult.Success( type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ) );
                 }
                 else if ( this._currentGenericType != null )
                 {
@@ -288,7 +288,7 @@ public sealed class SerializableTypeIdResolver
                         return leftResult;
                     }
 
-                    var left = leftResult.TypeOrNamespaceSymbol.AssertNotNull();
+                    var left = leftResult.TypeOrNamespaceSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization );
 
                     return this.LookupName( qualifiedName.Right, left );
 
@@ -327,7 +327,10 @@ public sealed class SerializableTypeIdResolver
                             }
                         }
 
-                        return ResolverResult.Success( definition.Construct( typeArgumentResults.SelectAsArray( r => r.TypeSymbol.AssertNotNull() ) ) );
+                        return ResolverResult.Success(
+                            definition.Construct(
+                                typeArgumentResults.SelectAsArray(
+                                    r => r.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ) ) ) );
                     }
 
                 case AliasQualifiedNameSyntax aliasQualifiedName:

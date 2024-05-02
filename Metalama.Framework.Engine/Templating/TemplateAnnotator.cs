@@ -403,7 +403,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     private void ReportScopeError( SyntaxNode node )
     {
-        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node ).AssertNotNull();
+        var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node ).AssertSymbolNotNull();
 
         this._symbolScopeClassifier.ReportScopeError( node, symbol, this );
     }
@@ -740,7 +740,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private T VisitTypeDeclaration<T>( T node, Func<T, SyntaxNode?> callBase )
         where T : SyntaxNode
     {
-        var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertNotNull() );
+        var typeScope = this.GetSymbolScope( this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node ).AssertSymbolNotNull() );
 
         if ( typeScope == Conflict )
         {
@@ -1285,7 +1285,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         StatementSyntax? annotatedElseStatement;
         ScopeContext? scopeContext;
 
-        if ( conditionScope.GetExpressionValueScope( preferCompileTime: true ) is CompileTimeOnly or RunTimeOrCompileTime )
+        if ( conditionScope.GetExpressionValueScope( true ) is CompileTimeOnly or RunTimeOrCompileTime )
         {
             // We have an if statement where the condition is a compile-time expression. Add annotations
             // to the if and else statements but not to the blocks themselves.
@@ -1350,7 +1350,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         if ( node.AwaitKeyword.IsKind( SyntaxKind.None ) )
         {
             forEachScope = this.GetNodeScope( annotatedExpression )
-                .GetExpressionValueScope( preferCompileTime: true )
+                .GetExpressionValueScope( true )
                 .ReplaceIndeterminate( RunTimeOnly );
 
             reason = $"foreach ( {node.Type} {node.Identifier} in ... )";
@@ -1672,7 +1672,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     {
         var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Name );
 
-        if ( symbol is IMethodSymbol { ContainingNamespace: { } } constructor
+        if ( symbol is IMethodSymbol { ContainingNamespace: not null } constructor
              && (constructor.ContainingNamespace.ToString()?.StartsWith( "Metalama.Framework", StringComparison.Ordinal ) ?? false) )
         {
             node = node.AddColoringAnnotation( TextSpanClassification.CompileTime );
@@ -2506,7 +2506,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         string scopeReason;
 
         if ( (expressionScope == CompileTimeOnly && this._templateMemberClassifier.IsNodeOfDynamicType( annotatedExpression ))
-             || expressionScope.GetExpressionValueScope( preferCompileTime: true ).ReplaceIndeterminate( CompileTimeOnly )
+             || expressionScope.GetExpressionValueScope( true ).ReplaceIndeterminate( CompileTimeOnly )
              != CompileTimeOnly )
         {
             switchScope = RunTimeOnly;

@@ -57,7 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.Target = this._originalTarget = attributeData;
 
             this.AttributeType = Ref.FromSymbol<INamedType>(
-                attributeData.AttributeClass.AssertNotNull().TranslateIfNecessary( compilationContext ),
+                attributeData.AttributeClass.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
+                    .TranslateIfNecessary( compilationContext ),
                 compilationContext );
 
             this._declaringDeclaration = declaringDeclaration;

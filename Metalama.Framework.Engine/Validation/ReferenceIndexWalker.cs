@@ -68,10 +68,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         base.DefaultVisit( node );
     }
 
-    public override void VisitIdentifierName( IdentifierNameSyntax node )
-    {
-        this.IndexReference( node, node.Identifier );
-    }
+    public override void VisitIdentifierName( IdentifierNameSyntax node ) => this.IndexReference( node, node.Identifier );
 
     public override void VisitAssignmentExpression( AssignmentExpressionSyntax node )
     {
@@ -127,10 +124,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-    public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node )
-    {
-        this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
-    }
+    public override void VisitSimpleBaseType( SimpleBaseTypeSyntax node ) => this.VisitTypeReference( node.Type, ReferenceKinds.BaseType );
 
     public override void VisitTypeArgumentList( TypeArgumentListSyntax node )
     {
@@ -140,10 +134,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-    public override void VisitTypeOfExpression( TypeOfExpressionSyntax node )
-    {
-        this.VisitTypeReference( node.Type, ReferenceKinds.TypeOf );
-    }
+    public override void VisitTypeOfExpression( TypeOfExpressionSyntax node ) => this.VisitTypeReference( node.Type, ReferenceKinds.TypeOf );
 
     public override void VisitParameter( ParameterSyntax node )
     {
@@ -167,10 +158,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-    public override void VisitTypeConstraint( TypeConstraintSyntax node )
-    {
-        this.VisitTypeReference( node.Type, ReferenceKinds.TypeConstraint );
-    }
+    public override void VisitTypeConstraint( TypeConstraintSyntax node ) => this.VisitTypeReference( node.Type, ReferenceKinds.TypeConstraint );
 
     private void VisitMembers( SyntaxList<MemberDeclarationSyntax> members )
     {
@@ -453,7 +441,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
                     {
                         this._referenceIndexBuilder.AddReference(
                             baseConstructorSymbol,
-                            this.CurrentDeclarationSymbol.AssertNotNull(),
+                            this.CurrentDeclarationSymbol.AssertSymbolNotNull(),
                             node.Identifier,
                             ReferenceKinds.BaseConstructor );
                     }
@@ -576,10 +564,7 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         this.Visit( node.ArgumentList );
     }
 
-    public override void VisitUsingDirective( UsingDirectiveSyntax node )
-    {
-        this.VisitWithReferenceKinds( node.Name, ReferenceKinds.UsingNamespace );
-    }
+    public override void VisitUsingDirective( UsingDirectiveSyntax node ) => this.VisitWithReferenceKinds( node.Name, ReferenceKinds.UsingNamespace );
 
     public override void VisitMemberAccessExpression( MemberAccessExpressionSyntax node )
     {
@@ -592,15 +577,9 @@ internal sealed class ReferenceIndexWalker : SafeSyntaxWalker
         }
     }
 
-    public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
-    {
-        this.Visit( node.Members );
-    }
+    public override void VisitNamespaceDeclaration( NamespaceDeclarationSyntax node ) => this.Visit( node.Members );
 
-    public override void VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
-    {
-        this.Visit( node.Members );
-    }
+    public override void VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node ) => this.Visit( node.Members );
 
     public override void VisitElementAccessExpression( ElementAccessExpressionSyntax node )
     {

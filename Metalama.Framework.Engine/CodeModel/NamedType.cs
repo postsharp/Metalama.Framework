@@ -30,10 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
         }
 
-        protected override void OnUsingDeclaration()
-        {
-            UserCodeExecutionContext.CurrentOrNull?.AddDependency( this );
-        }
+        protected override void OnUsingDeclaration() => UserCodeExecutionContext.CurrentOrNull?.AddDependency( this );
 
         public override bool CanBeInherited
         {
@@ -502,7 +499,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             for ( var i = 0; i < types.Length; i++ )
             {
-                typeArgumentSymbols[i] = types[i].GetSymbol();
+                typeArgumentSymbols[i] = types[i].GetSymbol().AssertSymbolNotNull();
             }
 
             var symbol = ((INamedTypeSymbol) this.TypeSymbol.OriginalDefinition).Construct( typeArgumentSymbols );

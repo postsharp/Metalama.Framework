@@ -205,7 +205,8 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
-            this._namedTypes = ImmutableDictionary.Create<Ref<INamespaceOrNamedType>, TypeUpdatableCollection>().WithComparers( RefEqualityComparer<INamespaceOrNamedType>.Default );
+            this._namedTypes = ImmutableDictionary.Create<Ref<INamespaceOrNamedType>, TypeUpdatableCollection>()
+                .WithComparers( RefEqualityComparer<INamespaceOrNamedType>.Default );
 
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( RefEqualityComparer<IHasParameters>.Default );
@@ -354,12 +355,18 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamedTypeCollection Types
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef(this.CompilationContext).As<INamespaceOrNamedType>(), false ) );
+                new CompilationTypeUpdatableCollection(
+                    this,
+                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
+                    false ) );
 
         public INamedTypeCollection AllTypes
             => new NamedTypeCollection(
                 this,
-                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(), true ) );
+                new CompilationTypeUpdatableCollection(
+                    this,
+                    this.RoslynCompilation.SourceModule.GlobalNamespace.ToTypedRef( this.CompilationContext ).As<INamespaceOrNamedType>(),
+                    true ) );
 
         [Memo]
         public override IAttributeCollection Attributes
@@ -393,12 +400,17 @@ namespace Metalama.Framework.Engine.CodeModel
 
             switch ( baseType )
             {
-                case NamedType namedType:
+                case (NamedType or NamedTypeImpl) and INamedTypeImpl namedType:
                     // TODO: This should include derived types that were introduced.
-                    return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType.GetSymbol(), options ).Select( t => this.Factory.GetNamedType( t ) );
+                    return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation(
+                            baseType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedBaseTypes ),
+                            options )
+                        .Select( t => this.Factory.GetNamedType( t ) );
+
                 case BuiltNamedType or NamedTypeBuilder:
                     // TODO: This should should be built for named types that were introduced.
                     return ImmutableArray<INamedType>.Empty;
+
                 default:
                     throw new AssertionFailedException( $"Unsupported: {baseType}" );
             }
@@ -424,7 +436,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type, bool includeDerivedTypes = false )
         {
-            var typeSymbol = type.GetSymbol().AssertNotNull();
+            var typeSymbol = type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes );
 
             if ( includeDerivedTypes )
             {
@@ -615,7 +627,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal CompilationModel CreateImmutableClone( string? debugLabel = null ) => new( this, false, debugLabel, this.Options );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
-            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertNotNull() );
+            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertSymbolNotNull() );
 
         [Memo]
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );
