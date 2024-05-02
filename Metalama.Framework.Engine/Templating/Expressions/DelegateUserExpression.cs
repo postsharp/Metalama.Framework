@@ -7,7 +7,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
-internal class DelegateUserExpression : UserExpression
+internal sealed class DelegateUserExpression : UserExpression
 {
     private readonly Func<SyntaxSerializationContext, ExpressionSyntax> _createExpression;
 
