@@ -2334,7 +2334,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     }
 
     public override SyntaxNode VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
-        => this.VisitAnonymousFunctionExpression( node, node.DelegateKeyword, node.ParameterList.Parameters, base.VisitAnonymousMethodExpression );
+        => this.VisitAnonymousFunctionExpression(
+            node,
+            node.DelegateKeyword,
+            node.ParameterList?.Parameters ?? (IEnumerable<ParameterSyntax>) Array.Empty<ParameterSyntax>(),
+            base.VisitAnonymousMethodExpression );
 
     public override SyntaxNode VisitQueryExpression( QueryExpressionSyntax node )
     {
@@ -2382,7 +2386,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     #region Lambda expressions
 
-    private SyntaxNode? VisitAnonymousFunctionExpression<T>(
+    private SyntaxNode VisitAnonymousFunctionExpression<T>(
         T node,
         SyntaxToken tokenForDiagnostic,
         IEnumerable<ParameterSyntax> parameters,
@@ -2409,7 +2413,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
         if ( node.ExpressionBody != null )
         {
-            // Dynamic expressions are not supported in lambdas.
+            // Lambda expressions returning a dynamic type are not supported because they change the return
+            // type of the whole invocation expression when using LINQ selects. Allowing this would require more handling
+            // and testing.
             if ( this._syntaxTreeAnnotationMap.GetExpressionType( node.ExpressionBody ) is IDynamicTypeSymbol )
             {
                 this.ReportDiagnostic( TemplatingDiagnosticDescriptors.DynamicInLambdaUnsupported, node, default );
@@ -2432,7 +2438,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             // We must know the scope.
             this.ReportDiagnostic( TemplatingDiagnosticDescriptors.UnknownScopedAnonymousMethod, tokenForDiagnostic, default );
 
-            return callBase( node );
+            return callBase( node )!;
         }
     }
 
@@ -2461,7 +2467,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     }
 
     public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
-        => this.VisitAnonymousFunctionExpression( node, node.ArrowToken, Enumerable.Empty<ParameterSyntax>(), base.VisitSimpleLambdaExpression );
+        => this.VisitAnonymousFunctionExpression( node, node.ArrowToken, [node.Parameter], base.VisitSimpleLambdaExpression );
 
     #endregion
 

@@ -160,7 +160,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     private void DeclareMetaVariable( string hint, SyntaxToken metaVariableIdentifier )
     {
-        var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( hint );
+        var callGetUniqueIdentifier =
+            this._templateMetaSyntaxFactory.GetUniqueIdentifier( hint );
 
         var localDeclaration =
             LocalDeclarationStatement(
@@ -365,11 +366,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( IsLocalSymbol( identifierSymbol ) )
             {
+                if ( identifierSymbol is IParameterSymbol { Name: "_" } )
+                {
+                    // If we have a discard parameter (or a pseudo-discard one, just by naming conventions).
+                    // Formally, it may be a usable parameter and we may need to map it,
+                    // but it's better in general not to do so and to let the user cope with the consequences of conflicts.
+                    return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( "_" ) );
+                }
+
                 if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
                     // It is the first time we are seeing this local symbol, so we reserve a name for it.
 
                     declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
+
                     this._currentMetaContext.AddRunTimeSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
                 }
 
@@ -2249,7 +2259,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             // Compile-time returns can exist in anonymous methods.
             return base.VisitReturnStatement( node )!;
         }
-        
+
         InvocationExpressionSyntax invocationExpression;
 
         if ( this.IsCompileTimeDynamic( node.Expression ) )

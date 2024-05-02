@@ -134,7 +134,6 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-
                 try
                 {
                     testResult = await testRunner.RunAsync( testInput, testContext );
@@ -150,7 +149,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                 var errorsDocument = new FlowDocument();
 
-                var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
+                var testSyntaxTree = testResult?.SyntaxTrees.FirstOrDefault();
 
                 if ( testSyntaxTree != null )
                 {
