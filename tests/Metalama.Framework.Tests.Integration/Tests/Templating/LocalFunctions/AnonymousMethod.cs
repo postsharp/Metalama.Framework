@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.LambdaStatement_Parameters;
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.AnonymousMethod;
 
 [CompileTime]
 internal class Aspect
@@ -11,13 +11,7 @@ internal class Aspect
     private dynamic? Template()
     {
         object? result = null;
-
-        RunTimeClass.Execute(
-            x =>
-            {
-                Console.WriteLine( x );
-                result = meta.Proceed();
-            } );
+        RunTimeClass.Execute( delegate { result = meta.Proceed(); } );
 
         return result;
     }
@@ -25,7 +19,7 @@ internal class Aspect
 
 internal class RunTimeClass
 {
-    public static void Execute( Action<object> action ) => action( new object() );
+    public static void Execute( Action action ) => action();
 }
 
 internal class TargetCode

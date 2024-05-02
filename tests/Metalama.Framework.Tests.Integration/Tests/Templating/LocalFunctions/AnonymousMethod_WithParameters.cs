@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.LambdaStatement_Parameters;
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.AnonymousMethodWithParameters;
 
 [CompileTime]
 internal class Aspect
@@ -13,7 +13,7 @@ internal class Aspect
         object? result = null;
 
         RunTimeClass.Execute(
-            x =>
+            delegate ( object x )
             {
                 Console.WriteLine( x );
                 result = meta.Proceed();

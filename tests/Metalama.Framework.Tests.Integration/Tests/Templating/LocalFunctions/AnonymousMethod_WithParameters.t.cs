@@ -1,7 +1,7 @@
 private int Method(int a)
 {
   object? result = null;
-  global::Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.LambdaStatement_Parameters.RunTimeClass.Execute(x =>
+  global::Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.AnonymousMethodWithParameters.RunTimeClass.Execute(delegate (object x)
   {
     global::System.Console.WriteLine(x);
     result = this.Method(a);
