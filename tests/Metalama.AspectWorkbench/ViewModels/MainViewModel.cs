@@ -179,7 +179,7 @@ namespace Metalama.AspectWorkbench.ViewModels
                         {
                             var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                            this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                            this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3, true );
                         }
                         else
                         {

@@ -3,63 +3,151 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using RoslynProject = Microsoft.CodeAnalysis.Project;
 
 namespace Metalama.Framework.Engine.Formatting
 {
     public static partial class OutputCodeFormatter
     {
-        public static async ValueTask<(Document Document, CompilationUnitSyntax Syntax)> FormatAsync(
+        private static async Task<Dictionary<DocumentId, Document>> TransformAllAsync(
+            Dictionary<DocumentId, Document> inputDocuments,
+            Func<Document, Task<Document>> transformAsync )
+        {
+            var tasks = inputDocuments.SelectAsMutableList(
+                async x =>
+                {
+                    var newDocument = await transformAsync( x.Value );
+
+                    return new KeyValuePair<DocumentId, Document>( x.Key, newDocument );
+                } );
+
+            await Task.WhenAll( tasks );
+
+            return tasks.ToDictionary( t => t.Result.Key, t => t.Result.Value );
+        }
+
+        private static async Task<OutputCodeFormatterResult> ApplyToSolutionAsync(
+            Solution solution,
+            Dictionary<DocumentId, Document> documents,
+            CancellationToken cancellationToken )
+        {
+            var modifiedSolution = solution;
+
+            foreach ( var document in documents )
+            {
+                modifiedSolution = modifiedSolution
+                    .GetDocument( document.Key )
+                    .AssertNotNull()
+                    .WithSyntaxRoot( (await document.Value.GetSyntaxRootAsync( cancellationToken )).AssertNotNull() )
+                    .Project
+                    .Solution;
+            }
+
+            return new OutputCodeFormatterResult(
+                modifiedSolution,
+                documents.Keys.ToDictionary( x => x, x => modifiedSolution.GetDocument( x ).AssertNotNull() ) );
+        }
+
+        private static async Task<OutputCodeFormatterResult> TransformAllAsync(
+            OutputCodeFormatterResult input,
+            Func<Document, Task<Document>> transformAsync,
+            CancellationToken cancellationToken )
+        {
+            var documents = await TransformAllAsync( input.Documents, transformAsync );
+
+            return await ApplyToSolutionAsync( input.Solution, documents, cancellationToken );
+        }
+
+        public static async ValueTask<Document> FormatAsync(
             Document document,
-            IEnumerable<Diagnostic>? diagnostics = null,
+            IReadOnlyCollection<Diagnostic>? diagnostics = null,
             bool reformatAll = true,
             CancellationToken cancellationToken = default )
         {
-            // Add diagnostics as annotations.
-            if ( diagnostics != null )
+            var result = await FormatAsync( document.Project.Solution, [document], diagnostics, reformatAll, cancellationToken );
+
+            return result.Documents.Single().Value;
+        }
+
+        public static async ValueTask<OutputCodeFormatterResult> FormatAsync(
+            Solution solution,
+            IReadOnlyCollection<Document> documents,
+            IReadOnlyCollection<Diagnostic>? diagnostics = null,
+            bool reformatAll = true,
+            CancellationToken cancellationToken = default )
+        {
+            if ( documents.Count == 0 )
             {
-                document = document.WithSyntaxRoot(
-                    FormattedCodeWriter.AddDiagnosticAnnotations( (await document.GetSyntaxRootAsync( cancellationToken ))!, document.FilePath, diagnostics ) );
+                return new OutputCodeFormatterResult( solution, new Dictionary<DocumentId, Document>() );
             }
-            
+
+            var result = new OutputCodeFormatterResult( documents.First().Project.Solution, documents.ToDictionary( x => x.Id, x => x ) );
+
+            // Add diagnostics as annotations.
+            if ( diagnostics is { Count: > 0 } )
+            {
+                result = await TransformAllAsync(
+                    result,
+                    async document => document.WithSyntaxRoot(
+                        FormattedCodeWriter.AddDiagnosticAnnotations(
+                            (await document.GetSyntaxRootAsync( cancellationToken ))!,
+                            document.FilePath,
+                            diagnostics ) ),
+                    cancellationToken );
+            }
+
             // Run custom simplifications.
-            document = document.WithSyntaxRoot( new CustomerSimplifier().Visit( await document.GetSyntaxRootAsync( cancellationToken ) )! );
+            result = await TransformAllAsync(
+                result,
+                async document =>
+                    document.WithSyntaxRoot( new CustomerSimplifier().Visit( await document.GetSyntaxRootAsync( cancellationToken ) )! ),
+                cancellationToken );
 
             // Add imports and simplify.
-            var documentWithImports = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
-            var simplifiedDocument = await Simplifier.ReduceAsync( documentWithImports, cancellationToken: cancellationToken );
+            result = await TransformAllAsync(
+                result,
+                document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+                cancellationToken );
 
-            Document formattedDocument;
+            result = await TransformAllAsync( result, document => Simplifier.ReduceAsync( document, cancellationToken: cancellationToken ), cancellationToken );
 
             // Reformat.
             if ( reformatAll )
             {
-                formattedDocument = await Formatter.FormatAsync( simplifiedDocument, cancellationToken: cancellationToken );
+                result = await TransformAllAsync(
+                    result,
+                    document => Formatter.FormatAsync( document, cancellationToken: cancellationToken ),
+                    cancellationToken );
             }
             else
             {
-                var classifiedTextSpans = new ClassifiedTextSpanCollection( await simplifiedDocument.GetTextAsync( cancellationToken ) );
-                var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
-                visitor.Visit( await simplifiedDocument.GetSyntaxRootAsync( cancellationToken ) );
-                classifiedTextSpans.Polish();
-                var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
+                result = await TransformAllAsync(
+                    result,
+                    async document =>
+                    {
+                        var classifiedTextSpans = new ClassifiedTextSpanCollection( await document.GetTextAsync( cancellationToken ) );
+                        var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
+                        visitor.Visit( await document.GetSyntaxRootAsync( cancellationToken ) );
+                        classifiedTextSpans.Polish();
+                        var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
 
-                formattedDocument = await Formatter.FormatAsync(
-                    simplifiedDocument,
-                    generatedSpans,
-                    cancellationToken: cancellationToken );
+                        return await Formatter.FormatAsync(
+                            document,
+                            generatedSpans,
+                            cancellationToken: cancellationToken );
+                    },
+                    cancellationToken );
             }
 
-            var formattedSyntax = (CompilationUnitSyntax) (await formattedDocument.GetSyntaxRootAsync( cancellationToken ))!;
-
-            return (formattedDocument, formattedSyntax);
+            return result;
         }
 
         internal static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
@@ -67,6 +155,7 @@ namespace Metalama.Framework.Engine.Formatting
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
             List<SyntaxTreeTransformation> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
+            List<(Document InputDocument, SyntaxTree InputSyntaxTree)> inputDocuments = new( compilation.ModifiedSyntaxTrees.Count );
 
             foreach ( var modifiedSyntaxTree in compilation.ModifiedSyntaxTrees.Values )
             {
@@ -86,10 +175,16 @@ namespace Metalama.Framework.Engine.Formatting
                     continue;
                 }
 
-                var formatted = await FormatAsync( document, null, false, cancellationToken );
+                inputDocuments.Add( (document, syntaxTree) );
+            }
 
-                syntaxTreeReplacements.Add(
-                    SyntaxTreeTransformation.ReplaceTree( syntaxTree, syntaxTree.WithRootAndOptions( formatted.Syntax, syntaxTree.Options ) ) );
+            var formatted = await FormatAsync( project.Solution, inputDocuments.SelectAsMutableList( d => d.InputDocument ), null, false, cancellationToken );
+
+            foreach ( var document in inputDocuments )
+            {
+                var newSyntaxTree = (await formatted.Documents[document.InputDocument.Id].GetSyntaxTreeAsync( cancellationToken )).AssertNotNull();
+
+                syntaxTreeReplacements.Add( SyntaxTreeTransformation.ReplaceTree( document.InputSyntaxTree, newSyntaxTree ) );
             }
 
             return compilation.Update( syntaxTreeReplacements );
@@ -97,31 +192,18 @@ namespace Metalama.Framework.Engine.Formatting
 
         internal static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {
-            var formattedCompilation = compilation;
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
 
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
-            {
-                var documentId = syntaxTreeMap[syntaxTree];
+            var documents = compilation.SyntaxTrees.Select( x => project.GetDocument( syntaxTreeMap[x] ) )
+                .Where( d => d is { SupportsSyntaxTree: true } )
+                .ToReadOnlyList();
 
-                var document = project.GetDocument( documentId )!;
+            var result = await FormatAsync( project.Solution, documents!, null, true, cancellationToken );
 
-                if ( !document.SupportsSyntaxTree )
-                {
-                    continue;
-                }
-
-                var formatted = await FormatAsync( document, null, true, cancellationToken );
-
-                formattedCompilation = formattedCompilation.ReplaceSyntaxTree(
-                    syntaxTree,
-                    syntaxTree.WithRootAndOptions( formatted.Syntax, syntaxTree.Options ) );
-            }
-
-            return formattedCompilation;
+            return (await result.Solution.Projects.Single().GetCompilationAsync( cancellationToken )).AssertNotNull();
         }
 
-        private static async Task<(Microsoft.CodeAnalysis.Project Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(
+        private static async Task<(RoslynProject Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {

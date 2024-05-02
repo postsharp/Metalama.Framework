@@ -109,10 +109,8 @@ namespace Metalama.Testing.AspectTesting
 
             if ( this._parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
-                var formatted = await OutputCodeFormatter.FormatAsync( document );
-
-                this.OutputDocument = formatted.Document;
-                this.OutputRunTimeSyntaxRoot = formatted.Syntax;
+                this.OutputDocument = (await OutputCodeFormatter.FormatAsync( document ))!;
+                this.OutputRunTimeSyntaxRoot = (CompilationUnitSyntax) (await this.OutputDocument.GetSyntaxRootAsync())!;
             }
             else
             {

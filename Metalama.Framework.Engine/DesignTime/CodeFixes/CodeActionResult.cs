@@ -73,13 +73,12 @@ public sealed class CodeActionResult
 
             if ( format )
             {
-                var formatted = (await OutputCodeFormatter.FormatAsync(
-                    solution.GetDocument( document.Id )!,
+                solution = (await OutputCodeFormatter.FormatAsync(
+                    solution,
+                    [solution.GetDocument( document.Id )!],
                     null,
                     false,
-                    cancellationToken )).Syntax;
-
-                solution = solution.WithDocumentSyntaxRoot( document.Id, formatted );
+                    cancellationToken )).Solution;
             }
         }
 
