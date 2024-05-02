@@ -613,8 +613,8 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0284",
                 _category,
-                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to remove the ambiguity.",
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity.",
                 Error,
-                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to remove the ambiguity." );
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity." );
     }
 }
