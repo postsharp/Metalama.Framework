@@ -2269,7 +2269,6 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         {
             // We are in a compile-time lambda.
             return base.VisitReturnStatement( node )!.AddScopeAnnotation( CompileTimeOnly );
-
         }
         else
         {
@@ -2335,15 +2334,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     }
 
     public override SyntaxNode VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
-    {
-        if ( !this._currentScopeContext.PreferRunTimeExpression )
-        {
-            this.ReportUnsupportedLanguageFeature( node.DelegateKeyword, "compile-time anonymous method" );
-        }
-
-        return base.VisitAnonymousMethodExpression( node )!
-            .AddTargetScopeAnnotation( RunTimeOnly );
-    }
+        => this.VisitAnonymousFunctionExpression( node, node.DelegateKeyword, node.ParameterList.Parameters, base.VisitAnonymousMethodExpression );
 
     public override SyntaxNode VisitQueryExpression( QueryExpressionSyntax node )
     {
@@ -2391,13 +2382,18 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     #region Lambda expressions
 
-    private SyntaxNode? VisitLambdaExpression<T>( T node, IEnumerable<ParameterSyntax> parameters, Func<T, SyntaxNode?> callBase )
-        where T : LambdaExpressionSyntax
+    private SyntaxNode? VisitAnonymousFunctionExpression<T>(
+        T node,
+        SyntaxToken tokenForDiagnostic,
+        IEnumerable<ParameterSyntax> parameters,
+        Func<T, SyntaxNode?> callBase )
+        where T : AnonymousFunctionExpressionSyntax
     {
         var wellKnownScope = this._currentScopeContext.PreferRunTimeExpression ? RunTimeOnly
             : this._currentScopeContext.ForceCompileTimeOnlyExpression ? CompileTimeOnly
             : LateBound;
 
+        // Remember the scope of the parameters.
         if ( wellKnownScope != LateBound )
         {
             foreach ( var parameter in parameters )
@@ -2433,8 +2429,8 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
         else
         {
-            // This is a compile-time statement lambda.
-            this.ReportUnsupportedLanguageFeature( node.ArrowToken, "scoped-neutral statement lambda" );
+            // We must know the scope.
+            this.ReportDiagnostic( TemplatingDiagnosticDescriptors.UnknownScopedAnonymousMethod, tokenForDiagnostic, default );
 
             return callBase( node );
         }
@@ -2461,11 +2457,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
         }
 
-        return this.VisitLambdaExpression( node, node.ParameterList.Parameters, base.VisitParenthesizedLambdaExpression );
+        return this.VisitAnonymousFunctionExpression( node, node.ArrowToken, node.ParameterList.Parameters, base.VisitParenthesizedLambdaExpression );
     }
 
     public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
-        => this.VisitLambdaExpression( node, Enumerable.Empty<ParameterSyntax>(), base.VisitSimpleLambdaExpression );
+        => this.VisitAnonymousFunctionExpression( node, node.ArrowToken, Enumerable.Empty<ParameterSyntax>(), base.VisitSimpleLambdaExpression );
 
     #endregion
 

@@ -1,2 +1,2 @@
 // TestTemplateCompiler.TryCompile failed.
-// Error LAMA0101 on `=>`: `'scoped-neutral statement lambda' is not supported in a template.`
+// Error LAMA0284 on `=>`: `The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to remove the ambiguity.`

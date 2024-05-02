@@ -1,4 +1,8 @@
-private int Method(int a)
+using System;
+
+private int Method( int a )
 {
-  return null;
+    Console.WriteLine( "Hello, world." );
+
+    return null;
 }

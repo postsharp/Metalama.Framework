@@ -608,5 +608,13 @@ namespace Metalama.Framework.Engine.Templating
                 "You should remove the parameter list from the type and use explicitly defined constructors instead.",
                 Error,
                 "Non-record primary constructors are not currently supported in compile-time code." );
+
+        internal static readonly DiagnosticDefinition UnknownScopedAnonymousMethod
+            = new(
+                "LAMA0284",
+                _category,
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to remove the ambiguity.",
+                Error,
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to remove the ambiguity." );
     }
 }
