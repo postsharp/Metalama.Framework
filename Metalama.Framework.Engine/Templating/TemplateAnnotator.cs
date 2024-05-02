@@ -44,7 +44,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     private readonly TemplateProjectManifestBuilder? _templateProjectManifestBuilder;
 
     /// <summary>
-    /// Scope of locally-defined symbols (local variables, anonymous types, ....).
+    /// Scope of locally-defined symbols (local variables, anonymous types, lambda parameters, ....).
     /// </summary>
     private readonly Dictionary<ISymbol, TemplatingScope> _localScopes;
 
@@ -182,7 +182,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
             // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
-            case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } when this._localScopes.TryGetValue( symbol, out var scope ):
+            case ILocalSymbol or INamedTypeSymbol { IsAnonymousType: true } or IParameterSymbol when this._localScopes.TryGetValue( symbol, out var scope ):
                 return scope;
 
             // When a local variable is assigned to an anonymous type, the scope is unknown because the anonymous
@@ -2263,7 +2263,19 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             .AddScopeAnnotation( conditionScope );
     }
 
-    public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node ) => base.VisitReturnStatement( node )!.AddScopeAnnotation( RunTimeOnly );
+    public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
+    {
+        if ( this._currentScopeContext.ForceCompileTimeOnlyExpression )
+        {
+            // We are in a compile-time lambda.
+            return base.VisitReturnStatement( node )!.AddScopeAnnotation( CompileTimeOnly );
+
+        }
+        else
+        {
+            return base.VisitReturnStatement( node )!.AddScopeAnnotation( RunTimeOnly );
+        }
+    }
 
     #region Unsupported Features
 
@@ -2322,11 +2334,15 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
     }
 
-    public override SyntaxNode? VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+    public override SyntaxNode VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
     {
-        this.ReportUnsupportedLanguageFeature( node.DelegateKeyword, "anonymous method" );
+        if ( !this._currentScopeContext.PreferRunTimeExpression )
+        {
+            this.ReportUnsupportedLanguageFeature( node.DelegateKeyword, "compile-time anonymous method" );
+        }
 
-        return base.VisitAnonymousMethodExpression( node );
+        return base.VisitAnonymousMethodExpression( node )!
+            .AddTargetScopeAnnotation( RunTimeOnly );
     }
 
     public override SyntaxNode VisitQueryExpression( QueryExpressionSyntax node )
@@ -2375,9 +2391,26 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
     #region Lambda expressions
 
-    private SyntaxNode? VisitLambdaExpression<T>( T node, Func<T, SyntaxNode?> callBase )
+    private SyntaxNode? VisitLambdaExpression<T>( T node, IEnumerable<ParameterSyntax> parameters, Func<T, SyntaxNode?> callBase )
         where T : LambdaExpressionSyntax
     {
+        var wellKnownScope = this._currentScopeContext.PreferRunTimeExpression ? RunTimeOnly
+            : this._currentScopeContext.ForceCompileTimeOnlyExpression ? CompileTimeOnly
+            : LateBound;
+
+        if ( wellKnownScope != LateBound )
+        {
+            foreach ( var parameter in parameters )
+            {
+                var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter );
+
+                if ( symbol != null )
+                {
+                    this.SetLocalSymbolScope( symbol, wellKnownScope );
+                }
+            }
+        }
+
         if ( node.ExpressionBody != null )
         {
             // Dynamic expressions are not supported in lambdas.
@@ -2390,10 +2423,18 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
 
             return node.WithExpressionBody( annotatedExpression ).WithScopeAnnotationFrom( annotatedExpression );
         }
+        else if ( wellKnownScope != LateBound )
+        {
+            var scope = this._currentScopeContext.PreferRunTimeExpression ? RunTimeOnly : CompileTimeOnly;
+
+            var annotateBlock = (BlockSyntax) this.VisitBlock( node.Block! )!;
+
+            return node.WithBlock( annotateBlock ).AddTargetScopeAnnotation( scope );
+        }
         else
         {
-            // it means Expression is a Block
-            this.ReportUnsupportedLanguageFeature( node.ArrowToken, "statement lambda" );
+            // This is a compile-time statement lambda.
+            this.ReportUnsupportedLanguageFeature( node.ArrowToken, "scoped-neutral statement lambda" );
 
             return callBase( node );
         }
@@ -2420,11 +2461,11 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
             }
         }
 
-        return this.VisitLambdaExpression( node, base.VisitParenthesizedLambdaExpression );
+        return this.VisitLambdaExpression( node, node.ParameterList.Parameters, base.VisitParenthesizedLambdaExpression );
     }
 
     public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
-        => this.VisitLambdaExpression( node, base.VisitSimpleLambdaExpression );
+        => this.VisitLambdaExpression( node, Enumerable.Empty<ParameterSyntax>(), base.VisitSimpleLambdaExpression );
 
     #endregion
 
@@ -2845,12 +2886,9 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
     public override SyntaxNode VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
     {
         var transformedType = this.Visit( node.Type );
-        var objectType = this._syntaxTreeAnnotationMap.GetExpressionType( node );
 
-        if ( objectType == null )
-        {
-            throw new AssertionFailedException( $"Cannot get the expression type for '{node}'." );
-        }
+        var objectType = this._syntaxTreeAnnotationMap.GetExpressionType( node )
+                         ?? throw new AssertionFailedException( $"Cannot get the expression type for '{node}'." );
 
         var objectTypeScope = this.GetSymbolScope( objectType );
 

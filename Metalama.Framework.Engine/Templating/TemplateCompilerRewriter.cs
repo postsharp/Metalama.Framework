@@ -2244,6 +2244,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
     {
+        if ( node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
+        {
+            // Compile-time returns can exist in anonymous methods.
+            return base.VisitReturnStatement( node )!;
+        }
+        
         InvocationExpressionSyntax invocationExpression;
 
         if ( this.IsCompileTimeDynamic( node.Expression ) )

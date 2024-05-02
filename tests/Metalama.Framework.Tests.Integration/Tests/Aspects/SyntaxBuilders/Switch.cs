@@ -30,7 +30,7 @@ public class TheAspect : TypeAspect
 [TheAspect]
 internal class C
 {
-    private string A { get; set; }
+    private string? A { get; set; }
 
-    private string B { get; set; }
+    private string? B { get; set; }
 }

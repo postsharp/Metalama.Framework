@@ -18,7 +18,6 @@ public class YourAttribute : Attribute
     public YourAttribute( string a, params string?[] p ) { }
 }
 
-
 [Inheritable]
 public class MyAspect : MethodAspect
 {
@@ -26,12 +25,12 @@ public class MyAspect : MethodAspect
     {
         var attr1 = AttributeConstruction.Create( typeof(MyAttribute), new object[] { "x", 1, 2, 3, 4, 5 } );
         builder.Advice.IntroduceAttribute( builder.Target, attr1 );
-        
+
         //  Known issue: should pass the 'null' argument, but does not.
-        var attr2 = AttributeConstruction.Create( typeof(MyAttribute), new object[] { "x", null } );
-        builder.Advice.IntroduceAttribute( builder.Target, attr2, whenExists: OverrideStrategy.New  );
-        
-        var attr3 = AttributeConstruction.Create( typeof(YourAttribute), new object[] { "x", null } );
+        var attr2 = AttributeConstruction.Create( typeof(MyAttribute), new object?[] { "x", null } );
+        builder.Advice.IntroduceAttribute( builder.Target, attr2, whenExists: OverrideStrategy.New );
+
+        var attr3 = AttributeConstruction.Create( typeof(YourAttribute), new object?[] { "x", null } );
         builder.Advice.IntroduceAttribute( builder.Target, attr3, whenExists: OverrideStrategy.New );
     }
 }
