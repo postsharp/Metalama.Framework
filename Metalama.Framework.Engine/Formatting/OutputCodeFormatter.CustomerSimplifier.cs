@@ -17,6 +17,7 @@ public static partial class OutputCodeFormatter
 
         public CustomSimplifier( SemanticModel? semanticModel )
         {
+            // The semantic model is optional, but we cannot do all much useful work if we don't have it.
             this._semanticModel = semanticModel;
         }
         
@@ -24,6 +25,9 @@ public static partial class OutputCodeFormatter
 
         public override SyntaxNode VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
         {
+            // We want to simplify delegate creation from `new Action( () => { ... } )` to just `() => { ... }`.
+            // This simplification is valid when the delegate is target typed. It is implemented for invocation arguments
+            // and assignments.
             if ( node.HasAnnotation( Simplifier.Annotation ) && node.ArgumentList?.Arguments is
                                                                  [{ Expression: AnonymousFunctionExpressionSyntax anonymousFunctionExpression }]
                                                              && node.Parent?.Kind() is SyntaxKind.Argument or SyntaxKind.SimpleAssignmentExpression )
