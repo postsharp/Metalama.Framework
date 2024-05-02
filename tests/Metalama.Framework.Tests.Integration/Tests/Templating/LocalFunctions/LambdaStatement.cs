@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.AnonymousMethod;
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.LambdaStatement;
 
 [CompileTime]
 internal class Aspect

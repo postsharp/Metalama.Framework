@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.CompileTimeAnonymousMethod;
+namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.LambdaStatement_Neutral;
 
 [CompileTime]
 internal class Aspect
@@ -10,9 +10,9 @@ internal class Aspect
     [TestTemplate]
     private dynamic? Template()
     {
-        var func = meta.CompileTime( new Func<string>( () => { return "Hello, world."; } ) );
+        // Not supported because neutral.
+        var action = new Func<string>( () => { return "Hello, world."; } );
 
-        Console.WriteLine(func());
         return null;
     }
 }
