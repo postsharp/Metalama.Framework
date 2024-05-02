@@ -4,12 +4,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers;
 
@@ -21,14 +19,6 @@ internal abstract class Invoker<T>
     protected InvokerOptions Options { get; }
 
     protected object? Target { get; }
-
-    protected static SyntaxGenerationContext CurrentGenerationContext
-        => TemplateExpansionContext.CurrentSyntaxGenerationContextOrNull
-           ?? throw new InvalidOperationException( "This operation can only be executed in the context of a template." );
-
-    protected static SyntaxSerializationContext CurrentSerializationContext
-        => TemplateExpansionContext.CurrentSyntaxSerializationContextOrNull
-           ?? throw new InvalidOperationException( "This operation can only be executed in the context of a template." );
 
     protected Invoker( T member, InvokerOptions? options, object? target )
     {
@@ -113,14 +103,14 @@ internal abstract class Invoker<T>
                 : definition.Name;
     }
 
-    protected ReceiverTypedExpressionSyntax GetReceiverInfo()
+    protected ReceiverTypedExpressionSyntax GetReceiverInfo( SyntaxSerializationContext syntaxSerializationContext )
     {
         if ( this.Target is UserReceiver receiver )
         {
             receiver = receiver.WithAspectReferenceOrder( this._order );
 
             return new ReceiverTypedExpressionSyntax(
-                receiver.ToTypedExpressionSyntax( CurrentSerializationContext ),
+                receiver.ToTypedExpressionSyntax( syntaxSerializationContext ),
                 false,
                 receiver.AspectReferenceSpecification );
         }
@@ -130,7 +120,7 @@ internal abstract class Invoker<T>
 
             if ( this.Target != null )
             {
-                var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, CurrentSerializationContext );
+                var typedExpressionSyntax = TypedExpressionSyntaxImpl.FromValue( this.Target, syntaxSerializationContext );
 
                 return new ReceiverTypedExpressionSyntax(
                     typedExpressionSyntax,
@@ -141,7 +131,7 @@ internal abstract class Invoker<T>
             {
                 return new ReceiverTypedExpressionSyntax(
                     new ThisTypeUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification )
-                        .ToTypedExpressionSyntax( CurrentSerializationContext ),
+                        .ToTypedExpressionSyntax( syntaxSerializationContext ),
                     false,
                     aspectReferenceSpecification );
             }
@@ -149,7 +139,7 @@ internal abstract class Invoker<T>
             {
                 return new ReceiverTypedExpressionSyntax(
                     new ThisInstanceUserReceiver( this.Member.DeclaringType, aspectReferenceSpecification ).ToTypedExpressionSyntax(
-                        CurrentSerializationContext ),
+                        syntaxSerializationContext ),
                     false,
                     aspectReferenceSpecification );
             }

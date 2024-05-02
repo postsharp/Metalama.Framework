@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,43 +17,50 @@ internal sealed class EventInvoker : Invoker<IEvent>, IEventInvoker
 
     public object Add( object? value )
     {
-        var eventAccess = this.CreateEventExpression( AspectReferenceTargetKind.EventAddAccessor );
+        return new DelegateUserExpression(
+            context =>
+            {
+                var eventAccess = this.CreateEventExpression( AspectReferenceTargetKind.EventAddAccessor, context );
 
-        var expression = AssignmentExpression(
-            SyntaxKind.AddAssignmentExpression,
-            eventAccess,
-            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
-
-        return new SyntaxUserExpression( expression, this.Member.Type );
+                return AssignmentExpression(
+                    SyntaxKind.AddAssignmentExpression,
+                    eventAccess,
+                    TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, context ) );
+            },
+            this.Member.AddMethod.ReturnType );
     }
 
     public object Remove( object? value )
     {
-        var eventAccess = this.CreateEventExpression( AspectReferenceTargetKind.EventRemoveAccessor );
+        return new DelegateUserExpression(
+            context =>
+            {
+                var eventAccess = this.CreateEventExpression( AspectReferenceTargetKind.EventRemoveAccessor, context );
 
-        var expression = AssignmentExpression(
-            SyntaxKind.SubtractAssignmentExpression,
-            eventAccess,
-            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
-
-        return new SyntaxUserExpression( expression, this.Member.Type );
+                return AssignmentExpression(
+                    SyntaxKind.SubtractAssignmentExpression,
+                    eventAccess,
+                    TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, context ) );
+            },
+            this.Member.RemoveMethod.ReturnType );
     }
 
     public object Raise( params object?[] args )
     {
-        var eventAccess = this.CreateEventExpression( AspectReferenceTargetKind.EventRaiseAccessor );
+        return new DelegateUserExpression(
+            context =>
+            {
+                var eventAccess = this.CreateEventExpression( AspectReferenceTargetKind.EventRaiseAccessor, context );
 
-        var arguments = this.Member.GetArguments(
-            this.Member.Signature.Parameters,
-            TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ),
-            CurrentGenerationContext );
+                var arguments = this.Member.GetArguments(
+                    this.Member.Signature.Parameters,
+                    TypedExpressionSyntaxImpl.FromValues( args, context ),
+                    context.SyntaxGenerationContext );
 
-        var expression = ConditionalAccessExpression(
-            eventAccess,
-            InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
-
-        return new SyntaxUserExpression(
-            expression,
+                return ConditionalAccessExpression(
+                    eventAccess,
+                    InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
+            },
             this.Member.Signature.ReturnType );
     }
 
@@ -61,14 +69,14 @@ internal sealed class EventInvoker : Invoker<IEvent>, IEventInvoker
     public IEventInvoker With( object? target, InvokerOptions options = default )
         => this.Target == target && this.Options == options ? this : new EventInvoker( this.Member, options, target );
 
-    private ExpressionSyntax CreateEventExpression( AspectReferenceTargetKind targetKind )
+    private ExpressionSyntax CreateEventExpression( AspectReferenceTargetKind targetKind, SyntaxSerializationContext syntaxSerializationContext )
     {
         this.CheckInvocationOptionsAndTarget();
 
-        var receiverInfo = this.GetReceiverInfo();
+        var receiverInfo = this.GetReceiverInfo( syntaxSerializationContext );
         var name = IdentifierName( this.GetCleanTargetMemberName() );
 
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, syntaxSerializationContext.SyntaxGenerationContext );
 
         var expression = receiverInfo.RequiresConditionalAccess
             ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) )

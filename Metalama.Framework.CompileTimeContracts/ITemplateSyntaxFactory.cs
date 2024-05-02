@@ -52,6 +52,9 @@ public interface ITemplateSyntaxFactory
     T AddSimplifierAnnotations<T>( T node )
         where T : SyntaxNode;
 
+    AnonymousFunctionExpressionSyntax SimplifyAnonymousFunction<T>( T node )
+        where T : AnonymousFunctionExpressionSyntax;
+
     ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString );
 
     ExpressionSyntax ConditionalExpression( ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse );

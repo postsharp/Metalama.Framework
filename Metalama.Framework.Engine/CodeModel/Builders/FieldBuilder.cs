@@ -84,7 +84,7 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => new FieldOrPropertyInvoker( this )
-            .GetTypedExpressionSyntax();
+            .ToTypedExpressionSyntax( syntaxGenerationContext );
 
     public TemplateMember<IField>? InitializerTemplate { get; set; }
 

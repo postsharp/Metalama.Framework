@@ -2406,6 +2406,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddSimplifierAnnotations) ),
             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
+    private ExpressionSyntax WithCallToSimplifyAnonymousFunction( ExpressionSyntax expression )
+        => InvocationExpression(
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SimplifyAnonymousFunction) ),
+            ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+
     /// <summary>
     /// Transforms a type or namespace so that it is fully qualified, but return <c>false</c> if the input <paramref name="node"/>
     /// is not a type or namespace.
@@ -2553,8 +2558,23 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     protected override ExpressionSyntax TransformCastExpression( CastExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformCastExpression( node ) );
 
+    protected override ExpressionSyntax TransformObjectCreationExpression( ObjectCreationExpressionSyntax node ) 
+        => this.WithCallToAddSimplifierAnnotation( base.TransformObjectCreationExpression( node ) );
+
     protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformParenthesizedExpression( node ) );
+
+    protected override ExpressionSyntax TransformArrayCreationExpression( ArrayCreationExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformArrayCreationExpression( node ) );
+
+    protected override ExpressionSyntax TransformParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+        => this.WithCallToSimplifyAnonymousFunction( base.TransformParenthesizedLambdaExpression( node ) );
+
+    protected override ExpressionSyntax TransformSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        => this.WithCallToSimplifyAnonymousFunction( base.TransformSimpleLambdaExpression( node ) );
+
+    protected override ExpressionSyntax TransformAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+        => this.WithCallToSimplifyAnonymousFunction( base.TransformAnonymousMethodExpression( node ) );
 
     public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
     {

@@ -28,6 +28,9 @@ namespace Metalama.Framework.Engine.Formatting
                 document = document.WithSyntaxRoot(
                     FormattedCodeWriter.AddDiagnosticAnnotations( (await document.GetSyntaxRootAsync( cancellationToken ))!, document.FilePath, diagnostics ) );
             }
+            
+            // Run custom simplifications.
+            document = document.WithSyntaxRoot( new CustomerSimplifier().Visit( await document.GetSyntaxRootAsync( cancellationToken ) )! );
 
             // Add imports and simplify.
             var documentWithImports = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );

@@ -2,11 +2,13 @@
 internal class C
 {
   public bool CanExecute(object? x) => x != null;
-  public void M(global::System.Int32 a)
+  public static void Execute(Func<object, bool> f) => f(new object ());
+  public void M(int a)
   {
-    if (new global::System.Func<global::System.Object, global::System.Boolean>(parameter => (bool)this.CanExecute((global::System.Int32)parameter)).Invoke(a))
+    if (new Func<object, bool>(parameter => CanExecute((int)parameter)).Invoke(a))
     {
-      global::System.Console.WriteLine("Hello, world.");
+      Console.WriteLine("Hello, world.");
     }
+    C.Execute(parameter => this.CanExecute((int)parameter));
   }
 }

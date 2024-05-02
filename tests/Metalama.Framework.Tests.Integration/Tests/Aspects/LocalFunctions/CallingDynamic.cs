@@ -1,3 +1,6 @@
+#if TEST_OPTIONS
+// @FormatOutput
+#endif
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
@@ -20,6 +23,8 @@ public class TheAspect : TypeAspect
         {
             Console.WriteLine( "Hello, world." );
         }
+        
+        C.Execute(canExecuteExpression.Value);
     }
 }
 
@@ -28,4 +33,6 @@ public class TheAspect : TypeAspect
 internal class C
 {
     public bool CanExecute( object? x ) => x != null;
+
+    public static void Execute( Func<object, bool> f ) => f( new object() );
 }

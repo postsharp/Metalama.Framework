@@ -23,15 +23,15 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
         options,
         target ) { }
 
-    private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind )
+    private ExpressionSyntax CreatePropertyExpression( AspectReferenceTargetKind targetKind, SyntaxSerializationContext context )
     {
         this.CheckInvocationOptionsAndTarget();
 
-        var receiverInfo = this.GetReceiverInfo();
+        var receiverInfo = this.GetReceiverInfo( context );
 
         var name = IdentifierName( this.GetCleanTargetMemberName() );
 
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context.SyntaxGenerationContext );
 
         ExpressionSyntax expression;
 
@@ -61,20 +61,23 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
 
     public object SetValue( object? value )
     {
-        var propertyAccess = this.CreatePropertyExpression( AspectReferenceTargetKind.PropertySetAccessor );
+        return new DelegateUserExpression(
+            context =>
+            {
+                var propertyAccess = this.CreatePropertyExpression( AspectReferenceTargetKind.PropertySetAccessor, context );
 
-        var expression = AssignmentExpression(
-            SyntaxKind.SimpleAssignmentExpression,
-            propertyAccess,
-            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
-
-        return new SyntaxUserExpression( expression, this.Member.Type );
+                return AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    propertyAccess,
+                    TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, context ) );
+            },
+            this.Member.Type );
     }
 
     public ref object? Value
         => ref RefHelper.Wrap(
-            new SyntaxUserExpression(
-                this.CreatePropertyExpression( AspectReferenceTargetKind.Self ),
+            new DelegateUserExpression(
+                context => this.CreatePropertyExpression( AspectReferenceTargetKind.Self, context ),
                 this.Member.Type,
                 this.IsRef(),
                 this.Member.Writeability != Writeability.None ) );
@@ -84,20 +87,16 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
     public IFieldOrPropertyInvoker With( object? target, InvokerOptions options = default )
         => this.Target == target && this.Options == options ? this : new FieldOrPropertyInvoker( this.Member, options, target );
 
-    public TypedExpressionSyntax GetTypedExpressionSyntax()
-        => new TypedExpressionSyntaxImpl(
-            this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor ),
+    public DelegateUserExpression GetUserExpression()
+        => new(
+            context => this.CreatePropertyExpression( AspectReferenceTargetKind.PropertyGetAccessor, context ),
             this.Member.Type,
-            CurrentSerializationContext.SyntaxGenerationContext,
             this.IsRef() );
 
     private bool IsRef() => this.Member.DeclarationKind is DeclarationKind.Field || this.Member.RefKind is RefKind.Ref;
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
     {
-        Invariant.Assert(
-            CurrentSerializationContext.SyntaxGenerationContext.Equals( (syntaxGenerationContext as SyntaxSerializationContext)?.SyntaxGenerationContext ) );
-
-        return this.GetTypedExpressionSyntax();
+        return this.GetUserExpression().ToTypedExpressionSyntax( syntaxGenerationContext );
     }
 }
