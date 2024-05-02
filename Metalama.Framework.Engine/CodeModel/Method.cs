@@ -79,7 +79,8 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var symbolWithGenericArguments = this.MethodSymbol.Construct( typeArguments.SelectAsArray( a => a.GetSymbol() ) );
+        var symbolWithGenericArguments = this.MethodSymbol.Construct(
+            typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
         return new Method( symbolWithGenericArguments, this.Compilation );
     }

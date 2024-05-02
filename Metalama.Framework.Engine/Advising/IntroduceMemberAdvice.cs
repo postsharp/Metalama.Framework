@@ -19,7 +19,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
     where TMember : class, IMember
     where TBuilder : MemberBuilder
 {
-    private readonly Action<TBuilder>? _buildAction;
     private readonly IntroductionScope _scope;
 
     protected OverrideStrategy OverrideStrategy { get; }

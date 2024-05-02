@@ -45,8 +45,10 @@ internal sealed class AllInterfaceUpdatableCollection : UpdatableDeclarationColl
             case INamedTypeBuilder builder:
                 foreach ( var i in builder.AllImplementedInterfaces )
                 {
-                    // TODO (TypeBuilder): Should not expect symbol-backed interface.
-                    action( Ref.FromSymbol<INamedType>( i.GetSymbol(), this.Compilation.CompilationContext ) );
+                    action(
+                        Ref.FromSymbol<INamedType>(
+                            i.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ),
+                            this.Compilation.CompilationContext ) );
                 }
 
                 break;

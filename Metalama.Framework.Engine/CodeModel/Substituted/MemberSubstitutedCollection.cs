@@ -47,7 +47,7 @@ internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T
         // TODO (TypeBuilder): Should not call GetSymbol.
         => SubstitutedMemberFactory.Substitute(
             sourceRef.GetTarget( this.Compilation ),
-            this._substitutedType.GetTarget( this.Compilation ).GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
+            this._substitutedType.GetTarget( this.Compilation ).GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
     ISourceDeclarationCollection<T, Ref<T>> ISourceDeclarationCollection<T, Ref<T>>.Clone( CompilationModel compilation )
         => new MemberSubstitutedCollection<T>(

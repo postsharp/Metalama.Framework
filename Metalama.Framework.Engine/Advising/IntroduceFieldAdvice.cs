@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Advising
 
             var targetType = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 
-            if ( targetType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetType.GetSymbol().IsReadOnly )
+            if ( targetType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetType.IsReadOnly )
             {
                 this.Builder.Writeability = Writeability.ConstructorOnly;
             }

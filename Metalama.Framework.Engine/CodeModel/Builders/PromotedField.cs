@@ -64,7 +64,8 @@ internal sealed class PromotedField : PropertyBuilder
 
             foreach ( var attribute in field.Attributes )
             {
-                if ( classificationService.MustMoveFromFieldToProperty( attribute.Type.GetSymbol() ) )
+                if ( classificationService.MustMoveFromFieldToProperty(
+                        attribute.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ) ) )
                 {
                     this.AddAttribute( attribute.ToAttributeConstruction() );
                 }

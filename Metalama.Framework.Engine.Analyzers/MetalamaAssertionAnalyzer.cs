@@ -49,7 +49,6 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
         [
             "Metalama.Framework.Engine.Aspects",     // Aspects are always backed by a symbol.
             "Metalama.Framework.Engine.CompileTime", // Compile time types are always backed by a symbol
-            "Metalama.Framework.Engine.DesignTime",  // Design time always works with symbols.
             "Metalama.Framework.Engine.Linking"      // Linker almost always works with intermediate compilation symbols.
         ];
 

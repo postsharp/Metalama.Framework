@@ -357,13 +357,13 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
         => (IArrayType) this.GetIType(
             this.RoslynCompilation.CreateArrayTypeSymbol(
-                ((ISdkType) elementType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ),
+                ((ISdkType) elementType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ),
                 rank ) );
 
     IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
         => (IPointerType) this.GetIType(
             this.RoslynCompilation.CreatePointerTypeSymbol(
-                ((ISdkType) pointedType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) ) );
+                ((ISdkType) pointedType).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
     public IType ConstructNullable( IType type, bool isNullable )
     {
@@ -377,7 +377,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( type.IsReferenceType ?? true )
         {
-            newTypeSymbol = typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution )
+            newTypeSymbol = typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes )
                 .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
         }
         else
@@ -385,7 +385,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             if ( isNullable )
             {
                 newTypeSymbol = this._compilationModel.RoslynCompilation.GetSpecialType( Microsoft.CodeAnalysis.SpecialType.System_Nullable_T )
-                    .Construct( typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
+                    .Construct( typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
             }
             else
             {
@@ -465,7 +465,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
                 case IType type:
                     var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
-                        type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
+                        type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
                     if ( translatedSymbol == null )
                     {
@@ -539,7 +539,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                     original.SourceMethod,
                     Ref.FromSymbol( original.SubstitutedType, original.GetCompilationModel().CompilationContext )
                         .GetSymbol( c.RoslynCompilation )
-                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution )
+                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes )
                         .AssertCast<INamedTypeSymbol>() );
             },
             this._compilationModel );
@@ -688,11 +688,11 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( type is ITypeImpl typeInternal )
         {
-            return this.GetIType( typeInternal.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
+            return this.GetIType( typeInternal.TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
         }
 
         // The type is necessarily backed by a Roslyn symbol because we don't support anything else.
-        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSubstitution ) );
+        return this.GetIType( ((ITypeImpl) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
     }
 
     [return: NotNullIfNotNull( "declaration" )]
