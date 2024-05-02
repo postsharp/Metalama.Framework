@@ -108,16 +108,39 @@ namespace Metalama.Framework.Engine.Formatting
             result = await TransformAllAsync(
                 result,
                 async document =>
-                    document.WithSyntaxRoot( new CustomerSimplifier().Visit( await document.GetSyntaxRootAsync( cancellationToken ) )! ),
+                {
+                    var oldRoot = await document.GetSyntaxRootAsync( cancellationToken );
+
+                    // Try a first time without a semantic mode. 
+                    var rewriterWithoutSemanticModel = new CustomSimplifier( null );
+                    var newRoot = rewriterWithoutSemanticModel.Visit( oldRoot )!;
+
+                    if ( rewriterWithoutSemanticModel.RequiresSemanticModel )
+                    {
+                        // If a semantic model is required, do a second run. We assume this is not likely.
+                        var semanticModel = await document.GetSemanticModelAsync( cancellationToken );
+
+                        if ( semanticModel == null )
+                        {
+                            return document;
+                        }
+                        
+                        var rewriterWithSemanticModel = new CustomSimplifier( semanticModel );
+                        newRoot = rewriterWithSemanticModel.Visit( oldRoot )!;
+                    }
+
+                    return document.WithSyntaxRoot( newRoot );
+                },
                 cancellationToken );
 
-            // Add imports and simplify.
+            // Add imports.
             result = await TransformAllAsync(
                 result,
                 document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
                 cancellationToken );
 
-            result = await TransformAllAsync( result, document => Simplifier.ReduceAsync( document, cancellationToken: cancellationToken ), cancellationToken );
+            // Run the simplifier.
+            result = await TransformAllAsync( result, document => Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ), cancellationToken );
 
             // Reformat.
             if ( reformatAll )
@@ -133,12 +156,14 @@ namespace Metalama.Framework.Engine.Formatting
                     result,
                     async document =>
                     {
+                        // Figure out which spans need to be reformatted.
                         var classifiedTextSpans = new ClassifiedTextSpanCollection( await document.GetTextAsync( cancellationToken ) );
                         var visitor = new MarkTextSpansVisitor( classifiedTextSpans );
                         visitor.Visit( await document.GetSyntaxRootAsync( cancellationToken ) );
                         classifiedTextSpans.Polish();
                         var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
 
+                        // Run the reformatter.
                         return await Formatter.FormatAsync(
                             document,
                             generatedSpans,
