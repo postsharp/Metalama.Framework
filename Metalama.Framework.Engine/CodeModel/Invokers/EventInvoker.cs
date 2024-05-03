@@ -76,14 +76,15 @@ internal sealed class EventInvoker : Invoker<IEvent>, IEventInvoker
         var receiverInfo = this.GetReceiverInfo( syntaxSerializationContext );
         var name = IdentifierName( this.GetCleanTargetMemberName() );
 
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, syntaxSerializationContext.SyntaxGenerationContext );
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, syntaxSerializationContext );
 
-        var expression = receiverInfo.RequiresConditionalAccess
-            ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) )
-            : MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                receiverSyntax,
-                name );
+        var expression =
+            receiverInfo.RequiresConditionalAccess
+                ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) )
+                : MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    receiverSyntax,
+                    name );
 
         // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
         if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )

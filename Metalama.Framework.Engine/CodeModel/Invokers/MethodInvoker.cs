@@ -138,8 +138,7 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                 }
                 else
                 {
-                    var receiver = receiverInfo.WithSyntax(
-                        this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context.SyntaxGenerationContext ) );
+                    var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context ) );
 
                     return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
                 }

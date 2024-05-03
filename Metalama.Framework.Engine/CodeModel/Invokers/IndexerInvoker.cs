@@ -43,7 +43,7 @@ internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
         args ??= Array.Empty<object>();
 
         var receiverInfo = this.GetReceiverInfo( context );
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context.SyntaxGenerationContext );
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context );
         var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, context ).AssertNotNull();
 
         // TODO: Aspect references.

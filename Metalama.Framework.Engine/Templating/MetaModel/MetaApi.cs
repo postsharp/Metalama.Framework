@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         internal TemplateMember<IMemberOrNamedType> Template => this._common.Template;
 
         private MetaApi( IDeclaration declaration, MetaApiProperties common )
-            : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
+            : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext, declaration.GetClosestNamedType() )
         {
             this.Declaration = declaration;
             this._common = common;

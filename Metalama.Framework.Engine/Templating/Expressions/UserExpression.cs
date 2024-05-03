@@ -56,7 +56,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 this.ToSyntax(
                         new SyntaxSerializationContext(
                             compilation,
-                            compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: false ) ) )
+                            compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted, isNullOblivious: false ),
+                            null ) )
                     .NormalizeWhitespace()
                     .ToString();
         }

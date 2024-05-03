@@ -2558,7 +2558,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     protected override ExpressionSyntax TransformCastExpression( CastExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformCastExpression( node ) );
 
-    protected override ExpressionSyntax TransformObjectCreationExpression( ObjectCreationExpressionSyntax node ) 
+    protected override ExpressionSyntax TransformObjectCreationExpression( ObjectCreationExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformObjectCreationExpression( node ) );
 
     protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
@@ -2575,6 +2575,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     protected override ExpressionSyntax TransformAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
         => this.WithCallToSimplifyAnonymousFunction( base.TransformAnonymousMethodExpression( node ) );
+
+    protected override ExpressionSyntax TransformMemberAccessExpression( MemberAccessExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformMemberAccessExpression( node ) );
+
+    protected override ExpressionSyntax TransformInvocationExpression( InvocationExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformInvocationExpression( node ) );
 
     public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
     {

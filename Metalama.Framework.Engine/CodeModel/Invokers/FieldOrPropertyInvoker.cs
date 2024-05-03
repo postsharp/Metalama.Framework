@@ -31,7 +31,7 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
 
         var name = IdentifierName( this.GetCleanTargetMemberName() );
 
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context.SyntaxGenerationContext );
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context );
 
         ExpressionSyntax expression;
 
