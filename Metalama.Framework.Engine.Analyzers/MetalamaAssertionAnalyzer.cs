@@ -45,6 +45,7 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
 
     private static void InitializeCompilation( CompilationStartAnalysisContext context )
     {
+        // Namespaces where the warning is not reported (because almost always these work with symbol-backed declarations.
         string[] ignoredNamespaces =
         [
             "Metalama.Framework.Engine.Aspects",     // Aspects are always backed by a symbol.
@@ -79,6 +80,7 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
 
         var containingNamespace = context.ContainingSymbol.ContainingNamespace.ToString();
 
+        // Is assertion has justification, we will not report it.
         var hasJustification = arguments is [_, IArgumentOperation { ArgumentKind: not ArgumentKind.DefaultValue }];
 
         if ( SymbolEqualityComparer.Default.Equals( invariantTypeSymbol, method.ContainingType )

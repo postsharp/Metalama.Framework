@@ -1,5 +1,5 @@
 ﻿#if TESTOPTIONS
-// Skipped(constructed generics not supported)
+// @Skipped(constructed generics not supported)
 # endif
 
 using System;
