@@ -1715,16 +1715,16 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => this.BuildRunTimeBlock(
             node.Statements,
             generateExpression,
-            this.GetFunctionLikeRunTimeBlockBlockInfo( node ) );
+            this.GetFunctionLikeRunTimeBlockInfo( node ) );
 
-    private record FunctionLikeRunTimeBlockBlockInfo( ITypeSymbol ReturnType, bool IsAsync );
+    private sealed record FunctionLikeRunTimeBlockInfo( ITypeSymbol ReturnType, bool IsAsync );
 
-    private FunctionLikeRunTimeBlockBlockInfo? GetFunctionLikeRunTimeBlockBlockInfo( SyntaxNode? node )
+    private FunctionLikeRunTimeBlockInfo? GetFunctionLikeRunTimeBlockInfo( SyntaxNode? node )
     {
-        switch ( node.Parent )
+        switch ( node?.Parent )
         {
             case LocalFunctionStatementSyntax localFunction:
-                var localFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction );
+                var localFunctionSymbol = (IMethodSymbol?) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction );
 
                 if ( localFunctionSymbol == null )
                 {
@@ -1733,17 +1733,17 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
                 var returnType = localFunctionSymbol.ReturnType;
 
-                return new FunctionLikeRunTimeBlockBlockInfo( returnType, localFunctionSymbol.IsAsync );
+                return new FunctionLikeRunTimeBlockInfo( returnType, localFunctionSymbol.IsAsync );
 
             case AnonymousFunctionExpressionSyntax anonymousFunction:
-                var anonymousFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetSymbol( anonymousFunction );
+                var anonymousFunctionSymbol = (IMethodSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( anonymousFunction );
 
                 if ( anonymousFunctionSymbol == null )
                 {
                     return null;
                 }
 
-                return new FunctionLikeRunTimeBlockBlockInfo( anonymousFunctionSymbol.ReturnType, anonymousFunctionSymbol.IsAsync );
+                return new FunctionLikeRunTimeBlockInfo( anonymousFunctionSymbol.ReturnType, anonymousFunctionSymbol.IsAsync );
 
             default:
                 return null;
@@ -1760,7 +1760,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private SyntaxNode BuildRunTimeBlock(
         SyntaxList<StatementSyntax> statements,
         bool generateExpression,
-        FunctionLikeRunTimeBlockBlockInfo? localFunctionInfo = null )
+        FunctionLikeRunTimeBlockInfo? localFunctionInfo = null )
     {
         using ( this.WithMetaContext( MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
         {
