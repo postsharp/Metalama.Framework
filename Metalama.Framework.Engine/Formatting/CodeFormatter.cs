@@ -2,11 +2,15 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -15,87 +19,91 @@ using RoslynProject = Microsoft.CodeAnalysis.Project;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public static partial class OutputCodeFormatter
+    public partial class CodeFormatter : IProjectService
     {
-        private static async Task<Dictionary<DocumentId, Document>> TransformAllAsync(
-            Dictionary<DocumentId, Document> inputDocuments,
-            Func<Document, Task<Document>> transformAsync )
+        private readonly IConcurrentTaskRunner _concurrentTaskRunner;
+
+        public CodeFormatter( ProjectServiceProvider serviceProvider )
         {
-            var tasks = inputDocuments.SelectAsMutableList(
-                async x =>
-                {
-                    var newDocument = await transformAsync( x.Value );
-
-                    return new KeyValuePair<DocumentId, Document>( x.Key, newDocument );
-                } );
-
-            await Task.WhenAll( tasks );
-
-            return tasks.ToDictionary( t => t.Result.Key, t => t.Result.Value );
+            this._concurrentTaskRunner = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
         }
 
-        private static async Task<OutputCodeFormatterResult> ApplyToSolutionAsync(
+        // Use this constructor when no ProjectServiceProvider is available.
+        // This happens in tests and at design time for actions that are not project-scoped.
+        public CodeFormatter()
+        {
+            this._concurrentTaskRunner = new ConcurrentTaskRunner();
+        }
+
+        private async Task<Solution> TransformAllAsync(
             Solution solution,
-            Dictionary<DocumentId, Document> documents,
-            CancellationToken cancellationToken )
-        {
-            var modifiedSolution = solution;
-
-            foreach ( var document in documents )
-            {
-                modifiedSolution = modifiedSolution
-                    .GetDocument( document.Key )
-                    .AssertNotNull()
-                    .WithSyntaxRoot( (await document.Value.GetSyntaxRootAsync( cancellationToken )).AssertNotNull() )
-                    .Project
-                    .Solution;
-            }
-
-            return new OutputCodeFormatterResult(
-                modifiedSolution,
-                documents.Keys.ToDictionary( x => x, x => modifiedSolution.GetDocument( x ).AssertNotNull() ) );
-        }
-
-        private static async Task<OutputCodeFormatterResult> TransformAllAsync(
-            OutputCodeFormatterResult input,
+            IEnumerable<DocumentId> documentIds,
             Func<Document, Task<Document>> transformAsync,
             CancellationToken cancellationToken )
         {
-            var documents = await TransformAllAsync( input.Documents, transformAsync );
+            var modifiedDocuments = new ConcurrentQueue<Document>();
 
-            return await ApplyToSolutionAsync( input.Solution, documents, cancellationToken );
+            await this._concurrentTaskRunner.RunConcurrentlyAsync( documentIds, ModifyDocumentAsync, cancellationToken );
+
+            async Task ModifyDocumentAsync( DocumentId documentId )
+            {
+                var oldDocument = solution.GetDocument( documentId );
+
+                if ( oldDocument == null )
+                {
+                    return;
+                }
+
+                var newDocument = await transformAsync( oldDocument );
+                modifiedDocuments.Enqueue( newDocument );
+            }
+
+            var modifiedSolution = solution;
+
+            foreach ( var modifiedDocument in modifiedDocuments )
+            {
+                var modifiedSyntaxRoot = await modifiedDocument.GetSyntaxRootAsync( cancellationToken );
+
+                modifiedSolution = modifiedSolution.GetDocument( modifiedDocument.Id )
+                    .AssertNotNull()
+                    .WithSyntaxRoot( modifiedSyntaxRoot.AssertNotNull() )
+                    .Project.Solution;
+            }
+
+            return modifiedSolution;
         }
 
-        public static async ValueTask<Document> FormatAsync(
+        public async ValueTask<Document> FormatAsync(
             Document document,
             IReadOnlyCollection<Diagnostic>? diagnostics = null,
             bool reformatAll = true,
             CancellationToken cancellationToken = default )
         {
-            var result = await FormatAsync( document.Project.Solution, [document], diagnostics, reformatAll, cancellationToken );
+            var modifiedSolution = await this.FormatAsync( document.Project.Solution, [document.Id], diagnostics, reformatAll, cancellationToken );
 
-            return result.Documents.Single().Value;
+            return modifiedSolution.GetDocument( document.Id ).AssertNotNull();
         }
 
-        public static async ValueTask<OutputCodeFormatterResult> FormatAsync(
+        public async ValueTask<Solution> FormatAsync(
             Solution solution,
-            IReadOnlyCollection<Document> documents,
+            IReadOnlyCollection<DocumentId> documentIds,
             IReadOnlyCollection<Diagnostic>? diagnostics = null,
             bool reformatAll = true,
             CancellationToken cancellationToken = default )
         {
-            if ( documents.Count == 0 )
+            if ( documentIds.Count == 0 )
             {
-                return new OutputCodeFormatterResult( solution, new Dictionary<DocumentId, Document>() );
+                return solution;
             }
 
-            var result = new OutputCodeFormatterResult( documents.First().Project.Solution, documents.ToDictionary( x => x.Id, x => x ) );
+            var modifiedSolution = solution;
 
             // Add diagnostics as annotations.
             if ( diagnostics is { Count: > 0 } )
             {
-                result = await TransformAllAsync(
-                    result,
+                modifiedSolution = await this.TransformAllAsync(
+                    modifiedSolution,
+                    documentIds,
                     async document => document.WithSyntaxRoot(
                         FormattedCodeWriter.AddDiagnosticAnnotations(
                             (await document.GetSyntaxRootAsync( cancellationToken ))!,
@@ -105,8 +113,9 @@ namespace Metalama.Framework.Engine.Formatting
             }
 
             // Run custom simplifications.
-            result = await TransformAllAsync(
-                result,
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
                 async document =>
                 {
                     var oldRoot = await document.GetSyntaxRootAsync( cancellationToken );
@@ -124,7 +133,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             return document;
                         }
-                        
+
                         var rewriterWithSemanticModel = new CustomSimplifier( semanticModel );
                         newRoot = rewriterWithSemanticModel.Visit( oldRoot )!;
                     }
@@ -134,26 +143,33 @@ namespace Metalama.Framework.Engine.Formatting
                 cancellationToken );
 
             // Add imports.
-            result = await TransformAllAsync(
-                result,
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
                 document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
                 cancellationToken );
 
             // Run the simplifier.
-            result = await TransformAllAsync( result, document => Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ), cancellationToken );
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
+                document => Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+                cancellationToken );
 
             // Reformat.
             if ( reformatAll )
             {
-                result = await TransformAllAsync(
-                    result,
+                modifiedSolution = await this.TransformAllAsync(
+                    modifiedSolution,
+                    documentIds,
                     document => Formatter.FormatAsync( document, cancellationToken: cancellationToken ),
                     cancellationToken );
             }
             else
             {
-                result = await TransformAllAsync(
-                    result,
+                modifiedSolution = await this.TransformAllAsync(
+                    modifiedSolution,
+                    documentIds,
                     async document =>
                     {
                         // Figure out which spans need to be reformatted.
@@ -172,60 +188,35 @@ namespace Metalama.Framework.Engine.Formatting
                     cancellationToken );
             }
 
-            return result;
+            return modifiedSolution;
         }
 
-        internal static async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
+        internal async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
             List<SyntaxTreeTransformation> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
-            List<(Document InputDocument, SyntaxTree InputSyntaxTree)> inputDocuments = new( compilation.ModifiedSyntaxTrees.Count );
 
-            foreach ( var modifiedSyntaxTree in compilation.ModifiedSyntaxTrees.Values )
+            var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, false, cancellationToken );
+
+            foreach ( var syntaxTreePair in syntaxTreeMap )
             {
-                var syntaxTree = modifiedSyntaxTree.NewTree;
+                var newSyntaxTree = (await formattedSolution.GetDocument( syntaxTreePair.Value ).AssertNotNull().GetSyntaxTreeAsync( cancellationToken ))
+                    .AssertNotNull();
 
-                if ( syntaxTree == null )
-                {
-                    continue;
-                }
-
-                var documentId = syntaxTreeMap[syntaxTree];
-
-                var document = project.GetDocument( documentId )!;
-
-                if ( !document.SupportsSyntaxTree )
-                {
-                    continue;
-                }
-
-                inputDocuments.Add( (document, syntaxTree) );
-            }
-
-            var formatted = await FormatAsync( project.Solution, inputDocuments.SelectAsMutableList( d => d.InputDocument ), null, false, cancellationToken );
-
-            foreach ( var document in inputDocuments )
-            {
-                var newSyntaxTree = (await formatted.Documents[document.InputDocument.Id].GetSyntaxTreeAsync( cancellationToken )).AssertNotNull();
-
-                syntaxTreeReplacements.Add( SyntaxTreeTransformation.ReplaceTree( document.InputSyntaxTree, newSyntaxTree ) );
+                syntaxTreeReplacements.Add( SyntaxTreeTransformation.ReplaceTree( syntaxTreePair.Key, newSyntaxTree ) );
             }
 
             return compilation.Update( syntaxTreeReplacements );
         }
 
-        internal static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
+        internal async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation, cancellationToken );
 
-            var documents = compilation.SyntaxTrees.Select( x => project.GetDocument( syntaxTreeMap[x] ) )
-                .Where( d => d is { SupportsSyntaxTree: true } )
-                .ToReadOnlyList();
+            var formattedSolution = await this.FormatAsync( project.Solution, syntaxTreeMap.Values, null, true, cancellationToken );
 
-            var result = await FormatAsync( project.Solution, documents!, null, true, cancellationToken );
-
-            return (await result.Solution.Projects.Single().GetCompilationAsync( cancellationToken )).AssertNotNull();
+            return (await formattedSolution.Projects.Single().GetCompilationAsync( cancellationToken )).AssertNotNull();
         }
 
         private static async Task<(RoslynProject Project, Dictionary<SyntaxTree, DocumentId> SyntaxTreeMap)> CreateProjectFromCompilationAsync(

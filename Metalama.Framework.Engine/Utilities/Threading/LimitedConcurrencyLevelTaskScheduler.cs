@@ -11,6 +11,8 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal sealed class LimitedConcurrencyLevelTaskScheduler : TaskScheduler, IDisposable
 {
+    public static new LimitedConcurrencyLevelTaskScheduler Default { get; } = new( Environment.ProcessorCount * 2 );
+
     // Indicates whether the current thread is processing work items.
     private readonly ThreadLocal<bool> _currentThreadIsProcessingItems = new();
 
@@ -18,7 +20,7 @@ internal sealed class LimitedConcurrencyLevelTaskScheduler : TaskScheduler, IDis
     private readonly LinkedList<Task> _tasks = []; // protected by lock(_tasks)
 
     public int PendingTasksCount => this._tasks.Count;
-    
+
     // Indicates whether the scheduler is currently processing work items.
     private int _delegatesQueuedOrRunning;
 

@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 internal sealed class ConcurrentTaskRunner : IConcurrentTaskRunner, IDisposable
 {
     // We used a shared scheduler to limit concurrency in the whole process.
-    private static readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
+    private static readonly LimitedConcurrencyLevelTaskScheduler _scheduler = LimitedConcurrencyLevelTaskScheduler.Default;
 
     public Task RunConcurrentlyAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
         where T : notnull

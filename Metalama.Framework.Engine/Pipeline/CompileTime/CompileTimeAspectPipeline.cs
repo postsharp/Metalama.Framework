@@ -171,8 +171,10 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                     diagnosticAdder.Report( GeneralDiagnosticDescriptors.CodeFormattingEnabled.CreateRoslynDiagnostic( null, default ) );
                 }
 
+                var codeFormatter = this.ServiceProvider.GetRequiredService<CodeFormatter>();
+
                 // ReSharper disable once AccessToModifiedClosure
-                resultPartialCompilation = await OutputCodeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
+                resultPartialCompilation = await codeFormatter.FormatAsync( resultPartialCompilation, cancellationToken );
             }
 
             // Write HTML (used only when building projects for documentation).

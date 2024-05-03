@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Serialization;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -140,6 +141,11 @@ public static class ServiceProviderFactory
             .WithServiceConditional<ISystemAttributeDeserializer>( sp => new SystemAttributeDeserializer( sp ) )
             .WithService( provider => new ClassifyingCompilationContextFactory( provider ) )
             .WithService( provider => new ObjectReaderFactory( provider ) );
+
+        if ( projectOptions.FormatCompileTimeCode || projectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted )
+        {
+            projectServiceProvider = projectServiceProvider.WithService( sp => new CodeFormatter( sp ) );
+        }
 
         return projectServiceProvider;
     }

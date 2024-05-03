@@ -5,11 +5,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
-using System;
 
 namespace Metalama.Framework.Engine.Formatting;
 
-public static partial class OutputCodeFormatter
+public partial class CodeFormatter
 {
     private sealed class CustomSimplifier : SafeSyntaxRewriter
     {
@@ -20,7 +19,7 @@ public static partial class OutputCodeFormatter
             // The semantic model is optional, but we cannot do all much useful work if we don't have it.
             this._semanticModel = semanticModel;
         }
-        
+
         public bool RequiresSemanticModel { get; private set; }
 
         public override SyntaxNode VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
