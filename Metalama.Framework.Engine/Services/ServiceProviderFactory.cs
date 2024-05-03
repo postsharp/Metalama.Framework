@@ -142,7 +142,7 @@ public static class ServiceProviderFactory
             .WithService( provider => new ClassifyingCompilationContextFactory( provider ) )
             .WithService( provider => new ObjectReaderFactory( provider ) );
 
-        if ( projectOptions.FormatCompileTimeCode || projectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted )
+        if ( projectOptions.FormatCompileTimeCode || projectOptions.CodeFormattingOptions == CodeFormattingOptions.Formatted || projectOptions.WriteHtml )
         {
             projectServiceProvider = projectServiceProvider.WithService( sp => new CodeFormatter( sp ) );
         }
