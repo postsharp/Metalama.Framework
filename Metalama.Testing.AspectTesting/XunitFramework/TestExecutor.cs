@@ -78,7 +78,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
             var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 
             var tasks = new ConcurrentDictionary<Task, Task>();
-            var semaphore = new SemaphoreSlim( executionOptions.MaxParallelThreadsOrDefault() * 2 );
+
+            // Increasing the concurrency seems detrimental to performance and to responsiveness of the test runner in case of cancellation.
+            var semaphore = new SemaphoreSlim( Environment.ProcessorCount * 2 );
             var eventLock = new object();
 
             foreach ( var collection in collections )

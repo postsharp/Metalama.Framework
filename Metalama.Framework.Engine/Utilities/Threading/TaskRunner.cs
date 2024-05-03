@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 internal sealed class TaskRunner : ITaskRunner
 {
     // We used a shared scheduler to limit concurrency in the whole process.
-    private static readonly LimitedConcurrencyLevelTaskScheduler _scheduler = LimitedConcurrencyLevelTaskScheduler.Default;
+    private static readonly TaskScheduler _scheduler = TaskSchedulerProvider.TaskScheduler;
 
     private static bool MustRunNewTask()
         => !Thread.CurrentThread.IsBackground || TaskScheduler.Current != TaskScheduler.Default || SynchronizationContext.Current != null;
