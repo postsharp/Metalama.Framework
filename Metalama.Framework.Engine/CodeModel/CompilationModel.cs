@@ -153,6 +153,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModelOptions Options { get; }
 
+        internal SerializableTypeIdResolverForIType SerializableTypeIdResolver { get; }
+
         private readonly string? _debugLabel;
 
         private CompilationModel(
@@ -215,6 +217,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
+
+            this.SerializableTypeIdResolver = new( this );
 
             // Discover custom attributes.
             AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );

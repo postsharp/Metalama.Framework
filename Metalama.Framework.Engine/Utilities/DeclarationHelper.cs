@@ -192,4 +192,10 @@ internal static class DeclarationHelper
 
         return assembly.Equals( thisCompilationAssembly );
     }
+
+    /// <summary>
+    /// Get the merged global namespace, i.e. one that contains both declared and referenced types.
+    /// </summary>
+    public static INamespace GetMergedGlobalNamespace( this CompilationModel compilation )
+        => compilation.Factory.GetNamespace( compilation.RoslynCompilation.GlobalNamespace );
 }

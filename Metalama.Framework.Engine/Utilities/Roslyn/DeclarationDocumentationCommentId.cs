@@ -151,12 +151,6 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return name;
         }
 
-        /// <summary>
-        /// Get the merged global namespace, i.e. one that contains both declared and referenced types.
-        /// </summary>
-        private static INamespace GetMergedGlobalNamespace( this CompilationModel compilation )
-            => compilation.Factory.GetNamespace( compilation.RoslynCompilation.GlobalNamespace );
-
         private sealed class DeclarationGenerator
         {
             private readonly StringBuilder _builder;

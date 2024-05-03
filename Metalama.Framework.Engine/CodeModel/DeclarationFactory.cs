@@ -481,11 +481,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     public IType GetTypeFromId( SerializableTypeId serializableTypeId, IReadOnlyDictionary<string, IType>? genericArguments )
-    {
-        var symbol = this._compilationModel.CompilationContext.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
-
-        return this.GetIType( symbol );
-    }
+        => this._compilationModel.SerializableTypeIdResolver.ResolveId( serializableTypeId, genericArguments );
 
     internal IAttribute GetAttribute( AttributeBuilder attributeBuilder, ReferenceResolutionOptions options )
         => (IAttribute) this._defaultCache.GetOrAdd(
