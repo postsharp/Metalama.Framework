@@ -372,12 +372,12 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             return type;
         }
 
-        var typeSymbol = ((ISdkType) type).TypeSymbol;
+        var typeSymbol = ((ISdkType) type).TypeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes );
         ITypeSymbol newTypeSymbol;
 
         if ( type.IsReferenceType ?? true )
         {
-            newTypeSymbol = typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes )
+            newTypeSymbol = typeSymbol
                 .WithNullableAnnotation( isNullable ? NullableAnnotation.Annotated : NullableAnnotation.NotAnnotated );
         }
         else
@@ -385,7 +385,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             if ( isNullable )
             {
                 newTypeSymbol = this._compilationModel.RoslynCompilation.GetSpecialType( Microsoft.CodeAnalysis.SpecialType.System_Nullable_T )
-                    .Construct( typeSymbol.AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
+                    .Construct( typeSymbol );
             }
             else
             {

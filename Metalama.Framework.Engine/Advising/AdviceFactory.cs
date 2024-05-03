@@ -1436,7 +1436,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             var eventTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
 
-            var accessorTemplates = eventTemplate.GetAccessorTemplates();
+            var (add, remove) = eventTemplate.GetAccessorTemplates();
 
             var advice = new IntroduceEventAdvice(
                 this._state.AspectInstance,
@@ -1445,8 +1445,8 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._compilation,
                 null,
                 eventTemplate,
-                accessorTemplates.Add?.PartialForIntroduction(),
-                accessorTemplates.Remove?.PartialForIntroduction(),
+                add?.PartialForIntroduction(),
+                remove?.PartialForIntroduction(),
                 scope,
                 whenExists,
                 buildEvent,

@@ -400,7 +400,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             switch ( baseType )
             {
-                case (NamedType or NamedTypeImpl) and INamedTypeImpl namedType:
+                case NamedType or NamedTypeImpl:
                     // TODO: This should include derived types that were introduced.
                     return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation(
                             baseType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedBaseTypes ),

@@ -77,7 +77,7 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         switch ( left.Target )
         {
             case ITypeSymbol symbol:
-                return this.Is( symbol, right.GetSymbol().AssertSymbolNotNull(), kind );
+                return this.Is( symbol, right.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ), kind );
 
             case NamedTypeBuilder builder:
                 return this.Is( builder, right, kind );

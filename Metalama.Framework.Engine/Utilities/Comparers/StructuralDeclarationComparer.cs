@@ -630,7 +630,6 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
             case (IPointerType xPointerType, IPointerType yPointerType):
                 return this.CompareTypes( xPointerType.PointedAtType, yPointerType.PointedAtType );
 
-            case (IFunctionPointerType, IFunctionPointerType):
             default:
                 throw new NotImplementedException( $"Unexpected type kind {typeX.TypeKind}." );
         }
@@ -869,7 +868,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
                 break;
 
             default:
-                throw new NotImplementedException( $"Unexpected type {compilationElement?.GetType()}." );
+                throw new NotImplementedException( $"Unexpected type {compilationElement.GetType()}." );
         }
 
         if ( options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )

@@ -21,7 +21,7 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
                     .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+            INamespaceOrNamedType =>
 
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<T>>.Empty,
@@ -37,7 +37,7 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
                     .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+            INamespaceOrNamedType =>
 
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<T>>.Empty,

@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration;
 internal partial class SyntaxGeneratorForIType
 {
     // Based on Roslyn TypeSyntaxGeneratorVisitor.
-    private class TypeSyntaxGeneratorVisitor : TypeVisitor<TypeSyntax>
+    private sealed class TypeSyntaxGeneratorVisitor : TypeVisitor<TypeSyntax>
     {
         private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
 
@@ -124,7 +124,7 @@ internal partial class SyntaxGeneratorForIType
 
         public override TypeSyntax VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => throw new NotImplementedException();
 
-        public TypeSyntax CreateSimpleTypeSyntax( INamedType type )
+        private TypeSyntax CreateSimpleTypeSyntax( INamedType type )
         {
             var syntax = this.TryCreateSpecializedNamedTypeSyntax( type );
 
@@ -140,7 +140,7 @@ internal partial class SyntaxGeneratorForIType
 
             if ( type.TypeParameters.Count == 0 )
             {
-                if ( type.TypeKind == TypeKind.Error && type.Name == "var" )
+                if ( type is { TypeKind: TypeKind.Error, Name: "var" } )
                 {
                     return CreateSystemObject();
                 }
@@ -155,7 +155,7 @@ internal partial class SyntaxGeneratorForIType
                 SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) );
         }
 
-        public static QualifiedNameSyntax CreateSystemObject()
+        private static QualifiedNameSyntax CreateSystemObject()
         {
             return SyntaxFactory.QualifiedName(
                 SyntaxFactory.AliasQualifiedName(
@@ -173,7 +173,7 @@ internal partial class SyntaxGeneratorForIType
                 return SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.VoidKeyword ) );
             }
 
-            if ( type.IsNullable == true && type.IsReferenceType == false )
+            if ( type is { IsNullable: true, IsReferenceType: false } )
             {
                 // Can't have a nullable of a pointer type.  i.e. "int*?" is illegal.
                 var innerType = type.TypeArguments.First();
@@ -191,12 +191,10 @@ internal partial class SyntaxGeneratorForIType
         {
             var typeSyntax = this.CreateSimpleTypeSyntax( type );
 
-            if ( typeSyntax is not SimpleNameSyntax )
+            if ( typeSyntax is not SimpleNameSyntax simpleNameSyntax )
             {
                 return typeSyntax;
             }
-
-            var simpleNameSyntax = (SimpleNameSyntax) typeSyntax;
 
             if ( type.DeclaringType != null )
             {
@@ -211,7 +209,7 @@ internal partial class SyntaxGeneratorForIType
                     typeSyntax = this.AddInformationTo( simpleNameSyntax, type );
                 }
             }
-            else if ( type.Namespace != null )
+            else
             {
                 if ( type.Namespace.IsGlobalNamespace )
                 {
@@ -237,7 +235,7 @@ internal partial class SyntaxGeneratorForIType
             return typeSyntax;
         }
 
-        public TypeSyntax VisitNamespace( INamespace ns )
+        private TypeSyntax VisitNamespace( INamespace ns )
         {
             var syntax = this.AddInformationTo( ToIdentifierName( ns.Name ), ns );
 
@@ -296,13 +294,13 @@ internal partial class SyntaxGeneratorForIType
         }
 
         // Copied from Roslyn.
-        internal class SymbolAnnotation
+        internal static class SymbolAnnotation
         {
-            public const string Kind = "SymbolId";
+            private const string _kind = "SymbolId";
 
-            public static SyntaxAnnotation Create( IType type ) => new( Kind, DeclarationDocumentationCommentId.CreateReferenceId( type ) );
+            public static SyntaxAnnotation Create( IType type ) => new( _kind, DeclarationDocumentationCommentId.CreateReferenceId( type ) );
 
-            public static SyntaxAnnotation Create( INamespace ns ) => new( Kind, DeclarationDocumentationCommentId.CreateReferenceId( ns ) );
+            public static SyntaxAnnotation Create( INamespace ns ) => new( _kind, DeclarationDocumentationCommentId.CreateReferenceId( ns ) );
         }
     }
 }

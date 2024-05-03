@@ -23,7 +23,7 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
                     .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
                     .Select( s => (MemberRef<T>?) new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .FirstOrDefault(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+            INamespaceOrNamedType =>
 
                 // TODO: should return initial member of the builder.
                 null,
@@ -38,7 +38,7 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
                     .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
                     .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+            INamespaceOrNamedType =>
 
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<T>>.Empty,

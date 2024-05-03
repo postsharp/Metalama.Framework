@@ -18,7 +18,7 @@ public sealed class AssertionTests : UnitTestClass
     [Fact]
     public void Symbols()
     {
-        var code = @"
+        const string code = @"
 using System;
 
 public class X
@@ -40,7 +40,7 @@ public class X
         var memberB = typeX.GetMembers().Single( m => m.Name == "B" );
         var memberC = typeX.GetMembers().Single( m => m.Name == "C" );
         var memberD = typeX.GetMembers().Single( m => m.Name == "D" );
-        var memberDP = ((IMethodSymbol)typeX.GetMembers().Single( m => m.Name == "D" )).Parameters[0];
+        var memberDP = ((IMethodSymbol) typeX.GetMembers().Single( m => m.Name == "D" )).Parameters[0];
         var memberX = typeX.GetMembers().Single( m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } );
         var memberTildeX = typeX.GetMembers().Single( m => m is IMethodSymbol { MethodKind: MethodKind.Destructor } );
 
@@ -57,7 +57,7 @@ public class X
     [Fact]
     public void SymbolErrors()
     {
-        var code = @"
+        const string code = @"
 using System;
 
 public class X
@@ -83,17 +83,17 @@ public class Y
         // Just make sure we are able to create exception for all symbols.
         var symbols =
             compilation.SyntaxTrees
-            .SelectMany( s => s.GetRoot().DescendantNodesAndSelf() )
-            .Select( n => compilation.GetSemanticModel( n.SyntaxTree ).GetSymbolInfo( n ) )
-            .SelectMany( si => si.CandidateSymbols.Append( si.Symbol ) )
-            .Select( s => new AssertionFailedException( $"{s}" ) )
-            .ToList();
+                .SelectMany( s => s.GetRoot().DescendantNodesAndSelf() )
+                .Select( n => compilation.GetSemanticModel( n.SyntaxTree ).GetSymbolInfo( n ) )
+                .SelectMany( si => si.CandidateSymbols.Append( si.Symbol ) )
+                .Select( s => new AssertionFailedException( $"{s}" ) )
+                .ToList();
     }
 
     [Fact]
     public void SyntaxNodes()
     {
-        var code = @"
+        const string code = @"
 using System;
 
 public class X
@@ -161,15 +161,15 @@ public class X
         // Just make sure we are able to create exception for all symbols.
         var exceptionStrings =
             compilation.SyntaxTrees
-            .SelectMany( t => t.GetRoot().DescendantNodesAndSelf() )
-            .Select( n => (Node: n, ExceptionFactory: (Func<Exception>) (() => new AssertionFailedException( $"{n}" ))) )
-            .ToList();
+                .SelectMany( t => t.GetRoot().DescendantNodesAndSelf() )
+                .Select( n => (Node: n, ExceptionFactory: (Func<Exception>) (() => new AssertionFailedException( $"{n}" ))) )
+                .ToList();
 
         var seenCombinations = new HashSet<(SyntaxKind Kind, string String)>();
         var uniqueStrings = new List<string>();
         var index = 0;
 
-        foreach(var (node, exceptionFactory) in exceptionStrings)
+        foreach ( var (node, exceptionFactory) in exceptionStrings )
         {
             if ( seenCombinations.Add( (node.Kind(), node.ToString()) ) )
             {

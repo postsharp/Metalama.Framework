@@ -57,7 +57,7 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
                     .Where( this.IsSymbolIncluded )
                     .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+            INamespaceOrNamedType =>
 
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<INamedType>>.Empty,
@@ -73,7 +73,7 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
                     .Where( this.IsSymbolIncluded )
                     .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+            INamespaceOrNamedType =>
 
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<INamedType>>.Empty,

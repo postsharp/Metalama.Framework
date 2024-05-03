@@ -1,18 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Testing.UnitTesting;
-using System;
 using System.Linq;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public sealed partial class CodeModelUpdateTests : UnitTestClass
+public sealed partial class CodeModelUpdateTests
 {
     [Fact]
     public void AddMethodToEmptyIntroducedType_InitializeBefore_Complete()
@@ -83,7 +78,7 @@ class C
         var nestedType = Assert.Single( type2.NestedTypes );
 
         // Instantiate the memoize the collection of methods of the nested type.
-        Assert.Empty( nestedType.Methods.OfName("M") );
+        Assert.Empty( nestedType.Methods.OfName( "M" ) );
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
