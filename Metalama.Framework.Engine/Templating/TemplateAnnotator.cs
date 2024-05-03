@@ -2337,7 +2337,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         => this.VisitAnonymousFunctionExpression(
             node,
             node.DelegateKeyword,
-            node.ParameterList?.Parameters ?? (IEnumerable<ParameterSyntax>) Array.Empty<ParameterSyntax>(),
+            node.ParameterList?.Parameters ?? Enumerable.Empty<ParameterSyntax>(),
             base.VisitAnonymousMethodExpression );
 
     public override SyntaxNode VisitQueryExpression( QueryExpressionSyntax node )
