@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Formatting;
 
 namespace Metalama.Framework.Engine.Formatting;
 
-public partial class CodeFormatter
+public sealed partial class CodeFormatter
 {
     private sealed class MarkTextSpansVisitor : SafeSyntaxWalker
     {

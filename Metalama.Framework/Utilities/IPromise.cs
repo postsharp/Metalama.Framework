@@ -32,7 +32,7 @@ public interface IPromise
     object? Value { get; }
 
     /// <summary>
-    /// Gets the <see cref="System.Exception"/> that the promise resulted in, if <see cref="IsFaulted"/> is <c>true</c>
+    /// Gets the <see cref="System.Exception"/> that the promise resulted in, if <see cref="IsFaulted"/> is <c>true</c>.
     /// </summary>
     Exception? Exception { get; }
 }

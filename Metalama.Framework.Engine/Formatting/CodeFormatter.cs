@@ -19,7 +19,7 @@ using RoslynProject = Microsoft.CodeAnalysis.Project;
 
 namespace Metalama.Framework.Engine.Formatting
 {
-    public partial class CodeFormatter : IProjectService
+    public sealed partial class CodeFormatter : IProjectService
     {
         private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
