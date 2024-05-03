@@ -9,13 +9,13 @@ public class Target
   {
     get
     {
-      return this._autoProperty;
+      return _autoProperty;
     }
     set
     {
-      if (value != this._autoProperty)
+      if (value != _autoProperty)
       {
-        this._autoProperty = value;
+        _autoProperty = value;
       }
     }
   }
@@ -23,13 +23,13 @@ public class Target
   {
     get
     {
-      return this.Property_Source;
+      return Property_Source;
     }
     set
     {
-      if (value != this.Property_Source)
+      if (value != Property_Source)
       {
-        this.Property_Source = value;
+        Property_Source = value;
       }
     }
   }

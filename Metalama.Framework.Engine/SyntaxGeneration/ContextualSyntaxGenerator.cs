@@ -40,13 +40,14 @@ internal sealed partial class ContextualSyntaxGenerator
     }
 
     private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSyntaxCache = new( SymbolEqualityComparer.IncludeNullability );
-    private readonly SyntaxGenerationContext _context;
 
     public bool IsNullAware { get; }
 
+    public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
     internal ContextualSyntaxGenerator( SyntaxGenerationContext context, bool nullAware )
     {
-        this._context = context;
+        this.SyntaxGenerationContext = context;
         this.IsNullAware = nullAware;
     }
 
@@ -112,19 +113,19 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
         => SyntaxFactory.DefaultExpression( this.Type( typeSymbol ) )
-            .WithSimplifierAnnotationIfNecessary( this._context );
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
     public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<SyntaxNode> elements )
     {
         var array = (ArrayCreationExpressionSyntax) _roslynSyntaxGenerator.ArrayCreationExpression( elementType, elements );
 
-        return array.WithType( array.Type.WithSimplifierAnnotationIfNecessary( this._context ) )
-            .NormalizeWhitespaceIfNecessary( this._context );
+        return array.WithType( array.Type.WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ) )
+            .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationContext );
     }
 
     public TypeSyntax Type( SpecialType specialType )
         => (TypeSyntax) _roslynSyntaxGenerator.TypeExpression( specialType )
-            .WithSimplifierAnnotationIfNecessary( this._context );
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
     public CastExpressionSyntax CastExpression( ITypeSymbol targetTypeSymbol, ExpressionSyntax expression )
     {
@@ -160,7 +161,7 @@ internal sealed partial class ContextualSyntaxGenerator
                 throw new AssertionFailedException( $"Unexpected symbol kind: {symbol.Kind}." );
         }
 
-        return expression.WithSimplifierAnnotationIfNecessary( this._context );
+        return expression.WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
     }
 
     // ReSharper disable once MemberCanBeMadeStatic.Global
@@ -171,7 +172,8 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public TypeSyntax ArrayTypeExpression( TypeSyntax type )
     {
-        var arrayType = (ArrayTypeSyntax) _roslynSyntaxGenerator.ArrayTypeExpression( type ).WithSimplifierAnnotationIfNecessary( this._context );
+        var arrayType = (ArrayTypeSyntax) _roslynSyntaxGenerator.ArrayTypeExpression( type )
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
         // Roslyn does not specify the rank properly so it needs to be fixed up.
 
@@ -300,7 +302,8 @@ internal sealed partial class ContextualSyntaxGenerator
         }
         else
         {
-            return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) );
+            return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) )
+                .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
     }
 
@@ -376,7 +379,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public TypeSyntax Type( ITypeSymbol symbol )
     {
-        if ( this._context.HasCompilationContext && symbol.BelongsToCompilation( this._context.CompilationContext ) == true )
+        if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
             return this._typeSyntaxCache.GetOrAdd( symbol, static ( s, x ) => x.TypeCore( s ), this );
         }
@@ -388,7 +391,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     private TypeSyntax TypeCore( ITypeSymbol symbol )
     {
-        var typeSyntax = (TypeSyntax) _roslynSyntaxGenerator.TypeExpression( symbol ).WithSimplifierAnnotationIfNecessary( this._context );
+        var typeSyntax = (TypeSyntax) _roslynSyntaxGenerator.TypeExpression( symbol ).WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
         if ( !this.IsNullAware )
         {
@@ -396,12 +399,12 @@ internal sealed partial class ContextualSyntaxGenerator
         }
 
         // We always need to normalize whitespace in tuples to workaround a Roslyn bug.
-        typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this._context.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
+        typeSyntax = (TypeSyntax) new NormalizeSpaceRewriter( this.SyntaxGenerationContext.EndOfLine ).Visit( typeSyntax ).AssertNotNull();
 
         return typeSyntax;
     }
 
-    private SyntaxGenerationOptions Options => this._context.Options;
+    private SyntaxGenerationOptions Options => this.SyntaxGenerationContext.Options;
 
     public AttributeSyntax Attribute( IAttributeData attribute )
     {
@@ -481,14 +484,14 @@ internal sealed partial class ContextualSyntaxGenerator
     public SyntaxNode AddAttribute( SyntaxNode oldNode, IAttributeData attribute )
     {
         var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute ) ) )
-            .WithOptionalLeadingTrivia( oldNode.GetLeadingTrivia(), this._context.Options )
-            .WithOptionalTrailingLineFeed( this._context );
+            .WithOptionalLeadingTrivia( oldNode.GetLeadingTrivia(), this.SyntaxGenerationContext.Options )
+            .WithOptionalTrailingLineFeed( this.SyntaxGenerationContext );
 
-        oldNode = oldNode.WithOptionalLeadingTrivia( default(SyntaxTriviaList), this._context.Options );
+        oldNode = oldNode.WithOptionalLeadingTrivia( default(SyntaxTriviaList), this.SyntaxGenerationContext.Options );
 
         if ( attributeList.GetLeadingTrivia().LastOrDefault() is { RawKind: (int) SyntaxKind.WhitespaceTrivia } indentationTrivia )
         {
-            oldNode = oldNode.WithOptionalLeadingTrivia( indentationTrivia, this._context.Options );
+            oldNode = oldNode.WithOptionalLeadingTrivia( indentationTrivia, this.SyntaxGenerationContext.Options );
         }
 
         return oldNode.Kind() switch
@@ -553,7 +556,7 @@ internal sealed partial class ContextualSyntaxGenerator
                             return this.TypeOfExpression( typeValue.GetSymbol() );
 
                         case Type systemTypeValue:
-                            return this.TypeOfExpression( this._context.ReflectionMapper.GetTypeSymbol( systemTypeValue ) );
+                            return this.TypeOfExpression( this.SyntaxGenerationContext.ReflectionMapper.GetTypeSymbol( systemTypeValue ) );
 
                         default:
                             {
@@ -704,7 +707,10 @@ internal sealed partial class ContextualSyntaxGenerator
 
             if ( constraints.Count > 0 )
             {
-                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespaceIfNecessary( this._context );
+                var clause = TypeParameterConstraintClause( parameter.Name )
+                    .WithConstraints( constraints )
+                    .NormalizeWhitespaceIfNecessary( this.SyntaxGenerationContext );
+
                 list = list.Add( clause );
             }
         }
@@ -746,7 +752,7 @@ internal sealed partial class ContextualSyntaxGenerator
         if ( requiresParenthesis )
         {
             return SyntaxFactory.CastExpression( type, ParenthesizedExpression( syntax ).WithAdditionalAnnotations( Simplifier.Annotation ) )
-                .WithSimplifierAnnotationIfNecessary( this._context );
+                .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
         else
         {
@@ -766,24 +772,24 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public BlockSyntax FormattedBlock( IEnumerable<StatementSyntax> statements )
         => Block(
-            Token( default, SyntaxKind.OpenBraceToken, this._context.ElasticEndOfLineTriviaList ),
+            Token( default, SyntaxKind.OpenBraceToken, this.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
             List(
                 statements.Select(
                     s => NeedsLineFeed( s )
-                        ? s.WithOptionalTrailingLineFeed( this._context )
+                        ? s.WithOptionalTrailingLineFeed( this.SyntaxGenerationContext )
                         : s ) ),
-            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
+            Token( this.SyntaxGenerationContext.ElasticEndOfLineTriviaList, SyntaxKind.CloseBraceToken, default ) );
 
     public PragmaWarningDirectiveTriviaSyntax PragmaWarningDirectiveTrivia(
         SyntaxKind disableOrRestoreKind,
         SeparatedSyntaxList<ExpressionSyntax> errorCodes )
         => SyntaxFactory.PragmaWarningDirectiveTrivia(
-            Token( this._context.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
+            Token( this.SyntaxGenerationContext.ElasticEndOfLineTriviaList, SyntaxKind.HashToken, default ),
             TokenWithTrailingSpace( SyntaxKind.PragmaKeyword ),
             TokenWithTrailingSpace( SyntaxKind.WarningKeyword ),
             TokenWithTrailingSpace( disableOrRestoreKind ),
             errorCodes,
-            Token( default, SyntaxKind.EndOfDirectiveToken, this._context.ElasticEndOfLineTriviaList ),
+            Token( default, SyntaxKind.EndOfDirectiveToken, this.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
             isActive: true );
 
     public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, ITypeSymbol? operandType )

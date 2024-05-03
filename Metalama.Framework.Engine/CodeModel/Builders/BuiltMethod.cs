@@ -78,6 +78,10 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
 
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => this._methodBuilder.With( target, options );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this._methodBuilder.CreateInvokeExpression( args );
+
     public object? Invoke( params object?[] args ) => this._methodBuilder.Invoke( args );
 
     public object? Invoke( IEnumerable<IExpression> args ) => this._methodBuilder.Invoke( args );

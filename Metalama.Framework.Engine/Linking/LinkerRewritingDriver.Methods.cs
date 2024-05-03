@@ -333,7 +333,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
                     else
                     {
-                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() );
+                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), GetTargetName() )
+                            .WithSimplifierAnnotationIfNecessary( context );
                     }
                 }
 

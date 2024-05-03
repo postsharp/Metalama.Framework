@@ -160,7 +160,8 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     private void DeclareMetaVariable( string hint, SyntaxToken metaVariableIdentifier )
     {
-        var callGetUniqueIdentifier = this._templateMetaSyntaxFactory.GetUniqueIdentifier( hint );
+        var callGetUniqueIdentifier =
+            this._templateMetaSyntaxFactory.GetUniqueIdentifier( hint );
 
         var localDeclaration =
             LocalDeclarationStatement(
@@ -365,11 +366,20 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             if ( IsLocalSymbol( identifierSymbol ) )
             {
+                if ( identifierSymbol is IParameterSymbol { Name: "_" } )
+                {
+                    // If we have a discard parameter (or a pseudo-discard one, just by naming conventions).
+                    // Formally, it may be a usable parameter and we may need to map it,
+                    // but it's better in general not to do so and to let the user cope with the consequences of conflicts.
+                    return this.MetaSyntaxFactory.Identifier( SyntaxFactoryEx.LiteralExpression( "_" ) );
+                }
+
                 if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
                     // It is the first time we are seeing this local symbol, so we reserve a name for it.
 
                     declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( identifierSymbol! ).Identifier;
+
                     this._currentMetaContext.AddRunTimeSymbolLocal( identifierSymbol!, declaredSymbolNameLocal );
                 }
 
@@ -2244,6 +2254,12 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
     public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
     {
+        if ( node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
+        {
+            // Compile-time returns can exist in anonymous methods.
+            return base.VisitReturnStatement( node )!;
+        }
+
         InvocationExpressionSyntax invocationExpression;
 
         if ( this.IsCompileTimeDynamic( node.Expression ) )
@@ -2388,6 +2404,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private ExpressionSyntax WithCallToAddSimplifierAnnotation( ExpressionSyntax expression )
         => InvocationExpression(
             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.AddSimplifierAnnotations) ),
+            ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
+
+    private ExpressionSyntax WithCallToSimplifyAnonymousFunction( ExpressionSyntax expression )
+        => InvocationExpression(
+            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.SimplifyAnonymousFunction) ),
             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
 
     /// <summary>
@@ -2537,8 +2558,29 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     protected override ExpressionSyntax TransformCastExpression( CastExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformCastExpression( node ) );
 
+    protected override ExpressionSyntax TransformObjectCreationExpression( ObjectCreationExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformObjectCreationExpression( node ) );
+
     protected override ExpressionSyntax TransformParenthesizedExpression( ParenthesizedExpressionSyntax node )
         => this.WithCallToAddSimplifierAnnotation( base.TransformParenthesizedExpression( node ) );
+
+    protected override ExpressionSyntax TransformArrayCreationExpression( ArrayCreationExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformArrayCreationExpression( node ) );
+
+    protected override ExpressionSyntax TransformParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+        => this.WithCallToSimplifyAnonymousFunction( base.TransformParenthesizedLambdaExpression( node ) );
+
+    protected override ExpressionSyntax TransformSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+        => this.WithCallToSimplifyAnonymousFunction( base.TransformSimpleLambdaExpression( node ) );
+
+    protected override ExpressionSyntax TransformAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+        => this.WithCallToSimplifyAnonymousFunction( base.TransformAnonymousMethodExpression( node ) );
+
+    protected override ExpressionSyntax TransformMemberAccessExpression( MemberAccessExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformMemberAccessExpression( node ) );
+
+    protected override ExpressionSyntax TransformInvocationExpression( InvocationExpressionSyntax node )
+        => this.WithCallToAddSimplifierAnnotation( base.TransformInvocationExpression( node ) );
 
     public override SyntaxNode? VisitCastExpression( CastExpressionSyntax node )
     {

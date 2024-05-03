@@ -450,8 +450,8 @@ namespace Metalama.Framework.Engine.Templating
         internal static readonly DiagnosticDefinition<None> DynamicInLambdaUnsupported
             = new(
                 "LAMA0263",
-                "Dynamic expressions in lambdas are not supported.",
-                "Using a dynamic expression in a lambda is not supported, unless it is casted to IExpression.",
+                "Lambdas or anonymous functions returning a dynamic type are not supported. Consider casting the result to IExpression. For void expressions, use a lambda statement.",
+                "Lambdas or anonymous functions returning a dynamic type are not supported except. Consider casting the result to IExpression.  For void expressions, use a lambda statement.",
                 _category,
                 Error );
 
@@ -608,5 +608,21 @@ namespace Metalama.Framework.Engine.Templating
                 "You should remove the parameter list from the type and use explicitly defined constructors instead.",
                 Error,
                 "Non-record primary constructors are not currently supported in compile-time code." );
+
+        internal static readonly DiagnosticDefinition UnknownScopedAnonymousMethod
+            = new(
+                "LAMA0284",
+                _category,
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity.",
+                Error,
+                "The scope of the anonymous method or lambda block cannot be determined. Use meta.RunTime or meta.CompileTime to resolve the ambiguity." );
+
+        internal static readonly DiagnosticDefinition AsVoidRequiresCastExpression
+            = new(
+                "LAMA0285",
+                _category,
+                "The argument of meta.AsVoid must be a cast expression. The cast will be ignored in the generated code.",
+                Error,
+                "The argument of meta.AsVoid must be a cast expression. The cast will be ignored in the generated code." );
     }
 }
