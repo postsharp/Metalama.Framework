@@ -100,26 +100,33 @@ namespace Metalama.Framework.Engine.Formatting
                 return solution;
             }
 
-            return await this.TransformAllAsync(
-                solution,
+            var modifiedSolution = solution;
+
+            // Add diagnostics as annotations.
+            if ( diagnostics is { Count: > 0 } )
+            {
+                modifiedSolution = await this.TransformAllAsync(
+                    modifiedSolution,
+                    documentIds,
+                    async document => document.WithSyntaxRoot(
+                        FormattedCodeWriter.AddDiagnosticAnnotations(
+                            (await document.GetSyntaxRootAsync( cancellationToken ))!,
+                            document.FilePath,
+                            diagnostics ) ),
+                    cancellationToken );
+            }
+
+            // Run custom simplifications.
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
                 documentIds,
                 async document =>
                 {
-                    var syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
-
-                    if ( syntaxRoot == null )
-                    {
-                        return document;
-                    }
-
-                    if ( diagnostics is { Count: > 0 } )
-                    {
-                        syntaxRoot = FormattedCodeWriter.AddDiagnosticAnnotations( syntaxRoot, document.FilePath, diagnostics );
-                    }
+                    var oldRoot = await document.GetSyntaxRootAsync( cancellationToken );
 
                     // Try a first time without a semantic mode. 
                     var rewriterWithoutSemanticModel = new CustomSimplifier( null );
-                    var tempSyntaxRoot = rewriterWithoutSemanticModel.Visit( syntaxRoot )!;
+                    var newRoot = rewriterWithoutSemanticModel.Visit( oldRoot )!;
 
                     if ( rewriterWithoutSemanticModel.RequiresSemanticModel )
                     {
@@ -132,33 +139,62 @@ namespace Metalama.Framework.Engine.Formatting
                         }
 
                         var rewriterWithSemanticModel = new CustomSimplifier( semanticModel );
-                        syntaxRoot = rewriterWithSemanticModel.Visit( syntaxRoot )!;
+                        newRoot = rewriterWithSemanticModel.Visit( oldRoot )!;
                     }
-                    else
+
+                    return document.WithSyntaxRoot( newRoot );
+                },
+                cancellationToken );
+
+            // Add imports.
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
+                document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+                cancellationToken );
+
+            // Run the simplifier.
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
+                async document =>
+                {
+                    var simplifiedDocument = await Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+
+                    if ( simplifiedDocument == document )
                     {
-                        syntaxRoot = tempSyntaxRoot;
+                        return document;
                     }
 
-                    document = document.WithSyntaxRoot( syntaxRoot );
+                    var simplifiedRoot = await simplifiedDocument.GetSyntaxRootAsync( cancellationToken );
+                    var fixedRoot = new SimplifierFixer().Visit( simplifiedRoot )!;
 
-                    // Add imports
-                    document = await ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+                    return simplifiedDocument.WithSyntaxRoot( fixedRoot );
+                },
+                cancellationToken );
 
-                    // Run the simplifier.
-                    document = await Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+            // Run the simplifier.
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
+                document => Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+                cancellationToken );
 
-                    // Run the fixer.
-                    syntaxRoot = await document.GetSyntaxRootAsync( cancellationToken );
-                    syntaxRoot = new SimplifierFixer().Visit( syntaxRoot )!;
-
-                    document = document.WithSyntaxRoot( syntaxRoot );
-
-                    // Reformat.
-                    if ( reformatAll )
-                    {
-                        document = await Formatter.FormatAsync( document, cancellationToken: cancellationToken );
-                    }
-                    else
+            // Reformat.
+            if ( reformatAll )
+            {
+                modifiedSolution = await this.TransformAllAsync(
+                    modifiedSolution,
+                    documentIds,
+                    document => Formatter.FormatAsync( document, cancellationToken: cancellationToken ),
+                    cancellationToken );
+            }
+            else
+            {
+                modifiedSolution = await this.TransformAllAsync(
+                    modifiedSolution,
+                    documentIds,
+                    async document =>
                     {
                         // Figure out which spans need to be reformatted.
                         var classifiedTextSpans = new ClassifiedTextSpanCollection( await document.GetTextAsync( cancellationToken ) );
@@ -168,12 +204,15 @@ namespace Metalama.Framework.Engine.Formatting
                         var generatedSpans = classifiedTextSpans.Where( s => s.Classification == TextSpanClassification.GeneratedCode ).Select( s => s.Span );
 
                         // Run the reformatter.
-                        document = await Formatter.FormatAsync( document, generatedSpans, cancellationToken: cancellationToken );
-                    }
+                        return await Formatter.FormatAsync(
+                            document,
+                            generatedSpans,
+                            cancellationToken: cancellationToken );
+                    },
+                    cancellationToken );
+            }
 
-                    return document;
-                },
-                cancellationToken );
+            return modifiedSolution;
         }
 
         internal async Task<PartialCompilation> FormatAsync( PartialCompilation compilation, CancellationToken cancellationToken = default )

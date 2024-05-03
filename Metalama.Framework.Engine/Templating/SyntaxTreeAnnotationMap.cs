@@ -107,7 +107,9 @@ namespace Metalama.Framework.Engine.Templating
 
         public Location? GetLocation( SyntaxNodeOrToken node )
         {
-            var annotation = node.GetAnnotations( _locationAnnotationKind ).SingleOrDefault();
+            // Strangely there could be sometimes be several annotations, probably due to operations on the syntax tree.
+            // In this case it is better to continue than to fail.
+            var annotation = node.GetAnnotations( _locationAnnotationKind ).FirstOrDefault();
 
             if ( annotation == null )
             {
