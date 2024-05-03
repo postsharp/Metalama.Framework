@@ -6,7 +6,7 @@ using System;
 namespace Metalama.Framework.Utilities;
 
 /// <summary>
-/// Encapsulates value that must be defined later. Promises can used to be passed introduced declarations to templates as arguments
+/// Encapsulates value that must be defined later. Promises can used to to pass introduced declarations to templates as arguments
 /// when these declarations have not been introduced yet, resolving a chicken-or-egg situation. When objects of type <see cref="IPromise"/> are passed to a template,
 /// the template will automatically receive its resolved <see cref="Value"/> instead of the <see cref="IPromise"/> object. 
 /// </summary>

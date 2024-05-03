@@ -27,6 +27,7 @@ internal abstract class TemplateMemberSymbolClassifier
             null => false,
             IDynamicTypeSymbol => true,
             IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => true,
+            IArrayTypeSymbol arrayType when IsDynamicParameter( arrayType.ElementType ) => true,
             INamedTypeSymbol { IsGenericType: true } genericType when genericType.TypeArguments.Any( IsDynamicParameter ) => true,
             _ => false
         };
