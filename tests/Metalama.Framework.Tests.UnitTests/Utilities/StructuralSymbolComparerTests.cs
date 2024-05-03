@@ -189,7 +189,7 @@ class A
             return symbols;
         }
 
-        private static IReadOnlyList<ICompilationElement> GetAllDeclarations(CompilationModel compilation)
+        private static IReadOnlyList<ICompilationElement> GetAllDeclarations( CompilationModel compilation )
         {
             var symbols = GetAllSymbols( compilation );
 
@@ -202,17 +202,20 @@ class A
 
             private CompilationElementEqualityComparer() { }
 
-            [return: NotNullIfNotNull(nameof(element))]
+            [return: NotNullIfNotNull( nameof(element) )]
             private static ISymbol? GetSymbol( ICompilationElement? element )
             {
                 switch ( element )
                 {
                     case null:
                         return null;
+
                     case IDeclaration declaration:
                         return declaration.GetSymbol().AssertNotNull();
+
                     case IType type:
                         return type.GetSymbol().AssertNotNull();
+
                     default:
                         throw new AssertionFailedException();
                 }

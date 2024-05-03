@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -48,14 +49,14 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
             return this.Is( leftSymbol, rightSymbol, kind );
         }
 
-        if ( kind is not ConversionKind.Reference and not ConversionKind.Default || left is not INamedType || right is not INamedType
-            || right is INamedType { IsGeneric: true } || right is INamedType { TypeKind: Code.TypeKind.Interface } )
+        if ( kind is not ConversionKind.Reference and not ConversionKind.Default || left is not INamedType leftType || right is not INamedType
+             || right is INamedType { IsGeneric: true } || right is INamedType { TypeKind: Code.TypeKind.Interface } )
         {
             // TODO: Implement.
             throw new NotSupportedException( "Not yet supported on introduced types." );
         }
 
-        var current = (INamedType) left;
+        var current = leftType;
 
         while ( current != null )
         {
@@ -70,7 +71,27 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         return false;
     }
 
-    public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left.GetSymbol().AssertSymbolNotNull(), this._reflectionMapper.GetTypeSymbol( right ), kind );
+    public bool Is( MemberRef<INamedType> left, IType right, ConversionKind kind )
+    {
+        // This should not instantiate the type if not needed.
+        switch ( left.Target )
+        {
+            case ITypeSymbol symbol:
+                return this.Is( symbol, right.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ), kind );
+
+            case NamedTypeBuilder builder:
+                return this.Is( builder, right, kind );
+
+            default:
+                throw new AssertionFailedException( $"Unsupported: {left.Target}" );
+        }
+    }
+
+    public bool Is( IType left, Type right, ConversionKind kind )
+        => this.Is(
+            left.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
+            this._reflectionMapper.GetTypeSymbol( right ),
+            kind );
 
     internal bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {

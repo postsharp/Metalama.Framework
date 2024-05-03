@@ -47,7 +47,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
     {
         this._template = template;
 
-        this.Builder = new ConstructorBuilder(this, targetDeclaration );
+        this.Builder = new ConstructorBuilder( this, targetDeclaration );
     }
 
     protected override void InitializeCore(

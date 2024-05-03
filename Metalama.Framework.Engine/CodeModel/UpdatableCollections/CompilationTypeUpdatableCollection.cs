@@ -47,10 +47,10 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 
         if ( !this._includeNestedTypes )
         {
-            return 
+            return
                 topLevelTypes
-                .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-                .ToImmutableArray();
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray();
         }
         else
         {
@@ -72,10 +72,10 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
             }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            return 
+            return
                 types
-                .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-                .ToImmutableArray();
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray();
 #pragma warning restore CS0618 // Type or member is obsolete
         }
     }
@@ -87,10 +87,14 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
         // TODO: This should not use GetSymbol.
         return
             this.GetMemberRefs()
-                .Select( mr => mr.GetSymbol( this.Compilation.RoslynCompilation ).AssertNotNull() )
-                .Where( t => comparer.Is( (ITypeSymbol) t, typeDefinition.GetSymbol().AssertNotNull(), ConversionKind.TypeDefinition ) )
-                .Where( this.IsSymbolIncluded )
-                .Select( x => new MemberRef<INamedType>( x, this.Compilation.CompilationContext ) )
+                .Where( t => comparer.Is( t, typeDefinition, ConversionKind.TypeDefinition ) )
+                .Where(
+                    t =>
+                    {
+                        var symbol = t.GetSymbol( this.Compilation.RoslynCompilation );
+
+                        return symbol == null || this.IsSymbolIncluded( symbol );
+                    } )
                 .ToImmutableArray();
     }
 }

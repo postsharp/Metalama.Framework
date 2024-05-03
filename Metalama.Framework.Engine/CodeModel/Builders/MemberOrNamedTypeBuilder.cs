@@ -103,7 +103,8 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
         }
     }
 
-    public override IDeclaration ContainingDeclaration => Invariant.AssertNotNull(this.DeclaringType, "Declaring type should not be null (missing override?).");
+    public override IDeclaration ContainingDeclaration
+        => this.DeclaringType.AssertNotNull( "Declaring type should not be null (missing override?)." );
 
     protected MemberOrNamedTypeBuilder( Advice advice, INamedType? declaringType, string name ) : base( advice )
     {

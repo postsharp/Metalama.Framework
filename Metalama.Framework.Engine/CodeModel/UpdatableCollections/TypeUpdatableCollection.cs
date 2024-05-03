@@ -14,7 +14,9 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>, INamedTypeCollectionImpl
 {
-    public TypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringTypeOrNamespace ) : base( compilation, declaringTypeOrNamespace ) { }
+    public TypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringTypeOrNamespace ) : base(
+        compilation,
+        declaringTypeOrNamespace ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
     {
@@ -30,11 +32,13 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
             return IsIncludedInPartialCompilation( (INamedTypeSymbol) symbol );
 
             bool IsIncludedInPartialCompilation( INamedTypeSymbol t )
-                => t switch
+            {
+                return t switch
                 {
                     { ContainingType: { } containingType } => IsIncludedInPartialCompilation( containingType ),
                     _ => this.Compilation.PartialCompilation.Types.Contains( t.OriginalDefinition )
                 };
+            }
         }
         else
         {
@@ -48,11 +52,13 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
         => this.DeclaringTypeOrNamespace.Target switch
         {
             INamespaceOrTypeSymbol symbol =>
-                symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetTypeMembers( name )
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
+                    .GetTypeMembers( name )
                     .Where( this.IsSymbolIncluded )
-                .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-                .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
+
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<INamedType>>.Empty,
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
@@ -62,11 +68,13 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
         => this.DeclaringTypeOrNamespace.Target switch
         {
             INamespaceOrTypeSymbol symbol =>
-                symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetTypeMembers()
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
+                    .GetTypeMembers()
                     .Where( this.IsSymbolIncluded )
-                .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
-                .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
+
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<INamedType>>.Empty,
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
@@ -79,10 +87,14 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
         // TODO: This should not use GetSymbol.
         return
             this.GetMemberRefs()
-                .Select( mr => mr.GetSymbol( this.Compilation.RoslynCompilation ).AssertNotNull() )
-                .Where( t => comparer.Is( (ITypeSymbol) t, typeDefinition.GetSymbol().AssertNotNull(), ConversionKind.TypeDefinition ) )
-                .Where( this.IsSymbolIncluded )
-                .Select( x => new MemberRef<INamedType>( x, this.Compilation.CompilationContext ) )
+                .Where( t => comparer.Is( t, typeDefinition, ConversionKind.TypeDefinition ) )
+                .Where(
+                    t =>
+                    {
+                        var symbol = t.GetSymbol( this.Compilation.RoslynCompilation );
+
+                        return symbol == null || this.IsSymbolIncluded( symbol );
+                    } )
                 .ToImmutableArray();
     }
 }

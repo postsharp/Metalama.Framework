@@ -58,7 +58,9 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     var xParameter = xHasParameters.Parameters[i].Type;
                     var yParameter = yHasParameters.Parameters[i].Type;
 
-                    if ( !this._symbolComparer.Equals( xParameter.GetSymbol(), yParameter.GetSymbol() ) )
+                    if ( !this._symbolComparer.Equals(
+                            xParameter.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
+                            yParameter.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ) ) )
                     {
                         return false;
                     }
@@ -77,7 +79,9 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             {
                 foreach ( var parameter in hasParameters.Parameters )
                 {
-                    hashCode.Add( parameter.Type.GetSymbol(), this._symbolComparer );
+                    hashCode.Add(
+                        parameter.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
+                        this._symbolComparer );
                 }
             }
 

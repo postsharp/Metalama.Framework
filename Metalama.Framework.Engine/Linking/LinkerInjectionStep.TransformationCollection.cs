@@ -252,7 +252,7 @@ internal sealed partial class LinkerInjectionStep
             return Array.Empty<LinkerInjectedInterface>();
         }
 
-        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeBuilder( INamedTypeBuilder typeBuilder)
+        public IReadOnlyList<LinkerInjectedInterface> GetIntroducedInterfacesForTypeBuilder( INamedTypeBuilder typeBuilder )
         {
             if ( this._injectedInterfacesByTargetTypeBuilder.TryGetValue( typeBuilder, out var interfaceList ) )
             {

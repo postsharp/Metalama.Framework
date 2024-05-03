@@ -40,7 +40,11 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
         var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
         */
 
-        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( method.DeclaringType.GetSymbol(), serializationContext );
+        var typeCreation =
+            TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                method.DeclaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ),
+                serializationContext );
+
         var allBindingFlags = SyntaxUtility.CreateBindingFlags( method, serializationContext );
         var reflectionHelperTypeSyntax = serializationContext.SyntaxGenerator.Type( serializationContext.GetTypeSymbol( typeof(ReflectionHelper) ) );
 

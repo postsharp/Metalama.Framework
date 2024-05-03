@@ -66,7 +66,8 @@ internal static partial class IteratorHelper
         return isIterator;
     }
 
-    private static EnumerableKind GetEnumerableKind( IType returnType ) => GetEnumerableKind( returnType.GetSymbol() );
+    private static EnumerableKind GetEnumerableKind( IType returnType )
+        => GetEnumerableKind( returnType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeStateMachines ) );
 
     private static EnumerableKind GetEnumerableKind( ITypeSymbol returnType )
         => returnType.OriginalDefinition.SpecialType switch

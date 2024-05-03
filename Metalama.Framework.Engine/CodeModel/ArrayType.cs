@@ -20,7 +20,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var symbol = this.GetCompilationModel().RoslynCompilation.CreateArrayTypeSymbol( elementType.GetSymbol(), this.Rank );
+                var symbol =
+                    this.GetCompilationModel()
+                        .RoslynCompilation.CreateArrayTypeSymbol(
+                            elementType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ),
+                            this.Rank );
 
                 return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
             }

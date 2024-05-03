@@ -106,13 +106,10 @@ internal sealed partial class ContextualSyntaxGenerator
 
         var typeSyntax = this.Type( type );
 
-        if ( type is INamedType { TypeParameters.Count: > 0 } namedType )
+        if ( type is INamedType { TypeParameters.Count: > 0, IsCanonicalGenericInstance: true } )
         {
-            if ( namedType.IsCanonicalGenericInstance )
-            {
-                // In generic definitions, we must remove type arguments.
-                typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax ).AssertNotNull();
-            }
+            // In generic definitions, we must remove type arguments.
+            typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax ).AssertNotNull();
         }
 
         if ( !keepNullableAnnotations )
@@ -128,7 +125,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
         SafeSyntaxRewriter rewriter = type switch
         {
-            INamedType { TypeParameters.Count: > 0 } genericType when genericType.IsCanonicalGenericInstance => new RemoveTypeArgumentsRewriter(),
+            INamedType { TypeParameters.Count: > 0, IsCanonicalGenericInstance: true } => new RemoveTypeArgumentsRewriter(),
             INamedType { TypeParameters.Count: > 0 } => new RemoveReferenceNullableAnnotationsRewriter( type ),
             _ => dynamicToVarRewriter
         };
@@ -769,15 +766,11 @@ internal sealed partial class ContextualSyntaxGenerator
             }
             else if ( parameter.HasReferenceTypeConstraint )
             {
-                if ( parameter.ReferenceTypeConstraintNullableAnnotation != NullableAnnotation.Annotated )
-                {
-                    constraints = constraints.Add( ClassOrStructConstraint( SyntaxKind.ClassConstraint ) );
-                }
-                else
-                {
-                    constraints = constraints.Add(
-                        ClassOrStructConstraint( SyntaxKind.ClassConstraint ).WithQuestionToken( Token( SyntaxKind.QuestionToken ) ) );
-                }
+                constraints =
+                    constraints.Add(
+                        parameter.ReferenceTypeConstraintNullableAnnotation != NullableAnnotation.Annotated
+                            ? ClassOrStructConstraint( SyntaxKind.ClassConstraint )
+                            : ClassOrStructConstraint( SyntaxKind.ClassConstraint ).WithQuestionToken( Token( SyntaxKind.QuestionToken ) ) );
             }
             else if ( parameter.HasValueTypeConstraint )
             {

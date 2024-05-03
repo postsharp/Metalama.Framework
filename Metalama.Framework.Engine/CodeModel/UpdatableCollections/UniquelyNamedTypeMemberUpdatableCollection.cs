@@ -15,29 +15,31 @@ internal abstract class UniquelyNamedTypeMemberUpdatableCollection<T> : Uniquely
     // Private members in referenced assemblies are not included because they are also not included in the "ref assembly" and this
     // would cause inconsistent behaviors between design time and compile time.
 
-    protected override MemberRef<T>? GetMemberRef( string name ) 
+    protected override MemberRef<T>? GetMemberRef( string name )
         => this.DeclaringTypeOrNamespace.Target switch
-    {
-        INamespaceOrTypeSymbol symbol =>
-            symbol.GetMembers( name )
-            .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
-            .Select( s => (MemberRef<T>?) new MemberRef<T>( s, this.Compilation.CompilationContext ) )
-            .FirstOrDefault(),
-        INamespaceOrNamedType namespaceOrNamedType =>
-            // TODO: should return initial member of the builder.
-            null,
-        _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
-    };
+        {
+            INamespaceOrTypeSymbol symbol =>
+                symbol.GetMembers( name )
+                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Select( s => (MemberRef<T>?) new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+                    .FirstOrDefault(),
+            INamespaceOrNamedType =>
 
-    protected override IEnumerable<MemberRef<T>> GetMemberRefs() 
+                // TODO: should return initial member of the builder.
+                null,
+            _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+        };
+
+    protected override IEnumerable<MemberRef<T>> GetMemberRefs()
         => this.DeclaringTypeOrNamespace.Target switch
         {
             INamespaceOrTypeSymbol symbol =>
                 symbol.GetMembers()
-                .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
-                .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
-                .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
+
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<T>>.Empty,
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )

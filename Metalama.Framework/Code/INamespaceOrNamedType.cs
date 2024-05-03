@@ -5,6 +5,4 @@ namespace Metalama.Framework.Code;
 /// <summary>
 /// Represents a namespace or a named type.
 /// </summary>
-public interface INamespaceOrNamedType : INamedDeclaration
-{
-}
+public interface INamespaceOrNamedType : INamedDeclaration;

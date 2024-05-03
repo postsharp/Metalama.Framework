@@ -251,6 +251,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         var initializationDiagnostics = new DiagnosticBag();
         advice.Initialize( this._state.ServiceProvider, initializationDiagnostics );
 
+        if ( !initializationDiagnostics.HasError )
+        {
+            advice.Validate( this._state.ServiceProvider, this._state.CurrentCompilation, initializationDiagnostics );
+        }
+
         ThrowOnErrors( initializationDiagnostics );
         this._state.Diagnostics.Report( initializationDiagnostics );
 
@@ -429,7 +434,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._state.AspectInstance,
                             this._templateInstance,
                             @event,
-                            this._state.CurrentCompilation,
+                            this._compilation,
                             template,
                             null,
                             this._layerName,
@@ -450,7 +455,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._state.AspectInstance,
                             this._templateInstance,
                             @event,
-                            this._state.CurrentCompilation,
+                            this._compilation,
                             null,
                             template,
                             this._layerName,
@@ -474,7 +479,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                                     this._state.AspectInstance,
                                     this._templateInstance,
                                     property,
-                                    this._state.CurrentCompilation,
+                                    this._compilation,
                                     template,
                                     null,
                                     this._layerName,
@@ -487,7 +492,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                                     this._state.AspectInstance,
                                     this._templateInstance,
                                     indexer,
-                                    this._state.CurrentCompilation,
+                                    this._compilation,
                                     template,
                                     null,
                                     this._layerName,
@@ -517,7 +522,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                                     this._state.AspectInstance,
                                     this._templateInstance,
                                     property,
-                                    this._state.CurrentCompilation,
+                                    this._compilation,
                                     null,
                                     template,
                                     this._layerName,
@@ -530,7 +535,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                                     this._state.AspectInstance,
                                     this._templateInstance,
                                     indexer,
-                                    this._state.CurrentCompilation,
+                                    this._compilation,
                                     null,
                                     template,
                                     this._layerName,
@@ -556,7 +561,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._state.AspectInstance,
                             this._templateInstance,
                             targetMethod,
-                            this._state.CurrentCompilation,
+                            this._compilation,
                             template,
                             this._layerName,
                             this.GetObjectReader( tags ) );
@@ -569,7 +574,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string typeName, Code.TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null )
+    public IIntroductionAdviceResult<INamedType> IntroduceType(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string typeName,
+        Code.TypeKind typeKind,
+        Action<INamedTypeBuilder>? buildType = null )
     {
         if ( this._templateInstance == null )
         {
@@ -583,7 +592,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._templateInstance,
                 targetNamespaceOrType,
                 typeName,
-                this._state.CurrentCompilation,
+                this._compilation,
                 buildType,
                 this._layerName );
 
@@ -591,7 +600,11 @@ internal sealed class AdviceFactory : IAdviceFactory
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType( string targetNamespace, string typeName, Code.TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null )
+    public IIntroductionAdviceResult<INamedType> IntroduceType(
+        string targetNamespace,
+        string typeName,
+        Code.TypeKind typeKind,
+        Action<INamedTypeBuilder>? buildType = null )
     {
         throw new NotImplementedException();
     }
@@ -622,7 +635,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 scope,
                 whenExists,
@@ -635,13 +648,13 @@ internal sealed class AdviceFactory : IAdviceFactory
     }
 
     public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-            INamedType targetType,
-            string defaultTemplate,
-            IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IConstructorBuilder>? buildAction = null,
-            object? args = null,
-            object? tags = null )
+        INamedType targetType,
+        string defaultTemplate,
+        IntroductionScope scope = IntroductionScope.Default,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IConstructorBuilder>? buildAction = null,
+        object? args = null,
+        object? tags = null )
     {
         if ( this._templateInstance == null )
         {
@@ -654,13 +667,13 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             var template =
                 this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new IntroduceConstructorAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 scope,
                 whenExists,
@@ -695,7 +708,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 this._layerName,
@@ -738,7 +751,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 kind,
                 inputType,
                 null,
@@ -787,7 +800,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 kind,
                 leftType,
                 rightType,
@@ -831,7 +844,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 operatorKind,
                 fromType,
                 null,
@@ -913,7 +926,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetFieldOrProperty,
-                this._state.CurrentCompilation,
+                this._compilation,
                 getTemplate,
                 setTemplate,
                 this._layerName,
@@ -965,7 +978,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._state.AspectInstance,
                             this._templateInstance,
                             targetFieldOrProperty,
-                            this._state.CurrentCompilation,
+                            this._compilation,
                             boundGetTemplate,
                             boundSetTemplate,
                             this._layerName,
@@ -980,7 +993,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._state.AspectInstance,
                             this._templateInstance,
                             targetIndexer,
-                            this._state.CurrentCompilation,
+                            this._compilation,
                             boundGetTemplate,
                             boundSetTemplate,
                             this._layerName,
@@ -1019,7 +1032,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 null,
                 template,
                 scope,
@@ -1054,7 +1067,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 fieldName,
                 default,
                 scope,
@@ -1110,7 +1123,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 propertyName,
                 propertyType,
                 default,
@@ -1169,7 +1182,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 null,
                 null,
                 propertyTemplate,
@@ -1222,7 +1235,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 name,
                 null,
                 default,
@@ -1338,7 +1351,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 indices,
                 boundGetTemplate?.PartialForIntroduction( parameterReaders ),
                 boundSetTemplate?.PartialForIntroduction( parameterReaders ),
@@ -1393,7 +1406,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetEvent,
-                this._state.CurrentCompilation,
+                this._compilation,
                 boundAddTemplate,
                 boundRemoveTemplate,
                 this._layerName,
@@ -1423,17 +1436,17 @@ internal sealed class AdviceFactory : IAdviceFactory
             var eventTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
 
-            var accessorTemplates = eventTemplate.GetAccessorTemplates();
+            var (add, remove) = eventTemplate.GetAccessorTemplates();
 
             var advice = new IntroduceEventAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 null,
                 eventTemplate,
-                accessorTemplates.Add?.PartialForIntroduction(),
-                accessorTemplates.Remove?.PartialForIntroduction(),
+                add?.PartialForIntroduction(),
+                remove?.PartialForIntroduction(),
                 scope,
                 whenExists,
                 buildEvent,
@@ -1477,7 +1490,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 name,
                 default,
                 boundAddTemplate.PartialForIntroduction( parameterReaders ),
@@ -1511,7 +1524,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 interfaceType,
                 whenExists,
                 this._layerName,
@@ -1555,7 +1568,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 boundTemplate.ForInitializer( this.GetObjectReader( args ) ),
                 kind,
                 this._layerName,
@@ -1583,7 +1596,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
-                this._state.CurrentCompilation,
+                this._compilation,
                 statement,
                 kind,
                 this._layerName );
@@ -1610,7 +1623,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetConstructor,
-                this._state.CurrentCompilation,
+                this._compilation,
                 boundTemplate.ForInitializer( this.GetObjectReader( args ) ),
                 InitializerKind.BeforeInstanceConstructor,
                 this._layerName,
@@ -1635,7 +1648,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetConstructor,
-                this._state.CurrentCompilation,
+                this._compilation,
                 statement,
                 InitializerKind.BeforeInstanceConstructor,
                 this._layerName );
@@ -1711,7 +1724,7 @@ internal sealed class AdviceFactory : IAdviceFactory
         {
             return new AdviceResult<T>(
                 null,
-                this._state.CurrentCompilation,
+                this._compilation,
                 AdviceOutcome.Ignore,
                 this._state.AspectBuilder.AssertNotNull(),
                 AdviceKind.AddContract,
@@ -1765,7 +1778,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                     this._state.AspectInstance,
                     this._templateInstance!,
                     targetDeclaration,
-                    this._state.CurrentCompilation,
+                    this._compilation,
                     attributeType,
                     this._layerName ) );
         }
@@ -1795,7 +1808,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 constructor,
-                this._state.CurrentCompilation,
+                this._compilation,
                 this._layerName,
                 parameterName,
                 parameterType,
@@ -1836,7 +1849,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._state.AspectInstance,
                 this._templateInstance,
                 declaration,
-                this._state.CurrentCompilation,
+                this._compilation,
                 new AnnotationInstance( annotation, export, declaration.ToTypedRef<IDeclaration>() ) );
 
             this.ExecuteAdvice<IDeclaration>( advice );

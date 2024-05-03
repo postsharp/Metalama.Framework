@@ -113,7 +113,7 @@ internal readonly ref struct AssertionFailedInterpolatedStringHandler
         {
             var firstLocation = locations.First();
 
-            return FormatLocation(firstLocation, ":[", "]");
+            return FormatLocation( firstLocation, ":[", "]" );
         }
     }
 
@@ -147,7 +147,7 @@ internal readonly ref struct AssertionFailedInterpolatedStringHandler
         var appendLeadingSpace = false;
 
         var rootLocation = rootNode.GetLocation();
-        var locationText = FormatLocation(rootLocation, ":", "" );
+        var locationText = FormatLocation( rootLocation, ":", "" );
 
         builder.AppendInvariant( $"[{rootNode.Kind()}{locationText}] " );
 

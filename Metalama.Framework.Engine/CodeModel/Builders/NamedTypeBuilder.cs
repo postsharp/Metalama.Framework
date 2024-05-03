@@ -15,17 +15,20 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, INamedTypeImpl, ISdkType, ISdkDeclaration
+internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, INamedTypeImpl
 {
     public GenericParameterBuilderList TypeParameters { get; } = new();
 
-    public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base( advice, declaringNamespaceOrType as INamedType, name )
+    public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
+        advice,
+        declaringNamespaceOrType as INamedType,
+        name )
     {
         this.Namespace = declaringNamespaceOrType switch
         {
             INamespace @namespace => @namespace,
             INamedType namedType => namedType.Namespace,
-            _ => throw new AssertionFailedException($"Unsupported: {declaringNamespaceOrType}"),
+            _ => throw new AssertionFailedException( $"Unsupported: {declaringNamespaceOrType}" ),
         };
 
         this.BaseType = ((CompilationModel) this.Namespace.Compilation).Factory.GetSpecialType( Code.SpecialType.Object );
@@ -201,7 +204,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
     {
-        throw new NotSupportedException("This method is not supported on the builder.");
+        throw new NotSupportedException( "This method is not supported on the builder." );
     }
 
     ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )

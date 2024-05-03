@@ -272,7 +272,9 @@ public class UserCodeExecutionContext : IExecutionContextInternal
 
                 if ( declaringType != null && declaringType != this._targetType )
                 {
-                    this._dependencyCollector.AddDependency( declaringType.GetSymbol(), this._targetType.GetSymbol() );
+                    this._dependencyCollector.AddDependency(
+                        declaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
+                        this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ) );
                 }
             }
         }

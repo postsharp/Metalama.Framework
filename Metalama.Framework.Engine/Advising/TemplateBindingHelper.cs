@@ -107,10 +107,10 @@ internal static class TemplateBindingHelper
     /// <summary>
     /// Binds a partially bound template to a target declaration and finished validation.
     /// </summary>
-    [return: NotNullIfNotNull( nameof( targetConstructor ) )]
+    [return: NotNullIfNotNull( nameof(targetConstructor) )]
     public static BoundTemplateMethod? ForIntroduction(
         this PartiallyBoundTemplateMethod template,
-        IConstructor? targetConstructor)
+        IConstructor? targetConstructor )
     {
         if ( targetConstructor == null )
         {

@@ -139,10 +139,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
                     this._oldType = oldType;
                 }
 
-                public void Dispose()
-                {
-                    this._parent._type = this._oldType;
-                }
+                public void Dispose() => this._parent._type = this._oldType;
             }
         }
 
@@ -199,7 +196,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
             public override SyntaxNode VisitTupleType( TupleTypeSyntax node )
             {
                 // tuple elements are not representable as IType
-                var typeSymbol = this._type.GetSymbol().AssertNotNull();
+                var typeSymbol = this._type.GetSymbol().AssertSymbolNotNull();
 
                 return new RemoveReferenceNullableAnnotationsRewriterForSymbol( typeSymbol ).Visit( node )!;
             }
@@ -207,7 +204,7 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
             public override SyntaxNode VisitFunctionPointerType( FunctionPointerTypeSyntax node )
             {
                 // function pointer types are basically not representable as IType
-                var typeSymbol = this._type.GetSymbol().AssertNotNull();
+                var typeSymbol = this._type.GetSymbol().AssertSymbolNotNull();
 
                 return new RemoveReferenceNullableAnnotationsRewriterForSymbol( typeSymbol ).Visit( node )!;
             }
@@ -245,12 +242,8 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
                     this._oldType = oldType;
                 }
 
-                public void Dispose()
-                {
-                    this._parent._type = this._oldType;
-                }
+                public void Dispose() => this._parent._type = this._oldType;
             }
         }
-
     }
 }

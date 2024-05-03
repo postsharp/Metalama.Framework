@@ -13,10 +13,17 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            var result = builder.Advice.IntroduceType(builder.Target, "Memento", TypeKind.Class, buildType: b => { b.Accessibility = Accessibility.Public; });
+            var mementoType =
+                builder.Advice.IntroduceType(
+                    builder.Target,
+                    "Memento",
+                    TypeKind.Class,
+                    buildType: b =>
+                    {
+                        b.Accessibility = Accessibility.Public;
+                    }).Declaration;
 
             var mementoFields = new List<IField>();
-            var mementoFieldRefs = new List<IRef<IDeclaration>>();
 
             foreach (var fieldOrProperty in builder.Target.FieldsAndProperties)
             {
@@ -26,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 }
 
                 var fieldResult = builder.Advice.IntroduceField(
-                    result.Declaration,
+                    mementoType,
                     nameof(MementoField),
                     buildField: b =>
                     {
@@ -36,13 +43,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                     });
 
                 mementoFields.Add(fieldResult.Declaration);
-                mementoFieldRefs.Add(fieldResult.Declaration.ToRef());
             }
 
-            builder.Advice.ImplementInterface(result.Declaration, typeof(IMemento));
+            builder.Advice.ImplementInterface(mementoType, typeof(IMemento));
 
             builder.Advice.IntroduceConstructor(
-                result.Declaration,
+                mementoType,
                 nameof(MementoConstructorTemplate),
                 buildConstructor: b =>
                 {
@@ -51,9 +57,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                         b.AddParameter(mementoField.Name, mementoField.Type);
                     }
                 },
-                args: new { fields = mementoFieldRefs });
+                args: new { fields = mementoFields });
 
-            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator));
+            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType });
         }
 
         [Template]
@@ -62,7 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         [InterfaceMember]
         public IMemento Save()
         {
-            var mementoType = meta.Target.Type.NestedTypes.Single();
+            var mementoType = (INamedType)meta.Tags["mementoType"];
 
             return 
                 BuildNewExpression(
@@ -102,7 +108,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         [InterfaceMember]
         public void Restore(IMemento memento)
         {
-            var mementoType = meta.Target.Type.NestedTypes.Single();
+            var mementoType = (INamedType)meta.Tags["mementoType"];
 
             foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
             {
@@ -113,13 +119,13 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         }
 
         [Template]
-        public void MementoConstructorTemplate([CompileTime] List<IRef<IDeclaration>> fields)
+        public void MementoConstructorTemplate([CompileTime] List<IField> fields)
         {
             int i = meta.CompileTime(0);
 
             foreach (var parameter in meta.Target.Constructor.Parameters)
             {
-                ((IFieldOrProperty)fields[i].GetTarget(ReferenceResolutionOptions.Default)).Value = parameter;
+                fields[i].Value = parameter;
                 i++;
             }
         }

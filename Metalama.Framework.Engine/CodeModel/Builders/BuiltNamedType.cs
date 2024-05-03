@@ -11,7 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, ISdkType, ISdkDeclaration
+internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
     public NamedTypeBuilder TypeBuilder { get; set; }
 
@@ -19,7 +19,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public override DeclarationBuilder Builder => this.TypeBuilder;
 
-    public BuiltNamedType( NamedTypeBuilder builder, CompilationModel compilation) : base(compilation, builder)
+    public BuiltNamedType( NamedTypeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
     {
         this.TypeBuilder = builder;
     }
@@ -143,15 +143,17 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl, I
 
     public bool Equals( SpecialType specialType ) => false;
 
-    public bool Equals( IType? otherType, TypeComparison typeComparison ) => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
+    public bool Equals( IType? otherType, TypeComparison typeComparison )
+        => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
     public bool Equals( IType? other ) => this.Compilation.Comparers.Default.Equals( this, other );
 
     public bool Equals( INamedType? other ) => this.Compilation.Comparers.Default.Equals( this, other );
 
-    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default ) => Array.Empty<IDeclaration>();
+    public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default )
+        => Array.Empty<IDeclaration>();
 
-    public bool IsSubclassOf( INamedType type ) => type.SpecialType == Code.SpecialType.Object;
+    public bool IsSubclassOf( INamedType type ) => type.SpecialType == SpecialType.Object;
 
     public Type ToType()
     {

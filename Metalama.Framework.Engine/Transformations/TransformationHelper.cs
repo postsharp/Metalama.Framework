@@ -100,14 +100,14 @@ internal static class TransformationHelper
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
     }
 
-    public static SyntaxGenerationContext GetSyntaxGenerationContext(this CompilationContext compilationContext, SyntaxGenerationOptions options, IDeclaration declaration )
+    public static SyntaxGenerationContext GetSyntaxGenerationContext( this CompilationContext compilationContext, SyntaxGenerationOptions options, IDeclaration declaration )
     {
         switch ( declaration )
         {
             case SymbolBasedDeclaration symbolBasedDeclaration:
                 var primaryDeclaration = symbolBasedDeclaration.GetPrimaryDeclarationSyntax().AssertNotNull();
 
-                return compilationContext.GetSyntaxGenerationContext(options, primaryDeclaration );
+                return compilationContext.GetSyntaxGenerationContext( options, primaryDeclaration );
 
             case BuiltDeclaration builtDeclaration:
                 return GetSyntaxGenerationContext( compilationContext, options, builtDeclaration.Builder );

@@ -183,7 +183,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Go through all types that will get generated constructors and index existing constructors.
             foreach ( var constructor in initialType.Constructors )
             {
-                existingSignatures.Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
+                existingSignatures.Add(
+                    constructor.Parameters.SelectAsArray(
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ), p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )
@@ -196,7 +198,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 
-                if ( !existingSignatures.Add( finalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                if ( !existingSignatures.Add(
+                        finalParameters.SelectAsArray(
+                            p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -231,7 +235,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
                     var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
 
-                    if ( existingSignatures.Add( nonOptionalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                    if ( existingSignatures.Add(
+                            nonOptionalParameters.SelectAsArray(
+                                p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ),
+                                      p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(
@@ -243,7 +250,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                                     SyntaxKind.ThisConstructorInitializer,
                                     ArgumentList(
                                         SeparatedList(
-                                                nonOptionalParameters.SelectAsArray( p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
+                                                nonOptionalParameters.SelectAsArray(
+                                                    p => Argument( null, GetArgumentRefToken( p ), IdentifierName( p.Name ) ) ) )
                                             .AddRange(
                                                 optionalParameters.SelectAsArray(
                                                     p =>

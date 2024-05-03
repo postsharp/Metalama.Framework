@@ -44,9 +44,7 @@ namespace Metalama.Framework.Engine.Templating
         public void AddStatement( List<StatementOrTrivia> list, StatementSyntax? statement ) => list.Add( new StatementOrTrivia( statement ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IStatement statement )
-        {
-            list.Add( new StatementOrTrivia( ((IStatementImpl) statement).GetSyntax( this ) ) );
-        }
+            => list.Add( new StatementOrTrivia( ((IStatementImpl) statement).GetSyntax( this ) ) );
 
         public void AddStatement( List<StatementOrTrivia> list, IExpression expression )
         {
@@ -329,8 +327,7 @@ namespace Metalama.Framework.Engine.Templating
         public SyntaxToken GetUniqueIdentifier( string hint )
             => SyntaxFactory.Identifier( this._templateExpansionContext.LexicalScope.GetUniqueIdentifier( hint ) );
 
-        public ExpressionSyntax Serialize<T>( T o )
-            => this._templateExpansionContext.SyntaxSerializationService.Serialize( o, this.SyntaxSerializationContext );
+        public ExpressionSyntax Serialize<T>( T o ) => this._templateExpansionContext.SyntaxSerializationService.Serialize( o, this.SyntaxSerializationContext );
 
         public T AddSimplifierAnnotations<T>( T node )
             where T : SyntaxNode
@@ -453,15 +450,13 @@ namespace Metalama.Framework.Engine.Templating
             allArguments[0] = this.ForTemplate( templateName, templateProvider );
             TemplateDriver.CopyTemplateArguments( templateArguments, allArguments, 1, this._templateExpansionContext.SyntaxGenerationContext );
 
-            var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertNotNull() );
+            var compiledTemplateMethodInfo = templateClass.GetCompiledTemplateMethodInfo( templateMember.Declaration.GetSymbol().AssertSymbolNotNull() );
 
             return compiledTemplateMethodInfo.Invoke( context.TemplateProvider.Object, allArguments ).AssertNotNull().AssertCast<BlockSyntax>();
         }
 
         public BlockSyntax InvokeTemplate( string templateName, object? templateInstanceOrType = null, object? args = null )
-        {
-            return this.InvokeTemplate( templateName, GetTemplateProvider( templateInstanceOrType ), this._objectReaderFactory.GetReader( args ) );
-        }
+            => this.InvokeTemplate( templateName, GetTemplateProvider( templateInstanceOrType ), this._objectReaderFactory.GetReader( args ) );
 
         public BlockSyntax InvokeTemplate( TemplateInvocation templateInvocation, object? args = null )
         {
@@ -484,7 +479,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             var templateClass = this._templateExpansionContext.GetTemplateClass( templateProvider );
-            var templateMemberRef = AdviceFactory.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, required: true )!.Value;
+            var templateMemberRef = AdviceFactory.ValidateTemplateName( templateClass, templateName, TemplateKind.Default, true )!.Value;
 
             var templateMember = templateMemberRef.GetTemplateMember<IMethod>(
                 this.Compilation.GetCompilationModel(),

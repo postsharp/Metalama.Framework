@@ -19,7 +19,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
     where TMember : class, IMember
     where TBuilder : MemberBuilder
 {
-    private readonly Action<TBuilder>? _buildAction;
     private readonly IntroductionScope _scope;
 
     protected OverrideStrategy OverrideStrategy { get; }
@@ -90,7 +89,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
         this.Builder.IsVirtual = templateAttributeProperties?.IsVirtual ?? this.Template?.Declaration.IsVirtual ?? false;
 
         // Handle the introduction scope.
-        var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 
         switch ( this._scope )
         {
@@ -128,11 +126,14 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
         this.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
         this.BuildAction?.Invoke( this.Builder );
-
-        this.ValidateBuilder( targetDeclaration, diagnosticAdder );
     }
 
-    protected override void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+    public override void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    {
+        this.ValidateBuilder( this.TargetDeclaration.GetTarget( compilation ), diagnosticAdder );
+    }
+
+    protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
     {
         // Check that static member is not virtual.
         if ( this.Builder is { IsStatic: true, IsVirtual: true } )

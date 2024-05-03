@@ -95,11 +95,11 @@ public static class DeclarationExtensions
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
         => declaration.GetSymbol() is ISymbol symbol
-           ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
-           : null;
+            ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
+            : null;
 
     internal static ISymbol GetSymbol( this SymbolBasedDeclaration declaration, CompilationContext compilationContext )
-        => compilationContext.SymbolTranslator.Translate( declaration.Symbol, declaration.GetCompilationModel().RoslynCompilation ).AssertNotNull();
+        => compilationContext.SymbolTranslator.Translate( declaration.Symbol, declaration.GetCompilationModel().RoslynCompilation ).AssertSymbolNotNull();
 
     internal static MemberRef<T> ToMemberRef<T>( this T member )
         where T : class, IMemberOrNamedType
@@ -445,7 +445,7 @@ public static class DeclarationExtensions
         switch ( @event )
         {
             case Event codeEvent:
-                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+                var eventSymbol = codeEvent.GetSymbol().AssertSymbolNotNull();
 
                 return eventSymbol.IsEventField();
 
@@ -593,6 +593,5 @@ public static class DeclarationExtensions
             ? namedType.Namespace
             : declaration.ContainingDeclaration;
 
-    internal static bool IsNullableReferenceType( this IType type )
-        => type.IsNullable == true && type.IsReferenceType != false;
+    internal static bool IsNullableReferenceType( this IType type ) => type.IsNullable == true && type.IsReferenceType != false;
 }

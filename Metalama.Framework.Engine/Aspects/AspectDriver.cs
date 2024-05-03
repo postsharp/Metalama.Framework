@@ -172,7 +172,7 @@ internal sealed class AspectDriver : IAspectDriver
                 // TODO: should the diagnostic be applied to the attribute, if one exists?
 
                 // Get the code model type for the reflection type so we have better formatting of the diagnostic.
-                var interfaceType = initialCompilationRevision.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof( IAspect<T> ) ).AssertNotNull();
+                var interfaceType = initialCompilationRevision.CompilationContext.ReflectionMapper.GetTypeSymbol( typeof(IAspect<T>) ).AssertNotNull();
 
                 var diagnostic =
                     GeneralDiagnosticDescriptors.AspectAppliedToIncorrectDeclaration.CreateRoslynDiagnostic(

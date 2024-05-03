@@ -42,9 +42,12 @@ internal sealed class MemberSubstitutedCollection<T> : ISourceMemberCollection<T
     public ImmutableArray<MemberRef<T>> OfName( string name )
         => this._source.OfName( name ).SelectAsImmutableArray( memberRef => new MemberRef<T>( this.Substitute( memberRef.ToRef() ).As<IDeclaration>() ) );
 
-    private Ref<T> Substitute( Ref<T> sourceRef ) 
+    private Ref<T> Substitute( Ref<T> sourceRef )
+
         // TODO (TypeBuilder): Should not call GetSymbol.
-        => SubstitutedMemberFactory.Substitute( sourceRef.GetTarget( this.Compilation ), this._substitutedType.GetTarget( this.Compilation ).GetSymbol().AssertSymbolNotNull() );
+        => SubstitutedMemberFactory.Substitute(
+            sourceRef.GetTarget( this.Compilation ),
+            this._substitutedType.GetTarget( this.Compilation ).GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
     ISourceDeclarationCollection<T, Ref<T>> ISourceDeclarationCollection<T, Ref<T>>.Clone( CompilationModel compilation )
         => new MemberSubstitutedCollection<T>(

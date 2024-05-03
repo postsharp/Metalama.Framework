@@ -482,15 +482,20 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 switch ( injectInterfaceTransformation.TargetDeclaration )
                 {
                     case NamedType sourceType:
-                        transformationCollection.AddInjectedInterface( (BaseTypeDeclarationSyntax)sourceType.GetPrimaryDeclarationSyntax().AssertNotNull(), introducedInterface );
+                        transformationCollection.AddInjectedInterface(
+                            (BaseTypeDeclarationSyntax) sourceType.GetPrimaryDeclarationSyntax().AssertNotNull(),
+                            introducedInterface );
+
                         break;
 
                     case BuiltNamedType builtType:
                         transformationCollection.AddInjectedInterface( builtType.TypeBuilder, introducedInterface );
+
                         break;
 
                     case NamedTypeBuilder typeBuilder:
                         transformationCollection.AddInjectedInterface( typeBuilder, introducedInterface );
+
                         break;
 
                     default:

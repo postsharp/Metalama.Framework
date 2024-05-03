@@ -118,7 +118,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
 
         switch (x, y)
         {
-            case (IMethod methodX, IMethod methodY ):
+            case (IMethod methodX, IMethod methodY):
                 result = this.CompareMethods( methodX, methodY, this._options );
 
                 if ( result != 0 )
@@ -128,7 +128,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
 
                 break;
 
-            case (IConstructor constructorX, IConstructor constructorY ):
+            case (IConstructor constructorX, IConstructor constructorY):
                 result = this.CompareConstructors( constructorX, constructorY, this._options );
 
                 if ( result != 0 )
@@ -159,7 +159,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
 
                 break;
 
-            case (IIndexer indexerX, IIndexer indexerY ):
+            case (IIndexer indexerX, IIndexer indexerY):
                 result = this.CompareIndexers( indexerX, indexerY, this._options );
 
                 if ( result != 0 )
@@ -219,7 +219,8 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
         if ( this._options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )
         {
             result = this.CompareContainingDeclarations(
-                (x as IDeclaration)?.GetContainingDeclarationOrNamespace(), (y as IDeclaration)?.GetContainingDeclarationOrNamespace() );
+                (x as IDeclaration)?.GetContainingDeclarationOrNamespace(),
+                (y as IDeclaration)?.GetContainingDeclarationOrNamespace() );
 
             if ( result != 0 )
             {
@@ -480,7 +481,10 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
         int CompareParameterTypes( IType? parameterTypeX, IType? parameterTypeY )
         {
             // Prevent infinite recursion.
-            var comparer = parameterTypeX is ITypeParameter { ContainingDeclaration: IMethod } && parameterTypeY is ITypeParameter { ContainingDeclaration: IMethod } ? _nonRecursive : this;
+            var comparer = parameterTypeX is ITypeParameter { ContainingDeclaration: IMethod }
+                           && parameterTypeY is ITypeParameter { ContainingDeclaration: IMethod }
+                ? _nonRecursive
+                : this;
 
             return comparer.Compare( parameterTypeX, parameterTypeY );
         }
@@ -626,7 +630,6 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
             case (IPointerType xPointerType, IPointerType yPointerType):
                 return this.CompareTypes( xPointerType.PointedAtType, yPointerType.PointedAtType );
 
-            case (IFunctionPointerType, IFunctionPointerType):
             default:
                 throw new NotImplementedException( $"Unexpected type kind {typeX.TypeKind}." );
         }
@@ -731,7 +734,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
         switch ( compilationElement )
         {
             case null:
-                throw new ArgumentNullException( nameof( compilationElement ) );
+                throw new ArgumentNullException( nameof(compilationElement) );
 
             case IParameter parameter:
                 h = HashCode.Combine( h, GetHashCode( parameter.ContainingDeclaration!, options ), parameter.Index );
@@ -794,7 +797,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
                 }
 
                 if ( options.HasFlagFast( StructuralComparerOptions.ParameterTypes )
-                                        || options.HasFlagFast( StructuralComparerOptions.ParameterModifiers ) )
+                     || options.HasFlagFast( StructuralComparerOptions.ParameterModifiers ) )
                 {
                     h = HashCode.Combine( h, indexer.Parameters.Count );
 
@@ -861,10 +864,11 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
 
             case IFunctionPointerType:
                 h = 173808215;
+
                 break;
 
             default:
-                throw new NotImplementedException( $"Unexpected type {compilationElement?.GetType()}." );
+                throw new NotImplementedException( $"Unexpected type {compilationElement.GetType()}." );
         }
 
         if ( options.HasFlagFast( StructuralComparerOptions.ContainingDeclaration ) )

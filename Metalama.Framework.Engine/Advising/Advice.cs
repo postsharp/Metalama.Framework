@@ -54,12 +54,15 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     /// <summary>
     /// Initializes the advice. Executed before any advices are executed.
     /// </summary>
-    /// <param name="serviceProvider"></param>
-    /// <param name="diagnosticAdder">Diagnostic adder.</param>
     /// <remarks>
     /// The advice should only report diagnostics that do not take into account the target declaration(s).
     /// </remarks>
     public virtual void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+
+    /// <summary>
+    /// Validates the advice. Executed only if initialization passed, before implementing the advice.
+    /// </summary>
+    public virtual void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
 
     /// <summary>
     /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.

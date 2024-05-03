@@ -13,28 +13,32 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
     where T : class, IMemberOrNamedType
 {
     protected override ImmutableArray<MemberRef<T>> GetMemberRefsOfName( string name )
-    => this.DeclaringTypeOrNamespace.Target switch
-    {
-        INamedTypeSymbol symbol =>
-            symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers( name )
-            .Where( x => this.IsSymbolIncluded(x ) && SymbolValidator.Instance.Visit( x ) )
-            .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
-            .ToImmutableArray(),
-        INamespaceOrNamedType namespaceOrNamedType =>
-            // TODO: should return initial members of the builder.
-            ImmutableArray<MemberRef<T>>.Empty,
-        _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
-    };
+        => this.DeclaringTypeOrNamespace.Target switch
+        {
+            INamedTypeSymbol symbol =>
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
+                    .GetMembers( name )
+                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
+
+                // TODO: should return initial members of the builder.
+                ImmutableArray<MemberRef<T>>.Empty,
+            _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+        };
 
     protected override ImmutableArray<MemberRef<T>> GetMemberRefs()
         => this.DeclaringTypeOrNamespace.Target switch
         {
             INamedTypeSymbol symbol =>
-                symbol.TranslateIfNecessary( this.Compilation.CompilationContext ).GetMembers()
-                .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
-                .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
-                .ToImmutableArray(),
-            INamespaceOrNamedType namespaceOrNamedType =>
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
+                    .GetMembers()
+                    .Where( x => this.IsSymbolIncluded( x ) && SymbolValidator.Instance.Visit( x ) )
+                    .Select( s => new MemberRef<T>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
+
                 // TODO: should return initial members of the builder.
                 ImmutableArray<MemberRef<T>>.Empty,
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )

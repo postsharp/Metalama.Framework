@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +28,7 @@ internal static class DeclarationHelper
     /// <summary>
     /// Gets a string that would be equal to <see cref="MemberInfo.Name"/>.
     /// </summary>
-    /// <param name="bypassSymbols">Does not use the symbol-based implemetation, even when available. Used for testing.</param>
+    /// <param name="bypassSymbols">Does not use the symbol-based implementation, even when available. Used for testing.</param>
     internal static string GetReflectionName( this IType type, bool bypassSymbols = false )
         => bypassSymbols
             ? type.GetReflectionName( TypeNameKind.Name, bypassSymbols: true )
@@ -38,7 +37,7 @@ internal static class DeclarationHelper
     /// <summary>
     /// Gets a string that would be equal to <see cref="Type.FullName"/>, except that we do not qualify type names with the assembly name.
     /// </summary>
-    /// <param name="bypassSymbols">Does not use the symbol-based implemetation, even when available. Used for testing.</param>
+    /// <param name="bypassSymbols">Does not use the symbol-based implementation, even when available. Used for testing.</param>
     internal static string GetReflectionFullName( this IType type, bool bypassSymbols = false )
         => bypassSymbols
             ? type.GetReflectionName( TypeNameKind.FullName, bypassSymbols: true )
@@ -104,8 +103,8 @@ internal static class DeclarationHelper
 
             switch ( declaration )
             {
-                case INamedType { IsGeneric: true } unboundGenericType
-                    when !unboundGenericType.IsCanonicalGenericInstance && kind != TypeNameKind.Name:
+                case INamedType { IsGeneric: true, IsCanonicalGenericInstance: false } unboundGenericType
+                    when kind != TypeNameKind.Name:
                     sb.Append( unboundGenericType.GetMetadataName() );
 
                     currentTypeArguments.AddRange( unboundGenericType.TypeArguments );

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Advising
         public IntroduceNamedTypeAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
-            INamespaceOrNamedType? targetNamespaceOrType,
+            INamespaceOrNamedType targetNamespaceOrType,
             string? explicitName,
             ICompilation sourceCompilation,
             Action<NamedTypeBuilder>? buildAction,
@@ -35,7 +35,10 @@ namespace Metalama.Framework.Engine.Advising
             this.BuildAction?.Invoke( this.Builder );
         }
 
-        public override AdviceImplementationResult Implement( ProjectServiceProvider serviceProvider, CompilationModel compilation, Action<ITransformation> addTransformation )
+        public override AdviceImplementationResult Implement(
+            ProjectServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             addTransformation( this.Builder.ToTransformation() );
 

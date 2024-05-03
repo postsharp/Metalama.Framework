@@ -38,8 +38,6 @@ internal abstract class IntroduceMemberOrNamedTypeAdvice<TMemberOrNamedType, TBu
         base.Initialize( serviceProvider, diagnosticAdder );
     }
 
-    protected virtual void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder ) { }
-
     protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, ProjectServiceProvider serviceProvider )
     {
         var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
