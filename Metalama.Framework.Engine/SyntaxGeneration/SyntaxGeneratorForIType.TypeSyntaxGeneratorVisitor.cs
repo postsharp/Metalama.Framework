@@ -100,10 +100,12 @@ internal partial class SyntaxGeneratorForIType
             var ranks = new List<ArrayRankSpecifierSyntax>();
 
             var arrayType = type;
+
             while ( arrayType != null && !arrayType.Equals( underlyingType ) )
             {
-                ranks.Add( SyntaxFactory.ArrayRankSpecifier(
-                    SyntaxFactory.SeparatedList( Enumerable.Repeat<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression(), arrayType.Rank ) ) ) );
+                ranks.Add(
+                    SyntaxFactory.ArrayRankSpecifier(
+                        SyntaxFactory.SeparatedList( Enumerable.Repeat<ExpressionSyntax>( SyntaxFactory.OmittedArraySizeExpression(), arrayType.Rank ) ) ) );
 
                 arrayType = arrayType.ElementType as IArrayType;
             }
@@ -118,14 +120,14 @@ internal partial class SyntaxGeneratorForIType
             return this.AddInformationTo( arrayTypeSyntax, type );
         }
 
-        public override TypeSyntax VisitDynamicType( IDynamicType type )
-            => this.AddInformationTo( SyntaxFactory.IdentifierName( "dynamic" ), type );
+        public override TypeSyntax VisitDynamicType( IDynamicType type ) => this.AddInformationTo( SyntaxFactory.IdentifierName( "dynamic" ), type );
 
         public override TypeSyntax VisitFunctionPointerType( IFunctionPointerType functionPointerType ) => throw new NotImplementedException();
 
         public TypeSyntax CreateSimpleTypeSyntax( INamedType type )
         {
             var syntax = this.TryCreateSpecializedNamedTypeSyntax( type );
+
             if ( syntax != null )
             {
                 return syntax;
@@ -162,8 +164,7 @@ internal partial class SyntaxGeneratorForIType
                 SyntaxFactory.IdentifierName( "Object" ) );
         }
 
-        private static IdentifierNameSyntax CreateGlobalIdentifier()
-            => SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) );
+        private static IdentifierNameSyntax CreateGlobalIdentifier() => SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) );
 
         private TypeSyntax? TryCreateSpecializedNamedTypeSyntax( INamedType type )
         {
@@ -176,6 +177,7 @@ internal partial class SyntaxGeneratorForIType
             {
                 // Can't have a nullable of a pointer type.  i.e. "int*?" is illegal.
                 var innerType = type.TypeArguments.First();
+
                 if ( innerType.TypeKind != TypeKind.Pointer )
                 {
                     return this.AddInformationTo( SyntaxFactory.NullableType( this._syntaxGeneratorForIType.TypeExpression( innerType ) ), type );
@@ -188,15 +190,18 @@ internal partial class SyntaxGeneratorForIType
         public override TypeSyntax VisitNamedType( INamedType type )
         {
             var typeSyntax = this.CreateSimpleTypeSyntax( type );
+
             if ( typeSyntax is not SimpleNameSyntax )
             {
                 return typeSyntax;
             }
 
             var simpleNameSyntax = (SimpleNameSyntax) typeSyntax;
+
             if ( type.DeclaringType != null )
             {
                 var containingTypeSyntax = this.VisitNamedType( type.DeclaringType );
+
                 if ( containingTypeSyntax is NameSyntax name )
                 {
                     typeSyntax = this.AddInformationTo( SyntaxFactory.QualifiedName( name, simpleNameSyntax ), type );
@@ -235,6 +240,7 @@ internal partial class SyntaxGeneratorForIType
         public TypeSyntax VisitNamespace( INamespace ns )
         {
             var syntax = this.AddInformationTo( ToIdentifierName( ns.Name ), ns );
+
             if ( ns.ParentNamespace == null )
             {
                 return syntax;
@@ -247,6 +253,7 @@ internal partial class SyntaxGeneratorForIType
             else
             {
                 var container = this.VisitNamespace( ns.ParentNamespace );
+
                 return this.AddInformationTo( SyntaxFactory.QualifiedName( (NameSyntax) container, syntax ), ns );
             }
         }
@@ -277,6 +284,7 @@ internal partial class SyntaxGeneratorForIType
         public override TypeSyntax VisitTypeParameter( ITypeParameter type )
         {
             TypeSyntax typeSyntax = this.AddInformationTo( ToIdentifierName( type.Name ), type );
+
             if ( type.IsNullableReferenceType() )
             {
                 // value type with nullable annotation may be composed from unconstrained nullable generic

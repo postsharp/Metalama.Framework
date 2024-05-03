@@ -23,26 +23,22 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceMemberOrNamedT
 
         var type =
             ClassDeclaration(
-                typeBuilder.GetAttributeLists( context ),
-                typeBuilder.GetSyntaxModifierList(),
-                Identifier( typeBuilder.Name ),
-                this.IntroducedDeclaration.TypeParameters.Count == 0
-                    ? null
-                    : TypeParameterList(
-                        SeparatedList(
-                            ((IEnumerable<TypeParameterBuilder>) this.IntroducedDeclaration.TypeParameters).Select( tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
-                BaseList(
+                    typeBuilder.GetAttributeLists( context ),
+                    typeBuilder.GetSyntaxModifierList(),
+                    Identifier( typeBuilder.Name ),
+                    this.IntroducedDeclaration.TypeParameters.Count == 0
+                        ? null
+                        : TypeParameterList(
+                            SeparatedList(
+                                ((IEnumerable<TypeParameterBuilder>) this.IntroducedDeclaration.TypeParameters).Select(
+                                    tp => TypeParameter( Identifier( tp.Name ) ) ) ) ),
+                    BaseList(
                         SingletonSeparatedList<BaseTypeSyntax>(
-                            SimpleBaseType(
-                                context.SyntaxGenerator.Type(
-                                    this.IntroducedDeclaration.BaseType.AssertNotNull() ) ) ) ),
-                List<TypeParameterConstraintClauseSyntax>(),
-                List<MemberDeclarationSyntax>() )
-            .NormalizeWhitespaceIfNecessary( context.SyntaxGenerationContext );
+                            SimpleBaseType( context.SyntaxGenerator.Type( this.IntroducedDeclaration.BaseType.AssertNotNull() ) ) ) ),
+                    List<TypeParameterConstraintClauseSyntax>(),
+                    List<MemberDeclarationSyntax>() )
+                .NormalizeWhitespaceIfNecessary( context.SyntaxGenerationContext );
 
-        return new[]
-        {
-            new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration )
-        };
+        return new[] { new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
     }
 }

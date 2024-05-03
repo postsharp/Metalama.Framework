@@ -487,7 +487,7 @@ internal sealed partial class LinkerInjectionStep
 
                         case TypeDeclarationSyntax typeDeclaration:
 
-                            var typeBuilder = (NamedTypeBuilder)injectedMember.DeclarationBuilder.AssertNotNull();
+                            var typeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
                             var injectedTypeMembers = new List<MemberDeclarationSyntax>();
 
                             AddInjectionsOnPosition(
@@ -498,7 +498,7 @@ internal sealed partial class LinkerInjectionStep
 
                             var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
 
-                            if (injectedInterfaces.Count > 0)
+                            if ( injectedInterfaces.Count > 0 )
                             {
                                 typeDeclaration = (TypeDeclarationSyntax) typeDeclaration.AddBaseListTypes( injectedInterfaces.SelectAsArray( i => i.Syntax ) );
                             }

@@ -68,10 +68,11 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.Type = this.SourceCompilation.GetCompilationModel().Cache.SystemObjectType;
                 this.Builder.Writeability = Writeability.All;
             }
+        }
 
-            var targetType = this.TargetDeclaration.GetTarget( this.SourceCompilation );
-
-            if ( targetType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetType.IsReadOnly )
+        protected override void ValidateBuilder( INamedType targetDeclaration, IDiagnosticAdder diagnosticAdder )
+        {
+            if ( targetDeclaration.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetDeclaration.IsReadOnly )
             {
                 this.Builder.Writeability = Writeability.ConstructorOnly;
             }

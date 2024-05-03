@@ -47,7 +47,8 @@ public sealed partial class CompilationModel
                 this._finalizers.TryGetValue( methodBuilder.DeclaringType.ToTypedRef(), out var finalizer )
                 && finalizer == methodBuilder,
             _ =>
-                this._methods.TryGetValue( methodBuilder.DeclaringType.ToTypedRef(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() )
+                this._methods.TryGetValue( methodBuilder.DeclaringType.ToTypedRef(), out var methods )
+                && methods.Contains( methodBuilder.ToTypedRef<IMethod>() )
         };
 
     internal bool Contains( ConstructorBuilder constructorBuilder )
@@ -78,7 +79,7 @@ public sealed partial class CompilationModel
 
     internal bool Contains( NamedTypeBuilder namedTypeBuilder )
         => this._namedTypes.TryGetValue(
-               ((INamespaceOrNamedType?)namedTypeBuilder.DeclaringType ?? namedTypeBuilder.Namespace ?? throw new AssertionFailedException()).ToTypedRef(),
+               ((INamespaceOrNamedType?) namedTypeBuilder.DeclaringType ?? namedTypeBuilder.Namespace ?? throw new AssertionFailedException()).ToTypedRef(),
                out var namedTypes )
            && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
 
@@ -267,7 +268,7 @@ public sealed partial class CompilationModel
 
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
-        this._staticConstructors.TryGetValue( declaringType.ToTypedRef<INamedType>(this.CompilationContext), out var value );
+        this._staticConstructors.TryGetValue( declaringType.ToTypedRef<INamedType>( this.CompilationContext ), out var value );
 
         return value;
     }

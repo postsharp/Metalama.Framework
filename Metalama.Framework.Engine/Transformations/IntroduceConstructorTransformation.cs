@@ -27,7 +27,7 @@ internal sealed class IntroduceConstructorTransformation
         var targetType = introducedDeclaration.DeclaringType;
 
         if ( targetType.Constructors.Any( c => c.GetSymbol() is { Parameters: [] } symbol && symbol.GetPrimarySyntaxReference() == null )
-             && this.IntroducedDeclaration.Parameters.Count == 0)
+             && this.IntroducedDeclaration.Parameters.Count == 0 )
         {
             this.ReplacedMember = targetType.Constructors.OfExactSignature( Array.Empty<IType>() ).AssertNotNull().ToMemberRef<IMember>();
         }
@@ -43,7 +43,7 @@ internal sealed class IntroduceConstructorTransformation
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
                 TokenList( Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( Space ) ) ),
-                Identifier(constructorBuilder.DeclaringType.Name),
+                Identifier( constructorBuilder.DeclaringType.Name ),
                 context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
                 null,
                 context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock( statements )
@@ -63,10 +63,10 @@ internal sealed class IntroduceConstructorTransformation
 
     public MemberRef<IMember> ReplacedMember { get; }
 
-    public override InsertPosition InsertPosition =>
-        this.ReplacedMember.Target != null
-        ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
-        : this.IntroducedDeclaration.ToInsertPosition();
+    public override InsertPosition InsertPosition
+        => this.ReplacedMember.Target != null
+            ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
+            : this.IntroducedDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 

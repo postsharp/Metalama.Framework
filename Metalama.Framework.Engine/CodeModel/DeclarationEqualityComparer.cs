@@ -49,14 +49,14 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
             return this.Is( leftSymbol, rightSymbol, kind );
         }
 
-        if ( kind is not ConversionKind.Reference and not ConversionKind.Default || left is not INamedType || right is not INamedType
+        if ( kind is not ConversionKind.Reference and not ConversionKind.Default || left is not INamedType leftType || right is not INamedType
              || right is INamedType { IsGeneric: true } || right is INamedType { TypeKind: Code.TypeKind.Interface } )
         {
             // TODO: Implement.
             throw new NotSupportedException( "Not yet supported on introduced types." );
         }
 
-        var current = (INamedType) left;
+        var current = leftType;
 
         while ( current != null )
         {

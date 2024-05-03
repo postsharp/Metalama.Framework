@@ -61,6 +61,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             var builder = new StringBuilder();
             var generator = new ReferenceGenerator( builder, typeParameterContext: null );
             generator.Visit( type );
+
             return builder.ToString();
         }
 
@@ -78,6 +79,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             var builder = new StringBuilder();
             var generator = new ReferenceGenerator( builder, typeParameterContext: null );
             generator.Visit( ns );
+
             return builder.ToString();
         }
 

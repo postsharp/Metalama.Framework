@@ -2,6 +2,7 @@
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AsField_SelfReferencing;
 
