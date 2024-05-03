@@ -348,7 +348,7 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
                         null,
                         expressionStatement.Expression ),
-                SimpleLambdaExpressionSyntax { Block.Statements: [ThrowStatementSyntax throwStatement] } simpleLambdaExpression =>
+                SimpleLambdaExpressionSyntax { Block.Statements: [ThrowStatementSyntax { Expression: not null } throwStatement] } simpleLambdaExpression =>
                     simpleLambdaExpression.Update(
                         simpleLambdaExpression.AttributeLists,
                         simpleLambdaExpression.Modifiers,
