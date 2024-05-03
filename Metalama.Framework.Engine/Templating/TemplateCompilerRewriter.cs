@@ -1715,7 +1715,40 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         => this.BuildRunTimeBlock(
             node.Statements,
             generateExpression,
-            node.Parent as LocalFunctionStatementSyntax );
+            this.GetFunctionLikeRunTimeBlockInfo( node ) );
+
+    private sealed record FunctionLikeRunTimeBlockInfo( ITypeSymbol ReturnType, bool IsAsync );
+
+    private FunctionLikeRunTimeBlockInfo? GetFunctionLikeRunTimeBlockInfo( SyntaxNode? node )
+    {
+        switch ( node?.Parent )
+        {
+            case LocalFunctionStatementSyntax localFunction:
+                var localFunctionSymbol = (IMethodSymbol?) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction );
+
+                if ( localFunctionSymbol == null )
+                {
+                    return null;
+                }
+
+                var returnType = localFunctionSymbol.ReturnType;
+
+                return new FunctionLikeRunTimeBlockInfo( returnType, localFunctionSymbol.IsAsync );
+
+            case AnonymousFunctionExpressionSyntax anonymousFunction:
+                var anonymousFunctionSymbol = (IMethodSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( anonymousFunction );
+
+                if ( anonymousFunctionSymbol == null )
+                {
+                    return null;
+                }
+
+                return new FunctionLikeRunTimeBlockInfo( anonymousFunctionSymbol.ReturnType, anonymousFunctionSymbol.IsAsync );
+
+            default:
+                return null;
+        }
+    }
 
     /// <summary>
     /// Generates a run-time block.
@@ -1727,7 +1760,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     private SyntaxNode BuildRunTimeBlock(
         SyntaxList<StatementSyntax> statements,
         bool generateExpression,
-        LocalFunctionStatementSyntax? localFunction = null )
+        FunctionLikeRunTimeBlockInfo? localFunctionInfo = null )
     {
         using ( this.WithMetaContext( MetaContext.CreateForRunTimeBlock( this._currentMetaContext, $"__s{++this._nextStatementListId}" ) ) )
         {
@@ -1748,14 +1781,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
             var previousTemplateMetaSyntaxFactory = this._templateMetaSyntaxFactory;
 
             // If we are in a local function, use a different TemplateMetaSyntaxFactory. 
-            if ( localFunction != null )
+            if ( localFunctionInfo != null )
             {
                 this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( _templateSyntaxFactoryLocalName );
 
                 // var localSyntaxFactory = syntaxFactory.ForLocalFunction( "typeof(X)", map );
-                var localFunctionSymbol = (IMethodSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunction ).AssertNotNull();
-
-                var returnType = localFunctionSymbol.ReturnType.GetSerializableTypeId().Id;
 
                 var map = this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType );
 
@@ -1775,9 +1805,11 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                                 SeparatedList(
                                                                     new[]
                                                                     {
-                                                                        Argument( SyntaxFactoryEx.LiteralExpression( returnType ) ),
+                                                                        Argument(
+                                                                            SyntaxFactoryEx.LiteralExpression(
+                                                                                localFunctionInfo.ReturnType.GetSerializableTypeId().Id ) ),
                                                                         Argument( map ),
-                                                                        Argument( SyntaxFactoryEx.LiteralExpression( localFunctionSymbol.IsAsync ) )
+                                                                        Argument( SyntaxFactoryEx.LiteralExpression( localFunctionInfo.IsAsync ) )
                                                                     } ) ) ) ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithLeadingTrivia( this.GetIndentation() ) );
