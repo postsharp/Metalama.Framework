@@ -5,6 +5,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -82,9 +83,10 @@ internal sealed class EventInvoker : Invoker<IEvent>, IEventInvoker
             receiverInfo.RequiresConditionalAccess
                 ? (ExpressionSyntax) ConditionalAccessExpression( receiverSyntax, MemberBindingExpression( name ) )
                 : MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    receiverSyntax,
-                    name );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        receiverSyntax,
+                        name )
+                    .WithSimplifierAnnotationIfNecessary( syntaxSerializationContext.SyntaxGenerationContext );
 
         // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or it's declaring type).
         if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )

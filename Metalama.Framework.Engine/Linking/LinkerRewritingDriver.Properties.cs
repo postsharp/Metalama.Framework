@@ -319,11 +319,12 @@ namespace Metalama.Framework.Engine.Linking
                     ReturnStatement(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.ReturnKeyword ),
                         MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            symbol.IsStatic
-                                ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                : ThisExpression(),
-                            IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                symbol.IsStatic
+                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
+                                    : ThisExpression(),
+                                IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) )
+                            .WithSimplifierAnnotationIfNecessary( generationContext ),
                         Token( SyntaxKind.SemicolonToken ) ) )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
@@ -333,11 +334,12 @@ namespace Metalama.Framework.Engine.Linking
                         AssignmentExpression(
                             SyntaxKind.SimpleAssignmentExpression,
                             MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                symbol.IsStatic
-                                    ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
-                                    : ThisExpression(),
-                                IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    symbol.IsStatic
+                                        ? generationContext.SyntaxGenerator.Type( symbol.ContainingType )
+                                        : ThisExpression(),
+                                    IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) )
+                                .WithSimplifierAnnotationIfNecessary( generationContext ),
                             IdentifierName( "value" ) ) ) )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
@@ -560,7 +562,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Symbol.Name ) );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Symbol.Name ) )
+                        .WithSimplifierAnnotationIfNecessary( context );
                 }
             }
         }

@@ -18,11 +18,11 @@ internal class C
     {
       Console.WriteLine("Hello, world.");
     }
-    C.Execute1(new Func<object, bool>(parameter => this.CanExecute((int)parameter)));
-    _ = new C(new Func<object, bool>(parameter => this.CanExecute((int)parameter)));
+    Execute1(new Func<object, bool>(parameter => CanExecute((int)parameter)));
+    _ = new C(new Func<object, bool>(parameter => CanExecute((int)parameter)));
     var x = new Func<object, bool>(parameter => CanExecute((int)parameter));
-    C.Execute2(parameter => this.CanExecute((int)parameter));
-    _ = new C(null, parameter => this.CanExecute((int)parameter));
+    Execute2(parameter => CanExecute((int)parameter));
+    _ = new C(null, parameter => CanExecute((int)parameter));
     var y = () => Execute1(new object ());
   }
 }

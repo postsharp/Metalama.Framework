@@ -6,6 +6,7 @@ using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -37,7 +38,8 @@ internal sealed class FieldOrPropertyInvoker : Invoker<IFieldOrProperty>, IField
 
         if ( !receiverInfo.RequiresConditionalAccess )
         {
-            expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverSyntax, name );
+            expression = MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverSyntax, name )
+                .WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
         }
         else
         {

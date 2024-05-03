@@ -4,7 +4,9 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -134,13 +136,18 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
                         throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this.Member );
                     }
 
-                    return this.CreateInvocationExpression( receiverInfo.ToReceiverExpressionSyntax(), name, arguments, AspectReferenceTargetKind.Self );
+                    return this.CreateInvocationExpression(
+                        receiverInfo.ToReceiverExpressionSyntax(),
+                        name,
+                        arguments,
+                        AspectReferenceTargetKind.Self,
+                        context );
                 }
                 else
                 {
                     var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context ) );
 
-                    return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self );
+                    return this.CreateInvocationExpression( receiver, name, arguments, AspectReferenceTargetKind.Self, context );
                 }
             },
             this.Member.ReturnType );
@@ -150,12 +157,14 @@ internal sealed class MethodInvoker : Invoker<IMethod>, IMethodInvoker
         ReceiverExpressionSyntax receiverTypedExpressionSyntax,
         SimpleNameSyntax name,
         ArgumentSyntax[]? arguments,
-        AspectReferenceTargetKind targetKind )
+        AspectReferenceTargetKind targetKind,
+        SyntaxSerializationContext context )
     {
         if ( !receiverTypedExpressionSyntax.RequiresNullConditionalAccessMember )
         {
             ExpressionSyntax memberAccessExpression =
-                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name );
+                MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, receiverTypedExpressionSyntax.Syntax, name )
+                    .WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
 
             // Only create an aspect reference when the declaring type of the invoked declaration is ancestor of the target of the template (or its declaring type).
             if ( GetTargetType()?.Is( this.Member.DeclaringType ) ?? false )
