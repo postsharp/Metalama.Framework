@@ -9,14 +9,12 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
 internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 {
-    public IAspectInstanceInternal Aspect { get; }
+    public IAspectInstanceInternal AspectInstance { get; }
 
     public TemplateClassInstance TemplateInstance { get; }
 
@@ -32,7 +30,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     public abstract AdviceKind AdviceKind { get; }
 
     protected Advice(
-        IAspectInstanceInternal aspect,
+        IAspectInstanceInternal aspectInstance,
         TemplateClassInstance template,
         IDeclaration targetDeclaration,
         ICompilation sourceCompilation,
@@ -44,11 +42,11 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
             throw new AssertionFailedException( $"Cannot override '{targetDeclaration}' because it is external." );
         }
 #endif
-        this.Aspect = aspect;
+        this.AspectInstance = aspectInstance;
         this.TemplateInstance = template;
         this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();
         this.SourceCompilation = sourceCompilation;
-        this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
+        this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, layerName );
     }
 
     /// <summary>
@@ -57,30 +55,21 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     /// <remarks>
     /// The advice should only report diagnostics that do not take into account the target declaration(s).
     /// </remarks>
-    public virtual void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+    protected virtual void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
     /// <summary>
     /// Validates the advice. Executed only if initialization passed, before implementing the advice.
     /// </summary>
     public virtual void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
-
-    /// <summary>
-    /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
-    /// </summary>
-    /// <param name="serviceProvider">Service provider.</param>
-    /// <param name="compilation">Input compilation.</param>
-    /// <param name="addTransformation"></param>
-    /// <returns>Advice result containing transformations and diagnostics.</returns>
-    public abstract AdviceImplementationResult Implement(
-        ProjectServiceProvider serviceProvider,
-        CompilationModel compilation,
-        Action<ITransformation> addTransformation );
-
-    IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.Aspect;
+    IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.AspectInstance;
 
     DeclarationOriginKind IDeclarationOrigin.Kind => DeclarationOriginKind.Aspect;
 
     bool IDeclarationOrigin.IsCompilerGenerated => false;
 
-    string IDiagnosticSource.DiagnosticSourceDescription => $"{this.GetType().Name} supplied by {this.Aspect.DiagnosticSourceDescription}'";
+    string IDiagnosticSource.DiagnosticSourceDescription => $"{this.GetType().Name} supplied by {this.AspectInstance.DiagnosticSourceDescription}'";
+
+    public AdviceResult Execute( IAdviceExecutionContext context ) => this.ExecuteCore( context );
+
+    protected abstract AdviceResult ExecuteCore( IAdviceExecutionContext context );
 }

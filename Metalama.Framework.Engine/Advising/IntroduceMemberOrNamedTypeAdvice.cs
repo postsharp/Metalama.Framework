@@ -33,7 +33,7 @@ internal abstract class IntroduceMemberOrNamedTypeAdvice<TMemberOrNamedType, TBu
         this.Builder = null!;
     }
 
-    public override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+    protected override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
     {
         base.Initialize( serviceProvider, diagnosticAdder );
     }

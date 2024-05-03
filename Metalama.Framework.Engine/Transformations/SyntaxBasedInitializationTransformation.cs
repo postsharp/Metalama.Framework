@@ -38,7 +38,7 @@ internal sealed class SyntaxBasedInitializationTransformation : BaseTransformati
         {
             new InsertedStatement(
                 this._initializationStatement( context.SyntaxGenerationContext )
-                    .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )
+                    .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                 this.ContextDeclaration,
                 this,

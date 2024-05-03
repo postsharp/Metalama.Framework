@@ -47,7 +47,7 @@ internal sealed class IntroduceConstructorTransformation
                 context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
                 null,
                 context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock( statements )
-                    .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                    .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
                 null );
 
         return new[]
@@ -85,7 +85,7 @@ internal sealed class IntroduceConstructorTransformation
                                 SyntaxKind.SimpleAssignmentExpression,
                                 ThisExpression(),
                                 LiteralExpression( SyntaxKind.DefaultLiteralExpression ) ) )
-                        .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                        .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
                     this.IntroducedDeclaration,
                     this,
                     InsertedStatementKind.Initializer )

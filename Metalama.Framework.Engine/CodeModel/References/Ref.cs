@@ -138,6 +138,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
         // The compilation for which the symbol (stored in Target) is valid.
         private readonly CompilationContext? _compilationContext;
 
+        static Ref()
+        {
+            if ( !typeof(T).IsInterface )
+            {
+                throw new ArgumentException( "The type argument must be an interface." );
+            }
+        }
+
         internal Ref( ISymbol symbol, CompilationContext compilationContext, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
             symbol.AssertValidType<T>();

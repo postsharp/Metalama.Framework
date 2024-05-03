@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder = new NamedTypeBuilder( this, targetNamespaceOrType.AssertNotNull(), explicitName.AssertNotNull() );
         }
 
-        public override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             base.Initialize( serviceProvider, diagnosticAdder );
 

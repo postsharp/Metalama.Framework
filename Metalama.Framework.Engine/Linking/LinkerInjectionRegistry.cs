@@ -569,6 +569,6 @@ internal sealed class LinkerInjectionRegistry
 
         var injectedMember = this.GetInjectedMemberForSymbol( symbol );
 
-        return injectedMember?.Transformation?.ParentAdvice.Aspect.AspectClass;
+        return injectedMember?.Transformation?.ParentAdvice.AspectInstance.AspectClass;
     }
 }

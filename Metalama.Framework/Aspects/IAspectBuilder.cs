@@ -90,7 +90,7 @@ namespace Metalama.Framework.Aspects
     /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is a strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
-    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder
+    public interface IAspectBuilder<out TAspectTarget> : IAspectBuilder, IAdviser<TAspectTarget>
         where TAspectTarget : class, IDeclaration
     {
         /// <summary>
@@ -110,5 +110,8 @@ namespace Metalama.Framework.Aspects
         /// Gets an object that allows to add child advice (even to code added by aspects executed after the current one) and to validate code and code references.
         /// </summary>
         IAspectReceiver<TAspectTarget> Outbound { get; }
+        
+        new IAspectBuilder<T> WithTarget<T>( T newTarget )
+            where T : class, IDeclaration;
     }
 }

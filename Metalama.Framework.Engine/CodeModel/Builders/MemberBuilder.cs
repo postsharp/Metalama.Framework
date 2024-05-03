@@ -97,7 +97,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                 tags,
                 advice.AspectLayerId,
                 context.SyntaxGenerationContext,
-                advice.Aspect,
+                advice.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 

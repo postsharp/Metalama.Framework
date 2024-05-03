@@ -1,6 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
+using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -8,31 +9,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = 
+            var result =
                 builder.Advice.IntroduceBinaryOperator(
                     builder.Target,
                     nameof(Operator),
                     builder.Target,
-                    TypeFactory.GetType(SpecialType.Int32),
-                    TypeFactory.GetType(SpecialType.Int32),
+                    TypeFactory.GetType( SpecialType.Int32 ),
+                    TypeFactory.GetType( SpecialType.Int32 ),
                     OperatorKind.Addition,
-                    whenExists: OverrideStrategy.Fail);
+                    whenExists: OverrideStrategy.Fail );
 
-            if (result.Outcome != Advising.AdviceOutcome.Error)
+            if (result.Outcome != AdviceOutcome.Error)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Ignored.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Ignored." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceOperator)
+            if (result.AdviceKind != AdviceKind.IntroduceOperator)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceOperator.");
-            }
-            
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceOperator." );
             }
 
             // TODO: #33060
@@ -43,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
         }
 
         [Template]
-        public int Operator(dynamic? x, dynamic? y)
+        public int Operator( dynamic? x, dynamic? y )
         {
             return 42;
         }
@@ -53,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
     [TestAspect]
     public class TargetClass
     {
-        public static int operator +(TargetClass x, int y)
+        public static int operator +( TargetClass x, int y )
         {
             return y;
         }

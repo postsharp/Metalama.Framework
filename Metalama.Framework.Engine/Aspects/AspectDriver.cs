@@ -213,7 +213,8 @@ internal sealed class AspectDriver : IAspectDriver
                 pipelineStepIndex,
                 indexWithinType );
 
-            var adviceFactory = new AdviceFactory(
+            var adviceFactory = new AdviceFactory<T>(
+                targetDeclaration,
                 adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
                 layer );
