@@ -55,7 +55,11 @@ namespace Metalama.Framework.Engine.Formatting
                 }
 
                 var newDocument = await transformAsync( oldDocument );
-                modifiedDocuments.Enqueue( newDocument );
+
+                if ( newDocument != oldDocument )
+                {
+                    modifiedDocuments.Enqueue( newDocument );
+                }
             }
 
             var modifiedSolution = solution;
@@ -147,6 +151,26 @@ namespace Metalama.Framework.Engine.Formatting
                 modifiedSolution,
                 documentIds,
                 document => ImportAdder.AddImportsAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken ),
+                cancellationToken );
+
+            // Run the simplifier.
+            modifiedSolution = await this.TransformAllAsync(
+                modifiedSolution,
+                documentIds,
+                async document =>
+                {
+                    var simplifiedDocument = await Simplifier.ReduceAsync( document, Simplifier.Annotation, cancellationToken: cancellationToken );
+
+                    if ( simplifiedDocument == document )
+                    {
+                        return document;
+                    }
+
+                    var simplifiedRoot = await simplifiedDocument.GetSyntaxRootAsync( cancellationToken );
+                    var fixedRoot = new SimplifierFixer().Visit( simplifiedRoot )!;
+
+                    return simplifiedDocument.WithSyntaxRoot( fixedRoot );
+                },
                 cancellationToken );
 
             // Run the simplifier.

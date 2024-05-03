@@ -158,7 +158,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var htmlPath = actualHtmlPath;
             var htmlContent = TestOutputNormalizer.NormalizeEndOfLines( File.ReadAllText( htmlPath ) );
 
-            Assert.Equal( expectedHighlightedSource, htmlContent );
+            this.AssertTextEqual( expectedHighlightedSource, expectedHtmlPath, htmlContent, htmlPath );
         }
     }
 }
