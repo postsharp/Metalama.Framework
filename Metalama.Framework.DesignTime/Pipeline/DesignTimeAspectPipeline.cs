@@ -930,7 +930,7 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
             // Check if the aspect class is accessible from the symbol.
 
-            if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( aspectClass.TypeId, null, out var aspectClassSymbol ) )
+            if ( !compilationContext.SerializableTypeIdResolver.TryResolveId( aspectClass.TypeId, out var aspectClassSymbol ) )
             {
                 // This situation may happen during edits (see #34704).
                 this.Logger.Trace?.Log( $"The aspect is not eligible because '{aspectClass.TypeId}' cannot be resolved." );

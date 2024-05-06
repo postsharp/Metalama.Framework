@@ -3,6 +3,7 @@
 using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Collections
 {
@@ -68,25 +69,6 @@ namespace Metalama.Framework.Engine.Collections
 
         public static IEnumerable<T> ConcatNotNull<T>( this IEnumerable<T> a, T? b )
             where T : class
-        {
-            if ( b == null )
-            {
-                return a;
-            }
-            else
-            {
-                return Core();
-            }
-
-            IEnumerable<T> Core()
-            {
-                foreach ( var item in a )
-                {
-                    yield return item;
-                }
-
-                yield return b;
-            }
-        }
+            => b == null ? a : a.Concat( b );
     }
 }

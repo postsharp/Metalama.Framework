@@ -20,26 +20,20 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static bool? IsNullableImpl( this ITypeParameter typeParameter )
         {
-            // Unconstrained, class? constrained and IFoo? constrained are considered nullable,
-            // even if they have NullableAnnotation.NotAnnotated.
-            if ( (typeParameter.TypeKindConstraint == TypeKindConstraint.None && !typeParameter.TypeConstraints.Any())
-                 || typeParameter.IsConstraintNullable == true
-                 || typeParameter.TypeConstraints.Any( t => t.IsNullable == true ) )
+            // Unconstrained, class? constrained and IFoo? constrained are *not* considered nullable,
+            // if they have NullableAnnotation.NotAnnotated, because non-nullable types also satify these constraints.
+
+            // Annotation takes priority over constraint.
+            // E.g. in void M<T>(T? t) where T : notnull, the type of t is ITypeParameter with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
+            if ( typeParameter.GetSymbol() is ITypeSymbol { NullableAnnotation: var annotation } && annotation.ToIsAnnotated() == true )
             {
                 return true;
             }
 
-            // Otherwise, annotation takes priority over constraint.
-            // E.g. in void M<T>(T? t) where T : notnull, the type of t is ITypeParameter with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
-            if ( ((IDeclaration) typeParameter).GetSymbol() is ITypeSymbol { NullableAnnotation: var annotation } )
-            {
-                return annotation.ToIsAnnotated();
-            }
-
-            // If we couldn't find a symbol for NullableAnnotation, fall back to checking constraints.
+            // If we couldn't find a symbol for NullableAnnotation or it didn't have '?', check constraints.
             return typeParameter.TypeKindConstraint switch
             {
-                TypeKindConstraint.Class => typeParameter.IsConstraintNullable,
+                TypeKindConstraint.Class => typeParameter.IsConstraintNullable == false ? false : null,
                 TypeKindConstraint.Struct => false,
                 TypeKindConstraint.NotNull => false,
                 TypeKindConstraint.Unmanaged => false,

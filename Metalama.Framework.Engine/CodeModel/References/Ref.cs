@@ -223,11 +223,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol.GetSerializableId( this.TargetKind );
         }
 
-        private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolver.Prefix[0];
+        private static bool IsDeclarationId( string id ) => char.IsLetter( id[0] ) && id[1] == ':' && id[0] != SerializableTypeIdResolverForSymbol.Prefix[0];
 
         private static bool IsTypeId( string id )
-            => id.StartsWith( SerializableTypeIdResolver.LegacyPrefix, StringComparison.Ordinal )
-               || id.StartsWith( SerializableTypeIdResolver.Prefix, StringComparison.Ordinal );
+            => id.StartsWith( SerializableTypeIdResolverForSymbol.LegacyPrefix, StringComparison.Ordinal )
+               || id.StartsWith( SerializableTypeIdResolverForSymbol.Prefix, StringComparison.Ordinal );
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this.GetTargetImpl( compilation, options, true )!;
 

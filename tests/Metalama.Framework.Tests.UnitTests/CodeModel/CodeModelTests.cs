@@ -1766,6 +1766,80 @@ public partial class C
         }
 
         [Fact]
+        public void NullableGenericTypeParameter()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code =
+                """
+                using System;
+
+                class C<T1,T2,T3>
+                    where T2 : class?
+                    where T3 : IDisposable?
+                {
+                    public void M(T1? n1, T2? n2, T3? n3, T1 nn1, T2 nn2, T3 nn3) {}
+                }
+                """;
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var method = type.Methods.Single();
+
+            var typeParameter1 = type.TypeParameters[0];
+            Assert.Null( typeParameter1.IsNullable );
+            Assert.True( typeParameter1.ToNullableType().IsNullable );
+            Assert.Null( typeParameter1.ToNonNullableType().IsNullable );
+            Assert.True( method.Parameters["n1"].Type.IsNullable );
+            Assert.Null( method.Parameters["nn1"].Type.IsNullable );
+
+            var typeParameter2 = type.TypeParameters[1];
+            Assert.Null( typeParameter2.IsNullable );
+            Assert.True( typeParameter2.ToNullableType().IsNullable );
+            Assert.Null( typeParameter2.ToNonNullableType().IsNullable );
+            Assert.True( method.Parameters["n2"].Type.IsNullable );
+            Assert.Null( method.Parameters["nn2"].Type.IsNullable );
+
+            var typeParameter3 = type.TypeParameters[2];
+            Assert.Null( typeParameter3.IsNullable );
+            Assert.True( typeParameter3.ToNullableType().IsNullable );
+            Assert.Null( typeParameter3.ToNonNullableType().IsNullable );
+            Assert.True( method.Parameters["n3"].Type.IsNullable );
+            Assert.Null( method.Parameters["nn3"].Type.IsNullable );
+        }
+
+        [Fact]
+        public void TypeParameterEquality()
+        {
+            using var testContext = this.CreateTestContext();
+
+            const string code = "class C<T>;";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.Single();
+            var typeParameterSymbol = type.TypeParameters.Single().GetSymbol();
+
+            var factory = compilation.Factory;
+
+            var asType = factory.GetIType( typeParameterSymbol );
+            var asTypeParameter = factory.GetGenericParameter( typeParameterSymbol );
+
+            var nullableAsType = factory.GetIType( typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+            var nullableAsTypeParameter = factory.GetGenericParameter( (ITypeParameterSymbol)typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+
+            var nullableFromIType = asType.ToNullableType();
+
+            Assert.Same( asType, asTypeParameter );
+
+            // Additional expectations (try not to break it when implementing constructed ITypes from built types).
+            Assert.Same( nullableAsType, nullableAsTypeParameter );
+            Assert.NotSame( asType, nullableAsType );
+            Assert.True( compilation.Comparers.Default.Equals( asType, nullableAsType ) );
+            Assert.False( compilation.Comparers.IncludeNullability.Equals( asType, nullableAsType ) );
+            Assert.Same( nullableAsType, nullableFromIType );
+        }
+
+        [Fact]
         public void HalfOverriddenProperty()
         {
             using var testContext = this.CreateTestContext();

@@ -33,8 +33,7 @@ internal sealed class CompilationHelpers : ICompilationHelpers
 
     public string GetFullMetadataName( INamedType type ) => type.GetReflectionFullName();
 
-    public SerializableTypeId GetSerializableId( IType type )
-        => type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ).GetSerializableTypeId();
+    public SerializableTypeId GetSerializableId( IType type ) => type.GetSerializableTypeId();
 
     public IExpression ToTypeOfExpression( IType type ) => new TypeOfUserExpression( type );
 
