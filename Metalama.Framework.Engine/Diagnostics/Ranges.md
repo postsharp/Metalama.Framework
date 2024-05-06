@@ -15,5 +15,5 @@
 | 0701-0749 | Extensions.DependencyInjection
 | 0750-0799 | Metalama.Framework
 | 0800-0819 | Licensing
-| 0820-0840 | Engine.Analyzers
+| 0820-0849 | Engine.Analyzers
 | 0900-0999 | Extensions.Architecture

@@ -50,7 +50,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal ReflectionMapper ReflectionMapper => new( this.Compilation );
 
     [Memo]
-    public SerializableTypeIdResolver SerializableTypeIdResolver => new( this.Compilation );
+    public SerializableTypeIdResolverForSymbol SerializableTypeIdResolver => new( this.Compilation );
 
     [Memo]
     internal SemanticModelProvider SemanticModelProvider => this.Compilation.GetSemanticModelProvider();

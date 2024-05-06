@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
@@ -140,6 +141,31 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             this._logger.WriteLine( $"Actual using IType: {typeSyntax2}" );
 
             Assert.Equal( expectedTypeOf, typeSyntax2 );
+        }
+
+        [Fact]
+        public void UnboundGenericType()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var compilation = testContext.CreateCompilationModel( "" );
+
+            var type = compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<,> ) );
+
+            var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted ).SyntaxGenerator;
+
+            var typeSyntax = syntaxGenerator.Type( type ).ToString();
+
+            this._logger.WriteLine( $"Actual using symbols: {typeSyntax}" );
+
+            const string expected = "global::System.Collections.Generic.Dictionary<TKey,TValue>";
+            Assert.Equal( expected, typeSyntax );
+
+            var typeSyntax2 = syntaxGenerator.Type( type, bypassSymbols: true ).ToString();
+
+            this._logger.WriteLine( $"Actual using IType: {typeSyntax2}" );
+
+            Assert.Equal( expected, typeSyntax2 );
         }
 
         [Theory]
