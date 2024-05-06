@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static INamedTypeSymbol? GetSymbol( this INamedType namedType ) => namedType.GetSymbol<INamedTypeSymbol>();
 
+        public static ITypeParameterSymbol? GetSymbol( this ITypeParameter typeParameter ) => typeParameter.GetSymbol<ITypeParameterSymbol>();
+
         public static IMethodSymbol? GetSymbol( this IMethodBase method ) => method.GetSymbol<IMethodSymbol>();
 
         public static IPropertySymbol? GetSymbol( this IProperty property ) => property.GetSymbol<IPropertySymbol>();

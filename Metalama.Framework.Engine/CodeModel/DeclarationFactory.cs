@@ -141,9 +141,9 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     }
 
     public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-        => (TypeParameter) this._defaultCache.GetOrAdd(
-            typeParameterSymbol.ToTypedRef( this.CompilationContext ).As<ICompilationElement>(),
-            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( c.RoslynCompilation ).AssertSymbolNotNull(), c ),
+        => (TypeParameter) this._typeCache.GetOrAdd(
+            typeParameterSymbol,
+            static ( tp, c ) => new TypeParameter( (ITypeParameterSymbol) tp, c ),
             this._compilationModel );
 
     public IMethod GetMethod( IMethodSymbol methodSymbol )
