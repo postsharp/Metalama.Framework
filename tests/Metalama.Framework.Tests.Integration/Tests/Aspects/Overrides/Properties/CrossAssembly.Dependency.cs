@@ -4,7 +4,7 @@ using Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.CrossAsse
 using System;
 using System.Collections.Generic;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.CrossAssembly
 {
@@ -15,12 +15,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Cross
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             set
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
 
@@ -38,12 +39,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Cross
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 return 42;
             }
             init
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
 
@@ -52,7 +54,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Cross
         {
             get
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
+
                 yield return 42;
             }
         }
@@ -60,18 +63,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Cross
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var property in builder.Target.Properties)
+            foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.OverrideAccessors(property, nameof(Template), nameof(Template));
+                builder.Advice.OverrideAccessors( property, nameof(Template), nameof(Template) );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
+
             return meta.Proceed();
         }
     }

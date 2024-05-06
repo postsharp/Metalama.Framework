@@ -1,7 +1,7 @@
-class Target
+internal class Target
 {
   [IntroduceAttributeAspect]
-  class IntroduceTarget
+  private class IntroduceTarget
   {
     /// <summary>
     /// Gets or sets a test property value.
@@ -17,20 +17,20 @@ class Target
     }
     // nested class
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    class Nested
+    private class Nested
     {
     }
     /// <summary>
     /// Field.
     /// </summary>
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _field;
+    private int _field;
     // multifield
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _f1;
+    private int _f1;
     // multifield
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _f2;
+    private int _f2;
     /// <summary>
     /// Event.
     /// </summary>
@@ -51,7 +51,7 @@ class Target
     }
   }
   [RemoveAttributeAspect]
-  class RemoveTarget
+  private class RemoveTarget
   {
     /// <summary>
     /// Gets or sets a test property value.
@@ -64,17 +64,17 @@ class Target
     {
     }
     // nested class
-    class Nested
+    private class Nested
     {
     }
     /// <summary>
     /// Field.
     /// </summary>
-    int _field;
+    private int _field;
     // multifield
-    int _f1;
+    private int _f1;
     // multifield
-    int _f2;
+    private int _f2;
     /// <summary>
     /// Event.
     /// </summary>
@@ -92,8 +92,9 @@ class Target
       }
     }
   }
-  [RemoveAttributeAspect, IntroduceAttributeAspect]
-  class ReplaceTarget
+  [RemoveAttributeAspect]
+  [IntroduceAttributeAspect]
+  private class ReplaceTarget
   {
     /// <summary>
     /// Gets or sets a test property value.
@@ -109,20 +110,20 @@ class Target
     }
     // nested class
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    class Nested
+    private class Nested
     {
     }
     /// <summary>
     /// Field.
     /// </summary>
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _field;
+    private int _field;
     // multifield
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _f1;
+    private int _f1;
     // multifield
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _f2;
+    private int _f2;
     /// <summary>
     /// Event.
     /// </summary>
@@ -142,8 +143,9 @@ class Target
       }
     }
   }
-  [RemoveAttributeAspect2, IntroduceAttributeAspect]
-  class ReplaceTarget2
+  [RemoveAttributeAspect2]
+  [IntroduceAttributeAspect]
+  private class ReplaceTarget2
   {
     /// <summary>
     /// Gets or sets a test property value.
@@ -159,20 +161,20 @@ class Target
     }
     // nested class
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    class Nested
+    private class Nested
     {
     }
     /// <summary>
     /// Field.
     /// </summary>
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _field;
+    private int _field;
     // multifield
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _f1;
+    private int _f1;
     // multifield
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia.NewAttribute]
-    int _f2;
+    private int _f2;
     /// <summary>
     /// Event.
     /// </summary>

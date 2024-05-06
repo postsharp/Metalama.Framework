@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride.CompilationModelIsolation;
 
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride.CompilationModelIsolation;
 

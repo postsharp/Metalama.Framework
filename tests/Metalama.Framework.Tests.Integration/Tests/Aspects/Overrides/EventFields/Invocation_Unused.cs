@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Unused
 {

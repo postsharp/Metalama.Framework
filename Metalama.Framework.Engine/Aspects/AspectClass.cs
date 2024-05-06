@@ -39,10 +39,10 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
 {
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
+    private readonly List<AspectClass> _childAspectClasses = new();
     private IAspectDriver? _aspectDriver;
     private ValidatorDriverFactory? _validatorDriverFactory;
     private EligibilityHelper? _eligibilityHelper;
-    private List<AspectClass> _childAspectClasses = new();
 
     internal override Type Type { get; }
 
@@ -118,10 +118,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
         this.GeneratedCodeAnnotation = MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( $"aspect '{this.ShortName}'" );
 
-        if ( baseClass != null )
-        {
-            baseClass._childAspectClasses.Add( this );
-        }
+        baseClass?._childAspectClasses.Add( this );
 
         List<string?> layers = new();
 

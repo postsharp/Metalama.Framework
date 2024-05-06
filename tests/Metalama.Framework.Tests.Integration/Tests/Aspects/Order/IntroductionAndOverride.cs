@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride;
 
-[assembly: AspectOrder( typeof(FirstAttribute), typeof(SecondAttribute), typeof(ThirdAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(FirstAttribute), typeof(SecondAttribute), typeof(ThirdAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Order.IntroductionAndOverride
 {

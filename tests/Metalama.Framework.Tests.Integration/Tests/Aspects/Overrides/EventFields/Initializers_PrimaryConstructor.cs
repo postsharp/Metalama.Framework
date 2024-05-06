@@ -12,7 +12,7 @@ using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFie
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Initializers_PrimaryConstructor
 {
@@ -44,13 +44,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public event EventHandler? IntroducedEvent = ExpressionFactory.Parse("h").Value;
+        public event EventHandler? IntroducedEvent = ExpressionFactory.Parse( "h" ).Value;
     }
 
     // <target>
     [Override]
     [Introduction]
-    internal class TargetClass(EventHandler h)
+    internal class TargetClass( EventHandler h )
     {
         public event EventHandler? Event = h;
     }

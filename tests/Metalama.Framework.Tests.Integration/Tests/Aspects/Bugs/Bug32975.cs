@@ -11,7 +11,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 
-[assembly: AspectOrder( typeof(TrackChangesAttribute), typeof(NotifyPropertyChangedAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(TrackChangesAttribute), typeof(NotifyPropertyChangedAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32975;
 

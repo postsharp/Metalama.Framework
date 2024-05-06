@@ -4,6 +4,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -64,7 +65,7 @@ internal static class AspectLayerSorter
 
             foreach ( var matchExpression in relationship.OrderedLayers )
             {
-                var indexOfColon = matchExpression.IndexOf( ':' );
+                var indexOfColon = matchExpression.IndexOfOrdinal( ':' );
 
                 string aspectName;
                 string? layerName;
@@ -239,16 +240,16 @@ internal static class AspectLayerSorter
                     return compareDistance;
                 }
 
-                    // If two aspects are not explicitly ordered, we order them alphabetically.
-                    var compareName = StringComparer.Ordinal.Compare( unsortedAspectLayers[i].AspectName, unsortedAspectLayers[j].AspectName );
+                // If two aspects are not explicitly ordered, we order them alphabetically.
+                var compareName = StringComparer.Ordinal.Compare( unsortedAspectLayers[i].AspectName, unsortedAspectLayers[j].AspectName );
 
-                    if ( compareName != 0 )
-                    {
-                        return -1 * compareName;
-                    }
+                if ( compareName != 0 )
+                {
+                    return -1 * compareName;
+                }
 
-                    // At this stage, all aspects should be ordered.
-                    throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and 'unsortedAspectLayers[j]' are not sorted." );
+                // At this stage, all aspects should be ordered.
+                throw new AssertionFailedException( $"Nodes '{unsortedAspectLayers[i]}' and 'unsortedAspectLayers[j]' are not sorted." );
             } );
 
         // Build the ordered list of aspects and assign the distance.

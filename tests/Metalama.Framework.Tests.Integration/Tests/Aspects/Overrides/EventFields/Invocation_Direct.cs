@@ -5,31 +5,31 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Invocation_Direct
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var @event in builder.Target.Events)
+            foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advice.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
         [Template]
-        public void OverrideAdd(dynamic value)
+        public void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("This is the add template.");
+            Console.WriteLine( "This is the add template." );
             meta.Proceed();
         }
 
         [Template]
-        public void OverrideRemove(dynamic value)
+        public void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("This is the remove template.");
+            Console.WriteLine( "This is the remove template." );
             meta.Proceed();
         }
     }
@@ -47,12 +47,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
         {
             if (meta.This.IntroducedEvent != null)
             {
-                meta.This.IntroducedEvent(meta.This, new EventArgs());
+                meta.This.IntroducedEvent( meta.This, new EventArgs() );
             }
 
             if (meta.ThisType.IntroducedStaticEvent != null)
             {
-                meta.ThisType.IntroducedStaticEvent(meta.This, new EventArgs());
+                meta.ThisType.IntroducedStaticEvent( meta.This, new EventArgs() );
             }
         }
     }
@@ -63,18 +63,19 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     internal class TargetClass
     {
         public event EventHandler? Event;
+
         public static event EventHandler? StaticEvent;
 
         public void Foo()
         {
-            if (this.Event != null)
+            if (Event != null)
             {
-                this.Event(this, new EventArgs());
+                Event( this, new EventArgs() );
             }
 
             if (StaticEvent != null)
             {
-                StaticEvent(this, new EventArgs());
+                StaticEvent( this, new EventArgs() );
             }
         }
     }

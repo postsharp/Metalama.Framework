@@ -1,7 +1,8 @@
 internal class Target
 {
-  [return: Test1, Test2]
-  private int NoOverride([Test1, Test2] ref int p1, [Test1, Test2] ref int p2)
+  [return: Test1]
+  [return: Test2]
+  private int NoOverride([Test1][Test2] ref int p1, [Test1][Test2] ref int p2)
   {
     global::System.Console.WriteLine($"[Test1] on {p1}, ordinal 1");
     global::System.Console.WriteLine($"[Test1] on {p1}, ordinal 2");
@@ -28,8 +29,9 @@ internal class Target
     return returnValue;
   }
   [Override]
-  [return: Test1, Test2]
-  private int Override([Test1, Test2] ref int p1, [Test1, Test2] ref int p2)
+  [return: Test1]
+  [return: Test2]
+  private int Override([Test1][Test2] ref int p1, [Test1][Test2] ref int p2)
   {
     global::System.Console.WriteLine($"[Test1] on {p1}, ordinal 1");
     global::System.Console.WriteLine($"[Test1] on {p1}, ordinal 2");

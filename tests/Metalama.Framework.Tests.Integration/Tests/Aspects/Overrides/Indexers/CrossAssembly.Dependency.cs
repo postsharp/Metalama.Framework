@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAssembly;
 using System;
 
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAssembly
 {

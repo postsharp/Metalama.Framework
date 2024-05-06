@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30818;
 
-[assembly: AspectOrder( typeof(ValidationAspect), typeof(OnPropertyChangedAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ValidationAspect), typeof(OnPropertyChangedAspect) )]
 
 #pragma warning disable CS8618, CS8602
 

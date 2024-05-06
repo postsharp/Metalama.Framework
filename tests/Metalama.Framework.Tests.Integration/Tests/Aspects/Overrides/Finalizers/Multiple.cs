@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Multiple;
 
-[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Multiple
 {

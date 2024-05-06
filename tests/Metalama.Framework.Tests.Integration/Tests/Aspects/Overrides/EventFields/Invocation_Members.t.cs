@@ -32,13 +32,13 @@ internal class TargetClass
   }
   public void Foo()
   {
-    this._event?.Invoke(this, new EventArgs());
-    _ = this._event?.GetInvocationList();
-    _ = this._event?.BeginInvoke(this, new EventArgs(), x =>
+    _event?.Invoke(this, new EventArgs());
+    _ = _event?.GetInvocationList();
+    _ = _event?.BeginInvoke(this, new EventArgs(), x =>
     {
     }, this);
-    _ = this._event?.Method;
-    _ = this._event?.Target;
+    _ = _event?.Method;
+    _ = _event?.Target;
     _staticEvent?.Invoke(this, new EventArgs());
     _ = _staticEvent?.GetInvocationList();
     _ = _staticEvent?.BeginInvoke(this, new EventArgs(), x =>

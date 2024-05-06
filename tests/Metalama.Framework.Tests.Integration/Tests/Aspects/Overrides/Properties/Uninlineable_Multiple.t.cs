@@ -177,6 +177,6 @@ internal class TargetClass
   }
   public TargetClass()
   {
-    this.AutoGetOnlyProperty = 42;
+    AutoGetOnlyProperty = 42;
   }
 }

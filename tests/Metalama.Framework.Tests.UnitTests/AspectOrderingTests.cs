@@ -19,7 +19,6 @@ namespace Metalama.Framework.Tests.UnitTests
     public sealed class AspectOrderingTests : UnitTestClass
     {
         public AspectOrderingTests( ITestOutputHelper logger ) : base( logger, false ) { }
-        
 
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
@@ -74,6 +73,7 @@ namespace Metalama.Framework.Tests.UnitTests
                     sortedAspectLayers.OrderBy( l => l.Order ).ThenBy( l => l.AspectName ) );
 
                 this.TestOutput.WriteLine( sortedAspects );
+
                 return true;
             }
             else
@@ -140,7 +140,7 @@ class Aspect2 : TypeAspect { }
             const string code = @"
 using Metalama.Framework.Aspects;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
 
 class Aspect3 : TypeAspect
 {
@@ -168,7 +168,7 @@ class Aspect2 : TypeAspect
             const string code = @"
 using Metalama.Framework.Aspects;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1) ) ]
 
 [Layers(""Layer1"")]
 class Aspect1 : TypeAspect { }
@@ -234,7 +234,7 @@ class Aspect2 : Aspect1 {}
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
             Assert.Equal( "Aspect2 => 0, Aspect1 => 0, Aspect2:Layer1 => 1, Aspect1:Layer1 => 1", ordered );
         }
-        
+
         [Fact]
         public void ApplyToDerivedTypes()
         {
@@ -252,7 +252,7 @@ class Aspect20 : Aspect10 {}
 class Aspect30  : TypeAspect { }
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code,  "Aspect00", "Aspect10", "Aspect20", "Aspect30" );
+            var ordered = this.GetOrderedAspectLayers( code, "Aspect00", "Aspect10", "Aspect20", "Aspect30" );
             Assert.Equal( "Aspect30 => 0, Aspect20 => 1, Aspect10 => 1, Aspect00 => 1", ordered );
         }
 
@@ -279,8 +279,8 @@ class Aspect1 : TypeAspect { }
             const string code = @"
 using Metalama.Framework.Aspects;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) ) ]
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1) ) ]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) ) ]
 
 class Aspect1 : TypeAspect { }
 class Aspect2 : TypeAspect { }
@@ -300,8 +300,8 @@ class Aspect2 : TypeAspect { }
             const string code = @"
 using Metalama.Framework.Aspects;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
-[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1), typeof(Aspect3) ) ]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect1), typeof(Aspect2) ) ]
 
 class Aspect1 : TypeAspect { }
 

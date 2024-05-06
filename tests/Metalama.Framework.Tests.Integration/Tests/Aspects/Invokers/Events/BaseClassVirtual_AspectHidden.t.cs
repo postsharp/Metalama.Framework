@@ -2,7 +2,7 @@
 public class TargetClass : BaseClass
 {
   [InvokerBeforeAspect]
-  public event System.EventHandler InvokerBefore
+  public event EventHandler InvokerBefore
   {
     add
     { // Invoke this.Event
@@ -26,7 +26,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerAfterAspect]
-  public event System.EventHandler InvokerAfter
+  public event EventHandler InvokerAfter
   {
     add
     { // Invoke this.Event
@@ -49,7 +49,7 @@ public class TargetClass : BaseClass
       this.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassVirtual_AspectHidden.TargetClass.StaticTarget;
     }
   }
-  public static void StaticTarget(object? sender, System.EventArgs args)
+  public static void StaticTarget(object? sender, EventArgs args)
   {
   }
   public new event global::System.EventHandler Event

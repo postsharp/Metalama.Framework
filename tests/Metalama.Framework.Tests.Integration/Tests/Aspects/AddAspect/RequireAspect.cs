@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.RequireAspect;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AddAspect.RequireAspect
 {
