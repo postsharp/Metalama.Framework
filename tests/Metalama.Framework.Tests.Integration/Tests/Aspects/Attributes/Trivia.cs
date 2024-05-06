@@ -7,7 +7,7 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia;
 
 #pragma warning disable CS0067, CS0169
 
-[assembly: AspectOrder(typeof(RemoveAttributeAspect), typeof(IntroduceAttributeAspect), typeof(RemoveAttributeAspect2))]
+[assembly: AspectOrder(typeof(RemoveAttributeAspect), typeof(IntroduceAttributeAspect), typeof(RemoveAttributeAspect2), ApplyToDerivedTypes = false)]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia;
 

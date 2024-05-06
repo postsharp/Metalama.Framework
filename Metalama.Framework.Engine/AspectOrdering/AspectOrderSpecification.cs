@@ -10,8 +10,9 @@ namespace Metalama.Framework.Engine.AspectOrdering
 {
     internal sealed class AspectOrderSpecification
     {
-        public AspectOrderSpecification( IEnumerable<string> orderedLayers )
+        public AspectOrderSpecification( IEnumerable<string> orderedLayers, bool applyToDerivedTypes )
         {
+            this.ApplyToDerivedTypes = applyToDerivedTypes;
             this.OrderedLayers = orderedLayers.ToImmutableArray();
         }
 
@@ -24,7 +25,10 @@ namespace Metalama.Framework.Engine.AspectOrdering
 
             this.OrderedLayers = attributeOrderedLayers;
             this.DiagnosticLocation = location;
+            this.ApplyToDerivedTypes = attribute.ApplyToDerivedTypes;
         }
+
+        public bool ApplyToDerivedTypes { get; }
 
         public Location? DiagnosticLocation { get; }
 

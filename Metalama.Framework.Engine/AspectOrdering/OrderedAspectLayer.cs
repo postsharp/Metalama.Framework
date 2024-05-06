@@ -28,6 +28,6 @@ namespace Metalama.Framework.Engine.AspectOrdering
             this.ExplicitOrder = order;
         }
 
-        public override string ToString() => base.ToString() + " => " + this.Order;
+        public override string ToString() => base.ToString() + " => " + this.ExplicitOrder;
     }
 }

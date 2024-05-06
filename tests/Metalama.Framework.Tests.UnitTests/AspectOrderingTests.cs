@@ -12,11 +12,15 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
     public sealed class AspectOrderingTests : UnitTestClass
     {
+        public AspectOrderingTests( ITestOutputHelper logger ) : base( logger, false ) { }
+        
+
         private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
             using var testContext = this.CreateTestContext();
@@ -54,16 +58,14 @@ namespace Metalama.Framework.Tests.UnitTests
                     diagnostics )
                 .ToImmutableArray();
 
-            var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
-
             var dependencies = new IAspectOrderingSource[]
             {
                 new AspectLayerOrderingSource( aspectTypes ), new AttributeAspectOrderingSource( serviceProvider, compilation.RoslynCompilation )
             };
 
             if ( AspectLayerSorter.TrySort(
-                    allLayers,
-                    dependencies,
+                    aspectTypes,
+                    dependencies, // We don't apply alphabetical ordering for better testing.
                     diagnostics,
                     out var sortedAspectLayers ) )
             {
@@ -71,6 +73,7 @@ namespace Metalama.Framework.Tests.UnitTests
                     ", ",
                     sortedAspectLayers.OrderBy( l => l.Order ).ThenBy( l => l.AspectName ) );
 
+                this.TestOutput.WriteLine( sortedAspects );
                 return true;
             }
             else
@@ -84,7 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests
         private string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
             var diagnostics = new DiagnosticBag();
-            Assert.True( this.TryGetOrderedAspectLayers( code, aspectNames, diagnostics, out var sortedAspects ) );
+            Assert.True( this.TryGetOrderedAspectLayers( code, aspectNames, diagnostics, out var sortedAspects ), "A cycle was detected." );
             Assert.Empty( diagnostics );
 
             return sortedAspects;
@@ -128,7 +131,7 @@ class Aspect2 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 0, Aspect2:Layer1 => 1, Aspect1:Layer1 => 1", ordered );
         }
 
         [Fact]
@@ -194,7 +197,7 @@ class Aspect2  : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 1, Aspect1:Layer1 => 2, Aspect2:Layer1 => 3", ordered );
+            Assert.Equal( "Aspect1 => 0, Aspect2 => 1, Aspect1:Layer1 => 1, Aspect2:Layer1 => 2", ordered );
         }
 
         [Fact]
@@ -229,7 +232,28 @@ class Aspect2 : Aspect1 {}
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 0, Aspect2:Layer1 => 1, Aspect1:Layer1 => 1", ordered );
+        }
+        
+        [Fact]
+        public void ApplyToDerivedTypes()
+        {
+            const string code = @"
+using Metalama.Framework.Aspects;
+
+[assembly: AspectOrder( ""Aspect10"", ""Aspect30"", ApplyToDerivedTypes = true ) ]
+
+class Aspect00 : Aspect10 {}
+
+class Aspect10  : TypeAspect { }
+
+class Aspect20 : Aspect10 {}
+
+class Aspect30  : TypeAspect { }
+";
+
+            var ordered = this.GetOrderedAspectLayers( code,  "Aspect00", "Aspect10", "Aspect20", "Aspect30" );
+            Assert.Equal( "Aspect30 => 0, Aspect20 => 1, Aspect10 => 1, Aspect00 => 1", ordered );
         }
 
         [Fact]

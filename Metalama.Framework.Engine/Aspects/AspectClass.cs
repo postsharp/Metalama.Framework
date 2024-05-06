@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
@@ -11,6 +12,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -40,6 +42,7 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     private IAspectDriver? _aspectDriver;
     private ValidatorDriverFactory? _validatorDriverFactory;
     private EligibilityHelper? _eligibilityHelper;
+    private List<AspectClass> _childAspectClasses = new();
 
     internal override Type Type { get; }
 
@@ -114,6 +117,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
         this._prototypeAspectInstance = prototype;
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
         this.GeneratedCodeAnnotation = MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( $"aspect '{this.ShortName}'" );
+
+        if ( baseClass != null )
+        {
+            baseClass._childAspectClasses.Add( this );
+        }
 
         List<string?> layers = new();
 
@@ -398,6 +406,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     {
         return this._eligibilityHelper?.GetEligibility( obj, isInheritable ) ?? EligibleScenarios.All;
     }
+
+    [Memo]
+    internal IReadOnlyCollection<IAspectClassImpl> DescendantClasses => this.SelectManyRecursive( x => x._childAspectClasses, includeRoot: true );
+
+    IReadOnlyCollection<IAspectClassImpl> IAspectClassImpl.DescendantClassesAndSelf => this.DescendantClasses;
 
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
         => this._eligibilityHelper.AssertNotNull().GetIneligibilityJustification( requestedEligibility, describedObject );
