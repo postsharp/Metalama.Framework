@@ -241,19 +241,21 @@ class Aspect2 : Aspect1 {}
             const string code = @"
 using Metalama.Framework.Aspects;
 
-[assembly: AspectOrder( ""Aspect10"", ""Aspect30"", ApplyToDerivedTypes = true ) ]
+[assembly: AspectOrder( ""AspectAA"", ""AspectBA"", ApplyToDerivedTypes = true ) ]
 
-class Aspect00 : Aspect10 {}
+abstract class  AspectAA  : TypeAspect { }
 
-class Aspect10  : TypeAspect { }
+class AspectAB : AspectAA {}
 
-class Aspect20 : Aspect10 {}
+abstract class  AspectBA  : TypeAspect { }
 
-class Aspect30  : TypeAspect { }
+class AspectBB : AspectBA {}
+
+
 ";
 
-            var ordered = this.GetOrderedAspectLayers( code, "Aspect00", "Aspect10", "Aspect20", "Aspect30" );
-            Assert.Equal( "Aspect30 => 0, Aspect20 => 1, Aspect10 => 1, Aspect00 => 1", ordered );
+            var ordered = this.GetOrderedAspectLayers( code, "AspectAA", "AspectAB", "AspectBA", "AspectBB" );
+            Assert.Equal( "AspectBB => 0, AspectAB => 1", ordered );
         }
 
         [Fact]
