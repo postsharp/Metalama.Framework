@@ -474,48 +474,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    public ITypeIntroductionAdviceResult IntroduceType(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string name,
-        Code.TypeKind typeKind,
-        Action<INamedTypeBuilder>? buildType = null )
-    {
-        if ( this._templateInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
-        using ( this.WithNonUserCode() )
-        {
-            return
-                AsAdviser(
-                    new IntroduceNamedTypeAdvice(
-                            this._state.AspectInstance,
-                            this._templateInstance,
-                            targetNamespaceOrType,
-                            name,
-                            this._compilation,
-                            buildType,
-                            this._layerName )
-                        .Execute( this._state ) );
-        }
-    }
-
-    public ITypeIntroductionAdviceResult IntroduceType(
-        string targetNamespace,
-        string name,
-        Code.TypeKind typeKind,
-        Action<INamedTypeBuilder>? buildType = null )
-    {
-        throw new NotImplementedException();
-    }
-
-    public ITypeIntroductionAdviceResult IntroduceClass(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
-
     public IIntroductionAdviceResult<IMethod> IntroduceMethod(
         INamedType targetType,
         string defaultTemplate,
@@ -551,43 +509,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
-        }
-    }
-
-    public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-        INamedType targetType,
-        string defaultTemplate,
-        IntroductionScope scope = IntroductionScope.Default,
-        OverrideStrategy whenExists = OverrideStrategy.Default,
-        Action<IConstructorBuilder>? buildAction = null,
-        object? args = null,
-        object? tags = null )
-    {
-        if ( this._templateInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
-        using ( this.WithNonUserCode() )
-        {
-            this.CheckEligibility( targetType, AdviceKind.IntroduceConstructor );
-
-            var template =
-                this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
-
-            return new IntroduceConstructorAdvice(
-                    this._state.AspectInstance,
-                    this._templateInstance,
-                    targetType,
-                    this._compilation,
-                    template.PartialForIntroduction( this.GetObjectReader( args ) ),
-                    scope,
-                    whenExists,
-                    buildAction,
-                    this._layerName,
-                    this.GetObjectReader( tags ) )
-                .Execute( this._state );
         }
     }
 
@@ -795,6 +716,43 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
+        }
+    }
+
+    public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+        INamedType targetType,
+        string defaultTemplate,
+        IntroductionScope scope = IntroductionScope.Default,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IConstructorBuilder>? buildAction = null,
+        object? args = null,
+        object? tags = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            this.CheckEligibility( targetType, AdviceKind.IntroduceConstructor );
+
+            var template =
+                this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+            return new IntroduceConstructorAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    template.PartialForIntroduction( this.GetObjectReader( args ) ),
+                    scope,
+                    whenExists,
+                    buildAction,
+                    this._layerName,
+                    this.GetObjectReader( tags ) )
+                .Execute( this._state );
         }
     }
 
@@ -1763,6 +1721,48 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             defaultValue,
             pullAction,
             attributes );
+
+    public ITypeIntroductionAdviceResult IntroduceType(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Code.TypeKind typeKind,
+        Action<INamedTypeBuilder>? buildType = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            return
+                AsAdviser(
+                    new IntroduceNamedTypeAdvice(
+                            this._state.AspectInstance,
+                            this._templateInstance,
+                            targetNamespaceOrType,
+                            name,
+                            this._compilation,
+                            buildType,
+                            this._layerName )
+                        .Execute( this._state ) );
+        }
+    }
+
+    public ITypeIntroductionAdviceResult IntroduceType(
+        string targetNamespace,
+        string name,
+        Code.TypeKind typeKind,
+        Action<INamedTypeBuilder>? buildType = null )
+    {
+        throw new NotImplementedException();
+    }
+
+    public ITypeIntroductionAdviceResult IntroduceClass(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
 
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration

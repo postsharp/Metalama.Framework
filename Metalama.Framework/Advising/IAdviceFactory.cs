@@ -42,24 +42,6 @@ namespace Metalama.Framework.Advising
         /// <seealso href="@overriding-methods"/>
         IOverrideAdviceResult<IMethod> Override( IMethod targetMethod, in MethodTemplateSelector template, object? args = null, object? tags = null );
 
-        ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
-        ITypeIntroductionAdviceResult IntroduceType( string targetNamespace, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
-        ITypeIntroductionAdviceResult IntroduceClass(
-            INamespaceOrNamedType targetNamespaceOrType,
-            string name,
-            Action<INamedTypeBuilder>? buildType = null );
-
-        IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-            INamedType targetType,
-            string template,
-            IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IConstructorBuilder>? buildConstructor = null,
-            object? args = null,
-            object? tags = null );
-
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
         /// </summary>
@@ -152,6 +134,15 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
         IOverrideAdviceResult<IConstructor> Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null );
+
+        IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+            INamedType targetType,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IConstructorBuilder>? buildConstructor = null,
+            object? args = null,
+            object? tags = null );
 
         /// <summary>
         /// Overrides a field or property by specifying a property template.
@@ -764,6 +755,15 @@ namespace Metalama.Framework.Advising
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
+
+        ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceType( string targetNamespace, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceClass(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
