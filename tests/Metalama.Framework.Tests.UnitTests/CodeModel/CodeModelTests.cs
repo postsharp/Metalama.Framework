@@ -1824,7 +1824,19 @@ public partial class C
             var asType = factory.GetIType( typeParameterSymbol );
             var asTypeParameter = factory.GetGenericParameter( typeParameterSymbol );
 
+            var nullableAsType = factory.GetIType( typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+            var nullableAsTypeParameter = factory.GetGenericParameter( (ITypeParameterSymbol)typeParameterSymbol.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+
+            var nullableFromIType = asType.ToNullableType();
+
             Assert.Same( asType, asTypeParameter );
+
+            // Additional expectations (try not to break it when implementing constructed ITypes from built types).
+            Assert.Same( nullableAsType, nullableAsTypeParameter );
+            Assert.NotSame( asType, nullableAsType );
+            Assert.True( compilation.Comparers.Default.Equals( asType, nullableAsType ) );
+            Assert.False( compilation.Comparers.IncludeNullability.Equals( asType, nullableAsType ) );
+            Assert.Same( nullableAsType, nullableFromIType );
         }
 
         [Fact]
