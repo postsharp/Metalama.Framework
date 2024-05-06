@@ -92,7 +92,9 @@ internal static class AspectLayerSorter
 
                 var currentIndices = ImmutableArray.CreateBuilder<int>();
 
-                var affectedAspects = relationship.ApplyToDerivedTypes ? aspect.DescendantClassesAndSelf : [aspect];
+                var affectedAspects = relationship.ApplyToDerivedTypes 
+                    ? aspect.DescendantClassesAndSelf.Where( c => !c.IsAbstract ) 
+                    : [aspect];
 
                 foreach ( var descendant in affectedAspects )
                 {
