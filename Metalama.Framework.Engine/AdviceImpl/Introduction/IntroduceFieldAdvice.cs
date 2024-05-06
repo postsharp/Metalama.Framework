@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceField;
 
-        protected override IntroduceMemberAdviceResult<IField> Implement(
+        protected override IntroductionAdviceResult<IField> Implement(
             ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )

@@ -10,9 +10,9 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.Advising.IntroduceMember
 {
-    internal class IntroduceNamedTypeAdvice : IntroduceMemberOrNamedTypeAdvice<INamedType, NamedTypeBuilder>
+    internal class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INamedType, NamedTypeBuilder>
     {
         public override AdviceKind AdviceKind => AdviceKind.IntroduceType;
 
@@ -35,14 +35,14 @@ namespace Metalama.Framework.Engine.Advising
             this.BuildAction?.Invoke( this.Builder );
         }
 
-        public override AdviceImplementationResult Implement(
+        protected override IntroductionAdviceResult<INamedType> Implement(
             ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )
         {
             addTransformation( this.Builder.ToTransformation() );
 
-            return AdviceImplementationResult.Success( AdviceOutcome.Default, this.Builder );
+            return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
         }
     }
 }

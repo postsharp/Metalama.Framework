@@ -26,5 +26,5 @@ internal class AddAttributeAdviceResult : AdviceResult, IIntroductionAdviceResul
     [Memo]
     public IAttribute Declaration => this.Resolve( this._attribute );
 
-    public IMember ConflictingMember => throw new NotSupportedException();
+    public IDeclaration ConflictingDeclaration => throw new NotSupportedException();
 }

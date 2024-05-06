@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceOperator;
 
-        protected override IntroduceMemberAdviceResult<IMethod> Implement(
+        protected override IntroductionAdviceResult<IMethod> Implement(
             ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )

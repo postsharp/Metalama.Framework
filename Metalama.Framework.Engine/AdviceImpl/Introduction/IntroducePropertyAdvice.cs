@@ -204,7 +204,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceProperty;
 
-    protected override IntroduceMemberAdviceResult<IProperty> Implement(
+    protected override IntroductionAdviceResult<IProperty> Implement(
         ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )

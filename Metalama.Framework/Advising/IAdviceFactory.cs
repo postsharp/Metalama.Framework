@@ -42,7 +42,14 @@ namespace Metalama.Framework.Advising
         /// <seealso href="@overriding-methods"/>
         IOverrideAdviceResult<IMethod> Override( IMethod targetMethod, in MethodTemplateSelector template, object? args = null, object? tags = null );
 
-        IIntroductionAdviceResult<INamedType> IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+        ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceType( string targetNamespace, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceClass(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
 
         IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
             INamedType targetType,
@@ -52,8 +59,6 @@ namespace Metalama.Framework.Advising
             Action<IConstructorBuilder>? buildConstructor = null,
             object? args = null,
             object? tags = null );
-
-        IIntroductionAdviceResult<INamedType> IntroduceType( string targetNamespace, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -759,11 +764,6 @@ namespace Metalama.Framework.Advising
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
-
-        ITypeIntroductionAdviceResult IntroduceClass(
-            INamedTypeOrNamespace containingTypeOrNamespace,
-            string name,
-            Action<INamedTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved

@@ -13,7 +13,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.Advising.IntroduceMember;
 
 internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod, IConstructor, ConstructorBuilder>
 {
@@ -60,7 +60,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;
 
-    public override AdviceImplementationResult Implement(
+    protected override IntroductionAdviceResult<IConstructor> Implement(
         ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
@@ -79,10 +79,10 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             if ( existingOtherMember != null )
             {
                 return
-                    AdviceImplementationResult.Failed(
+                    this.CreateFailedResult(
                         AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                             targetDeclaration.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
+                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
                             this ) );
             }
 
@@ -94,7 +94,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
             addTransformation( this.Builder.ToTransformation() );
             addTransformation( overriddenConstructor );
 
-            return AdviceImplementationResult.Success( this.Builder );
+            return this.CreateSuccessResult();
         }
         else
         {
@@ -103,16 +103,16 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
                 case OverrideStrategy.Fail:
                     // Produce fail diagnostic.
                     return
-                        AdviceImplementationResult.Failed(
+                        this.CreateFailedResult(
                             AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingConstructor.DeclaringType),
                                 this ) );
 
                 case OverrideStrategy.Ignore:
                     // Do nothing.
-                    return AdviceImplementationResult.Ignored( existingConstructor );
+                    return this.CreateIgnoredResult( existingConstructor );
 
                 case OverrideStrategy.Override:
                     var overriddenMethod = new OverrideConstructorTransformation(
@@ -123,7 +123,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
                     addTransformation( overriddenMethod );
 
-                    return AdviceImplementationResult.Success( AdviceOutcome.Override, existingConstructor );
+                    return this.CreateSuccessResult( AdviceOutcome.Override, existingConstructor );
 
                 default:
                     throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );

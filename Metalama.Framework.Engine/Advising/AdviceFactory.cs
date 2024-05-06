@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Engine.Advising.IntroduceMember;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -37,6 +38,8 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     private readonly AdviceFactoryState _state;
     private readonly ObjectReaderFactory _objectReaderFactory;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
+
+    public T Target { get; }
 
     public AdviceFactory( T target, AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
     {
@@ -468,9 +471,9 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType(
+    public ITypeIntroductionAdviceResult IntroduceType(
         INamespaceOrNamedType targetNamespaceOrType,
-        string typeName,
+        string name,
         Code.TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
@@ -481,27 +484,35 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
         using ( this.WithNonUserCode() )
         {
-            var advice = new IntroduceNamedTypeAdvice(
-                this._state.AspectInstance,
-                this._templateInstance,
-                targetNamespaceOrType,
-                typeName,
-                this._compilation,
-                buildType,
-                this._layerName );
-
-            return this.ExecuteAdvice<INamedType>( advice );
+            return
+                AsAdviser(
+                    new IntroduceNamedTypeAdvice(
+                        this._state.AspectInstance,
+                        this._templateInstance,
+                        targetNamespaceOrType,
+                        name,
+                        this._compilation,
+                        buildType,
+                        this._layerName )
+                    .Execute( this._state )
+                );
         }
     }
 
-    public IIntroductionAdviceResult<INamedType> IntroduceType(
+    public ITypeIntroductionAdviceResult IntroduceType(
         string targetNamespace,
-        string typeName,
+        string name,
         Code.TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
         throw new NotImplementedException();
     }
+
+    public ITypeIntroductionAdviceResult IntroduceClass(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
 
     public IIntroductionAdviceResult<IMethod> IntroduceMethod(
         INamedType targetType,
@@ -563,7 +574,7 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-            var advice = new IntroduceConstructorAdvice(
+            return new IntroduceConstructorAdvice(
                 this._state.AspectInstance,
                 this._templateInstance,
                 targetType,
@@ -573,9 +584,8 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 whenExists,
                 buildAction,
                 this._layerName,
-                this.GetObjectReader( tags ) );
-
-            return this.ExecuteAdvice<IConstructor>( advice );
+                this.GetObjectReader( tags ) )
+                .Execute( this._state );
         }
     }
 
@@ -1752,12 +1762,6 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             pullAction,
             attributes );
 
-    public ITypeIntroductionAdviceResult IntroduceClass(
-        INamedTypeOrNamespace containingTypeOrNamespace,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => throw new NotImplementedException();
-
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration
     {
@@ -1779,5 +1783,29 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    public T Target { get; }
+    private static ITypeIntroductionAdviceResult AsAdviser(IIntroductionAdviceResult<INamedType> result)
+        => new TypeIntroductionAdviceResult( result);
+
+    private class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult
+    {
+        private readonly IIntroductionAdviceResult<INamedType> _inner;
+
+        public TypeIntroductionAdviceResult( IIntroductionAdviceResult<INamedType> inner )
+        {
+            this._inner = inner;
+        }
+
+        public INamedType Declaration => this._inner.Declaration;
+
+        public IDeclaration ConflictingDeclaration => this._inner.ConflictingDeclaration;
+
+        public AdviceKind AdviceKind => this._inner.AdviceKind;
+
+        public AdviceOutcome Outcome => this._inner.Outcome;
+
+        public INamedType Target => this._inner.Declaration;
+
+        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target ) where TNewDeclaration : IDeclaration
+            => throw new NotImplementedException();
+    }
 }

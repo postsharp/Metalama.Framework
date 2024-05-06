@@ -4,6 +4,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Advising.IntroduceMember;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -14,10 +15,10 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : IntroduceMemberOrNamedTypeAdvice<TMember, TBuilder>
+internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> : IntroduceDeclarationAdvice<TIntroduced, TBuilder>
     where TTemplate : class, IMember
-    where TMember : class, IMember
-    where TBuilder : MemberBuilder, TMember
+    where TIntroduced : class, IMember
+    where TBuilder : MemberBuilder, TIntroduced
 {
     private readonly IntroductionScope _scope;
 
@@ -32,7 +33,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
     protected IObjectReader Tags { get; }
 
     protected IntroduceMemberAdvice(
-        IAspectInstanceInternal aspectInstance,
+        IAspectInstanceInternal aspect,
         TemplateClassInstance templateInstance,
         INamedType targetDeclaration,
         ICompilation sourceCompilation,
@@ -42,7 +43,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
         string? layerName,
-        IObjectReader tags ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName )
+        IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
     {
         var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
         var templateAttributeProperties = templateAttribute?.Properties;
@@ -63,7 +64,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
 
         if ( this._scope == IntroductionScope.Target )
         {
-            this._scope = aspectInstance.TargetDeclaration.GetTarget( sourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
+            this._scope = aspect.TargetDeclaration.GetTarget( sourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
                 ? IntroductionScope.Instance
                 : IntroductionScope.Static;
         }
@@ -128,7 +129,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
         this.BuildAction?.Invoke( this.Builder );
     }
 
-    public override void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
+    protected override void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
     {
         this.ValidateBuilder( this.TargetDeclaration.GetTarget( compilation ), diagnosticAdder );
     }
@@ -189,20 +190,6 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TMember, TBuilder> : In
             }
         }
     }
-
-    protected IntroduceMemberAdviceResult<TMember> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, IDeclaration? member = null )
-    {
-        var memberRef = member != null ? member.ToTypedRef().As<TMember>() : this.Builder.ToTypedRef<TMember>();
-
-        return new IntroduceMemberAdviceResult<TMember>( this.AdviceKind, outcome, memberRef, null );
-    }
-
-    protected IntroduceMemberAdviceResult<TMember> CreateIgnoredResult( IMember existingMember )
-        => new(
-            this.AdviceKind,
-            AdviceOutcome.Ignore,
-            existingMember is TMember { } typedMember ? typedMember.ToTypedRef() : null,
-            existingMember.ToTypedRef() );
 
     public override string ToString() => $"Introduce {this.Builder}";
 }

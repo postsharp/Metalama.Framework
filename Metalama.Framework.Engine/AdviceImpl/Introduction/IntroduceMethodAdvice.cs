@@ -122,7 +122,7 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceMethod;
 
-    protected override IntroduceMemberAdviceResult<IMethod> Implement(
+    protected override IntroductionAdviceResult<IMethod> Implement(
         ProjectServiceProvider serviceProvider,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )

@@ -173,7 +173,7 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        protected override IntroduceMemberAdviceResult<IIndexer> Implement(
+        protected override IntroductionAdviceResult<IIndexer> Implement(
             ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )

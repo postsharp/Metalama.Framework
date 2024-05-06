@@ -30,6 +30,19 @@ internal abstract class Advice<T> : Advice
         CompilationModel compilation,
         Action<ITransformation> addTransformation );
 
+    /// <summary>
+    /// Initializes the advice. Executed before any advices are executed.
+    /// </summary>
+    /// <remarks>
+    /// The advice should only report diagnostics that do not take into account the target declaration(s).
+    /// </remarks>
+    protected virtual void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+
+    /// <summary>
+    /// Validates the advice. Executed only if initialization passed, before implementing the advice.
+    /// </summary>
+    protected virtual void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder ) { }
+
     protected override AdviceResult ExecuteCore( IAdviceExecutionContext context ) => this.Execute( context );
 
     public new T Execute( IAdviceExecutionContext context )
@@ -41,6 +54,7 @@ internal abstract class Advice<T> : Advice
         var initializationDiagnostics = new DiagnosticBag();
         this.Initialize( context.ServiceProvider, initializationDiagnostics );
 
+        // Validate the advice against the current compilation.
         if ( !initializationDiagnostics.HasError )
         {
             this.Validate( context.ServiceProvider, context.CurrentCompilation, initializationDiagnostics );

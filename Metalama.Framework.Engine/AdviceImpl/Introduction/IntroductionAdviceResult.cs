@@ -6,29 +6,29 @@ using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal class IntroduceMemberAdviceResult<T> : AdviceResult, IIntroductionAdviceResult<T>
-    where T : class, ICompilationElement
+internal class IntroductionAdviceResult<T> : AdviceResult, IIntroductionAdviceResult<T>
+    where T : class, IDeclaration
 {
-    private readonly IRef<IMember>? _conflictingMember;
     private readonly IRef<T>? _declaration;
+    private readonly IRef<IDeclaration>? _conflictingDeclaration;
 
-    public IntroduceMemberAdviceResult(
+    public IntroductionAdviceResult(
         AdviceKind adviceKind,
         AdviceOutcome outcome,
         IRef<T>? declaration,
-        IRef<IMember>? conflictingMember )
+        IRef<IDeclaration>? conflictingDeclaration)
     {
         this.Outcome = outcome;
         this.AdviceKind = adviceKind;
         this._declaration = declaration;
-        this._conflictingMember = conflictingMember;
+        this._conflictingDeclaration = conflictingDeclaration;
     }
 
-    public IntroduceMemberAdviceResult() { }
+    public IntroductionAdviceResult() { }
 
     [Memo]
     public T Declaration => this.Resolve( this._declaration );
 
     [Memo]
-    public IMember ConflictingMember => this.Resolve( this._conflictingMember );
+    public IDeclaration ConflictingDeclaration => this.Resolve( this._conflictingDeclaration );
 }

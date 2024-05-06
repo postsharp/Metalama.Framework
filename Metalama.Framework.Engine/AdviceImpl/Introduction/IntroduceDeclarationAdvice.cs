@@ -1,24 +1,24 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.Advising.IntroduceMember;
 
-internal abstract class IntroduceMemberOrNamedTypeAdvice<TMemberOrNamedType, TBuilder> : Advice
-    where TMemberOrNamedType : class, IMemberOrNamedType
-    where TBuilder : MemberOrNamedTypeBuilder
+internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advice<IntroductionAdviceResult<TIntroduced>>
+    where TIntroduced : class, IDeclaration
+    where TBuilder : DeclarationBuilder
 {
     protected TBuilder Builder { get; init; }
 
     public Action<TBuilder>? BuildAction { get; }
 
-    protected IntroduceMemberOrNamedTypeAdvice(
+    protected IntroduceDeclarationAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance templateInstance,
         IDeclaration targetDeclaration,
@@ -33,12 +33,7 @@ internal abstract class IntroduceMemberOrNamedTypeAdvice<TMemberOrNamedType, TBu
         this.Builder = null!;
     }
 
-    protected override void Initialize( in ProjectServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
-    {
-        base.Initialize( serviceProvider, diagnosticAdder );
-    }
-
-    protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, ProjectServiceProvider serviceProvider )
+    protected static void CopyTemplateAttributes( TIntroduced declaration, TBuilder builder, in ProjectServiceProvider serviceProvider )
     {
         var classificationService = serviceProvider.Global.GetRequiredService<AttributeClassificationService>();
 
@@ -50,6 +45,20 @@ internal abstract class IntroduceMemberOrNamedTypeAdvice<TMemberOrNamedType, TBu
             }
         }
     }
+
+    protected IntroductionAdviceResult<TIntroduced> CreateSuccessResult( AdviceOutcome outcome = AdviceOutcome.Default, TIntroduced? member = null )
+    {
+        var memberRef = member != null ? member.ToTypedRef().As<TIntroduced>() : ((TIntroduced)(IDeclaration)this.Builder).ToTypedRef();
+
+        return new IntroductionAdviceResult<TIntroduced>( this.AdviceKind, outcome, memberRef, null );
+    }
+
+    protected IntroductionAdviceResult<TIntroduced> CreateIgnoredResult( IMember existingMember )
+        => new(
+            this.AdviceKind,
+            AdviceOutcome.Ignore,
+            existingMember is TIntroduced { } typedMember ? typedMember.ToTypedRef() : null,
+            existingMember.ToTypedRef() );
 
     public override string ToString() => $"Introduce {this.Builder}";
 }

@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public override AdviceKind AdviceKind => AdviceKind.IntroduceEvent;
 
-        protected override IntroduceMemberAdviceResult<IEvent> Implement(
+        protected override IntroductionAdviceResult<IEvent> Implement(
             ProjectServiceProvider serviceProvider,
             CompilationModel compilation,
             Action<ITransformation> addTransformation )

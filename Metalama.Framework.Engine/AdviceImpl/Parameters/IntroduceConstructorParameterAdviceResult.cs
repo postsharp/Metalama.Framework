@@ -12,7 +12,7 @@ internal class IntroduceConstructorParameterAdviceResult : AdviceResult, IIntrod
 
     public IParameter Declaration => this.Resolve( this._declaration );
 
-    public IMember ConflictingMember => throw new NotSupportedException();
+    public IDeclaration ConflictingDeclaration => throw new NotSupportedException();
 
     public IntroduceConstructorParameterAdviceResult() { }
 

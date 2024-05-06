@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal abstract class IntroduceMemberTransformation<T> : IntroduceMemberOrNamedTypeTransformation<T>
+internal abstract class IntroduceMemberTransformation<T> : IntroduceDeclarationTransformation<T>
     where T : MemberBuilder
 {
     protected IntroduceMemberTransformation( Advice advice, T introducedDeclaration ) : base( advice, introducedDeclaration ) { }

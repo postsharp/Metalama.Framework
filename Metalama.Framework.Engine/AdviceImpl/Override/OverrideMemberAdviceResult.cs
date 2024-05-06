@@ -9,21 +9,21 @@ namespace Metalama.Framework.Engine.Advising;
 /// <summary>
 /// An <see cref="AdviceResult"/> that does not have any property.
 /// </summary>
-internal class OverrideMemberAdviceResult<T> : AdviceResult, IOverrideAdviceResult<T>
-    where T : class, ICompilationElement
+internal class OverrideMemberAdviceResult<TMember> : AdviceResult, IOverrideAdviceResult<TMember>
+    where TMember : class, IMember
 {
-    private readonly IRef<T>? _declaration;
+    private readonly IRef<TMember>? _declaration;
 
     // Errpr constructor.
     public OverrideMemberAdviceResult() { }
 
     // Success constructor.
-    public OverrideMemberAdviceResult( IRef<T>? declaration )
+    public OverrideMemberAdviceResult( IRef<TMember>? declaration )
     {
         this._declaration = declaration;
     }
 
-    public T Declaration => this.Resolve( this._declaration );
+    public TMember Declaration => this.Resolve( this._declaration );
 
-    public OverrideAccessorAdviceResult<T> GetAccessor( Func<T, IMethod?> getAccessor ) => new( this, getAccessor );
+    public OverrideAccessorAdviceResult<TMember> GetAccessor( Func<TMember, IMethod?> getAccessor ) => new( this, getAccessor );
 }

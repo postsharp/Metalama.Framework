@@ -8,7 +8,7 @@ namespace Metalama.Framework.Advising;
 /// Represents the result of the <c>Introduce*</c> methods of the <see cref="IAdviceFactory"/> interface.
 /// </summary>
 public interface IIntroductionAdviceResult<out T> : IAdviceResult
-    where T : class, ICompilationElement
+    where T : class, IDeclaration
 {
     /// <summary>
     /// Gets the introduced or overridden declaration.
@@ -16,7 +16,7 @@ public interface IIntroductionAdviceResult<out T> : IAdviceResult
     T Declaration { get; }
 
     /// <summary>
-    /// Gets the member that was in conflict, if the outcome is <see cref="AdviceOutcome.Error"/>. The member may be of a different kind that <see cref="Declaration"/>. 
+    /// Gets the declaration that was in conflict, if the outcome is <see cref="AdviceOutcome.Error"/>. The member may be of a different kind that <see cref="Declaration"/>. 
     /// </summary>
-    IMember ConflictingMember { get; }
+    IDeclaration ConflictingDeclaration { get; }
 }
