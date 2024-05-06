@@ -67,9 +67,9 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
         Engine.Utilities.Diagnostics.Logger.Remoting.Trace?.Log(
             $"Parent processes: {string.Join( ", ", parentProcesses.SelectAsImmutableArray( x => x.ToString() ) )}" );
 
-        if ( parentProcesses.Count < 3 ||
-             !string.Equals( parentProcesses[1].ProcessName, "Microsoft.ServiceHub.Controller", StringComparison.OrdinalIgnoreCase ) ||
-             !string.Equals( parentProcesses[2].ProcessName, "devenv", StringComparison.OrdinalIgnoreCase )
+        if ( parentProcesses.Count < 2 ||
+             !string.Equals( parentProcesses[0].ProcessName, "Microsoft.ServiceHub.Controller", StringComparison.OrdinalIgnoreCase ) ||
+             !string.Equals( parentProcesses[1].ProcessName, "devenv", StringComparison.OrdinalIgnoreCase )
            )
         {
             Engine.Utilities.Diagnostics.Logger.Remoting.Error?.Log( "The process 'devenv' could not be found. " );
@@ -78,7 +78,7 @@ internal sealed class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServic
             return false;
         }
 
-        var parentProcess = parentProcesses[2];
+        var parentProcess = parentProcesses[1];
 
         pipeName = PipeNameProvider.GetPipeName( ServiceRole.Discovery, parentProcess.ProcessId );
 
