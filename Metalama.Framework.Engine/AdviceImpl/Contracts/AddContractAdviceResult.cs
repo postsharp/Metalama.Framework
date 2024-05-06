@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
 internal class AddContractAdviceResult<T> : AdviceResult, IAddContractAdviceResult<T>
     where T : class, IDeclaration

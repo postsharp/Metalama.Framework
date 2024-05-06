@@ -6,12 +6,13 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Transformations;
+namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
 {

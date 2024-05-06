@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
@@ -10,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Metalama.Framework.Engine.Transformations;
+namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal sealed class IntroduceParameterTransformation : BaseTransformation, IMemberLevelTransformation
 {

@@ -2,13 +2,14 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class AddAnnotationAdvice : Advice<AddAnnotationAdviceResult>
 {

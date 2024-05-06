@@ -5,11 +5,12 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Engine.Transformations;
+namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal sealed class IntroduceAttributeTransformation : BaseTransformation, IIntroduceDeclarationTransformation
 {

@@ -3,7 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
 internal sealed partial class ImplementInterfaceAdvice
 {

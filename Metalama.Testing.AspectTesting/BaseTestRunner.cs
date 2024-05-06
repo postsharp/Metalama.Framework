@@ -160,7 +160,14 @@ internal abstract partial class BaseTestRunner
     {
         var testResult = this.CreateTestResult();
 
-        await this.RunAsync( testInput, testResult, testContext );
+        try
+        {
+            await this.RunAsync( testInput, testResult, testContext );
+        }
+        catch (Exception e)
+        {
+            testResult.SetFailed( "Exception during test execution.", e );
+        }
 
         return testResult;
     }

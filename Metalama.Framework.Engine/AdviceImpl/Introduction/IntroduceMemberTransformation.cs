@@ -2,8 +2,9 @@
 
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Transformations;
 
-namespace Metalama.Framework.Engine.Transformations;
+namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal abstract class IntroduceMemberTransformation<T> : IntroduceDeclarationTransformation<T>
     where T : MemberBuilder

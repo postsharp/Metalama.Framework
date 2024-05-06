@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
 internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
 {

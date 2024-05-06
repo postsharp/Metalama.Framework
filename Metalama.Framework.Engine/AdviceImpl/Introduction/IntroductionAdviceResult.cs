@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal class IntroductionAdviceResult<T> : AdviceResult, IIntroductionAdviceResult<T>
     where T : class, IDeclaration

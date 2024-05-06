@@ -2,10 +2,11 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
 internal class AddAttributeAdviceResult : AdviceResult, IIntroductionAdviceResult<IAttribute>
 {

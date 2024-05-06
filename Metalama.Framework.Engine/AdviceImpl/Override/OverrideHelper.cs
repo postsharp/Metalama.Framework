@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -9,57 +10,56 @@ using System;
 using System.Linq;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.AdviceImpl.Override;
+
+internal static class OverrideHelper
 {
-    internal static class OverrideHelper
+    public static IProperty OverrideProperty(
+        ProjectServiceProvider serviceProvider,
+        Advice advice,
+        IFieldOrPropertyOrIndexer targetDeclaration,
+        BoundTemplateMethod? getTemplate,
+        BoundTemplateMethod? setTemplate,
+        IObjectReader tags,
+        Action<ITransformation> addTransformation )
     {
-        public static IProperty OverrideProperty(
-            ProjectServiceProvider serviceProvider,
-            Advice advice,
-            IFieldOrPropertyOrIndexer targetDeclaration,
-            BoundTemplateMethod? getTemplate,
-            BoundTemplateMethod? setTemplate,
-            IObjectReader tags,
-            Action<ITransformation> addTransformation )
+        if ( targetDeclaration is IField field )
         {
-            if ( targetDeclaration is IField field )
-            {
-                var propertyBuilder = new PromotedField( serviceProvider, field, tags, advice );
-                addTransformation( propertyBuilder.ToTransformation() );
-                addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
+            var propertyBuilder = new PromotedField( serviceProvider, field, tags, advice );
+            addTransformation( propertyBuilder.ToTransformation() );
+            addTransformation( new OverridePropertyTransformation( advice, propertyBuilder, getTemplate, setTemplate, tags ) );
 
-                AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+            AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
 
-                return propertyBuilder;
-            }
-            else if ( targetDeclaration is IProperty property )
-            {
-                addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
-
-                if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
-                {
-                    AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
-                }
-
-                return property;
-            }
-            else
-            {
-                throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
-            }
+            return propertyBuilder;
         }
-
-        public static void AddTransformationsForStructField( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+        else if ( targetDeclaration is IProperty property )
         {
-            if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
-            {
-                // If there is no 'this()' constructor, add one.
-                if ( type.Constructors.All( c => c.IsImplicitlyDeclared ) )
-                {
-                    var constructorBuilder = new ExplicitConstructorBuilder( type, advice );
+            addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
 
-                    addTransformation( constructorBuilder.ToTransformation() );
-                }
+            if ( property.IsAutoPropertyOrField.GetValueOrDefault() )
+            {
+                AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+            }
+
+            return property;
+        }
+        else
+        {
+            throw new AssertionFailedException( $"Unexpected declaration: '{targetDeclaration}'." );
+        }
+    }
+
+    public static void AddTransformationsForStructField( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+    {
+        if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+        {
+            // If there is no 'this()' constructor, add one.
+            if ( type.Constructors.All( c => c.IsImplicitlyDeclared ) )
+            {
+                var constructorBuilder = new ExplicitConstructorBuilder( type, advice );
+
+                addTransformation( constructorBuilder.ToTransformation() );
             }
         }
     }

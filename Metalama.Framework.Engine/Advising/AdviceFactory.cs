@@ -6,7 +6,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.Advising.IntroduceMember;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Contracts;
+using Metalama.Framework.Engine.AdviceImpl.Initialization;
+using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
+using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -487,15 +492,14 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             return
                 AsAdviser(
                     new IntroduceNamedTypeAdvice(
-                        this._state.AspectInstance,
-                        this._templateInstance,
-                        targetNamespaceOrType,
-                        name,
-                        this._compilation,
-                        buildType,
-                        this._layerName )
-                    .Execute( this._state )
-                );
+                            this._state.AspectInstance,
+                            this._templateInstance,
+                            targetNamespaceOrType,
+                            name,
+                            this._compilation,
+                            buildType,
+                            this._layerName )
+                        .Execute( this._state ) );
         }
     }
 
@@ -575,16 +579,16 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             return new IntroduceConstructorAdvice(
-                this._state.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                template.PartialForIntroduction( this.GetObjectReader( args ) ),
-                scope,
-                whenExists,
-                buildAction,
-                this._layerName,
-                this.GetObjectReader( tags ) )
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    template.PartialForIntroduction( this.GetObjectReader( args ) ),
+                    scope,
+                    whenExists,
+                    buildAction,
+                    this._layerName,
+                    this.GetObjectReader( tags ) )
                 .Execute( this._state );
         }
     }
@@ -1783,8 +1787,7 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    private static ITypeIntroductionAdviceResult AsAdviser(IIntroductionAdviceResult<INamedType> result)
-        => new TypeIntroductionAdviceResult( result);
+    private static ITypeIntroductionAdviceResult AsAdviser( IIntroductionAdviceResult<INamedType> result ) => new TypeIntroductionAdviceResult( result );
 
     private class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult
     {

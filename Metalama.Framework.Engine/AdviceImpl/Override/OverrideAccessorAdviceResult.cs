@@ -2,12 +2,13 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
-internal class OverrideAccessorAdviceResult<TOwner> : AdviceResult, IOverrideAdviceResult<IMethod> 
+internal class OverrideAccessorAdviceResult<TOwner> : AdviceResult, IOverrideAdviceResult<IMethod>
     where TOwner : class, IMember
 {
     private readonly OverrideMemberAdviceResult<TOwner> _owner;

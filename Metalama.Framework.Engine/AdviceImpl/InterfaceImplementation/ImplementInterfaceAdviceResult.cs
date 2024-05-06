@@ -2,12 +2,13 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
 internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfaceAdviceResult
 {

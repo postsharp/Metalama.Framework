@@ -3,25 +3,24 @@
 using Metalama.Framework.Code;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
+
+internal sealed partial class ImplementInterfaceAdvice
 {
-    internal sealed partial class ImplementInterfaceAdvice
+    private sealed class InterfaceSpecification
     {
-        private sealed class InterfaceSpecification
+        public INamedType InterfaceType { get; }
+
+        public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
+
+        public InterfaceSpecification(
+            INamedType interfaceType,
+            IReadOnlyList<MemberSpecification> memberSpecification )
         {
-            public INamedType InterfaceType { get; }
-
-            public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
-
-            public InterfaceSpecification(
-                INamedType interfaceType,
-                IReadOnlyList<MemberSpecification> memberSpecification )
-            {
-                this.InterfaceType = interfaceType;
-                this.MemberSpecifications = memberSpecification;
-            }
-
-            public override string ToString() => $"{this.InterfaceType}";
+            this.InterfaceType = interfaceType;
+            this.MemberSpecifications = memberSpecification;
         }
+
+        public override string ToString() => $"{this.InterfaceType}";
     }
 }

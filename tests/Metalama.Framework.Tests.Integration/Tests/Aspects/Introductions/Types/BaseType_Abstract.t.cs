@@ -1,5 +1,3 @@
-using System;
-
 [IntroductionAttribute]
 public abstract class TargetType
 {
@@ -7,9 +5,20 @@ public abstract class TargetType
   public abstract void Method();
   class TestNestedType : global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.BaseType_Abstract.TargetType
   {
-        public override int Property { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override void Method()
-        {
-        }
+    private global::System.Int32 _property;
+    public override global::System.Int32 Property
+    {
+      get
+      {
+        return this._property;
+      }
+      set
+      {
+        this._property = value;
+      }
+    }
+    public override void Method()
+    {
+    }
   }
 }

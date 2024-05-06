@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using System;
 
-namespace Metalama.Framework.Engine.Advising;
+namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
 /// <summary>
 /// An <see cref="AdviceResult"/> that does not have any property.

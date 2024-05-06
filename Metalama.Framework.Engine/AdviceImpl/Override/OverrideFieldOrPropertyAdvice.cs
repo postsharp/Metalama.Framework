@@ -3,55 +3,55 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.AdviceImpl.Override;
+
+internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty, IProperty>
 {
-    internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty, IProperty>
+    private readonly BoundTemplateMethod? _getTemplate;
+    private readonly BoundTemplateMethod? _setTemplate;
+
+    public OverrideFieldOrPropertyAdvice(
+        IAspectInstanceInternal aspectInstance,
+        TemplateClassInstance templateInstance,
+        IFieldOrProperty targetDeclaration,
+        ICompilation sourceCompilation,
+        BoundTemplateMethod? getTemplate,
+        BoundTemplateMethod? setTemplate,
+        string? layerName,
+        IObjectReader tags )
+        : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
     {
-        private readonly BoundTemplateMethod? _getTemplate;
-        private readonly BoundTemplateMethod? _setTemplate;
+        this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
+        this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
+    }
 
-        public OverrideFieldOrPropertyAdvice(
-            IAspectInstanceInternal aspectInstance,
-            TemplateClassInstance templateInstance,
-            IFieldOrProperty targetDeclaration,
-            ICompilation sourceCompilation,
-            BoundTemplateMethod? getTemplate,
-            BoundTemplateMethod? setTemplate,
-            string? layerName,
-            IObjectReader tags )
-            : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
-        {
-            this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
-            this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();
-        }
+    public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
 
-        public override AdviceKind AdviceKind => AdviceKind.OverrideFieldOrPropertyOrIndexer;
+    protected override OverrideMemberAdviceResult<IProperty> Implement(
+        ProjectServiceProvider serviceProvider,
+        CompilationModel compilation,
+        Action<ITransformation> addTransformation )
+    {
+        // TODO: Translate templates to this compilation.
+        // TODO: order should be self if the target is introduced on the same layer.
+        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-        protected override OverrideMemberAdviceResult<IProperty> Implement(
-            ProjectServiceProvider serviceProvider,
-            CompilationModel compilation,
-            Action<ITransformation> addTransformation )
-        {
-            // TODO: Translate templates to this compilation.
-            // TODO: order should be self if the target is introduced on the same layer.
-            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+        var promotedField = OverrideHelper.OverrideProperty(
+            serviceProvider,
+            this,
+            targetDeclaration.ForCompilation( compilation ).AssertNotNull(),
+            this._getTemplate,
+            this._setTemplate,
+            this.Tags,
+            addTransformation );
 
-            var promotedField = OverrideHelper.OverrideProperty(
-                serviceProvider,
-                this,
-                targetDeclaration.ForCompilation( compilation ).AssertNotNull(),
-                this._getTemplate,
-                this._setTemplate,
-                this.Tags,
-                addTransformation );
-
-            return this.CreateSuccessResult( promotedField );
-        }
+        return this.CreateSuccessResult( promotedField );
     }
 }

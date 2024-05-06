@@ -5,12 +5,13 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Transformations;
+namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal abstract class IntroduceDeclarationTransformation<T> : BaseTransformation, IIntroduceDeclarationTransformation,
                                                                       IInjectMemberTransformation

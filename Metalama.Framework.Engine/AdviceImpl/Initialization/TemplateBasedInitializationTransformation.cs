@@ -7,11 +7,12 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Transformations;
+namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
 internal sealed class TemplateBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
 {
