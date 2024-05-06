@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             => new TypedExpressionSyntaxImpl(
                 SyntaxFactory.IdentifierName( this.Name ),
                 this.Type,
-                ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
+                ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                 isReferenceable: true );
 
         public override bool BelongsToCurrentProject => this.ContainingDeclaration.BelongsToCurrentProject;

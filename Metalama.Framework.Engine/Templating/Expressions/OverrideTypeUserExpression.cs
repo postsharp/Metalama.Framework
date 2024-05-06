@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -21,7 +20,7 @@ internal sealed class OverrideTypeUserExpression : UserExpression
     {
         var expression = this._expression.ToExpressionSyntax( syntaxSerializationContext );
 
-        var expressionWithNewTypeAnnotation = SymbolAnnotationMapper.AddExpressionTypeAnnotation( expression, this.Type.GetSymbol() );
+        var expressionWithNewTypeAnnotation = TypeAnnotationMapper.AddExpressionTypeAnnotation( expression, this.Type );
         
         return expressionWithNewTypeAnnotation;
     }

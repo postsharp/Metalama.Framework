@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
@@ -64,7 +63,7 @@ internal abstract class ContractBaseTransformation : BaseTransformation, IInsert
         IType valueType,
         [NotNullWhen( true )] out BlockSyntax? contractBlock )
     {
-        var annotatedValueExpression = SymbolAnnotationMapper.AddExpressionTypeAnnotation( valueExpression, valueType.GetSymbol() );
+        var annotatedValueExpression = TypeAnnotationMapper.AddExpressionTypeAnnotation( valueExpression, valueType );
         var boundTemplate = this._template.ForContract( annotatedValueExpression, this._templateArguments );
 
         var metaApiProperties = new MetaApiProperties(

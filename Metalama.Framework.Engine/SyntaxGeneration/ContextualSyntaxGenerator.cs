@@ -901,35 +901,6 @@ internal sealed partial class ContextualSyntaxGenerator
             Token( default, SyntaxKind.EndOfDirectiveToken, this.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
             isActive: true );
 
-    public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, ITypeSymbol? operandType )
-    {
-        var suppressNullableWarning = false;
-
-        if ( this.IsNullAware )
-        {
-            suppressNullableWarning = true;
-
-            if ( operandType != null )
-            {
-                // Value types, including nullable value types don't need suppression.
-                if ( operandType.IsValueType )
-                {
-                    suppressNullableWarning = false;
-                }
-
-                // Non-nullable types don't need suppression.
-                if ( operandType.IsNullable() == false )
-                {
-                    suppressNullableWarning = false;
-                }
-            }
-        }
-
-        return suppressNullableWarning
-            ? PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, operand )
-            : operand;
-    }
-
     public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, IType? operandType )
     {
         var suppressNullableWarning = false;

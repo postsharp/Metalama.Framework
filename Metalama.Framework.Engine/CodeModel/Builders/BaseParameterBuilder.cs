@@ -44,6 +44,6 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
             new TypedExpressionSyntaxImpl(
                 SyntaxFactory.IdentifierName( this.Name ),
                 this.Type,
-                ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
+                ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                 true ) );
 }

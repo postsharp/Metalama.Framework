@@ -144,8 +144,8 @@ namespace Metalama.Framework.Engine.Templating
                     {
                         if ( !this._map._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
                         {
-                            annotation = SymbolAnnotationMapper.GetOrCreateAnnotation(
-                                SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
+                            annotation = TypeAnnotationMapper.GetOrCreateAnnotation(
+                                TypeAnnotationMapper.ExpressionTypeSymbolAnnotationKind,
                                 typeInfo.Type );
 
                             this._map._typeToAnnotationMap[typeInfo.Type] = annotation;
