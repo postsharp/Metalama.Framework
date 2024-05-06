@@ -14,18 +14,18 @@ namespace Metalama.Framework.Engine.Collections
         {
             private readonly ImmutableDictionaryOfArray<TKey, TValue>? _initialValues;
 
-            private readonly ImmutableDictionary<TKey, ImmutableArray<TValue>.Builder>.Builder _modifiedValuesBuilder;
+            private readonly Dictionary<TKey, ImmutableArray<TValue>.Builder> _modifiedValuesBuilder;
 
             // Creates a Builder initialized to an empty dictionary.
             internal Builder( IEqualityComparer<TKey>? comparer = null )
             {
-                this._modifiedValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( comparer );
+                this._modifiedValuesBuilder = new Dictionary<TKey, ImmutableArray<TValue>.Builder>( comparer );
             }
 
             internal Builder( ImmutableDictionaryOfArray<TKey, TValue> initialValues )
             {
                 this._initialValues = initialValues;
-                this._modifiedValuesBuilder = ImmutableDictionary.CreateBuilder<TKey, ImmutableArray<TValue>.Builder>( initialValues._dictionary.KeyComparer );
+                this._modifiedValuesBuilder = new Dictionary<TKey, ImmutableArray<TValue>.Builder>( initialValues._dictionary.KeyComparer );
             }
 
             public void Add( TKey key, TValue value )
@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.Collections
                 else
                 {
                     var dictionaryBuilder = this._initialValues?._dictionary.ToBuilder()
-                                            ?? ImmutableDictionary.CreateBuilder<TKey, Group>( this._modifiedValuesBuilder.KeyComparer );
+                                            ?? ImmutableDictionary.CreateBuilder<TKey, Group>( this._modifiedValuesBuilder.Comparer );
 
                     foreach ( var modifiedGroup in this._modifiedValuesBuilder )
                     {

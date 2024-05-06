@@ -1,8 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Testing.UnitTesting;
+using Metalama.Framework.Engine.Transformations;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
@@ -165,5 +166,45 @@ class C
 
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation2.Types.Single().NestedTypes.Single().Methods.OfName( "M" ) );
+    }
+
+    [Fact]
+    public void DerivedTypes()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            interface I;
+
+            class Target;
+            """;
+
+        var initialCompilation = testContext.CreateCompilationModel( code );
+
+        var target = initialCompilation.Types.OfName("Target").Single();
+
+        var baseType = new NamedTypeBuilder( null!, target, "B" );
+
+        var derivedType = new NamedTypeBuilder( null!, target, "C" ) { BaseType = baseType };
+
+        var interfaceType = initialCompilation.Types.OfName( "I" ).Single();
+
+        var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType, interfaceType, [] );
+
+        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
+            [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface], null, null );
+
+        var baseClass = finalCompilation.Types.OfName( "Target" ).Single().NestedTypes.OfName( "B" ).Single();
+
+        var derivedClass = Assert.Single( finalCompilation.GetDerivedTypes( baseClass ) );
+
+        Assert.Equal( "C", derivedClass.Name );
+
+        var implementedInterface = finalCompilation.Types.OfName( "I" ).Single();
+
+        var implementingClass = Assert.Single( finalCompilation.GetDerivedTypes( implementedInterface ) );
+
+        Assert.Same( derivedClass, implementingClass );
     }
 }

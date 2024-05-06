@@ -40,6 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public static IParameterSymbol? GetSymbol( this IParameter parameter ) => parameter.GetSymbol<IParameterSymbol>();
 
+        public static IAssemblySymbol GetSymbol( this IAssembly assembly ) => assembly.GetSymbol<IAssemblySymbol>();
+
         public static ISymbol? GetOverriddenMember( this ISymbol? symbol )
             => symbol switch
             {
