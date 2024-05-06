@@ -28,10 +28,8 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Advising;
 
-#pragma warning disable CS0612 // Type or member is obsolete
-
 // ReSharper disable once PossibleInterfaceMemberAmbiguity
-internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
+internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     where T : IDeclaration
 {
     private readonly string? _layerName;
@@ -1788,27 +1786,4 @@ internal sealed class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     }
 
     private static ITypeIntroductionAdviceResult AsAdviser( IIntroductionAdviceResult<INamedType> result ) => new TypeIntroductionAdviceResult( result );
-
-    private class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult
-    {
-        private readonly IIntroductionAdviceResult<INamedType> _inner;
-
-        public TypeIntroductionAdviceResult( IIntroductionAdviceResult<INamedType> inner )
-        {
-            this._inner = inner;
-        }
-
-        public INamedType Declaration => this._inner.Declaration;
-
-        public IDeclaration ConflictingDeclaration => this._inner.ConflictingDeclaration;
-
-        public AdviceKind AdviceKind => this._inner.AdviceKind;
-
-        public AdviceOutcome Outcome => this._inner.Outcome;
-
-        public INamedType Target => this._inner.Declaration;
-
-        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target ) where TNewDeclaration : IDeclaration
-            => throw new NotImplementedException();
-    }
 }

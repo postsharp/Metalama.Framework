@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Advising;
 
-internal interface IAdvisableInternal
+internal interface IAdviserInternal
 {
     IAdviceFactory AdviceFactory { get; }
 }

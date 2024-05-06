@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Aspects
         [Obsolete]
         IAdviceFactory IAspectBuilder.Advice => this.AdviceFactory;
 
-        IAdviceFactory IAdvisableInternal.AdviceFactory => this.AdviceFactory;
+        IAdviceFactory IAdviserInternal.AdviceFactory => this.AdviceFactory;
 
         public AdviceFactory<T> AdviceFactory { get; }
 

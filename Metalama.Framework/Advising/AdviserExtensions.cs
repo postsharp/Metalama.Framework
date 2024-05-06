@@ -26,7 +26,7 @@ public static class AdviserExtensions
         in MethodTemplateSelector template,
         object? args = null,
         object? tags = null )
-        => ((IAdvisableInternal) adviser).AdviceFactory.Override( adviser.Target, template, args, tags );
+        => ((IAdviserInternal) adviser).AdviceFactory.Override( adviser.Target, template, args, tags );
 
     /// <summary>
     /// Introduces a new method or overrides the implementation of the existing one.
@@ -55,7 +55,7 @@ public static class AdviserExtensions
         Action<IMethodBuilder>? buildMethod = null,
         object? args = null,
         object? tags = null )
-        => ((IAdvisableInternal) adviser).AdviceFactory.IntroduceMethod(
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceMethod(
             adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
             template,
             scope,
