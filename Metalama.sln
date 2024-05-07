@@ -101,6 +101,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.Un
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Tests.UnitTests.4.4.0", "tests\Metalama.Framework.Tests.UnitTests.4.4.0\Metalama.Framework.Tests.UnitTests.4.4.0.csproj", "{1C4B1567-AFD6-4020-87AB-0148D828785A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Metalama.Framework.Tests.Benchmarks", "tests\Metalama.Framework.Tests.Benchmarks\Metalama.Framework.Tests.Benchmarks.csproj", "{37BFB340-CEA5-4C48-BFA9-CA4E379FBD63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -263,6 +265,10 @@ Global
 		{1C4B1567-AFD6-4020-87AB-0148D828785A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C4B1567-AFD6-4020-87AB-0148D828785A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C4B1567-AFD6-4020-87AB-0148D828785A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37BFB340-CEA5-4C48-BFA9-CA4E379FBD63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37BFB340-CEA5-4C48-BFA9-CA4E379FBD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37BFB340-CEA5-4C48-BFA9-CA4E379FBD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37BFB340-CEA5-4C48-BFA9-CA4E379FBD63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -287,6 +293,7 @@ Global
 		{2C72AE9F-3399-47B6-AEB0-E5D40F90ECD9} = {59709DBF-050C-4E30-906E-1252C6B6C0E0}
 		{811D9D57-C4E8-4D8D-84FD-45B41C44089A} = {59709DBF-050C-4E30-906E-1252C6B6C0E0}
 		{1C4B1567-AFD6-4020-87AB-0148D828785A} = {59709DBF-050C-4E30-906E-1252C6B6C0E0}
+		{37BFB340-CEA5-4C48-BFA9-CA4E379FBD63} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}
