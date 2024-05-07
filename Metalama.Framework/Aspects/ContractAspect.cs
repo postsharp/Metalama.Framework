@@ -250,7 +250,7 @@ namespace Metalama.Framework.Aspects
             {
                 foreach ( var parameter in redirectToParameters )
                 {
-                    this.BuildAspect( ((IAspectBuilder) builder).WithTarget<IParameter>( parameter ) );
+                    this.BuildAspect( builder.WithTarget( parameter ) );
                 }
             }
             else

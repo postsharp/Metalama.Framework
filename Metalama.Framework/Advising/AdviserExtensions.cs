@@ -14,7 +14,7 @@ public static class AdviserExtensions
     /// </summary>
     /// <param name="adviser">The advisable method.</param>
     /// <param name="template">Name of a method in the aspect class whose implementation will be used as a template.
-    ///     This property must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
+    ///     This method must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
     ///     (such as async or iterator methods), use the constructor of the <see cref="MethodTemplateSelector"/> type. To specify a single
     ///     template for all methods, pass a string.</param>
     /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
@@ -33,7 +33,7 @@ public static class AdviserExtensions
     /// </summary>
     /// <param name="adviser">An adviser for a member or named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
-    ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
+    ///     annotated with <see cref="TemplateAttribute"/>. This method can have parameters and a return type. The actual parameters and return type
     ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
     /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
     ///     method. The default scope depends on the scope of the template method.

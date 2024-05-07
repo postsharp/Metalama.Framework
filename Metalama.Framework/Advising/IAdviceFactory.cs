@@ -47,7 +47,7 @@ namespace Metalama.Framework.Advising
         /// </summary>
         /// <param name="targetType">The type into which the method must be introduced.</param>
         /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
-        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
+        ///     annotated with <see cref="TemplateAttribute"/>. This method can have parameters and a return type. The actual parameters and return type
         ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
         ///     method. The default scope depends on the scope of the template method.
