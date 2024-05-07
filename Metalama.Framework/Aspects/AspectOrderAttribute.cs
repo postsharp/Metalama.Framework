@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +12,17 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@ordering-aspects"/>
     [AttributeUsage( AttributeTargets.Assembly, AllowMultiple = true )]
+    [PublicAPI]
     public sealed class AspectOrderAttribute : Attribute
     {
+        public AspectOrderDirection Direction { get; }
+
         private readonly string[] _orderedAspectLayers;
 
-        [Obsolete("Explicitly specify the AspectOrderDirection parameter.")]
+        [Obsolete( "Explicitly specify AspectOrderDirection.RunTime for the 'direction' parameter." )]
         public AspectOrderAttribute( params Type[] orderedAspectTypes ) : this( AspectOrderDirection.RunTime, orderedAspectTypes ) { }
 
-        [Obsolete("Explicitly specify the AspectOrderDirection parameter.")]
+        [Obsolete( "Explicitly specify AspectOrderDirection.RunTime for the 'direction' parameter." )]
         public AspectOrderAttribute( params string[] orderedAspectLayers ) : this( AspectOrderDirection.RunTime, orderedAspectLayers ) { }
 
         /// <summary>
@@ -34,12 +38,8 @@ namespace Metalama.Framework.Aspects
         /// <param name="orderedAspectTypes">A list of aspect types given the desired order of execution.</param>
         public AspectOrderAttribute( AspectOrderDirection direction, params Type[] orderedAspectTypes )
         {
+            this.Direction = direction;
             this._orderedAspectLayers = orderedAspectTypes.Select( t => t.FullName + ":*" ).ToArray();
-
-            if ( direction == AspectOrderDirection.CompileTime )
-            {
-                Array.Reverse( this._orderedAspectLayers );
-            }
         }
 
         /// <summary>
@@ -54,14 +54,10 @@ namespace Metalama.Framework.Aspects
         /// <c>MyNamespace.MyAspectType:MyLayer</c> to match a non-default layer, or <c>MyNamespace.MyAspectType:*</c> to match
         /// all layers of an aspect.
         /// </param>
-        public AspectOrderAttribute( AspectOrderDirection direction,params string[] orderedAspectLayers )
+        public AspectOrderAttribute( AspectOrderDirection direction, params string[] orderedAspectLayers )
         {
+            this.Direction = direction;
             this._orderedAspectLayers = orderedAspectLayers;
-            
-            if ( direction == AspectOrderDirection.CompileTime )
-            {
-                Array.Reverse( this._orderedAspectLayers );
-            }
         }
 
         /// <summary>

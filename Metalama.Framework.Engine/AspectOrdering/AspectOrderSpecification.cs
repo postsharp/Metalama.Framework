@@ -20,8 +20,11 @@ namespace Metalama.Framework.Engine.AspectOrdering
         {
             var attributeOrderedLayers = attribute.OrderedAspectLayers.ToMutableList();
 
-            // User order of layers is opposite of internal order.
-            attributeOrderedLayers.Reverse();
+            if ( attribute.Direction == AspectOrderDirection.RunTime )
+            {
+                // Set the order in compile-time order.
+                attributeOrderedLayers.Reverse();
+            }
 
             this.OrderedLayers = attributeOrderedLayers;
             this.DiagnosticLocation = location;
