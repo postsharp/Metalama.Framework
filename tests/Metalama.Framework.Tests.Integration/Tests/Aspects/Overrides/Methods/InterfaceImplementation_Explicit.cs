@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit;
 using System.Threading.Tasks;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroduceAspectAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroduceAspectAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit
 {
@@ -17,67 +17,73 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
+
             return meta.Proceed();
         }
     }
 
     internal class IntroduceAspectAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.ImplementInterface(builder.Target, (INamedType)TypeFactory.GetType(typeof(IntroducedInterface)));
+            builder.Advice.ImplementInterface( builder.Target, (INamedType)TypeFactory.GetType( typeof(IntroducedInterface) ) );
 
-            builder.Outbound.SelectMany(x => x.Methods).AddAspect(x => new OverrideAttribute());
+            builder.Outbound.SelectMany( x => x.Methods ).AddAspect( x => new OverrideAttribute() );
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        void IntroducedVoidMethod()
+        [InterfaceMember( IsExplicit = true )]
+        private void IntroducedVoidMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        int IntroducedMethod()
+        [InterfaceMember( IsExplicit = true )]
+        private int IntroducedMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             return 42;
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        T IntroducedGenericMethod<T>(T value)
+        [InterfaceMember( IsExplicit = true )]
+        private T IntroducedGenericMethod<T>( T value )
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             return value;
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        async Task IntroducedAsyncVoidMethod()
+        [InterfaceMember( IsExplicit = true )]
+        private async Task IntroducedAsyncVoidMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        async Task<int> IntroducedAsyncMethod()
+        [InterfaceMember( IsExplicit = true )]
+        private async Task<int> IntroducedAsyncMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             return 42;
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        IEnumerable<int> IntroducedIteratorMethod()
+        [InterfaceMember( IsExplicit = true )]
+        private IEnumerable<int> IntroducedIteratorMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
+
             yield return 42;
         }
 
-        [InterfaceMember(IsExplicit = true)]
-        async IAsyncEnumerable<int> IntroducedAsyncIteratorMethod()
+        [InterfaceMember( IsExplicit = true )]
+        private async IAsyncEnumerable<int> IntroducedAsyncIteratorMethod()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             yield return 42;
         }
     }
@@ -88,7 +94,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
 
         int Method();
 
-        T GenericMethod<T>(T value);
+        T GenericMethod<T>( T value );
 
         //Task AsyncVoidMethod();
 
@@ -97,7 +103,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
         //IEnumerable<int> IteratorMethod();
 
         //IAsyncEnumerable<int> AsyncIteratorMethod();
-
     }
 
     public interface IntroducedInterface
@@ -106,7 +111,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
 
         int IntroducedMethod();
 
-        T IntroducedGenericMethod<T>(T value);
+        T IntroducedGenericMethod<T>( T value );
 
         //Task IntroducedAsyncVoidMethod();
 
@@ -123,18 +128,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     {
         void Interface.VoidMethod()
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
         }
 
         int Interface.Method()
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return 42;
         }
 
-        T Interface.GenericMethod<T>(T value)
+        T Interface.GenericMethod<T>( T value )
         {
-            Console.WriteLine("Original");
+            Console.WriteLine( "Original" );
+
             return value;
         }
 

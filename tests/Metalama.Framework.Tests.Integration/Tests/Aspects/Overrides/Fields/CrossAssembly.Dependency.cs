@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAssembly;
 using System;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAssembly
 {
@@ -24,11 +24,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAsse
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var field in builder.Target.Fields)
+            foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.Override(field, nameof(Template));
+                builder.Advice.Override( field, nameof(Template) );
             }
         }
 
@@ -37,13 +37,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.CrossAsse
         {
             get
             {
-                Console.WriteLine("Override");
+                Console.WriteLine( "Override" );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Override");
+                Console.WriteLine( "Override" );
                 meta.Proceed();
             }
         }

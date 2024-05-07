@@ -1,7 +1,7 @@
 public class TargetClass : BaseClass
 {
   [OverrideAspect]
-  public new static event System.EventHandler Event
+  public new static event EventHandler Event
   {
     add
     { // Invoke TargetClass.Event_Source
@@ -28,7 +28,7 @@ public class TargetClass : BaseClass
       global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Event_Source -= value;
     }
   }
-  private static event System.EventHandler Event_Source
+  private static event EventHandler Event_Source
   {
     add
     {
@@ -38,7 +38,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerBeforeAspect]
-  public event System.EventHandler InvokerBefore
+  public event EventHandler InvokerBefore
   {
     add
     { // Invoke TargetClass.Event
@@ -62,7 +62,7 @@ public class TargetClass : BaseClass
     }
   }
   [InvokerAfterAspect]
-  public event System.EventHandler InvokerAfter
+  public event EventHandler InvokerAfter
   {
     add
     { // Invoke TargetClass.Event
@@ -86,7 +86,7 @@ public class TargetClass : BaseClass
       global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Event -= global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Events.BaseClassStatic_UserHidden_AspectOverride.TargetClass.StaticTarget;
     }
   }
-  public static void StaticTarget(object? sender, System.EventArgs args)
+  public static void StaticTarget(object? sender, EventArgs args)
   {
   }
 }

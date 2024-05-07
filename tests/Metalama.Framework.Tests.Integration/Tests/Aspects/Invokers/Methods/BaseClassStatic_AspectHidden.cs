@@ -4,7 +4,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_AspectHidden;
 using System.Linq;
 
-[assembly: AspectOrder(typeof(InvokerAfterAspect), typeof(IntroductionAspect), typeof(InvokerBeforeAspect))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(InvokerAfterAspect), typeof(IntroductionAspect), typeof(InvokerBeforeAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_AspectHidden;
 
@@ -14,25 +14,25 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ba
 
 public class InvokerBeforeAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         builder.Advice.Override(
             builder.Target,
             nameof(Template),
-            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName("Method").Single() });
+            new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName( "Method" ).Single() } );
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? Template( [CompileTime] IMethod target )
     {
-        meta.InsertComment("Invoke TargetClass.Method");
+        meta.InsertComment( "Invoke TargetClass.Method" );
         target.Invoke();
-        meta.InsertComment("Invoke BaseClass.Method");
-        target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke BaseClass.Method");
-        target.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke TargetClass.Method");
-        target.With(InvokerOptions.Final).Invoke();
+        meta.InsertComment( "Invoke BaseClass.Method" );
+        target.With( InvokerOptions.Base ).Invoke();
+        meta.InsertComment( "Invoke BaseClass.Method" );
+        target.With( InvokerOptions.Current ).Invoke();
+        meta.InsertComment( "Invoke TargetClass.Method" );
+        target.With( InvokerOptions.Final ).Invoke();
 
         return meta.Proceed();
     }
@@ -40,43 +40,44 @@ public class InvokerBeforeAspect : MethodAspect
 
 public class IntroductionAspect : TypeAspect
 {
-    [Introduce(WhenExists = OverrideStrategy.New)]
+    [Introduce( WhenExists = OverrideStrategy.New )]
     public static void Method()
     {
-        meta.InsertComment("Invoke BaseClass.Method");
+        meta.InsertComment( "Invoke BaseClass.Method" );
         meta.Target.Method.Invoke();
-        meta.InsertComment("Invoke BaseClass.Method");
-        meta.Target.Method.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke TargetClass.Method");
-        meta.Target.Method.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke TargetClass.Method");
-        meta.Target.Method.With(InvokerOptions.Final).Invoke();
+        meta.InsertComment( "Invoke BaseClass.Method" );
+        meta.Target.Method.With( InvokerOptions.Base ).Invoke();
+        meta.InsertComment( "Invoke TargetClass.Method" );
+        meta.Target.Method.With( InvokerOptions.Current ).Invoke();
+        meta.InsertComment( "Invoke TargetClass.Method" );
+        meta.Target.Method.With( InvokerOptions.Final ).Invoke();
 
-        meta.InsertComment("Invoke BaseClass.Method");
+        meta.InsertComment( "Invoke BaseClass.Method" );
         meta.Proceed();
     }
 }
+
 public class InvokerAfterAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
         builder.Advice.Override(
             builder.Target,
             nameof(Template),
-            new { target = builder.Target.DeclaringType!.AllMethods.OfName("Method").Single() });
+            new { target = builder.Target.DeclaringType!.AllMethods.OfName( "Method" ).Single() } );
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? Template( [CompileTime] IMethod target )
     {
-        meta.InsertComment("Invoke TargetClass.Method");
+        meta.InsertComment( "Invoke TargetClass.Method" );
         target.Invoke();
-        meta.InsertComment("Invoke TargetClass.Method");
-        target.With(InvokerOptions.Base).Invoke();
-        meta.InsertComment("Invoke TargetClass.Method");
-        target.With(InvokerOptions.Current).Invoke();
-        meta.InsertComment("Invoke TargetClass.Method");
-        target.With(InvokerOptions.Final).Invoke();
+        meta.InsertComment( "Invoke TargetClass.Method" );
+        target.With( InvokerOptions.Base ).Invoke();
+        meta.InsertComment( "Invoke TargetClass.Method" );
+        target.With( InvokerOptions.Current ).Invoke();
+        meta.InsertComment( "Invoke TargetClass.Method" );
+        target.With( InvokerOptions.Final ).Invoke();
 
         return meta.Proceed();
     }
@@ -84,9 +85,7 @@ public class InvokerAfterAspect : MethodAspect
 
 public class BaseClass
 {
-    public static void Method()
-    {
-    }
+    public static void Method() { }
 }
 
 // <target>
@@ -94,12 +93,8 @@ public class BaseClass
 public class TargetClass : BaseClass
 {
     [InvokerBeforeAspect]
-    public void InvokerBefore()
-    {
-    }
+    public void InvokerBefore() { }
 
     [InvokerAfterAspect]
-    public void InvokerAfter()
-    {
-    }
+    public void InvokerAfter() { }
 }

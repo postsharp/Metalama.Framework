@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -74,4 +75,6 @@ internal sealed class FabricTopLevelAspectClass : IBoundAspectClass
         => throw new AssertionFailedException( "This aspect is always eligible." );
 
     public string DiagnosticSourceDescription => "top-level fabric";
+
+    IReadOnlyCollection<IAspectClassImpl> IAspectClassImpl.DescendantClassesAndSelf => Array.Empty<IAspectClassImpl>();
 }

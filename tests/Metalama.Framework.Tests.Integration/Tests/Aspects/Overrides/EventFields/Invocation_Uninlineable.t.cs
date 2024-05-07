@@ -36,9 +36,9 @@ internal class TargetClass
   }
   public void Foo()
   {
-    if (this._event != null)
+    if (_event != null)
     {
-      this._event(this, new EventArgs());
+      _event(this, new EventArgs());
     }
     if (_staticEvent != null)
     {

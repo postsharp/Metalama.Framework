@@ -5,31 +5,31 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.Simple
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var @event in builder.Target.Events)
+            foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(@event, nameof(OverrideAdd), nameof(OverrideRemove));
+                builder.Advice.OverrideAccessors( @event, nameof(OverrideAdd), nameof(OverrideRemove) );
             }
         }
 
         [Template]
-        public void OverrideAdd(dynamic value)
+        public void OverrideAdd( dynamic value )
         {
-            Console.WriteLine("This is the add template.");
+            Console.WriteLine( "This is the add template." );
             meta.Proceed();
         }
 
         [Template]
-        public void OverrideRemove(dynamic value)
+        public void OverrideRemove( dynamic value )
         {
-            Console.WriteLine("This is the remove template.");
+            Console.WriteLine( "This is the remove template." );
             meta.Proceed();
         }
     }
@@ -49,6 +49,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     internal class TargetClass
     {
         public event EventHandler? Event;
+
         public static event EventHandler? StaticEvent;
     }
 }

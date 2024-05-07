@@ -5,7 +5,7 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Introdu
 
 #pragma warning disable CS8618, CS0169, CS0649
 
-[assembly: AspectOrder( typeof(IntroduceAndFilterAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(IntroduceAndFilterAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Introduced
 {

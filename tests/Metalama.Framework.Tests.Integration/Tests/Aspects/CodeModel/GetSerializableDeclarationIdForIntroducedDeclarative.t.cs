@@ -1,8 +1,8 @@
 [IntroduceMembers]
-class C
+internal class C
 {
   [Serialize]
-  string[] M()
+  private string[] M()
   {
     return new global::System.String[]
     {

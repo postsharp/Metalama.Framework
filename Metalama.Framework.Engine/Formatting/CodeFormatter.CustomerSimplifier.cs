@@ -44,61 +44,87 @@ public sealed partial class CodeFormatter
             {
                 if ( node.ArgumentList?.Arguments is
                          [{ Expression: AnonymousFunctionExpressionSyntax anonymousFunctionExpression }]
-                     && node.Parent?.Kind() is SyntaxKind.Argument or SyntaxKind.EqualsValueClause )
+                     && node.Parent?.Kind() is SyntaxKind.Argument or SyntaxKind.EqualsValueClause or SyntaxKind.SimpleAssignmentExpression )
                 {
-                    if ( node.Parent is ArgumentSyntax argument )
+                    switch ( node.Parent?.Kind() )
                     {
-                        switch ( node.Parent.Parent?.Parent )
+                        case SyntaxKind.Argument:
+                            var argument = (ArgumentSyntax) node.Parent;
+
+                            switch ( node.Parent.Parent?.Parent )
+                            {
+                                case InvocationExpressionSyntax invocation:
+                                    if ( this._semanticModel != null )
+                                    {
+                                        var symbol = this._semanticModel.GetSymbolInfo( invocation.Expression ).Symbol;
+                                        var argumentIndex = invocation.ArgumentList.Arguments.IndexOf( argument );
+
+                                        if ( symbol is IMethodSymbol invokedMethod
+                                             && invokedMethod.Parameters[argumentIndex].Type.TypeKind == TypeKind.Delegate )
+                                        {
+                                            return this.Visit( anonymousFunctionExpression )!;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        this.RequiresSemanticModel = true;
+                                    }
+
+                                    break;
+
+                                case ObjectCreationExpressionSyntax { ArgumentList: not null } objectCreation:
+                                    if ( this._semanticModel != null )
+                                    {
+                                        var symbol = this._semanticModel.GetSymbolInfo( objectCreation ).Symbol;
+                                        var argumentIndex = objectCreation.ArgumentList.Arguments.IndexOf( argument );
+
+                                        if ( symbol is IMethodSymbol invokedMethod
+                                             && invokedMethod.Parameters[argumentIndex].Type.TypeKind == TypeKind.Delegate )
+                                        {
+                                            return this.Visit( anonymousFunctionExpression )!;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        this.RequiresSemanticModel = true;
+                                    }
+
+                                    break;
+
+                                default:
+                                    if ( node.Parent.IsKind( SyntaxKind.EqualsValueClause ) )
+                                    {
+                                        return this.Visit( anonymousFunctionExpression )!;
+                                    }
+
+                                    break;
+                            }
+
+                            break;
+
+                        case SyntaxKind.EqualsValueClause when anonymousFunctionExpression is ParenthesizedLambdaExpressionSyntax
                         {
-                            case InvocationExpressionSyntax invocation:
-                                if ( this._semanticModel != null )
-                                {
-                                    var symbol = this._semanticModel.GetSymbolInfo( invocation.Expression ).Symbol;
-                                    var argumentIndex = invocation.ArgumentList.Arguments.IndexOf( argument );
+                            ParameterList.Parameters.Count: 0
+                        }:
+                            return anonymousFunctionExpression;
 
-                                    if ( symbol is IMethodSymbol invokedMethod && invokedMethod.Parameters[argumentIndex].Type.TypeKind == TypeKind.Delegate )
-                                    {
-                                        return this.Visit( anonymousFunctionExpression )!;
-                                    }
-                                }
-                                else
-                                {
-                                    this.RequiresSemanticModel = true;
-                                }
+                        case SyntaxKind.SimpleAssignmentExpression:
+                            if ( this._semanticModel != null )
+                            {
+                                var assignmentExpression = (AssignmentExpressionSyntax) node.Parent;
+                                var symbol = this._semanticModel.GetSymbolInfo( assignmentExpression.Left ).Symbol;
 
-                                break;
-
-                            case ObjectCreationExpressionSyntax { ArgumentList: not null } objectCreation:
-                                if ( this._semanticModel != null )
-                                {
-                                    var symbol = this._semanticModel.GetSymbolInfo( objectCreation ).Symbol;
-                                    var argumentIndex = objectCreation.ArgumentList.Arguments.IndexOf( argument );
-
-                                    if ( symbol is IMethodSymbol invokedMethod && invokedMethod.Parameters[argumentIndex].Type.TypeKind == TypeKind.Delegate )
-                                    {
-                                        return this.Visit( anonymousFunctionExpression )!;
-                                    }
-                                }
-                                else
-                                {
-                                    this.RequiresSemanticModel = true;
-                                }
-
-                                break;
-
-                            default:
-                                if ( node.Parent.IsKind( SyntaxKind.EqualsValueClause ) )
+                                if ( symbol is IFieldSymbol { Type.TypeKind: TypeKind.Delegate } or IPropertySymbol { Type.TypeKind: TypeKind.Delegate } )
                                 {
                                     return this.Visit( anonymousFunctionExpression )!;
                                 }
+                            }
+                            else
+                            {
+                                this.RequiresSemanticModel = true;
+                            }
 
-                                break;
-                        }
-                    }
-                    else if ( node.Parent.IsKind( SyntaxKind.EqualsValueClause ) &&
-                              anonymousFunctionExpression is ParenthesizedLambdaExpressionSyntax { ParameterList.Parameters.Count: 0 } )
-                    {
-                        return anonymousFunctionExpression;
+                            break;
                     }
                 }
             }

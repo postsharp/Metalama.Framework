@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialMethod_TwoAspects;
 
-[assembly: AspectOrder(typeof(Override2Attribute), typeof(Override1Attribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Override2Attribute), typeof(Override1Attribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialMethod_TwoAspects
 {
@@ -25,24 +25,26 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialM
         public dynamic? Template()
         {
             Console.WriteLine( $"This is the override 1 of {meta.Tags["name"]}." );
+
             return meta.Proceed();
         }
     }
 
     public class Override2Attribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(Template), tags: new { name = method.Name });
+                builder.Advice.Override( method, nameof(Template), tags: new { name = method.Name } );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine($"This is the override 2 of {meta.Tags["name"]}.");
+            Console.WriteLine( $"This is the override 2 of {meta.Tags["name"]}." );
+
             return meta.Proceed();
         }
     }

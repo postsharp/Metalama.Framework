@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAssembly_AsyncEnumerable
 {
@@ -14,26 +14,28 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.CrossAss
         [Introduce]
         public async IAsyncEnumerable<int> IntroducedMethod_AsyncIterator()
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
             await Task.Yield();
+
             yield return 42;
         }
     }
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var method in builder.Target.Methods)
+            foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(Template));
+                builder.Advice.Override( method, nameof(Template) );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
+
             return meta.Proceed();
         }
     }
