@@ -31,12 +31,14 @@ public class TheAspect : TypeAspect
         C.Execute1( canExecuteExpression.Value );
         _ = new C( canExecuteExpression.Value );
         var x = canExecuteExpression.Value;
+        _ = new C { UntypedProperty = executeExpression.Value };
 
         // The references below should be simplified.
 
         C.Execute2( canExecuteExpression.Value );
         _ = new C( null, canExecuteExpression.Value );
         var y = executeExpression.Value;
+        _ = new C { TypedProperty = executeExpression.Value };
     }
 }
 
@@ -44,6 +46,8 @@ public class TheAspect : TypeAspect
 [TheAspect]
 internal class C
 {
+    public C() { }
+
     public C( object o ) { }
 
     public C( object o, Func<object, bool> f ) { }
@@ -53,4 +57,8 @@ internal class C
     public static void Execute1( object o ) { }
 
     public static void Execute2( Func<object, bool> f ) => f( new object() );
+
+    public Action? TypedProperty { get; set; }
+
+    public object? UntypedProperty { get; set; }
 }
