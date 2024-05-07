@@ -366,6 +366,8 @@ public class TestOptions
     /// </summary>
     public bool? IgnoreUserProfileLicenses { get; set; }
 
+    public bool? TestUnformattedOutput { get; set; }
+
     /// <summary>
     /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
     /// that is not defined in the current object but defined in the argument.
@@ -460,6 +462,8 @@ public class TestOptions
         this.CompareProgramOutput ??= baseOptions.CompareProgramOutput;
 
         this.IgnoreUserProfileLicenses ??= baseOptions.IgnoreUserProfileLicenses;
+
+        this.TestUnformattedOutput ??= baseOptions.TestUnformattedOutput;
     }
 
     public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -803,6 +807,11 @@ public class TestOptions
 
                 case "ProjectName":
                     this.ProjectName = optionArg;
+
+                    break;
+
+                case "TestUnformattedOutput":
+                    this.TestUnformattedOutput = true;
 
                     break;
 

@@ -42,25 +42,12 @@ namespace Metalama.Framework.Advising
         /// <seealso href="@overriding-methods"/>
         IOverrideAdviceResult<IMethod> Override( IMethod targetMethod, in MethodTemplateSelector template, object? args = null, object? tags = null );
 
-        IIntroductionAdviceResult<INamedType> IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
-        IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-            INamedType targetType,
-            string template,
-            IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IConstructorBuilder>? buildConstructor = null,
-            object? args = null,
-            object? tags = null );
-
-        IIntroductionAdviceResult<INamedType> IntroduceType( string targetNamespace, string typeName, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
         /// </summary>
         /// <param name="targetType">The type into which the method must be introduced.</param>
         /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
-        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
+        ///     annotated with <see cref="TemplateAttribute"/>. This method can have parameters and a return type. The actual parameters and return type
         ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
         ///     method. The default scope depends on the scope of the template method.
@@ -148,6 +135,15 @@ namespace Metalama.Framework.Advising
         ///     of the <see cref="meta"/> API.</param>
         IOverrideAdviceResult<IConstructor> Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null );
 
+        IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+            INamedType targetType,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IConstructorBuilder>? buildConstructor = null,
+            object? args = null,
+            object? tags = null );
+
         /// <summary>
         /// Overrides a field or property by specifying a property template.
         /// </summary>
@@ -179,7 +175,7 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-fields-or-properties"/>
-        IOverrideAdviceResult<IProperty> OverrideAccessors(
+        IOverrideAdviceResult<IPropertyOrIndexer> OverrideAccessors(
             IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
@@ -678,7 +674,7 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
-        IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
+        IAddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
             ContractDirection direction = ContractDirection.Default,
@@ -759,6 +755,15 @@ namespace Metalama.Framework.Advising
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
+
+        ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceType( string targetNamespace, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceClass(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved

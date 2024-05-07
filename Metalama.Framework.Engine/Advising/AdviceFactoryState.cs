@@ -12,17 +12,18 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class AdviceFactoryState
+internal sealed class AdviceFactoryState : IAdviceExecutionContext
 {
     private readonly int _pipelineStepIndex;
     private readonly int _orderWithinType;
+    private readonly ProjectServiceProvider _serviceProvider;
     private int _nextTransformationOrder;
 
     public CompilationModel CurrentCompilation { get; }
 
     public IAspectInstanceInternal AspectInstance { get; }
 
-    public ProjectServiceProvider ServiceProvider { get; }
+    public ref readonly ProjectServiceProvider ServiceProvider => ref this._serviceProvider;
 
     public CompilationModel InitialCompilation { get; }
 
@@ -37,7 +38,7 @@ internal sealed class AdviceFactoryState
     public UserCodeExecutionContext ExecutionContext { get; }
 
     public AdviceFactoryState(
-        ProjectServiceProvider serviceProvider,
+        in ProjectServiceProvider serviceProvider,
         CompilationModel initialCompilation,
         CompilationModel currentCompilation,
         IAspectInstanceInternal aspectInstance,
@@ -51,7 +52,7 @@ internal sealed class AdviceFactoryState
         this.InitialCompilation = initialCompilation;
         this.CurrentCompilation = currentCompilation;
         this.AspectInstance = aspectInstance;
-        this.ServiceProvider = serviceProvider;
+        this._serviceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
         this.ExecutionContext = executionContext;

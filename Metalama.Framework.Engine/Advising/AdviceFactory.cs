@@ -6,16 +6,20 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Contracts;
+using Metalama.Framework.Engine.AdviceImpl.Initialization;
+using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
+using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using EligibilityExtensions = Metalama.Framework.Eligibility.EligibilityExtensions;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -24,7 +28,9 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed class AdviceFactory : IAdviceFactory
+// ReSharper disable once PossibleInterfaceMemberAmbiguity
+internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
+    where T : IDeclaration
 {
     private readonly string? _layerName;
 
@@ -36,8 +42,11 @@ internal sealed class AdviceFactory : IAdviceFactory
     private readonly ObjectReaderFactory _objectReaderFactory;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
 
-    public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
+    public T Target { get; }
+
+    public AdviceFactory( T target, AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
     {
+        this.Target = target;
         this._state = state;
         this._templateInstance = templateInstance;
         this._layerName = layerName;
@@ -55,7 +64,11 @@ internal sealed class AdviceFactory : IAdviceFactory
 
     private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();
 
-    public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this._state, templateClassInstance, this._layerName );
+    public AdviceFactory<T> WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
+        => new( this.Target, this._state, templateClassInstance, this._layerName );
+
+    IAdviceFactoryImpl IAdviceFactoryImpl.WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
+        => this.WithTemplateClassInstance( templateClassInstance );
 
     public IAdviceFactory WithTemplateProvider( TemplateProvider templateProvider )
         => this.WithTemplateClassInstance(
@@ -90,53 +103,7 @@ internal sealed class AdviceFactory : IAdviceFactory
             }
         }
 
-        return ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
-    }
-
-    public static TemplateMemberRef? ValidateTemplateName(
-        TemplateClass templateClass,
-        string templateName,
-        TemplateKind templateKind,
-        bool required = false,
-        bool ignoreMissing = false )
-    {
-        Invariant.Assert( !(required && ignoreMissing) );
-
-        if ( templateClass.Members.TryGetValue( templateName, out var template ) )
-        {
-            if ( template.TemplateInfo.IsNone )
-            {
-                // It is possible that the aspect has a member of the required name, but the user did not use the custom attribute. In this case,
-                // we want a proper error message.
-
-                throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException( (template.TemplateClass.FullName, templateName) );
-            }
-
-            if ( template.TemplateInfo.IsAbstract )
-            {
-                if ( !required )
-                {
-                    return null;
-                }
-                else
-                {
-                    throw new AssertionFailedException( "A non-abstract template was expected." );
-                }
-            }
-
-            return new TemplateMemberRef( template, templateKind );
-        }
-        else
-        {
-            if ( ignoreMissing )
-            {
-                return null;
-            }
-            else
-            {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException( (templateClass.ShortName, templateName) );
-            }
-        }
+        return TemplateNameValidator.ValidateTemplateName( this._templateInstance.TemplateClass, templateName, templateKind, required, ignoreMissing );
     }
 
     private TemplateMemberRef SelectMethodTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
@@ -241,70 +208,6 @@ internal sealed class AdviceFactory : IAdviceFactory
         return selectedTemplate.InterpretedAs( interpretedKind );
     }
 
-    private AdviceResult<T> ExecuteAdvice<T>( Advice advice )
-        where T : class, IDeclaration
-    {
-        List<ITransformation> transformations = new();
-
-        // Initialize the advice. It should report errors for any situation that does not depend on the target declaration.
-        // These errors are reported as exceptions.
-        var initializationDiagnostics = new DiagnosticBag();
-        advice.Initialize( this._state.ServiceProvider, initializationDiagnostics );
-
-        if ( !initializationDiagnostics.HasError )
-        {
-            advice.Validate( this._state.ServiceProvider, this._state.CurrentCompilation, initializationDiagnostics );
-        }
-
-        ThrowOnErrors( initializationDiagnostics );
-        this._state.Diagnostics.Report( initializationDiagnostics );
-
-        // Implement the advice. This should report errors for any situation that does depend on the target declaration.
-        // These errors are reported as diagnostics.
-        var result = advice.Implement(
-            this._state.ServiceProvider,
-            this._state.CurrentCompilation,
-            t =>
-            {
-                this._state.SetOrders( t );
-                transformations.Add( t );
-            } );
-
-        this._state.Diagnostics.Report( result.Diagnostics );
-
-        this._state.IntrospectionListener?.AddAdviceResult( this._state.AspectInstance, advice, result, this._state.CurrentCompilation );
-
-        switch ( result.Outcome )
-        {
-            case AdviceOutcome.Error:
-                this._state.AspectInstance.Skip();
-
-                break;
-
-            case AdviceOutcome.Ignore:
-                break;
-
-            default:
-                this._state.AddTransformations( transformations );
-
-                if ( this._state.IntrospectionListener != null )
-                {
-                    result.Transformations = transformations.ToImmutableArray();
-                }
-
-                break;
-        }
-
-        return new AdviceResult<T>(
-            result.NewDeclaration.As<IDeclaration, T>(),
-            this._state.CurrentCompilation,
-            result.Outcome,
-            this._state.AspectBuilder.AssertNotNull(),
-            advice.AdviceKind,
-            result.Interfaces,
-            result.InterfaceMembers );
-    }
-
     private TemplateMemberRef? SelectGetterTemplate(
         IFieldOrPropertyOrIndexer targetFieldOrProperty,
         in GetterTemplateSelector templateSelector,
@@ -335,6 +238,12 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         return selectedTemplate;
     }
+
+    IAdviser<TNewDeclaration> IAdviser<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => this.WithDeclaration( target );
+
+    public AdviceFactory<TNewTarget> WithDeclaration<TNewTarget>( TNewTarget target )
+        where TNewTarget : IDeclaration
+        => new( target, this._state, this._templateInstance, this._layerName );
 
     public ICompilation MutableCompilation => this._state.CurrentCompilation;
 
@@ -418,8 +327,6 @@ internal sealed class AdviceFactory : IAdviceFactory
 
             this.CheckEligibility( targetMethod, AdviceKind.OverrideMethod );
 
-            Advice advice;
-
             switch ( targetMethod.MethodKind )
             {
                 case MethodKind.EventAdd:
@@ -430,18 +337,18 @@ internal sealed class AdviceFactory : IAdviceFactory
                             .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                             .ForOverride( @event.AddMethod, this.GetObjectReader( args ) );
 
-                        advice = new OverrideEventAdvice(
-                            this._state.AspectInstance,
-                            this._templateInstance,
-                            @event,
-                            this._compilation,
-                            template,
-                            null,
-                            this._layerName,
-                            this.GetObjectReader( tags ) );
+                        return new OverrideEventAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                @event,
+                                this._compilation,
+                                template,
+                                null,
+                                this._layerName,
+                                this.GetObjectReader( tags ) )
+                            .Execute( this._state )
+                            .GetAccessor( e => e.AddMethod );
                     }
-
-                    break;
 
                 case MethodKind.EventRemove:
                     {
@@ -451,18 +358,18 @@ internal sealed class AdviceFactory : IAdviceFactory
                             .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
                             .ForOverride( @event.AddMethod, this.GetObjectReader( args ) );
 
-                        advice = new OverrideEventAdvice(
-                            this._state.AspectInstance,
-                            this._templateInstance,
-                            @event,
-                            this._compilation,
-                            null,
-                            template,
-                            this._layerName,
-                            this.GetObjectReader( tags ) );
+                        return new OverrideEventAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                @event,
+                                this._compilation,
+                                null,
+                                template,
+                                this._layerName,
+                                this.GetObjectReader( tags ) )
+                            .Execute( this._state )
+                            .GetAccessor( e => e.RemoveMethod );
                     }
-
-                    break;
 
                 case MethodKind.PropertyGet:
                     {
@@ -475,37 +382,35 @@ internal sealed class AdviceFactory : IAdviceFactory
                         switch ( propertyOrIndexer )
                         {
                             case IProperty property:
-                                advice = new OverrideFieldOrPropertyAdvice(
-                                    this._state.AspectInstance,
-                                    this._templateInstance,
-                                    property,
-                                    this._compilation,
-                                    template,
-                                    null,
-                                    this._layerName,
-                                    this.GetObjectReader( tags ) );
-
-                                break;
+                                return new OverrideFieldOrPropertyAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        property,
+                                        this._compilation,
+                                        template,
+                                        null,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) )
+                                    .Execute( this._state )
+                                    .GetAccessor( p => p.GetMethod );
 
                             case IIndexer indexer:
-                                advice = new OverrideIndexerAdvice(
-                                    this._state.AspectInstance,
-                                    this._templateInstance,
-                                    indexer,
-                                    this._compilation,
-                                    template,
-                                    null,
-                                    this._layerName,
-                                    this.GetObjectReader( tags ) );
-
-                                break;
+                                return new OverrideIndexerAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        indexer,
+                                        this._compilation,
+                                        template,
+                                        null,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) )
+                                    .Execute( this._state )
+                                    .GetAccessor( p => p.GetMethod );
 
                             default:
                                 throw new AssertionFailedException( $"Unexpected declaration {propertyOrIndexer.DeclarationKind}." );
                         }
                     }
-
-                    break;
 
                 case MethodKind.PropertySet:
                     {
@@ -518,37 +423,35 @@ internal sealed class AdviceFactory : IAdviceFactory
                         switch ( propertyOrIndexer )
                         {
                             case IProperty property:
-                                advice = new OverrideFieldOrPropertyAdvice(
-                                    this._state.AspectInstance,
-                                    this._templateInstance,
-                                    property,
-                                    this._compilation,
-                                    null,
-                                    template,
-                                    this._layerName,
-                                    this.GetObjectReader( tags ) );
-
-                                break;
+                                return new OverrideFieldOrPropertyAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        property,
+                                        this._compilation,
+                                        null,
+                                        template,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) )
+                                    .Execute( this._state )
+                                    .GetAccessor( p => p.SetMethod );
 
                             case IIndexer indexer:
-                                advice = new OverrideIndexerAdvice(
-                                    this._state.AspectInstance,
-                                    this._templateInstance,
-                                    indexer,
-                                    this._compilation,
-                                    null,
-                                    template,
-                                    this._layerName,
-                                    this.GetObjectReader( tags ) );
-
-                                break;
+                                return new OverrideIndexerAdvice(
+                                        this._state.AspectInstance,
+                                        this._templateInstance,
+                                        indexer,
+                                        this._compilation,
+                                        null,
+                                        template,
+                                        this._layerName,
+                                        this.GetObjectReader( tags ) )
+                                    .Execute( this._state )
+                                    .GetAccessor( p => p.SetMethod );
 
                             default:
                                 throw new AssertionFailedException( $"Unexpected declaration {propertyOrIndexer.DeclarationKind}." );
                         }
                     }
-
-                    break;
 
                 default:
                     {
@@ -557,56 +460,18 @@ internal sealed class AdviceFactory : IAdviceFactory
                             .ForOverride( targetMethod, this.GetObjectReader( args ) )
                             .AssertNotNull();
 
-                        advice = new OverrideMethodAdvice(
-                            this._state.AspectInstance,
-                            this._templateInstance,
-                            targetMethod,
-                            this._compilation,
-                            template,
-                            this._layerName,
-                            this.GetObjectReader( tags ) );
-
-                        break;
+                        return new OverrideMethodAdvice(
+                                this._state.AspectInstance,
+                                this._templateInstance,
+                                targetMethod,
+                                this._compilation,
+                                template,
+                                this._layerName,
+                                this.GetObjectReader( tags ) )
+                            .Execute( this._state );
                     }
             }
-
-            return this.ExecuteAdvice<IMethod>( advice );
         }
-    }
-
-    public IIntroductionAdviceResult<INamedType> IntroduceType(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string typeName,
-        Code.TypeKind typeKind,
-        Action<INamedTypeBuilder>? buildType = null )
-    {
-        if ( this._templateInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
-        using ( this.WithNonUserCode() )
-        {
-            var advice = new IntroduceNamedTypeAdvice(
-                this._state.AspectInstance,
-                this._templateInstance,
-                targetNamespaceOrType,
-                typeName,
-                this._compilation,
-                buildType,
-                this._layerName );
-
-            return this.ExecuteAdvice<INamedType>( advice );
-        }
-    }
-
-    public IIntroductionAdviceResult<INamedType> IntroduceType(
-        string targetNamespace,
-        string typeName,
-        Code.TypeKind typeKind,
-        Action<INamedTypeBuilder>? buildType = null )
-    {
-        throw new NotImplementedException();
     }
 
     public IIntroductionAdviceResult<IMethod> IntroduceMethod(
@@ -643,45 +508,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
-        }
-    }
-
-    public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-        INamedType targetType,
-        string defaultTemplate,
-        IntroductionScope scope = IntroductionScope.Default,
-        OverrideStrategy whenExists = OverrideStrategy.Default,
-        Action<IConstructorBuilder>? buildAction = null,
-        object? args = null,
-        object? tags = null )
-    {
-        if ( this._templateInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
-        using ( this.WithNonUserCode() )
-        {
-            this.CheckEligibility( targetType, AdviceKind.IntroduceConstructor );
-
-            var template =
-                this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
-
-            var advice = new IntroduceConstructorAdvice(
-                this._state.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                template.PartialForIntroduction( this.GetObjectReader( args ) ),
-                scope,
-                whenExists,
-                buildAction,
-                this._layerName,
-                this.GetObjectReader( tags ) );
-
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -714,7 +541,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -762,7 +589,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -811,7 +638,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -855,7 +682,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -888,7 +715,44 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return advice.Execute( this._state );
+        }
+    }
+
+    public IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+        INamedType targetType,
+        string defaultTemplate,
+        IntroductionScope scope = IntroductionScope.Default,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IConstructorBuilder>? buildAction = null,
+        object? args = null,
+        object? tags = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            this.CheckEligibility( targetType, AdviceKind.IntroduceConstructor );
+
+            var template =
+                this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+            return new IntroduceConstructorAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    template.PartialForIntroduction( this.GetObjectReader( args ) ),
+                    scope,
+                    whenExists,
+                    buildAction,
+                    this._layerName,
+                    this.GetObjectReader( tags ) )
+                .Execute( this._state );
         }
     }
 
@@ -932,11 +796,11 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
-    public IOverrideAdviceResult<IProperty> OverrideAccessors(
+    public IOverrideAdviceResult<IPropertyOrIndexer> OverrideAccessors(
         IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
         in GetterTemplateSelector getTemplateSelector,
         string? setTemplate = null,
@@ -984,7 +848,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._layerName,
                             this.GetObjectReader( tags ) );
 
-                        return this.ExecuteAdvice<IProperty>( advice );
+                        return advice.Execute( this._state );
                     }
 
                 case IIndexer targetIndexer:
@@ -999,7 +863,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                             this._layerName,
                             this.GetObjectReader( tags ) );
 
-                        return this.ExecuteAdvice<IProperty>( advice );
+                        return advice.Execute( this._state );
                     }
 
                 default:
@@ -1041,7 +905,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IField>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1080,7 +944,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IField>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1135,7 +999,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1194,7 +1058,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1247,7 +1111,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IProperty>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1361,7 +1225,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IIndexer>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1412,7 +1276,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IEvent>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1453,7 +1317,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IEvent>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1501,7 +1365,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IEvent>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1530,9 +1394,17 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<INamedType>( advice );
+            return advice.Execute( this._state );
         }
     }
+
+    public IImplementInterfaceAdviceResult ImplementInterface(
+        INamedType targetType,
+        INamedType interfaceType,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IInterfaceImplementationBuilder>? implementInterface = null,
+        object? tags = null )
+        => throw new NotImplementedException();
 
     public IImplementInterfaceAdviceResult ImplementInterface(
         INamedType targetType,
@@ -1544,6 +1416,14 @@ internal sealed class AdviceFactory : IAdviceFactory
             (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
             whenExists,
             tags );
+
+    public IImplementInterfaceAdviceResult ImplementInterface(
+        INamedType targetType,
+        Type interfaceType,
+        OverrideStrategy whenExists = OverrideStrategy.Default,
+        Action<IInterfaceImplementationBuilder>? implementInterface = null,
+        object? tags = null )
+        => throw new NotImplementedException();
 
     public IAddInitializerAdviceResult AddInitializer(
         INamedType targetType,
@@ -1574,7 +1454,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<INamedType>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1601,7 +1481,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 kind,
                 this._layerName );
 
-            return this.ExecuteAdvice<INamedType>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1629,7 +1509,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._layerName,
                 this.GetObjectReader( tags ) );
 
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1653,17 +1533,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 InitializerKind.BeforeInstanceConstructor,
                 this._layerName );
 
-            return this.ExecuteAdvice<IConstructor>( advice );
-        }
-    }
-
-    private static void ThrowOnErrors( DiagnosticBag diagnosticBag )
-    {
-        if ( diagnosticBag.HasError() )
-        {
-            throw new DiagnosticException(
-                "Errors have occured while creating advice.",
-                diagnosticBag.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1695,25 +1565,61 @@ internal sealed class AdviceFactory : IAdviceFactory
                         MetalamaStringFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
             }
 
-            return this.AddContractImpl<IParameter>( targetParameter, template, kind, tags, args );
+            if ( !this.TryPrepareContract( targetParameter, template, ref kind, out var boundTemplate ) )
+            {
+                return AddContractAdviceResult<IParameter>.Ignored;
+            }
+
+            var advice = new ParameterContractAdvice(
+                this._state.AspectInstance,
+                this._templateInstance.AssertNotNull(),
+                targetParameter,
+                this._compilation,
+                boundTemplate,
+                kind,
+                this._layerName,
+                this.GetObjectReader( tags ),
+                this.GetObjectReader( args ) );
+
+            return advice.Execute( this._state );
         }
     }
 
-    public IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
+    public IAddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContract(
         IFieldOrPropertyOrIndexer targetMember,
         string template,
-        ContractDirection kind = ContractDirection.Default,
+        ContractDirection direction = ContractDirection.Default,
         object? tags = null,
         object? args = null )
-        => this.AddContractImpl<IPropertyOrIndexer>( targetMember, template, kind, tags, args );
+    {
+        using ( this.WithNonUserCode() )
+        {
+            if ( !this.TryPrepareContract( targetMember, template, ref direction, out var boundTemplate ) )
+            {
+                return AddContractAdviceResult<IFieldOrPropertyOrIndexer>.Ignored;
+            }
 
-    private AdviceResult<T> AddContractImpl<T>(
-        IDeclaration targetDeclaration,
-        string template,
-        ContractDirection direction,
-        object? tags,
-        object? args )
-        where T : class, IDeclaration
+            var advice = new FieldOrPropertyOrIndexerContractAdvice(
+                this._state.AspectInstance,
+                this._templateInstance.AssertNotNull(),
+                targetMember,
+                this._compilation,
+                boundTemplate,
+                direction,
+                this._layerName,
+                this.GetObjectReader( tags ),
+                this.GetObjectReader( args ) );
+
+            return advice.Execute( this._state );
+        }
+    }
+
+    private bool TryPrepareContract<TContract>(
+        TContract targetDeclaration,
+        string templateName,
+        ref ContractDirection direction,
+        [NotNullWhen( true )] out TemplateMember<IMethod>? boundTemplate )
+        where TContract : class, IDeclaration
     {
         if ( this._templateInstance == null )
         {
@@ -1722,65 +1628,46 @@ internal sealed class AdviceFactory : IAdviceFactory
 
         if ( direction == ContractDirection.None )
         {
-            return new AdviceResult<T>(
-                null,
-                this._compilation,
-                AdviceOutcome.Ignore,
-                this._state.AspectBuilder.AssertNotNull(),
-                AdviceKind.AddContract,
-                Array.Empty<IInterfaceImplementationResult>(),
-                Array.Empty<IInterfaceMemberImplementationResult>() );
+            boundTemplate = null;
+
+            return false;
         }
 
         this.CheckContractEligibility( targetDeclaration, direction );
 
         direction = ContractAspectHelper.GetEffectiveDirection( direction, targetDeclaration );
 
-        var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
+        boundTemplate = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
             .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-        var advice = new ContractAdvice(
-            this._state.AspectInstance,
-            this._templateInstance,
-            targetDeclaration,
-            this._compilation,
-            boundTemplate,
-            direction,
-            this._layerName,
-            this.GetObjectReader( tags ),
-            this.GetObjectReader( args ) );
-
-        var result = this.ExecuteAdvice<T>( advice );
-
-        return result;
+        return true;
     }
 
     public IIntroductionAdviceResult<IAttribute> IntroduceAttribute(
         IDeclaration targetDeclaration,
         IAttributeData attribute,
         OverrideStrategy whenExists = OverrideStrategy.Default )
-        => this.ExecuteAdvice<IAttribute>(
-            new AddAttributeAdvice(
-                this._state.AspectInstance,
-                this._templateInstance!,
-                targetDeclaration,
-                this._compilation,
-                attribute,
-                whenExists,
-                this._layerName ) );
+        => new AddAttributeAdvice(
+            this._state.AspectInstance,
+            this._templateInstance!,
+            targetDeclaration,
+            this._compilation,
+            attribute,
+            whenExists,
+            this._layerName ).Execute( this._state );
 
     public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
     {
         using ( this.WithNonUserCode() )
         {
-            return this.ExecuteAdvice<IDeclaration>(
+            return
                 new RemoveAttributesAdvice(
                     this._state.AspectInstance,
                     this._templateInstance!,
                     targetDeclaration,
                     this._compilation,
                     attributeType,
-                    this._layerName ) );
+                    this._layerName ).Execute( this._state );
         }
     }
 
@@ -1816,7 +1703,7 @@ internal sealed class AdviceFactory : IAdviceFactory
                 pullAction,
                 defaultValue );
 
-            return this.ExecuteAdvice<IParameter>( advice );
+            return advice.Execute( this._state );
         }
     }
 
@@ -1835,6 +1722,48 @@ internal sealed class AdviceFactory : IAdviceFactory
             pullAction,
             attributes );
 
+    public ITypeIntroductionAdviceResult IntroduceType(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Code.TypeKind typeKind,
+        Action<INamedTypeBuilder>? buildType = null )
+    {
+        if ( this._templateInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            return
+                AsAdviser(
+                    new IntroduceNamedTypeAdvice(
+                            this._state.AspectInstance,
+                            this._templateInstance,
+                            targetNamespaceOrType,
+                            name,
+                            this._compilation,
+                            buildType,
+                            this._layerName )
+                        .Execute( this._state ) );
+        }
+    }
+
+    public ITypeIntroductionAdviceResult IntroduceType(
+        string targetNamespace,
+        string name,
+        Code.TypeKind typeKind,
+        Action<INamedTypeBuilder>? buildType = null )
+    {
+        throw new NotImplementedException();
+    }
+
+    public ITypeIntroductionAdviceResult IntroduceClass(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
+
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration
     {
@@ -1852,7 +1781,9 @@ internal sealed class AdviceFactory : IAdviceFactory
                 this._compilation,
                 new AnnotationInstance( annotation, export, declaration.ToTypedRef<IDeclaration>() ) );
 
-            this.ExecuteAdvice<IDeclaration>( advice );
+            advice.Execute( this._state );
         }
     }
+
+    private static ITypeIntroductionAdviceResult AsAdviser( IIntroductionAdviceResult<INamedType> result ) => new TypeIntroductionAdviceResult( result );
 }

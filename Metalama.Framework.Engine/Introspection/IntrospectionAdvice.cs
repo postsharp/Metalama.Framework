@@ -13,13 +13,13 @@ namespace Metalama.Framework.Engine.Introspection;
 internal sealed class IntrospectionAdvice : IIntrospectionAdvice
 {
     private readonly Advice _advice;
-    private readonly AdviceImplementationResult _adviceResult;
+    private readonly AdviceResult _adviceResult;
     private readonly ICompilation _compilation;
     private readonly IntrospectionFactory _factory;
 
     // TODO: we should not store an ICompilation here because it causes several compilation versions to be mixed in the introspection output.
 
-    public IntrospectionAdvice( Advice advice, AdviceImplementationResult adviceResult, ICompilation compilation, IntrospectionFactory factory )
+    public IntrospectionAdvice( Advice advice, AdviceResult adviceResult, ICompilation compilation, IntrospectionFactory factory )
     {
         this._advice = advice;
         this._adviceResult = adviceResult;
@@ -28,7 +28,7 @@ internal sealed class IntrospectionAdvice : IIntrospectionAdvice
     }
 
     [Memo]
-    public IIntrospectionAspectInstance AspectInstance => this._factory.GetIntrospectionAspectInstance( this._advice.Aspect );
+    public IIntrospectionAspectInstance AspectInstance => this._factory.GetIntrospectionAspectInstance( this._advice.AspectInstance );
 
     public AdviceKind AdviceKind => this._advice.AdviceKind;
 
@@ -42,5 +42,5 @@ internal sealed class IntrospectionAdvice : IIntrospectionAdvice
             .ToImmutableArray<IIntrospectionTransformation>();
 
     public override string ToString()
-        => $"{this._advice.AdviceKind} on '{this._advice.TargetDeclaration}' provided by '{this._advice.Aspect.AspectClass.ShortName}'";
+        => $"{this._advice.AdviceKind} on '{this._advice.TargetDeclaration}' provided by '{this._advice.AspectInstance.AspectClass.ShortName}'";
 }

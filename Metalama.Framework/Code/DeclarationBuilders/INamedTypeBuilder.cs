@@ -9,6 +9,8 @@ public interface INamedTypeBuilder : IMemberOrNamedTypeBuilder, INamedType
     /// </summary>
     new INamedType? BaseType { get; set; }
 
+    // TODO: Base types, interface implementations, type parameters
+
     /// <summary>
     /// Adds a generic parameter to the type.
     /// </summary>

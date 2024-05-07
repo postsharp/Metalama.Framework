@@ -10,8 +10,8 @@ public class IntroductionAttribute : TypeAspect
     {
         var result = builder.Advice.IntroduceType(builder.Target, "TestNestedType", TypeKind.Class, buildType: t => { t.BaseType = builder.Target; });
 
-        builder.Advice.IntroduceProperty(builder.Target, nameof(Property), whenExists: OverrideStrategy.Override);
-        builder.Advice.IntroduceMethod(builder.Target, nameof(Method), whenExists: OverrideStrategy.Override);
+        builder.Advice.IntroduceProperty(result.Declaration, nameof(Property), whenExists: OverrideStrategy.Override);
+        builder.Advice.IntroduceMethod(result.Declaration, nameof(Method), whenExists: OverrideStrategy.Override);
     }
 
     [Template]

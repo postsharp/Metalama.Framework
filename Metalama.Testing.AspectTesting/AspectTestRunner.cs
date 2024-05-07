@@ -5,6 +5,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting.Licensing;
@@ -77,6 +78,7 @@ internal class AspectTestRunner : BaseTestRunner
             return;
         }
 
+        // Execute the pipeline with text formatting options.
         var serviceProviderForThisTestWithoutLicensing = testContext.ServiceProvider
             .WithService( new Observer( testContext.ServiceProvider, testResult ) );
 
@@ -93,8 +95,10 @@ internal class AspectTestRunner : BaseTestRunner
             _ => throw new InvalidOperationException( $"Unknown test scenario: {testScenario}" )
         };
 
+        var serviceProvider = isLicensingRequiredForCompilation ? serviceProviderForThisTestWithLicensing : serviceProviderForThisTestWithoutLicensing;
+
         var pipeline = new CompileTimeAspectPipeline(
-            isLicensingRequiredForCompilation ? serviceProviderForThisTestWithLicensing : serviceProviderForThisTestWithoutLicensing,
+            serviceProvider,
             testContext.Domain );
 
         var pipelineResult = await pipeline.ExecuteAsync(
@@ -125,7 +129,7 @@ internal class AspectTestRunner : BaseTestRunner
 
                 case TestScenario.Default:
                     {
-                        if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
+                        if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, testContext, pipelineResult.Value ) )
                         {
                             return;
                         }
@@ -196,6 +200,7 @@ internal class AspectTestRunner : BaseTestRunner
     private async Task<bool> ProcessCompileTimePipelineOutputAsync(
         TestInput testInput,
         TestResult testResult,
+        TestContext testContext,
         CompileTimeAspectPipelineResult pipelineResult )
     {
         var resultCompilation = pipelineResult.ResultingCompilation.Compilation;
@@ -236,11 +241,54 @@ internal class AspectTestRunner : BaseTestRunner
 #if NET5_0_OR_GREATER
                 await ExecuteTestProgramAsync( testInput, testResult, peStream );
 #endif
+
+                if ( !await RunUnformattedPipelineAsync( testInput, testResult, testContext ) )
+                {
+                    return false;
+                }
             }
         }
         else
         {
             testResult.OutputCompilationDiagnostics.Report( resultCompilation.GetDiagnostics() );
+        }
+
+        return true;
+    }
+
+    private static async Task<bool> RunUnformattedPipelineAsync( TestInput testInput, TestResult testResult, TestContext testContext )
+    {
+        // Execute the pipeline with unformatted options to check well-formness of syntax trees.
+        if ( testInput.Options.TestUnformattedOutput == true )
+        {
+            using var unformattedOptons = new TestProjectOptions( testContext.ProjectOptions, CodeFormattingOptions.None );
+
+            var unformattedServiceProvider =
+                testContext.ServiceProvider.WithService( unformattedOptons, true );
+
+            var unformattedPipeline = new CompileTimeAspectPipeline(
+                unformattedServiceProvider,
+                testContext.Domain );
+
+            var unformattedPipelineResult = await unformattedPipeline.ExecuteAsync(
+                new UserDiagnosticSink( null ),
+                testResult.InputCompilation!,
+                default );
+
+            if ( unformattedPipelineResult.IsSuccessful )
+            {
+                var unformattedCompilation = unformattedPipelineResult.Value.ResultingCompilation.Compilation;
+                var emitResult = unformattedCompilation.Emit( new MemoryStream() );
+
+                if ( !emitResult.Success )
+                {
+                    testResult.SetFailed(
+                        "The unformatted pipeline run failed: "
+                        + string.Join( "; ", emitResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ) ) );
+
+                    return false;
+                }
+            }
         }
 
         return true;

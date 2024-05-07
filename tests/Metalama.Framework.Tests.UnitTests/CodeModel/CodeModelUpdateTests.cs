@@ -2,6 +2,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
@@ -462,7 +464,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes.OfName("T") );
+        Assert.Empty( immutableCompilation.Types.Single().NestedTypes.OfName( "T" ) );
 
         var compilation = immutableCompilation.CreateMutableClone();
 

@@ -2,6 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.Substituted;
@@ -115,31 +118,31 @@ public sealed partial class CompilationModel
                && events.Contains( parameterBuilder.ToTypedRef<IParameter>() );
     }
 
-    private TCollection GetMemberCollection<TKey, TDeclaration, TCollection>(
-        ref ImmutableDictionary<TKey, TCollection> dictionary,
+    private TCollection GetMemberCollection<TOwner, TDeclaration, TCollection>(
+        ref ImmutableDictionary<Ref<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,
-        TKey declaringTypeRef,
-        Func<CompilationModel, TKey, TCollection> createCollection,
-        Func<TCollection, TKey, TCollection>? createSubstitutedCollection = null )
+        Ref<TOwner> declaringTypeRef,
+        Func<CompilationModel, Ref<TOwner>, TCollection> createCollection,
+        Func<TCollection, Ref<TOwner>, TCollection>? createSubstitutedCollection = null )
+        where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
         where TCollection : ISourceDeclarationCollection<TDeclaration>
-        where TKey : notnull
-        => this.GetMemberCollection<TKey, TDeclaration, Ref<TDeclaration>, TCollection>(
+        => this.GetMemberCollection<TOwner, TDeclaration, Ref<TDeclaration>, TCollection>(
             ref dictionary,
             requestMutableCollection,
             declaringTypeRef,
             createCollection,
             createSubstitutedCollection );
 
-    private TCollection GetMemberCollection<TKey, TDeclaration, TRef, TCollection>(
-        ref ImmutableDictionary<TKey, TCollection> dictionary,
+    private TCollection GetMemberCollection<TOwner, TDeclaration, TRef, TCollection>(
+        ref ImmutableDictionary<Ref<TOwner>, TCollection> dictionary,
         bool requestMutableCollection,
-        TKey declaration,
-        Func<CompilationModel, TKey, TCollection> createCollection,
-        Func<TCollection, TKey, TCollection>? createSubstitutedCollection )
+        Ref<TOwner> declaration,
+        Func<CompilationModel, Ref<TOwner>, TCollection> createCollection,
+        Func<TCollection, Ref<TOwner>, TCollection>? createSubstitutedCollection )
+        where TOwner : class, IDeclaration
         where TDeclaration : class, IDeclaration
         where TCollection : ISourceDeclarationCollection<TDeclaration, TRef>
-        where TKey : notnull
         where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
     {
         if ( requestMutableCollection && !this.IsMutable )
@@ -167,13 +170,13 @@ public sealed partial class CompilationModel
         else
         {
             if ( createSubstitutedCollection != null &&
-                 declaration is INamedTypeSymbol { IsGenericType: true } substitutedType &&
+                 declaration.Target is INamedTypeSymbol { IsGenericType: true } substitutedType &&
                  substitutedType.OriginalDefinition != substitutedType )
             {
-                var sourceCollection = this.GetMemberCollection<TKey, TDeclaration, TRef, TCollection>(
+                var sourceCollection = this.GetMemberCollection<TOwner, TDeclaration, TRef, TCollection>(
                     ref dictionary,
                     requestMutableCollection,
-                    (TKey) substitutedType.OriginalDefinition,
+                    substitutedType.OriginalDefinition.ToTypedRef<TOwner>(this.CompilationContext),
                     createCollection,
                     createSubstitutedCollection );
 
@@ -191,14 +194,14 @@ public sealed partial class CompilationModel
     }
 
     internal FieldUpdatableCollection GetFieldCollection( Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<Ref<INamedType>, IField, FieldUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IField, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
     internal ISourceMemberCollection<IMethod> GetMethodCollection( Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<Ref<INamedType>, IMethod, ISourceMemberCollection<IMethod>>(
+        => this.GetMemberCollection<INamedType, IMethod, ISourceMemberCollection<IMethod>>(
             ref this._methods,
             mutable,
             declaringType,
@@ -206,49 +209,49 @@ public sealed partial class CompilationModel
             ( s, t ) => new MemberSubstitutedCollection<IMethod>( s, t ) );
 
     internal ConstructorUpdatableCollection GetConstructorCollection( Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<Ref<INamedType>, IConstructor, ConstructorUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IConstructor, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
             ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
     internal PropertyUpdatableCollection GetPropertyCollection( Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<Ref<INamedType>, IProperty, PropertyUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IProperty, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
             ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
     internal IndexerUpdatableCollection GetIndexerCollection( Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<Ref<INamedType>, IIndexer, IndexerUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IIndexer, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
             ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
     internal EventUpdatableCollection GetEventCollection( Ref<INamedType> declaringType, bool mutable = false )
-        => this.GetMemberCollection<Ref<INamedType>, IEvent, EventUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, IEvent, EventUpdatableCollection>(
             ref this._events,
             mutable,
             declaringType,
             ( c, t ) => new EventUpdatableCollection( c, t ) );
 
     internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( Ref<INamedType> declaringType, bool mutable )
-        => this.GetMemberCollection<Ref<INamedType>, INamedType, InterfaceUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
 
     internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( Ref<INamedType> declaringType, bool mutable )
-        => this.GetMemberCollection<Ref<INamedType>, INamedType, AllInterfaceUpdatableCollection>(
+        => this.GetMemberCollection<INamedType, INamedType, AllInterfaceUpdatableCollection>(
             ref this._allInterfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
 
     internal ParameterUpdatableCollection GetParameterCollection( in Ref<IHasParameters> parent, bool mutable = false )
-        => this.GetMemberCollection<Ref<IHasParameters>, IParameter, ParameterUpdatableCollection>(
+        => this.GetMemberCollection<IHasParameters, IParameter, ParameterUpdatableCollection>(
             ref this._parameters,
             mutable,
             parent,
@@ -258,7 +261,7 @@ public sealed partial class CompilationModel
     {
         var moduleSymbol = parent.Target is ISourceAssemblySymbol ? this.RoslynCompilation.SourceModule : null;
 
-        return this.GetMemberCollection<Ref<IDeclaration>, IAttribute, AttributeRef, AttributeUpdatableCollection>(
+        return this.GetMemberCollection<IDeclaration, IAttribute, AttributeRef, AttributeUpdatableCollection>(
             ref this._attributes,
             mutable,
             parent,

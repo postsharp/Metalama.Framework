@@ -3,6 +3,7 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -127,7 +128,7 @@ internal sealed class TypeFabricDriver : FabricDriver
         {
             this._aspectBuilder = aspectBuilder;
             this.Type = namedType;
-            this.Advice = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
+            this.Advice = ((IAdviceFactoryImpl) aspectBuilder.AdviceFactory).WithTemplateClassInstance( templateClassInstance );
         }
 
         public INamedType Type { get; }
