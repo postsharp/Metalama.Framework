@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,8 +15,6 @@ namespace Metalama.Framework.Engine.SyntaxGeneration;
 public sealed class SyntaxGenerationContext
 {
     private readonly CompilationContext? _compilationContext;
-
-    internal RecyclableObjectPool<FixTypeWhitespaceRewriter> FixTypeWhitespaceRewriterPool { get; }
 
     internal string EndOfLine { get; }
 
@@ -55,7 +52,6 @@ public sealed class SyntaxGenerationContext
         this.Options = syntaxGenerationOptions;
         this.EndOfLine = endOfLine;
         this.SyntaxGenerator = new ContextualSyntaxGenerator( this, !isNullOblivious );
-        this.FixTypeWhitespaceRewriterPool = new RecyclableObjectPool<FixTypeWhitespaceRewriter>( () => new FixTypeWhitespaceRewriter( this.EndOfLine ) );
     }
 
     internal static SyntaxGenerationContext Contextless { get; } =
@@ -80,7 +76,6 @@ public sealed class SyntaxGenerationContext
         this.Options = syntaxGenerationOptions;
         this.EndOfLine = endOfLine;
         this.SyntaxGenerator = new ContextualSyntaxGenerator( this, !isNullOblivious );
-        this.FixTypeWhitespaceRewriterPool = new RecyclableObjectPool<FixTypeWhitespaceRewriter>( () => new FixTypeWhitespaceRewriter( this.EndOfLine ) );
     }
 
     public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";

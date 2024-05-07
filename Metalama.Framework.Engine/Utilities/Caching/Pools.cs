@@ -6,5 +6,5 @@ namespace Metalama.Framework.Engine.Utilities.Caching;
 
 internal static class Pools
 {
-    public static Pool<SemaphoreSlim> SemaphoreSlim { get; } = new( () => new SemaphoreSlim( 1 ) );
+    public static ObjectPool<SemaphoreSlim> SemaphoreSlim { get; } = new( () => new SemaphoreSlim( 1 ) );
 }

@@ -73,7 +73,8 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
             // The thread that wins adds the item to the cache. The other threads have to wait.
 
             // Create our own monitor and acquires it. We have to acquire it _before_ adding it to the dictionary of locks.
-            var mySemaphore = Pools.SemaphoreSlim.Acquire();
+            using var semaphoreHandle = Pools.SemaphoreSlim.Allocate();
+            var mySemaphore = semaphoreHandle.Value;
 
             try
             {
@@ -130,7 +131,6 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
             finally
             {
                 mySemaphore.Release();
-                Pools.SemaphoreSlim.Release( mySemaphore );
             }
         }
     }
@@ -148,7 +148,8 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
         // The thread that wins adds the item to the cache. The other threads have to wait.
 
         // Create our own monitor and acquires it. We have to acquire it _before_ adding it to the dictionary of locks.
-        var mySemaphore = Pools.SemaphoreSlim.Acquire();
+        using var semaphoreHandle = Pools.SemaphoreSlim.Allocate();
+        var mySemaphore = semaphoreHandle.Value;
 
         try
         {
@@ -187,7 +188,6 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
         finally
         {
             mySemaphore.Release();
-            Pools.SemaphoreSlim.Release( mySemaphore );
         }
     }
 
@@ -225,7 +225,8 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
             // The thread that wins adds the item to the cache. The other threads have to wait.
 
             // Create our own monitor and acquires it. We have to acquire it _before_ adding it to the dictionary of locks.
-            var mySemaphore = Pools.SemaphoreSlim.Acquire();
+            using var semaphoreHandle = Pools.SemaphoreSlim.Allocate();
+            var mySemaphore = semaphoreHandle.Value;
 
             try
             {
@@ -282,7 +283,6 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
             finally
             {
                 mySemaphore.Release();
-                Pools.SemaphoreSlim.Release( mySemaphore );
             }
         }
     }
@@ -299,7 +299,8 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
         // The thread that wins adds the item to the cache. The other threads have to wait.
 
         // Create our own monitor and acquires it. We have to acquire it _before_ adding it to the dictionary of locks.
-        var mySemaphore = Pools.SemaphoreSlim.Acquire();
+        using var semaphoreHandle = Pools.SemaphoreSlim.Allocate();
+        var mySemaphore = semaphoreHandle.Value;
 
         try
         {
@@ -338,7 +339,6 @@ internal sealed class AsyncWeakCache<TKey, TValue> : ICache<TKey, TValue>
         finally
         {
             mySemaphore.Release();
-            Pools.SemaphoreSlim.Release( mySemaphore );
         }
     }
 

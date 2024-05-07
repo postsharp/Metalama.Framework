@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,9 +12,7 @@ public static partial class SyntaxFactoryDebugHelper
 {
     private sealed class NormalizeRewriter : SafeSyntaxRewriter
     {
-        public static RecyclableObjectPool<NormalizeRewriter> Pool { get; } = new( () => new NormalizeRewriter() );
-
-        private NormalizeRewriter() : base( true ) { }
+        public NormalizeRewriter() : base( true ) { }
 
         public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
         {

@@ -20,8 +20,7 @@ public static partial class SyntaxFactoryDebugHelper
 
         try
         {
-            using var normalizer = NormalizeRewriter.Pool.Allocate();
-            var normalized = normalizer.Value.Visit( node );
+            var normalized = new NormalizeRewriter().Visit( node );
             var transformedNode = rewriter.Visit( normalized )!;
 
             return transformedNode.ToFullString();

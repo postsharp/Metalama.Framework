@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -14,7 +13,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 /// Also prevents <see cref="InsufficientExecutionStackException "/> for deeply nested trees.
 /// </summary>
 [PublicAPI]
-public abstract class SafeSyntaxWalker : CSharpSyntaxWalker, IRecyclable
+public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
 {
     private RecursionGuard _recursionGuard;
 
@@ -52,8 +51,4 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker, IRecyclable
     {
         base.Visit( node );
     }
-
-    void IRecyclable.CleanUp() => this._recursionGuard = default;
-
-    void IRecyclable.Recycle() => this._recursionGuard = new RecursionGuard( this );
 }

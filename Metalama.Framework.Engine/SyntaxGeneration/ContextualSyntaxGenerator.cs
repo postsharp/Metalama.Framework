@@ -5,7 +5,6 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -57,8 +56,6 @@ internal sealed partial class ContextualSyntaxGenerator
         IReadOnlyDictionary<string, TypeSyntax>? substitutions = null,
         bool keepNullableAnnotations = false )
     {
-        ObjectPoolHandle<RemoveTypeArgumentsRewriter>? removeTypeArgumentsRewriter = default;
-
         var typeSyntax = this.Type( type );
 
         if ( type is INamedTypeSymbol { IsGenericType: true } namedType )
@@ -66,8 +63,7 @@ internal sealed partial class ContextualSyntaxGenerator
             if ( namedType.IsGenericTypeDefinition() )
             {
                 // In generic definitions, we must remove type arguments.
-                removeTypeArgumentsRewriter = RemoveTypeArgumentsRewriter.Pool.Allocate();
-                typeSyntax = (TypeSyntax) removeTypeArgumentsRewriter.Value.Value.Visit( typeSyntax ).AssertNotNull();
+                typeSyntax = (TypeSyntax) new RemoveTypeArgumentsRewriter().Visit( typeSyntax ).AssertNotNull();
             }
         }
 
@@ -77,17 +73,16 @@ internal sealed partial class ContextualSyntaxGenerator
             typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
         }
 
-        using var dynamicToVarRewriter = DynamicToVarRewriter.Pool.Allocate();
+        var dynamicToVarRewriter = new DynamicToVarRewriter();
 
         // In any typeof, we must change dynamic to object.
-        typeSyntax = (TypeSyntax) dynamicToVarRewriter.Value.Visit( typeSyntax ).AssertNotNull();
+        typeSyntax = (TypeSyntax) dynamicToVarRewriter.Visit( typeSyntax ).AssertNotNull();
 
         SafeSyntaxRewriter rewriter = type switch
         {
-            INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => (removeTypeArgumentsRewriter ??=
-                RemoveTypeArgumentsRewriter.Pool.Allocate()).Value,
+            INamedTypeSymbol { IsGenericType: true } genericType when genericType.IsGenericTypeDefinition() => new RemoveTypeArgumentsRewriter(),
             INamedTypeSymbol { IsGenericType: true } => new RemoveReferenceNullableAnnotationsRewriter( type ),
-            _ => dynamicToVarRewriter.Value
+            _ => dynamicToVarRewriter
         };
 
         var rewrittenTypeSyntax = rewriter.Visit( typeSyntax ).AssertNotNull();
@@ -99,9 +94,21 @@ internal sealed partial class ContextualSyntaxGenerator
             rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax ).AssertNotNull();
         }
 
-        removeTypeArgumentsRewriter?.Dispose();
-
         return (TypeOfExpressionSyntax) _roslynSyntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
+    }
+
+    private sealed class NormalizeSpaceRewriter : SafeSyntaxRewriter
+    {
+        private readonly string _endOfLine;
+
+        public NormalizeSpaceRewriter( string endOfLine )
+        {
+            this._endOfLine = endOfLine;
+        }
+
+#pragma warning disable LAMA0830 // NormalizeWhitespace is expensive.
+        public override SyntaxNode VisitTupleType( TupleTypeSyntax node ) => base.VisitTupleType( node )!.NormalizeWhitespace( eol: this._endOfLine );
+#pragma warning restore LAMA0830
     }
 
     public DefaultExpressionSyntax DefaultExpression( ITypeSymbol typeSymbol )
