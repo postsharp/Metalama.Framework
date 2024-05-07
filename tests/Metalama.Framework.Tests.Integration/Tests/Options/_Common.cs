@@ -7,7 +7,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Options;
 using Metalama.Framework.Tests.Integration.Tests.Options;
 
-[assembly: AspectOrder( typeof(ShowOptionsAspect), typeof(ModifyOptionsAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ShowOptionsAspect), typeof(ModifyOptionsAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options;
 

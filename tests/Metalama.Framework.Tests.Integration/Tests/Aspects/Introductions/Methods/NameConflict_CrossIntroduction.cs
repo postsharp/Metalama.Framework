@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.NameConflict_CrossIntroduction;
 
-[assembly: AspectOrder(typeof(Introduction2Attribute), typeof(Introduction1Attribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Introduction2Attribute), typeof(Introduction1Attribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.NameConflict_CrossIntroduction
 {
@@ -12,9 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
      */
     public class Introduction1Attribute : TypeAspect
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
-        {
-        }
+        public override void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Introduce]
         public int Foo1()
@@ -27,18 +25,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
         {
             Foo1();
 
-            return ExpressionFactory.Parse("Foo1()").Value;
+            return ExpressionFactory.Parse( "Foo1()" ).Value;
 
-            void Foo1()
-            {
-            }
+            void Foo1() { }
         }
     }
+
     public class Introduction2Attribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
-        {
-        }
+        public override void BuildAspect( IAspectBuilder<INamedType> builder ) { }
 
         [Introduce]
         public int Foo2()
@@ -51,11 +46,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
         {
             Foo2();
 
-            return ExpressionFactory.Parse("Foo2()").Value;
+            return ExpressionFactory.Parse( "Foo2()" ).Value;
 
-            void Foo2()
-            {
-            }
+            void Foo2() { }
         }
 
         [Introduce]
@@ -63,11 +56,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
         {
             Foo1();
 
-            return ExpressionFactory.Parse("Foo1()").Value;
+            return ExpressionFactory.Parse( "Foo1()" ).Value;
 
-            void Foo1()
-            {
-            }
+            void Foo1() { }
         }
     }
 

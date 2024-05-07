@@ -6,6 +6,7 @@ using Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.SyntaxOr
 
 [assembly:
     AspectOrder(
+        AspectOrderDirection.RunTime,
         typeof(Override4Attribute),
         typeof(Override3Attribute),
         typeof(Override2Attribute),

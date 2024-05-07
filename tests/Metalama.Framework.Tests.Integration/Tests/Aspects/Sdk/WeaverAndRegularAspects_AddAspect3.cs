@@ -3,11 +3,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect3;
 
-[assembly: AspectOrder(typeof(RegularAspect1), typeof(WeaverAspect), typeof(CombinedAspect), typeof(RegularAspect2))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(RegularAspect1), typeof(WeaverAspect), typeof(CombinedAspect), typeof(RegularAspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect3
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect3.AspectWeaver")]
+    [RequireAspectWeaver( "Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegularAspects_AddAspect3.AspectWeaver" )]
     internal class WeaverAspect : MethodAspect { }
 
     // Weaver aspect is not actually used, so weaver does not have to exist.
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegula
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Added by regular aspect #1.");
+            Console.WriteLine( "Added by regular aspect #1." );
 
             return meta.Proceed();
         }
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegula
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Added by regular aspect #2.");
+            Console.WriteLine( "Added by regular aspect #2." );
 
             return meta.Proceed();
         }
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegula
 
     internal class CombinedAspect : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             builder.Outbound.AddAspect<RegularAspect1>();
             builder.Outbound.AddAspect<RegularAspect2>();
@@ -45,8 +45,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Sdk.WeaverAndRegula
     internal class TargetCode
     {
         [CombinedAspect]
-        private void M()
-        {
-        }
+        private void M() { }
     }
 }

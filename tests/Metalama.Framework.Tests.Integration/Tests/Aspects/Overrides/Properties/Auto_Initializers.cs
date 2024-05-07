@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_Initializers;
 
-[assembly:AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -36,9 +36,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Outbound.SelectMany(x => x.Properties.Where(x => !x.IsImplicitlyDeclared)).AddAspect(x => new OverrideAttribute());
+            builder.Outbound.SelectMany( x => x.Properties.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new OverrideAttribute() );
         }
 
         [Introduce]

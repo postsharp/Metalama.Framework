@@ -59,7 +59,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             {
                 testResult.HasOutputCode = true;
 
-                var formattedOutputCompilation = await OutputCodeFormatter.FormatAsync( result.Value, CancellationToken.None );
+                var formattedOutputCompilation = await new CodeFormatter().FormatAsync( result.Value, CancellationToken.None );
 
                 var targetSyntaxTree = targetMethod.GetPrimarySyntaxTree();
 

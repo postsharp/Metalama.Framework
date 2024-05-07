@@ -1,8 +1,8 @@
-class TargetCode
+internal class TargetCode
 {
   [Aspect1]
   [Aspect2]
-  async void AsyncMethod()
+  private async void AsyncMethod()
   {
     await global::System.Threading.Tasks.Task.Yield();
     await this.AsyncMethod_Aspect2();

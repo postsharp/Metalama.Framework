@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.Attributes;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -16,18 +16,19 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var method in builder.Target.Methods )
+            foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override(method, nameof(Override));
+                builder.Advice.Override( method, nameof(Override) );
             }
         }
 
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("This is the overridden method.");
+            Console.WriteLine( "This is the overridden method." );
+
             return meta.Proceed();
         }
     }
@@ -37,30 +38,20 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         [Introduce]
         [MethodOnly]
         [return: ReturnValueOnly]
-        public void IntroducedMethod<[GenericParameterOnly]T>([ParameterOnly] int x)
-        {
-        }
+        public void IntroducedMethod<[GenericParameterOnly] T>( [ParameterOnly] int x ) { }
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class MethodOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Method )]
+    public class MethodOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class ParameterOnly : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.Parameter )]
+    public class ParameterOnly : Attribute { }
 
-    [AttributeUsage(AttributeTargets.ReturnValue)]
-    public class ReturnValueOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.ReturnValue )]
+    public class ReturnValueOnlyAttribute : Attribute { }
 
-    [AttributeUsage(AttributeTargets.GenericParameter)]
-    public class GenericParameterOnlyAttribute : Attribute
-    {
-    }
+    [AttributeUsage( AttributeTargets.GenericParameter )]
+    public class GenericParameterOnlyAttribute : Attribute { }
 
     // <target>
     [Introduction]
@@ -69,8 +60,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         [MethodOnly]
         [return: ReturnValueOnly]
-        public void Method<[GenericParameterOnly] T>([ParameterOnly] int x)
-        {
-        }
+        public void Method<[GenericParameterOnly] T>( [ParameterOnly] int x ) { }
     }
 }

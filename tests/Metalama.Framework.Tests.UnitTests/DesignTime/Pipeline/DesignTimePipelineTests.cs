@@ -1365,7 +1365,7 @@ class D{version}
             """;
 
         var options = compilation.SyntaxTrees[0].Options;
-        
+
         compilation = compilation.AddSyntaxTrees(
             SyntaxFactory.ParseSyntaxTree( firstFileCode, options, "C.cs" ),
             SyntaxFactory.ParseSyntaxTree( secondFileCode, options, "C.cs" ) );
@@ -1399,7 +1399,7 @@ class D{version}
 
         var assemblyLocator1 = pipeline1.ServiceProvider.GetRequiredService<IAssemblyLocator>();
 
-        Assert.False( assemblyLocator1.TryFindAssembly( new( "dependency" ), out _ ) );
+        Assert.False( assemblyLocator1.TryFindAssembly( new AssemblyIdentity( "dependency" ), out _ ) );
 
         var dependencyReference = MetadataReference.CreateFromFile( dependencyPath );
         compilation = compilation.AddReferences( dependencyReference );
@@ -1408,20 +1408,20 @@ class D{version}
 
         var assemblyLocator2 = pipeline3.ServiceProvider.GetRequiredService<IAssemblyLocator>();
 
-        Assert.True( assemblyLocator2.TryFindAssembly( new( "dependency" ), out var foundReference ) );
+        Assert.True( assemblyLocator2.TryFindAssembly( new AssemblyIdentity( "dependency" ), out var foundReference ) );
         Assert.Same( dependencyReference, foundReference );
     }
-    
+
     // Tests that introductions work without a license key.
     [Fact]
     public void WorksWithoutLicense()
     {
         var services = new AdditionalServiceCollection();
-        
-        services.AddProjectService( 
-            serviceProvider => new ProjectLicenseConsumptionService( 
+
+        services.AddProjectService(
+            serviceProvider => new ProjectLicenseConsumptionService(
                 BackstageServiceFactory.CreateTestLicenseConsumptionService( serviceProvider.Underlying, null ) ) );
-        
+
         using var testContext = this.CreateTestContext();
 
         const string code = """
@@ -1470,72 +1470,72 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Fabrics;
-            using System;
-            using System.Linq;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Fabrics;
+                            using System;
+                            using System.Linq;
 
-            [assembly: AspectOrder(typeof(UninlineableOverrideAspect), typeof(OverridePropertyAttribute))]
+                            [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(UninlineableOverrideAspect), typeof(OverridePropertyAttribute))]
 
-            class FieldsFabric : ProjectFabric
-            {
-                public override void AmendProject(IProjectAmender amender)
-                {
-                    amender
-                        .SelectMany(p => p.Types)
-                        .SelectMany(t => t.Fields)
-                        .AddAspect<OverridePropertyAttribute>();
+                            class FieldsFabric : ProjectFabric
+                            {
+                                public override void AmendProject(IProjectAmender amender)
+                                {
+                                    amender
+                                        .SelectMany(p => p.Types)
+                                        .SelectMany(t => t.Fields)
+                                        .AddAspect<OverridePropertyAttribute>();
+                            
+                                    amender
+                                        .SelectMany(p => p.Types)
+                                        .SelectMany(t => t.Properties)
+                                        .SelectMany(p => new[] { p.GetMethod!, p.SetMethod! })
+                                        .Where(m => m != null)
+                                        .AddAspect<UninlineableOverrideAspect>();
+                                }
+                            }
 
-                    amender
-                        .SelectMany(p => p.Types)
-                        .SelectMany(t => t.Properties)
-                        .SelectMany(p => new[] { p.GetMethod!, p.SetMethod! })
-                        .Where(m => m != null)
-                        .AddAspect<UninlineableOverrideAspect>();
-                }
-            }
+                            class OverridePropertyAttribute : OverrideFieldOrPropertyAspect
+                            {
+                                public override dynamic? OverrideProperty
+                                {
+                                    get
+                                    {
+                                        Console.WriteLine("This is the overridden getter.");
+                                        return meta.Proceed();
+                                    }
+                            
+                                    set
+                                    {
+                                        Console.WriteLine($"This is the overridden setter.");
+                                        meta.Proceed();
+                                    }
+                                }
+                            }
 
-            class OverridePropertyAttribute : OverrideFieldOrPropertyAspect
-            {
-                public override dynamic? OverrideProperty
-                {
-                    get
-                    {
-                        Console.WriteLine("This is the overridden getter.");
-                        return meta.Proceed();
-                    }
+                            class UninlineableOverrideAspect : OverrideMethodAspect
+                            {
+                                public override dynamic? OverrideMethod()
+                                {
+                                    if (new Random().Next() == 0)
+                                    {
+                                        Console.WriteLine($"Uninlineable: randomly");
+                                        return meta.Proceed();
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Uninlineable: normally");
+                                        return meta.Proceed();
+                                    }
+                                }
+                            }
 
-                    set
-                    {
-                        Console.WriteLine($"This is the overridden setter.");
-                        meta.Proceed();
-                    }
-                }
-            }
-
-            class UninlineableOverrideAspect : OverrideMethodAspect
-            {
-                public override dynamic? OverrideMethod()
-                {
-                    if (new Random().Next() == 0)
-                    {
-                        Console.WriteLine($"Uninlineable: randomly");
-                        return meta.Proceed();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Uninlineable: normally");
-                        return meta.Proceed();
-                    }
-                }
-            }
-
-            class TargetClass
-            {
-                int i;
-            }
-            """;
+                            class TargetClass
+                            {
+                                int i;
+                            }
+                            """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
 
@@ -1550,15 +1550,15 @@ class D{version}
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using Metalama.Framework.Fabrics;
+                            using Metalama.Framework.Fabrics;
 
-            public class TargetClass
-            {
-                class Fabric : TypeFabric
-                {
-                }
-            }
-            """;
+                            public class TargetClass
+                            {
+                                class Fabric : TypeFabric
+                                {
+                                }
+                            }
+                            """;
 
         var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
 

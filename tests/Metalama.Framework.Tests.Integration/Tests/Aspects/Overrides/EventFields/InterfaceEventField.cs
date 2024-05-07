@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.InterfaceEventField;
 
-[assembly: AspectOrder(typeof(OverrideEventAttribute), typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideEventAttribute), typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0414
 
@@ -18,46 +18,42 @@ internal interface Interface
 
 internal class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.ImplementInterface(builder.Target, typeof(Interface));
+        builder.Advice.ImplementInterface( builder.Target, typeof(Interface) );
     }
 
-    [InterfaceMember(IsExplicit = true)]
+    [InterfaceMember( IsExplicit = true )]
     public event EventHandler? EventField_Default = default;
 
-    [InterfaceMember(IsExplicit = true)]
+    [InterfaceMember( IsExplicit = true )]
     public event EventHandler? EventField = Foo;
 
     [Introduce]
-    public static void Foo(object? sender, EventArgs args)
-    {
-    }
+    public static void Foo( object? sender, EventArgs args ) { }
 }
 
 internal class OverrideAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Outbound.SelectMany(x => x.Events).AddAspect<OverrideEventAttribute>();
+        builder.Outbound.SelectMany( x => x.Events ).AddAspect<OverrideEventAttribute>();
     }
 }
 
 public class OverrideEventAttribute : OverrideEventAspect
 {
-    public OverrideEventAttribute()
-    {
-    }
+    public OverrideEventAttribute() { }
 
-    public override void OverrideAdd(dynamic value)
+    public override void OverrideAdd( dynamic value )
     {
-        Console.WriteLine("Overriden add.");
+        Console.WriteLine( "Overriden add." );
         meta.Proceed();
     }
 
-    public override void OverrideRemove(dynamic value)
+    public override void OverrideRemove( dynamic value )
     {
-        Console.WriteLine("Overriden remove.");
+        Console.WriteLine( "Overriden remove." );
         meta.Proceed();
     }
 }

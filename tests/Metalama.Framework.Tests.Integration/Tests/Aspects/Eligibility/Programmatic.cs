@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(Aspect2), typeof(Aspect1) )]
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic
 {

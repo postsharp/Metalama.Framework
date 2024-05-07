@@ -71,6 +71,10 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
 
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
+
     public object? Invoke( params object?[] args ) => new MethodInvoker( this ).Invoke( args );
 
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );

@@ -20,6 +20,21 @@ namespace Metalama.Testing.AspectTesting
     {
         private readonly TestResult _parent;
 
+        private TestSyntaxTree( string? inputPath, Document document, TestResult parent, SyntaxTree syntaxTree )
+        {
+            this.InputDocument = document;
+            this._parent = parent;
+            this.InputPath = inputPath;
+            this.InputSyntaxTree = syntaxTree;
+        }
+
+        public static async Task<TestSyntaxTree> CreateAsync( string? inputPath, Document document, TestResult parent )
+        {
+            var syntaxTree = await document.GetSyntaxTreeAsync();
+
+            return new TestSyntaxTree( inputPath, document, parent, syntaxTree.AssertNotNull() );
+        }
+
         public string? InputPath { get; }
 
         /// <summary>
@@ -109,31 +124,16 @@ namespace Metalama.Testing.AspectTesting
 
             if ( this._parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
-                var formatted = await OutputCodeFormatter.FormatAsync( document );
+                var codeFormatter = new CodeFormatter();
 
-                this.OutputDocument = formatted.Document;
-                this.OutputRunTimeSyntaxRoot = formatted.Syntax;
+                this.OutputDocument = (await codeFormatter.FormatAsync( document ))!;
+                this.OutputRunTimeSyntaxRoot = (CompilationUnitSyntax) (await this.OutputDocument.GetSyntaxRootAsync())!;
             }
             else
             {
                 this.OutputDocument = document;
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
-        }
-
-        private TestSyntaxTree( string? inputPath, Document document, TestResult parent, SyntaxTree syntaxTree )
-        {
-            this.InputDocument = document;
-            this._parent = parent;
-            this.InputPath = inputPath;
-            this.InputSyntaxTree = syntaxTree;
-        }
-
-        public static async Task<TestSyntaxTree> CreateAsync( string? inputPath, Document document, TestResult parent )
-        {
-            var syntaxTree = await document.GetSyntaxTreeAsync();
-
-            return new TestSyntaxTree( inputPath, document, parent, syntaxTree.AssertNotNull() );
         }
     }
 }

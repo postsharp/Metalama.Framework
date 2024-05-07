@@ -134,7 +134,6 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             try
             {
-
                 try
                 {
                     testResult = await testRunner.RunAsync( testInput, testContext );
@@ -150,7 +149,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                 var errorsDocument = new FlowDocument();
 
-                var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
+                var testSyntaxTree = testResult?.SyntaxTrees.FirstOrDefault();
 
                 if ( testSyntaxTree != null )
                 {
@@ -178,9 +177,10 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                         if ( testInput.Options.FormatCompileTimeCode != false )
                         {
-                            var formattedDocument3 = await OutputCodeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+                            var codeFormatter = serviceProvider.GetRequiredService<CodeFormatter>();
+                            var formattedDocument3 = await codeFormatter.FormatAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
-                            this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                            this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3, true );
                         }
                         else
                         {

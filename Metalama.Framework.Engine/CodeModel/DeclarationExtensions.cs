@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -203,12 +204,12 @@ public static class DeclarationExtensions
     internal static ExpressionSyntax GetReceiverSyntax<T>(
         this T declaration,
         TypedExpressionSyntaxImpl instance,
-        SyntaxGenerationContext generationContext )
+        SyntaxSerializationContext context )
         where T : IMember
     {
         if ( declaration.IsStatic )
         {
-            return generationContext.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() );
+            return context.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() ).WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
         }
 
         var definition = declaration.Definition;
@@ -217,12 +218,13 @@ public static class DeclarationExtensions
         {
             return
                 SyntaxFactory.ParenthesizedExpression(
-                    SyntaxFactory.CastExpression(
-                        generationContext.SyntaxGenerator.Type( definition.GetExplicitInterfaceImplementation().DeclaringType.GetSymbol() ),
-                        instance.Syntax ) );
+                        SyntaxFactory.CastExpression(
+                            context.SyntaxGenerator.Type( definition.GetExplicitInterfaceImplementation().DeclaringType.GetSymbol() ),
+                            instance.Syntax ) )
+                    .WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
         }
 
-        return instance.Convert( declaration.DeclaringType, generationContext ).Syntax;
+        return instance.Convert( declaration.DeclaringType, context.SyntaxGenerationContext ).Syntax;
     }
 
     /// <summary>

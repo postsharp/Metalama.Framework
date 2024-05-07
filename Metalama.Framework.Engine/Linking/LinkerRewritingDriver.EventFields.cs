@@ -218,7 +218,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) )
+                        .WithSimplifierAnnotationIfNecessary( context );
                 }
             }
         }

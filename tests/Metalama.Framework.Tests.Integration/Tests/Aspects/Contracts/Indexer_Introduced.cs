@@ -5,7 +5,7 @@ using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_Intro
 
 #pragma warning disable CS8618, CS0169
 
-[assembly: AspectOrder( typeof(IntroduceAndFilterAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(IntroduceAndFilterAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_Introduced
 {
@@ -23,17 +23,22 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
 
                 foreach (var param in indexer.Parameters)
                 {
-                    builder.Advice.AddContract(param, nameof(Filter));
+                    builder.Advice.AddContract( param, nameof(Filter) );
                 }
             }
 
-            var introducedIndexer = builder.Advice.IntroduceIndexer(builder.Target, TypeFactory.GetType(typeof(string)).ToNullableType(), nameof(GetTemplate), nameof(SetTemplate)).Declaration;
+            var introducedIndexer = builder.Advice.IntroduceIndexer(
+                    builder.Target,
+                    TypeFactory.GetType( typeof(string) ).ToNullableType(),
+                    nameof(GetTemplate),
+                    nameof(SetTemplate) )
+                .Declaration;
 
             builder.Advice.AddContract( introducedIndexer, nameof(Filter), ContractDirection.Both );
 
             foreach (var param in introducedIndexer.Parameters)
             {
-                builder.Advice.AddContract(param, nameof(Filter));
+                builder.Advice.AddContract( param, nameof(Filter) );
             }
         }
 
@@ -63,16 +68,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
     [IntroduceAndFilter]
     internal class Target
     {
-        public string? this[string? x, string? y]
+        public string? this[ string? x, string? y ]
         {
             get
             {
                 return x + y;
             }
 
-            set
-            {
-            }
+            set { }
         }
     }
 }

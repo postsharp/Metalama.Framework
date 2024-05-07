@@ -11,8 +11,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Initializers_PrimaryConstructor;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
-
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
@@ -29,14 +28,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine("This is the overridden getter.");
+                Console.WriteLine( "This is the overridden getter." );
 
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("This is the overridden setter.");
+                Console.WriteLine( "This is the overridden setter." );
                 meta.Proceed();
             }
         }
@@ -44,18 +43,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Outbound.SelectMany(x => x.Fields.Where(x => !x.IsImplicitlyDeclared)).AddAspect(x => new OverrideAttribute());
+            builder.Outbound.SelectMany( x => x.Fields.Where( x => !x.IsImplicitlyDeclared ) ).AddAspect( x => new OverrideAttribute() );
         }
 
         [Introduce]
-        public int IntroducedField = ExpressionFactory.Parse("x").Value;
+        public int IntroducedField = ExpressionFactory.Parse( "x" ).Value;
     }
 
     // <target>
     [Introduction]
-    internal class TargetClass(int x)
+    internal class TargetClass( int x )
     {
         public int Field = x;
     }
