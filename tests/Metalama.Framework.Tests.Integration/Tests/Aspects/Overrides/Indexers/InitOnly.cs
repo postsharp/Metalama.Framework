@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly;
 
-[assembly: AspectOrder( typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverridePropertyAttribute), typeof(OverrideIndexerAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.InitOnly
 {

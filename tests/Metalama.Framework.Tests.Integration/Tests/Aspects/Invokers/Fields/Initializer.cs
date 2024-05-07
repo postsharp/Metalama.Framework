@@ -3,8 +3,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClass;
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
+using Metalama.Framework.Code.Invokers;
 
-[assembly: AspectOrder(typeof(OverrideAndInitializeAttribute), typeof(ResetInitializerAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAndInitializeAttribute), typeof(ResetInitializerAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClass;
 
@@ -14,31 +16,31 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Bas
 
 public class ResetInitializerAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var f = builder.Target.Fields.OfName("TestField").Single();
-        var p = builder.Target.Properties.OfName("TestProperty").Single();
+        var f = builder.Target.Fields.OfName( "TestField" ).Single();
+        var p = builder.Target.Properties.OfName( "TestProperty" ).Single();
 
-        builder.Advice.AddInitializer(builder.Target, nameof(Template), Metalama.Framework.Advising.InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = f });
-        builder.Advice.AddInitializer(builder.Target, nameof(Template), Metalama.Framework.Advising.InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = p });
+        builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = f } );
+        builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { fieldOrProperty = p } );
     }
 
     [Template]
-    public void Template([CompileTime] IFieldOrProperty fieldOrProperty)
+    public void Template( [CompileTime] IFieldOrProperty fieldOrProperty )
     {
-        fieldOrProperty.With(Metalama.Framework.Code.Invokers.InvokerOptions.Base).Value = default;
+        fieldOrProperty.With( InvokerOptions.Base ).Value = default;
     }
 }
 
 public class OverrideAndInitializeAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var f = builder.Target.Fields.OfName("TestField").Single();
-        var p = builder.Target.Properties.OfName("TestProperty").Single();
+        var f = builder.Target.Fields.OfName( "TestField" ).Single();
+        var p = builder.Target.Properties.OfName( "TestProperty" ).Single();
 
-        builder.Advice.Override(f, nameof(Template));
-        builder.Advice.Override(p, nameof(Template));
+        builder.Advice.Override( f, nameof(Template) );
+        builder.Advice.Override( p, nameof(Template) );
     }
 
     [Template]
@@ -46,13 +48,14 @@ public class OverrideAndInitializeAttribute : TypeAspect
     {
         get
         {
-            Console.WriteLine("Overridden");
+            Console.WriteLine( "Overridden" );
+
             return meta.Proceed();
         }
 
         set
         {
-            Console.WriteLine("Overridden");
+            Console.WriteLine( "Overridden" );
             meta.Proceed();
         }
     }

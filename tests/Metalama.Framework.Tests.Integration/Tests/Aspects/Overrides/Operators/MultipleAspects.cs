@@ -2,7 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.MultipleAspects;
 
-[assembly: AspectOrder(typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OuterOverrideAttribute), typeof(InnerOverrideAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.MultipleAspects
 {
@@ -14,7 +14,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Multip
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the inner overriding template method.");
+            Console.WriteLine( "This is the inner overriding template method." );
+
             return meta.Proceed();
         }
     }
@@ -23,7 +24,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Multip
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is the outer overriding template method.");
+            Console.WriteLine( "This is the outer overriding template method." );
+
             return meta.Proceed();
         }
     }
@@ -33,18 +35,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Multip
     {
         [InnerOverride]
         [OuterOverride]
-        public static TargetClass operator +(TargetClass a, TargetClass b)
+        public static TargetClass operator +( TargetClass a, TargetClass b )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
 
         [InnerOverride]
         [OuterOverride]
-        public static TargetClass operator -(TargetClass a)
+        public static TargetClass operator -( TargetClass a )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }
@@ -53,7 +55,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Multip
         [OuterOverride]
         public static explicit operator TargetClass( int x )
         {
-            Console.WriteLine($"This is the original operator.");
+            Console.WriteLine( $"This is the original operator." );
 
             return new TargetClass();
         }

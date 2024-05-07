@@ -9,7 +9,7 @@ using System.Linq;
 
 #pragma warning disable CS0067, CS0169, CS0618, CS0649
 
-[assembly: AspectOrder( typeof(SerializeAttribute), typeof(IntroduceMembersAttribute) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(SerializeAttribute), typeof(IntroduceMembersAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.GetSerializableDeclarationIdForIntroduced;
 

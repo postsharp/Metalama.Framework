@@ -32,7 +32,7 @@ internal sealed class FrameworkAspectOrderingSource : IAspectOrderingSource
             {
                 foreach ( var frameworkAspect in frameworkAspects )
                 {
-                    yield return new AspectOrderSpecification( new[] { frameworkAspect.FullName, aspectClass.FullName } );
+                    yield return new AspectOrderSpecification( new[] { frameworkAspect.FullName, aspectClass.FullName }, false );
                 }
             }
         }

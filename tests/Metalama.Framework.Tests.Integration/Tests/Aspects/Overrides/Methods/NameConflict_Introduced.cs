@@ -3,43 +3,45 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict_Introduced;
 using System.Linq;
 
-[assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute), typeof(IntroductionAttribute) )]
 #pragma warning disable CS0219
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict_Introduced
 {
     public class InnerOverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var method in builder.Target.Methods.Where(m => !m.IsImplicitlyDeclared))
+            foreach (var method in builder.Target.Methods.Where( m => !m.IsImplicitlyDeclared ))
             {
-                builder.Advice.Override(method, nameof(OverrideMethod));
+                builder.Advice.Override( method, nameof(OverrideMethod) );
             }
         }
 
         [Template]
         public dynamic? OverrideMethod()
         {
-            int i = 27;
+            var i = 27;
+
             return meta.Proceed();
         }
     }
 
     public class OuterOverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var method in builder.Target.Methods.Where(m => !m.IsImplicitlyDeclared))
+            foreach (var method in builder.Target.Methods.Where( m => !m.IsImplicitlyDeclared ))
             {
-                builder.Advice.Override(method, nameof(OverrideMethod));
+                builder.Advice.Override( method, nameof(OverrideMethod) );
             }
         }
 
         [Template]
         public dynamic? OverrideMethod()
         {
-            int i = 42;
+            var i = 42;
+
             return meta.Proceed();
         }
     }
@@ -53,7 +55,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         }
 
         [Introduce]
-        public dynamic? IntroducedMethod_ConflictWithParameter( int i)
+        public dynamic? IntroducedMethod_ConflictWithParameter( int i )
         {
             return meta.Proceed();
         }
@@ -63,7 +65,5 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     [InnerOverride]
     [OuterOverride]
     [Introduction]
-    internal class TargetClass
-    {
-    }
+    internal class TargetClass { }
 }

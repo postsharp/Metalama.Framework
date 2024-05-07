@@ -1,7 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict;
 
-[assembly: AspectOrder(typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(InnerOverrideAttribute), typeof(OuterOverrideAttribute) )]
 #pragma warning disable CS0219
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Methods.NameConflict
@@ -10,7 +10,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         public override dynamic? OverrideMethod()
         {
-            int i = 27;
+            var i = 27;
+
             return meta.Proceed();
         }
     }
@@ -19,8 +20,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         public override dynamic? OverrideMethod()
         {
-            int i = 42;
-            int j = 42;
+            var i = 42;
+            var j = 42;
+
             return meta.Proceed();
         }
     }
@@ -30,7 +32,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
     {
         [InnerOverride]
         [OuterOverride]
-
         public int TargetMethod_ConflictBetweenOverrides()
         {
             return 42;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
 
         [InnerOverride]
         [OuterOverride]
-        public int TargetMethod_ConflictWithParameter(int i)
+        public int TargetMethod_ConflictWithParameter( int i )
         {
             return 42;
         }
@@ -47,7 +48,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         [OuterOverride]
         public int TargetMethod_ConflictWithTarget()
         {
-            int i = 0;
+            var i = 0;
+
             return 42;
         }
 
@@ -55,8 +57,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Meth
         [OuterOverride]
         public int TargetMethod_MultipleConflicts()
         {
-            int i = 0;
-            int j = 0;
+            var i = 0;
+            var j = 0;
+
             return 42;
         }
     }

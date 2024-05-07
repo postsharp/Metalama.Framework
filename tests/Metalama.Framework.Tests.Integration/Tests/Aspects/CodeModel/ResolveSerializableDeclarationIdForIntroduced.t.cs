@@ -1,10 +1,11 @@
-[IntroduceMembers, Serialize]
-class C
+[IntroduceMembers]
+[Serialize]
+internal class C
 {
-  C(global::System.Int32 x = 42)
+  private C(global::System.Int32 x = 42)
   {
   }
-  C(string id) : this()
+  private C(string id) : this()
   {
   }
   private global::System.Int32 _field;

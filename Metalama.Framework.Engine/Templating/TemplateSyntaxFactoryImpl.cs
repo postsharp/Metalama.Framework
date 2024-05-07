@@ -353,6 +353,8 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
                         null,
                         SyntaxFactory.ThrowExpression( throwStatement.ThrowKeyword, throwStatement.Expression! ) ),
+                SimpleLambdaExpressionSyntax { Block.Statements: [BlockSyntax { Statements.Count: 1 } nestedBlock] } simpleLambdaExpression 
+                    => this.SimplifyAnonymousFunction( simpleLambdaExpression.WithBlock( nestedBlock ) ),
                 ParenthesizedLambdaExpressionSyntax { Block.Statements: [ExpressionStatementSyntax expressionStatement] } simpleLambdaExpression =>
                     simpleLambdaExpression.Update(
                         simpleLambdaExpression.AttributeLists,
@@ -369,6 +371,9 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
                         null,
                         SyntaxFactory.ThrowExpression( throwStatement.ThrowKeyword, throwStatement.Expression! ) ),
+                ParenthesizedLambdaExpressionSyntax { Block.Statements: [BlockSyntax { Statements.Count: 1 } nestedBlock] } simpleLambdaExpression 
+                    => this.SimplifyAnonymousFunction( simpleLambdaExpression.WithBlock( nestedBlock ) ),
+
                 _ => node
             };
 

@@ -5,7 +5,7 @@ using System.Linq;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 using Metalama.Framework.Code;
 
-[assembly: AspectOrder( typeof(ParameterContractAspect), typeof(OverrideAspect), typeof(IntroductionAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ParameterContractAspect), typeof(OverrideAspect), typeof(IntroductionAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32570;
 

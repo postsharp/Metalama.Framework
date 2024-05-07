@@ -4,7 +4,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Applying.AppliedToNamespace;
 
-[assembly: AspectOrder( typeof(MyTypeAspect), typeof(MyNamespaceAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(MyTypeAspect), typeof(MyNamespaceAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Applying.AppliedToNamespace;
 

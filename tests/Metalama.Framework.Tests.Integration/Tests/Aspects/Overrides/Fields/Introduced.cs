@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Introduced;
 
-[assembly: AspectOrder(typeof(TestAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(TestAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Introduced
 {
@@ -12,17 +12,17 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Introduce
         [Introduce]
         public int Field;
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
+        [Introduce( WhenExists = OverrideStrategy.New )]
         public int NewField;
     }
 
     public class TestAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var field in builder.Target.Fields)
+            foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.Override(field, nameof(Template));
+                builder.Advice.Override( field, nameof(Template) );
             }
         }
 
@@ -31,12 +31,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Introduce
         {
             get
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
+
                 return meta.Proceed();
             }
             set
             {
-                Console.WriteLine("This is aspect code.");
+                Console.WriteLine( "This is aspect code." );
                 meta.Proceed();
             }
         }
@@ -50,7 +51,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Introduce
     // <target>
     [Introduction]
     [Test]
-    internal class TargetClass : BaseClass
-    {
-    }
+    internal class TargetClass : BaseClass { }
 }

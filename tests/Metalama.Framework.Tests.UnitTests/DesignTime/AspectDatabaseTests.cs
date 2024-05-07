@@ -26,14 +26,15 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
     }
 
-    private static void AssertAspectClasses( IEnumerable<string> expected, IEnumerable<string> actual )
-        => Assert.Equal( expected, actual.OrderBy( id => id ) );
+    private static void AssertAspectClasses( IEnumerable<string> expected, IEnumerable<string> actual ) => Assert.Equal( expected, actual.OrderBy( id => id ) );
 
     private static void AssertAspectInstances( IEnumerable<string> expected, IEnumerable<AspectDatabaseAspectInstance> actual )
         => Assert.Equal( expected, actual.Select( aspectInstance => aspectInstance.TargetDeclarationId ).OrderBy( s => s ) );
 
     private static void AssertAspectTransformations( IEnumerable<string> expected, IEnumerable<AspectDatabaseAspectInstance> actual )
-        => Assert.Equal( expected, actual.SelectMany( i => i.Transformations ).Select( aspectTransformation => aspectTransformation.Description ).OrderBy( s => s ) );
+        => Assert.Equal(
+            expected,
+            actual.SelectMany( i => i.Transformations ).Select( aspectTransformation => aspectTransformation.Description ).OrderBy( s => s ) );
 
     [Fact]
     public async Task BasicTest()
@@ -82,7 +83,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
-        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new() { ["code.cs"] = code } );
+        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
 
         var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
 
@@ -97,7 +98,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
             ],
             aspectClasses );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::Aspect" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new SerializableTypeId( "Y:global::Aspect" ), default );
 
         AssertAspectInstances(
             [
@@ -114,76 +115,76 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
     public async Task TransformationsTest()
     {
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Code.DeclarationBuilders;
-            using System;
-            using System.Linq;
+                            using Metalama.Framework.Aspects;
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Code.DeclarationBuilders;
+                            using System;
+                            using System.Linq;
 
-            [assembly: CompilationAttribute]
-            [assembly: AspectOrder(typeof(MethodAspect), typeof(Aspect))]
+                            [assembly: CompilationAttribute]
+                            [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(MethodAspect), typeof(Aspect))]
 
-            class MethodAspect : OverrideMethodAspect
-            {
-                public override dynamic? OverrideMethod()
-                {
-                    return meta.Proceed();
-                }
-            }
+                            class MethodAspect : OverrideMethodAspect
+                            {
+                                public override dynamic? OverrideMethod()
+                                {
+                                    return meta.Proceed();
+                                }
+                            }
 
-            class Aspect : TypeAspect
-            {
-                public override void BuildAspect(IAspectBuilder<INamedType> builder)
-                {
-                    base.BuildAspect(builder);
+                            class Aspect : TypeAspect
+                            {
+                                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                                {
+                                    base.BuildAspect(builder);
+                            
+                                    if (builder.Target.Methods.OfName("M").FirstOrDefault() is { } method)
+                                    {
+                                        //builder.Advice.Override(method, nameof(Template));
+                                        builder.WithTarget(method).Outbound.AddAspect<MethodAspect>();
+                                    }
+                            
+                                    if (builder.Target.Constructors.OfExactSignature(Array.Empty<IType>()) is { } constructor)
+                                    {
+                                        builder.Advice.IntroduceParameter(constructor, "p", typeof(int), TypedConstant.Create(0));
+                                    }
+                                }
+                            
+                                [Introduce]
+                                int i;
+                            
+                                [Template]
+                                void Template() { }
+                            }
 
-                    if (builder.Target.Methods.OfName("M").FirstOrDefault() is { } method)
-                    {
-                        //builder.Advice.Override(method, nameof(Template));
-                        builder.WithTarget(method).Outbound.AddAspect<MethodAspect>();
-                    }
+                            class CompilationAttribute : CompilationAspect
+                            {
+                                public override void BuildAspect(IAspectBuilder<ICompilation> builder)
+                                {
+                                    base.BuildAspect(builder);
+                            
+                                    builder.Advice.IntroduceAttribute(builder.Target, AttributeConstruction.Create(typeof(MyAttribute)));
+                                }
+                            }
 
-                    if (builder.Target.Constructors.OfExactSignature(Array.Empty<IType>()) is { } constructor)
-                    {
-                        builder.Advice.IntroduceParameter(constructor, "p", typeof(int), TypedConstant.Create(0));
-                    }
-                }
+                            class MyAttribute : Attribute { }
 
-                [Introduce]
-                int i;
-
-                [Template]
-                void Template() { }
-            }
-
-            class CompilationAttribute : CompilationAspect
-            {
-                public override void BuildAspect(IAspectBuilder<ICompilation> builder)
-                {
-                    base.BuildAspect(builder);
-
-                    builder.Advice.IntroduceAttribute(builder.Target, AttributeConstruction.Create(typeof(MyAttribute)));
-                }
-            }
-
-            class MyAttribute : Attribute { }
-
-            [Aspect]
-            class Target
-            {
-                void M() { }
-            }
-            """;
+                            [Aspect]
+                            class Target
+                            {
+                                void M() { }
+                            }
+                            """;
 
         using var testContext = this.CreateTestContext();
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
-        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new() { ["code.cs"] = code } );
+        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
 
         var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::Aspect" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new SerializableTypeId( "Y:global::Aspect" ), default );
 
         AssertAspectTransformations(
             [
@@ -194,7 +195,11 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
             ],
             aspectInstances );
 
-        var compilationInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::CompilationAttribute" ), default );
+        var compilationInstances = await aspectDatabase.GetAspectInstancesAsync(
+            projectKey,
+            "project",
+            new SerializableTypeId( "Y:global::CompilationAttribute" ),
+            default );
 
         AssertAspectTransformations(
             ["Introduce attribute of type 'MyAttribute' into 'project'"],
@@ -331,8 +336,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
 
         var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
 
-        var projectKey1 = workspaceProvider.AddOrUpdateProject( "project1", new() { ["code1.cs"] = GetCode( 1 ) } );
-        var projectKey2 = workspaceProvider.AddOrUpdateProject( "project2", new() { ["code2.cs"] = GetCode( 2 ) } );
+        var projectKey1 = workspaceProvider.AddOrUpdateProject( "project1", new Dictionary<string, string> { ["code1.cs"] = GetCode( 1 ) } );
+        var projectKey2 = workspaceProvider.AddOrUpdateProject( "project2", new Dictionary<string, string> { ["code2.cs"] = GetCode( 2 ) } );
 
         var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
 
@@ -342,10 +347,10 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         var aspectClasses2 = await aspectDatabase.GetAspectClassesAsync( projectKey2, default );
         AssertAspectClasses( ["Y:global::Aspect", "Y:global::Metalama.Framework.Validation.InternalImplementAttribute"], aspectClasses2 );
 
-        var aspectInstances1 = await aspectDatabase.GetAspectInstancesAsync( projectKey1, "project1", new( "Y:global::Aspect" ), default );
+        var aspectInstances1 = await aspectDatabase.GetAspectInstancesAsync( projectKey1, "project1", new SerializableTypeId( "Y:global::Aspect" ), default );
         AssertAspectInstances( ["M:Target1.M"], aspectInstances1 );
 
-        var aspectInstances2 = await aspectDatabase.GetAspectInstancesAsync( projectKey2, "project2", new( "Y:global::Aspect" ), default );
+        var aspectInstances2 = await aspectDatabase.GetAspectInstancesAsync( projectKey2, "project2", new SerializableTypeId( "Y:global::Aspect" ), default );
         AssertAspectInstances( ["M:Target2.M"], aspectInstances2 );
     }
 
@@ -386,11 +391,11 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         var workspaceProvider = factory.ServiceProvider.GetRequiredService<TestWorkspaceProvider>();
-        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new() { ["code.cs"] = code } );
+        var projectKey = workspaceProvider.AddOrUpdateProject( "project", new Dictionary<string, string> { ["code.cs"] = code } );
 
         var aspectDatabase = new AspectDatabase( factory.ServiceProvider );
 
-        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new( "Y:global::MyAspect" ), default );
+        var aspectInstances = await aspectDatabase.GetAspectInstancesAsync( projectKey, "project", new SerializableTypeId( "Y:global::MyAspect" ), default );
 
 #pragma warning disable IDE0053 // Use expression body for lambda expression
         Assert.Collection(

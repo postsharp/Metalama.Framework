@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.CrossAssembly;
 using System;
 
-[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.CrossAssembly
 {
@@ -14,29 +14,30 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.CrossAsse
         {
             add
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
             remove
             {
-                Console.WriteLine("Original");
+                Console.WriteLine( "Original" );
             }
         }
     }
 
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach(var @event in builder.Target.Events)
+            foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors(@event, nameof(Template), nameof(Template));
+                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template) );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("Override");
+            Console.WriteLine( "Override" );
+
             return meta.Proceed();
         }
     }

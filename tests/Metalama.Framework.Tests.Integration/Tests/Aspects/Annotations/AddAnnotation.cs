@@ -7,7 +7,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Annotations.AddAnnotation;
 
-[assembly: AspectOrder( typeof(ReadAnnotationAspect), typeof(AddAnnotationAspect) )]
+[assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(ReadAnnotationAspect), typeof(AddAnnotationAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Annotations.AddAnnotation;
 
