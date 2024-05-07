@@ -187,7 +187,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var invocation =
                     InvocationExpression(
-                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) )
+                            .WithSimplifierAnnotationIfNecessary( context ),
                         ArgumentList() );
 
                 return context.SyntaxGenerator.FormattedBlock(

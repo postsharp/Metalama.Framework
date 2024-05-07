@@ -76,6 +76,10 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
 
     public IMethodInvoker With( object? target, InvokerOptions options ) => this._accessorBuilder.With( target, options );
 
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => this._accessorBuilder.With( target, options );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this._accessorBuilder.CreateInvokeExpression( args );
+
     public object? Invoke( params object?[] args ) => this._accessorBuilder.Invoke( args );
 
     public object? Invoke( IEnumerable<IExpression> args ) => this._accessorBuilder.Invoke( args );

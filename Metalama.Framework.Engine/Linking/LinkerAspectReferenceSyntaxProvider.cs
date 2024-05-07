@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -174,28 +175,31 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                 var implementedInterfaceMember = targetDeclaration.GetExplicitInterfaceImplementation();
 
                 expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ParenthesizedExpression(
-                        syntaxGenerator.SafeCastExpression(
-                            syntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
-                            ThisExpression() ) ),
-                    memberName );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ParenthesizedExpression(
+                            syntaxGenerator.SafeCastExpression(
+                                syntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
+                                ThisExpression() ) ),
+                        memberName )
+                    .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
             }
             else
             {
                 expression = MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    ThisExpression(),
-                    memberName );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        ThisExpression(),
+                        memberName )
+                    .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
             }
         }
         else
         {
             expression =
                 MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    syntaxGenerator.Type( targetDeclaration.DeclaringType ),
-                    memberName );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        syntaxGenerator.Type( targetDeclaration.DeclaringType ),
+                        memberName )
+                    .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
         }
 
         return expression;

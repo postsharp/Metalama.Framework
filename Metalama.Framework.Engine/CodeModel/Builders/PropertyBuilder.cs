@@ -87,7 +87,7 @@ internal class PropertyBuilder : PropertyOrIndexerBuilder, IPropertyBuilder, IPr
 
     public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
         => new FieldOrPropertyInvoker( this )
-            .GetTypedExpressionSyntax();
+            .ToTypedExpressionSyntax( syntaxGenerationContext );
 
     public TemplateMember<IProperty>? InitializerTemplate
     {

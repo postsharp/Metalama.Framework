@@ -30,19 +30,21 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     private readonly CompilationModel _compilation;
     private readonly SyntaxGenerationContext _syntaxGenerationContext;
+    private readonly INamedType? _currentType;
 
     public ICompilation Compilation => this._compilation;
 
     private ContextualSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
 
-    protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
+    protected SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext, INamedType? currentType )
     {
         this._compilation = compilation;
         this._syntaxGenerationContext = syntaxGenerationContext;
+        this._currentType = currentType;
     }
 
-    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions )
-        : this( compilation, compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ) ) { }
+    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationOptions syntaxGenerationOptions, INamedType? currentType )
+        : this( compilation, compilation.CompilationContext.GetSyntaxGenerationContext( syntaxGenerationOptions ), currentType ) { }
 
     public IProject Project => this.Compilation.Project;
 
@@ -69,8 +71,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IStatement CreateExpressionStatement( IExpression expression )
         => new UserStatement(
-            SyntaxFactory.ExpressionStatement(
-                ((UserExpression) expression).ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) ) ) );
+            SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this.CreateSyntaxSerializationContext() ) ) );
+
+    private SyntaxSerializationContext CreateSyntaxSerializationContext() => new( this._compilation, this._syntaxGenerationContext, this._currentType );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -145,7 +148,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
         => stringBuilder.Append(
-            expression.ToExpressionSyntax( new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
+            expression.ToExpressionSyntax( this.CreateSyntaxSerializationContext() )
                 .NormalizeWhitespace()
                 .ToFullString() );
 
@@ -153,7 +156,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, new SyntaxSerializationContext( this._compilation, this._syntaxGenerationContext ) )
+                : TypedExpressionSyntaxImpl.GetSyntaxFromValue( expression, this.CreateSyntaxSerializationContext() )
                     .NormalizeWhitespace()
                     .ToFullString() );
 

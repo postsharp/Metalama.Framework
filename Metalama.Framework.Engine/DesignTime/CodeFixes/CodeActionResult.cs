@@ -54,6 +54,7 @@ public sealed class CodeActionResult
         }
 
         var solution = project.Solution;
+        var documentIds = new List<DocumentId>( this.SyntaxTreeChanges.Length );
 
         // Apply changes.
         foreach ( var change in this.SyntaxTreeChanges )
@@ -70,17 +71,17 @@ public sealed class CodeActionResult
             }
 
             solution = solution.WithDocumentSyntaxRoot( document.Id, change.ToSyntaxNode( cancellationToken ) );
+            documentIds.Add( document.Id );
+        }
 
-            if ( format )
-            {
-                var formatted = (await OutputCodeFormatter.FormatAsync(
-                    solution.GetDocument( document.Id )!,
-                    null,
-                    false,
-                    cancellationToken )).Syntax;
-
-                solution = solution.WithDocumentSyntaxRoot( document.Id, formatted );
-            }
+        if ( format )
+        {
+            solution = await new CodeFormatter().FormatAsync(
+                solution,
+                documentIds,
+                null,
+                false,
+                cancellationToken );
         }
 
         return solution;

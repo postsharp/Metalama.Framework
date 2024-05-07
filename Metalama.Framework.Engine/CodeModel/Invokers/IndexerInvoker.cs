@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,30 +17,34 @@ internal sealed class IndexerInvoker : Invoker<IIndexer>, IIndexerInvoker
     public IndexerInvoker( IIndexer indexer, InvokerOptions? options = default, object? target = null ) : base( indexer, options, target ) { }
 
     public object GetValue( params object?[] args )
-        => new SyntaxUserExpression(
-            this.CreateIndexerAccess( args ),
+        => new DelegateUserExpression(
+            context => this.CreateIndexerAccess( args, context ),
             this.Member.Type,
             isAssignable: this.Member.Writeability != Writeability.None );
 
     public object SetValue( object? value, params object?[] args )
     {
-        var propertyAccess = this.CreateIndexerAccess( args );
+        return new DelegateUserExpression(
+            context =>
+            {
+                var propertyAccess = this.CreateIndexerAccess( args, context );
 
-        var expression = AssignmentExpression(
-            SyntaxKind.SimpleAssignmentExpression,
-            propertyAccess,
-            TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, CurrentSerializationContext ) );
-
-        return new SyntaxUserExpression( expression, this.Member.Type, isAssignable: true );
+                return AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    propertyAccess,
+                    TypedExpressionSyntaxImpl.GetSyntaxFromValue( value, context ) );
+            },
+            this.Member.Type,
+            isAssignable: true );
     }
 
-    private ExpressionSyntax CreateIndexerAccess( object?[]? args )
+    private ExpressionSyntax CreateIndexerAccess( object?[]? args, SyntaxSerializationContext context )
     {
         args ??= Array.Empty<object>();
 
-        var receiverInfo = this.GetReceiverInfo();
-        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, CurrentGenerationContext );
-        var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, CurrentSerializationContext ).AssertNotNull();
+        var receiverInfo = this.GetReceiverInfo( context );
+        var receiverSyntax = this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context );
+        var argExpressions = TypedExpressionSyntaxImpl.FromValues( args, context ).AssertNotNull();
 
         // TODO: Aspect references.
 

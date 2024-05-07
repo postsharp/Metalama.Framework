@@ -130,7 +130,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         this.TargetDeclaration = targetDeclaration;
         this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
         this._targetType = targetDeclaration?.GetTopmostNamedType();
-        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider );
+        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
         this.MetaApi = metaApi;
     }
 
@@ -162,7 +162,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
 
         this._compilationServices = compilationServices ?? compilationModel?.CompilationContext;
 
-        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider );
+        this._syntaxBuilder = GetSyntaxBuilder( compilationModel, syntaxBuilder, serviceProvider, targetDeclaration );
         this.MetaApi = metaApi;
     }
 
@@ -185,10 +185,14 @@ public class UserCodeExecutionContext : IExecutionContextInternal
     private static ISyntaxBuilderImpl? GetSyntaxBuilder(
         CompilationModel? compilationModel,
         ISyntaxBuilderImpl? syntaxBuilderImpl,
-        ProjectServiceProvider serviceProvider )
+        ProjectServiceProvider serviceProvider,
+        IDeclaration? targetDeclaration )
         => syntaxBuilderImpl ?? (compilationModel == null
             ? null
-            : new SyntaxBuilderImpl( compilationModel, serviceProvider.GetRequiredService<SyntaxGenerationOptions>() ));
+            : new SyntaxBuilderImpl(
+                compilationModel,
+                serviceProvider.GetRequiredService<SyntaxGenerationOptions>(),
+                targetDeclaration?.GetClosestNamedType() ));
 
     internal IDiagnosticAdder Diagnostics
         => this._diagnosticAdder ?? throw new InvalidOperationException( "Cannot report diagnostics in a context without diagnostics adder." );
@@ -248,7 +252,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             compilation,
             this.TargetDeclaration,
             this._throwOnUnsupportedDependencies,
-            GetSyntaxBuilder( compilation, null, this.ServiceProvider ),
+            GetSyntaxBuilder( compilation, null, this.ServiceProvider, null ),
             this.MetaApi );
     }
 

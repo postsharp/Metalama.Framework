@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.CheckNotPropertyBackingField();
 
-            return new FieldOrPropertyInvoker( this ).GetTypedExpressionSyntax();
+            return new FieldOrPropertyInvoker( this ).ToTypedExpressionSyntax( syntaxGenerationContext );
         }
 
         private IExpression? GetInitializerExpressionCore()

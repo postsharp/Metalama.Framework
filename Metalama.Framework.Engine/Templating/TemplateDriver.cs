@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
+using Metalama.Framework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -34,6 +35,7 @@ namespace Metalama.Framework.Engine.Templating
                 target[i + index] = source[i] switch
                 {
                     TemplateTypeArgumentFactory factory => factory.Create( context ),
+                    IPromise deferred => deferred.Value,
                     _ => source[i]
                 };
             }

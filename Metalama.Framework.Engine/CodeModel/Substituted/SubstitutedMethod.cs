@@ -52,6 +52,10 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
     public object? Invoke( IEnumerable<IExpression> args ) => new MethodInvoker( this ).Invoke( args );
 
+    public IMethodInvoker With( IExpression target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new MethodInvoker( this ).CreateInvokeExpression( args );
+
     public IMethodInvoker With( InvokerOptions options ) => new MethodInvoker( this, options );
 
     public IMethodInvoker With( object? target, InvokerOptions options = default ) => new MethodInvoker( this, options, target );

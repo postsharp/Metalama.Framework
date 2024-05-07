@@ -82,8 +82,8 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var newProject = newDocument.Project.WithAnalyzerReferences( [] );
             newDocument = newProject.GetDocument( document.Id )!;
 
-            var formattedDocument = await OutputCodeFormatter.FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
-            var formattedSyntaxTree = await formattedDocument.Document.GetSyntaxTreeAsync( cancellationToken );
+            var formattedDocument = await new CodeFormatter().FormatAsync( newDocument, cancellationToken: cancellationToken, reformatAll: false );
+            var formattedSyntaxTree = await formattedDocument.GetSyntaxTreeAsync( cancellationToken );
 
             return formattedSyntaxTree;
         }

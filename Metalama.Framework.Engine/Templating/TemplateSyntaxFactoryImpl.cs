@@ -333,6 +333,45 @@ namespace Metalama.Framework.Engine.Templating
             where T : SyntaxNode
             => node.WithSimplifierAnnotation();
 
+        public AnonymousFunctionExpressionSyntax SimplifyAnonymousFunction<T>( T node )
+            where T : AnonymousFunctionExpressionSyntax
+            => node switch
+            {
+                SimpleLambdaExpressionSyntax { Block.Statements: [ExpressionStatementSyntax expressionStatement] } simpleLambdaExpression =>
+                    simpleLambdaExpression.Update(
+                        simpleLambdaExpression.AttributeLists,
+                        simpleLambdaExpression.Modifiers,
+                        simpleLambdaExpression.Parameter,
+                        SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
+                        null,
+                        expressionStatement.Expression ),
+                SimpleLambdaExpressionSyntax { Block.Statements: [ThrowStatementSyntax { Expression: not null } throwStatement] } simpleLambdaExpression =>
+                    simpleLambdaExpression.Update(
+                        simpleLambdaExpression.AttributeLists,
+                        simpleLambdaExpression.Modifiers,
+                        simpleLambdaExpression.Parameter,
+                        SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
+                        null,
+                        SyntaxFactory.ThrowExpression( throwStatement.ThrowKeyword, throwStatement.Expression! ) ),
+                ParenthesizedLambdaExpressionSyntax { Block.Statements: [ExpressionStatementSyntax expressionStatement] } simpleLambdaExpression =>
+                    simpleLambdaExpression.Update(
+                        simpleLambdaExpression.AttributeLists,
+                        simpleLambdaExpression.Modifiers,
+                        simpleLambdaExpression.ParameterList,
+                        SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
+                        null,
+                        expressionStatement.Expression ),
+                ParenthesizedLambdaExpressionSyntax { Block.Statements: [ThrowStatementSyntax throwStatement] } simpleLambdaExpression =>
+                    simpleLambdaExpression.Update(
+                        simpleLambdaExpression.AttributeLists,
+                        simpleLambdaExpression.Modifiers,
+                        simpleLambdaExpression.ParameterList,
+                        SyntaxFactory.Token( SyntaxKind.EqualsGreaterThanToken ),
+                        null,
+                        SyntaxFactory.ThrowExpression( throwStatement.ThrowKeyword, throwStatement.Expression! ) ),
+                _ => node
+            };
+
         public ExpressionSyntax RenderInterpolatedString( InterpolatedStringExpressionSyntax interpolatedString )
             => this.SyntaxSerializationContext.SyntaxGenerator.RenderInterpolatedString( interpolatedString );
 

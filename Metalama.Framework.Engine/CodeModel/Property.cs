@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public TypedExpressionSyntax ToTypedExpressionSyntax( ISyntaxGenerationContext syntaxGenerationContext )
             => new FieldOrPropertyInvoker( this )
-                .GetTypedExpressionSyntax();
+                .ToTypedExpressionSyntax( syntaxGenerationContext );
 
         private IExpression? GetInitializerExpressionCore()
         {
