@@ -49,7 +49,8 @@ namespace Metalama.Framework.Aspects
         /// <param name="direction">The direction in which the aspect types are supplied. <see cref="AspectOrderDirection.RunTime"/>
         /// means that the <paramref name="orderedAspectLayers"/> parameter specifies the run-time execution order, which is more intuitive to aspect users.
         /// <see cref="AspectOrderDirection.CompileTime"/> means that the compile-time execution order is supplied, which is intuitive to aspect authors.
-        /// </param>/// <param name="orderedAspectLayers">A list of layer names composed of the full name of the aspect type and the name
+        /// </param>
+        /// <param name="orderedAspectLayers">A list of layer names composed of the full name of the aspect type and the name
         /// of the aspect layer. The following formats are allowed: <c>MyNamespace.MyAspectType</c> to match the default layer,
         /// <c>MyNamespace.MyAspectType:MyLayer</c> to match a non-default layer, or <c>MyNamespace.MyAspectType:*</c> to match
         /// all layers of an aspect.
