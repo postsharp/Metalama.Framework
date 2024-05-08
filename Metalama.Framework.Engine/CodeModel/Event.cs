@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IEvent Definition
-            => this._symbol == this._symbol.OriginalDefinition ? this : this.Compilation.Factory.GetEvent( this._symbol.OriginalDefinition );
+            => ReferenceEquals( this._symbol, this._symbol.OriginalDefinition ) ? this : this.Compilation.Factory.GetEvent( this._symbol.OriginalDefinition );
 
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 

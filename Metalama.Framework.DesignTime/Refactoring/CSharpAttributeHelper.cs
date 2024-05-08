@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.SyntaxGeneration;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using System.Text;
 
 namespace Metalama.Framework.DesignTime.Refactoring
 {
@@ -263,7 +263,8 @@ namespace Metalama.Framework.DesignTime.Refactoring
 
         private static string CreateAttributeSourceCode( AttributeDescription attribute, bool forAssembly )
         {
-            var stringBuilder = new StringBuilder();
+            using var stringBuilderHandle = StringBuilderPool.Default.Allocate();
+            var stringBuilder = stringBuilderHandle.Value;
 
             stringBuilder.Append( '[' );
 
