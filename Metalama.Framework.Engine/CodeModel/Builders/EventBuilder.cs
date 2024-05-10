@@ -109,7 +109,9 @@ internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
 
     public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
-    public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
+    public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this ); 
+
+    public override MemberInfo ToMemberInfo() => this.ToEventInfo();
 
     public IEventInvoker With( InvokerOptions options ) => new EventInvoker( this, options );
 

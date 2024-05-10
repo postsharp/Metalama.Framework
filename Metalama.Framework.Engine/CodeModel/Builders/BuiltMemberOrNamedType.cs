@@ -28,7 +28,7 @@ internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrName
 
     public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
 
-    public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+    public MemberInfo ToMemberInfo() => this.MemberOrNamedTypeBuilder.ToMemberInfo();
 
     ExecutionScope IMemberOrNamedType.ExecutionScope => ExecutionScope.RunTime;
 

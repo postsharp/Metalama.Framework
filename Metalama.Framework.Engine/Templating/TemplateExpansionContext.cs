@@ -549,9 +549,12 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
             {
-                var returnType = this._localFunctionInfo?.ReturnType ?? this.MetaApi.Method.ReturnType;
+                var returnType = 
+                    this._localFunctionInfo?.ReturnType 
+                    ?? (this.MetaApi.MethodBase is IMethod method ? method.ReturnType : null);
 
-                if ( returnType.Equals( SpecialType.Void )
+                if ( returnType == null
+                     || returnType.Equals( SpecialType.Void )
                      || returnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
                 {
                     var returnStatement = ReturnStatement().WithAdditionalAnnotations( FormattingAnnotations.PossibleRedundantAnnotation );

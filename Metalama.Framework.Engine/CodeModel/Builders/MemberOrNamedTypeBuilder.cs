@@ -55,7 +55,7 @@ internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOr
 
     public INamedType? DeclaringType { get; }
 
-    public MemberInfo ToMemberInfo() => throw new NotImplementedException();
+    public abstract MemberInfo ToMemberInfo();
 
     public ExecutionScope ExecutionScope => ExecutionScope.RunTime;
 

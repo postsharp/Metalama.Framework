@@ -42,6 +42,8 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
+    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
+
     IHasAccessors? IMethod.DeclaringMember => null;
 
     public override void Freeze()
@@ -104,8 +106,6 @@ internal sealed class MethodBuilder : MethodBaseBuilder, IMethodBuilder, IMethod
             DeclarationKind.Finalizer => MethodKind.Finalizer,
             _ => throw new AssertionFailedException( $"Unexpected DeclarationKind: {this.DeclarationKind}." )
         };
-
-    public override System.Reflection.MethodBase ToMethodBase() => this.ToMethodInfo();
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 

@@ -27,7 +27,7 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
 
     public static ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
     {
-        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive(
+        var typeCreation = TypeSerializationHelper.SerializeTypeRecursive(
             propertyOrIndexer.DeclaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers ),
             serializationContext );
 
@@ -56,7 +56,7 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
 
             case IIndexer indexer:
                 {
-                    var returnTypeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                    var returnTypeCreation = TypeSerializationHelper.SerializeTypeRecursive(
                         propertyOrIndexer.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers ),
                         serializationContext );
 
@@ -64,7 +64,7 @@ internal sealed class CompileTimePropertyInfoSerializer : ObjectSerializer<Compi
 
                     foreach ( var parameter in indexer.Parameters )
                     {
-                        var parameterType = TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                        var parameterType = TypeSerializationHelper.SerializeTypeRecursive(
                             parameter.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers ),
                             serializationContext );
 

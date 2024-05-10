@@ -94,4 +94,6 @@ internal abstract class PropertyOrIndexerBuilder : MemberBuilder, IPropertyOrInd
     }
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
+
+    public override MemberInfo ToMemberInfo() => this.ToPropertyInfo();
 }

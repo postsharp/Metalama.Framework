@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -49,6 +50,8 @@ internal abstract class MethodBaseBuilder : MemberBuilder, IMethodBaseBuilder, I
     IParameterBuilderList IHasParametersBuilder.Parameters => this.Parameters;
 
     public abstract System.Reflection.MethodBase ToMethodBase();
+
+    public override MemberInfo ToMemberInfo() => this.ToMethodBase();
 
     protected MethodBaseBuilder(
         Advice advice,

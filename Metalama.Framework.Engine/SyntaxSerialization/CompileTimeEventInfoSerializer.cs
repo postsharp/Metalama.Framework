@@ -23,7 +23,7 @@ internal sealed class CompileTimeEventInfoSerializer : ObjectSerializer<CompileT
         var eventName = @event.Name;
 
         var typeCreation =
-            TypeSerializationHelper.SerializeTypeSymbolRecursive(
+            TypeSerializationHelper.SerializeTypeRecursive(
                 @event.DeclaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers ),
                 serializationContext );
 

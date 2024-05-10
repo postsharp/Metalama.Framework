@@ -14,6 +14,7 @@ using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 

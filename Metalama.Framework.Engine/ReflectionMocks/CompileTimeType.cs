@@ -188,7 +188,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
                     .AssertCast<ITypeSymbol>()
                     .AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ),
                 this.ReflectionType,
-                TypeSerializationHelper.SerializeTypeSymbolRecursive,
+                TypeSerializationHelper.SerializeTypeRecursive,
                 syntaxGenerationContext );
         }
     }

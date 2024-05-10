@@ -116,6 +116,8 @@ internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
 
     public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );
 
+    public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
+
     public bool IsRequired { get; set; }
 
     bool IExpression.IsAssignable => this.Writeability != Writeability.None;

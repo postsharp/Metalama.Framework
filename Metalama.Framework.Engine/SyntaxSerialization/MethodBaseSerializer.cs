@@ -17,11 +17,11 @@ using ReflectionHelper = Metalama.Framework.RunTime.ReflectionHelper;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
-internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
+internal abstract class MethodBaseSerializer<TInput, TOutput> : ObjectSerializer<TInput, TOutput>
     where TInput : MethodBase, TOutput
     where TOutput : MethodBase
 {
-    protected MetalamaMethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
+    protected MethodBaseSerializer( SyntaxSerializationService service ) : base( service ) { }
 
     internal static ExpressionSyntax SerializeMethodBase(
         ICompileTimeReflectionObject<IMethodBase> method,
@@ -41,8 +41,8 @@ internal abstract class MetalamaMethodBaseSerializer<TInput, TOutput> : ObjectSe
         */
 
         var typeCreation =
-            TypeSerializationHelper.SerializeTypeSymbolRecursive(
-                method.DeclaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeSerialization ),
+            TypeSerializationHelper.SerializeTypeRecursive(
+                method.DeclaringType,
                 serializationContext );
 
         var allBindingFlags = SyntaxUtility.CreateBindingFlags( method, serializationContext );

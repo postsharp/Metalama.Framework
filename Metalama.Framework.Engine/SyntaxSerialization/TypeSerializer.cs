@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     internal sealed class TypeSerializer : ObjectSerializer<Type>
     {
         public override ExpressionSyntax Serialize( Type obj, SyntaxSerializationContext serializationContext )
-            => TypeSerializationHelper.SerializeTypeSymbolRecursive( serializationContext.GetTypeSymbol( obj ), serializationContext );
+            => TypeSerializationHelper.SerializeTypeRecursive( serializationContext.GetTypeSymbol( obj ), serializationContext );
 
         public TypeSerializer( SyntaxSerializationService service ) : base( service ) { }
     }

@@ -6,12 +6,14 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -209,7 +211,9 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public bool IsSubclassOf( INamedType type ) => false;
 
-    public Type ToType() => throw new NotImplementedException();
+    public Type ToType() => CompileTimeType.Create( this );
+
+    public override MemberInfo ToMemberInfo() => this.ToType();
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
