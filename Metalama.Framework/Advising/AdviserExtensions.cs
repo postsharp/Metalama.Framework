@@ -75,10 +75,9 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a finalizer or overrides the implementation of the existing one.
     /// </summary>
-    /// <param name="adviser">An adviser for a named type.</param>
+    /// <param name="adviser">An adviser for a member or a named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced finalizer. This method must be
-    ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
-    ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
+    ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type.</param>
     /// <param name="whenExists">Determines the implementation strategy when a finalizer is already declared in the target type.
     ///     The default strategy is to fail with a compile-time error.</param>
     /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
@@ -184,7 +183,7 @@ public static class AdviserExtensions
             tags );
 
     public static IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-        this IAdviser<INamedType> adviser,
+        this IAdviser<IMemberOrNamedType> adviser,
         string template,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
