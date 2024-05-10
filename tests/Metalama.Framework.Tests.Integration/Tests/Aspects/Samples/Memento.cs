@@ -7,6 +7,8 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 
+#pragma warning disable CS0169, CS0649
+
 namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
 {
     public class MementoAttribute : TypeAspect

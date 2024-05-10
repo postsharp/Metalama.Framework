@@ -262,9 +262,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 constructorSymbol is { MethodKind: MethodKind.Constructor }
                 && declarationSyntax is TypeDeclarationSyntax { ParameterList: not null };
 #else
-                return
-                    constructorSymbol is { MethodKind: MethodKind.Constructor }
-                    && declarationSyntax is RecordDeclarationSyntax { ParameterList: not null };
+            return
+                constructorSymbol is { MethodKind: MethodKind.Constructor }
+                && declarationSyntax is RecordDeclarationSyntax { ParameterList: not null };
 #endif
         }
 

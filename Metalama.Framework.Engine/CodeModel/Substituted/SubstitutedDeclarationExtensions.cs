@@ -13,8 +13,16 @@ internal static class SubstitutedDeclarationExtensions
         where T : class, ITypeSymbol
         => declaration.GenericMap.Map( typeSymbol );
 
-    public static T MapIType<T>( this ISubstitutedDeclaration declaration, T type )
-        where T : IType
-        => (T) declaration.GetCompilationModel()
+    [return: NotNullIfNotNull( nameof( type ) )]
+    public static T? MapIType<T>( this ISubstitutedDeclaration declaration, T? type )
+        where T : class, IType
+    {
+        if ( type == null )
+        {
+            return null;
+        }
+
+        return (T) declaration.GetCompilationModel()
             .Factory.GetIType( declaration.MapSymbol( type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
+    }
 }
