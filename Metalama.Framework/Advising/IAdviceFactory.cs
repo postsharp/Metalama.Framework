@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// IMPORTANT: Keep XML doc in this file in sync with AdviserExtensions.
+
 namespace Metalama.Framework.Advising
 {
     /// <summary>
@@ -757,8 +759,6 @@ namespace Metalama.Framework.Advising
             ImmutableArray<AttributeConstruction> attributes = default );
 
         ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
-        ITypeIntroductionAdviceResult IntroduceType( string targetNamespace, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
 
         ITypeIntroductionAdviceResult IntroduceClass(
             INamespaceOrNamedType targetNamespaceOrType,

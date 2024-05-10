@@ -6,7 +6,8 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed partial class AdviceFactory<T> where T : IDeclaration
+internal sealed partial class AdviceFactory<T> 
+    where T : IDeclaration
 {
     private class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult
     {
@@ -27,7 +28,8 @@ internal sealed partial class AdviceFactory<T> where T : IDeclaration
 
         public INamedType Target => this._inner.Declaration;
 
-        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target ) where TNewDeclaration : IDeclaration
+        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target ) 
+            where TNewDeclaration : IDeclaration
             => throw new NotImplementedException();
     }
 }
