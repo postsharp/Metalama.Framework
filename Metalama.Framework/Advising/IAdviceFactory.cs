@@ -758,12 +758,41 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
-        ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+        ITypeIntroductionAdviceResult IntroduceType( 
+            INamespaceOrNamedType targetNamespaceOrType, 
+            string name, 
+            TypeKind typeKind, 
+            Action<INamedTypeBuilder>? buildType = null );
 
         ITypeIntroductionAdviceResult IntroduceClass(
             INamespaceOrNamedType targetNamespaceOrType,
             string name,
             Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceStruct(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceRecordClass( 
+            INamespaceOrNamedType targetType, 
+            string typeName, 
+            Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceRecordStruct(
+            INamespaceOrNamedType targetType,
+            string typeName,
+            Action<INamedTypeBuilder>? buildType = null );
+
+        IIntroductionAdviceResult<INamedType> IntroduceEnum(
+            INamespaceOrNamedType targetType,
+            string typeName,
+            Action<IEnumTypeBuilder>? buildType = null );
+
+        IIntroductionAdviceResult<INamedType> IntroduceDelegateType(
+            INamespaceOrNamedType targetType,
+            string typeName,
+            Action<IDelegateTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved

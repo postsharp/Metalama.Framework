@@ -1733,6 +1733,11 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             throw new InvalidOperationException();
         }
 
+        if (typeKind is not TypeKind.Class)
+        {
+            throw new NotImplementedException("Introducing other kinds of types than classes is not implemented.");
+        }
+
         using ( this.WithNonUserCode() )
         {
             return
@@ -1749,20 +1754,41 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    public ITypeIntroductionAdviceResult IntroduceType(
-        string targetNamespace,
-        string name,
-        Code.TypeKind typeKind,
-        Action<INamedTypeBuilder>? buildType = null )
-    {
-        throw new NotImplementedException();
-    }
-
     public ITypeIntroductionAdviceResult IntroduceClass(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
         Action<INamedTypeBuilder>? buildType = null )
         => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
+
+    public ITypeIntroductionAdviceResult IntroduceStruct(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Struct, buildType );
+
+    public ITypeIntroductionAdviceResult IntroduceRecordClass(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.RecordClass, buildType );
+
+    public ITypeIntroductionAdviceResult IntroduceRecordStruct(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.RecordStruct, buildType );
+
+    public IIntroductionAdviceResult<INamedType> IntroduceEnum(
+        INamespaceOrNamedType targetType,
+        string typeName,
+        Action<IEnumTypeBuilder>? buildType = null )
+        => throw new NotImplementedException( "Introducing enum types is not implemented." );
+
+    public IIntroductionAdviceResult<INamedType> IntroduceDelegateType(
+        INamespaceOrNamedType targetType,
+        string typeName,
+        Action<IDelegateTypeBuilder>? buildType = null )
+        => throw new NotImplementedException( "Introducing delegate types is not implemented." );
 
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration

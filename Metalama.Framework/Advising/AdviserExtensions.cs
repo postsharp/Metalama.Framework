@@ -1029,6 +1029,51 @@ public static class AdviserExtensions
             name,
             buildType );
 
+    public static ITypeIntroductionAdviceResult IntroduceStruct(
+        this IAdviser<INamespaceOrNamedType> adviser,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
+            adviser.Target,
+            name,
+            buildType );
+
+    public static ITypeIntroductionAdviceResult IntroduceRecordClass(
+        this IAdviser<INamespaceOrNamedType> adviser,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
+            adviser.Target,
+            name,
+            buildType );
+
+    public static ITypeIntroductionAdviceResult IntroduceRecordStruct(
+        this IAdviser<INamespaceOrNamedType> adviser,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
+            adviser.Target,
+            name,
+            buildType );
+
+    public static IIntroductionAdviceResult<INamedType> IntroduceEnum(
+        this IAdviser<INamespaceOrNamedType> adviser,
+        string name,
+        Action<IEnumTypeBuilder>? buildEnum = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceEnum(
+            adviser.Target,
+            name,
+            buildEnum );
+
+    public static IIntroductionAdviceResult<INamedType> IntroduceDelegateType(
+        this IAdviser<INamespaceOrNamedType> adviser,
+        string name,
+        Action<IDelegateTypeBuilder>? buildDelegateType = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceDelegateType(
+            adviser.Target,
+            name,
+            buildDelegateType );
+
     /// <summary>
     /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
     /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.
