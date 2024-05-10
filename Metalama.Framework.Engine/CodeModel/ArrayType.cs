@@ -10,7 +10,15 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed class ArrayType : RoslynType<IArrayTypeSymbol>, IArrayType
     {
-        internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
+        internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation )
+        {
+            // Array types with lower bounds or sizes specified are not supported.
+            Invariant.Assert( typeSymbol.LowerBounds.IsDefault );
+            Invariant.Assert( typeSymbol.Sizes.IsEmpty );
+
+            // MDArrays with rank 1 are not supported.
+            Invariant.Implies( typeSymbol.Rank == 1, typeSymbol.IsSZArray );
+        }
 
         internal ITypeImpl WithElementType( ITypeImpl elementType )
         {

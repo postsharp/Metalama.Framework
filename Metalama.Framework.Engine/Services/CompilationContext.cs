@@ -88,22 +88,22 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<MemberRef<IMethod>> MethodRefComparer => new MemberRefEqualityComparer<IMethod>( this.SymbolComparer );
 
     [Memo]
-    internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.SymbolComparer );
+    internal IEqualityComparer<IEvent> EventComparer => new MemberComparer<IEvent>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.SymbolComparer );
+    internal IEqualityComparer<IField> FieldComparer => new MemberComparer<IField>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IFieldOrProperty> FieldOrPropertyComparer => new MemberComparer<IFieldOrProperty>( this.SymbolComparer );
+    internal IEqualityComparer<IFieldOrProperty> FieldOrPropertyComparer => new MemberComparer<IFieldOrProperty>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.SymbolComparer );
+    internal IEqualityComparer<IIndexer> IndexerComparer => new MemberComparer<IIndexer>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.SymbolComparer );
+    internal IEqualityComparer<IMethod> MethodComparer => new MemberComparer<IMethod>( this.Comparers.Default );
 
     [Memo]
-    internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.SymbolComparer );
+    internal IEqualityComparer<IProperty> PropertyComparer => new MemberComparer<IProperty>( this.Comparers.Default );
 
     internal SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxGenerationOptions options, SyntaxNode node )
         => this.GetSyntaxGenerationContext( options, node.SyntaxTree, node.SpanStart );

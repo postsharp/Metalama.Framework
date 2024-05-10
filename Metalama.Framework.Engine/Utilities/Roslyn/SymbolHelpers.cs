@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -90,4 +92,12 @@ internal static class SymbolHelpers
             throw new AssertionFailedException( $"The symbols '{symbol}' and '{otherSymbol}' do not belong to the same compilation." );
         }
     }
+
+    internal static ImmutableArray<SpecialType> ArrayGenericInterfaces { get; } =
+        ImmutableArray.Create(
+            SpecialType.System_Collections_Generic_IEnumerable_T,
+            SpecialType.System_Collections_Generic_IList_T,
+            SpecialType.System_Collections_Generic_ICollection_T,
+            SpecialType.System_Collections_Generic_IReadOnlyList_T,
+            SpecialType.System_Collections_Generic_IReadOnlyCollection_T );
 }
