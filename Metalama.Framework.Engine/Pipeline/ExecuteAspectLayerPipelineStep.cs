@@ -28,15 +28,19 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
     private readonly List<AspectInstance> _aspectInstances = new();
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
 
-    public ExecuteAspectLayerPipelineStep( PipelineStepsState parent, PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base(
-        parent,
-        stepId,
-        aspectLayer )
+    public ExecuteAspectLayerPipelineStep( PipelineStepsState parent, PipelineStepId stepId, OrderedAspectLayer aspectLayer )
+        : base( parent, stepId, aspectLayer )
     {
         this._concurrentTaskRunner = parent.PipelineConfiguration.ServiceProvider.GetRequiredService<IConcurrentTaskRunner>();
     }
 
-    public void AddAspectInstance( in ResolvedAspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance.AspectInstance );
+    public void AddAspectInstance( in ResolvedAspectInstance aspectInstance )
+    {
+        lock ( this._aspectInstances )
+        {
+            this._aspectInstances.Add( aspectInstance.AspectInstance );
+        }
+    }
 
     public override async Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
