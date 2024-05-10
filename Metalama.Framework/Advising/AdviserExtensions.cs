@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -12,6 +13,8 @@ namespace Metalama.Framework.Advising;
 
 // IMPORTANT: Keep XML doc in this file in sync with IAdviceFactory.
 
+[PublicAPI]
+[CompileTime]
 public static class AdviserExtensions
 {
     /// <summary>
