@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -33,7 +32,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
                 TokenList( Token( TriviaList(), SyntaxKind.StaticKeyword, TriviaList( Space ) ) ),
-                ((TypeDeclarationSyntax) constructorBuilder.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
+                Identifier( constructorBuilder.DeclaringType.Name ),
                 ParameterList(),
                 null,
                 context.SyntaxGenerator.FormattedBlock().WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
@@ -53,9 +52,9 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
     private MemberRef<IMember> ReplacedMember { get; }
 
     public override InsertPosition InsertPosition
-        => this.ReplacedMember.IsDefault
-            ? this.IntroducedDeclaration.DeclaringType.ToInsertPosition()
-            : this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition();
+        => this.ReplacedMember.Target != null
+            ? this.ReplacedMember.GetTarget( this.TargetDeclaration.Compilation ).ToInsertPosition()
+            : this.IntroducedDeclaration.ToInsertPosition();
 
     public override TransformationObservability Observability => TransformationObservability.CompileTimeOnly;
 

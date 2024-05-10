@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// IMPORTANT: Keep XML doc in this file in sync with AdviserExtensions.
+
 namespace Metalama.Framework.Advising
 {
     /// <summary>
@@ -75,8 +77,7 @@ namespace Metalama.Framework.Advising
         /// </summary>
         /// <param name="targetType">The type into which the finalizer must be introduced.</param>
         /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced finalizer. This method must be
-        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
-        ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
+        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type.</param>
         /// <param name="whenExists">Determines the implementation strategy when a finalizer is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
@@ -756,14 +757,41 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
-        ITypeIntroductionAdviceResult IntroduceType( INamespaceOrNamedType targetNamespaceOrType, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
-
-        ITypeIntroductionAdviceResult IntroduceType( string targetNamespace, string name, TypeKind typeKind, Action<INamedTypeBuilder>? buildType = null );
+        ITypeIntroductionAdviceResult IntroduceType( 
+            INamespaceOrNamedType targetNamespaceOrType, 
+            string name, 
+            TypeKind typeKind, 
+            Action<INamedTypeBuilder>? buildType = null );
 
         ITypeIntroductionAdviceResult IntroduceClass(
             INamespaceOrNamedType targetNamespaceOrType,
             string name,
             Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceStruct(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceRecordClass( 
+            INamespaceOrNamedType targetType, 
+            string typeName, 
+            Action<INamedTypeBuilder>? buildType = null );
+
+        ITypeIntroductionAdviceResult IntroduceRecordStruct(
+            INamespaceOrNamedType targetType,
+            string typeName,
+            Action<INamedTypeBuilder>? buildType = null );
+
+        IIntroductionAdviceResult<INamedType> IntroduceEnum(
+            INamespaceOrNamedType targetType,
+            string typeName,
+            Action<IEnumTypeBuilder>? buildType = null );
+
+        IIntroductionAdviceResult<INamedType> IntroduceDelegateType(
+            INamespaceOrNamedType targetType,
+            string typeName,
+            Action<IDelegateTypeBuilder>? buildType = null );
 
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved

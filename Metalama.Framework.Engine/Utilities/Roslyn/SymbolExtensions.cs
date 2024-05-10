@@ -256,8 +256,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         internal static bool IsPrimaryConstructor( this IMethodSymbol constructorSymbol )
         {
             var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
+            
 #if ROSLYN_4_8_0_OR_GREATER
-
             return
                 constructorSymbol is { MethodKind: MethodKind.Constructor }
                 && declarationSyntax is TypeDeclarationSyntax { ParameterList: not null };

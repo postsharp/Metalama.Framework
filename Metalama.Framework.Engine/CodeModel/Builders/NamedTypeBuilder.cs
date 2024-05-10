@@ -17,6 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, INamedTypeImpl
 {
+    private bool _isPartial;
+    private INamedType? _baseType;
+
     public GenericParameterBuilderList TypeParameters { get; } = new();
 
     public NamedTypeBuilder( Advice advice, INamespaceOrNamedType declaringNamespaceOrType, string name ) : base(
@@ -56,13 +59,29 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public override IDeclaration ContainingDeclaration => (IDeclaration?) this.DeclaringType ?? this.Namespace;
 
-    public bool IsPartial => false;
+    public bool IsPartial
+    {
+        get => this._isPartial;
+        set
+        {
+            this.CheckNotFrozen();
+
+            this._isPartial = value;
+        }
+    }
 
     public bool HasDefaultConstructor => true;
 
-    public INamedType? BaseType { get; set; }
+    public INamedType? BaseType
+    {
+        get => this._baseType;
+        set
+        {
+            this.CheckNotFrozen();
 
-    INamedType? INamedType.BaseType => this.BaseType;
+            this._baseType = value;
+        }
+    }
 
     [Memo]
     public IImplementedInterfaceCollection AllImplementedInterfaces => new EmptyImplementedInterfaceCollection();
