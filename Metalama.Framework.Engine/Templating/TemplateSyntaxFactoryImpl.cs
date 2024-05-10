@@ -321,7 +321,7 @@ namespace Metalama.Framework.Engine.Templating
                         expression,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithSimplifierAnnotationIfNecessary( this.SyntaxSerializationContext.SyntaxGenerationContext ),
-                this.SyntaxSerializationContext.SyntaxGenerationContext );
+                this.SyntaxSerializationContext.CompilationModel );
         }
 
         public SyntaxToken GetUniqueIdentifier( string hint )
@@ -429,31 +429,31 @@ namespace Metalama.Framework.Engine.Templating
             var syntaxSerializationContext = this.SyntaxSerializationContext;
 
             var expressionType = type != null
-                ? syntaxSerializationContext.CompilationContext.SerializableTypeIdResolver.ResolveId(
+                ? syntaxSerializationContext.CompilationModel.SerializableTypeIdResolver.ResolveId(
                     new SerializableTypeId( type ),
                     this._templateExpansionContext.TemplateGenericArguments )
                 : null;
 
-            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxSerializationContext.SyntaxGenerationContext );
+            return new TypedExpressionSyntaxImpl( syntax, expressionType, syntaxSerializationContext.CompilationModel );
         }
 
         public IUserExpression GetUserExpression( object expression ) => ((IExpression) expression).ToUserExpression();
 
         public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )
         {
-            SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+            TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                 operand,
-                this.SyntaxSerializationContext.CompilationContext,
-                out var typeSymbol );
+                this.SyntaxSerializationContext.CompilationModel,
+                out var type );
 
-            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, typeSymbol );
+            return this._templateExpansionContext.SyntaxGenerator.SuppressNullableWarningExpression( operand, type );
         }
 
         public ExpressionSyntax ConditionalAccessExpression( ExpressionSyntax expression, ExpressionSyntax whenNotNullExpression )
         {
-            SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation( expression, this.SyntaxSerializationContext.CompilationContext, out var typeSymbol );
+            TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation( expression, this.SyntaxSerializationContext.CompilationModel, out var type );
 
-            return typeSymbol?.IsNullable() != false
+            return type?.IsNullable != false
                 ? SyntaxFactory.ConditionalAccessExpression( expression, whenNotNullExpression )
                 : (ExpressionSyntax) new RemoveConditionalAccessRewriter( expression ).Visit( whenNotNullExpression )!;
         }

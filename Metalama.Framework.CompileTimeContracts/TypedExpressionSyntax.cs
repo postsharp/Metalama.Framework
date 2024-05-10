@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.CompileTimeContracts;
@@ -17,7 +16,7 @@ public readonly struct TypedExpressionSyntax
         this.Implementation = impl;
     }
 
-    public ITypeSymbol? ExpressionType => this.Implementation.ExpressionType;
+    internal IType? ExpressionType => this.Implementation.ExpressionType;
 
     public ExpressionSyntax Syntax => this.Implementation.Syntax;
 

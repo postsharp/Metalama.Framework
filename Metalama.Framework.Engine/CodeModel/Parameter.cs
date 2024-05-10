@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 new TypedExpressionSyntaxImpl(
                     SyntaxFactory.IdentifierName( this.Name ),
                     this.Type,
-                    ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
+                    ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                     true ) );
     }
 }

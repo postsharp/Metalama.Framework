@@ -91,22 +91,34 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         {
             if ( typeSymbol is ITypeParameterSymbol typeParameterSymbol )
             {
-                var isUnconstrained = typeParameterSymbol is { HasUnmanagedTypeConstraint: false, HasValueTypeConstraint: false } and
-                                          { HasReferenceTypeConstraint: false, HasNotNullConstraint: false }
-                                      && !typeParameterSymbol.ConstraintTypes.Any();
+                // Unconstrained, class? constrained and IFoo? constrained are *not* considered nullable,
+                // if they have NullableAnnotation.NotAnnotated, because non-nullable types also satify these constraints.
 
-                // Unconstrained, class? constrained and IFoo? constrained are considered nullable,
-                // even if they have NullableAnnotation.NotAnnotated.
-                if ( isUnconstrained
-                     || typeParameterSymbol.ReferenceTypeConstraintNullableAnnotation == NullableAnnotation.Annotated
-                     || typeParameterSymbol.ConstraintNullableAnnotations.Any( a => a == NullableAnnotation.Annotated ) )
+                // Annotation takes priority over constraint.
+                // E.g. in void M<T>(T? t) where T : notnull, the type of t is ITypeParameterSymbol with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
+                if (typeParameterSymbol.NullableAnnotation.ToIsAnnotated() == true)
                 {
                     return true;
                 }
 
-                // Otherwise, annotation takes priority over constraint.
-                // E.g. in void M<T>(T? t) where T : notnull, the type of t is ITypeParameterSymbol with TypeKindConstraint of NotNull and NullableAnnotation.Annotated.
-                return typeParameterSymbol.NullableAnnotation.ToIsAnnotated();
+                // If thw symbol didn't have '?', check constraints.
+                if ( typeParameterSymbol.ConstraintTypes.Any( t => t.IsNullable() == false ) )
+                {
+                    return false;
+                }
+
+                if ( typeParameterSymbol.HasReferenceTypeConstraint )
+                {
+                    return typeParameterSymbol.ReferenceTypeConstraintNullableAnnotation.ToIsAnnotated() == false ? false : null;
+                }
+                else if ( typeParameterSymbol.HasValueTypeConstraint
+                    || typeParameterSymbol.HasNotNullConstraint
+                    || typeParameterSymbol.HasUnmanagedTypeConstraint )
+                {
+                    return false;
+                }
+
+                return null;
             }
 
             if ( typeSymbol.IsReferenceType )

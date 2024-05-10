@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
                 this._type,
-                TemplateExpansionContext.CurrentSyntaxGenerationContext,
+                TemplateExpansionContext.CurrentSyntaxSerializationContext.CompilationModel,
                 canBeNull: false );
 
         protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec )

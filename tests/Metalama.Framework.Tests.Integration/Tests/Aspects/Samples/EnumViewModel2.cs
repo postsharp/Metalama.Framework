@@ -7,6 +7,8 @@ using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel2;
 
+#pragma warning disable CS0649
+
 public class EnumViewModelAttribute : TypeAspect
 {
     private static readonly DiagnosticDefinition<INamedType> _missingFieldError =

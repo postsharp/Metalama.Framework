@@ -66,7 +66,7 @@ internal static class TemplateBindingHelper
                 var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
                 var parameter = targetMethod.Parameters[i];
                 ExpressionSyntax parameterSyntax = IdentifierName( parameter.Name );
-                parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type.GetSymbol() );
+                parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type );
                 mappingBuilder.Add( templateParameter.Name, parameterSyntax );
             }
 
@@ -126,7 +126,7 @@ internal static class TemplateBindingHelper
                 var templateParameter = template.TemplateMember.TemplateClassMember.RunTimeParameters[i];
                 var parameter = targetConstructor.Parameters[i];
                 ExpressionSyntax parameterSyntax = IdentifierName( parameter.Name );
-                parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type.GetSymbol() );
+                parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, parameter.Type );
                 mappingBuilder.Add( templateParameter.Name, parameterSyntax );
             }
 
@@ -234,7 +234,7 @@ internal static class TemplateBindingHelper
         {
             ExpressionSyntax parameterSyntax = IdentifierName( methodParameter.Name );
 
-            parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type.GetSymbol() );
+            parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type );
 
             parameterMapping.Add( templateParameter.Name, parameterSyntax );
         }
@@ -294,7 +294,7 @@ internal static class TemplateBindingHelper
         {
             ExpressionSyntax parameterSyntax = IdentifierName( methodParameter.Name );
 
-            parameterSyntax = SymbolAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type.GetSymbol() );
+            parameterSyntax = TypeAnnotationMapper.AddExpressionTypeAnnotation( parameterSyntax, methodParameter.Type );
 
             parameterMapping.Add( templateParameter.Name, parameterSyntax );
         }

@@ -2,11 +2,10 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using System;
 
 namespace Metalama.Framework.Engine.Advising;
 
-internal sealed partial class AdviceFactory<T> 
+internal sealed partial class AdviceFactory<T>
     where T : IDeclaration
 {
     private class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult, IAdviserInternal
@@ -32,7 +31,7 @@ internal sealed partial class AdviceFactory<T>
 
         public IAdviceFactory AdviceFactory => this._origin;
 
-        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target ) 
+        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
             where TNewDeclaration : IDeclaration
             => this._origin.WithDeclaration( target);
     }

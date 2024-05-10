@@ -27,9 +27,9 @@ public class SerializableTypeIdResolverForSymbol : SerializableTypeIdResolver<IT
 
     public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
     {
-        var genericArgumentSymbols = genericArguments?.ToDictionary( kv => kv.Key, kv => kv.Value.GetSymbol().AssertSymbolNotNull() );
+        var genericArgumentSymbols = genericArguments?.ToDictionary( kv => kv.Key, kv => kv.Value.GetSymbol() );
 
-        return this.ResolveId( typeId, genericArgumentSymbols );
+        return this.ResolveId( typeId, genericArgumentSymbols! );
     }
 
     protected override ITypeSymbol CreateArrayType( ITypeSymbol elementType, int rank )
