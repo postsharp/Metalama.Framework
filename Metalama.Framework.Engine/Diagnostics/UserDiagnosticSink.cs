@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.DesignTime.CodeFixes;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
@@ -113,7 +114,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
                 // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
-                StringBuilder? stringBuilder = null;
+                ObjectPoolHandle<StringBuilder> stringBuilder = default;
 
                 // Store the code fixes if we should.
                 foreach ( var codeFix in codeFixes )
@@ -135,20 +136,31 @@ namespace Metalama.Framework.Engine.Diagnostics
                     }
                     else
                     {
-                        if ( stringBuilder == null )
+                        if ( stringBuilder.IsDefault )
                         {
                             // This gets executed for the second code fix.
-                            stringBuilder = new StringBuilder();
-                            stringBuilder.Append( firstTitle );
+                            stringBuilder = StringBuilderPool.Default.Allocate();
+                            stringBuilder.Value.Append( firstTitle );
                         }
 
                         // This gets executed for all code fixes but the first one.
-                        stringBuilder.Append( CodeFixTitles.Separator );
-                        stringBuilder.Append( codeFix.Title );
+                        stringBuilder.Value.Append( CodeFixTitles.Separator );
+                        stringBuilder.Value.Append( codeFix.Title );
                     }
                 }
 
-                return new CodeFixTitles( stringBuilder?.ToString() ?? firstTitle );
+                if ( !stringBuilder.IsDefault )
+                {
+                    var title = stringBuilder.Value.ToString();
+
+                    stringBuilder.Dispose();
+
+                    return new CodeFixTitles( title );
+                }
+                else
+                {
+                    return new CodeFixTitles( firstTitle );
+                }
             }
             else
             {

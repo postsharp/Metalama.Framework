@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
-using System.Text;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -19,7 +18,7 @@ internal static class NamespaceHelper
             return null;
         }
 
-        var stringBuilder = new StringBuilder();
+            using var stringBuilder = StringBuilderPool.Default.Allocate();
 
         void AppendNameRecursive( ISymbol s )
         {
@@ -36,16 +35,16 @@ internal static class NamespaceHelper
                 AppendNameRecursive( parent );
             }
 
-            if ( stringBuilder.Length > 0 )
+                if ( stringBuilder.Value.Length > 0 )
             {
-                stringBuilder.Append( separator );
+                    stringBuilder.Value.Append( separator );
             }
 
-            stringBuilder.Append( s.Name );
+                stringBuilder.Value.Append( s.Name );
         }
 
         AppendNameRecursive( symbol );
 
-        return stringBuilder.ToString();
+            return stringBuilder.Value.ToString();
     }
 }

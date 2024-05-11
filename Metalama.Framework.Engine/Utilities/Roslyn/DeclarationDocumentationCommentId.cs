@@ -12,6 +12,7 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -40,11 +41,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentNullException( nameof(declaration) );
             }
 
-            var builder = new StringBuilder();
-            var generator = new DeclarationGenerator( builder );
+            using var builder = StringBuilderPool.Default.Allocate();
+
+            var generator = new DeclarationGenerator( builder.Value );
             generator.Visit( declaration );
 
-            return builder.ToString();
+            return builder.Value.ToString();
         }
 
         /// <summary>

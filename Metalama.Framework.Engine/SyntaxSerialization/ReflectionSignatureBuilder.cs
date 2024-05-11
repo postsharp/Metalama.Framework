@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
@@ -25,7 +26,7 @@ internal static class ReflectionSignatureBuilder
 
     public static string GetMethodSignature( IMethod method )
     {
-        var impl = new StringBuildingVisitor();
+        using var impl = new StringBuildingVisitor();
         impl.BuildSignature( method );
 
         return impl.ToString();
@@ -33,7 +34,7 @@ internal static class ReflectionSignatureBuilder
 
     public static string GetConstructorSignature( IConstructor constructor )
     {
-        var impl = new StringBuildingVisitor();
+        using var impl = new StringBuildingVisitor();
         impl.BuildSignature( constructor );
 
         return impl.ToString();
@@ -58,97 +59,100 @@ internal static class ReflectionSignatureBuilder
         public override bool VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
     }
 
-    private sealed class StringBuildingVisitor : SymbolVisitor
+    private sealed class StringBuildingVisitor : SymbolVisitor, IDisposable
     {
-        private readonly StringBuilder _stringBuilder = new();
+        private readonly ObjectPoolHandle<StringBuilder> _stringBuilderHandle = StringBuilderPool.Default.Allocate();
+
+        private StringBuilder StringBuilder => this._stringBuilderHandle.Value;
+
         private bool _isTypeArgument;
 
         public void BuildSignature( IMethod method )
         {
             this.Visit( method.ReturnType.GetSymbol() );
-            this._stringBuilder.Append( ' ' );
-            this._stringBuilder.Append( method.Name );
+            this.StringBuilder.Append( ' ' );
+            this.StringBuilder.Append( method.Name );
 
             if ( method.TypeParameters.Count > 0 )
             {
-                this._stringBuilder.Append( '[' );
+                this.StringBuilder.Append( '[' );
 
                 foreach ( var typeParameter in method.TypeParameters )
                 {
                     if ( typeParameter.Index > 0 )
                     {
-                        this._stringBuilder.Append( ',' );
+                        this.StringBuilder.Append( ',' );
                     }
 
-                    this._stringBuilder.Append( typeParameter.Name );
+                    this.StringBuilder.Append( typeParameter.Name );
                 }
 
-                this._stringBuilder.Append( ']' );
+                this.StringBuilder.Append( ']' );
             }
 
-            this._stringBuilder.Append( '(' );
+            this.StringBuilder.Append( '(' );
 
             foreach ( var parameter in method.Parameters )
             {
                 if ( parameter.Index > 0 )
                 {
-                    this._stringBuilder.Append( ", " );
+                    this.StringBuilder.Append( ", " );
                 }
 
                 this.Visit( parameter.Type.GetSymbol() );
 
                 if ( parameter.RefKind != RefKind.None )
                 {
-                    this._stringBuilder.Append( " ByRef" );
+                    this.StringBuilder.Append( " ByRef" );
                 }
             }
 
-            this._stringBuilder.Append( ')' );
+            this.StringBuilder.Append( ')' );
         }
 
         public void BuildSignature( IConstructor constructor )
         {
-            this._stringBuilder.Append( "Void " );
-            this._stringBuilder.Append( constructor.Name );
+            this.StringBuilder.Append( "Void " );
+            this.StringBuilder.Append( constructor.Name );
 
-            this._stringBuilder.Append( '(' );
+            this.StringBuilder.Append( '(' );
 
             foreach ( var parameter in constructor.Parameters )
             {
                 if ( parameter.Index > 0 )
                 {
-                    this._stringBuilder.Append( ", " );
+                    this.StringBuilder.Append( ", " );
                 }
 
                 this.Visit( parameter.Type.GetSymbol() );
 
                 if ( parameter.RefKind != RefKind.None )
                 {
-                    this._stringBuilder.Append( " ByRef" );
+                    this.StringBuilder.Append( " ByRef" );
                 }
             }
 
-            this._stringBuilder.Append( ')' );
+            this.StringBuilder.Append( ')' );
         }
 
-        public override string ToString() => this._stringBuilder.ToString();
+        public override string ToString() => this.StringBuilder.ToString();
 
         public override void DefaultVisit( ISymbol symbol ) => throw new NotSupportedException();
 
         public override void VisitArrayType( IArrayTypeSymbol symbol )
         {
             this.Visit( symbol.ElementType );
-            this._stringBuilder.Append( '[' );
+            this.StringBuilder.Append( '[' );
 
             for ( var i = 1; i < symbol.Rank; i++ )
             {
-                this._stringBuilder.Append( ',' );
+                this.StringBuilder.Append( ',' );
             }
 
-            this._stringBuilder.Append( ']' );
+            this.StringBuilder.Append( ']' );
         }
 
-        public override void VisitDynamicType( IDynamicTypeSymbol symbol ) => this._stringBuilder.Append( "System.Object" );
+        public override void VisitDynamicType( IDynamicTypeSymbol symbol ) => this.StringBuilder.Append( "System.Object" );
 
         public override void VisitNamedType( INamedTypeSymbol symbol )
         {
@@ -184,16 +188,16 @@ internal static class ReflectionSignatureBuilder
             if ( requiresNamespace && !symbol.ContainingNamespace.IsGlobalNamespace )
             {
                 this.VisitNamespace( symbol.ContainingNamespace );
-                this._stringBuilder.Append( '.' );
+                this.StringBuilder.Append( '.' );
             }
 
-            this._stringBuilder.Append( symbol.MetadataName );
+            this.StringBuilder.Append( symbol.MetadataName );
 
             if ( symbol.TypeArguments.Length > 0 )
             {
                 var oldIsTypeArgument = this._isTypeArgument;
                 this._isTypeArgument = true;
-                this._stringBuilder.Append( '[' );
+                this.StringBuilder.Append( '[' );
 
                 for ( var i = 0; i < symbol.TypeArguments.Length; i++ )
                 {
@@ -201,14 +205,14 @@ internal static class ReflectionSignatureBuilder
 
                     if ( i > 0 )
                     {
-                        this._stringBuilder.Append( ',' );
+                        this.StringBuilder.Append( ',' );
                     }
 
                     this.Visit( typeArgument );
                 }
 
                 this._isTypeArgument = oldIsTypeArgument;
-                this._stringBuilder.Append( ']' );
+                this.StringBuilder.Append( ']' );
             }
         }
 
@@ -222,20 +226,22 @@ internal static class ReflectionSignatureBuilder
             if ( !symbol.ContainingNamespace.IsGlobalNamespace )
             {
                 this.VisitNamespace( symbol.ContainingNamespace );
-                this._stringBuilder.Append( '.' );
+                this.StringBuilder.Append( '.' );
             }
 
-            this._stringBuilder.Append( symbol.Name );
+            this.StringBuilder.Append( symbol.Name );
         }
 
         public override void VisitPointerType( IPointerTypeSymbol symbol )
         {
             this.Visit( symbol.PointedAtType );
-            this._stringBuilder.Append( '*' );
+            this.StringBuilder.Append( '*' );
         }
 
         public override void VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
 
-        public override void VisitTypeParameter( ITypeParameterSymbol symbol ) => this._stringBuilder.Append( symbol.Name );
+        public override void VisitTypeParameter( ITypeParameterSymbol symbol ) => this.StringBuilder.Append( symbol.Name );
+
+        public void Dispose() => this._stringBuilderHandle.Dispose();
     }
 }

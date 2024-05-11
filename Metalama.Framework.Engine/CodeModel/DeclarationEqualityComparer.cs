@@ -97,6 +97,11 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
     {
         // TODO: Does not take introduced interfaces into account (requires a lot of changes).
 
+        if ( ReferenceEquals( left, right ) )
+        {
+            return true;
+        }
+
         left.ThrowIfBelongsToDifferentCompilationThan( right );
 
         if ( kind == ConversionKind.TypeDefinition )
@@ -117,11 +122,6 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
                 default:
                     return false;
             }
-        }
-
-        if ( left == right )
-        {
-            return true;
         }
 
         var conversion = this._compilation.ClassifyConversion( left, right );
