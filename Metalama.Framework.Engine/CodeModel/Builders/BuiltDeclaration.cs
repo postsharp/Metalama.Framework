@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -18,10 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 /// </summary>
 internal abstract class BuiltDeclaration : BaseDeclaration
 {
-    protected BuiltDeclaration( CompilationModel compilation, IDeclarationBuilder builder )
+    protected BuiltDeclaration( CompilationModel compilation )
     {
         this.Compilation = compilation;
-        _ = builder;
     }
 
     public override CompilationModel Compilation { get; }

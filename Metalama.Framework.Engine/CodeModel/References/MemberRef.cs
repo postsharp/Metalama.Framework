@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
     private readonly Ref<T> _underlying;
 

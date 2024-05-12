@@ -10,35 +10,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltPropertyOrIndexer : BuiltMember, IPropertyOrIndexerImpl
 {
-    private readonly PropertyOrIndexerBuilder _propertyOrIndexerBuilder;
+    protected BuiltPropertyOrIndexer( CompilationModel compilation ) : base( compilation ) { }
 
-    protected BuiltPropertyOrIndexer( PropertyOrIndexerBuilder builder, CompilationModel compilation ) : base( compilation, builder )
-    {
-        this._propertyOrIndexerBuilder = builder;
-    }
+    protected abstract PropertyOrIndexerBuilder PropertyOrIndexerBuilder { get; }
 
-    protected override MemberBuilder MemberBuilder => this._propertyOrIndexerBuilder;
+    public RefKind RefKind => this.PropertyOrIndexerBuilder.RefKind;
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._propertyOrIndexerBuilder;
-
-    public RefKind RefKind => this._propertyOrIndexerBuilder.RefKind;
-
-    public Writeability Writeability => this._propertyOrIndexerBuilder.Writeability;
+    public Writeability Writeability => this.PropertyOrIndexerBuilder.Writeability;
 
     [Memo]
-    public IType Type => this.Compilation.Factory.GetIType( this._propertyOrIndexerBuilder.Type );
+    public IType Type => this.Compilation.Factory.GetIType( this.PropertyOrIndexerBuilder.Type );
 
     [Memo]
     public IMethod? GetMethod
-        => this._propertyOrIndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._propertyOrIndexerBuilder.GetMethod ) : null;
+        => this.PropertyOrIndexerBuilder.GetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.GetMethod ) : null;
 
     [Memo]
     public IMethod? SetMethod
-        => this._propertyOrIndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this._propertyOrIndexerBuilder.SetMethod ) : null;
+        => this.PropertyOrIndexerBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyOrIndexerBuilder.SetMethod ) : null;
 
-    public PropertyInfo ToPropertyInfo() => this._propertyOrIndexerBuilder.ToPropertyInfo();
+    public PropertyInfo ToPropertyInfo() => this.PropertyOrIndexerBuilder.ToPropertyInfo();
 
     public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
-    public IEnumerable<IMethod> Accessors => this._propertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
+    public IEnumerable<IMethod> Accessors => this.PropertyOrIndexerBuilder.Accessors.Select( a => this.Compilation.Factory.GetDeclaration( a ) );
 }

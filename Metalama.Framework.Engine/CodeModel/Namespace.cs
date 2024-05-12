@@ -109,10 +109,7 @@ internal sealed class Namespace : Declaration, INamespace
     private INamespaceCollection NamespacesCore
         => new NamespaceCollection(
             this,
-            this._symbol.GetNamespaceMembers()
-                .Where( n => this.IsExternal || this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
-                .Select( n => new Ref<INamespace>( n, this.Compilation.CompilationContext ) )
-                .ToReadOnlyList() );
+            this.Compilation.GetNamespaceCollection( this._symbol.ToTypedRef<INamespace>( this.Compilation.CompilationContext ) ) );
 
     public INamespace? GetDescendant( string ns )
     {

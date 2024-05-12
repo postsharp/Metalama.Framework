@@ -8,27 +8,30 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
 {
-    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation ) : base( constructorBuilder, compilation )
+    private readonly ConstructorBuilder _constructorBuilder;
+
+    public BuiltConstructor( CompilationModel compilation, ConstructorBuilder constructorBuilder ) : base( compilation )
     {
-        this.ConstructorBuilder = constructorBuilder;
+        this._constructorBuilder = constructorBuilder;
     }
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.ConstructorBuilder;
+    public override DeclarationBuilder Builder => this._constructorBuilder;
 
-    protected override MemberBuilder MemberBuilder => this.ConstructorBuilder;
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._constructorBuilder;
 
-    protected override MethodBaseBuilder MethodBaseBuilder => this.ConstructorBuilder;
+    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._constructorBuilder;
+
+    protected override MemberBuilder MemberBuilder => this._constructorBuilder;
+
+    protected override MethodBaseBuilder MethodBaseBuilder => this._constructorBuilder;
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    public ConstructorInitializerKind InitializerKind => this.ConstructorBuilder.InitializerKind;
+    public ConstructorInitializerKind InitializerKind => this._constructorBuilder.InitializerKind;
 
     bool IConstructor.IsPrimary => false;
 
-    // ReSharper disable once MemberCanBePrivate.Global
-    public ConstructorBuilder ConstructorBuilder { get; }
-
-    public ConstructorInfo ToConstructorInfo() => this.ConstructorBuilder.ToConstructorInfo();
+    public ConstructorInfo ToConstructorInfo() => this._constructorBuilder.ToConstructorInfo();
 
     IConstructor IConstructor.Definition => this;
 

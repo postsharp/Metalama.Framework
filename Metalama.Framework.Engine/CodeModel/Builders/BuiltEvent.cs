@@ -12,16 +12,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltEvent : BuiltMember, IEventImpl
 {
-    public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public EventBuilder EventBuilder { get; }
+
+    public BuiltEvent( CompilationModel compilation, EventBuilder builder ) : base( compilation )
     {
         this.EventBuilder = builder;
     }
 
-    public EventBuilder EventBuilder { get; }
+    public sealed override DeclarationBuilder Builder => this.EventBuilder;
 
-    protected override MemberBuilder MemberBuilder => this.EventBuilder;
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.EventBuilder;
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.EventBuilder;
+
+    protected override MemberBuilder MemberBuilder => this.EventBuilder;
 
     [Memo]
     public INamedType Type => this.Compilation.Factory.GetDeclaration( this.EventBuilder.Type );

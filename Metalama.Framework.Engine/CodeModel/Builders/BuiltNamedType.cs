@@ -15,14 +15,16 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 {
     public NamedTypeBuilder TypeBuilder { get; set; }
 
-    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.TypeBuilder;
-
-    public override DeclarationBuilder Builder => this.TypeBuilder;
-
-    public BuiltNamedType( NamedTypeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public BuiltNamedType( CompilationModel compilation, NamedTypeBuilder builder ) : base( compilation )
     {
         this.TypeBuilder = builder;
     }
+
+    public override DeclarationBuilder Builder => this.TypeBuilder;
+
+    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.TypeBuilder;
+
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.TypeBuilder;
 
     public bool IsPartial => this.TypeBuilder.IsPartial;
 

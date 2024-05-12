@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
     private ImmutableDictionary<string, MemberRef<T>>? _dictionary;
 

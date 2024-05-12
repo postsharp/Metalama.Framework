@@ -521,7 +521,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltMethod( (MethodBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltMethod( c, (MethodBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -561,7 +561,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IConstructor) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( constructorBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltConstructor( (ConstructorBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltConstructor( c, (ConstructorBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -574,7 +574,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IField) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltField( (FieldBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltField( c, (FieldBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -604,7 +604,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IProperty) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltProperty( (PropertyBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltProperty( c, (PropertyBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -617,7 +617,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IIndexer) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( indexerBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltIndexer( (IndexerBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltIndexer( c, (IndexerBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -630,7 +630,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IEvent) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltEvent( (EventBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltEvent( c, (EventBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -643,7 +643,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (INamedType) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( namedTypeBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltNamedType( (NamedTypeBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltNamedType( c, (NamedTypeBuilder) l.Target! ),
             this._compilationModel );
     }
 

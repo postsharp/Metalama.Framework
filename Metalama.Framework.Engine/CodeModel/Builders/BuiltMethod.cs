@@ -17,14 +17,18 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
 {
     private readonly MethodBuilder _methodBuilder;
 
-    public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( builder, compilation )
+    public BuiltMethod( CompilationModel compilation, MethodBuilder builder ) : base( compilation )
     {
         this._methodBuilder = builder;
     }
 
-    protected override MemberBuilder MemberBuilder => this._methodBuilder;
+    public override DeclarationBuilder Builder => this._methodBuilder;
+
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._methodBuilder;
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this._methodBuilder;
+
+    protected override MemberBuilder MemberBuilder => this._methodBuilder;
 
     protected override MethodBaseBuilder MethodBaseBuilder => this._methodBuilder;
 

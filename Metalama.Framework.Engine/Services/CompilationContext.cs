@@ -70,6 +70,9 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal IEqualityComparer<MemberRef<INamedType>> NamedTypeRefComparer => new MemberRefEqualityComparer<INamedType>( this.SymbolComparer );
 
     [Memo]
+    internal IEqualityComparer<MemberRef<INamespace>> NamespaceRefComparer => new MemberRefEqualityComparer<INamespace>( this.SymbolComparer );
+
+    [Memo]
     internal IEqualityComparer<MemberRef<IConstructor>> ConstructorRefComparer => new MemberRefEqualityComparer<IConstructor>( this.SymbolComparer );
 
     [Memo]
