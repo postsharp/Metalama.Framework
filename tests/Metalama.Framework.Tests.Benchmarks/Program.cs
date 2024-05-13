@@ -4,8 +4,6 @@
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using Metalama.Framework.Engine.Utilities.Caching;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 
 BenchmarkRunner.Run<Benchmarks>();
 
@@ -23,9 +21,9 @@ public class Benchmarks
     [Benchmark]
     public void Pooled()
     {
-        using var handle = Pools.SemaphoreSlim.Allocate();
-        var semaphore = handle.Value;
-        semaphore.Wait();
-        semaphore.Release();
+        // using var handle = Pools.SemaphoreSlim.Allocate();
+        // var semaphore = handle.Value;
+        // semaphore.Wait();
+        // semaphore.Release();
     }
 }
