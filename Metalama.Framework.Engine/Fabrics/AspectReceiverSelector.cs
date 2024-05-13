@@ -37,7 +37,13 @@ internal sealed class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
             this._version,
             ( compilation, diagnostics ) =>
             {
-                var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
+                var targetDeclaration = this._targetDeclaration.GetTargetOrNull( compilation );
+
+                if ( targetDeclaration == null )
+                {
+                    // This happens at design time during a background rebuild, but we don't want to fail because of this.
+                    return Enumerable.Empty<TMember>();
+                }
 
                 if ( !this._parent.UserCodeInvoker.TryInvokeEnumerable(
                         () => selector( targetDeclaration ),
