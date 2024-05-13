@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                     buildType: b =>
                     {
                         b.Accessibility = Accessibility.Public;
-                    }).Declaration;
+                    });
 
             var mementoFields = new List<IField>();
 
@@ -34,8 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                     continue;
                 }
 
-                var fieldResult = builder.Advice.IntroduceField(
-                    mementoType,
+                var field = mementoType.IntroduceField(
                     nameof(MementoField),
                     buildField: b =>
                     {
@@ -44,13 +44,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                         b.Accessibility = Accessibility.Public;
                     });
 
-                mementoFields.Add(fieldResult.Declaration);
+                mementoFields.Add(field.Declaration);
             }
 
-            builder.Advice.ImplementInterface(mementoType, typeof(IMemento));
+            mementoType.ImplementInterface(typeof(IMemento));
 
-            builder.Advice.IntroduceConstructor(
-                mementoType,
+            mementoType.IntroduceConstructor(
                 nameof(MementoConstructorTemplate),
                 buildConstructor: b =>
                 {
@@ -61,7 +60,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 },
                 args: new { fields = mementoFields });
 
-            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType });
+            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType.Declaration });
         }
 
         [Template]
