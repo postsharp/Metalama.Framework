@@ -1798,7 +1798,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                                                 EqualsValueClause(
                                                     InvocationExpression(
                                                             previousTemplateMetaSyntaxFactory.TemplateSyntaxFactoryMember(
-                                                                nameof( ITemplateSyntaxFactory.ForLocalFunction ) ) )
+                                                                nameof(ITemplateSyntaxFactory.ForLocalFunction) ) )
                                                         .WithArgumentList(
                                                             ArgumentList(
                                                                 SeparatedList(

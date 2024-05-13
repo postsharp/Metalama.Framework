@@ -35,10 +35,11 @@ internal sealed class IntroduceInterfaceTransformation : BaseTransformation, IIn
 
     public BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options )
     {
-        var syntaxGenerationContext = 
-            this.TargetType.GetCompilationModel().CompilationContext.GetSyntaxGenerationContext(
-                options,
-                this.TargetType );
+        var syntaxGenerationContext =
+            this.TargetType.GetCompilationModel()
+                .CompilationContext.GetSyntaxGenerationContext(
+                    options,
+                    this.TargetType );
 
         // The type already implements the interface members itself.
         return SimpleBaseType( syntaxGenerationContext.SyntaxGenerator.Type( this.InterfaceType ) );

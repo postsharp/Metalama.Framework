@@ -240,7 +240,6 @@ class C
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
         typeBuilder.BaseType = type1.NestedTypes.Single();
-        var originalBaseMethodCount = type1.NestedTypes.Single().AllMethods.Count;
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -336,7 +335,6 @@ class C
         // Add a type.
         var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
         typeBuilder.BaseType = type1.NestedTypes.Single();
-        var originalBaseMethodCount = type1.NestedTypes.Single().AllMethods.Count;
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();

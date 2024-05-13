@@ -82,5 +82,5 @@ internal sealed class TypeParameterBuilder : DeclarationBuilder, ITypeParameterB
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );
 
-    public ITypeSymbol? TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
+    public ITypeSymbol TypeSymbol => throw new NotSupportedException( "Constructed types involving ITypeParameterBuilder are not supported" );
 }

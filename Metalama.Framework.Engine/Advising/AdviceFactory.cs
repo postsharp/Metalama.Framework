@@ -1725,7 +1725,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     public ITypeIntroductionAdviceResult IntroduceType(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
-        Code.TypeKind typeKind,
+        TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
         if ( this._templateClassInstance == null )
@@ -1733,9 +1733,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             throw new InvalidOperationException();
         }
 
-        if (typeKind is not TypeKind.Class)
+        if ( typeKind is not TypeKind.Class )
         {
-            throw new NotImplementedException("Introducing other kinds of types than classes is not implemented.");
+            throw new NotImplementedException( "Introducing other kinds of types than classes is not implemented." );
         }
 
         using ( this.WithNonUserCode() )
@@ -1812,5 +1812,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    private static ITypeIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamedType> result ) => new TypeIntroductionAdviceResult( adviceFactory, result );
+    private static ITypeIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamedType> result )
+        => new TypeIntroductionAdviceResult( adviceFactory, result );
 }

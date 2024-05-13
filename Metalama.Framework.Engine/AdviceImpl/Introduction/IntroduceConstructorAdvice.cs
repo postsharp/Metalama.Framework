@@ -52,14 +52,6 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         this.Builder = new ConstructorBuilder( this, targetDeclaration );
     }
 
-    protected override void InitializeCore(
-        ProjectServiceProvider serviceProvider,
-        IDiagnosticAdder diagnosticAdder,
-        TemplateAttributeProperties? templateAttributeProperties )
-    {
-        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
-    }
-
     public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;
 
     protected override IntroductionAdviceResult<IConstructor> Implement(

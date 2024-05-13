@@ -69,7 +69,7 @@ internal partial class SyntaxGeneratorForIType
                 "Microsoft.CodeAnalysis.CodeGeneration.NullableSyntaxAnnotation",
                 throwOnError: false );
 
-            if ( nullableSyntaxAnnotation is object )
+            if ( nullableSyntaxAnnotation != null )
             {
                 Oblivious = (SyntaxAnnotation?) nullableSyntaxAnnotation.GetField( nameof(Oblivious), BindingFlags.Static | BindingFlags.Public )
                     ?.GetValue( null );

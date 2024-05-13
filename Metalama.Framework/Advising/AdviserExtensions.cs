@@ -1099,5 +1099,6 @@ public static class AdviserExtensions
     public static IAdviser<TTarget> WithTarget<TTarget, TAdvised>(
         this IAdviser<TAdvised> adviser,
         TTarget target )
+        where TTarget : IDeclaration
         => adviser.WithTarget( target );
 }

@@ -20,7 +20,7 @@ internal abstract class ContractAdvice<T> : Advice<AddContractAdviceResult<T>>
 
     protected IObjectReader TemplateArguments { get; }
 
-    public ContractAdvice(
+    protected ContractAdvice(
         IAspectInstanceInternal aspectInstance,
         TemplateClassInstance templateInstance,
         T targetDeclaration,
