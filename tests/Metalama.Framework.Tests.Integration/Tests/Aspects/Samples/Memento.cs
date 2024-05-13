@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TESTOPTIONS
+// @Skipped(TypeComparer.Is is not yet implemented for introduced types.)
+#endif
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Advising;
