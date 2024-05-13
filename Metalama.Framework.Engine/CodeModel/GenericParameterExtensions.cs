@@ -31,6 +31,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             // If we couldn't find a symbol for NullableAnnotation or it didn't have '?', check constraints.
+            if ( typeParameter.TypeConstraints.Any( t => t.IsNullable == false ) )
+            {
+                return false;
+            }
+
             return typeParameter.TypeKindConstraint switch
             {
                 TypeKindConstraint.Class => typeParameter.IsConstraintNullable == false ? false : null,

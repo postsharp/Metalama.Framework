@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating
         internal static readonly ImmutableList<string> AnnotationKinds = ImmutableList.Create(
             _symbolAnnotationKind,
             _declaredSymbolAnnotationKind,
-            SymbolAnnotationMapper.ExpressionTypeAnnotationKind,
+            TypeAnnotationMapper.ExpressionTypeSymbolAnnotationKind,
             _locationAnnotationKind );
 
         private readonly List<(SyntaxTree Tree, TextSpan Span)> _indexToLocationMap = new();
@@ -297,7 +297,7 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         public ITypeSymbol? GetExpressionType( ExpressionSyntax node )
         {
-            var annotation = node.GetAnnotations( SymbolAnnotationMapper.ExpressionTypeAnnotationKind ).SingleOrDefault();
+            var annotation = node.GetAnnotations( TypeAnnotationMapper.ExpressionTypeSymbolAnnotationKind ).SingleOrDefault();
 
             if ( annotation is not null )
             {

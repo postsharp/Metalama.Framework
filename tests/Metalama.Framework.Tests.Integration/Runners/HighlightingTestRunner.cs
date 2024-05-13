@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;

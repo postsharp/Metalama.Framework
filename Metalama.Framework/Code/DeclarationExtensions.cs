@@ -126,7 +126,7 @@ namespace Metalama.Framework.Code
             else
             {
                 return
-                    (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
+                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
                     ?? throw new InvalidOperationException(
                         $"The declaration '{compilationElement}' does not exist in the requested compilation. "
                         + $"Use TryForCompilation to avoid this exception." );
@@ -151,7 +151,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                translated = (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
 
                 return translated != null;
             }

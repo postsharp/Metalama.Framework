@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                         TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type( this._type ),
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this.AspectReferenceSpecification ),
-                TemplateExpansionContext.CurrentSyntaxGenerationContext );
+                TemplateExpansionContext.CurrentSyntaxSerializationContext.CompilationModel );
 
         protected override UserReceiver WithAspectReferenceSpecification( AspectReferenceSpecification spec ) => new ThisTypeUserReceiver( this._type, spec );
 

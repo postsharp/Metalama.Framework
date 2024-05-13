@@ -45,7 +45,7 @@ internal sealed class ExternalAssembly : Declaration, IAssembly
     public INamedTypeCollection AllTypes => new ExternalAssemblyTypeCollection( this._assemblySymbol, this.Compilation, true );
 
     public bool AreInternalsVisibleFrom( IAssembly assembly )
-        => this._assemblySymbol.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertSymbolNotNull() );
+        => this._assemblySymbol.AreInternalsVisibleToImpl( assembly.GetSymbol() );
 
     [Memo]
     public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this.Compilation, this._assemblySymbol.Modules.First() );

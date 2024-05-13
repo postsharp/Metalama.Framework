@@ -1,0 +1,14 @@
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System.Text;
+
+namespace Metalama.Framework.Engine.Utilities.Caching;
+
+public sealed class StringBuilderPool : ObjectPool<StringBuilder>
+{
+    public static StringBuilderPool Default { get; } = new( 128 );
+
+    internal StringBuilderPool( int capacity ) : base( () => new StringBuilder( capacity ) ) { }
+
+    protected override void CleanUp( StringBuilder obj ) => obj.Clear();
+}

@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -280,12 +281,12 @@ namespace Metalama.Framework.Engine.CodeModel
                 // TODO: this cache may need to be smartly invalidated when we have interface introductions.
                 this._allMemberAttributesByType = prototype._allMemberAttributesByType.AddRange( allAttributes, a => a.AttributeType );
 
-                var attributeTypes = this._allMemberAttributesByType.Keys.Select( x => (INamedTypeSymbol?) x.GetSymbol( this.RoslynCompilation ) )
-                    .WhereNotNull();
+                var attributeTypes = this._allMemberAttributesByType.Keys.Select( x => x.GetTarget( this ) );
 
                 this._derivedTypes = new Lazy<DerivedTypeIndex>(
                     () => prototype._derivedTypes.Value
                         .WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() )
+                        .WithIntroducedTypes( observableTransformations.OfType<IntroduceNamedTypeTransformation>() )
                         .WithAdditionalAnalyzedTypes( attributeTypes ) );
             }
 
@@ -322,7 +323,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._attributes = prototype._attributes;
             this._namedTypes = prototype._namedTypes;
 
-            this.Factory = new DeclarationFactory( this );
+            this.Factory = new( this );
+            this.SerializableTypeIdResolver = new( this );
             this._depthsCache = prototype._depthsCache;
             this._redirections = prototype._redirections;
             this._allMemberAttributesByType = prototype._allMemberAttributesByType;
@@ -404,22 +406,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             OnUnsupportedDependency( $"{nameof(ICompilation)}.{nameof(this.GetDerivedTypes)}" );
 
-            switch ( baseType )
-            {
-                case NamedType or NamedTypeImpl:
-                    // TODO: This should include derived types that were introduced.
-                    return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation(
-                            baseType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedBaseTypes ),
-                            options )
-                        .Select( t => this.Factory.GetNamedType( t ) );
-
-                case BuiltNamedType or NamedTypeBuilder:
-                    // TODO: This should should be built for named types that were introduced.
-                    return ImmutableArray<INamedType>.Empty;
-
-                default:
-                    throw new AssertionFailedException( $"Unsupported: {baseType}" );
-            }
+            return this._derivedTypes.Value.GetDerivedTypesInCurrentCompilation( baseType, options );
         }
 
         public IEnumerable<INamedType> GetDerivedTypes( Type baseType, DerivedTypesOptions options = default )
@@ -442,20 +429,18 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IEnumerable<IAttribute> GetAllAttributesOfType( INamedType type, bool includeDerivedTypes = false )
         {
-            var typeSymbol = type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes );
-
             if ( includeDerivedTypes )
             {
-                return this._derivedTypes.Value.GetDerivedTypes( typeSymbol ).SelectMany( GetAllAttributesOfExactType );
+                return this._derivedTypes.Value.GetDerivedTypes( type ).SelectMany( GetAllAttributesOfExactType );
             }
             else
             {
-                return GetAllAttributesOfExactType( typeSymbol );
+                return GetAllAttributesOfExactType( type );
             }
 
-            IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedTypeSymbol t )
+            IEnumerable<IAttribute> GetAllAttributesOfExactType( INamedType t )
             {
-                return this._allMemberAttributesByType[Ref.FromSymbol<INamedType>( t, this.CompilationContext )]
+                return this._allMemberAttributesByType[t.ToTypedRef()]
                     .Select(
                         a =>
                         {
@@ -633,7 +618,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal CompilationModel CreateImmutableClone( string? debugLabel = null ) => new( this, false, debugLabel, this.Options );
 
         public bool AreInternalsVisibleFrom( IAssembly assembly )
-            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( (IAssemblySymbol) assembly.GetSymbol().AssertSymbolNotNull() );
+            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( assembly.GetSymbol() );
 
         [Memo]
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );

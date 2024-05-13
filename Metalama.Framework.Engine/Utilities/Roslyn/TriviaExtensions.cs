@@ -68,12 +68,4 @@ internal static class TriviaExtensions
             return list.AddRange( list );
         }
     }
-
-    internal static T WithPrependedLeadingTriviaIfNecessary<T>( this T node, params SyntaxTrivia[] trivia )
-        where T : SyntaxNode
-    {
-#pragma warning disable LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-        return node.WithLeadingTrivia( node.GetLeadingTrivia().InsertRange( 0, trivia ) );
-#pragma warning restore LAMA0832 // Avoid WithLeadingTrivia and WithTrailingTrivia calls.
-    }
 }

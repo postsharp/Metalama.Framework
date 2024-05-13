@@ -150,7 +150,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var compilation = testContext.CreateCompilationModel( "" );
 
-            var type = compilation.Factory.GetTypeByReflectionType( typeof( Dictionary<,> ) );
+            var type = compilation.Factory.GetTypeByReflectionType( typeof(Dictionary<,>) );
 
             var syntaxGenerator = compilation.CompilationContext.GetSyntaxGenerationContext( SyntaxGenerationOptions.Formatted ).SyntaxGenerator;
 

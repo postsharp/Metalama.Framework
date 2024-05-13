@@ -27,7 +27,7 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
 
     public TType ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments = null )
     {
-        var result = this.ResolveAndCache( typeId, genericArguments );
+        var result = this.ResolveAndCache( typeId, genericArguments! );
 
         if ( !result.IsSuccess )
         {
@@ -43,7 +43,7 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
 
     public bool TryResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments, [NotNullWhen( true )] out TType? type )
     {
-        var result = this.ResolveAndCache( typeId, genericArguments );
+        var result = this.ResolveAndCache( typeId, genericArguments! );
 
         if ( !result.IsSuccess )
         {
@@ -59,7 +59,7 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
         }
     }
 
-    private ResolverResult ResolveAndCache( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments = null )
+    private ResolverResult ResolveAndCache( SerializableTypeId typeId, IReadOnlyDictionary<string, TType?>? genericArguments = null )
     {
         if ( genericArguments == null || genericArguments.Count == 0 )
         {
@@ -71,7 +71,7 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
         }
     }
 
-    private ResolverResult ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, TType>? genericArguments = null )
+    private ResolverResult ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, TType?>? genericArguments = null )
     {
         try
         {
@@ -169,11 +169,11 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
     private sealed class Resolver : SafeSyntaxVisitor<ResolverResult>
     {
         private readonly SerializableTypeIdResolver<TType, TTypeOrNamespace> _parent;
-        private readonly IReadOnlyDictionary<string, TType>? _genericArguments;
+        private readonly IReadOnlyDictionary<string, TType?>? _genericArguments;
         private readonly bool _isNullOblivious;
         private TType? _currentGenericType;
 
-        public Resolver( SerializableTypeIdResolver<TType, TTypeOrNamespace> parent, IReadOnlyDictionary<string, TType>? genericArguments, bool isNullOblivious )
+        public Resolver( SerializableTypeIdResolver<TType, TTypeOrNamespace> parent, IReadOnlyDictionary<string, TType?>? genericArguments, bool isNullOblivious )
         {
             this._parent = parent;
             this._genericArguments = genericArguments;
@@ -227,7 +227,9 @@ public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
             {
                 if ( this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
                 {
-                    return ResolverResult.Success( type );
+                    return type == null
+                        ? ResolverResult.Error( $"Could not resolve the type for type parameter {name}." )
+                        : ResolverResult.Success( type );
                 }
                 else if ( this._currentGenericType != null && this._parent.HasTypeParameterOfName( this._currentGenericType, name ) )
                 {

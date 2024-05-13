@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Caching;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -25,19 +26,20 @@ internal static class DisplayStringFormatter
     {
         private readonly CodeDisplayFormat? _format;
         private readonly CodeDisplayContext? _context;
-        private readonly StringBuilder _stringBuilder;
+        private readonly ObjectPoolHandle<StringBuilder> _stringBuilder;
 
         // ReSharper disable UnusedParameter.Local
         public InterpolatedStringHandler( int literalLength, int formattedCount, CodeDisplayFormat? format, CodeDisplayContext? context )
         {
             this._format = format;
             this._context = context;
-            this._stringBuilder = new StringBuilder();
+            this._stringBuilder = StringBuilderPool.Default.Allocate();
         }
 
-        public void AppendLiteral( string s ) => this._stringBuilder.Append( s );
+        public void AppendLiteral( string s ) => this._stringBuilder.Value.Append( s );
 
-        public void AppendFormatted( IDisplayable displayable ) => this._stringBuilder.Append( displayable.ToDisplayString( this._format, this._context ) );
+        public void AppendFormatted( IDisplayable displayable )
+            => this._stringBuilder.Value.Append( displayable.ToDisplayString( this._format, this._context ) );
 
         public void AppendFormatted( IEnumerable<IDisplayable> collection )
         {
@@ -47,17 +49,23 @@ internal static class DisplayStringFormatter
             {
                 if ( !first )
                 {
-                    this._stringBuilder.Append( ", " );
+                    this._stringBuilder.Value.Append( ", " );
                 }
 
                 first = false;
 
-                this._stringBuilder.Append( item.ToDisplayString( this._format, this._context ) );
+                this._stringBuilder.Value.Append( item.ToDisplayString( this._format, this._context ) );
             }
         }
 
-        public void AppendFormatted( string s ) => this._stringBuilder.Append( s );
+        public void AppendFormatted( string s ) => this._stringBuilder.Value.Append( s );
 
-        public override string ToString() => this._stringBuilder.ToString();
+        public override string ToString()
+        {
+            var s = this._stringBuilder.Value.ToString();
+            this._stringBuilder.Dispose();
+
+            return s;
+        }
     }
 }

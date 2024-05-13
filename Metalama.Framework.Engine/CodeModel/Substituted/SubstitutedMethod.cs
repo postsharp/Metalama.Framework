@@ -165,8 +165,8 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
             return new TypedExpressionSyntax(
                 new TypedExpressionSyntaxImpl(
                     sourceExpression.Syntax,
-                    this.MapSymbol( sourceExpression.ExpressionType ),
-                    ((SyntaxSerializationContext) syntaxGenerationContext).SyntaxGenerationContext,
+                    this.MapIType( sourceExpression.ExpressionType ),
+                    ((SyntaxSerializationContext) syntaxGenerationContext).CompilationModel,
                     sourceExpression.IsReferenceable,
                     sourceExpression.CanBeNull ) );
         }

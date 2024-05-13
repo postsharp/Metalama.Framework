@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             => new(
                 this.ToSyntax( syntaxSerializationContext ),
                 this.Type,
-                syntaxSerializationContext.SyntaxGenerationContext,
+                syntaxSerializationContext.CompilationModel,
                 this.IsReferenceable,
                 this.CanBeNull );
 

@@ -45,8 +45,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
             
             var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Formatted );
-            var syntaxGenerationContext = syntaxSerializationContext.SyntaxGenerationContext;
-            var generator = syntaxGenerationContext.SyntaxGenerator;
+            var generator = syntaxSerializationContext.SyntaxGenerationContext.SyntaxGenerator;
 
             using ( TemplateExpansionContext.WithTestingContext(
                        syntaxSerializationContext,
@@ -59,18 +58,18 @@ class TargetCode
 
                 // Test normal case.
                 AssertEx.DynamicEquals(
-                    toString.With( new TypedExpressionSyntaxImpl( generator.ThisExpression(), syntaxGenerationContext ) )
-                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( generator.ThisExpression(), compilation ) )
+                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( "x" ), compilation ) ),
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.With( new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), syntaxGenerationContext ), InvokerOptions.NullConditional )
-                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( "x" ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( generator.IdentifierName( "a" ), compilation ), InvokerOptions.NullConditional )
+                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( "x" ), compilation ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
-                    toString.With( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( 42 ), syntaxGenerationContext ) )
-                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( 43 ), syntaxGenerationContext ) ),
+                    toString.With( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( 42 ), compilation ) )
+                        .Invoke( new TypedExpressionSyntaxImpl( SyntaxFactoryEx.LiteralExpression( 43 ), compilation ) ),
                     @"((global::TargetCode)42).ToString((global::System.String)43)" );
 
                 // Test static call.
@@ -88,15 +87,15 @@ class TargetCode
 
                 AssertEx.DynamicEquals(
                     byRefMethod.Invoke(
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), intType, syntaxGenerationContext, isReferenceable: true ),
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), intType, syntaxGenerationContext, isReferenceable: true ) ),
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), intType, compilation, isReferenceable: true ),
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), intType, compilation, isReferenceable: true ) ),
                     @"global::TargetCode.ByRef(out x, ref y)" );
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                     () => byRefMethod.Invoke(
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), syntaxGenerationContext, isReferenceable: false ),
-                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), syntaxGenerationContext, isReferenceable: false ) ) );
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "x" ), compilation, isReferenceable: false ),
+                        new TypedExpressionSyntaxImpl( generator.IdentifierName( "y" ), compilation, isReferenceable: false ) ) );
             }
         }
 
@@ -154,7 +153,7 @@ class TargetCode
                 AssertEx.DynamicEquals( staticEvent.Add( null ), "global::TargetCode.Nested<T1>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
-                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxSerializationContext.SyntaxGenerationContext );
+                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxSerializationContext.CompilationModel );
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" ).Single();
                 var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
                 var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
@@ -236,7 +235,7 @@ class TargetCode
                 AssertEx.DynamicEquals( staticEvent.Add( null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
-                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxSerializationContext.SyntaxGenerationContext );
+                var instance = new TypedExpressionSyntaxImpl( SyntaxFactory.ParseExpression( "abc" ), syntaxSerializationContext.CompilationModel );
 
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
                     .Single()
@@ -395,7 +394,7 @@ class TargetCode
 
                 TypedExpressionSyntaxImpl parameterExpression = new(
                     SyntaxFactory.IdentifierName( "value" ),
-                    syntaxSerializationContext.SyntaxGenerationContext );
+                    syntaxSerializationContext.CompilationModel );
 
                 AssertEx.DynamicEquals( @event.Add( parameterExpression ), @"this.MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Remove( parameterExpression ), @"this.MyEvent -= value" );
@@ -437,7 +436,7 @@ class TargetCode
 
                 TypedExpressionSyntaxImpl parameterExpression = new(
                     SyntaxFactory.IdentifierName( "value" ),
-                    syntaxSerializationContext.SyntaxGenerationContext );
+                    syntaxSerializationContext.CompilationModel );
 
                 AssertEx.DynamicEquals(
                     @event.AddMethod.Invoke( parameterExpression ),

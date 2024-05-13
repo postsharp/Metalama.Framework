@@ -61,8 +61,6 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public override IDeclaration ContainingDeclaration => (IDeclaration?) this.DeclaringType ?? this.Namespace;
 
-    bool INamedType.IsPartial => this.IsPartial;
-
     public bool IsPartial
     {
         get => this._isPartial;
@@ -86,8 +84,6 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
             this._baseType = value;
         }
     }
-
-    INamedType? INamedType.BaseType => this.BaseType;
 
     [Memo]
     public IImplementedInterfaceCollection AllImplementedInterfaces => new EmptyImplementedInterfaceCollection();

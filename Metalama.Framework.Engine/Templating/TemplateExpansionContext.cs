@@ -352,34 +352,27 @@ internal sealed partial class TemplateExpansionContext : UserCodeExecutionContex
         {
             var compilation = returnType.GetCompilationModel();
 
-            if ( SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+            var expression = awaitResult
+                ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
+                : returnExpression;
+
+            if ( TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                      returnExpression,
-                     returnType.GetCompilationModel().CompilationContext,
+                     compilation,
                      out var expressionType ) &&
-                 compilation.RoslynCompilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
+                 compilation.Comparers.Default.Is( expressionType, returnType, ConversionKind.Implicit ) )
             {
                 // No need to emit a cast.
-                return
-                    ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                        awaitResult
-                            ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
-                            : returnExpression,
-                        Token( SyntaxKind.SemicolonToken ) );
             }
             else
             {
-                return
-                    ReturnStatement(
-                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                        this.SyntaxGenerator.CastExpression(
-                                returnType,
-                                awaitResult
-                                    ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
-                                    : returnExpression )
-                            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext ),
-                        Token( SyntaxKind.SemicolonToken ) );
+                expression = this.SyntaxGenerator.CastExpression( returnType, expression );
             }
+
+            return ReturnStatement(
+                Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                expression,
+                Token( SyntaxKind.SemicolonToken ) );
         }
     }
 

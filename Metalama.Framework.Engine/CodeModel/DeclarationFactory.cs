@@ -450,7 +450,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         return declaration;
     }
 
-    public ICompilationElement? Translate( ICompilationElement compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+    public T? Translate<T>( T compilationElement, ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
+        where T : class, ICompilationElement
     {
         if ( ReferenceEquals( compilationElement.Compilation, this._compilationModel ) )
         {
@@ -461,7 +462,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             switch ( compilationElement )
             {
                 case IDeclaration declaration:
-                    return declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
+                    return (T?) declaration.ToTypedRef().GetTargetOrNull( this._compilationModel, options );
 
                 case IType type:
                     var translatedSymbol = this._compilationModel.CompilationContext.SymbolTranslator.Translate(
@@ -472,7 +473,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
                         return null;
                     }
 
-                    return this._compilationModel.Factory.GetIType( translatedSymbol );
+                    return (T) this._compilationModel.Factory.GetIType( translatedSymbol );
 
                 default:
                     throw new AssertionFailedException( $"Cannot translate a '{compilationElement.GetType().Name}'." );

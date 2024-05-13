@@ -117,7 +117,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 assertionWalker.Visit( syntaxTree.OutputRunTimeSyntaxRoot );
             }
 
-            base.ExecuteAssertions( testInput, testResult);
+            base.ExecuteAssertions( testInput, testResult );
         }
 
         private protected override SyntaxNode PreprocessSyntaxRoot( SyntaxNode syntaxRoot, TestResult testResult )

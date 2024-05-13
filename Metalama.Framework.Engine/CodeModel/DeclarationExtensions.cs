@@ -95,7 +95,7 @@ public static class DeclarationExtensions
         => ((IDeclarationImpl) declaration).ToRef().As<T>();
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
-        => declaration.GetSymbol() is ISymbol symbol
+        => declaration.GetSymbol() is { } symbol
             ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
             : null;
 
@@ -581,10 +581,10 @@ public static class DeclarationExtensions
         this T declaration,
         ICompilation newCompilation,
         ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
-        where T : IDeclaration
+        where T : class, IDeclaration
         => declaration.Compilation == newCompilation
             ? declaration
-            : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+            : ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
 
     /// <summary>
     /// Version of <see cref="IDeclaration.ContainingDeclaration"/> that behaves like <see cref="ISymbol.ContainingSymbol"/>,

@@ -17,7 +17,7 @@ internal class IntroductionAdviceResult<T> : AdviceResult, IIntroductionAdviceRe
         AdviceKind adviceKind,
         AdviceOutcome outcome,
         IRef<T>? declaration,
-        IRef<IDeclaration>? conflictingDeclaration)
+        IRef<IDeclaration>? conflictingDeclaration )
     {
         this.Outcome = outcome;
         this.AdviceKind = adviceKind;
