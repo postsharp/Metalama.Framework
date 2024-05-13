@@ -10,16 +10,17 @@ namespace Metalama.Framework.Engine.CodeModel;
 /// </summary>
 internal abstract class TypeVisitor<T>
 {
-    public virtual T Visit( IType type ) => type switch
-    {
-        IArrayType arrayType => this.VisitArrayType( arrayType ),
-        IDynamicType dynamicType => this.VisitDynamicType( dynamicType ),
-        INamedType namedType => this.VisitNamedType( namedType ),
-        IPointerType pointerType => this.VisitPointerType( pointerType ),
-        IFunctionPointerType functionPointerType => this.VisitFunctionPointerType( functionPointerType ),
-        ITypeParameter typeParameter => this.VisitTypeParameter( typeParameter ),
-        IFunctionPointerType or _ => throw new AssertionFailedException( $"Unexpected type: {type.GetType()}" ),
-    };
+    public virtual T Visit( IType type )
+        => type switch
+        {
+            IArrayType arrayType => this.VisitArrayType( arrayType ),
+            IDynamicType dynamicType => this.VisitDynamicType( dynamicType ),
+            INamedType namedType => this.VisitNamedType( namedType ),
+            IPointerType pointerType => this.VisitPointerType( pointerType ),
+            IFunctionPointerType functionPointerType => this.VisitFunctionPointerType( functionPointerType ),
+            ITypeParameter typeParameter => this.VisitTypeParameter( typeParameter ),
+            IFunctionPointerType or _ => throw new AssertionFailedException( $"Unexpected type: {type.GetType()}" ),
+        };
 
     public abstract T DefaultVisit( IType type );
 

@@ -145,7 +145,7 @@ public sealed partial class DerivedTypeIndex
     {
         foreach ( var baseType in this._relationships.Keys )
         {
-            if ( baseType.Symbol is { } baseTypeSymbol && !baseTypeSymbol.OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty )
+            if ( baseType.Symbol is { OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty: false } baseTypeSymbol )
             {
                 this.PopulateDependenciesCore( collector, baseTypeSymbol, baseType );
             }
