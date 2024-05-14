@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -46,6 +47,16 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = targetRef;
         }
 
+        private CompileTimeType( NamedTypeBuilder builder )
+        {
+            this.Namespace = builder.Namespace.FullName;
+            this.Name = builder.Name;
+            this.FullName = builder.FullName;
+            this._toStringName = builder.GetMetadataName();
+
+            this.Target = builder.ToTypedRef<INamedType>();
+        }
+
         internal static CompileTimeType CreateFromSymbolId( SymbolId symbolId, ITypeSymbol symbolForMetadata )
             => new( Ref.FromSymbolId<IType>( symbolId ), symbolForMetadata );
 
@@ -54,6 +65,9 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         internal static CompileTimeType CreateFromTypeId( SerializableTypeId typeId, CompileTimeTypeMetadata metadata )
             => new( Ref.FromTypeId<IType>( typeId ), metadata );
+
+        internal static CompileTimeType CreateFromBuilder( NamedTypeBuilder builder )
+            => new( builder );
 
         // For test only.
         internal static CompileTimeType Create( IType type ) => Create( type.GetSymbol().AssertSymbolNotNull(), type.GetCompilationModel().CompilationContext );

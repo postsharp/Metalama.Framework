@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Reflection;
@@ -84,7 +85,7 @@ internal sealed class ParameterBuilder : BaseParameterBuilder
 
     public override IHasParameters DeclaringMember { get; }
 
-    public override ParameterInfo ToParameterInfo() => throw new NotImplementedException();
+    public override ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create(this);
 
     public override bool IsReturnParameter => this.Index < 0;
 

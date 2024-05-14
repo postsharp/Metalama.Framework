@@ -155,10 +155,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool IsSubclassOf( INamedType type ) => type.SpecialType == SpecialType.Object;
 
-    public Type ToType()
-    {
-        throw new NotSupportedException( "Reflection types on introduced types are not yet supported." );
-    }
+    public Type ToType() => this.TypeBuilder.ToType();
 
     protected override Microsoft.CodeAnalysis.ISymbol? GetSymbol() => this.TypeSymbol;
 

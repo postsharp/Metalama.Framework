@@ -207,7 +207,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public bool IsSubclassOf( INamedType type ) => false;
 
-    public Type ToType() => CompileTimeType.Create( this );
+    public Type ToType() => CompileTimeType.CreateFromBuilder( this );
 
     public override MemberInfo ToMemberInfo() => this.ToType();
 

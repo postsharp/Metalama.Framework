@@ -32,7 +32,7 @@ internal sealed class SyntaxSerializationContext : ISyntaxGenerationContext
 
     public CompilationContext CompilationContext => this.CompilationModel.CompilationContext;
 
-    public ITypeSymbol GetTypeSymbol( Type type ) => this.CompilationContext.ReflectionMapper.GetTypeSymbol( type );
+    public ITypeSymbol GetTypeSymbol( Type type ) => this.CompilationModel.ReflectionMapper.GetTypeSymbol( type );
 
     public TypeSyntax GetTypeSyntax( Type type ) => this.SyntaxGenerator.Type( this.CompilationContext.ReflectionMapper.GetTypeSymbol( type ) );
 
