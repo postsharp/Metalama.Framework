@@ -15,7 +15,7 @@ namespace Metalama.Framework.Code
         int Index { get; }
 
         /// <summary>
-        /// Gets the type (interface) constraints of the generic parameter.
+        /// Gets the type constraints of the generic parameter.
         /// </summary>
         IReadOnlyList<IType> TypeConstraints { get; }
 

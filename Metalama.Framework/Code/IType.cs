@@ -26,7 +26,7 @@ namespace Metalama.Framework.Code
         TypeKind TypeKind { get; }
 
         /// <summary>
-        /// Gets the <see cref="Code.SpecialType"/> enumeration value for the current type. Provides a fast to determine whether
+        /// Gets the <see cref="Code.SpecialType"/> enumeration value for the current type. Provides a fast way to determine whether
         /// the current type is of a well-known type. 
         /// </summary>
         SpecialType SpecialType { get; }
