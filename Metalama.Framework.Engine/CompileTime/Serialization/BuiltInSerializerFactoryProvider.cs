@@ -47,7 +47,8 @@ internal sealed class BuiltInSerializerFactoryProvider : SerializerFactoryProvid
 
         // Our own types.
         this.AddSerializer( typeof(Ref<>), typeof(RefSerializer<>) );
-        this.AddSerializer( typeof(SerializableDeclarationId), typeof(DeclarationSerializableIdSerializer) );
+        this.AddSerializer( typeof(SerializableDeclarationId), typeof(SerializableDeclarationIdSerializer) );
+        this.AddSerializer( typeof(SerializableTypeId), typeof(SerializableTypeIdSerializer) );
 
         this.MakeReadOnly();
     }
