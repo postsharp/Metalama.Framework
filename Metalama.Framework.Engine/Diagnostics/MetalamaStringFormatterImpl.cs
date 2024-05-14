@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
             try
             {
-                return arg != null ? arg.ToString() ?? string.Empty : string.Empty;
+                return arg?.ToString() ?? string.Empty;
             }
             catch
             {

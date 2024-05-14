@@ -396,6 +396,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 return safeCast;
             }
 
+            T? Missing( string id, Exception? ex = null )
+            {
+                if ( throwIfMissing )
+                {
+                    throw new SymbolNotFoundException( id, compilation.RoslynCompilation, ex );
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
             switch ( reference )
             {
                 case null:
@@ -404,11 +416,14 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         : throw new AssertionFailedException( "The reference target is null but the kind is not assembly or module." );
 
                 case ISymbol symbol:
-                    return Convert(
-                        compilation.Factory.GetCompilationElement(
-                                compilation.CompilationContext.SymbolTranslator.Translate( symbol, this._compilationContext?.Compilation ).AssertNotNull(),
-                                this.TargetKind )
-                            .AssertNotNull() );
+                    var translatedSymbol = compilation.CompilationContext.SymbolTranslator.Translate( symbol, this._compilationContext?.Compilation );
+
+                    if ( translatedSymbol == null )
+                    {
+                        return Missing( MetalamaStringFormatter.Instance.Format( symbol ) );
+                    }
+
+                    return Convert( compilation.Factory.GetCompilationElement( translatedSymbol, this.TargetKind ).AssertNotNull() );
 
                 case SyntaxNode node:
                     return Convert(
@@ -427,12 +442,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     {
                         if ( IsDeclarationId( id ) )
                         {
-                            var declaration = new SerializableDeclarationId( id ).ResolveToDeclaration( compilation )
-                                              ?? (throwIfMissing ? throw new SymbolNotFoundException( id, compilation.RoslynCompilation ) : null);
+                            var declaration = new SerializableDeclarationId( id ).ResolveToDeclaration( compilation );
 
                             if ( declaration == null )
                             {
-                                return null;
+                                return Missing( id );
                             }
 
                             return Convert( declaration );
@@ -447,24 +461,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             }
                             catch ( InvalidOperationException ex )
                             {
-                                if ( throwIfMissing )
-                                {
-                                    throw new SymbolNotFoundException( id, compilation.RoslynCompilation, ex );
-                                }
-                                else
-                                {
-                                    return null;
-                                }
+                                return Missing( id, ex );
                             }
                         }
                         else
                         {
-                            var symbol = new SymbolId( id ).Resolve( compilation.RoslynCompilation )
-                                         ?? (throwIfMissing ? throw new SymbolNotFoundException( id, compilation.RoslynCompilation ) : null);
+                            var symbol = new SymbolId( id ).Resolve( compilation.RoslynCompilation );
 
                             if ( symbol == null )
                             {
-                                return null;
+                                return Missing( id );
                             }
 
                             return Convert( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull() );
@@ -481,7 +487,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             var value = this.Target switch
             {
                 null => "null",
-                ISymbol symbol => MetalamaStringFormatter.Instance.Format( null, symbol, null ),
+                ISymbol symbol => MetalamaStringFormatter.Instance.Format( symbol ),
                 _ => this.Target.ToString() ?? "null"
             };
 
