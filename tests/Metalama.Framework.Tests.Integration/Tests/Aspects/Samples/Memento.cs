@@ -1,8 +1,4 @@
-﻿#if TESTOPTIONS
-// @Skipped(TypeComparer.Is is not yet implemented for introduced types.)
-#endif
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Advising;
@@ -46,6 +42,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                         b.Name = fieldOrProperty.Name;
                         b.Type = fieldOrProperty.Type;
                         b.Accessibility = Accessibility.Public;
+                        b.Writeability = Writeability.ConstructorOnly;
                     });
 
                 mementoFields.Add(field.Declaration);
