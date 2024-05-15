@@ -185,7 +185,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 existingSignatures.Add(
                     constructor.Parameters.SelectAsArray(
-                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ), p.RefKind) ) );
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )
@@ -200,7 +200,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 if ( !existingSignatures.Add(
                         finalParameters.SelectAsArray(
-                            p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ), p.RefKind) ) ) )
+                            p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                     if ( existingSignatures.Add(
                             nonOptionalParameters.SelectAsArray(
-                                p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ),
+                                p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
                                       p.RefKind) ) ) )
                     {
                         constructors.Add(

@@ -768,6 +768,11 @@ namespace Metalama.Framework.Advising
             string name,
             Action<INamedTypeBuilder>? buildType = null );
 
+        ITypeIntroductionAdviceResult IntroduceInterface(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            Action<INamedTypeBuilder>? buildType = null );
+
         ITypeIntroductionAdviceResult IntroduceStruct(
             INamespaceOrNamedType targetNamespaceOrType,
             string name,

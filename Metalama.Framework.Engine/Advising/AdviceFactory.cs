@@ -1761,6 +1761,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         Action<INamedTypeBuilder>? buildType = null )
         => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
 
+    public ITypeIntroductionAdviceResult IntroduceInterface(
+        INamespaceOrNamedType targetNamespaceOrType,
+        string name,
+        Action<INamedTypeBuilder>? buildType = null )
+        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Interface, buildType );
+
     public ITypeIntroductionAdviceResult IntroduceStruct(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
