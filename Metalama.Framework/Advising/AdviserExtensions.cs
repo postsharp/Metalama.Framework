@@ -247,6 +247,32 @@ public static class AdviserExtensions
             args,
             tags );
 
+    public static IOverrideAdviceResult<IProperty> OverrideAccessors(
+        this IAdviser<IFieldOrProperty> adviser,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.OverrideAccessors(
+            adviser.Target,
+            getTemplate,
+            setTemplate,
+            args,
+            tags );
+
+    public static IOverrideAdviceResult<IIndexer> OverrideAccessors(
+        this IAdviser<IIndexer> adviser,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.OverrideAccessors(
+            adviser.Target,
+            getTemplate,
+            setTemplate,
+            args,
+            tags );
+
     /// <summary>
     /// Introduces a field to the target type by specifying a template.
     /// </summary>

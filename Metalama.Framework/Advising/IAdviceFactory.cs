@@ -183,6 +183,20 @@ namespace Metalama.Framework.Advising
             object? args = null,
             object? tags = null );
 
+        IOverrideAdviceResult<IProperty> OverrideAccessors(
+            IFieldOrProperty targetFieldOrProperty,
+            in GetterTemplateSelector getTemplate = default,
+            string? setTemplate = null,
+            object? args = null,
+            object? tags = null );
+
+        IOverrideAdviceResult<IIndexer> OverrideAccessors(
+            IIndexer targetIndexer,
+            in GetterTemplateSelector getTemplate = default,
+            string? setTemplate = null,
+            object? args = null,
+            object? tags = null );
+
         /// <summary>
         /// Introduces a field to the target type by specifying a template.
         /// </summary>

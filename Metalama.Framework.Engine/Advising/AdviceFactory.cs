@@ -873,6 +873,22 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
+    public IOverrideAdviceResult<IProperty> OverrideAccessors(
+        IFieldOrProperty targetFieldOrProperty,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => (IOverrideAdviceResult<IProperty>) this.OverrideAccessors( (IFieldOrPropertyOrIndexer) targetFieldOrProperty, getTemplate, setTemplate, args, tags );
+
+    public IOverrideAdviceResult<IIndexer> OverrideAccessors(
+        IIndexer targetIndexer,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => (IOverrideAdviceResult<IIndexer>) this.OverrideAccessors( (IFieldOrPropertyOrIndexer) targetIndexer, getTemplate, setTemplate, args, tags );
+
     public IIntroductionAdviceResult<IField> IntroduceField(
         INamedType targetType,
         string templateName,
@@ -1401,14 +1417,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     public IImplementInterfaceAdviceResult ImplementInterface(
         INamedType targetType,
-        INamedType interfaceType,
-        OverrideStrategy whenExists = OverrideStrategy.Default,
-        Action<IInterfaceImplementationBuilder>? implementInterface = null,
-        object? tags = null )
-        => throw new NotImplementedException();
-
-    public IImplementInterfaceAdviceResult ImplementInterface(
-        INamedType targetType,
         Type interfaceType,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         object? tags = null )
@@ -1417,14 +1425,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
             whenExists,
             tags );
-
-    public IImplementInterfaceAdviceResult ImplementInterface(
-        INamedType targetType,
-        Type interfaceType,
-        OverrideStrategy whenExists = OverrideStrategy.Default,
-        Action<IInterfaceImplementationBuilder>? implementInterface = null,
-        object? tags = null )
-        => throw new NotImplementedException();
 
     public IAddInitializerAdviceResult AddInitializer(
         INamedType targetType,
