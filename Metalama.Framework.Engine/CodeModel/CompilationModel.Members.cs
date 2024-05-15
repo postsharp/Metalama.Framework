@@ -176,7 +176,7 @@ public sealed partial class CompilationModel
                 var sourceCollection = this.GetMemberCollection<TOwner, TDeclaration, TRef, TCollection>(
                     ref dictionary,
                     requestMutableCollection,
-                    substitutedType.OriginalDefinition.ToTypedRef<TOwner>(this.CompilationContext),
+                    substitutedType.OriginalDefinition.ToTypedRef<TOwner>( this.CompilationContext ),
                     createCollection,
                     createSubstitutedCollection );
 

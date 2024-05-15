@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;

@@ -26,8 +26,8 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
         string? layerName,
         IObjectReader tags ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
     {
-            this._boundTemplate = boundTemplate;
-        }
+        this._boundTemplate = boundTemplate;
+    }
 
     public override AdviceKind AdviceKind => AdviceKind.OverrideConstructor;
 
@@ -36,18 +36,18 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-            var constructor = this.TargetDeclaration.GetTarget( compilation );
+        var constructor = this.TargetDeclaration.GetTarget( compilation );
 
-            if ( constructor.IsImplicitInstanceConstructor() )
-            {
-                // Missing implicit ctor.
-                var builder = new ConstructorBuilder( this, constructor.DeclaringType );
-                addTransformation( builder.ToTransformation() );
-                constructor = builder;
-            }
-
-            addTransformation( new OverrideConstructorTransformation( this, constructor, this._boundTemplate, this.Tags ) );
-
-            return this.CreateSuccessResult( constructor );
+        if ( constructor.IsImplicitInstanceConstructor() )
+        {
+            // Missing implicit ctor.
+            var builder = new ConstructorBuilder( this, constructor.DeclaringType );
+            addTransformation( builder.ToTransformation() );
+            constructor = builder;
         }
+
+        addTransformation( new OverrideConstructorTransformation( this, constructor, this._boundTemplate, this.Tags ) );
+
+        return this.CreateSuccessResult( constructor );
+    }
 }

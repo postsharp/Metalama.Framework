@@ -73,6 +73,7 @@ public partial class DerivedTypeIndex
             if ( type.GetSymbol() is { } symbol )
             {
                 this.AnalyzeType( symbol );
+                
                 return;
             }
 

@@ -37,7 +37,7 @@ internal class DeclarationSelectionContext
     {
         this._selectionCache ??= _staticCache.GetOrAdd( this.Compilation, _ => new ConcurrentDictionary<IAspectReceiver<IDeclaration>, Node>() );
 
-        var node = this._selectionCache.GetOrAdd( receiver, r => new Node() );
+        var node = this._selectionCache.GetOrAdd( receiver, _ => new Node() );
 
         if ( node.Payload != null )
         {

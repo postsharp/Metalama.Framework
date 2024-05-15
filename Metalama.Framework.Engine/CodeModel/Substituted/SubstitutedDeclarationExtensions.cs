@@ -13,7 +13,7 @@ internal static class SubstitutedDeclarationExtensions
         where T : class, ITypeSymbol
         => declaration.GenericMap.Map( typeSymbol );
 
-    [return: NotNullIfNotNull( nameof( type ) )]
+    [return: NotNullIfNotNull( nameof(type) )]
     public static T? MapIType<T>( this ISubstitutedDeclaration declaration, T? type )
         where T : class, IType
     {

@@ -202,7 +202,7 @@ namespace Metalama.Framework.Aspects
                     // TODO: Use AssertNotNull() extension method instead of `throw` if it can be made accessible.
 
                     this.BuildAspect(
-                        ((IAspectBuilder) builder).WithTarget<IParameter>(
+                        ((IAspectBuilder) builder).WithTarget(
                             parameter.ForCompilation( builder.Target.Compilation ) ?? throw new InvalidOperationException( "Assertion failed." ) ) );
                 }
             }

@@ -692,7 +692,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         () =>
                             new[]
                             {
-                            new InjectedMember(
+                                new InjectedMember(
                                     transformation,
                                     declarationKind,
                                     overrideSyntax,

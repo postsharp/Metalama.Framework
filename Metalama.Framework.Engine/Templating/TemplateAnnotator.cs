@@ -2442,7 +2442,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         }
     }
 
-    public override SyntaxNode? VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+    public override SyntaxNode VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
     {
         if ( node.ReturnType != null && this._templateMemberClassifier.IsNodeOfDynamicType( node.ReturnType ) )
         {
@@ -2466,7 +2466,7 @@ internal sealed partial class TemplateAnnotator : SafeSyntaxRewriter, IDiagnosti
         return this.VisitAnonymousFunctionExpression( node, node.ArrowToken, node.ParameterList.Parameters, base.VisitParenthesizedLambdaExpression );
     }
 
-    public override SyntaxNode? VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+    public override SyntaxNode VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
         => this.VisitAnonymousFunctionExpression( node, node.ArrowToken, [node.Parameter], base.VisitSimpleLambdaExpression );
 
     #endregion

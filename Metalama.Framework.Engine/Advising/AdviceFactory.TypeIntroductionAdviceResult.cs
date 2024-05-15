@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Advising;
 internal sealed partial class AdviceFactory<T>
     where T : IDeclaration
 {
-    private class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult, IAdviserInternal
+    private sealed class TypeIntroductionAdviceResult : ITypeIntroductionAdviceResult, IAdviserInternal
     {
         private readonly AdviceFactory<T> _origin;
         private readonly IIntroductionAdviceResult<INamedType> _inner;
@@ -33,6 +33,6 @@ internal sealed partial class AdviceFactory<T>
 
         public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
             where TNewDeclaration : IDeclaration
-            => this._origin.WithDeclaration( target);
+            => this._origin.WithDeclaration( target );
     }
 }

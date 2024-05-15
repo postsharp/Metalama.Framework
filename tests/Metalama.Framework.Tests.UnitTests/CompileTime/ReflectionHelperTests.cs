@@ -29,7 +29,8 @@ public sealed class ReflectionHelperTests : UnitTestClass
     }
 
     public static IEnumerable<object[]> Types()
-        => [
+        =>
+        [
             [typeof(int)],
             [typeof(List<>)],
             [typeof(List<int>)],
@@ -68,7 +69,7 @@ public sealed class ReflectionHelperTests : UnitTestClass
         using var testContext = this.CreateTestContext();
 
         var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null )
-            .AddReferences( MetadataReference.CreateFromFile( typeof( ReflectionHelperTests ).Assembly.Location ) );
+            .AddReferences( MetadataReference.CreateFromFile( typeof(ReflectionHelperTests).Assembly.Location ) );
 
         var reflectionMapper = new ReflectionMapper( compilation );
 
