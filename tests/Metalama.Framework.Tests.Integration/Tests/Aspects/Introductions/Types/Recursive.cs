@@ -7,21 +7,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introduced = builder.IntroduceType("Test", TypeKind.Class);
-        var inner = introduced.IntroduceType( "InnerTest", TypeKind.Class);
-        inner.IntroduceType("InnerInnerTest", TypeKind.Class);
+        var introduced = builder.IntroduceClass( "Test", TypeKind.Class );
+        var inner = introduced.IntroduceClass( "InnerTest", TypeKind.Class );
+        inner.IntroduceClass( "InnerInnerTest", TypeKind.Class );
     }
 
     [Template]
-    public void Method()
-    {
-    }
+    public void Method() { }
 }
 
 // <target>
 [IntroductionAttribute]
-public class TargetType
-{
-}
+public class TargetType { }

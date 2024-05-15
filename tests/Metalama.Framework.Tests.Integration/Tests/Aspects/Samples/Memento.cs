@@ -14,17 +14,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
 {
     public class MementoAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var mementoType =
-                builder.Advice.IntroduceType(
-                    builder.Target,
+                builder.IntroduceClass(
                     "Memento",
-                    TypeKind.Class,
-                    buildType: b =>
-                    {
-                        b.Accessibility = Accessibility.Public;
-                    });
+                    buildType: b => { b.Accessibility = Accessibility.Public; } );
 
             var mementoFields = new List<IField>();
 
@@ -43,12 +38,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                         b.Type = fieldOrProperty.Type;
                         b.Accessibility = Accessibility.Public;
                         b.Writeability = Writeability.ConstructorOnly;
-                    });
+                    } );
 
-                mementoFields.Add(field.Declaration);
+                mementoFields.Add( field.Declaration );
             }
 
-            mementoType.ImplementInterface(typeof(IMemento));
+            mementoType.ImplementInterface( typeof(IMemento) );
 
             mementoType.IntroduceConstructor(
                 nameof(MementoConstructorTemplate),
@@ -56,12 +51,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 {
                     foreach (var mementoField in mementoFields)
                     {
-                        b.AddParameter(mementoField.Name, mementoField.Type);
+                        b.AddParameter( mementoField.Name, mementoField.Type );
                     }
                 },
-                args: new { fields = mementoFields });
+                args: new { fields = mementoFields } );
 
-            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType.Declaration });
+            builder.ImplementInterface( typeof(IOriginator), tags: new { mementoType = mementoType.Declaration } );
         }
 
         [Template]
@@ -72,21 +67,21 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         {
             var mementoType = (INamedType)meta.Tags["mementoType"];
 
-            return 
+            return
                 BuildNewExpression(
-                    mementoType, 
-                    meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
-                .Value;
+                        mementoType,
+                        meta.Target.Type.FieldsAndProperties.Where( f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared ) )
+                    .Value;
         }
 
-        public IExpression BuildNewExpression(INamedType mementoType, IEnumerable<IFieldOrProperty> fieldsOrProperties)
+        public IExpression BuildNewExpression( INamedType mementoType, IEnumerable<IFieldOrProperty> fieldsOrProperties )
         {
-            ExpressionBuilder expressionBuilder = new ExpressionBuilder();
-            expressionBuilder.AppendVerbatim("new ");
-            expressionBuilder.AppendTypeName(mementoType);
-            expressionBuilder.AppendVerbatim("(");
+            var expressionBuilder = new ExpressionBuilder();
+            expressionBuilder.AppendVerbatim( "new " );
+            expressionBuilder.AppendTypeName( mementoType );
+            expressionBuilder.AppendVerbatim( "(" );
 
-            bool first = true;
+            var first = true;
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {
@@ -96,34 +91,34 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 }
                 else
                 {
-                    expressionBuilder.AppendVerbatim(",");
+                    expressionBuilder.AppendVerbatim( "," );
                 }
 
-                expressionBuilder.AppendExpression(fieldOrProperty);
+                expressionBuilder.AppendExpression( fieldOrProperty );
             }
 
-            expressionBuilder.AppendVerbatim(")");
+            expressionBuilder.AppendVerbatim( ")" );
 
             return expressionBuilder.ToExpression();
         }
 
         [InterfaceMember]
-        public void Restore(IMemento memento)
+        public void Restore( IMemento memento )
         {
             var mementoType = (INamedType)meta.Tags["mementoType"];
 
-            foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
+            foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where( f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared ))
             {
-                var mementoField = mementoType.FieldsAndProperties.OfName(fieldOrProperty.Name).Single();
+                var mementoField = mementoType.FieldsAndProperties.OfName( fieldOrProperty.Name ).Single();
 
-                fieldOrProperty.Value = mementoField.With((IExpression)meta.Cast(mementoType, memento)).Value;
+                fieldOrProperty.Value = mementoField.With( (IExpression)meta.Cast( mementoType, memento ) ).Value;
             }
         }
 
         [Template]
-        public void MementoConstructorTemplate([CompileTime] List<IField> fields)
+        public void MementoConstructorTemplate( [CompileTime] List<IField> fields )
         {
-            int i = meta.CompileTime(0);
+            var i = meta.CompileTime( 0 );
 
             foreach (var parameter in meta.Target.Constructor.Parameters)
             {
@@ -137,7 +132,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
     {
         IMemento Save();
 
-        void Restore(IMemento memento);
+        void Restore( IMemento memento );
     }
 
     public interface IMemento { }

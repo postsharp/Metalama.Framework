@@ -211,7 +211,7 @@ internal partial class SyntaxGeneratorForIType
             }
             else
             {
-                if ( type.Namespace.IsGlobalNamespace )
+                if ( type.ContainingNamespace.IsGlobalNamespace )
                 {
                     if ( type.TypeKind != TypeKind.Error )
                     {
@@ -220,7 +220,7 @@ internal partial class SyntaxGeneratorForIType
                 }
                 else
                 {
-                    var container = this.VisitNamespace( type.Namespace );
+                    var container = this.VisitNamespace( type.ContainingNamespace );
                     typeSyntax = this.AddInformationTo( SyntaxFactory.QualifiedName( (NameSyntax) container, simpleNameSyntax ), type );
                 }
             }
@@ -239,18 +239,18 @@ internal partial class SyntaxGeneratorForIType
         {
             var syntax = this.AddInformationTo( ToIdentifierName( ns.Name ), ns );
 
-            if ( ns.ParentNamespace == null )
+            if ( ns.ContainingNamespace == null )
             {
                 return syntax;
             }
 
-            if ( ns.ParentNamespace.IsGlobalNamespace )
+            if ( ns.ContainingNamespace.IsGlobalNamespace )
             {
                 return this.AddGlobalAlias( ns, syntax );
             }
             else
             {
-                var container = this.VisitNamespace( ns.ParentNamespace );
+                var container = this.VisitNamespace( ns.ContainingNamespace );
 
                 return this.AddInformationTo( SyntaxFactory.QualifiedName( (NameSyntax) container, syntax ), ns );
             }

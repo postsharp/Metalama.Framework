@@ -65,7 +65,7 @@ public static class DeclarationExtensions
                 ICompilation compilation => new[] { compilation.GlobalNamespace },
                 INamespace ns => EnumerableExtensions.Concat<IDeclaration>( ns.Namespaces, ns.Types ),
                 INamedType namedType => EnumerableExtensions.Concat<IDeclaration>(
-                        namedType.NestedTypes,
+                        namedType.Types,
                         namedType.Methods,
                         namedType.Constructors,
                         namedType.Fields,
@@ -507,7 +507,7 @@ public static class DeclarationExtensions
                         currentType.Fields.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Properties.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Events.OfName( declaration.Name ).FirstOrDefault()
-                        ?? currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault()
+                        ?? currentType.Types.OfName( declaration.Name ).FirstOrDefault()
                         ?? (IMemberOrNamedType?) currentType.Methods.OfName( declaration.Name ).FirstOrDefault();
 
                     if ( candidateMember != null )
@@ -549,7 +549,7 @@ public static class DeclarationExtensions
                         currentType.Fields.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Properties.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Events.OfName( declaration.Name ).FirstOrDefault()
-                        ?? (IMemberOrNamedType?) currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault();
+                        ?? (IMemberOrNamedType?) currentType.Types.OfName( declaration.Name ).FirstOrDefault();
 
                     if ( candidateNonMethod != null )
                     {
@@ -592,7 +592,7 @@ public static class DeclarationExtensions
     /// </summary>
     internal static IDeclaration? GetContainingDeclarationOrNamespace( this IDeclaration declaration )
         => declaration.ContainingDeclaration is IAssembly && declaration is INamedType namedType
-            ? namedType.Namespace
+            ? namedType.ContainingNamespace
             : declaration.ContainingDeclaration;
 
     internal static bool IsNullableReferenceType( this IType type ) => type is { IsNullable: true, IsReferenceType: not false };

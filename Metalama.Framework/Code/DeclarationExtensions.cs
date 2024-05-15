@@ -28,7 +28,7 @@ namespace Metalama.Framework.Code
 
             if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
             {
-                return namedType.Namespace.IsContainedIn( containingNamespace );
+                return namedType.ContainingNamespace.IsContainedIn( containingNamespace );
             }
 
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Code
             {
                 INamespace ns => ns,
                 ICompilation compilation => compilation.GlobalNamespace,
-                _ => declaration.GetTopmostNamedType()?.Namespace
+                _ => declaration.GetTopmostNamedType()?.ContainingNamespace
             };
 
         /// <summary>

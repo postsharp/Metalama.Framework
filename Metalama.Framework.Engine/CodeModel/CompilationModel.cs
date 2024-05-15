@@ -220,7 +220,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.Factory = new DeclarationFactory( this );
 
-            this.SerializableTypeIdResolver = new( this );
+            this.SerializableTypeIdResolver = new SerializableTypeIdResolverForIType( this );
 
             // Discover custom attributes.
             AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.CompilationContext );
@@ -323,8 +323,8 @@ namespace Metalama.Framework.Engine.CodeModel
             this._attributes = prototype._attributes;
             this._namedTypes = prototype._namedTypes;
 
-            this.Factory = new( this );
-            this.SerializableTypeIdResolver = new( this );
+            this.Factory = new DeclarationFactory( this );
+            this.SerializableTypeIdResolver = new SerializableTypeIdResolverForIType( this );
             this._depthsCache = prototype._depthsCache;
             this._redirections = prototype._redirections;
             this._allMemberAttributesByType = prototype._allMemberAttributesByType;
@@ -520,7 +520,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return depth;
             }
 
-            depth = this.GetDepth( namedType.Namespace );
+            depth = this.GetDepth( namedType.ContainingNamespace );
 
             if ( namedType.BaseType is { DeclaringAssembly.IsExternal: false } baseType )
             {
@@ -617,8 +617,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal CompilationModel CreateImmutableClone( string? debugLabel = null ) => new( this, false, debugLabel, this.Options );
 
-        public bool AreInternalsVisibleFrom( IAssembly assembly )
-            => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( assembly.GetSymbol() );
+        public bool AreInternalsVisibleFrom( IAssembly assembly ) => this.RoslynCompilation.Assembly.AreInternalsVisibleToImpl( assembly.GetSymbol() );
 
         [Memo]
         public IAssemblyCollection ReferencedAssemblies => new ReferencedAssemblyCollection( this, this.RoslynCompilation.SourceModule );

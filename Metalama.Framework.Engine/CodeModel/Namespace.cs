@@ -41,7 +41,7 @@ internal sealed class Namespace : Declaration, INamespace
             }
             else
             {
-                return this.ParentNamespace.AssertNotNull();
+                return this.ContainingNamespace.AssertNotNull();
             }
         }
     }
@@ -68,7 +68,7 @@ internal sealed class Namespace : Declaration, INamespace
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = default ) => Enumerable.Empty<IDeclaration>();
 
     [Memo]
-    public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
+    public INamespace? ContainingNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 
     // TODO: TypeUpdatableCollection could be cached in the CompilationModel.
     public INamedTypeCollection Types
@@ -127,6 +127,8 @@ internal sealed class Namespace : Declaration, INamespace
     }
 
     public bool IsPartial => !this.IsExternal && this.Compilation.IsPartial;
+
+    INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     public override string ToString() => $"{(this.IsGlobalNamespace ? "<Global Namespace>" : this.FullName)} ({this.DeclaringAssembly.Identity.Name})";
 

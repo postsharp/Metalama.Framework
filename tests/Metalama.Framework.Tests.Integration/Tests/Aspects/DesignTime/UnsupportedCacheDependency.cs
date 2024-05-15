@@ -11,7 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.UnsupportedCach
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var t in builder.Target.Namespace.Types) { }
+            foreach (var t in builder.Target.ContainingNamespace.Types) { }
         }
     }
 

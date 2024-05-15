@@ -7,9 +7,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType", TypeKind.Class );
+        var result = builder.Advice.IntroduceClass( builder.Target, "IntroducedNestedType", TypeKind.Class );
 
         builder.Advice.IntroduceMethod(
             result.Declaration,
@@ -17,18 +17,14 @@ public class IntroductionAttribute : TypeAspect
             buildMethod: b =>
             {
                 b.Name = "Method";
-                b.AddParameter("p", result.Declaration);
-            });
+                b.AddParameter( "p", result.Declaration );
+            } );
     }
 
     [Template]
-    public void MethodTemplate()
-    {
-    }
+    public void MethodTemplate() { }
 }
 
 // <target>
 [IntroductionAttribute]
-public class TargetType
-{
-}
+public class TargetType { }

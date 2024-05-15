@@ -33,13 +33,9 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
 
     public INamedType Target => this.Resolve( this._target );
 
-    public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
-        where TNewDeclaration : IDeclaration
-        => throw new NotImplementedException();
-
     public IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; } = Array.Empty<IInterfaceImplementationResult>();
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
 
-    public IAdviser<INamedType> WithExplicitImplementation() => throw new NotImplementedException();
+    public IAdviser<INamedType> ExplicitImplementation => throw new NotImplementedException();
 }

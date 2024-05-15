@@ -43,7 +43,7 @@ class TargetCode
             var serviceProvider = testContext.ServiceProvider;
 
             var compilation = testContext.CreateCompilationModel( code );
-            
+
             var syntaxSerializationContext = new SyntaxSerializationContext( compilation, SyntaxGenerationOptions.Formatted );
             var generator = syntaxSerializationContext.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -135,7 +135,7 @@ class TargetCode
                        serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
-                var nestedType = type.NestedTypes.Single();
+                var nestedType = type.Types.Single();
 
                 // Testing static members.
                 var staticGenericMethod = nestedType.Methods.OfName( "StaticGenericMethod" ).Single();
@@ -210,7 +210,7 @@ class TargetCode
                        serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
-                var nestedType = type.NestedTypes.Single().WithTypeArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
+                var nestedType = type.Types.Single().WithTypeArguments( compilation.Factory.GetTypeByReflectionType( typeof(string) ) );
 
                 // Testing static members.
                 var staticGenericMethod = nestedType.Methods.OfName( "StaticGenericMethod" )

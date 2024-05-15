@@ -134,10 +134,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 // Add the class to a namespace.
-                if ( !declaringType.Namespace.IsGlobalNamespace )
+                if ( !declaringType.ContainingNamespace.IsGlobalNamespace )
                 {
                     topDeclaration = NamespaceDeclaration(
-                        ParseName( declaringType.Namespace.FullName ),
+                        ParseName( declaringType.ContainingNamespace.FullName ),
                         default,
                         default,
                         SingletonList( topDeclaration ) );
@@ -185,7 +185,8 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 existingSignatures.Add(
                     constructor.Parameters.SelectAsArray(
-                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) );
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )
@@ -200,7 +201,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 if ( !existingSignatures.Add(
                         finalParameters.SelectAsArray(
-                            p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
+                            p => (
+                                (ISymbol) p.Type.GetSymbol()
+                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -237,8 +240,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                     if ( existingSignatures.Add(
                             nonOptionalParameters.SelectAsArray(
-                                p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
-                                      p.RefKind) ) ) )
+                                p => (
+                                    (ISymbol) p.Type.GetSymbol()
+                                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                                    p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(

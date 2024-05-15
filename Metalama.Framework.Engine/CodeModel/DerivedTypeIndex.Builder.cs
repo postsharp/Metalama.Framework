@@ -38,7 +38,7 @@ public partial class DerivedTypeIndex
 
         public void AnalyzeType( INamedTypeSymbol type )
         {
-            if ( !this._processedTypes.Add( new( type ) ) )
+            if ( !this._processedTypes.Add( new NamedType( type ) ) )
             {
                 return;
             }
@@ -46,7 +46,7 @@ public partial class DerivedTypeIndex
             if ( type.BaseType != null && type.BaseType.Kind != SymbolKind.ErrorType )
             {
                 var baseType = type.BaseType.OriginalDefinition;
-                this._relationships.Add( new( baseType ), new NamedType( type ) );
+                this._relationships.Add( new NamedType( baseType ), new NamedType( type ) );
                 this.AnalyzeType( baseType );
             }
 
@@ -58,7 +58,7 @@ public partial class DerivedTypeIndex
                 }
 
                 var interfaceType = interfaceImpl.OriginalDefinition;
-                this._relationships.Add( new( interfaceType ), new NamedType( type ) );
+                this._relationships.Add( new NamedType( interfaceType ), new NamedType( type ) );
                 this.AnalyzeType( interfaceType );
             }
 
@@ -73,11 +73,11 @@ public partial class DerivedTypeIndex
             if ( type.GetSymbol() is { } symbol )
             {
                 this.AnalyzeType( symbol );
-                
+
                 return;
             }
 
-            if ( !this._processedTypes.Add( new( type ) ) )
+            if ( !this._processedTypes.Add( new NamedType( type ) ) )
             {
                 return;
             }
@@ -85,7 +85,7 @@ public partial class DerivedTypeIndex
             if ( type.BaseType != null && type.BaseType.TypeKind != MetalamaTypeKind.Error )
             {
                 var baseType = type.BaseType.Definition;
-                this._relationships.Add( new( baseType ), new NamedType( type ) );
+                this._relationships.Add( new NamedType( baseType ), new NamedType( type ) );
                 this.AnalyzeType( baseType );
             }
 
@@ -97,19 +97,21 @@ public partial class DerivedTypeIndex
                 }
 
                 var interfaceType = interfaceImpl.Definition;
-                this._relationships.Add( new( interfaceType ), new NamedType( type ) );
+                this._relationships.Add( new NamedType( interfaceType ), new NamedType( type ) );
                 this.AnalyzeType( interfaceType );
             }
 
-            foreach ( var nestedType in type.NestedTypes )
+            foreach ( var nestedType in type.Types )
             {
                 this.AnalyzeType( nestedType );
             }
         }
 
-        public void AddDerivedType( INamedTypeSymbol baseType, INamedTypeSymbol derivedType ) => this._relationships.Add( new( baseType ), new NamedType( derivedType ) );
+        public void AddDerivedType( INamedTypeSymbol baseType, INamedTypeSymbol derivedType )
+            => this._relationships.Add( new NamedType( baseType ), new NamedType( derivedType ) );
 
-        public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( new( baseType ), new NamedType( derivedType ) );
+        public void AddDerivedType( INamedType baseType, INamedType derivedType )
+            => this._relationships.Add( new NamedType( baseType ), new NamedType( derivedType ) );
 
         public DerivedTypeIndex ToImmutable()
         {

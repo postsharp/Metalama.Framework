@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Infrastructure;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace Metalama.Testing.AspectTesting
 {
@@ -21,7 +22,10 @@ namespace Metalama.Testing.AspectTesting
         {
             var json = fileSystem.ReadAllText( path );
 
-            return JsonConvert.DeserializeObject<TestDirectoryOptions>( json )!;
+            var options = JsonConvert.DeserializeObject<TestDirectoryOptions>( json )!;
+            options.SetFullPaths( Path.GetDirectoryName( path )! );
+
+            return options;
         }
 
         internal override void ApplyBaseOptions( TestDirectoryOptions baseOptions )

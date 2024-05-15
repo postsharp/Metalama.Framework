@@ -322,7 +322,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         return false;
                     }
 
-                    if ( this.Visit( ns.ParentNamespace! ) )
+                    if ( this.Visit( ns.ContainingNamespace! ) )
                     {
                         this._builder.Append( '.' );
                     }
@@ -336,7 +336,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     var success = namedType.ContainingDeclaration is INamedType containingType
                         ? this.Visit( containingType )
-                        : this.Visit( namedType.Namespace );
+                        : this.Visit( namedType.ContainingNamespace );
 
                     if ( success )
                     {
@@ -372,7 +372,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             {
                 var success = namedType.ContainingDeclaration is INamedType containingType
                     ? this.Visit( containingType )
-                    : this.Visit( namedType.Namespace );
+                    : this.Visit( namedType.ContainingNamespace );
 
                 if ( success )
                 {
@@ -384,7 +384,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private void BuildDottedName( INamespace ns )
             {
-                if ( this.Visit( ns.ParentNamespace.AssertNotNull() ) )
+                if ( this.Visit( ns.ContainingNamespace.AssertNotNull() ) )
                 {
                     this._builder.Append( '.' );
                 }
@@ -1029,7 +1029,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 var types = container switch
                 {
                     INamespace ns => ns.Types.OfName( memberName ),
-                    INamedType namedType => namedType.NestedTypes.OfName( memberName ),
+                    INamedType namedType => namedType.Types.OfName( memberName ),
                     _ => Enumerable.Empty<INamedType>()
                 };
 
@@ -1056,7 +1056,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     INamespace ns => ns.Types.OfName( memberName )
                         .ConcatNotNull<IDeclaration>( ns.Namespaces.OfName( memberName ) ),
-                    INamedType namedType => namedType.NestedTypes.OfName( memberName ),
+                    INamedType namedType => namedType.Types.OfName( memberName ),
                     _ => Enumerable.Empty<IDeclaration>()
                 };
 

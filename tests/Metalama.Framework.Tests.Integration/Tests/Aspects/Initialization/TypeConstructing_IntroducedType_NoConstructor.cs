@@ -9,7 +9,7 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceType(builder.Target, "IntroducedType", TypeKind.Class).Declaration;
+        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType", TypeKind.Class ).Declaration;
         builder.Advice.AddInitializer( introducedType, nameof(Template), InitializerKind.BeforeTypeConstructor );
     }
 
@@ -22,6 +22,4 @@ public class Aspect : TypeAspect
 
 // <target>
 [Aspect]
-public class TargetCode
-{
-}
+public class TargetCode { }

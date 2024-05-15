@@ -368,6 +368,14 @@ public class TestOptions
 
     public bool? TestUnformattedOutput { get; set; }
 
+    internal void SetFullPaths( string directory )
+    {
+        for ( var i = 0; i < this.IncludedFiles.Count; i++ )
+        {
+            this.IncludedFiles[i] = Path.GetFullPath( Path.Combine( directory, this.IncludedFiles[i] ) );
+        }
+    }
+
     /// <summary>
     /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
     /// that is not defined in the current object but defined in the argument.
