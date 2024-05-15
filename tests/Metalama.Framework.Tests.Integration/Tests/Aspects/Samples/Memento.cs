@@ -140,7 +140,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         void Restore(IMemento memento);
     }
 
-    public interface IMemento;
+    public interface IMemento { }
 
     // <target>
     [Memento]

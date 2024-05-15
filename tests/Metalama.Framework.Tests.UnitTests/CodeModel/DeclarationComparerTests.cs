@@ -60,14 +60,14 @@ class B : A, I
 
                 Assert.False(
                     comparer.Is(
-                        compilation.Factory.GetTypeByReflectionType( typeof( int ) ),
-                        typeof( long ),
+                        compilation.Factory.GetTypeByReflectionType( typeof(int) ),
+                        typeof(long),
                         ConversionKind.Default ) );
 
                 Assert.False(
                     comparer.Is(
-                        compilation.Factory.GetTypeByReflectionType( typeof( long ) ),
-                        typeof( int ),
+                        compilation.Factory.GetTypeByReflectionType( typeof(long) ),
+                        typeof(int),
                         ConversionKind.Default ) );
             }
 
@@ -152,18 +152,15 @@ class B : A, I
             Assert.False( comparer.Is( typeI, typeB, ConversionKind.Implicit, bypassSymbols ) );
             Assert.True( comparer.Is( typeB, typeI, ConversionKind.Implicit, bypassSymbols ) );
 
-            Assert.True(
-                comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Implicit, bypassSymbols ) );
+            Assert.True( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(object), ConversionKind.Implicit, bypassSymbols ) );
 
             if ( !bypassSymbols )
             {
                 // Built-in implicit numeric conversions are not supported in bypassSymbols mode.
 
-                Assert.True(
-                    comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof( int ) ), typeof( long ), ConversionKind.Implicit, bypassSymbols ) );
+                Assert.True( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(int) ), typeof(long), ConversionKind.Implicit, bypassSymbols ) );
 
-                Assert.False(
-                    comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof( long ) ), typeof( int ), ConversionKind.Implicit, bypassSymbols ) );
+                Assert.False( comparer.Is( compilation.Factory.GetTypeByReflectionType( typeof(long) ), typeof(int), ConversionKind.Implicit, bypassSymbols ) );
             }
         }
 

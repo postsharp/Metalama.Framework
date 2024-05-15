@@ -599,19 +599,21 @@ public static class DeclarationExtensions
 
     internal static bool IsNullableValueType( this IType type ) => type is { IsNullable: true, IsReferenceType: false };
 
-    internal static INamedType? GetBaseType( this IType type ) => type switch
-    {
-        INamedType namedType => namedType.BaseType,
-        IArrayType => (INamedType) type.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(Array) ),
-        _ => null
-    };
+    internal static INamedType? GetBaseType( this IType type )
+        => type switch
+        {
+            INamedType namedType => namedType.BaseType,
+            IArrayType => (INamedType) type.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(Array) ),
+            _ => null
+        };
 
     internal static IEnumerable<INamedType> GetImplementedInterfaces( this IType type )
         => type switch
         {
             INamedType namedType => namedType.ImplementedInterfaces,
             IArrayType { Rank: 1 } arrayType => SymbolHelpers.ArrayGenericInterfaces.Select(
-                definitionSpecialType => type.GetCompilationModel().Factory
+                definitionSpecialType => type.GetCompilationModel()
+                    .Factory
                     .GetNamedType( type.GetCompilationModel().RoslynCompilation.GetSpecialType( definitionSpecialType ) )
                     .WithTypeArguments( arrayType.ElementType ) ),
             _ => []

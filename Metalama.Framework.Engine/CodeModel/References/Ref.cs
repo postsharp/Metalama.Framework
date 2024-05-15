@@ -94,7 +94,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     MethodKind.PropertySet => DeclarationRefTargetKind.PropertySetParameter,
                     MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGetReturnParameter,
                     MethodKind.EventRaise when pseudoParameter.IsReturnParameter => DeclarationRefTargetKind.EventRaiseReturnParameter,
-                    MethodKind.EventRaise => throw new NotImplementedException( $"Getting the reference of a pseudo event raiser parameter is not implemented." ),
+                    MethodKind.EventRaise => throw new NotImplementedException(
+                        $"Getting the reference of a pseudo event raiser parameter is not implemented." ),
                     _ => throw new AssertionFailedException( $"Unexpected MethodKind: {accessor.MethodKind}." )
                 } );
         }
@@ -231,7 +232,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this.GetTargetImpl( compilation, options, true )!;
 
-        public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default ) => this.GetTargetImpl( compilation, options, false );
+        public T? GetTargetOrNull( ICompilation compilation, ReferenceResolutionOptions options = default )
+            => this.GetTargetImpl( compilation, options, false );
 
         private T? GetTargetImpl( ICompilation compilation, ReferenceResolutionOptions options, bool throwIfMissing )
         {
@@ -360,7 +362,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 DeclarationRefTargetKind.Default => symbol,
                 DeclarationRefTargetKind.Return => throw new InvalidOperationException( "Cannot get a symbol for the method return parameter." ),
                 DeclarationRefTargetKind.Field when symbol is IPropertySymbol property => property.GetBackingField().AssertSymbolNotNull(),
-                DeclarationRefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException( "Cannot get the underlying field of an event." ),
+                DeclarationRefTargetKind.Field when symbol is IEventSymbol => throw new InvalidOperationException(
+                    "Cannot get the underlying field of an event." ),
                 DeclarationRefTargetKind.Parameter when symbol is IPropertySymbol property => property.SetMethod.AssertSymbolNotNull().Parameters[0],
                 DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method => method.Parameters[0],
                 DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter => parameter.ContainingType.GetMembers( symbol.Name )
@@ -466,8 +469,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             catch ( InvalidOperationException ex )
                             {
                                 return Missing( id, ex );
-                                }
-                                }
+                            }
+                        }
                         else
                         {
                             var symbol = new SymbolId( id ).Resolve( compilation.RoslynCompilation );
