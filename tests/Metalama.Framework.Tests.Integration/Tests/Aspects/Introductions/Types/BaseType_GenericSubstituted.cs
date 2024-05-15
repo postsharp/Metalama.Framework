@@ -13,7 +13,7 @@ public class IntroductionAttribute : TypeAspect
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
         builder.Advice.IntroduceType(
-            builder.Target.ForCompilation(builder.Advice.MutableCompilation), 
+            builder.Target, 
             "TestNestedType", 
             TypeKind.Class, 
             buildType: t => 

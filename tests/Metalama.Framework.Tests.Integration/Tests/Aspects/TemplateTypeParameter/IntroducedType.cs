@@ -19,7 +19,7 @@ public class Aspect : TypeAspect
         builder.Advice.IntroduceMethod(
             builder.Target,
             nameof(Method),
-            args: new { T = type.ForCompilation(builder.Advice.MutableCompilation) },
+            args: new { T = type },
             buildMethod: b => { b.Name = "FromMutableCompilation"; });
     }
 

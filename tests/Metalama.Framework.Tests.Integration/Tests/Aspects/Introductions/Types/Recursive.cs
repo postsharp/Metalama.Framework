@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,9 +9,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "Test", TypeKind.Class);
-        var innerResult = builder.Advice.IntroduceType(result.Declaration, "InnerTest", TypeKind.Class);
-        builder.Advice.IntroduceType(innerResult.Declaration, "InnerInnerTest", TypeKind.Class);
+        var introduced = builder.IntroduceType("Test", TypeKind.Class);
+        var inner = introduced.IntroduceType( "InnerTest", TypeKind.Class);
+        inner.IntroduceType("InnerInnerTest", TypeKind.Class);
     }
 
     [Template]
