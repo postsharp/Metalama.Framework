@@ -180,7 +180,12 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             // Write HTML (used only when building projects for documentation).
             if ( this.ProjectOptions.WriteHtml )
             {
-                await HtmlCodeWriter.WriteAllDiffAsync( this.ProjectOptions, this.ServiceProvider, compilation, resultPartialCompilation );
+                await HtmlCodeWriter.WriteAllDiffAsync(
+                    this.ProjectOptions,
+                    this.ServiceProvider,
+                    compilation,
+                    resultPartialCompilation,
+                    result.Value.Diagnostics.ReportedDiagnostics );
             }
 
             // Add managed resources.

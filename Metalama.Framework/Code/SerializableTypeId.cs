@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System;
 using System.Collections.Generic;
 
@@ -9,6 +10,7 @@ namespace Metalama.Framework.Code;
 /// Encapsulates a string that uniquely identifies a type within a compilation (except in the situation where the compilation
 /// contains several assemblies providing types of the same name) and that is safe to persist in a file.
 /// </summary>
+[CompileTime]
 public readonly struct SerializableTypeId : IEquatable<SerializableTypeId>
 {
     public string Id { get; }

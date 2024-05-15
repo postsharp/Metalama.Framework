@@ -35,7 +35,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
     }
 
-    private Type GetOptionType( string typeName, CompilationModel compilationModel )
+    private Type? GetOptionType( string typeName, CompilationModel compilationModel )
     {
         // We get the type resolver lazily because several tests do not supply it.
 
@@ -45,14 +45,11 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
         if ( type == null! )
         {
-            throw new AssertionFailedException( $"The type '{type}' cannot be found." );
+            return null;
         }
 
         return
-            this._typeResolver.GetCompileTimeType(
-                    type.GetSymbol().AssertSymbolNotNull(),
-                    false )
-                .AssertNotNull();
+            this._typeResolver.GetCompileTimeType( type.GetSymbol().AssertSymbolNotNull(), false );
     }
 
     internal Task InitializeAsync(
@@ -74,6 +71,12 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
                 compilationModel: compilationModel );
 
             var optionType = this.GetOptionType( optionTypeName, compilationModel );
+
+            if ( optionType == null )
+            {
+                // It seems to happen at design time during external rebuilds that the options type may not be found.
+                continue;
+            }
 
             if ( !this._userCodeInvoker.TryInvoke(
                     () => (IHierarchicalOptions) Activator.CreateInstance( optionType ).AssertNotNull(),
