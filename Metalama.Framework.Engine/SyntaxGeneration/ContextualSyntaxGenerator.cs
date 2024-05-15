@@ -829,7 +829,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public CastExpressionSyntax SafeCastExpression( TypeSyntax type, ExpressionSyntax syntax )
     {
-        if ( syntax is CastExpressionSyntax cast && cast.Type.IsEquivalentTo( type, false ) )
+        if ( syntax is CastExpressionSyntax cast && cast.Type.IsEquivalentTo( type, topLevel: false ) )
         {
             // It's already a cast to the same type, no need to cast again.
             return cast;

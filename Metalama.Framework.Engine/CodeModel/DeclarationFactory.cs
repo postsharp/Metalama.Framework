@@ -707,7 +707,6 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         }
         else if ( declaration is NamedType namedType )
         {
-            // TODO: This would not work after type introductions, but that would require more changes.
             return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol );
         }
         else
