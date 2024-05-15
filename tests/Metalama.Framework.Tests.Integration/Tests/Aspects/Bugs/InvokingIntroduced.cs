@@ -1,3 +1,8 @@
+#if TEST_OPTIONS
+// @Include(../../Common/_ImplementInterfaceAdviceResultExtensions.cs)
+#endif
+
+
 using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;

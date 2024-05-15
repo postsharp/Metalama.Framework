@@ -6,6 +6,5 @@
  "MainMethod": "TestMain",
  "CheckMemoryLeaks": true,
  "IgnoreUserProfileLicenses": true,
- "IncludedFiles" : ["Common/_ImplementInterfaceAdviceResultExtensions.cs"],
  "TestUnformattedOutput": false // This can be occasionally turned on.
  }
