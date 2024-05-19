@@ -2,22 +2,22 @@
     <ItemGroup>
 
         <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
-        <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />
-        <None Include="$(MSBuildProjectDirectory)\**\*.t.cs">
+        <Compile Remove="$(MSBuildProjectDirectory)/**/*.t.cs" />
+        <None Include="$(MSBuildProjectDirectory)/**/*.t.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
             <SubType>Code</SubType>
         </None>
 
-        <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs" />
+        <None Remove="$(MSBuildProjectDirectory)/obj/**/*.t.cs" />
 
         <!-- Fix file nesting for *.Aspect.cs -->
-        <Compile Update="$(MSBuildProjectDirectory)\**\*.Aspect.cs">
+        <Compile Update="$(MSBuildProjectDirectory)/**/*.Aspect.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Aspect','')).cs</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
 
         <!-- Fix file nesting for *.t.txt -->
-        <None Include="$(MSBuildProjectDirectory)\**\*.t.txt" Exclude="$(MSBuildProjectDirectory)\obj\**\*.t.txt">
+        <None Include="$(MSBuildProjectDirectory)/**/*.t.txt" Exclude="$(MSBuildProjectDirectory)/obj/**/*.t.txt">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
         </None>
 
@@ -41,11 +41,11 @@
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>ReferenceAssemblyList</_Parameter1>
-                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
+                <_Parameter2>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)assemblies.txt</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>AnalyzerAssemblyList</_Parameter1>
-                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)analyzers.txt</_Parameter2>
+                <_Parameter2>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)analyzers.txt</_Parameter2>
             </AssemblyAttribute>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
@@ -120,18 +120,18 @@ namespace $(RootNamespace)
 
     <Target Name="CleanTestOutput">
         <ItemGroup>
-            <_CleanTestOutput Include="obj\transformed\**\*.*" />
-            <_CleanTestOutput Include="obj\html\**\*.*" />
+            <_CleanTestOutput Include="obj/transformed/**/*.*" />
+            <_CleanTestOutput Include="obj/html/**/*.*" />
         </ItemGroup>
-        <RemoveDir Directories="obj\transformed" />
-        <RemoveDir Directories="obj\html" />
+        <RemoveDir Directories="obj/transformed" />
+        <RemoveDir Directories="obj/html" />
         <Delete Files="@(_CleanTestOutput)" />
     </Target>
 
     <Target Name="_AcceptTestOutput">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs" />
-            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt" />
+            <_AcceptTestOutput Include="obj/transformed/$(TargetFramework)/**/*.cs" />
+            <_AcceptTestOutput Include="obj/transformed/$(TargetFramework)/**/*.txt" />
         </ItemGroup>
         <Message
             Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"
@@ -142,7 +142,7 @@ namespace $(RootNamespace)
 
     <Target Name="_AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html" />
+            <_AcceptTestOutput Include="obj/html/$(TargetFramework)/**/*.cs.html" />
         </ItemGroup>
         <Message
             Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"

@@ -5,12 +5,12 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.Tests.Integration\**\*.cs" Exclude="..\Metalama.Framework.Tests.Integration\bin\**\*.cs;..\Metalama.Framework.Tests.Integration\obj\**\*.cs" />
+        <Compile Include="../Metalama.Framework.Tests.Integration/**/*.cs" Exclude="../Metalama.Framework.Tests.Integration/bin/**/*.cs;../Metalama.Framework.Tests.Integration/obj/**/*.cs" />
         <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
     </ItemGroup>
 
-    <Import Project="..\..\Build\RoslynVersion\Roslyn.4.0.1.props" />
+    <Import Project="../../build/RoslynVersion/Roslyn.4.0.1.props" />
 
-    <Import Project="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj" />
+    <Import Project="../Metalama.Framework.Tests.Integration/Metalama.Framework.Tests.Integration.csproj" />
 
 </Project>

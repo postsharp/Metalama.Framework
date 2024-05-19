@@ -57,7 +57,7 @@ namespace Foo
 
             var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() )!.ToFullString();
 
-            Assert.Equal( expected, actual );
+            AssertEx.EolInvariantEqual( expected, actual );
         }
 
         [Fact]
@@ -768,7 +768,7 @@ public class ReferencedClass
 
             var transformed = File.ReadAllText( Path.Combine( compileTimeProject!.Directory!, compileTimeProject.CodeFiles[0].TransformedPath ) );
 
-            Assert.Equal( expected, transformed );
+            AssertEx.EolInvariantEqual( expected, transformed );
 
             // We are not testing the rewriting of typeof in a template because this is done by the template compiler and covered by template tests.
         }
@@ -962,7 +962,7 @@ using Metalama.Framework.Aspects;
 class CompileTimeClass { }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1067,7 +1067,7 @@ namespace SomeNamespace
 }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1137,7 +1137,7 @@ public record SomeRecord(int P);
 public delegate void SomeDelegate();
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1169,7 +1169,7 @@ public interface SomeInterface
 }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]
@@ -1306,7 +1306,7 @@ namespace RemainingNamespace
 }
 ";
 
-            Assert.Equal( expected, compileTimeCode );
+            AssertEx.EolInvariantEqual( expected, compileTimeCode );
         }
 
         [Fact]

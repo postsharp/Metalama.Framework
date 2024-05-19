@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Metalama.Reactive\Metalama.Reactive.csproj" />
+    <ProjectReference Include="../../../Metalama.Reactive/Metalama.Reactive.csproj" />
   </ItemGroup>
 
 </Project>

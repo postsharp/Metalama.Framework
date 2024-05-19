@@ -13,8 +13,8 @@
 
     <!-- Additional content of NuGet packages -->
     <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)..\LICENSE.md" Visible="false" Pack="true" PackagePath="" />
-        <None Include="$(MSBuildThisFileDirectory)..\THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)../LICENSE.md" Visible="false" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)../THIRD-PARTY-NOTICES.TXT" Visible="false" Pack="true" PackagePath="" />
     </ItemGroup>
 
 </Project>

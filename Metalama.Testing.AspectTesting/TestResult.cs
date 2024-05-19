@@ -294,7 +294,7 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.AsEnumerable()
+                ? this.SyntaxTrees.OrderBy( x => x.InputPath ).AsEnumerable()
                 : this.SyntaxTrees.Take( 1 );
 
         foreach ( var outputSyntaxTree in outputSyntaxTrees )
