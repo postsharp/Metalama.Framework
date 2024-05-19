@@ -1,23 +1,3 @@
-// --- PartialType_SyntaxTrees.cs ---
-[Override]
-internal partial class TargetClass
-{
-  private global::System.Int32 _targetField1;
-  public global::System.Int32 TargetField1
-  {
-    get
-    {
-      global::System.Console.WriteLine("This is the override of TargetField1.");
-      return this._targetField1;
-    }
-    set
-    {
-      global::System.Console.WriteLine("This is the override of TargetField1.");
-      this._targetField1 = value;
-      return;
-    }
-  }
-}
 // --- PartialType_SyntaxTrees.1.cs ---
 internal partial class TargetClass
 {
@@ -52,6 +32,26 @@ internal partial class TargetClass
     {
       global::System.Console.WriteLine("This is the override of TargetField3.");
       this._targetField3 = value;
+      return;
+    }
+  }
+}
+// --- PartialType_SyntaxTrees.cs ---
+[Override]
+internal partial class TargetClass
+{
+  private global::System.Int32 _targetField1;
+  public global::System.Int32 TargetField1
+  {
+    get
+    {
+      global::System.Console.WriteLine("This is the override of TargetField1.");
+      return this._targetField1;
+    }
+    set
+    {
+      global::System.Console.WriteLine("This is the override of TargetField1.");
+      this._targetField1 = value;
       return;
     }
   }
