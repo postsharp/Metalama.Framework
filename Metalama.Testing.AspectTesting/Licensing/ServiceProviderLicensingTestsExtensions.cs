@@ -17,11 +17,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
 
             if ( testInput.Options.LicenseKey != null )
             {
-                if ( testInput.Options.LicenseKey.Equals( "none", StringComparison.OrdinalIgnoreCase ) )
-                {
-                    licenseKey = null;
-                }
-                else if ( !licenseKeyProvider.TryGetLicenseKey( testInput.Options.LicenseKey, out licenseKey ) )
+                if ( !licenseKeyProvider.TryGetLicenseKey( testInput.Options.LicenseKey, out licenseKey ) )
                 {
                     throw new InvalidOperationException( $"The license key name {testInput.Options.LicenseKey} is invalid." );
                 }

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -33,7 +34,7 @@ public class X
 }
 ";
 
-        var compilation = CSharpCompilation.Create( null, [CSharpSyntaxTree.ParseText( code, path: "path\\file.cs" )] );
+        var compilation = CSharpCompilation.Create( null, [CSharpSyntaxTree.ParseText( code, path: Path.Combine( "path", "file.cs" ) )] );
 
         var typeX = compilation.Assembly.GlobalNamespace.GetTypeMembers().Single();
         var memberA = typeX.GetMembers().Single( m => m.Name == "A" );
