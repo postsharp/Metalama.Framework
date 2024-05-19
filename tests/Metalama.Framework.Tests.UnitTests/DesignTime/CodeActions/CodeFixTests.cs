@@ -225,6 +225,6 @@ public sealed class CodeFixTests : UnitTestClass
 
         var modifiedText = await workspace.GetProject( "app" ).Documents.Single().GetTextAsync();
 
-        Assert.Equal( modifiedAppCode, modifiedText.ToString() );
+        AssertEx.EolInvariantEqual( modifiedAppCode, modifiedText.ToString() );
     }
 }

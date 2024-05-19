@@ -85,7 +85,7 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
 'Interface1'->'Class3.cs'
 'Interface1'->'Interface2.cs'";
 
-        Assert.Equal( expectedDependencies.NormalizeEndOfLines(), actualDependencies.NormalizeEndOfLines() );
+        AssertEx.EolInvariantEqual( expectedDependencies, actualDependencies );
     }
 
     [Fact]
@@ -130,6 +130,6 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
 'Class2'->'Class3.cs'
 'Interface1'->'Class3.cs'";
 
-        Assert.Equal( expectedDependencies, actualDependencies );
+        AssertEx.EolInvariantEqual( expectedDependencies, actualDependencies );
     }
 }

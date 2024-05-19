@@ -5,6 +5,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Tests.UnitTests.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using Xunit;
@@ -36,5 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests
                 Assert.Contains( e.Diagnostics, d => d.Id == diagnosticDefinition.Id );
             }
         }
+
+        public static void EolInvariantEqual( string expected, string actual ) => Assert.Equal( expected.NormalizeEndOfLines().Trim(), actual.NormalizeEndOfLines().Trim() );
     }
 }

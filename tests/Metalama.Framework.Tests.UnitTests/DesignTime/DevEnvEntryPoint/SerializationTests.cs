@@ -81,7 +81,7 @@ public sealed class SerializationTests
         var roundloop = Roundloop( input );
         Assert.Single( roundloop.SyntaxTreeChanges );
         Assert.Equal( "path.cs", roundloop.SyntaxTreeChanges[0].FilePath );
-        Assert.Equal( code, roundloop.SyntaxTreeChanges[0].Text );
+        AssertEx.EolInvariantEqual( code, roundloop.SyntaxTreeChanges[0].Text );
     }
 
     [Fact]

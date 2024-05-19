@@ -94,7 +94,7 @@ public sealed partial class DependencyCollectorTests
 'Interface2.cs'->'Interface3.cs'
 'Interface3.cs'->'Class4.cs'";
 
-        Assert.Equal( expectedDependencies.NormalizeEndOfLines(), actualDependencies.NormalizeEndOfLines() );
+        AssertEx.EolInvariantEqual( expectedDependencies, actualDependencies );
     }
 
     [Fact]
