@@ -8,8 +8,8 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\TestWeaver.Weaver\TestWeaver.Weaver.csproj" />
-		<ProjectReference Include="..\TestWeaver.Library\TestWeaver.Library.csproj" />
+		<ProjectReference Include="../TestWeaver.Weaver/TestWeaver.Weaver.csproj" />
+		<ProjectReference Include="../TestWeaver.Library/TestWeaver.Library.csproj" />
 	</ItemGroup>
 
 </Project>

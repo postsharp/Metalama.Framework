@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\Build\RoslynVersion\Latest.imports" />
+    <Import Project="../build/RoslynVersion/Latest.imports" />
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
@@ -15,10 +15,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
         <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Rpc\Metalama.Framework.DesignTime.Rpc.csproj" />
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" />
+        <ProjectReference Include="../Metalama.Framework.DesignTime.Rpc/Metalama.Framework.DesignTime.Rpc.csproj" />
+        <ProjectReference Include="../Metalama.SystemTypes/Metalama.SystemTypes.csproj" />
     </ItemGroup>
 
 </Project>

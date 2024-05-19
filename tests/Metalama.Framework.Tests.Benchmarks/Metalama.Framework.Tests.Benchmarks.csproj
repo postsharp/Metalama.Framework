@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+      <ProjectReference Include="../../Metalama.Framework.Engine/Metalama.Framework.Engine.csproj" />
     </ItemGroup>
 
 </Project>
