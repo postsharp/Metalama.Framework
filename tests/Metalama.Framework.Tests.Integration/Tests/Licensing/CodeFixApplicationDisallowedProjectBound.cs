@@ -1,6 +1,8 @@
+#if TEST_OPTIONS
 // @TestScenario(ApplyCodeFix)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaUltimatePersonalProjectBound)
+// @LicenseKey(MetalamaUltimatePersonalProjectBound)
 // @Include(_CodeFix.cs);
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixApplicationDisallowedProjectBound;
 

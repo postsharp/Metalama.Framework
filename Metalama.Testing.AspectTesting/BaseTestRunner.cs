@@ -47,6 +47,9 @@ internal abstract partial class BaseTestRunner
     private static readonly AsyncLocal<bool> _isTestRunning = new();
 
     private readonly TestProjectReferences _references;
+
+    protected ILicenseKeyProvider LicenseKeyProvider { get; }
+
     private readonly IFileSystem _fileSystem;
     private readonly TestRunnerOptions _testRunnerOptions;
 
@@ -54,9 +57,11 @@ internal abstract partial class BaseTestRunner
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,
-        ITestOutputHelper? logger )
+        ITestOutputHelper? logger,
+        ILicenseKeyProvider? licenseKeyProvider )
     {
         this._references = references;
+        this.LicenseKeyProvider = licenseKeyProvider ?? new NullLicenseKeyProvider();
         this.ProjectDirectory = projectDirectory;
         this.Logger = logger;
         this._fileSystem = serviceProvider.GetRequiredBackstageService<IFileSystem>();
@@ -212,15 +217,13 @@ internal abstract partial class BaseTestRunner
         // ReSharper disable once RedundantAssignment
         string? dependencyLicenseKey = null;
 
-        if ( testInput.Options.DependencyLicenseFile != null )
+        if ( testInput.Options.DependencyLicenseKey != null )
         {
             // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = this._fileSystem.ReadAllText( Path.Combine( testInput.SourceDirectory, testInput.Options.DependencyLicenseFile ) );
-        }
-        else if ( testInput.Options.DependencyLicenseExpression != null )
-        {
-            // ReSharper disable once RedundantAssignment
-            dependencyLicenseKey = TestOptions.ReadLicenseExpression( testInput.Options.DependencyLicenseExpression );
+            if ( !this.LicenseKeyProvider.TryGetLicenseKey( testInput.Options.DependencyLicenseKey, out dependencyLicenseKey ) )
+            {
+                throw new InvalidOperationException( $"Unknown dependency license key name '{testInput.Options.DependencyLicenseKey}'." );
+            }
         }
 
         try

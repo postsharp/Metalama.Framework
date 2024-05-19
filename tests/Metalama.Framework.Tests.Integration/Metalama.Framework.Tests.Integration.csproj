@@ -58,4 +58,12 @@
 
     <Import Project="../../Metalama.Testing.AspectTesting/Metalama.Testing.AspectTesting.targets" />
 
+    <ItemGroup>
+        <!-- This metadata attribute is used by the TestLicenseKeyProvider class in Backstage. -->
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>EngineeringDataDirectory</_Parameter1>
+            <_Parameter2>$(MetalamaEngineeringDataDirectory)</_Parameter2>
+        </AssemblyAttribute>
+    </ItemGroup>
+
 </Project>

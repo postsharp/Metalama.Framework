@@ -80,7 +80,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 serviceProvider,
                 projectDirectory,
                 references,
-                logger )
+                logger,
+                null )
         {
             this._testAnalyzers = testAnalyzers;
         }
@@ -108,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var templateDocument = testSyntaxTree.InputDocument;
             var templateSyntaxRoot = await templateDocument.GetSyntaxRootAsync();
             var templateSemanticModel = await templateDocument.GetSemanticModelAsync();
-            
+
             foreach ( var testAnalyzer in this._testAnalyzers )
             {
                 testAnalyzer.Visit( templateSyntaxRoot );
@@ -124,7 +125,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     assemblyLocator.StandardCompileTimeMetadataReferences,
                     (CSharpCompilationOptions) testResult.InputProject!.CompilationOptions! )
                 .AddReferences( MetadataReference.CreateFromFile( typeof(TestTemplateAttribute).Assembly.Location ) );
-            
+
             var templateCompiler = new TestTemplateCompiler( templateSemanticModel, testResult.PipelineDiagnostics, serviceProvider );
 
             var templateCompilerSuccess = templateCompiler.TryCompile(

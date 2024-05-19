@@ -1,9 +1,11 @@
+#if TEST_OPTIONS
 // @TestScenario(PreviewLiveTemplate)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaFreePersonal)
-// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaUltimateBusiness)
+// @LicenseKey(MetalamaFreePersonal)
+// @DependencyLicenseKey(MetalamaUltimateBusiness)
 // @Include(_LiveTemplateRedistribution.cs);
 // @Include(_LiveTemplateRedistribution.Dependency.cs);
 // @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplateRedistributionPreviewingAllowed
 {

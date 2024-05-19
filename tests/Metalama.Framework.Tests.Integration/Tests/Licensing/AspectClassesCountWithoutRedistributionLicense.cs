@@ -1,8 +1,10 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaFreePersonal)
-// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaUltimateOpenSourceRedistribution)
+﻿#if TEST_OPTIONS
+// @LicenseKey(MetalamaFreePersonal)
+// @DependencyLicenseKey(MetalamaUltimateOpenSourceRedistribution)
 // @Include(_Redistribution.cs);
 // @Include(_Redistribution.Dependency.cs);
 // @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectClassesCountWithoutRedistributionLicense;
 

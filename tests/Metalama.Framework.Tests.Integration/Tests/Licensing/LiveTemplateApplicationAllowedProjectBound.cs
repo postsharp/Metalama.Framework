@@ -1,8 +1,10 @@
+#if TEST_OPTIONS
 // @TestScenario(ApplyLiveTemplate)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaUltimatePersonalProjectBound)
+// @LicenseKey(MetalamaUltimatePersonalProjectBound)
 // @Include(_LiveTemplate.cs);
 // @ProjectName(ProjectBoundTestsProject)
 // @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplateApplicationAllowedProjectBound
 {

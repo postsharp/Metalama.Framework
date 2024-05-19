@@ -1,6 +1,8 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaProfessionalBusiness)
+﻿#if TEST_OPTIONS
+// @LicenseKey(MetalamaProfessionalBusiness)
 // @Include(_AspectWeaver.cs);
 // @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.SdkAllowedByProfessional;
 

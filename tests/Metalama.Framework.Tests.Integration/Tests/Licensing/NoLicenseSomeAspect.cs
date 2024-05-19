@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @LicenseExpression(None)
+#endif
 
 using Metalama.Framework.Aspects;
 
