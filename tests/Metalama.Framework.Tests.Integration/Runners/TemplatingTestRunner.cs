@@ -190,7 +190,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 buildTimeDebugStream,
                 options: new EmitOptions(
                     defaultSourceFileEncoding: Encoding.UTF8,
-                    fallbackSourceFileEncoding: Encoding.UTF8 ) );
+                    fallbackSourceFileEncoding: Encoding.UTF8,
+                    debugInformationFormat: DebugInformationFormat.PortablePdb ) );
 
             if ( !emitResult.Success )
             {

@@ -301,7 +301,7 @@ internal abstract partial class BaseTestRunner
             foreach ( var includedFile in testInput.Options.IncludedFiles.Where( f => !f.EndsWith( ".Dependency.cs", StringComparison.OrdinalIgnoreCase ) ) )
             {
                 var includedFullPath = Path.GetFullPath(
-                    Path.Combine( testDirectory, includedFile.Replace( '\\', Path.PathSeparator ).Replace( '/', Path.PathSeparator ) ) );
+                    Path.Combine( testDirectory, includedFile.Replace( '\\', Path.DirectorySeparatorChar ).Replace( '/', Path.DirectorySeparatorChar ) ) );
 
                 var includedText = this._fileSystem.ReadAllText( includedFullPath );
 

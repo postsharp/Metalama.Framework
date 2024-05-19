@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
+using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -93,7 +94,7 @@ public sealed partial class DependencyCollectorTests
 'Interface2.cs'->'Interface3.cs'
 'Interface3.cs'->'Class4.cs'";
 
-        Assert.Equal( expectedDependencies, actualDependencies );
+        Assert.Equal( expectedDependencies.NormalizeEndOfLines(), actualDependencies.NormalizeEndOfLines() );
     }
 
     [Fact]
@@ -128,7 +129,7 @@ public sealed partial class DependencyCollectorTests
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
 
         var actualDependencies = string.Join(
-            Environment.NewLine,
+            "\r\n",
             dependencyCollector.EnumerateSyntaxTreeDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         const string expectedDependencies = @"'Class2.cs'->'Class3.cs'

@@ -45,7 +45,7 @@
     <ItemGroup>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>EngineeringDataDirectory</_Parameter1>
-            <_Parameter2>$(MetalamaEngineeringDataDirectory)</_Parameter2>
+            <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
         </AssemblyAttribute>
     </ItemGroup>
 

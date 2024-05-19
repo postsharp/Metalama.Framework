@@ -89,7 +89,6 @@ var product = new Product( MetalamaDependencies.Metalama )
                 ]
             } ),
     SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
-    DockerBaseImage = "mcr.microsoft.com/dotnet/sdk:8.0.101-jammy"
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
