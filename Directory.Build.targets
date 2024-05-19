@@ -30,13 +30,7 @@
     </PropertyGroup>
 
 
-    <ItemGroup>
-        <!-- Specifically use the same version of Roslyn as we're using in Metalama Compiler -->
-        <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)"
-                          Condition="'$(UseMetalamaCompiler)'==''">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
+    <ItemGroup>    
         <PackageReference Include="Metalama.Compiler" Version="$(MetalamaCompilerVersion)" PrivateAssets="all"
                           Condition="'$(UseMetalamaCompiler)'=='Private'"/>
         <PackageReference Include="Metalama.Compiler" Version="$(MetalamaCompilerVersion)"
