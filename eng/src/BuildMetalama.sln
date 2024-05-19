@@ -7,8 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuildMetalama", "BuildMetal
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1125ED95-5D73-447C-A24A-444ED7E4F259}"
 	ProjectSection(SolutionItems) = preProject
-		..\MainVersion.props = ..\MainVersion.props
-		..\Versions.props = ..\Versions.props
+		../MainVersion.props = ../MainVersion.props
+		../Versions.props = ../Versions.props
 	EndProjectSection
 EndProject
 Global

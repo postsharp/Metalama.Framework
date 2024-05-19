@@ -1,4 +1,4 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaProfessionalBusiness)
+﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeyProvider,Metalama.Backstage.Testing;MetalamaProfessionalBusiness)
 // @Include(_AspectWeaver.cs);
 // @OutputAllSyntaxTrees
 

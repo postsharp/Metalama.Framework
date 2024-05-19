@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />
+        <ProjectReference Include="../Metalama.Framework/Metalama.Framework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -20,7 +20,7 @@
 
     <!-- Packaging -->
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>

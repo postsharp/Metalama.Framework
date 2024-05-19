@@ -37,7 +37,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="$(MsBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+        <None Include="$(MsBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
     
     <ItemGroup>
@@ -47,15 +47,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj" />
-      <ProjectReference Include="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
-      <ProjectReference Include="..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
+      <ProjectReference Include="../Metalama.Framework.DesignTime/Metalama.Framework.DesignTime.csproj" />
+      <ProjectReference Include="../Metalama.Framework.Engine/Metalama.Framework.Engine.csproj" />
+      <ProjectReference Include="../Metalama.Testing.AspectTesting/Metalama.Testing.AspectTesting.csproj" />
     </ItemGroup>
 
     <!-- Exclude full pdbs from packing so the .snupkg doesn't get refused by nuget.org. -->
     <Target Name="_ExcludeFullPdbs" AfterTargets="Build" BeforeTargets="GenerateNuspec">
         <ItemGroup>
-            <_PackageFilesToExclude Include="$(PublishDir)\runtimes\**\*.pdb" />
+            <_PackageFilesToExclude Include="$(PublishDir)/runtimes/**/*.pdb" />
         </ItemGroup>
     </Target>
 

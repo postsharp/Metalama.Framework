@@ -42,12 +42,12 @@
             
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.EditorExtensions\Metalama.Framework.EditorExtensions.csproj" PrivateAssets="all" />
-        <ProjectReference Include="..\Metalama.Framework.CompilerExtensions\Metalama.Framework.CompilerExtensions.csproj" PrivateAssets="all" />
+        <ProjectReference Include="../Metalama.Framework.EditorExtensions/Metalama.Framework.EditorExtensions.csproj" PrivateAssets="all" />
+        <ProjectReference Include="../Metalama.Framework.CompilerExtensions/Metalama.Framework.CompilerExtensions.csproj" PrivateAssets="all" />
 
         <!-- Adding PrivateAssets="none" here below is important otherwise PrivateAssets="all" will be transitively inherited from the ProjectReference above -->
 
-        <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="none" />
+        <ProjectReference Include="../Metalama.Framework/Metalama.Framework.csproj" PrivateAssets="none" />
 
         <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" PrivateAssets="none" />
     </ItemGroup>
@@ -55,8 +55,8 @@
 
     <Target Name="_AddAnalyzersToOutput">
         <ItemGroup>
-            <TfmSpecificPackageFile Include="$(OutputPath)\Metalama.Framework.CompilerExtensions.dll" PackagePath="analyzers/dotnet/cs" />
-            <TfmSpecificPackageFile Include="$(OutputPath)\Metalama.Framework.EditorExtensions.dll" PackagePath="analyzers/dotnet/cs" />
+            <TfmSpecificPackageFile Include="$(OutputPath)/Metalama.Framework.CompilerExtensions.dll" PackagePath="analyzers/dotnet/cs" />
+            <TfmSpecificPackageFile Include="$(OutputPath)/Metalama.Framework.EditorExtensions.dll" PackagePath="analyzers/dotnet/cs" />
         </ItemGroup>
     </Target>
 
@@ -68,7 +68,7 @@
     </Target>
 
     <ItemGroup>
-        <None Include="README.md" Pack="true" PackagePath="\" />
+        <None Include="README.md" Pack="true" PackagePath="/" />
     </ItemGroup>
 
 </Project>
