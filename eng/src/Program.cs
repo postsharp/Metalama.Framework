@@ -6,6 +6,7 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
+using PostSharp.Engineering.BuildTools.Docker;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System.IO;
@@ -72,7 +73,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
     ],
     SourceDependencies = [MetalamaDependencies.MetalamaFrameworkPrivate],
-    ExportedProperties = { { @"eng\Versions.props", new[] { "RoslynApiMaxVersion" } } },
+    ExportedProperties = { { @"eng\Versions.props", ["RoslynApiMaxVersion"] } },
     Configurations = Product.DefaultConfigurations
         .WithValue(
             BuildConfiguration.Debug,

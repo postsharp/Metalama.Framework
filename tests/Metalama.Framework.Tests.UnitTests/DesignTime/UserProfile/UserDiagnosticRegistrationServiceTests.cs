@@ -171,7 +171,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
                 } );
 
             // Verify that the diagnostic is reported for both compilations.
-            Assert.Equal(
+            AssertEx.EolInvariantEqual(
                 """
                 MY001
                 MY001
