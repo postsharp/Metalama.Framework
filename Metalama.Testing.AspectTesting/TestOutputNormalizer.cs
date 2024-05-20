@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Testing.AspectTesting;
