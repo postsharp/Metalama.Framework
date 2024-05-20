@@ -1,24 +1,3 @@
-// --- PartialType_SyntaxTrees.cs ---
-[Override]
-internal partial class TargetClass
-{
-  private event EventHandler? _targetEvent1;
-  public event EventHandler? TargetEvent1
-  {
-    add
-    {
-      global::System.Console.WriteLine("This is the override of TargetEvent1.");
-      this._targetEvent1 += value;
-      return;
-    }
-    remove
-    {
-      global::System.Console.WriteLine("This is the override of TargetEvent1.");
-      this._targetEvent1 -= value;
-      return;
-    }
-  }
-}
 // --- PartialType_SyntaxTrees.1.cs ---
 internal partial class TargetClass
 {
@@ -55,6 +34,27 @@ internal partial class TargetClass
     {
       global::System.Console.WriteLine("This is the override of TargetEvent3.");
       this._targetEvent3 -= value;
+      return;
+    }
+  }
+}
+// --- PartialType_SyntaxTrees.cs ---
+[Override]
+internal partial class TargetClass
+{
+  private event EventHandler? _targetEvent1;
+  public event EventHandler? TargetEvent1
+  {
+    add
+    {
+      global::System.Console.WriteLine("This is the override of TargetEvent1.");
+      this._targetEvent1 += value;
+      return;
+    }
+    remove
+    {
+      global::System.Console.WriteLine("This is the override of TargetEvent1.");
+      this._targetEvent1 -= value;
       return;
     }
   }

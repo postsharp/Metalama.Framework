@@ -83,15 +83,15 @@ class TargetClass
 
         [Theory]
         [InlineData( null, _noLicenseKeyErrorId )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpFramework), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpUltimate), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution), "DEMO01" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), LicensingDiagnosticDescriptors.InvalidLicenseKeyRegisteredId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), "DEMO01", TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        [InlineData( nameof(LicenseKeys.PostSharpFramework), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.PostSharpUltimate), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.MetalamaProfessionalBusiness), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution), "DEMO01" )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), LicensingDiagnosticDescriptors.InvalidLicenseKeyRegisteredId )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), "DEMO01", TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
         public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string? licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
@@ -107,14 +107,14 @@ class TargetClass
 
         [Theory]
         [InlineData( null, _noLicenseKeyErrorId )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpFramework), "DEMO02" )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpUltimate), "DEMO02" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), _fabricsNotAvailableErrorId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), "DEMO02" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness), "DEMO02" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness), "DEMO02" )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), _fabricsNotAvailableErrorId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), "DEMO02", TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        [InlineData( nameof(LicenseKeys.PostSharpFramework), "DEMO02" )]
+        [InlineData( nameof(LicenseKeys.PostSharpUltimate), "DEMO02" )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), _fabricsNotAvailableErrorId )]
+        [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness), "DEMO02" )]
+        [InlineData( nameof(LicenseKeys.MetalamaProfessionalBusiness), "DEMO02" )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness), "DEMO02" )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), _fabricsNotAvailableErrorId )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), "DEMO02", TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
         public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKeyName, string expectedDiagnosticId, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
@@ -128,7 +128,7 @@ class TargetClass
         [Fact]
         public async Task NotificationsAreTriggeredWhenOnlyValidatorsAreUsedAsync()
         {
-            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, TestLicenseKeys.MetalamaUltimateBusiness );
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, LicenseKeys.MetalamaUltimateBusiness );
 
             Assert.Single( diagnostics, d => d.Id == "DEMO01" );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );

@@ -2,11 +2,11 @@
 
   <Target Name="Build">
       <!-- The library must be built with `dotnet build`, which is supposed to be the current process. -->
-      <Exec Command="dotnet build $(MSBuildThisFileDirectory)NetCoreBuildLibrary\ClassLibrary1.csproj /t:rebuild"/>
+      <Exec Command="dotnet build $(MSBuildThisFileDirectory)NetCoreBuildLibrary/ClassLibrary1.csproj /t:rebuild"/>
 
       <!-- The app must be built with `msbuild` -->
       <Exec Command="dotnet restore" WorkingDirectory="$(MSBuildThisFileDirectory)NetFrameworkBuildApp"/>
-      <Exec Command="msbuild $(MSBuildThisFileDirectory)NetFrameworkBuildApp\ConsoleApp1.csproj  /t:rebuild" EnvironmentVariables="DOTNET_ROOT_X64=;MSBUILD_EXE_PATH=;MSBuildSDKsPath="/>
+      <Exec Command="msbuild $(MSBuildThisFileDirectory)NetFrameworkBuildApp/ConsoleApp1.csproj  /t:rebuild" EnvironmentVariables="DOTNET_ROOT_X64=;MSBUILD_EXE_PATH=;MSBuildSDKsPath="/>
   </Target>
 
 </Project>

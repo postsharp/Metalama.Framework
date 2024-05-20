@@ -4,6 +4,7 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
+using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -84,7 +85,7 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
 'Interface1'->'Class3.cs'
 'Interface1'->'Interface2.cs'";
 
-        Assert.Equal( expectedDependencies, actualDependencies );
+        AssertEx.EolInvariantEqual( expectedDependencies, actualDependencies );
     }
 
     [Fact]
@@ -120,7 +121,7 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
 
         var actualDependencies = string.Join(
-            Environment.NewLine,
+            "\r\n",
             dependencyCollector.EnumeratePartialTypeDependencies().Select( x => $"'{x.MasterType}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         const string expectedDependencies = @"'Class1'->'Class2_1.cs'
@@ -129,6 +130,6 @@ public sealed partial class DependencyCollectorTests : UnitTestClass
 'Class2'->'Class3.cs'
 'Interface1'->'Class3.cs'";
 
-        Assert.Equal( expectedDependencies, actualDependencies );
+        AssertEx.EolInvariantEqual( expectedDependencies, actualDependencies );
     }
 }

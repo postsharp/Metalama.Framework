@@ -16,38 +16,38 @@
 // Warning MY002 on `Property1`: `Warning 2: AnotherClass.Property1.`
 internal class TargetCode
 {
-    private int Method1(int a) => a;
-    private string Method2(string s)
-    {
+  private int Method1(int a) => a;
+  private string Method2(string s)
+  {
     global::System.Console.WriteLine("overridden instances: 1");
-        return s;
-    }
-    private string Property1
+    return s;
+  }
+  private string Property1
+  {
+    get
     {
-        get
-        {
       global::System.Console.WriteLine("overridden instances: 1");
-            return "";
-        }
+      return "";
     }
+  }
 }
 namespace Sub
 {
-    internal class AnotherClass
+  internal class AnotherClass
+  {
+    private int Method1(int a) => a;
+    private string Method2(string s)
     {
-        private int Method1(int a) => a;
-        private string Method2(string s)
-        {
       global::System.Console.WriteLine("overridden instances: 1");
-            return s;
-        }
-        private string Property1
-        {
-            get
-            {
-        global::System.Console.WriteLine("overridden instances: 1");
-                return "";
-            }
-        }
+      return s;
     }
+    private string Property1
+    {
+      get
+      {
+        global::System.Console.WriteLine("overridden instances: 1");
+        return "";
+      }
+    }
+  }
 }

@@ -28,62 +28,62 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         [Theory]
         [InlineData( null, 0, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData( null, 1, _arbitraryNamespace, _arbitraryNamespace, _noLicenseKeyErrorId )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpFramework), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpFramework), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpUltimate), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), 5, _arbitraryNamespace, _arbitraryNamespace, null )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [InlineData( nameof(LicenseKeys.PostSharpFramework), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [InlineData( nameof(LicenseKeys.PostSharpFramework), 11, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [InlineData( nameof(LicenseKeys.PostSharpUltimate), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), 4, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness), 5, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness), 6, _arbitraryNamespace, _arbitraryNamespace, _tooManyAspectClassesErrorId )]
+        [InlineData( nameof(LicenseKeys.MetalamaProfessionalBusiness), 10, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaProfessionalBusiness),
+            nameof(LicenseKeys.MetalamaProfessionalBusiness),
             11,
             _arbitraryNamespace,
             _arbitraryNamespace,
             _tooManyAspectClassesErrorId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness), 11, _arbitraryNamespace, _arbitraryNamespace, null )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution),
             1,
             _arbitraryNamespace,
             _arbitraryNamespace,
             _redistributionInvalidErrorId )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution),
             1,
             _arbitraryNamespace,
-            TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
+            TestLicenseKeyProvider.MetalamaUltimateRedistributionNamespace,
             _redistributionInvalidErrorId )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution),
             11,
-            TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
+            TestLicenseKeyProvider.MetalamaUltimateRedistributionNamespace,
             _arbitraryNamespace,
             null )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution),
+            nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution),
             11,
-            TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
-            TestLicenseKeys.MetalamaUltimateRedistributionNamespace,
+            TestLicenseKeyProvider.MetalamaUltimateRedistributionNamespace,
+            TestLicenseKeyProvider.MetalamaUltimateRedistributionNamespace,
             null )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound),
+            nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound),
             1,
             _arbitraryNamespace,
             _arbitraryNamespace,
             LicensingDiagnosticDescriptors.InvalidLicenseKeyRegisteredId )]
         [InlineData(
-            nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound),
+            nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound),
             11,
             _arbitraryNamespace,
             _arbitraryNamespace,
             null,
             0,
-            TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+            TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), 0, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), 2, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), 3, _arbitraryNamespace, _arbitraryNamespace, null, 4 )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(
             string? licenseKeyName,
             int numberOfAspects,
@@ -293,7 +293,7 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );
@@ -359,7 +359,7 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );
@@ -443,7 +443,7 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
 
             Assert.Single( diagnostics, d => d.Id == _tooManyAspectClassesErrorId );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );
@@ -519,7 +519,7 @@ interface ITargetInterface
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
             Assert.False( this.ToastNotifications.WasDetectionTriggered );
@@ -527,12 +527,12 @@ interface ITargetInterface
 
         [Theory]
         [InlineData( null, _noLicenseKeyErrorId )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpFramework), null )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpUltimate), null )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal), _tooManyAspectClassesErrorId )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness), null )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness), null )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness), null )]
+        [InlineData( nameof(LicenseKeys.PostSharpFramework), null )]
+        [InlineData( nameof(LicenseKeys.PostSharpUltimate), null )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal), _tooManyAspectClassesErrorId )]
+        [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness), null )]
+        [InlineData( nameof(LicenseKeys.MetalamaProfessionalBusiness), null )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness), null )]
         public async Task InheritedAspectsCountAsync( string licenseKeyName, string? expectedErrorId )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );
@@ -691,7 +691,7 @@ class TargetClass : ITargetInterface
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+            var diagnostics = await this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );
@@ -723,7 +723,7 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaUltimateBusiness );
+            var diagnostics = await this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaUltimateBusiness );
 
             Assert.Empty( diagnostics );
             Assert.True( this.ToastNotifications.WasDetectionTriggered );

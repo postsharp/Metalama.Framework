@@ -17,8 +17,9 @@ namespace Metalama.Testing.AspectTesting
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, references, logger ) { }
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
+            : base( serviceProvider, projectDirectory, references, logger, licenseKeyProvider ) { }
 
         protected override async Task RunAsync(
             TestInput testInput,

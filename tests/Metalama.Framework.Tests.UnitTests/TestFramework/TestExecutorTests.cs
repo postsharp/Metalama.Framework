@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.AspectTesting.XunitFramework;
 using Metalama.Testing.UnitTesting;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -32,7 +33,7 @@ public sealed class TestExecutorTests : UnitTestClass
     {
         using var testContext = this.CreateTestContext();
         var fileSystem = new TestFileSystem( testContext.ServiceProvider.Underlying );
-        const string directory = "C:\\test";
+        var directory = Path.Combine( Environment.CurrentDirectory, "tests" );
         fileSystem.CreateDirectory( directory );
         fileSystem.WriteAllText( Path.Combine( directory, "Test.cs" ), testInput );
         fileSystem.WriteAllText( Path.Combine( directory, "Test.t.cs" ), expectedTestOutput );
@@ -41,7 +42,14 @@ public sealed class TestExecutorTests : UnitTestClass
             .WithUntypedService( typeof(IFileSystem), fileSystem )
             .WithService( new FakeMetadataReader( directory ) );
 
-        var testProperties = new TestProjectProperties( assemblyName: null, directory, directory, ImmutableArray<string>.Empty, "net6.0", ImmutableArray<string>.Empty );
+        var testProperties = new TestProjectProperties(
+            assemblyName: null,
+            directory,
+            directory,
+            ImmutableArray<string>.Empty,
+            "net6.0",
+            ImmutableArray<string>.Empty );
+
         var assemblyInfo = new TestAssemblyInfo( $"test.dll" );
         var testFactory = new TestFactory( serviceProvider, testProperties, new TestDirectoryOptionsReader( serviceProvider, directory ), assemblyInfo );
         var messageSink = new TestMessageSink();

@@ -5,12 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Testing.AspectTesting\**\*.cs" Exclude="..\Metalama.Testing.AspectTesting\bin\**\*.cs;..\Metalama.Testing.AspectTesting\obj\**\*.cs" />
+        <Compile Include="../Metalama.Testing.AspectTesting/**/*.cs" Exclude="../Metalama.Testing.AspectTesting/bin/**/*.cs;../Metalama.Testing.AspectTesting/obj/**/*.cs" />
         <Compile Remove="**/*" Condition="'$(FormattingCode)'=='True'" />
     </ItemGroup>
 
-    <Import Project="..\Build\RoslynVersion\Roslyn.4.4.0.props" />
+    <Import Project="../build/RoslynVersion/Roslyn.4.4.0.props" />
 
-    <Import Project="..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
+    <Import Project="../Metalama.Testing.AspectTesting/Metalama.Testing.AspectTesting.csproj" />
 
 </Project>

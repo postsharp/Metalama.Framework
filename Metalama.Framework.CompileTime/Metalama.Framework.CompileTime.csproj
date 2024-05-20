@@ -17,7 +17,7 @@
     <ItemGroup>
         <!-- Include all files from the Metalama.Framework project, but only in real builds because we don't want to import the files
              several times in the IDE. -->
-        <Compile Include="..\Metalama.Framework\**\*.cs" Exclude="..\Metalama.Framework\bin\**\*.cs;..\Metalama.Framework\obj\**\*.cs" Condition="'$(DesignTimeBuild)'!='True'" />
+        <Compile Include="../Metalama.Framework/**/*.cs" Exclude="../Metalama.Framework/bin/**/*.cs;../Metalama.Framework/obj/**/*.cs" Condition="'$(DesignTimeBuild)'!='True'" />
     </ItemGroup>
 
     <ItemGroup>
@@ -31,8 +31,8 @@
         <PackageReference Include="Metalama.Framework.RunTime" Version="$(MetalamaFrameworkRunTimeVersion)" />
 
         <!-- The following references change 'dynamic' into 'object' -->
-        <ProjectReference Include="..\source-dependencies\Metalama.Framework.Private\src\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists('..\source-dependencies\Metalama.Framework.Private')" />
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" />
+        <ProjectReference Include="../source-dependencies/Metalama.Framework.Private/src/Metalama.SourceTransformer/Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists('../source-dependencies/Metalama.Framework.Private')" />
+        <ProjectReference Include="../Metalama.SystemTypes/Metalama.SystemTypes.csproj" />
     </ItemGroup>
 
 </Project>

@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Aspect\Aspect.csproj" />
-    <ProjectReference Include="..\ServiceImpl\ServiceImpl.csproj" />
-    <ProjectReference Include="..\Contract\Contract.csproj" />
+    <ProjectReference Include="../Aspect/Aspect.csproj" />
+    <ProjectReference Include="../ServiceImpl/ServiceImpl.csproj" />
+    <ProjectReference Include="../Contract/Contract.csproj" />
   </ItemGroup>
 
 </Project>

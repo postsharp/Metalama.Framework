@@ -12,7 +12,8 @@ namespace Metalama.Testing.AspectTesting
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
-            => new DesignTimeTestRunner( serviceProvider, projectDirectory, references, logger );
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
+            => new DesignTimeTestRunner( serviceProvider, projectDirectory, references, logger, licenseKeyProvider );
     }
 }

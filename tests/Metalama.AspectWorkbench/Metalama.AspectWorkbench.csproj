@@ -6,6 +6,7 @@
         <UseWPF>true</UseWPF>
         <NoWarn>CS8002</NoWarn>
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
+        <EnableWindowsTargeting>True</EnableWindowsTargeting>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,10 +15,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.csproj" />
-        <ProjectReference Include="..\Metalama.Framework.Tests.Integration\Metalama.Framework.Tests.Integration.csproj" />
+        <ProjectReference Include="../../Metalama.Framework.Engine/Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="../../Metalama.Framework/Metalama.Framework.csproj" />
+        <ProjectReference Include="../../Metalama.Testing.AspectTesting/Metalama.Testing.AspectTesting.csproj" />
+        <ProjectReference Include="../Metalama.Framework.Tests.Integration/Metalama.Framework.Tests.Integration.csproj" />
     </ItemGroup>
 
 </Project>
