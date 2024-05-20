@@ -87,50 +87,27 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         public static implicit operator Integer( int integer )
-        {
-            if ( integer < 0 )
+            => integer switch
             {
-                if ( integer == int.MinValue )
-                {
-                    return new Integer( checked(-(long) int.MinValue), true );
-                }
-
-                return new Integer( (ulong) -integer, true );
-            }
-            else
-            {
-                return new Integer( (ulong) integer, false );
-            }
-        }
+                int.MinValue => new Integer( checked(-(long) int.MinValue), true ),
+                < 0 => new Integer( (ulong) -integer, true ),
+                _ => new Integer( (ulong) integer, false )
+            };
 
         public static implicit operator Integer( long integer )
-        {
-            if ( integer == long.MinValue )
+            => integer switch
             {
-                return new Integer( 1 + (ulong) long.MaxValue, true );
-            }
-
-            if ( integer < 0 )
-            {
-                return new Integer( (ulong) -integer, true );
-            }
-            else
-            {
-                return new Integer( (ulong) integer, false );
-            }
-        }
+                long.MinValue => new Integer( 1 + (ulong) long.MaxValue, true ),
+                < 0 => new Integer( (ulong) -integer, true ),
+                _ => new Integer( (ulong) integer, false )
+            };
 
         public static implicit operator Integer( short integer )
-        {
-            if ( integer < 0 )
+            => integer switch
             {
-                return new Integer( (ulong) -integer, true );
-            }
-            else
-            {
-                return new Integer( (ulong) integer, false );
-            }
-        }
+                < 0 => new Integer( (ulong) -integer, true ),
+                _ => new Integer( (ulong) integer, false )
+            };
 
         public static implicit operator Integer( uint integer ) => new( integer, false );
 
