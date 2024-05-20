@@ -11,6 +11,6 @@ public class TargetType
   {
   }
   public class IntroducedNestedType : global::System.Object
-    {
+  {
   }
 }

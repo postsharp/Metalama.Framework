@@ -34,7 +34,9 @@ namespace Metalama.Testing.AspectTesting
 
             return new TestSyntaxTree( inputPath, document, parent, syntaxTree.AssertNotNull() );
         }
+
         public bool IsAuxiliary => this.InputPath != null && Path.GetFileName( this.InputPath ).StartsWith( "_", StringComparison.Ordinal );
+
         public string? InputPath { get; }
 
         /// <summary>

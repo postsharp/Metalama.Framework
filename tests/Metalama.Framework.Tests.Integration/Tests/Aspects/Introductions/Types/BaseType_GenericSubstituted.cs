@@ -1,4 +1,4 @@
-﻿#if TESTOPTIONS
+﻿#if TEST_OPTIONS
 // @Skipped(constructed generics not supported)
 # endif
 
