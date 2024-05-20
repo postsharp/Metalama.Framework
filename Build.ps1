@@ -1,4 +1,4 @@
-if ( $IsWindows -and $env:VisualStudioVersion -eq $null ) {
+if ( ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') -and $env:VisualStudioVersion -eq $null ) {
     Import-Module "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
     Enter-VsDevShell -VsInstallPath "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\" -StartInPath $(Get-Location)
 }
