@@ -1,5 +1,3 @@
-// --- LiveTemplateRedistributionPreviewingAllowed.cs ---
-// --- _LiveTemplateRedistribution.cs ---
 internal class TargetClass
 {
   private int TargetMethod(int a)

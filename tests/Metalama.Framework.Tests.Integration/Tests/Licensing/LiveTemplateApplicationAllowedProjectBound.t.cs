@@ -1,5 +1,3 @@
-// --- LiveTemplateApplicationAllowedProjectBound.cs ---
-// --- _LiveTemplate.cs ---
 internal class TargetClass
 {
   private int TargetMethod(int a)

@@ -1,8 +1,3 @@
-// --- RoslynAllowed.cs ---
-namespace Metalama.Framework.Tests.Integration.Tests.Licensing.RoslynAllowed;
-class Dummy
-{
-}
 // --- _Roslyn.cs ---
 public class TargetClass
 {
@@ -12,4 +7,9 @@ public class TargetClass
     global::System.Console.WriteLine("Starting TargetMethod, doc ID M:Metalama.Framework.Tests.Integration.Tests.Licensing.Roslyn.TargetClass.TargetMethod.");
     return;
   }
+}
+// --- RoslynAllowed.cs ---
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.RoslynAllowed;
+class Dummy
+{
 }

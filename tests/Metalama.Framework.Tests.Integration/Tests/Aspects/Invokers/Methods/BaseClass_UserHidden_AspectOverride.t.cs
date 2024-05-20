@@ -2,8 +2,7 @@ public class TargetClass : BaseClass
 {
   [OverrideAspect]
   public new void Method()
-  {
-    // Invoke this.Method_Source
+  { // Invoke this.Method_Source
     this.Method_Source();
     // Invoke this.Method_Source
     this.Method_Source();
@@ -19,8 +18,7 @@ public class TargetClass : BaseClass
   }
   [InvokerBeforeAspect]
   public void InvokerBefore()
-  {
-    // Invoke this.Method
+  { // Invoke this.Method
     this.Method();
     // Invoke this.Method_Source
     this.Method_Source();
@@ -32,8 +30,7 @@ public class TargetClass : BaseClass
   }
   [InvokerAfterAspect]
   public void InvokerAfter()
-  {
-    // Invoke this.Method
+  { // Invoke this.Method
     this.Method();
     // Invoke this.Method
     this.Method();

@@ -35,7 +35,8 @@ public class TargetClass : BaseClass
   public int InvokerBefore
   {
     get
-    { // Invoke this.Field
+    {
+      // Invoke this.Field
       _ = this.Field;
       // Invoke this._field
       _ = this._field;
@@ -60,7 +61,8 @@ public class TargetClass : BaseClass
   public int InvokerAfter
   {
     get
-    { // Invoke this.Field
+    {
+      // Invoke this.Field
       _ = this.Field;
       // Invoke this.Field
       _ = this.Field;

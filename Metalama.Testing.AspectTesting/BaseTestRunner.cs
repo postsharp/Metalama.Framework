@@ -637,9 +637,15 @@ internal abstract partial class BaseTestRunner
                 default:
                     var sb = new StringBuilder();
 
-                    foreach ( var syntaxTree in compilationUnits )
+                    for ( var index = 0; index < compilationUnits.Count; index++ )
                     {
-                        sb.AppendLine();
+                        var syntaxTree = compilationUnits[index];
+
+                        if ( index > 0 )
+                        {
+                            sb.AppendLine();
+                        }
+
                         sb.AppendLineInvariant( $"// --- {syntaxTree.FilePath} ---" );
                         sb.AppendLine();
                         sb.AppendLine( syntaxTree.GetRoot().ToFullString() );

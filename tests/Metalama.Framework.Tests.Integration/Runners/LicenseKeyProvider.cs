@@ -1,19 +1,19 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using JetBrains.Annotations;
 using Metalama.Backstage.Testing;
 using Metalama.Testing.AspectTesting;
 using System;
-using System.Diagnostics;
 
 namespace Metalama.Framework.Tests.Integration.Runners;
 
-public class LicenseKeyProvider : ILicenseKeyProvider
+[UsedImplicitly]
+public sealed class LicenseKeyProvider : ILicenseKeyProvider
 {
     private static readonly TestLicenseKeyProvider _provider;
 
     static LicenseKeyProvider()
     {
-        Debugger.Break();
         _provider = new TestLicenseKeyProvider( typeof(LicenseKeyProvider).Assembly );
     }
 

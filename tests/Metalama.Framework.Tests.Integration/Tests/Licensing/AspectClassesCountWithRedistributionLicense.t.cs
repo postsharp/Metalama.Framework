@@ -1,9 +1,5 @@
-// --- AspectClassesCountWithRedistributionLicense.cs ---
-namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectClassesCountWithRedistributionLicense;
-class Dummy
-{
-} // --- _Redistribution.cs ---
-using  Metalama . Framework . Tests . Integration . Tests . Licensing . Redistribution . Dependency ;
+// --- _Redistribution.cs ---
+using Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution.Dependency;
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution;
 class RedistributionTargetClass
 {
@@ -19,4 +15,9 @@ class RedistributionTargetClass
     global::System.Console.WriteLine("RedistributionTargetClass.RedistributionTargetMethod() enhanced by RedistributionAspect4");
     return;
   }
+}
+// --- AspectClassesCountWithRedistributionLicense.cs ---
+namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectClassesCountWithRedistributionLicense;
+class Dummy
+{
 }
