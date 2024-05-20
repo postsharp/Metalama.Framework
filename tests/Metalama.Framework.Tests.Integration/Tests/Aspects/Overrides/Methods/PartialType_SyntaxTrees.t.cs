@@ -1,14 +1,3 @@
-// --- PartialType_SyntaxTrees.cs ---
-[Override]
-internal partial class TargetClass
-{
-  public void TargetMethod1()
-  {
-    global::System.Console.WriteLine("This is the override of TargetMethod1.");
-    Console.WriteLine("This is TargetMethod1.");
-    return;
-  }
-}
 // --- PartialType_SyntaxTrees.1.cs ---
 internal partial class TargetClass
 {
@@ -26,6 +15,17 @@ internal partial class TargetClass
   {
     global::System.Console.WriteLine("This is the override of TargetMethod3.");
     Console.WriteLine("This is TargetMethod3.");
+    return;
+  }
+}
+// --- PartialType_SyntaxTrees.cs ---
+[Override]
+internal partial class TargetClass
+{
+  public void TargetMethod1()
+  {
+    global::System.Console.WriteLine("This is the override of TargetMethod1.");
+    Console.WriteLine("This is TargetMethod1.");
     return;
   }
 }

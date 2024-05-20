@@ -1,9 +1,11 @@
+#if TEST_OPTIONS
 // @TestScenario(PreviewCodeFix)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaFreePersonal)
-// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaUltimateBusiness)
+// @LicenseKey(MetalamaFreePersonal)
+// @DependencyLicenseKey(MetalamaUltimateBusiness)
 // @Include(_CodeFixRedistribution.cs);
 // @Include(_CodeFixRedistribution.Dependency.cs);
 // @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.CodeFixRedistributionPreviewAllowed;
 

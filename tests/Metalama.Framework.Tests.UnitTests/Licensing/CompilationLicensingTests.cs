@@ -13,14 +13,14 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
         [Theory]
         [InlineData( null )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpFramework) )]
-        [InlineData( nameof(TestLicenseKeys.PostSharpUltimate) )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaFreePersonal) )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaStarterBusiness) )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaProfessionalBusiness) )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateBusiness) )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
-        [InlineData( nameof(TestLicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeys.MetalamaUltimateProjectBoundProjectName )]
+        [InlineData( nameof(LicenseKeys.PostSharpFramework) )]
+        [InlineData( nameof(LicenseKeys.PostSharpUltimate) )]
+        [InlineData( nameof(LicenseKeys.MetalamaFreePersonal) )]
+        [InlineData( nameof(LicenseKeys.MetalamaStarterBusiness) )]
+        [InlineData( nameof(LicenseKeys.MetalamaProfessionalBusiness) )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateBusiness) )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimateOpenSourceRedistribution) )]
+        [InlineData( nameof(LicenseKeys.MetalamaUltimatePersonalProjectBound), TestLicenseKeyProvider.MetalamaUltimateProjectBoundProjectName )]
         public async Task CompilationPassesWithNoMetalamaUsageAsync( string licenseKeyName, string projectName = "TestProject" )
         {
             var licenseKey = GetLicenseKey( licenseKeyName );

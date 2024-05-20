@@ -14,7 +14,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
-            => new LiveTemplateTestRunner( serviceProvider, projectDirectory, references, logger );
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
+            => new LiveTemplateTestRunner( serviceProvider, projectDirectory, references, logger, licenseKeyProvider );
     }
 }

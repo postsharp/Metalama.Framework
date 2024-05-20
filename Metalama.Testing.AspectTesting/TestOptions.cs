@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis.CSharp;
@@ -63,6 +62,12 @@ public class TestOptions
     /// You can only define this option in the <c>metalamaTests.json</c> file of a directory. This setting is for Metalama internal use only.
     /// </summary>
     public string? TestRunnerFactoryType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the name of the type implementing the <see cref="ILicenseKeyProvider"/>. This property is required when
+    /// <see cref="LicenseKey"/> or <see cref="DependencyLicenseKey"/> is specified.
+    /// </summary>
+    public string? LicenseKeyProviderType { get; set; }
 
     /// <summary>
     /// Gets the list of assembly names that should be included in the compilation.
@@ -269,20 +274,16 @@ public class TestOptions
     public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
 
     /// <summary>
-    /// Gets or sets the name of a file in the project directory containing the license key.
-    /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
+    /// Gets or sets the name of the license key used to compile the test input. The <see cref="LicenseKeyProviderType"/> property must be specified.
+    /// To set this option in a test, add this comment to your test file: <c>// @LicenseKey(name)</c>. 
     /// </summary>
-    public string? LicenseFile { get; set; }
-
-    public string? LicenseExpression { get; set; }
+    public string? LicenseKey { get; set; }
 
     /// <summary>
-    /// Gets or sets the name of a file in the project directory containing the license key to be used to compile the dependency.
-    /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
+    /// Gets or sets the name of the license key used to compile the test dependency. The <see cref="LicenseKeyProviderType"/> property must be specified.
+    /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseKey(name)</c>. 
     /// </summary>
-    public string? DependencyLicenseFile { get; set; }
-
-    public string? DependencyLicenseExpression { get; set; }
+    public string? DependencyLicenseKey { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether an error should be reported if the compilation uses aspects that
@@ -384,6 +385,8 @@ public class TestOptions
 
         this.TestRunnerFactoryType ??= baseOptions.TestRunnerFactoryType;
 
+        this.LicenseKeyProviderType ??= baseOptions.LicenseKeyProviderType;
+
         this.WriteInputHtml ??= baseOptions.WriteInputHtml;
 
         this.WriteOutputHtml ??= baseOptions.WriteOutputHtml;
@@ -429,13 +432,9 @@ public class TestOptions
 
         this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
 
-        this.LicenseFile ??= baseOptions.LicenseFile;
+        this.LicenseKey ??= baseOptions.LicenseKey;
 
-        this.LicenseExpression ??= baseOptions.LicenseExpression;
-
-        this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
-
-        this.DependencyLicenseExpression ??= baseOptions.DependencyLicenseExpression;
+        this.DependencyLicenseKey ??= baseOptions.DependencyLicenseKey;
 
         this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
 
@@ -725,27 +724,15 @@ public class TestOptions
 
                     break;
 
-                case "LicenseFile":
+                case "LicenseKey":
 
-                    this.LicenseFile = optionArg;
-
-                    break;
-
-                case "LicenseExpression":
-
-                    this.LicenseExpression = optionArg;
+                    this.LicenseKey = optionArg;
 
                     break;
 
-                case "DependencyLicenseFile":
+                case "DependencyLicenseKey":
 
-                    this.DependencyLicenseFile = optionArg;
-
-                    break;
-
-                case "DependencyLicenseExpression":
-
-                    this.DependencyLicenseExpression = optionArg;
+                    this.DependencyLicenseKey = optionArg;
 
                     break;
 
@@ -830,16 +817,6 @@ public class TestOptions
     {
         this.ApplySourceDirectives( sourceCode );
         this.ApplyBaseOptions( optionsReader.GetDirectoryOptions( Path.GetDirectoryName( path )! ) );
-    }
-
-    internal static string ReadLicenseExpression( string licenseExpression )
-    {
-        if ( licenseExpression.Split( ';' ) is not [var type, var property] )
-        {
-            throw new InvalidOperationException( $"Could not parse license expression '{licenseExpression}'." );
-        }
-
-        return Type.GetType( type ).AssertNotNull().GetProperty( property ).AssertNotNull().GetValue( null ).AssertNotNull().AssertCast<string>();
     }
 
     internal TestContextOptions ApplyToTestContextOptions( TestContextOptions testContextOptions )

@@ -2,8 +2,7 @@ public class TargetClass : BaseClass
 {
   [OverrideAspect]
   public new static void Method()
-  {
-    // Invoke TargetClass.Method_Source
+  { // Invoke TargetClass.Method_Source
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Method_Source();
     // Invoke TargetClass.Method_Source
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden_AspectOverride.TargetClass.Method_Source();
@@ -19,8 +18,7 @@ public class TargetClass : BaseClass
   }
   [InvokerBeforeAspect]
   public void InvokerBefore()
-  {
-    // Invoke TargetClass.Method
+  { // Invoke TargetClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Method();
     // Invoke TargetClass.Method_Source
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Method();
@@ -32,8 +30,7 @@ public class TargetClass : BaseClass
   }
   [InvokerAfterAspect]
   public void InvokerAfter()
-  {
-    // Invoke TargetClass.Method
+  { // Invoke TargetClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Method();
     // Invoke TargetClass.Method
     global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassStatic_UserHidden_AspectOverride.BaseClass.Method();

@@ -1,6 +1,8 @@
+#if TEST_OPTIONS
 // @TestScenario(ApplyLiveTemplate)
-// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaFreePersonal)
+// @LicenseKey(MetalamaFreePersonal)
 // @Include(_LiveTemplate.cs);
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.LiveTemplateApplicationDisallowed;
 

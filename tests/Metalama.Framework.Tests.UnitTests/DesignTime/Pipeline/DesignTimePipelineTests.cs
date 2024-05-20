@@ -200,14 +200,14 @@ F1.cs:
 0 introductions(s):
 ";
 
-        Assert.Equal( expectedResult.Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults );
 
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
         // Second execution. The result should be the same, and the number of executions should not change.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        Assert.Equal( expectedResult.Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult.Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
     }
 
@@ -306,14 +306,14 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
         var dumpedResults = DumpResults( results );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
@@ -332,7 +332,7 @@ Target.cs:
 
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
 
         // Forth execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
         var compilation4 = TestCompilationFactory.CreateCSharpCompilation(
@@ -352,7 +352,7 @@ Target.cs:
 
         var dumpedResults4 = DumpResults( results4 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults4 );
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
@@ -380,7 +380,7 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results5 ) );
         var dumpedResults5 = DumpResults( results5 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
         Assert.Equal( 2, pipeline.PipelineExecutionCount );
         Assert.Equal( 1, pipeline.PipelineInitializationCount );
 
@@ -400,7 +400,7 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, default, out var results6 ) );
         var dumpedResults6 = DumpResults( results6 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
         Assert.Equal( 3, pipeline.PipelineExecutionCount );
         Assert.Equal( 2, pipeline.PipelineInitializationCount );
         Assert.False( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
@@ -473,13 +473,13 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results ) );
         var dumpedResults = DumpResults( results );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
         // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation, default, out var results2 ) );
         var dumpedResults2 = DumpResults( results2 );
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
 
         // Third execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
@@ -503,7 +503,7 @@ Target.cs:
 
         var dumpedResults3 = DumpResults( results3 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults3 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults3 );
         Assert.Equal( 1, targetProjectPipeline.PipelineExecutionCount );
         Assert.Equal( 1, targetProjectPipeline.PipelineInitializationCount );
 
@@ -519,7 +519,7 @@ Target.cs:
         Assert.True( factory.TryExecute( testContext.ProjectOptions, targetCompilation3, default, out var results6 ) );
         var dumpedResults6 = DumpResults( results6 );
 
-        Assert.Equal( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
+        AssertEx.EolInvariantEqual( expectedResult.Replace( "$AspectVersion$", "2" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults6 );
         await targetProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         await aspectProjectPipeline.ProcessJobQueueWhenLockAvailableAsync();
         Assert.Equal( 2, targetProjectPipeline.PipelineExecutionCount );

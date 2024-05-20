@@ -1,16 +1,3 @@
-// --- PartialMethod_SyntaxTrees.cs ---
-[Override]
-internal partial class TargetClass
-{
-  public partial int TargetMethod();
-  partial void TargetMethodNoImplementation();
-  partial void TargetMethodNoImplementation()
-  {
-    global::System.Console.WriteLine("This is the override of TargetMethodNoImplementation.");
-    return;
-  }
-  partial void TargetVoidMethodWithImplementation();
-}
 // --- PartialMethod_SyntaxTrees.1.cs ---
 internal partial class TargetClass
 {
@@ -26,4 +13,17 @@ internal partial class TargetClass
     Console.WriteLine("This is a partial method.");
     return;
   }
+}
+// --- PartialMethod_SyntaxTrees.cs ---
+[Override]
+internal partial class TargetClass
+{
+  public partial int TargetMethod();
+  partial void TargetMethodNoImplementation();
+  partial void TargetMethodNoImplementation()
+  {
+    global::System.Console.WriteLine("This is the override of TargetMethodNoImplementation.");
+    return;
+  }
+  partial void TargetVoidMethodWithImplementation();
 }

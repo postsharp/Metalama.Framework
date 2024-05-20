@@ -1,8 +1,10 @@
-﻿// @LicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaFreePersonal)
-// @DependencyLicenseExpression(Metalama.Backstage.Testing.TestLicenseKeys,Metalama.Backstage.Testing;MetalamaFreePersonal)
+﻿#if TEST_OPTIONS
+// @LicenseKey(MetalamaFreePersonal)
+// @DependencyLicenseKey(MetalamaFreePersonal)
 // @Include(_AspectInheritanceCrossAssembly.cs);
 // @Include(_AspectInheritanceCrossAssembly.Dependency.cs);
 // @OutputAllSyntaxTrees
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.AspectInheritanceCrossAssemblyDisallowed;
 

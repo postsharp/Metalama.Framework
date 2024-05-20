@@ -6,5 +6,6 @@
  "MainMethod": "TestMain",
  "CheckMemoryLeaks": true,
  "IgnoreUserProfileLicenses": true,
- "TestUnformattedOutput": false // This can be occasionally turned on.
+ "TestUnformattedOutput": false, // This can be occasionally turned on.
+ "LicenseKeyProviderType": "Metalama.Framework.Tests.Integration.Runners.LicenseKeyProvider"
  }

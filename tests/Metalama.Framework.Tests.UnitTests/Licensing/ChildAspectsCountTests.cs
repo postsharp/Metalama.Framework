@@ -137,7 +137,7 @@ using System.Linq;
     
     public ChildAspectsCountTests( ITestOutputHelper logger ) : base( logger ) { }
 
-    private Task<DiagnosticBag> GetDiagnosticsWithFreeLicenseAsync( string code ) => this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
+    private Task<DiagnosticBag> GetDiagnosticsWithFreeLicenseAsync( string code ) => this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
 
     private void AssertTooManyAspectClasses( DiagnosticBag diagnostics )
     {

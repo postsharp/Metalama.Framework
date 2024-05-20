@@ -137,7 +137,7 @@ public sealed class RemotingTests : UnitTestClass
             CancellationToken.None );
 
         Assert.True( result.IsSuccessful );
-        Assert.Equal( "class TransformedCode {}", result.TransformedSyntaxTree?.Text );
+        AssertEx.EolInvariantEqual( "class TransformedCode {}", result.TransformedSyntaxTree?.Text );
     }
 
     [Fact]

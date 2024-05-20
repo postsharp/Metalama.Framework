@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="c:\src\Metalama\other-version\Metalama.version.props"/>
+  <Import Project="c:/src/Metalama/other-version/Metalama.version.props"/>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>

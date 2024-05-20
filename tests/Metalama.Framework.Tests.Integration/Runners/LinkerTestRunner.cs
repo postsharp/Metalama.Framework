@@ -28,12 +28,14 @@ namespace Metalama.Framework.Tests.Integration.Runners
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
             : base(
                 serviceProvider,
                 projectDirectory,
                 references,
-                logger ) { }
+                logger,
+                licenseKeyProvider ) { }
 
         /// <summary>
         /// Runs the template test with name and source provided in the <paramref name="testInput"/>.
