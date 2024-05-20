@@ -83,7 +83,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {
-            var constructorBuilder = new ExplicitConstructorBuilder( constructor.DeclaringType, this );
+            var constructorBuilder = new ConstructorBuilder(this, constructor.DeclaringType) { IsReplacingExisting = true };
             initializedConstructor = constructorBuilder;
             addTransformation( constructorBuilder.ToTransformation() );
         }
@@ -154,7 +154,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
 
                 if ( chainedConstructor.IsImplicitInstanceConstructor() )
                 {
-                    var derivedConstructorBuilder = new ExplicitConstructorBuilder( chainedConstructor.DeclaringType, this );
+                    var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType ) { IsReplacingExisting = true };
                     addTransformation( derivedConstructorBuilder.ToTransformation() );
                     initializedChainedConstructor = derivedConstructorBuilder;
                 }

@@ -82,8 +82,6 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
 
             // There is no existing declaration, we will introduce and override the introduced.
             var overriddenConstructor = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
-            this.Builder.IsOverride = false;
-            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
 
             addTransformation( this.Builder.ToTransformation() );
             addTransformation( overriddenConstructor );
@@ -118,6 +116,17 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
                     addTransformation( overriddenMethod );
 
                     return this.CreateSuccessResult( AdviceOutcome.Override, existingConstructor );
+
+                case OverrideStrategy.New:
+                    // The constructor that conflicts with the existing constructor will replace it.
+                    var overriddenConstructor = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
+
+                    this.Builder.IsReplacingExisting = true;
+
+                    addTransformation( this.Builder.ToTransformation() );
+                    addTransformation( overriddenConstructor );
+
+                    return this.CreateSuccessResult();
 
                 default:
                     throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );

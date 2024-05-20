@@ -46,6 +46,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\BaseInitializer - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\Declarative.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
@@ -54,6 +59,17 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Introductions\Constructors\ThisInitializer.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>ThisInitializer.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\BaseInitializer.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>BaseInitializer.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.Testing.AspectTesting\Metalama.Testing.AspectTesting.targets" />

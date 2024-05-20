@@ -6,8 +6,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -27,10 +28,9 @@ internal sealed class IntroduceConstructorTransformation
 
         var targetType = introducedDeclaration.DeclaringType;
 
-        if ( targetType.Constructors.Any( c => c.GetSymbol() is { Parameters: [] } symbol && symbol.GetPrimarySyntaxReference() == null )
-             && this.IntroducedDeclaration.Parameters.Count == 0 )
+        if ( introducedDeclaration.IsReplacingExisting )
         {
-            this.ReplacedMember = targetType.Constructors.OfExactSignature( Array.Empty<IType>() ).AssertNotNull().ToMemberRef<IMember>();
+            this.ReplacedMember = targetType.Constructors.OfExactSignature( introducedDeclaration ).AssertNotNull().ToMemberRef<IMember>();
         }
     }
 
@@ -40,13 +40,44 @@ internal sealed class IntroduceConstructorTransformation
 
         var statements = Array.Empty<StatementSyntax>();
 
+        var syntaxSerializationContext = new SyntaxSerializationContext(
+            context.Compilation,
+            context.SyntaxGenerationContext,
+            constructorBuilder.DeclaringType.ForCompilation( context.Compilation ) );
+
+        var arguments =
+            ArgumentList(
+                SeparatedList(
+                    constructorBuilder.InitializerArguments.SelectAsArray( a =>
+                        Argument(
+                            a.ParameterName != null
+                            ? NameColon( IdentifierName( a.ParameterName ) )
+                            : null,
+                            default,
+                            a.Expression.ToExpressionSyntax( syntaxSerializationContext ) ) ) ) );
+
+        var initializer =
+            constructorBuilder.InitializerKind switch
+            {
+                ConstructorInitializerKind.None => null,
+                ConstructorInitializerKind.Base => 
+                    ConstructorInitializer(
+                        SyntaxKind.BaseConstructorInitializer,
+                        arguments ),
+                ConstructorInitializerKind.This =>
+                    ConstructorInitializer(
+                        SyntaxKind.ThisConstructorInitializer,
+                        arguments ),
+                var i => throw new AssertionFailedException($"Unsupported initializer kind: {i}"),
+            };
+
         var syntax =
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
                 TokenList( Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( Space ) ) ),
                 Identifier( constructorBuilder.DeclaringType.Name ),
                 context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
-                null,
+                initializer,
                 context.SyntaxGenerationContext.SyntaxGenerator.FormattedBlock( statements )
                     .WithGeneratedCodeAnnotation( this.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation ),
                 null );

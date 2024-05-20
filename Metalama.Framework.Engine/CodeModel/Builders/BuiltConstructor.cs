@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Invokers;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -38,4 +40,10 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
             // Currently ConstructorBuilder is used to represent a default constructor, the base constructor is always
             // the default constructor of the base class.
             this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
+
+    public object? Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
+
+    public object? Invoke( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).Invoke( args );
+
+    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
 }

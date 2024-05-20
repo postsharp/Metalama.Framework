@@ -41,7 +41,7 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
         if ( constructor.IsImplicitInstanceConstructor() )
         {
             // Missing implicit ctor.
-            var builder = new ConstructorBuilder( this, constructor.DeclaringType );
+            var builder = new ConstructorBuilder( this, constructor.DeclaringType ) { IsReplacingExisting = true };
             addTransformation( builder.ToTransformation() );
             constructor = builder;
         }
