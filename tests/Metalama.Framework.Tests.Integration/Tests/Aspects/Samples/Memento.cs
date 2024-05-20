@@ -72,39 +72,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         {
             var mementoType = (INamedType)meta.Tags["mementoType"];
 
-            return 
-                BuildNewExpression(
-                    mementoType, 
-                    meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
-                .Value;
-        }
+            var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared);
 
-        public IExpression BuildNewExpression(INamedType mementoType, IEnumerable<IFieldOrProperty> fieldsOrProperties)
-        {
-            ExpressionBuilder expressionBuilder = new ExpressionBuilder();
-            expressionBuilder.AppendVerbatim("new ");
-            expressionBuilder.AppendTypeName(mementoType);
-            expressionBuilder.AppendVerbatim("(");
-
-            bool first = true;
-
-            foreach (var fieldOrProperty in fieldsOrProperties)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    expressionBuilder.AppendVerbatim(",");
-                }
-
-                expressionBuilder.AppendExpression(fieldOrProperty);
-            }
-
-            expressionBuilder.AppendVerbatim(")");
-
-            return expressionBuilder.ToExpression();
+            return mementoType.Constructors.Single().Invoke(fieldExpressions);
         }
 
         [InterfaceMember]

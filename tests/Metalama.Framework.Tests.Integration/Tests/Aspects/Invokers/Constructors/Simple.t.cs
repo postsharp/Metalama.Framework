@@ -1,1 +1,10 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+public class TargetClass
+{
+  [InvokerAspect]
+  public void Invoker()
+  {
+    // Invoke new <target>();
+    new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Constructors.Simple.TargetClass();
+    return;
+  }
+}

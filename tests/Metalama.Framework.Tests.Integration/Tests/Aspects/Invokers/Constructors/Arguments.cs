@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Constructors.Simple;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Constructors.Arguments;
 
 public class InvokerAspect : MethodAspect
 {
@@ -22,7 +22,7 @@ public class InvokerAspect : MethodAspect
     public dynamic? Template([CompileTime] IConstructor target)
     {
         meta.InsertComment("Invoke new <target>();");
-        target.Invoke();
+        target.Invoke(42, new object());
 
         return meta.Proceed();
     }
@@ -31,6 +31,10 @@ public class InvokerAspect : MethodAspect
 // <target>
 public class TargetClass
 {
+    public TargetClass(int x, object y)
+    {
+    }
+
     [InvokerAspect]
     public void Invoker()
     {
