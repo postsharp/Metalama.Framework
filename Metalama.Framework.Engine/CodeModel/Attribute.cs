@@ -129,6 +129,8 @@ internal sealed class Attribute : IAttributeImpl
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( DerivedTypesOptions options ) => Enumerable.Empty<IDeclaration>();
 
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
+
     Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotSupportedException( "Attribute is represented by an AttributeRef." );
 
     public bool Equals( IDeclaration? other ) => other is Attribute attribute && this.AttributeData == attribute.AttributeData;

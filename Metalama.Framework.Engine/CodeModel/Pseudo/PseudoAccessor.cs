@@ -91,6 +91,8 @@ internal abstract class PseudoAccessor<T> : IMethodImpl, IPseudoDeclaration
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
     public SerializableDeclarationId ToSerializableId() => this.DeclaringMember.GetSerializableId( this.MethodKind.ToDeclarationRefTargetKind() );
 
     public IAssembly DeclaringAssembly => this.DeclaringMember.DeclaringAssembly;
