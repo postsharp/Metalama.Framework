@@ -2,6 +2,8 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+#pragma warning disable CS0618
+
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_MakeExplicit
 {
     /*

@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -21,13 +20,7 @@ internal abstract class InitializeAdvice : Advice<AddInitializerAdviceResult>
 
     private new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
-    protected InitializeAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IMemberOrNamedType targetDeclaration,
-        ICompilation sourceCompilation,
-        InitializerKind kind,
-        string? layerName ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName )
+    protected InitializeAdvice( AdviceConstructorParameters<IMemberOrNamedType> parameters, InitializerKind kind ) : base( parameters )
     {
         this._kind = kind;
     }

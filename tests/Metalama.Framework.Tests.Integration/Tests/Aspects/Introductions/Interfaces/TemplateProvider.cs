@@ -18,15 +18,20 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            aspectBuilder.Advice.WithTemplateProvider(new TemplateProvider()).ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            var factory = builder.Advice.WithTemplateProvider(new TemplateProvider());
+
+            factory.ImplementInterface( builder.Target, typeof(IInterface) );
+
+            factory.IntroduceMethod(builder.Target, nameof(TemplateProviderBase.Foo));
+            factory.IntroduceMethod(builder.Target, nameof(TemplateProvider.Bar));
         }
     }
 
     public class TemplateProviderBase : ITemplateProvider
     {
-        [InterfaceMember]
+        [Template]
         public void Foo()
         {
             Console.WriteLine("Introduced interface member");
@@ -35,7 +40,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class TemplateProvider : TemplateProviderBase
     { 
-        [InterfaceMember]
+        [Template]
         public void Bar()
         {
             Console.WriteLine("Introduced interface member");

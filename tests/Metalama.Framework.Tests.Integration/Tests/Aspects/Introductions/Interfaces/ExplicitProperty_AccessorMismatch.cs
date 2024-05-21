@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [InterfaceMember( IsExplicit = true )]
+        [ExplicitInterfaceMember]
         int TemplateWithGet 
         { 
             get
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [ExplicitInterfaceMember]
         public int TemplateWithSet
         {
             get
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [ExplicitInterfaceMember]
         int TemplateWithInit
         {
             init
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [ExplicitInterfaceMember]
         int TemplateWithoutInit
         {
             set

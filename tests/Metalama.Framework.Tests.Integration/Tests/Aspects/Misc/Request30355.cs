@@ -21,7 +21,7 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
 {
     #region Events
 
-    [InterfaceMember]
+    [Introduce]
     public event PropertyChangedEventHandler? PropertyChanged;
 
     #endregion

@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -14,24 +13,12 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 internal class ParameterContractAdvice : ContractAdvice<IParameter>
 {
     public ParameterContractAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IParameter targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<IParameter> parameters,
         TemplateMember<IMethod> template,
         ContractDirection direction,
-        string? layerName,
         IObjectReader tags,
-        IObjectReader templateArguments ) : base(
-        aspectInstance,
-        templateInstance,
-        targetDeclaration,
-        sourceCompilation,
-        template,
-        direction,
-        layerName,
-        tags,
-        templateArguments ) { }
+        IObjectReader templateArguments )
+        : base( parameters, template, direction, tags, templateArguments ) { }
 
     protected override AddContractAdviceResult<IParameter> Implement(
         ProjectServiceProvider serviceProvider,

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using System;
+using System.ComponentModel;
 
 namespace Metalama.Framework.Advising
 {
@@ -23,30 +24,35 @@ namespace Metalama.Framework.Advising
         /// Indicates that the advice should be executed after all constructors are finished but before the initialization block.
         /// </summary>
         [Obsolete( "Not implemented", true )]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         AfterLastInstanceConstructor,
 
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished and after the initialization block.
         /// </summary>
         [Obsolete( "Not implemented", true )]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         AfterObjectInitialization,
 
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is deserialized.
         /// </summary>
         [Obsolete( "Not implemented", true )]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         AfterDeserialize,
 
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is cloned.
         /// </summary>
         [Obsolete( "Not implemented", true )]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         AfterMemberwiseClone,
 
         /// <summary>
         /// Indicated that the advice should be executed when the the target value type is mutated using the "with" expression.
         /// </summary>
         [Obsolete( "Not implemented", true )]
+        [EditorBrowsable( EditorBrowsableState.Never )]
         AfterWith
     }
 }

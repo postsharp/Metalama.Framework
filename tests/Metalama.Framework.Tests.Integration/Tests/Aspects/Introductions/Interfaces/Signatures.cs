@@ -42,40 +42,40 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [InterfaceMember]
+        [Introduce]
         public void VoidMethod() { }
 
-        [InterfaceMember]
+        [Introduce]
         public int Method( int x, string y )
         {
             return x;
         }
 
-        [InterfaceMember]
+        [Introduce]
         public int Method_Ref( ref int x )
         {
             return x;
         }
 
-        [InterfaceMember]
+        [Introduce]
         public T? GenericMethod<T>( T? x )
         {
             return x;
         }
 
-        [InterfaceMember]
+        [Introduce]
         public T? GenericMethod_Multiple<T, U>( T? x, U? y )
         {
             return x;
         }
 
-        [InterfaceMember]
+        [Introduce]
         public T? GenericMethod_MultipleReverse<T, U>( U? x, T? y )
         {
             return y;
         }
 
-        [InterfaceMember]
+        [Introduce]
         public T? GenericMethod_NestedParam<T>( List<T> x )
         {
             if (x.Count > 0)
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember]
+        [Introduce]
         public T? GenericMethod_DoubleNestedParam<T>( List<List<T>> x )
         {
             if (x.Count > 0)
@@ -108,13 +108,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember]
+        [Introduce]
         public T? GenericMethod_Ref<T>( ref T? x )
         {
             return x;
         }
 
-        [InterfaceMember]
+        [Introduce]
         public void GenericMethod_Out<T>( out T? x )
         {
             x = default;

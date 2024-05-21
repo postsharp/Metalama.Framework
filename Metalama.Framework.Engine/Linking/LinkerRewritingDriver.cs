@@ -496,44 +496,30 @@ internal sealed partial class LinkerRewritingDriver
             return Array.Empty<MemberDeclarationSyntax>();
         }
 
-        switch ( symbol )
+        return symbol switch
         {
-            case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation } methodSymbol:
-                return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
-
-            case IMethodSymbol { MethodKind: MethodKind.Destructor } destructorSymbol:
-                return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
-
-            case IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } constructorSymbol:
-                return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, constructorSymbol, generationContext );
-
-            case IMethodSymbol { MethodKind: MethodKind.Conversion } operatorSymbol:
-                return this.RewriteConversionOperator( (ConversionOperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
-
-            case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
-                return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
-
-            case IPropertySymbol { Parameters.Length: 0 } propertySymbol:
-                return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
-
-            case IPropertySymbol indexerSymbol:
-                return this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext );
-
-            case IFieldSymbol fieldSymbol:
-                return this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext );
-
-            case IEventSymbol eventSymbol:
-                return syntax switch
-                {
-                    EventDeclarationSyntax eventSyntax => this.RewriteEvent( eventSyntax, eventSymbol ),
-                    EventFieldDeclarationSyntax eventFieldSyntax => this.RewriteEventField( eventFieldSyntax, eventSymbol ),
-                    _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax}" )
-                };
-
-            default:
-                // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-                throw new AssertionFailedException( $"Unsupported symbol kind: {symbol}" );
-        }
+            IMethodSymbol methodSymbol => methodSymbol.GetImplementedMethodKind() switch
+            {
+                MethodKind.Ordinary => this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext ),
+                MethodKind.Destructor => this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, methodSymbol, generationContext ),
+                MethodKind.Constructor or MethodKind.StaticConstructor =>
+                    this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, methodSymbol, generationContext ),
+                MethodKind.Conversion => this.RewriteConversionOperator( (ConversionOperatorDeclarationSyntax) syntax, methodSymbol, generationContext ),
+                MethodKind.UserDefinedOperator => this.RewriteOperator( (OperatorDeclarationSyntax) syntax, methodSymbol, generationContext ),
+                _ => throw new AssertionFailedException( $"Unsupported method kind: {methodSymbol.GetImplementedMethodKind()}." )
+            },
+            IPropertySymbol { Parameters.Length: 0 } propertySymbol =>
+                this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext ),
+            IPropertySymbol indexerSymbol => this.RewriteIndexer( (IndexerDeclarationSyntax) syntax, indexerSymbol, generationContext ),
+            IFieldSymbol fieldSymbol => this.RewriteField( (FieldDeclarationSyntax) syntax, fieldSymbol, generationContext ),
+            IEventSymbol eventSymbol => syntax switch
+            {
+                EventDeclarationSyntax eventSyntax => this.RewriteEvent( eventSyntax, eventSymbol ),
+                EventFieldDeclarationSyntax eventFieldSyntax => this.RewriteEventField( eventFieldSyntax, eventSymbol ),
+                _ => throw new InvalidOperationException( $"Unsupported event syntax: {syntax}." )
+            },
+            _ => throw new AssertionFailedException( $"Unsupported symbol kind: {symbol}." )
+        };
     }
 
     /// <summary>
@@ -647,7 +633,7 @@ internal sealed partial class LinkerRewritingDriver
             case IMethodSymbol methodSymbol:
                 if ( methodSymbol.ExplicitInterfaceImplementations.Any() )
                 {
-                    return CreateName( symbol, GetInterfaceMemberName( methodSymbol.ExplicitInterfaceImplementations[0] ), suffix );
+                    return CreateName( symbol, GetInterfaceMemberName( methodSymbol.ExplicitInterfaceImplementations.Single() ), suffix );
                 }
                 else
                 {
@@ -657,7 +643,7 @@ internal sealed partial class LinkerRewritingDriver
             case IPropertySymbol propertySymbol:
                 if ( propertySymbol.ExplicitInterfaceImplementations.Any() )
                 {
-                    return CreateName( symbol, GetInterfaceMemberName( propertySymbol.ExplicitInterfaceImplementations[0] ), suffix );
+                    return CreateName( symbol, GetInterfaceMemberName( propertySymbol.ExplicitInterfaceImplementations.Single() ), suffix );
                 }
                 else
                 {
@@ -667,7 +653,7 @@ internal sealed partial class LinkerRewritingDriver
             case IEventSymbol eventSymbol:
                 if ( eventSymbol.ExplicitInterfaceImplementations.Any() )
                 {
-                    return CreateName( symbol, GetInterfaceMemberName( eventSymbol.ExplicitInterfaceImplementations[0] ), suffix );
+                    return CreateName( symbol, GetInterfaceMemberName( eventSymbol.ExplicitInterfaceImplementations.Single() ), suffix );
                 }
                 else
                 {
@@ -711,7 +697,7 @@ internal sealed partial class LinkerRewritingDriver
             case IPropertySymbol propertySymbol:
                 name =
                     propertySymbol.ExplicitInterfaceImplementations.Any()
-                        ? propertySymbol.ExplicitInterfaceImplementations[0].Name
+                        ? propertySymbol.ExplicitInterfaceImplementations.Single().Name
                         : propertySymbol.Name;
 
                 break;
@@ -719,7 +705,7 @@ internal sealed partial class LinkerRewritingDriver
             case IEventSymbol eventSymbol:
                 name =
                     eventSymbol.ExplicitInterfaceImplementations.Any()
-                        ? eventSymbol.ExplicitInterfaceImplementations[0].Name
+                        ? eventSymbol.ExplicitInterfaceImplementations.Single().Name
                         : eventSymbol.Name;
 
                 break;

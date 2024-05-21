@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 
@@ -18,13 +17,7 @@ internal abstract class OverrideMemberAdvice<TInput, TOutput> : Advice<OverrideM
 
     protected IObjectReader Tags { get; }
 
-    protected OverrideMemberAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        TInput targetDeclaration,
-        ICompilation sourceCompilation,
-        string? layerName,
-        IObjectReader tags ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName )
+    protected OverrideMemberAdvice( AdviceConstructorParameters<TInput> parameters, IObjectReader tags ) : base( parameters )
     {
         this.Tags = tags;
     }

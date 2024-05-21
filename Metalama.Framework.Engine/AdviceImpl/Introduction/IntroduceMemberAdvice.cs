@@ -5,13 +5,14 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Utilities;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -22,28 +23,25 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 {
     private readonly IntroductionScope _scope;
 
-    protected OverrideStrategy OverrideStrategy { get; }
-
     protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+
+    protected string MemberName { get; }
 
     protected TemplateMember<TTemplate>? Template { get; }
 
-    protected string MemberName { get; }
+    protected OverrideStrategy OverrideStrategy { get; }
 
     protected IObjectReader Tags { get; }
 
     protected IntroduceMemberAdvice(
-        IAspectInstanceInternal aspect,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         string? explicitName,
         TemplateMember<TTemplate>? template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
-        string? layerName,
-        IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, buildAction, layerName )
+        IObjectReader tags )
+        : base( parameters, buildAction )
     {
         var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
         var templateAttributeProperties = templateAttribute?.Properties;
@@ -64,7 +62,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         if ( this._scope == IntroductionScope.Target )
         {
-            this._scope = aspect.TargetDeclaration.GetTarget( sourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
+            this._scope = parameters.AspectInstance.TargetDeclaration.GetTarget( parameters.SourceCompilation ).GetClosestMemberOrNamedType()?.IsStatic == false
                 ? IntroductionScope.Instance
                 : IntroductionScope.Static;
         }
@@ -189,6 +187,61 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
                 builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
             }
         }
+    }
+
+    protected static void SetBuilderExplicitInterfaceImplementation( TBuilder builder, INamedType? explicitlyImplementedInterfaceType )
+    {
+        if ( explicitlyImplementedInterfaceType == null )
+        {
+            return;
+        }
+
+        switch ( builder )
+        {
+            case MethodBuilder methodBuilder:
+                if ( explicitlyImplementedInterfaceType.Methods.OfExactSignature( methodBuilder ) is { } interfaceMethod )
+                {
+                    methodBuilder.SetExplicitInterfaceImplementation( interfaceMethod );
+
+                    return;
+                }
+
+                break;
+
+            case PropertyBuilder propertyBuilder:
+                if ( explicitlyImplementedInterfaceType.Properties.OfName( propertyBuilder.Name ).SingleOrDefault() is { } interfaceProperty )
+                {
+                    propertyBuilder.SetExplicitInterfaceImplementation( interfaceProperty );
+
+                    return;
+                }
+
+                break;
+
+            case EventBuilder eventBuilder:
+                if ( explicitlyImplementedInterfaceType.Events.OfName( eventBuilder.Name ).SingleOrDefault() is { } interfaceEvent )
+                {
+                    eventBuilder.SetExplicitInterfaceImplementation( interfaceEvent );
+
+                    return;
+                }
+
+                break;
+
+            case IndexerBuilder indexerBuilder:
+                if ( explicitlyImplementedInterfaceType.Indexers.OfExactSignature( indexerBuilder ) is { } interfaceIndexer )
+                {
+                    indexerBuilder.SetExplicitInterfaceImplementation( interfaceIndexer );
+
+                    return;
+                }
+
+                break;
+        }
+
+        throw new InvalidOperationException(
+            MetalamaStringFormatter.Format(
+                $"The member '{builder}' can't be used to explicitly implement the interface '{explicitlyImplementedInterfaceType}', because it doesn't match any member of the interface." ) );
     }
 
     public override string ToString() => $"Introduce {this.Builder}";

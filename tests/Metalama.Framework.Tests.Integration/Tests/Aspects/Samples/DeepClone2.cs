@@ -96,7 +96,7 @@ public class DeepCloneAttribute : TypeAspect
         return clone;
     }
 
-    [InterfaceMember( IsExplicit = true )]
+    [ExplicitInterfaceMember]
     private object Clone()
     {
         return meta.This.Clone();

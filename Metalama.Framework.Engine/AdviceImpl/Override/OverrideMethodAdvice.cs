@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -16,14 +15,8 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
 {
     private readonly BoundTemplateMethod _boundTemplate;
 
-    public OverrideMethodAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IMethod targetDeclaration,
-        ICompilation sourceCompilation,
-        BoundTemplateMethod boundTemplate,
-        string? layerName,
-        IObjectReader tags ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
+    public OverrideMethodAdvice( AdviceConstructorParameters<IMethod> parameters, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        : base( parameters, tags )
     {
         this._boundTemplate = boundTemplate;
     }

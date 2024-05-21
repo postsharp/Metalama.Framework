@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Diff
             return clone;
         }
 
-        [InterfaceMember( IsExplicit = true )]
+        [ExplicitInterfaceMember]
         private object Clone()
         {
             return meta.This.Clone();

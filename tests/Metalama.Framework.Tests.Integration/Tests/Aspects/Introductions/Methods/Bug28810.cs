@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             return null;
         }
 
-        [InterfaceMember( IsExplicit = true )]
+        [ExplicitInterfaceMember]
         private object Clone()
         {
             // This should call final version of introduced Clone method.

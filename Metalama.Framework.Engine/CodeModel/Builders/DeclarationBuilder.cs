@@ -40,7 +40,6 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
         where T : class, ICompilationElement
         => compilationElement.ForCompilation( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
 
-    // TODO: implement
     protected TypedConstant? Translate( TypedConstant? typedConstant ) => typedConstant?.ForCompilation( this.Compilation );
 
     public Advice ParentAdvice { get; }

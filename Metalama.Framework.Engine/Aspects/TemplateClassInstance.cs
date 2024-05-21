@@ -6,7 +6,7 @@ namespace Metalama.Framework.Engine.Aspects
 {
     /// <summary>
     /// An instance of a template class, i.e. the transformed class containing the compiled templates.
-    /// For a normal template, see cref="TemplateProvider"/> is the aspect instance itself. For fabrics,
+    /// For a normal template, <see cref="TemplateProvider"/> is the aspect instance itself. For fabrics,
     /// the <see cref="TemplateProvider"/> is the transformed fabric class.
     /// </summary>
     internal sealed class TemplateClassInstance

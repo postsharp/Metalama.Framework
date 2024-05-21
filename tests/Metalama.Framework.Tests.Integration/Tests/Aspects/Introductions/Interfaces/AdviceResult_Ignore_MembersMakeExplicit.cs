@@ -9,7 +9,7 @@ using System;
 using System.Linq;
 using Metalama.Framework.Engine.Advising;
 
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS0618
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.AdviceResult_Ignore_MembersMakeExplicit
 {
