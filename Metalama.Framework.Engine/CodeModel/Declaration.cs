@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.OnUsingDeclaration();
 
-            return Ref.FromSymbol( this.Symbol, this.Compilation.CompilationContext );
+            return Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.CompilationContext );
         }
 
         public override string ToString()

@@ -66,7 +66,7 @@ public sealed partial class DerivedTypeIndex
 
     internal IEnumerable<INamedType> GetDerivedTypes( INamedType baseType )
         => this.GetDerivedTypesCore( baseType.ToTypedRef() )
-        .Select( nt => nt.GetTarget( baseType.Compilation ) );
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetDerivedTypesCore( Ref<INamedType> baseType )
         => this._relationships[baseType]
@@ -74,7 +74,7 @@ public sealed partial class DerivedTypeIndex
 
     private IEnumerable<INamedType> GetAllDerivedTypes( INamedType baseType )
         => this.GetAllDerivedTypesCore( baseType.ToTypedRef() )
-        .Select( nt => nt.GetTarget( baseType.Compilation ) );
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetAllDerivedTypesCore( Ref<INamedType> baseType )
         => this.GetDerivedTypesCore( baseType )
@@ -82,7 +82,7 @@ public sealed partial class DerivedTypeIndex
 
     private IEnumerable<INamedType> GetDirectlyDerivedTypes( INamedType baseType )
         => this.GetDirectlyDerivedTypesCore( baseType.ToTypedRef() )
-        .Select( nt => nt.GetTarget( baseType.Compilation ) );
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetDirectlyDerivedTypesCore( Ref<INamedType> baseType )
     {
@@ -97,7 +97,7 @@ public sealed partial class DerivedTypeIndex
 
     private IEnumerable<INamedType> GetFirstLevelDerivedTypes( INamedType baseType )
         => this.GetFirstLevelDerivedTypesCore( baseType.ToTypedRef() )
-        .Select( nt => nt.GetTarget( baseType.Compilation ) );
+            .Select( nt => nt.GetTarget( baseType.Compilation ) );
 
     private IEnumerable<Ref<INamedType>> GetFirstLevelDerivedTypesCore( Ref<INamedType> baseType )
     {
@@ -183,7 +183,7 @@ public sealed partial class DerivedTypeIndex
     {
         foreach ( var derivedType in this._relationships[baseType] )
         {
-            if ( derivedType.Target is INamedTypeSymbol { } derivedTypeSymbol )
+            if ( derivedType.Target is INamedTypeSymbol derivedTypeSymbol )
             {
                 collector.AddDependency( rootType, derivedTypeSymbol );
                 this.PopulateDependenciesCore( collector, rootType, derivedType );
@@ -197,7 +197,7 @@ public sealed partial class DerivedTypeIndex
 
         foreach ( var type in types )
         {
-            if ( !this._processedTypes.Contains( type.ToTypedRef<INamedType>(this._compilationContext) ) )
+            if ( !this._processedTypes.Contains( type.ToTypedRef<INamedType>( this._compilationContext ) ) )
             {
                 builder ??= new Builder( this );
                 builder.AnalyzeType( type );

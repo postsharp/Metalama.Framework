@@ -113,13 +113,13 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var builder = new ImmutableDictionaryOfArray<SerializableDeclarationId, IAnnotation>.Builder();
 
-            foreach ( var annotation in this.Annotations
+            foreach ( var (declarationId, annotation) in this.Annotations
                          .SelectMany(
                              group => group
                                  .Where( i => i.Export )
                                  .Select( i => (DeclarationId: group.Key.ToSerializableId(), i.Annotation) ) ) )
             {
-                builder.Add( annotation.DeclarationId, annotation.Annotation );
+                builder.Add( declarationId, annotation );
             }
 
             return builder.ToImmutable();

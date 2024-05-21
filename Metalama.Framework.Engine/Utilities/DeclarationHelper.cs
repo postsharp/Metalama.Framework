@@ -62,11 +62,11 @@ internal static class DeclarationHelper
 
         var sb = new StringBuilder();
 
-        Append( declaration );
+        Append( declaration, kind, sb );
 
         return sb.ToString();
 
-        void Append( ICompilationElement declaration, List<IType>? typeArguments = null )
+        static void Append( ICompilationElement declaration, TypeNameKind kind, StringBuilder sb, List<IType>? typeArguments = null )
         {
             var currentTypeArguments = typeArguments ?? [];
 
@@ -79,7 +79,7 @@ internal static class DeclarationHelper
                         break;
 
                     case IType type:
-                        Append( type, currentTypeArguments );
+                        Append( type, kind, sb, currentTypeArguments );
 
                         sb.Append( '+' );
 
@@ -88,7 +88,7 @@ internal static class DeclarationHelper
                     case INamespace ns:
                         if ( !ns.IsGlobalNamespace )
                         {
-                            Append( ns );
+                            Append( ns, kind, sb );
 
                             sb.Append( '.' );
                         }
@@ -117,7 +117,7 @@ internal static class DeclarationHelper
                     break;
 
                 case IArrayType array:
-                    Append( array.ElementType );
+                    Append( array.ElementType, kind, sb );
 
                     sb.Append( '[' );
 
@@ -131,7 +131,7 @@ internal static class DeclarationHelper
                     break;
 
                 case IPointerType pointer:
-                    Append( pointer.PointedAtType );
+                    Append( pointer.PointedAtType, kind, sb );
 
                     sb.Append( '*' );
 
@@ -143,7 +143,7 @@ internal static class DeclarationHelper
                     break;
 
                 default:
-                    throw new AssertionFailedException( $"Don't know how to process a {declaration?.GetType()}." );
+                    throw new AssertionFailedException( $"Don't know how to process a {declaration.GetType()}." );
             }
 
             if ( typeArguments == null && currentTypeArguments.Any() )
@@ -159,7 +159,7 @@ internal static class DeclarationHelper
 
                     var arg = currentTypeArguments[i];
 
-                    Append( arg );
+                    Append( arg, kind, sb );
                 }
 
                 sb.Append( ']' );
@@ -190,7 +190,7 @@ internal static class DeclarationHelper
             return null;
         }
 
-        return assembly.Equals( thisCompilationAssembly );
+        return assembly.GetSymbol().Equals( thisCompilationAssembly );
     }
 
     /// <summary>

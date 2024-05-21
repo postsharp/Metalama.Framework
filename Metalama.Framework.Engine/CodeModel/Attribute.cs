@@ -36,7 +36,7 @@ internal sealed class Attribute : IAttributeImpl
     public AttributeData AttributeData { get; }
 
     IRef<IDeclaration> IDeclaration.ToRef()
-        => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef(), this._compilation.CompilationContext );
+        => new AttributeRef( this.AttributeData, this.ContainingDeclaration.ToTypedRef(), this._compilation.CompilationContext );
 
     public SerializableDeclarationId ToSerializableId() => throw new NotSupportedException();
 

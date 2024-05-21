@@ -128,7 +128,7 @@ namespace Metalama.Testing.AspectTesting
             {
                 var codeFormatter = new CodeFormatter();
 
-                this.OutputDocument = (await codeFormatter.FormatAsync( document ))!;
+                this.OutputDocument = await codeFormatter.FormatAsync( document );
                 this.OutputRunTimeSyntaxRoot = (CompilationUnitSyntax) (await this.OutputDocument.GetSyntaxRootAsync())!;
             }
             else

@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
-using Metalama.Framework.Tests.UnitTests.Utilities;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Collections.Generic;

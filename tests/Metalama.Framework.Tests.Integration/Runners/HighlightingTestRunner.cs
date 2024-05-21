@@ -81,7 +81,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, references, logger, null )
+            : base( serviceProvider, projectDirectory, references, logger )
         {
             StringBuilder epilogueBuilder = new();
 

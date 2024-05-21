@@ -7,6 +7,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.Operations;
 using System;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Analyzers;
@@ -16,6 +17,7 @@ namespace Metalama.Framework.Engine.Analyzers;
 public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
 {
     // Range: 0840-0849
+    // ReSharper disable once MemberCanBePrivate.Global
     internal static readonly DiagnosticDescriptor AssertNotNullShouldNotBeUsedOnSymbols = new(
         "LAMA0840",
         "AssertNotNull should not be used to assert ISymbol. Use AssertSymbolNotNull or AssertSymbolNullNotImplemented.",
@@ -25,10 +27,11 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
         true );
 
     // TODO: Not Implemented yet.
+    // ReSharper disable once UnusedMember.Global
     internal static readonly DiagnosticDescriptor AssertNotNullShouldNotBeUsedOnNonNullable = new(
         "LAMA0841",
         "Method should not be used to assert non-nullable type.",
-        "{0} method is indended to assert nullable type not being null and should not be used on non-nullable type. Check the call site and remove the assertion.",
+        "{0} method is intended to assert nullable type not being null and should not be used on non-nullable type. Check the call site and remove the assertion.",
         "Metalama",
         DiagnosticSeverity.Warning,
         true );
@@ -60,7 +63,7 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
             context.Compilation.GetTypeByMetadataName( "Microsoft.CodeAnalysis.ISymbol" )!;
 
         context.RegisterOperationAction(
-            context => AnalyzeInvariant( context, invariantSymbol, iSymbolSymbol, ignoredNamespaces ),
+            operationAnalysisContext => AnalyzeInvariant( operationAnalysisContext, invariantSymbol, iSymbolSymbol, ignoredNamespaces ),
             OperationKind.Invocation,
             OperationKind.MethodReference );
     }
@@ -69,7 +72,7 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
         OperationAnalysisContext context,
         INamedTypeSymbol invariantTypeSymbol,
         INamedTypeSymbol iSymbolSymbol,
-        string[] namespaces )
+        IEnumerable<string> namespaces )
     {
         var (method, arguments) = context.Operation switch
         {
@@ -81,10 +84,11 @@ public class MetalamaAssertionAnalyzer : DiagnosticAnalyzer
         var containingNamespace = context.ContainingSymbol.ContainingNamespace.ToString();
 
         // Is assertion has justification, we will not report it.
-        var hasJustification = arguments is [_, IArgumentOperation { ArgumentKind: not ArgumentKind.DefaultValue }];
+        var hasJustification = arguments is [_, { ArgumentKind: not ArgumentKind.DefaultValue }];
 
         if ( SymbolEqualityComparer.Default.Equals( invariantTypeSymbol, method.ContainingType )
-             && method.Name == "AssertNotNull" && method.TypeArguments.Length > 0 && !hasJustification
+             && method is { Name: "AssertNotNull", TypeArguments.Length: > 0 } 
+             && !hasJustification
              && namespaces.All( n => !containingNamespace.StartsWith( n, StringComparison.Ordinal ) ) )
         {
             var typeArgument = method.TypeArguments[0];

@@ -35,12 +35,14 @@ public class X
 ";
 
         var compilation = CSharpCompilation.Create( null, [CSharpSyntaxTree.ParseText( code, path: Path.Combine( "path", "file.cs" ) )] );
-
+        
         var typeX = compilation.Assembly.GlobalNamespace.GetTypeMembers().Single();
         var memberA = typeX.GetMembers().Single( m => m.Name == "A" );
         var memberB = typeX.GetMembers().Single( m => m.Name == "B" );
         var memberC = typeX.GetMembers().Single( m => m.Name == "C" );
         var memberD = typeX.GetMembers().Single( m => m.Name == "D" );
+        
+        // ReSharper disable once InconsistentNaming
         var memberDP = ((IMethodSymbol) typeX.GetMembers().Single( m => m.Name == "D" )).Parameters[0];
         var memberX = typeX.GetMembers().Single( m => m is IMethodSymbol { MethodKind: MethodKind.Constructor } );
         var memberTildeX = typeX.GetMembers().Single( m => m is IMethodSymbol { MethodKind: MethodKind.Destructor } );
@@ -82,6 +84,7 @@ public class Y
         var compilation = CSharpCompilation.Create( null, [CSharpSyntaxTree.ParseText( code, path: Path.Combine( "path", "file.cs" ) )] );
 
         // Just make sure we are able to create exception for all symbols.
+        // ReSharper disable once UnusedVariable
         var symbols =
             compilation.SyntaxTrees
                 .SelectMany( s => s.GetRoot().DescendantNodesAndSelf() )
@@ -180,7 +183,7 @@ public class X
             index++;
         }
 
-        var expected = @"
+        const string expected = @"
 [0] => [CompilationUnit:(1,0)-(61,0):file.cs] using <IdentifierName>;public class <identifier>{<...>}
 [1] => [UsingDirective:(1,0)-(1,13):file.cs] using <identifier>;
 [2] => [IdentifierName:(1,6)-(1,12):file.cs] <identifier>

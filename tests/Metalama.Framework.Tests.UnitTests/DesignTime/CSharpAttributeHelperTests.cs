@@ -3,7 +3,6 @@
 using Metalama.Framework.DesignTime.Refactoring;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
-using Metalama.Framework.Tests.UnitTests.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;

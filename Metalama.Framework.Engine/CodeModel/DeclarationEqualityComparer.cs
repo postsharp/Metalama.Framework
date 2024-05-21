@@ -15,14 +15,12 @@ namespace Metalama.Framework.Engine.CodeModel;
 internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
 {
     private readonly RefEqualityComparer<IDeclaration> _innerComparer;
-    private readonly ReflectionMapper _reflectionMapper;
     private readonly Compilation _compilation;
     private readonly Conversions _conversions;
 
-    public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation, bool includeNullability )
+    public DeclarationEqualityComparer( Compilation compilation, bool includeNullability )
     {
         this._innerComparer = includeNullability ? RefEqualityComparer<IDeclaration>.IncludeNullability : RefEqualityComparer<IDeclaration>.Default;
-        this._reflectionMapper = reflectionMapper;
         this._compilation = compilation;
         this._conversions = new Conversions( this );
     }
@@ -73,7 +71,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
         {
             // Cannot use code based on Roslyn for this kind of conversion.
 
-            if ( right is not INamedType rightNamedType || !rightNamedType.IsCanonicalGenericInstance )
+            if ( right is not INamedType { IsCanonicalGenericInstance: true } rightNamedType )
             {
                 throw new ArgumentException(
                     $"{nameof(ConversionKind)}.{nameof(ConversionKind.TypeDefinition)} can only be used with canonical generic instance on the right side." );
@@ -177,7 +175,7 @@ internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
         if ( typeDefinition.TypeKind == Code.TypeKind.Interface )
         {
             // When searching for an interface, we should consider interfaces defined by the evaluated type.
-            if ( type.GetImplementedInterfaces().Any( i => this.IsOfTypeDefinition( i, typeDefinition ) ) == true )
+            if ( type.GetImplementedInterfaces().Any( i => this.IsOfTypeDefinition( i, typeDefinition ) ) )
             {
                 // The type implements interface that has the same definition.
                 return true;

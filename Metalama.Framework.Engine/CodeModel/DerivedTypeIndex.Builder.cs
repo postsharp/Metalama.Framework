@@ -5,7 +5,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Services;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using MetalamaTypeKind = Metalama.Framework.Code.TypeKind;
@@ -38,6 +37,21 @@ public partial class DerivedTypeIndex
 
         public void AnalyzeType( Ref<INamedType> type )
         {
+            switch ( type.Target )
+            {
+                case INamedTypeSymbol symbol:
+                    this.AnalyzeType( symbol );
+
+                    break;
+
+                case INamedTypeBuilder builder:
+                    this.AnalyzeType( builder );
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException( $"Unsupported target: {type.Target}" );
+            }
         }
 
         public void AnalyzeType( INamedTypeSymbol type )
@@ -62,7 +76,11 @@ public partial class DerivedTypeIndex
                 }
 
                 var interfaceType = interfaceImpl.OriginalDefinition;
-                this._relationships.Add( interfaceType.ToTypedRef<INamedType>( this._compilationContext ), type.ToTypedRef<INamedType>( this._compilationContext ) );
+
+                this._relationships.Add(
+                    interfaceType.ToTypedRef<INamedType>( this._compilationContext ),
+                    type.ToTypedRef<INamedType>( this._compilationContext ) );
+
                 this.AnalyzeType( interfaceType );
             }
 
@@ -112,10 +130,11 @@ public partial class DerivedTypeIndex
         }
 
         public void AddDerivedType( INamedTypeSymbol baseType, INamedTypeSymbol derivedType )
-            => this._relationships.Add( baseType.ToTypedRef<INamedType>( this._compilationContext ), derivedType.ToTypedRef<INamedType>( this._compilationContext ) );
+            => this._relationships.Add(
+                baseType.ToTypedRef<INamedType>( this._compilationContext ),
+                derivedType.ToTypedRef<INamedType>( this._compilationContext ) );
 
-        public void AddDerivedType( INamedType baseType, INamedType derivedType )
-            => this._relationships.Add( baseType.ToTypedRef(), derivedType.ToTypedRef() );
+        public void AddDerivedType( INamedType baseType, INamedType derivedType ) => this._relationships.Add( baseType.ToTypedRef(), derivedType.ToTypedRef() );
 
         public DerivedTypeIndex ToImmutable()
         {

@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#pragma warning disable IDE0073 // The file header does not match the required text
-
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -60,11 +58,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentNullException( nameof(type) );
             }
 
-            var builder = new StringBuilder();
-            var generator = new ReferenceGenerator( builder, typeParameterContext: null );
+            using var builder = StringBuilderPool.Default.Allocate();
+            var generator = new ReferenceGenerator( builder.Value, typeParameterContext: null );
             generator.Visit( type );
 
-            return builder.ToString();
+            return builder.Value.ToString();
         }
 
         /// <summary>
@@ -78,11 +76,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentNullException( nameof(ns) );
             }
 
-            var builder = new StringBuilder();
-            var generator = new ReferenceGenerator( builder, typeParameterContext: null );
+            using var builder = StringBuilderPool.Default.Allocate();
+            var generator = new ReferenceGenerator( builder.Value, typeParameterContext: null );
             generator.Visit( ns );
 
-            return builder.ToString();
+            return builder.Value.ToString();
         }
 
         /// <summary>
