@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface ITypeImpl : ISdkType
+    internal interface ITypeImpl : ISdkType, ICompilationElementImpl
     {
         ITypeImpl Accept( TypeRewriter visitor );
     }

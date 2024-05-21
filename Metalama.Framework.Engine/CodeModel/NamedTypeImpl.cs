@@ -130,10 +130,12 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public bool IsCanonicalGenericInstance => this.TypeSymbol.OriginalDefinition == this.TypeSymbol;
 
     [Memo]
-    public INamedTypeCollection NestedTypes
+    public INamedTypeCollection Types
         => new NamedTypeCollection(
             this._facade,
             this.Compilation.GetNamedTypeCollection( this.TypeSymbol.ToTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
+
+    INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     [Memo]
     public IPropertyCollection Properties
@@ -289,8 +291,10 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
             this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
                 .ToReadOnlyList() );
 
+    INamespace INamedType.Namespace => this.ContainingNamespace;
+
     [Memo]
-    public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
+    public INamespace ContainingNamespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
     [Memo]
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();

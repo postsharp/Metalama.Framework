@@ -30,21 +30,23 @@ public sealed class ReflectionHelperTests : UnitTestClass
 
     public static IEnumerable<object[]> Types()
         =>
-        [
-            [typeof(int)],
-            [typeof(List<>)],
-            [typeof(List<int>)],
-            [typeof(List<List<int>>)],
-            [typeof(List<>.Enumerator)],
-            [typeof(List<int>.Enumerator)],
-            [typeof(List<List<int>>.Enumerator)],
-            [typeof(Outer<int, object>.Inner<string>)],
-            [typeof(int[])],
-            [typeof(List<int>[])],
-            [typeof(List<int>.Enumerator[])],
-            [typeof(int[,])],
-            [typeof(int*)]
-        ];
+
+            // ReSharper disable once RedundantLinebreak
+            [
+                [typeof(int)],
+                [typeof(List<>)],
+                [typeof(List<int>)],
+                [typeof(List<List<int>>)],
+                [typeof(List<>.Enumerator)],
+                [typeof(List<int>.Enumerator)],
+                [typeof(List<List<int>>.Enumerator)],
+                [typeof(Outer<int, object>.Inner<string>)],
+                [typeof(int[])],
+                [typeof(List<int>[])],
+                [typeof(List<int>.Enumerator[])],
+                [typeof(int[,])],
+                [typeof(int*)]
+            ];
 
     [Theory]
     [MemberData( nameof(Types) )]

@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ZAspectLibraryProjectAplhabeticallyOrderedAfterMetalama\ZAspectLibraryProjectAplhabeticallyOrderedAfterMetalama.csproj" />
+    <ProjectReference Include="../ZAspectLibraryProjectAplhabeticallyOrderedAfterMetalama/ZAspectLibraryProjectAplhabeticallyOrderedAfterMetalama.csproj" />
   </ItemGroup>
 
 </Project>

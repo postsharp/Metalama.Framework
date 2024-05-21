@@ -5,7 +5,8 @@ public class TargetClass : BaseClass
   public int InvokerBefore
   {
     get
-    { // Invoke this.Property
+    {
+      // Invoke this.Property
       _ = this.Property;
       // Invoke base.Property
       _ = base.Property;
@@ -30,7 +31,8 @@ public class TargetClass : BaseClass
   public int InvokerAfter
   {
     get
-    { // Invoke this.Property
+    {
+      // Invoke this.Property
       _ = this.Property;
       // Invoke this.Property
       _ = this.Property;

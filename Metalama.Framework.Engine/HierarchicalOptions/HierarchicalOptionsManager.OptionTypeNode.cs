@@ -129,7 +129,7 @@ public sealed partial class HierarchicalOptionsManager
                         containingDeclarationOptions = null;
                     }
 
-                    namespaceOptions = !ignoreNamespace ? this.GetOptions( namedType.Namespace ) : null;
+                    namespaceOptions = !ignoreNamespace ? this.GetOptions( namedType.ContainingNamespace ) : null;
 
                     break;
 

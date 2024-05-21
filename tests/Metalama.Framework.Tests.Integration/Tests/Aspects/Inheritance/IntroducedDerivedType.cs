@@ -8,19 +8,24 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
     [Inheritable]
     internal class Aspect : TypeAspect
     {
-        [Introduce(WhenExists = OverrideStrategy.Override, IsVirtual = true)]
+        [Introduce( WhenExists = OverrideStrategy.Override, IsVirtual = true )]
         public int Foo()
         {
-            Console.WriteLine("Introduced!");
+            Console.WriteLine( "Introduced!" );
+
             return meta.Proceed();
         }
     }
 
     internal class Introduction : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceType(builder.Target, "IntroducedDerived", TypeKind.Class, b => { b.BaseType = builder.Target.NestedTypes.OfName("BaseType").Single(); });
+            builder.Advice.IntroduceClass(
+                builder.Target,
+                "IntroducedDerived",
+                TypeKind.Class,
+                b => { b.BaseType = builder.Target.Types.OfName( "BaseType" ).Single(); } );
         }
     }
 

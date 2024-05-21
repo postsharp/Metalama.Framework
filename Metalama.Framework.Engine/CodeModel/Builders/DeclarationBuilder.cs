@@ -108,6 +108,8 @@ internal abstract class DeclarationBuilder : IDeclarationBuilderImpl, IDeclarati
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
     ISymbol? ISdkDeclaration.Symbol => null;
 
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences

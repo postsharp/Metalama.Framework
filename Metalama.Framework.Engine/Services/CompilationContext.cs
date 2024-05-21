@@ -30,7 +30,7 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
     internal ResolvingCompileTimeTypeFactory CompileTimeTypeFactory => new( this.SerializableTypeIdResolver );
 
     [Memo]
-    internal CompilationComparers Comparers => new( this.ReflectionMapper, this.Compilation );
+    internal CompilationComparers Comparers => new( this.Compilation );
 
     public Compilation Compilation { get; }
 

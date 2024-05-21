@@ -39,36 +39,24 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// </summary>
         /// <param name="dottedString">A <see cref="DottedString"/>.</param>
         /// <returns>The <see cref="string"/> encapsulated by <paramref name="dottedString"/>.</returns>
-        public static implicit operator string( DottedString dottedString )
-        {
-            return dottedString.ToString();
-        }
+        public static implicit operator string( DottedString dottedString ) => dottedString.ToString();
 
         /// <summary>
         /// Converts a <see cref="string"/> into a <see cref="DottedString"/>.
         /// </summary>
         /// <param name="str">A <see cref="string"/>.</param>
         /// <returns>A <see cref="DottedString"/> encapsulating <paramref name="str"/>.</returns>
-        public static implicit operator DottedString( string str )
-        {
-            return new DottedString( str );
-        }
+        public static implicit operator DottedString( string str ) => new( str );
 
         /// <summary>
         /// Determines whether the current<see cref="DottedString"/> is equal to another one.
         /// </summary>
         /// <param name="other">Another <see cref="DottedString"/>.</param>
         /// <returns><c>true</c> if the current <see cref="DottedString"/> equals <c>other</c>, otherwise <c>false</c>.</returns>
-        public bool Equals( DottedString other )
-        {
-            return string.Equals( this.Value, other.Value, StringComparison.Ordinal );
-        }
+        public bool Equals( DottedString other ) => string.Equals( this.Value, other.Value, StringComparison.Ordinal );
 
         /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return this.Value == null ? 0 : this.GetHashCode();
-        }
+        public override int GetHashCode() => this.Value == null ? 0 : this.GetHashCode();
 
         /// <inheritdoc />
         public override bool Equals( object? obj )
@@ -84,10 +72,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         }
 
         /// <inheritdoc />
-        public override string ToString()
-        {
-            return this.Value;
-        }
+        public override string ToString() => this.Value;
 
         /// <summary>
         /// Operator.
@@ -95,10 +80,7 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator ==( DottedString left, DottedString right )
-        {
-            return left.Equals( right );
-        }
+        public static bool operator ==( DottedString left, DottedString right ) => left.Equals( right );
 
         /// <summary>
         /// Operator.
@@ -106,9 +88,6 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator !=( DottedString left, DottedString right )
-        {
-            return !(left == right);
-        }
+        public static bool operator !=( DottedString left, DottedString right ) => !(left == right);
     }
 }

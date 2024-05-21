@@ -41,6 +41,8 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this._sourceMember.DeclaringSyntaxReferences;
 
     public bool CanBeInherited => this._sourceMember.CanBeInherited;

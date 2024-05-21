@@ -1,5 +1,5 @@
 [IntroduceAndInvoke]
-class Target : global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.InvokingIntroduced.IFoo
+internal class Target : global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.InvokingIntroduced.IFoo
 {
   public void Bar()
   {

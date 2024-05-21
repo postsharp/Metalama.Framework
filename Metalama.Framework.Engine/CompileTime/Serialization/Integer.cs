@@ -132,19 +132,10 @@ namespace Metalama.Framework.Engine.CompileTime.Serialization
             }
         }
 
-        public static implicit operator Integer( uint integer )
-        {
-            return new Integer( integer, false );
-        }
+        public static implicit operator Integer( uint integer ) => new( integer, false );
 
-        public static implicit operator Integer( ulong integer )
-        {
-            return new Integer( integer, false );
-        }
+        public static implicit operator Integer( ulong integer ) => new( integer, false );
 
-        public static implicit operator Integer( ushort integer )
-        {
-            return new Integer( integer, false );
-        }
+        public static implicit operator Integer( ushort integer ) => new( integer, false );
     }
 }

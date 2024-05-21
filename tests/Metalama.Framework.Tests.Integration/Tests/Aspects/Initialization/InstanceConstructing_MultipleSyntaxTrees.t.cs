@@ -1,16 +1,3 @@
-// --- InstanceConstructing_MultipleSyntaxTrees.cs ---
-[Aspect]
-public partial class TargetCode
-{
-  public TargetCode()
-  {
-    global::System.Console.WriteLine("TargetCode: Aspect");
-  }
-  private int Method(int a)
-  {
-    return a;
-  }
-}
 // --- InstanceConstructing_MultipleSyntaxTrees.1.cs ---
 public partial class TargetCode
 {
@@ -25,4 +12,17 @@ public partial class TargetCode
 // --- InstanceConstructing_MultipleSyntaxTrees.2.cs ---
 public partial class TargetCode
 {
+}
+// --- InstanceConstructing_MultipleSyntaxTrees.cs ---
+[Aspect]
+public partial class TargetCode
+{
+  public TargetCode()
+  {
+    global::System.Console.WriteLine("TargetCode: Aspect");
+  }
+  private int Method(int a)
+  {
+    return a;
+  }
 }

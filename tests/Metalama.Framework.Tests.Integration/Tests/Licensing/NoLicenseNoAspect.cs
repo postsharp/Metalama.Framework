@@ -1,19 +1,22 @@
-// @LicenseExpression(None)
+#if TEST_OPTIONS
+// @LicenseKey(None)
+#endif
 
+using System;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.NoLicenseNoAspect
 {
-    class Dummy
+    internal class Dummy
     {
         private void M() { }
     }
 
-    class SomeAspect : OverrideMethodAspect
+    internal class SomeAspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

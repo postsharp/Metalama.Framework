@@ -128,10 +128,10 @@ public static class NamedTypeExtensions
     /// <summary>
     /// Gets all nested types of the current type, and all recursively all nested types of those nested types, but not the current type.
     /// </summary>
-    public static IEnumerable<INamedType> NestedTypes( this INamedType type ) => type.SelectManyRecursive( t => t.NestedTypes );
+    public static IEnumerable<INamedType> NestedTypes( this INamedType type ) => type.SelectManyRecursive( t => t.Types );
 
     /// <summary>
     /// Gets all nested types of the current type, and all recursively all nested types of those nested types, including the current type.
     /// </summary>
-    public static IEnumerable<INamedType> NestedTypesAndSelf( this INamedType type ) => type.SelectManyRecursive( t => t.NestedTypes, true );
+    public static IEnumerable<INamedType> NestedTypesAndSelf( this INamedType type ) => type.SelectManyRecursive( t => t.Types, true );
 }

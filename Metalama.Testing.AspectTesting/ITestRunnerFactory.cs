@@ -14,6 +14,7 @@ namespace Metalama.Testing.AspectTesting
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger );
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider );
     }
 }

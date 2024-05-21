@@ -43,8 +43,9 @@ internal class AspectTestRunner : BaseTestRunner
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,
-        ITestOutputHelper? logger )
-        : base( serviceProvider, projectDirectory, references, logger ) { }
+        ITestOutputHelper? logger = null,
+        ILicenseKeyProvider? licenseKeyProvider = null )
+        : base( serviceProvider, projectDirectory, references, logger, licenseKeyProvider ) { }
 
     // We don't want the base class to report errors in the input compilation because the pipeline does.
 
@@ -83,7 +84,7 @@ internal class AspectTestRunner : BaseTestRunner
             .WithService( new Observer( testContext.ServiceProvider, testResult ) );
 
         var serviceProviderForThisTestWithLicensing = serviceProviderForThisTestWithoutLicensing
-            .AddLicenseConsumptionManagerForTest( testInput );
+            .AddLicenseConsumptionManagerForTest( testInput, this.LicenseKeyProvider );
 
         var testScenario = testInput.Options.TestScenario ?? TestScenario.Default;
 

@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
-        public static Ref<IDeclaration> FromSymbol( ISymbol symbol, CompilationContext compilationContext ) => new( symbol, compilationContext );
+        public static Ref<ICompilationElement> FromSymbol( ISymbol symbol, CompilationContext compilationContext ) => new( symbol, compilationContext );
 
         public static Ref<IDeclaration> PseudoAccessor( IMethod accessor )
         {

@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-#pragma warning disable IDE0073 // The file header does not match the required text
-
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -60,11 +58,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentNullException( nameof(type) );
             }
 
-            var builder = new StringBuilder();
-            var generator = new ReferenceGenerator( builder, typeParameterContext: null );
+            using var builder = StringBuilderPool.Default.Allocate();
+            var generator = new ReferenceGenerator( builder.Value, typeParameterContext: null );
             generator.Visit( type );
 
-            return builder.ToString();
+            return builder.Value.ToString();
         }
 
         /// <summary>
@@ -78,11 +76,11 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentNullException( nameof(ns) );
             }
 
-            var builder = new StringBuilder();
-            var generator = new ReferenceGenerator( builder, typeParameterContext: null );
+            using var builder = StringBuilderPool.Default.Allocate();
+            var generator = new ReferenceGenerator( builder.Value, typeParameterContext: null );
             generator.Visit( ns );
 
-            return builder.ToString();
+            return builder.Value.ToString();
         }
 
         /// <summary>
@@ -322,7 +320,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                         return false;
                     }
 
-                    if ( this.Visit( ns.ParentNamespace! ) )
+                    if ( this.Visit( ns.ContainingNamespace! ) )
                     {
                         this._builder.Append( '.' );
                     }
@@ -336,7 +334,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     var success = namedType.ContainingDeclaration is INamedType containingType
                         ? this.Visit( containingType )
-                        : this.Visit( namedType.Namespace );
+                        : this.Visit( namedType.ContainingNamespace );
 
                     if ( success )
                     {
@@ -372,7 +370,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             {
                 var success = namedType.ContainingDeclaration is INamedType containingType
                     ? this.Visit( containingType )
-                    : this.Visit( namedType.Namespace );
+                    : this.Visit( namedType.ContainingNamespace );
 
                 if ( success )
                 {
@@ -384,7 +382,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             private void BuildDottedName( INamespace ns )
             {
-                if ( this.Visit( ns.ParentNamespace.AssertNotNull() ) )
+                if ( this.Visit( ns.ContainingNamespace.AssertNotNull() ) )
                 {
                     this._builder.Append( '.' );
                 }
@@ -1029,7 +1027,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 var types = container switch
                 {
                     INamespace ns => ns.Types.OfName( memberName ),
-                    INamedType namedType => namedType.NestedTypes.OfName( memberName ),
+                    INamedType namedType => namedType.Types.OfName( memberName ),
                     _ => Enumerable.Empty<INamedType>()
                 };
 
@@ -1056,7 +1054,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 {
                     INamespace ns => ns.Types.OfName( memberName )
                         .ConcatNotNull<IDeclaration>( ns.Namespaces.OfName( memberName ) ),
-                    INamedType namedType => namedType.NestedTypes.OfName( memberName ),
+                    INamedType namedType => namedType.Types.OfName( memberName ),
                     _ => Enumerable.Empty<IDeclaration>()
                 };
 

@@ -82,7 +82,8 @@ public sealed partial class CompilationModel
 
     internal bool Contains( NamedTypeBuilder namedTypeBuilder )
         => this._namedTypes.TryGetValue(
-               ((INamespaceOrNamedType?) namedTypeBuilder.DeclaringType ?? namedTypeBuilder.Namespace ?? throw new AssertionFailedException()).ToTypedRef(),
+               ((INamespaceOrNamedType?) namedTypeBuilder.DeclaringType ?? namedTypeBuilder.ContainingNamespace ?? throw new AssertionFailedException())
+               .ToTypedRef(),
                out var namedTypes )
            && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
 

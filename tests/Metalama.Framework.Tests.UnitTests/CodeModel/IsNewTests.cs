@@ -213,8 +213,8 @@ class D : C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            var baseType = compilation.Types.OfName( "C" ).Single().NestedTypes.Single();
-            var derivedType = compilation.Types.OfName( "D" ).Single().NestedTypes.Single();
+            var baseType = compilation.Types.OfName( "C" ).Single().Types.Single();
+            var derivedType = compilation.Types.OfName( "D" ).Single().Types.Single();
 
             Assert.False( baseType.IsNew );
             Assert.False( ((INamedTypeImpl) baseType).HasNewKeyword );

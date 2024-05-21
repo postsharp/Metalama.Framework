@@ -17,8 +17,9 @@ namespace Metalama.Testing.AspectTesting
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, references, logger ) { }
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
+            : base( serviceProvider, projectDirectory, references, logger, licenseKeyProvider ) { }
 
         protected override async Task RunAsync(
             TestInput testInput,
@@ -43,8 +44,8 @@ namespace Metalama.Testing.AspectTesting
                     ? SyntaxFactory.CompilationUnit()
                     : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
 
-                await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );
-
+                await testResult.SyntaxTrees.Single( x => !x.IsAuxiliary ).SetRunTimeCodeAsync( introducedSyntaxRoot );
+                
                 testResult.DiagnosticSuppressions = pipelineResult.Suppressions;
 
                 if ( introducedSyntaxTree != null )

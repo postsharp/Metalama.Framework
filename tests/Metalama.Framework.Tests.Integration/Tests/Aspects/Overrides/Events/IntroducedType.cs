@@ -4,14 +4,14 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.IntroducedType;
 
-class Aspect : TypeAspect
+internal class Aspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var typeResult = builder.Advice.IntroduceType(builder.Target, "TestType", TypeKind.Class);
-        var methodResult = builder.Advice.IntroduceEvent(typeResult.Declaration, nameof(IntroducedEvent) );
+        var typeResult = builder.Advice.IntroduceClass( builder.Target, "TestType", TypeKind.Class );
+        var methodResult = builder.Advice.IntroduceEvent( typeResult.Declaration, nameof(IntroducedEvent) );
 
-        builder.Advice.OverrideAccessors(methodResult.Declaration, nameof(OverrideTemplate), nameof(OverrideTemplate));
+        builder.Advice.OverrideAccessors( methodResult.Declaration, nameof(OverrideTemplate), nameof(OverrideTemplate) );
     }
 
     [Template]
@@ -19,25 +19,23 @@ class Aspect : TypeAspect
     {
         add
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
         }
 
         remove
         {
-            Console.WriteLine("Introduced");
+            Console.WriteLine( "Introduced" );
         }
     }
 
     [Template]
     public void OverrideTemplate()
     {
-        Console.WriteLine("Override");
+        Console.WriteLine( "Override" );
         meta.Proceed();
     }
 }
 
 // <target>
 [Aspect]
-class Target
-{
-}
+internal class Target { }

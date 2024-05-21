@@ -83,9 +83,17 @@ namespace D {}
             var compilation1 = testContext.CreateCompilationModel( code );
             var compilation2 = testContext.CreateCompilationModel( code );
 
-            AssertSymbolsEqual( GetAllSymbols( compilation1 ), GetAllSymbols( compilation2 ), StructuralSymbolComparer.Default, SymbolEqualityComparer.Default );
+            AssertSymbolsEqual(
+                GetAllSymbols( compilation1 ),
+                GetAllSymbols( compilation2 ),
+                StructuralSymbolComparer.Default,
+                SymbolEqualityComparer.Default );
 
-            AssertSymbolsEqual( GetAllDeclarations( compilation1 ), GetAllDeclarations( compilation2 ), StructuralDeclarationComparer.BypassSymbols, CompilationElementEqualityComparer.Default );
+            AssertSymbolsEqual(
+                GetAllDeclarations( compilation1 ),
+                GetAllDeclarations( compilation2 ),
+                StructuralDeclarationComparer.BypassSymbols,
+                CompilationElementEqualityComparer.Default );
         }
 
         [Fact]
@@ -104,8 +112,8 @@ class A
             using var testContext = this.CreateTestContext();
 
             var compilation = testContext.CreateCompilationModel( code );
-            var externalNamespace = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) )).Namespace;
-            var internalNamespace = compilation.Types.Single().Namespace;
+            var externalNamespace = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) )).ContainingNamespace;
+            var internalNamespace = compilation.Types.Single().ContainingNamespace;
 
             Assert.NotSame( externalNamespace, internalNamespace );
 
@@ -115,7 +123,11 @@ class A
 
         // TODO: More tests.
 
-        private static void AssertSymbolsEqual<T>( IReadOnlyList<T> symbols1, IReadOnlyList<T> symbols2, IEqualityComparer<T> comparer, IEqualityComparer<T> roslynEqualityComparer ) where T : notnull
+        private static void AssertSymbolsEqual<T>(
+            IReadOnlyList<T> symbols1,
+            IReadOnlyList<T> symbols2,
+            IEqualityComparer<T> comparer,
+            IEqualityComparer<T> roslynEqualityComparer ) where T : notnull
         {
             Assert.Equal( symbols1.Count, symbols2.Count );
 

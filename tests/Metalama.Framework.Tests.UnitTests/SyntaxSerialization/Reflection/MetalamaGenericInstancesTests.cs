@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             using var testContext = this.CreateSerializationTestContext( code );
 
             var allTypes = testContext.Compilation.Types;
-            var nestedTypes = allTypes.Single().NestedTypes;
+            var nestedTypes = allTypes.Single().Types;
             var innerType = nestedTypes.Single();
             var allProperties = innerType.Fields;
 

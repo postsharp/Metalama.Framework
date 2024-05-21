@@ -15,6 +15,7 @@ internal class EndOfLineTestRunnerFactory : ITestRunnerFactory
         GlobalServiceProvider serviceProvider,
         string? projectDirectory,
         TestProjectReferences references,
-        ITestOutputHelper? logger )
+        ITestOutputHelper? logger,
+        ILicenseKeyProvider? licenseKeyProvider )
         => new OutputFormatterAspectTestRunner( serviceProvider, projectDirectory, references, logger );
 }

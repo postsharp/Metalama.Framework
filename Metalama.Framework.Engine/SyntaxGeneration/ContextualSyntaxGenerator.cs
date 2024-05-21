@@ -40,8 +40,7 @@ internal sealed partial class ContextualSyntaxGenerator
     }
 
     private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
-    private readonly ConcurrentDictionary<IType, TypeSyntax> _typeSyntaxCache;
-    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSymbolSyntaxCache;
+    private readonly ConcurrentDictionary<Ref<IType>, TypeSyntax> _typeSyntaxCache;
 
     public bool IsNullAware { get; }
 
@@ -51,8 +50,7 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         this.SyntaxGenerationContext = context;
         this._syntaxGeneratorForIType = new SyntaxGeneratorForIType( context.Options );
-        this._typeSyntaxCache = [];
-        this._typeSymbolSyntaxCache = new ConcurrentDictionary<ITypeSymbol, TypeSyntax>( SymbolEqualityComparer.IncludeNullability );
+        this._typeSyntaxCache = new ConcurrentDictionary<Ref<IType>, TypeSyntax>( RefEqualityComparer<IType>.IncludeNullability );
         this.IsNullAware = nullAware;
     }
 
@@ -464,11 +462,30 @@ internal sealed partial class ContextualSyntaxGenerator
 
         if ( this.SyntaxGenerationContext.HasCompilationContext && type.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
-            return this._typeSyntaxCache.AssertNotNull().GetOrAdd( type, static ( s, x ) => x.TypeCore( s ), this );
+            return this._typeSyntaxCache.AssertNotNull()
+                .GetOrAdd(
+                    type.ToTypedRef(),
+                    static ( _, x ) => x.This.TypeCore( x.Type ),
+                    (This: this, Type: type) );
         }
         else
         {
             return this.TypeCore( type );
+        }
+    }
+
+    public TypeSyntax Type( ITypeSymbol symbol )
+    {
+        if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
+        {
+            return this._typeSyntaxCache.GetOrAdd(
+                symbol.ToTypedRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
+                static ( _, x ) => x.This.TypeCore( x.Type ),
+                (This: this, Type: symbol) );
+        }
+        else
+        {
+            return this.TypeCore( symbol );
         }
     }
 
@@ -488,18 +505,6 @@ internal sealed partial class ContextualSyntaxGenerator
         }
 
         return typeSyntax;
-    }
-
-    public TypeSyntax Type( ITypeSymbol symbol )
-    {
-        if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
-        {
-            return this._typeSymbolSyntaxCache.GetOrAdd( symbol, static ( s, x ) => x.TypeCore( s ), this );
-        }
-        else
-        {
-            return this.TypeCore( symbol );
-        }
     }
 
     private TypeSyntax TypeCore( ITypeSymbol symbol )

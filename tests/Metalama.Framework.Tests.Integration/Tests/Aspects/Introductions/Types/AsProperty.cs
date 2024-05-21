@@ -9,8 +9,8 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType", TypeKind.Class, buildType: t => { t.Accessibility = Code.Accessibility.Public; });
-        var existingNested = builder.Target.NestedTypes.Single();
+        var result = builder.Advice.IntroduceClass(builder.Target, "IntroducedNestedType", TypeKind.Class, buildType: t => { t.Accessibility = Code.Accessibility.Public; });
+        var existingNested = builder.Target.Types.Single();
 
         builder.Advice.IntroduceProperty(
             builder.Target, 

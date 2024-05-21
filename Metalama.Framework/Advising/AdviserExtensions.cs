@@ -128,7 +128,7 @@ public static class AdviserExtensions
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IMethodBuilder>? buildOperator = null,
         object? args = null,
-        object? tags = null ) 
+        object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceBinaryOperator(
             adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
             template,
@@ -236,6 +236,32 @@ public static class AdviserExtensions
     /// <seealso href="@overriding-fields-or-properties"/>
     public static IOverrideAdviceResult<IPropertyOrIndexer> OverrideAccessors(
         this IAdviser<IFieldOrPropertyOrIndexer> adviser,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.OverrideAccessors(
+            adviser.Target,
+            getTemplate,
+            setTemplate,
+            args,
+            tags );
+
+    public static IOverrideAdviceResult<IProperty> OverrideAccessors(
+        this IAdviser<IFieldOrProperty> adviser,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => ((IAdviserInternal) adviser).AdviceFactory.OverrideAccessors(
+            adviser.Target,
+            getTemplate,
+            setTemplate,
+            args,
+            tags );
+
+    public static IOverrideAdviceResult<IIndexer> OverrideAccessors(
+        this IAdviser<IIndexer> adviser,
         in GetterTemplateSelector getTemplate = default,
         string? setTemplate = null,
         object? args = null,
@@ -818,7 +844,7 @@ public static class AdviserExtensions
             adviser.Target,
             template,
             kind,
-            tags, 
+            tags,
             args );
 
     /// <summary>
@@ -846,8 +872,8 @@ public static class AdviserExtensions
     /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     public static IAddInitializerAdviceResult AddInitializer(
         this IAdviser<IConstructor> adviser,
-        string template, 
-        object? tags = null, 
+        string template,
+        object? tags = null,
         object? args = null )
         => ((IAdviserInternal) adviser).AdviceFactory.AddInitializer(
             adviser.Target,
@@ -1011,70 +1037,16 @@ public static class AdviserExtensions
             pullAction,
             attributes );
 
-    public static ITypeIntroductionAdviceResult IntroduceType(
+    public static IClassIntroductionAdviceResult IntroduceClass(
         this IAdviser<INamespaceOrNamedType> adviser,
-        string name, 
-        TypeKind typeKind, 
+        string name,
+        TypeKind typeKind = TypeKind.Class,
         Action<INamedTypeBuilder>? buildType = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceType(
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
             adviser.Target,
             name,
             typeKind,
             buildType );
-
-    public static ITypeIntroductionAdviceResult IntroduceClass(
-        this IAdviser<INamespaceOrNamedType> adviser,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
-            adviser.Target,
-            name,
-            buildType );
-
-    public static ITypeIntroductionAdviceResult IntroduceStruct(
-        this IAdviser<INamespaceOrNamedType> adviser,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
-            adviser.Target,
-            name,
-            buildType );
-
-    public static ITypeIntroductionAdviceResult IntroduceRecordClass(
-        this IAdviser<INamespaceOrNamedType> adviser,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
-            adviser.Target,
-            name,
-            buildType );
-
-    public static ITypeIntroductionAdviceResult IntroduceRecordStruct(
-        this IAdviser<INamespaceOrNamedType> adviser,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
-            adviser.Target,
-            name,
-            buildType );
-
-    public static IIntroductionAdviceResult<INamedType> IntroduceEnum(
-        this IAdviser<INamespaceOrNamedType> adviser,
-        string name,
-        Action<IEnumTypeBuilder>? buildEnum = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceEnum(
-            adviser.Target,
-            name,
-            buildEnum );
-
-    public static IIntroductionAdviceResult<INamedType> IntroduceDelegateType(
-        this IAdviser<INamespaceOrNamedType> adviser,
-        string name,
-        Action<IDelegateTypeBuilder>? buildDelegateType = null )
-        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceDelegateType(
-            adviser.Target,
-            name,
-            buildDelegateType );
 
     /// <summary>
     /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
@@ -1088,7 +1060,7 @@ public static class AdviserExtensions
     /// <typeparam name="TDeclaration">The type of declaration.</typeparam>
     public static void AddAnnotation<TDeclaration>(
         this IAdviser<TDeclaration> adviser,
-        IAnnotation<TDeclaration> annotation, 
+        IAnnotation<TDeclaration> annotation,
         bool export = false )
         where TDeclaration : class, IDeclaration
         => ((IAdviserInternal) adviser).AdviceFactory.AddAnnotation(

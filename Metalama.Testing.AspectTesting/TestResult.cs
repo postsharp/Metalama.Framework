@@ -294,11 +294,16 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.AsEnumerable()
+                ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).AsEnumerable()
                 : this.SyntaxTrees.Take( 1 );
 
         foreach ( var outputSyntaxTree in outputSyntaxTrees )
         {
+            if ( outputSyntaxTree.IsAuxiliary )
+            {
+                continue;
+            }
+            
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )
@@ -332,7 +337,7 @@ internal class TestResult : IDisposable
                         .Cast<SyntaxNode>()
                         .ToArray();
 
-                outputMembers = outputMembers is [] ? new SyntaxNode[] { outputSyntaxRoot } : outputMembers;
+                outputMembers = outputMembers is [] ? [outputSyntaxRoot] : outputMembers;
 
                 for ( var i = 0; i < outputMembers.Length; i++ )
                 {
@@ -399,12 +404,16 @@ internal class TestResult : IDisposable
 
             // Individual trees should be formatted, so we don't need to format again.
 
-            result.Add(
-                CSharpSyntaxTree.Create(
-                    consolidatedCompilationUnit,
-                    path: Path.GetFileName(
-                        outputSyntaxTree.InputPath
-                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
+            if ( comments.Count > 0 ||
+                 consolidatedCompilationUnit.ChildNodes().Any() )
+            {
+                result.Add(
+                    CSharpSyntaxTree.Create(
+                        consolidatedCompilationUnit,
+                        path: Path.GetFileName(
+                            outputSyntaxTree.InputPath
+                            ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
+            }
         }
 
         return result;

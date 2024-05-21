@@ -222,15 +222,19 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public INamespace Namespace
+        INamespace INamedType.Namespace => this.ContainingNamespace;
+
+        public INamespace ContainingNamespace
         {
             get
             {
                 this.OnUsingDeclaration();
 
-                return this.Implementation.Namespace;
+                return this.Implementation.ContainingNamespace;
             }
         }
+
+        INamedTypeCollection INamedType.NestedTypes => this.Types;
 
         public string FullName
         {
@@ -242,13 +246,13 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public INamedTypeCollection NestedTypes
+        public INamedTypeCollection Types
         {
             get
             {
                 this.OnUsingDeclaration();
 
-                return this.Implementation.NestedTypes;
+                return this.Implementation.Types;
             }
         }
 

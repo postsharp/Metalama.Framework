@@ -15,8 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.CompilerExtensions\Metalama.Framework.CompilerExtensions.csproj"/>
+        <ProjectReference Include="../Metalama.Framework.CompilerExtensions/Metalama.Framework.CompilerExtensions.csproj"/>
     </ItemGroup>
 
 </Project>
-

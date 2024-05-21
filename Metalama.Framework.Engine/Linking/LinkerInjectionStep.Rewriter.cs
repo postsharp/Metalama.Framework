@@ -91,7 +91,7 @@ internal sealed partial class LinkerInjectionStep
             SyntaxGenerationContext? syntaxGenerationContext = null;
 
             this.RewriteAttributeLists(
-                Ref.FromSymbol( symbol, this._compilation.CompilationContext ),
+                Ref.FromSymbol<IDeclaration>( symbol, this._compilation.CompilationContext ),
                 SyntaxKind.None,
                 originalDeclaringNode,
                 attributeLists,

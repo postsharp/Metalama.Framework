@@ -22,15 +22,5 @@ internal sealed class ProgrammaticAspectSource : IAspectSource
 
     public ImmutableArray<IAspectClass> AspectClasses { get; }
 
-    public Task CollectAspectInstancesAsync(
-        IAspectClass aspectClass,
-        OutboundActionCollectionContext context )
-    {
-        if ( this._addResultsAction != null )
-        {
-            return this._addResultsAction.Invoke( context );
-        }
-
-        return Task.CompletedTask;
-    }
+    public Task CollectAspectInstancesAsync( IAspectClass aspectClass, OutboundActionCollectionContext context ) => this._addResultsAction.Invoke( context );
 }

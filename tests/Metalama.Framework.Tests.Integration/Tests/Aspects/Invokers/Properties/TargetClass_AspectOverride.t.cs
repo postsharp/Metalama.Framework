@@ -4,7 +4,8 @@ public class TargetClass
   public int Property
   {
     get
-    { // Invoke this.Property_Source
+    {
+      // Invoke this.Property_Source
       _ = this.Property_Source;
       // Invoke this.Property_Source
       _ = this.Property_Source;
@@ -42,7 +43,8 @@ public class TargetClass
   public int InvokerBefore
   {
     get
-    { // Invoke this.Property
+    {
+      // Invoke this.Property
       _ = this.Property;
       // Invoke this.Property_Source
       _ = this.Property_Source;
@@ -69,7 +71,8 @@ public class TargetClass
   public int InvokerAfter
   {
     get
-    { // Invoke this.Property
+    {
+      // Invoke this.Property
       _ = this.Property;
       // Invoke this.Property
       _ = this.Property;

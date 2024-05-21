@@ -20,6 +20,8 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 
         protected LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
+        protected static TestLicenseKeyProvider LicenseKeys { get; } = new TestLicenseKeyProvider( typeof(LicensingTestsBase).Assembly );
+
         protected async Task<DiagnosticBag> GetDiagnosticsAsync(
             string code,
             string? licenseKey,
@@ -68,7 +70,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 return null;
             }
 
-            return TestLicenseKeys.GetLicenseKey( name );
+            return LicenseKeys.GetLicenseKey( name );
         }
     }
 }

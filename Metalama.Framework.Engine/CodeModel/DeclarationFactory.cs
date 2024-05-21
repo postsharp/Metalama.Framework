@@ -439,13 +439,10 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
     {
-        var declaration = declarationId.ResolveToDeclaration( this._compilationModel );
-
-        if ( declaration == null )
-        {
-            throw new InvalidOperationException(
+        var declaration =
+            declarationId.ResolveToDeclaration( this._compilationModel )
+            ?? throw new InvalidOperationException(
                 $"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'." );
-        }
 
         return declaration;
     }

@@ -7,14 +7,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.IntroduceType("SealedType", TypeKind.Class, buildType: t => { t.IsSealed = true; });
+        var introducedType = builder.IntroduceClass( "SealedType", TypeKind.Class, buildType: t => { t.IsSealed = true; } );
     }
 }
 
 // <target>
 [IntroductionAttribute]
-public class TargetType
-{
-}
+public class TargetType { }

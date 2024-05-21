@@ -156,7 +156,7 @@ internal static class TestDeclarationExtensions
             INamespace ns => ns.Namespaces.Concat<IDeclaration>( ns.Types ),
             INamedType namedType => new IEnumerable<IDeclaration>[]
                 {
-                    namedType.NestedTypes,
+                    namedType.Types,
                     namedType.Methods,
                     namedType.Constructors,
                     namedType.Fields,

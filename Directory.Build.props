@@ -12,9 +12,9 @@
         <WarningsAsErrors>$(WarningsAsErrors);NU1604</WarningsAsErrors>
     </PropertyGroup>
 
-    <Import Project="eng\Versions.props"/>
-    <Import Project="eng\StrongName.props"/>
-    <Import Project="eng\Packaging.props"/>
+    <Import Project="eng/Versions.props"/>
+    <Import Project="eng/StrongName.props"/>
+    <Import Project="eng/Packaging.props"/>
 
     <!-- We don't want nullability warnings in the Release build since the inlining AssertNotNull creates issues to analyzers -->
     <PropertyGroup Condition="'$(Configuration)'=='Release' OR ( '$(TargetFramework)'!='net6.0' AND '$(TargetFramework)'!='net7.0' )">
@@ -22,7 +22,7 @@
     </PropertyGroup>
 
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
-    <Import Project="Metalama.Framework.Package\build\Metalama.CompilerVisibleProperties.props"/>
+    <Import Project="Metalama.Framework.Package/build/Metalama.CompilerVisibleProperties.props"/>
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="BuildOptions.props"/>
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SourceLink.props"/>

@@ -313,7 +313,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
             return 0;
         }
 
-        return this.CompareNamespaces( nsX.ParentNamespace!, nsY.ParentNamespace! );
+        return this.CompareNamespaces( nsX.ContainingNamespace!, nsY.ContainingNamespace! );
     }
 
     private int CompareNamedTypes( INamedType namedTypeX, INamedType namedTypeY, StructuralComparerOptions options )
@@ -331,7 +331,7 @@ internal sealed class StructuralDeclarationComparer : IEqualityComparer<ICompila
 
             if ( namedTypeX.ContainingDeclaration is not INamedType && namedTypeY.ContainingDeclaration is not INamedType )
             {
-                result = this.CompareNamespaces( namedTypeX.Namespace, namedTypeY.Namespace );
+                result = this.CompareNamespaces( namedTypeX.ContainingNamespace, namedTypeY.ContainingNamespace );
 
                 if ( result != 0 )
                 {
