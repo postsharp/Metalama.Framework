@@ -70,7 +70,7 @@ object DebugBuild : BuildType({
     }
 
     requirements {
-        equals("env.BuildAgentType", "Windows-Server-2022-Medium")
+        equals ("teamcity.agent.name", "Windows-Server-2022-Medium")
     }
 
     features {
@@ -173,7 +173,7 @@ object ReleaseBuild : BuildType({
     }
 
     requirements {
-        equals("env.BuildAgentType", "Windows-Server-2022-Medium")
+        equals ("teamcity.agent.name", "Windows-Server-2022-Medium")
     }
 
     features {
@@ -276,7 +276,7 @@ object PublicBuild : BuildType({
     }
 
     requirements {
-        equals("env.BuildAgentType", "Windows-Server-2022-Medium")
+        equals ("teamcity.agent.name", "Windows-Server-2022-Medium")
     }
 
     features {
@@ -365,7 +365,7 @@ object PublicDeployment : BuildType({
     }
 
     requirements {
-        equals("env.BuildAgentType", "Windows-Server-2022-Medium")
+        equals ("teamcity.agent.name", "Windows-Server-2022-Medium")
     }
 
     features {
@@ -477,7 +477,7 @@ object VersionBump : BuildType({
     }
 
     requirements {
-        equals("env.BuildAgentType", "Windows-Server-2022-Medium")
+        equals ("teamcity.agent.name", "Windows-Server-2022-Medium")
     }
 
     features {

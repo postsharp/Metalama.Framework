@@ -4,6 +4,7 @@ using PostSharp.Engineering.BuildTools;
 using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
+using PostSharp.Engineering.BuildTools.ContinuousIntegration.Model;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
 using PostSharp.Engineering.BuildTools.Docker;
@@ -90,7 +91,7 @@ var product = new Product( MetalamaDependencies.Metalama )
             } ),
     SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
     UseDockerInTeamcity = true,
-    BuildAgentType = "Windows-Server-2022-Medium"
+    BuildAgentRequirements = BuildAgentRequirements.JetBrainsHosted( "Windows-Server-2022-Medium" ) 
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
