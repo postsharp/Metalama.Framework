@@ -22,7 +22,6 @@ var product = new Product( MetalamaDependencies.Metalama )
             SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
             SupportsTestCoverage = true,
             CanFormatCode = true,
-            
             // We don't run the tests for the whole solution because they are too slow and redundant. See #34277.
             TestMethod = BuildMethod.None,
             FormatExclusions =
@@ -34,7 +33,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 
                 // XML formatting seems to be conflicting.
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
-            ]
+            ],
         },
         new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
         {
@@ -90,6 +89,8 @@ var product = new Product( MetalamaDependencies.Metalama )
                 ]
             } ),
     SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
+    UseDockerInTeamcity = true,
+    BuildAgentType = "Windows-Server-2022-Medium"
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
