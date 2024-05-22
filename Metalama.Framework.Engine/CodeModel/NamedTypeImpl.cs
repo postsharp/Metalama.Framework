@@ -481,7 +481,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         {
             var introducedInterface =
                 this.Compilation
-                    .GetInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false )
+                    .GetInterfaceImplementationCollection( currentType.ToTypedRef<INamedType>(), false )
                     .Introductions
                     .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
@@ -496,13 +496,13 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 // Which is later in inheritance?
                 if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
                 {
-                    implementationMember = interfaceMemberImplementation;
+                    implementationMember = interfaceMemberImplementation.ForCompilation( this.Compilation );
 
                     return true;
                 }
                 else
                 {
-                    implementationMember = symbolInterfaceMemberImplementation;
+                    implementationMember = symbolInterfaceMemberImplementation.ForCompilation( this.Compilation );
 
                     return true;
                 }
@@ -513,7 +513,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( symbolInterfaceMemberImplementation != null )
         {
-            implementationMember = symbolInterfaceMemberImplementation;
+            implementationMember = symbolInterfaceMemberImplementation.ForCompilation( this.Compilation );
 
             return true;
         }
