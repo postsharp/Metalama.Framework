@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -67,17 +68,11 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         // TODO: Introduce attributes that are added not present on the existing member?
         if ( existingConstructor == null )
         {
-            // Check that there is no other member named the same, which is possible, but very unlikely.
-            var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
+            var existingImplicitConstructor = targetDeclaration.Constructors.FirstOrDefault( c => c.Parameters.Count == 0 && c.IsImplicitlyDeclared );
 
-            if ( existingOtherMember != null )
+            if ( existingImplicitConstructor != null )
             {
-                return
-                    this.CreateFailedResult(
-                        AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
-                            targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
-                            this ) );
+                this.Builder.IsReplacingImplicit = true;
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
@@ -116,17 +111,6 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
                     addTransformation( overriddenMethod );
 
                     return this.CreateSuccessResult( AdviceOutcome.Override, existingConstructor );
-
-                case OverrideStrategy.New:
-                    // The constructor that conflicts with the existing constructor will replace it.
-                    var overriddenConstructor = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
-
-                    this.Builder.IsReplacingExisting = true;
-
-                    addTransformation( this.Builder.ToTransformation() );
-                    addTransformation( overriddenConstructor );
-
-                    return this.CreateSuccessResult();
 
                 default:
                     throw new AssertionFailedException( $"Unexpected OverrideStrategy: {this.OverrideStrategy}." );

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
-    public bool IsReplacingExisting { get; set; }
+    public bool IsReplacingImplicit { get; set; }
 
     public ConstructorInitializerKind InitializerKind { get; set; }
 

@@ -17,10 +17,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             var mementoType =
-                builder.Advice.IntroduceType(
+                builder.Advice.IntroduceClass(
                     builder.Target,
                     "Memento",
-                    TypeKind.Class,
                     buildType: b =>
                     {
                         b.Accessibility = Accessibility.Public;

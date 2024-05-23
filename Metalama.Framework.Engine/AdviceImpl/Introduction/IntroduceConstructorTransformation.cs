@@ -28,9 +28,9 @@ internal sealed class IntroduceConstructorTransformation
 
         var targetType = introducedDeclaration.DeclaringType;
 
-        if ( introducedDeclaration.IsReplacingExisting )
+        if ( introducedDeclaration.IsReplacingImplicit )
         {
-            this.ReplacedMember = targetType.Constructors.OfExactSignature( introducedDeclaration ).AssertNotNull().ToMemberRef<IMember>();
+            this.ReplacedMember = targetType.Constructors.Single( c => c.IsImplicitInstanceConstructor() ).ToMemberRef<IMember>();
         }
     }
 

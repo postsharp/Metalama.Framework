@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using System.Linq;
@@ -355,6 +356,80 @@ class C
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation2.Types.Single().Types.OfName( "B" ).Single().Methods.OfName( "M" ) );
         Assert.Empty( immutableCompilation2.Types.Single().Types.OfName( "T" ).Single().AllMethods.OfName( "M" ) );
+    }
+
+    [Fact]
+    public void ReplaceImplicitConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            class Target;
+            """;
+
+        var initialCompilation = testContext.CreateCompilationModel( code );
+
+        var target = initialCompilation.Types.OfName( "Target" ).Single();
+
+        var introducedConstructor = new ConstructorBuilder( null!, target );
+        introducedConstructor.AddParameter( "p", typeof( int ) );
+        introducedConstructor.IsReplacingImplicit = true;
+
+        var implicitCtor = Assert.Single( target.Constructors );
+
+        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
+            [introducedConstructor.ToTransformation()],
+            null,
+            null );
+
+        var target2 = finalCompilation.Types.OfName( "Target" ).Single();
+        var constructor2 = Assert.Single( target2.Constructors );
+
+        Assert.Equal( implicitCtor.Name, introducedConstructor.Name );
+        Assert.Same( constructor2, introducedConstructor.ForCompilation<IConstructor>( finalCompilation ) );
+
+        // NB: This a weird. It's caused by the introduced constructor replacing the implicit one.
+        //     If another parameterless constructor is introduced afterwards, the implicit constructor will still translate to the
+        //     one with parameters.
+
+        Assert.Same( constructor2, implicitCtor.ForCompilation( finalCompilation ) );
+    }
+
+    [Fact]
+    public void ReplaceImplicitStaticConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            class Target
+            {
+                public static int f = 42;
+            }
+            """;
+
+        var initialCompilation = testContext.CreateCompilationModel( code );
+
+        var target = initialCompilation.Types.OfName( "Target" ).Single();
+
+        var introducedStaticConstructor = new ConstructorBuilder( null!, target );
+        introducedStaticConstructor.IsStatic = true;
+        introducedStaticConstructor.IsReplacingImplicit = true;
+
+        Assert.NotNull( target.StaticConstructor );
+
+        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
+            [introducedStaticConstructor.ToTransformation()],
+            null,
+            null );
+
+        var target2 = finalCompilation.Types.OfName( "Target" ).Single();
+        var staticConstructor2 = target2.StaticConstructor;
+
+        Assert.Equal( target.StaticConstructor.Name, introducedStaticConstructor.Name );
+        Assert.Same( introducedStaticConstructor.ForCompilation<IConstructor>( finalCompilation ), staticConstructor2 );
+        Assert.Same( target.StaticConstructor.ForCompilation( finalCompilation ), staticConstructor2 );
     }
 
     [Fact]
