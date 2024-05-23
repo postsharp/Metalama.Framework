@@ -90,9 +90,7 @@ var product = new Product( MetalamaDependencies.Metalama )
                 ]
             } ),
     SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
-    UseDockerInTeamcity = true,
-    // This is to force the build on our own agent.
-    AdditionalBuildAgentRequirements = new BuildAgentRequirements( new BuildAgentRequirement( "env.BuildAgentType", "DockerWindowsStandard" ) )
+    UseDockerInTeamcity = true
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
