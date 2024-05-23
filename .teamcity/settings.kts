@@ -39,14 +39,6 @@ object DebugBuild : BuildType({
 
     steps {
         powerShell {
-            name = "Kill background processes before cleanup"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-        }
-        powerShell {
             name = "Build"
             scriptMode = file {
                 path = "Build.ps1"
@@ -70,7 +62,9 @@ object DebugBuild : BuildType({
     }
 
     requirements {
-        equals ("env.BuildAgentType", "DockerWindowsStandard")
+        equals ("container.engine", "docker")
+        equals ("container.engine.osType", "windows")
+        equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
     }
 
     features {
@@ -142,14 +136,6 @@ object ReleaseBuild : BuildType({
 
     steps {
         powerShell {
-            name = "Kill background processes before cleanup"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-        }
-        powerShell {
             name = "Build"
             scriptMode = file {
                 path = "Build.ps1"
@@ -173,7 +159,9 @@ object ReleaseBuild : BuildType({
     }
 
     requirements {
-        equals ("env.BuildAgentType", "DockerWindowsStandard")
+        equals ("container.engine", "docker")
+        equals ("container.engine.osType", "windows")
+        equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
     }
 
     features {
@@ -237,14 +225,6 @@ object PublicBuild : BuildType({
 
     steps {
         powerShell {
-            name = "Kill background processes before cleanup"
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "tools kill")
-        }
-        powerShell {
             name = "Check pending upstream changes"
             scriptMode = file {
                 path = "Build.ps1"
@@ -276,7 +256,9 @@ object PublicBuild : BuildType({
     }
 
     requirements {
-        equals ("env.BuildAgentType", "DockerWindowsStandard")
+        equals ("container.engine", "docker")
+        equals ("container.engine.osType", "windows")
+        equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
     }
 
     features {
@@ -365,7 +347,9 @@ object PublicDeployment : BuildType({
     }
 
     requirements {
-        equals ("env.BuildAgentType", "DockerWindowsStandard")
+        equals ("container.engine", "docker")
+        equals ("container.engine.osType", "windows")
+        equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
     }
 
     features {
@@ -477,7 +461,9 @@ object VersionBump : BuildType({
     }
 
     requirements {
-        equals ("env.BuildAgentType", "DockerWindowsStandard")
+        equals ("container.engine", "docker")
+        equals ("container.engine.osType", "windows")
+        equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
     }
 
     features {
