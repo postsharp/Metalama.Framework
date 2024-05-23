@@ -47,7 +47,8 @@ coverage.json
 **/.vscode
 **/.tools
 
-# Source dependencies are passed as contexts.
+# Source dependencies are passed as the 'docker-source-dependencies' directory,
+# since the 'source-dependencies' typicall contains symbolic links.
 source-dependencies
 
 # Dependencies must be copied
@@ -55,3 +56,6 @@ source-dependencies
 
 # The git directory must be copied because of SourceLink
 !.git
+
+# Symbolic links cause problems.
+.editorconfig
