@@ -1,7 +1,5 @@
 <Project>
 
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="MetalamaBranding.props" />
-
     <!-- Properties of NuGet packages-->
     <PropertyGroup>
         <Authors>PostSharp Technologies</Authors>
