@@ -90,10 +90,7 @@ var product = new Product( MetalamaDependencies.Metalama )
                 ]
             } ),
     SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
-    UseDockerInTeamcity = true,
-    DockerBaseImage = new DockerWindowsImage(
-        "mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-ltsc2022", "windowsservercore" ),
-    BuildAgentRequirements = BuildAgentRequirements.SelfHosted( "DockerWindowsStandard" ) 
+    UseDockerInTeamcity = true
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
