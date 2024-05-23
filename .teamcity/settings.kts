@@ -65,6 +65,7 @@ object DebugBuild : BuildType({
         equals ("container.engine", "docker")
         equals ("container.engine.osType", "windows")
         equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
+        equals ("env.BuildAgentType", "DockerWindowsStandard")
     }
 
     features {
@@ -162,6 +163,7 @@ object ReleaseBuild : BuildType({
         equals ("container.engine", "docker")
         equals ("container.engine.osType", "windows")
         equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
+        equals ("env.BuildAgentType", "DockerWindowsStandard")
     }
 
     features {
@@ -259,6 +261,7 @@ object PublicBuild : BuildType({
         equals ("container.engine", "docker")
         equals ("container.engine.osType", "windows")
         equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
+        equals ("env.BuildAgentType", "DockerWindowsStandard")
     }
 
     features {
@@ -350,6 +353,7 @@ object PublicDeployment : BuildType({
         equals ("container.engine", "docker")
         equals ("container.engine.osType", "windows")
         equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
+        equals ("env.BuildAgentType", "DockerWindowsStandard")
     }
 
     features {
@@ -464,6 +468,7 @@ object VersionBump : BuildType({
         equals ("container.engine", "docker")
         equals ("container.engine.osType", "windows")
         equals ("teamcity.agent.jvm.os.name", "Windows Server 2022")
+        equals ("env.BuildAgentType", "DockerWindowsStandard")
     }
 
     features {
