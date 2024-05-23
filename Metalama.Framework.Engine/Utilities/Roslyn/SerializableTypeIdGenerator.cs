@@ -17,7 +17,21 @@ public static class SerializableTypeIdGenerator
             id += '!';
         }
 
-        id = SerializableTypeIdResolver.Prefix + id;
+        id = SerializableTypeIdResolverForSymbol.Prefix + id;
+
+        return new SerializableTypeId( id );
+    }
+
+    public static SerializableTypeId GetSerializableTypeId( this IType type, bool bypassSymbols = false )
+    {
+        var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type( type, bypassSymbols ).ToString();
+
+        if ( type.IsNullable == false && type.IsReferenceType != false )
+        {
+            id += '!';
+        }
+
+        id = SerializableTypeIdResolverForIType.Prefix + id;
 
         return new SerializableTypeId( id );
     }

@@ -25,7 +25,7 @@ public abstract class WorkspaceProvider : IGlobalService, IDisposable
 
     public bool TryGetWorkspace( [NotNullWhen( true )] out Workspace? workspace )
     {
-        var task = this.GetWorkspaceAsync( default );
+        var task = this.GetWorkspaceAsync();
 
         if ( task.IsCompleted )
         {

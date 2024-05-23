@@ -16,7 +16,7 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 {
     private readonly bool _includeNestedTypes;
 
-    public CompilationTypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType, bool includeNestedTypes ) : base(
+    public CompilationTypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType, bool includeNestedTypes ) : base(
         compilation,
         declaringType )
     {
@@ -25,25 +25,32 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
 
     protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
-    protected override IEnumerable<ISymbol> GetSymbolsOfName( string name )
+    protected override ImmutableArray<MemberRef<INamedType>> GetMemberRefsOfName( string name )
     {
+        // TODO: Optimize, what about introduced types?
         if ( this._includeNestedTypes )
         {
             throw new InvalidOperationException( "This method is not supported when the collection recursively includes nested types." );
         }
 
         return this.Compilation.PartialCompilation.Types
-            .Where( t => t.Name == name && this.IsVisible( t ) );
+            .Where( t => t.Name == name && this.IsVisible( t ) )
+            .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+            .ToImmutableArray();
     }
 
-    protected override IEnumerable<ISymbol> GetSymbols()
+    protected override ImmutableArray<MemberRef<INamedType>> GetMemberRefs()
     {
+        // TODO: Optimize, what about introduced types?
         var topLevelTypes = this.Compilation.PartialCompilation.Types
             .Where( this.IsVisible );
 
         if ( !this._includeNestedTypes )
         {
-            return topLevelTypes;
+            return
+                topLevelTypes
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray();
         }
         else
         {
@@ -64,7 +71,12 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
                 ProcessType( type );
             }
 
-            return types;
+#pragma warning disable CS0618 // Type or member is obsolete
+            return
+                types
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray();
+#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 
@@ -72,11 +84,17 @@ internal sealed class CompilationTypeUpdatableCollection : NonUniquelyNamedUpdat
     {
         var comparer = (DeclarationEqualityComparer) this.Compilation.Comparers.GetTypeComparer( TypeComparison.Default );
 
+        // TODO: This should not use GetSymbol.
         return
-            this.GetSymbols()
-                .Where( t => comparer.Is( (ITypeSymbol) t, typeDefinition.GetSymbol(), ConversionKind.TypeDefinition ) )
-                .Where( this.IsSymbolIncluded )
-                .Select( x => new MemberRef<INamedType>( x, this.Compilation.CompilationContext ) )
+            this.GetMemberRefs()
+                .Where( t => comparer.Is( t, typeDefinition, ConversionKind.TypeDefinition ) )
+                .Where(
+                    t =>
+                    {
+                        var symbol = t.GetSymbol( this.Compilation.RoslynCompilation );
+
+                        return symbol == null || this.IsSymbolIncluded( symbol );
+                    } )
                 .ToImmutableArray();
     }
 }

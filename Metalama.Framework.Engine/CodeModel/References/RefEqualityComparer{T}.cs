@@ -13,19 +13,21 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// An implementation of <see cref="IEqualityComparer{T}"/> that can compare implementations of <see cref="Ref{T}"/>.
     /// The comparison is compilation-independent.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal sealed class RefEqualityComparer<T> : IEqualityComparer<Ref<T>>
         where T : class, ICompilationElement
     {
-        public static readonly RefEqualityComparer<T> Default = new( StructuralSymbolComparer.IncludeAssembly );
-        public static readonly RefEqualityComparer<T> IncludeNullability = new( StructuralSymbolComparer.IncludeAssemblyAndNullability );
+        public static readonly RefEqualityComparer<T> Default = new( StructuralSymbolComparer.IncludeAssembly, StructuralDeclarationComparer.IncludeAssembly );
+        public static readonly RefEqualityComparer<T> IncludeNullability = new( StructuralSymbolComparer.IncludeAssemblyAndNullability, StructuralDeclarationComparer.IncludeAssemblyAndNullability );
 
-        private RefEqualityComparer( StructuralSymbolComparer symbolEqualityComparer )
+        private RefEqualityComparer( StructuralSymbolComparer symbolEqualityComparer, StructuralDeclarationComparer declarationEqualityComparer )
         {
             this.StructuralSymbolComparer = symbolEqualityComparer;
+            this.StructuralDeclarationComparer = declarationEqualityComparer;
         }
 
         public StructuralSymbolComparer StructuralSymbolComparer { get; }
+
+        public StructuralDeclarationComparer StructuralDeclarationComparer { get; }
 
         private static ISymbol? GetSymbol( in Ref<T> reference ) => reference.Target as ISymbol;
 

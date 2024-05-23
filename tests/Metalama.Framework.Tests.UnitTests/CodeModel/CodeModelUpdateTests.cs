@@ -2,9 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
@@ -12,7 +13,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
 
-public sealed class CodeModelUpdateTests : UnitTestClass
+public sealed partial class CodeModelUpdateTests : UnitTestClass
 {
     [Fact]
     public void AddMethodToEmptyType_InitializeBefore_Complete()
@@ -418,5 +419,174 @@ class C
                 (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
 
         Assert.Empty( type.Attributes );
+    }
+
+    [Fact]
+    public void AddNestedTypeToEmptyType_InitializeBefore_Complete()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.Types.Single().Types );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var type = Assert.Single( compilation.Types );
+
+        // Instantiate the memoize the collection of nested types.
+        Assert.Empty( type.Types );
+
+        // Add a nested type.
+        var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.Single( type.Types );
+
+        // Assert that there is still no type in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Types );
+    }
+
+    [Fact]
+    public void AddNestedTypeToEmptyType_InitializeBefore_OfName()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var type = Assert.Single( compilation.Types );
+
+        // Instantiate the memoize the collection of nested types.
+        Assert.Empty( type.Types.OfName( "T" ) );
+
+        // Add a nested type.
+        var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.Single( type.Types.OfName( "T" ) );
+
+        // Assert that there is still no type in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
+    }
+
+    [Fact]
+    public void AddNestedTypeToEmptyType_DontInitializeBefore_Complete()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.Types.Single().Types );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var type = Assert.Single( compilation.Types );
+
+        // Add a nested type.
+        var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.Single( type.Types );
+
+        // Assert that there is still no type in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Types );
+    }
+
+    [Fact]
+    public void AddNestedTypeToEmptyType_DontInitializeBefore_OfName()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var type = Assert.Single( compilation.Types );
+
+        // Add a nested type.
+        var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.Single( type.Types.OfName( "T" ) );
+
+        // Assert that there is still no type in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
+    }
+
+    [Fact]
+    public void AddNestedTypeToNonEmptyType_DontInitializeBefore_ByName()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+    class T<U>;
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var type = Assert.Single( compilation.Types );
+
+        // Add a nested type.
+        var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        // Assert that the method has been added.
+        Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
+    }
+
+    [Fact]
+    public void AddNestedTypeToNonEmptyType_InitializeBefore_ByName()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+    class T<U>;
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var type = Assert.Single( compilation.Types );
+
+        // Instantiate the memoize the collection of nested types.
+        Assert.Single( type.Types.OfName( "T" ) );
+
+        // Add a nested type.
+        var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
+        compilation.AddTransformation( typeBuilder.ToTransformation() );
+
+        // Assert that the method has been added.
+        Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
     }
 }

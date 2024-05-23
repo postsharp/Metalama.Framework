@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -82,7 +81,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             string? projectDirectory,
             TestProjectReferences references,
             ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, references, logger, null )
+            : base( serviceProvider, projectDirectory, references, logger )
         {
             StringBuilder epilogueBuilder = new();
 

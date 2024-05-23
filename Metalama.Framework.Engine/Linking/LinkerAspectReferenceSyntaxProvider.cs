@@ -47,7 +47,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                 SingletonSeparatedList(
                     Argument(
                         ObjectCreationExpression(
-                            syntaxGenerator.Type( overriddenConstructor.DeclaringType.GetSymbol() ),
+                            syntaxGenerator.Type( overriddenConstructor.DeclaringType ),
                             ArgumentList( SeparatedList( overriddenConstructor.Parameters.SelectAsArray( p => Argument( IdentifierName( p.Name ) ) ) ) ),
                             null ) ) ) ) );
 
@@ -133,7 +133,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
             expression =
                 ParenthesizedExpression(
                     syntaxGenerator.SafeCastExpression(
-                        syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                        syntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
                         ThisExpression() ) );
         }
         else
@@ -178,7 +178,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
                         SyntaxKind.SimpleMemberAccessExpression,
                         ParenthesizedExpression(
                             syntaxGenerator.SafeCastExpression(
-                                syntaxGenerator.Type( implementedInterfaceMember.DeclaringType.GetSymbol() ),
+                                syntaxGenerator.Type( implementedInterfaceMember.DeclaringType ),
                                 ThisExpression() ) ),
                         memberName )
                     .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
@@ -197,7 +197,7 @@ internal sealed class LinkerAspectReferenceSyntaxProvider : AspectReferenceSynta
             expression =
                 MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        syntaxGenerator.Type( targetDeclaration.DeclaringType.GetSymbol() ),
+                        syntaxGenerator.Type( targetDeclaration.DeclaringType ),
                         memberName )
                     .WithSimplifierAnnotationIfNecessary( syntaxGenerator.SyntaxGenerationContext );
         }

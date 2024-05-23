@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.CompileTimeContracts;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 _ => throw new AssertionFailedException( $"Unexpected value type: '{this._value?.GetType()}'." )
             };
 
-            return SyntaxFactory.ParenthesizedExpression( syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type.GetSymbol(), valueSyntax ) )
+            return SyntaxFactory.ParenthesizedExpression( syntaxSerializationContext.SyntaxGenerator.CastExpression( this.Type, valueSyntax ) )
                 .WithSimplifierAnnotationIfNecessary( syntaxSerializationContext.SyntaxGenerationContext );
         }
 

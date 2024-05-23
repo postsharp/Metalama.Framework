@@ -24,7 +24,11 @@ internal sealed class CompileTimeFieldInfoSerializer : ObjectSerializer<CompileT
 
     public static ExpressionSyntax SerializeField( IField field, SyntaxSerializationContext serializationContext )
     {
-        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( field.DeclaringType.GetSymbol(), serializationContext );
+        var typeCreation =
+            TypeSerializationHelper.SerializeTypeSymbolRecursive(
+                field.DeclaringType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeReflectionWrappers ),
+                serializationContext );
+
         var allBindingFlags = SyntaxUtility.CreateBindingFlags( field, serializationContext );
 
         ExpressionSyntax fieldInfo = InvocationExpression(

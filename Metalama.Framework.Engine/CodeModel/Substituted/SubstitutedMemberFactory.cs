@@ -29,7 +29,8 @@ internal static class SubstitutedMemberFactory
     public static Ref<T> Substitute<T>( T sourceDeclaration, GenericMap genericMap, INamedTypeSymbol? targetType = null )
         where T : class, IMemberOrNamedType
     {
-        targetType ??= genericMap.Map( sourceDeclaration.DeclaringType.AssertNotNull().GetSymbol() );
+        targetType ??= genericMap.Map(
+            sourceDeclaration.DeclaringType.AssertNotNull().GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
         switch ( sourceDeclaration )
         {

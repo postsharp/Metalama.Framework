@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatableCollection<IMethod>
 {
-    public MethodUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public MethodUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation, declaringType.As<INamespaceOrNamedType>() ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
         => base.IsSymbolIncluded( symbol ) && symbol switch

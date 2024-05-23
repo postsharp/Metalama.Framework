@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Microsoft.CodeAnalysis;
@@ -10,34 +9,25 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
-public sealed class SerializableTypeIdResolver
+public abstract class SerializableTypeIdResolver<TType, TTypeOrNamespace>
+    where TType : class
+    where TTypeOrNamespace : class
 {
     internal const string LegacyPrefix = "typeof";
     internal const string Prefix = "Y:"; // T: is used for named types.
 
     private readonly ConcurrentDictionary<SerializableTypeId, ResolverResult> _cache = new();
-    private readonly Compilation _compilation;
 
-    internal SerializableTypeIdResolver( Compilation compilation )
+    public TType ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments = null )
     {
-#if DEBUG
-        if ( compilation.AssemblyName == "empty" )
-        {
-            throw new AssertionFailedException( "Expected a non-empty assembly." );
-        }
-#endif
-        this._compilation = compilation;
-    }
-
-    public ITypeSymbol ResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
-    {
-        var result = this.ResolveAndCache( typeId, genericArguments );
+        var result = this.ResolveAndCache( typeId, genericArguments! );
 
         if ( !result.IsSuccess )
         {
@@ -45,15 +35,15 @@ public sealed class SerializableTypeIdResolver
         }
         else
         {
-            return result.TypeSymbol.AssertNotNull();
+            return result.Type;
         }
     }
 
-    public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen( true )] out ITypeSymbol? type ) => this.TryResolveId( typeId, null, out type );
+    public bool TryResolveId( SerializableTypeId typeId, [NotNullWhen( true )] out TType? type ) => this.TryResolveId( typeId, null, out type );
 
-    public bool TryResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments, [NotNullWhen( true )] out ITypeSymbol? type )
+    public bool TryResolveId( SerializableTypeId typeId, IReadOnlyDictionary<string, TType>? genericArguments, [NotNullWhen( true )] out TType? type )
     {
-        var result = this.ResolveAndCache( typeId, genericArguments );
+        var result = this.ResolveAndCache( typeId, genericArguments! );
 
         if ( !result.IsSuccess )
         {
@@ -63,13 +53,13 @@ public sealed class SerializableTypeIdResolver
         }
         else
         {
-            type = result.TypeSymbol;
+            type = result.Type;
 
             return true;
         }
     }
 
-    private ResolverResult ResolveAndCache( SerializableTypeId typeId, IReadOnlyDictionary<string, IType>? genericArguments = null )
+    private ResolverResult ResolveAndCache( SerializableTypeId typeId, IReadOnlyDictionary<string, TType?>? genericArguments = null )
     {
         if ( genericArguments == null || genericArguments.Count == 0 )
         {
@@ -81,7 +71,7 @@ public sealed class SerializableTypeIdResolver
         }
     }
 
-    private ResolverResult ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, IType>? genericArguments = null )
+    private ResolverResult ResolveCore( SerializableTypeId id, IReadOnlyDictionary<string, TType?>? genericArguments = null )
     {
         try
         {
@@ -94,7 +84,7 @@ public sealed class SerializableTypeIdResolver
                 idString = idString[..^1];
             }
 
-            var resolver = new Resolver( this._compilation, genericArguments, isNullOblivious: nullOblivious );
+            var resolver = new Resolver( this, genericArguments, nullOblivious );
 
             TypeSyntax type;
 
@@ -128,19 +118,39 @@ public sealed class SerializableTypeIdResolver
         }
     }
 
+    protected abstract TType CreateArrayType( TType elementType, int rank );
+
+    protected abstract TType CreatePointerType( TType pointedAtType );
+
+    protected abstract TType CreateNullableType( TType elementType );
+
+    protected abstract TType CreateNonNullableReferenceType( TType referenceType );
+
+    protected abstract TType ConstructGenericType( TType genericType, TType[] typeArguments );
+
+    protected abstract TType CreateTupleType( ImmutableArray<TType> elementTypes );
+
+    protected abstract TType DynamicType { get; }
+
+    protected abstract TTypeOrNamespace? LookupName( string name, int arity, TTypeOrNamespace? ns );
+
+    protected abstract TType GetSpecialType( SpecialType specialType );
+
+    protected abstract bool HasTypeParameterOfName( TType type, string name );
+
     private readonly struct ResolverResult
     {
         public static ResolverResult TypeParameterOfDeclaration { get; } = new( null );
 
         private readonly object? _value;
 
-        public ITypeSymbol TypeSymbol => (ITypeSymbol?) this._value ?? throw new InvalidOperationException();
+        public TType Type => (TType?) this._value ?? throw new InvalidOperationException();
 
-        public INamespaceOrTypeSymbol TypeOrNamespaceSymbol => (INamespaceOrTypeSymbol?) this._value ?? throw new InvalidOperationException();
+        public TTypeOrNamespace TypeOrNamespace => (TTypeOrNamespace?) this._value ?? throw new InvalidOperationException();
 
         public string? ErrorMessage => (string?) this._value;
 
-        public bool IsSuccess => this._value is null or INamespaceOrTypeSymbol;
+        public bool IsSuccess => this._value is null or TType or TTypeOrNamespace;
 
         public bool IsTypeParameterOfDeclaration => this._value == null;
 
@@ -149,21 +159,23 @@ public sealed class SerializableTypeIdResolver
             this._value = value;
         }
 
-        public static ResolverResult Success( INamespaceOrTypeSymbol symbol ) => new( symbol );
+        public static ResolverResult Success( TType type ) => new( type );
+
+        public static ResolverResult Success( TTypeOrNamespace typeOrNamespace ) => new( typeOrNamespace );
 
         public static ResolverResult Error( string errorMessage ) => new( errorMessage );
     }
 
     private sealed class Resolver : SafeSyntaxVisitor<ResolverResult>
     {
-        private readonly Compilation _compilation;
-        private readonly IReadOnlyDictionary<string, IType>? _genericArguments;
+        private readonly SerializableTypeIdResolver<TType, TTypeOrNamespace> _parent;
+        private readonly IReadOnlyDictionary<string, TType?>? _genericArguments;
         private readonly bool _isNullOblivious;
-        private INamedTypeSymbol? _currentGenericType;
+        private TType? _currentGenericType;
 
-        public Resolver( Compilation compilation, IReadOnlyDictionary<string, IType>? genericArguments, bool isNullOblivious )
+        public Resolver( SerializableTypeIdResolver<TType, TTypeOrNamespace> parent, IReadOnlyDictionary<string, TType?>? genericArguments, bool isNullOblivious )
         {
-            this._compilation = compilation;
+            this._parent = parent;
             this._genericArguments = genericArguments;
             this._isNullOblivious = isNullOblivious;
         }
@@ -177,7 +189,7 @@ public sealed class SerializableTypeIdResolver
                 return elementTypeResult;
             }
 
-            return ResolverResult.Success( this._compilation.CreateArrayTypeSymbol( elementTypeResult.TypeSymbol, node.RankSpecifiers.Count ) );
+            return ResolverResult.Success( this._parent.CreateArrayType( elementTypeResult.Type, node.RankSpecifiers.Count ) );
         }
 
         public override ResolverResult VisitPointerType( PointerTypeSyntax node )
@@ -189,7 +201,7 @@ public sealed class SerializableTypeIdResolver
                 return elementTypeResult;
             }
 
-            return ResolverResult.Success( this._compilation.CreatePointerTypeSymbol( elementTypeResult.TypeSymbol ) );
+            return ResolverResult.Success( this._parent.CreatePointerType( elementTypeResult.Type ) );
         }
 
         public override ResolverResult VisitNullableType( NullableTypeSyntax node )
@@ -201,51 +213,36 @@ public sealed class SerializableTypeIdResolver
                 return elementTypeResult;
             }
 
-            var elementType = elementTypeResult.TypeSymbol.AssertNotNull();
-
-            return ResolverResult.Success(
-                elementType.IsValueType
-                    ? this._compilation.GetSpecialType( SpecialType.System_Nullable_T ).Construct( elementType )
-                    : elementType.WithNullableAnnotation( NullableAnnotation.Annotated ) );
+            return ResolverResult.Success( this._parent.CreateNullableType( elementTypeResult.Type ) );
         }
 
-        private ResolverResult LookupName( string name, int arity, INamespaceOrTypeSymbol? ns )
+        private ResolverResult LookupName( string name, int arity, TTypeOrNamespace? ns )
         {
             if ( name == "dynamic" )
             {
-                return ResolverResult.Success( this._compilation.DynamicType );
+                return ResolverResult.Success( this._parent.DynamicType );
             }
 
             if ( ns == null )
             {
                 if ( this._genericArguments != null && this._genericArguments.TryGetValue( name, out var type ) )
                 {
-                    return ResolverResult.Success( type.GetSymbol() );
+                    return type == null
+                        ? ResolverResult.Error( $"Could not resolve the type for type parameter {name}." )
+                        : ResolverResult.Success( type );
                 }
-                else if ( this._currentGenericType != null )
+                else if ( this._currentGenericType != null && this._parent.HasTypeParameterOfName( this._currentGenericType, name ) )
                 {
-                    var typeParameter = this._currentGenericType.TypeParameters.FirstOrDefault( t => t.Name == name );
-
-                    if ( typeParameter != null )
-                    {
-                        // We matched the name of a type parameter of the type declaration.
-                        return ResolverResult.TypeParameterOfDeclaration;
-                    }
+                    // We matched the name of a type parameter of the type declaration.
+                    return ResolverResult.TypeParameterOfDeclaration;
                 }
             }
 
-            ns ??= this._compilation.GlobalNamespace;
+            var member = this._parent.LookupName( name, arity, ns );
 
-            var candidates = ns.GetMembers( name );
-
-            foreach ( var member in candidates )
+            if ( member != null )
             {
-                var memberArity = member.Kind == SymbolKind.Namespace ? 0 : ((INamedTypeSymbol) member).Arity;
-
-                if ( arity == memberArity )
-                {
-                    return ResolverResult.Success( (INamespaceOrTypeSymbol) member );
-                }
+                return ResolverResult.Success( member );
             }
 
             return ResolverResult.Error( $"The type or namespace '{ns}' does not contain a member named '{name}' of arity {arity}." );
@@ -265,7 +262,7 @@ public sealed class SerializableTypeIdResolver
             }
             else if ( !this._isNullOblivious )
             {
-                return ResolverResult.Success( result.TypeSymbol.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
+                return ResolverResult.Success( this._parent.CreateNonNullableReferenceType( result.Type ) );
             }
             else
             {
@@ -273,7 +270,7 @@ public sealed class SerializableTypeIdResolver
             }
         }
 
-        private ResolverResult LookupName( NameSyntax name, INamespaceOrTypeSymbol? ns )
+        private ResolverResult LookupName( NameSyntax name, TTypeOrNamespace? ns )
         {
             switch ( name )
             {
@@ -288,7 +285,7 @@ public sealed class SerializableTypeIdResolver
                         return leftResult;
                     }
 
-                    var left = leftResult.TypeOrNamespaceSymbol.AssertNotNull();
+                    var left = leftResult.TypeOrNamespace;
 
                     return this.LookupName( qualifiedName.Right, left );
 
@@ -300,7 +297,7 @@ public sealed class SerializableTypeIdResolver
                         return definitionResult;
                     }
 
-                    var definition = (INamedTypeSymbol) definitionResult.TypeSymbol;
+                    var definition = definitionResult.Type;
 
                     if ( genericName.IsUnboundGenericName )
                     {
@@ -327,7 +324,7 @@ public sealed class SerializableTypeIdResolver
                             }
                         }
 
-                        return ResolverResult.Success( definition.Construct( typeArgumentResults.SelectAsArray( r => r.TypeSymbol.AssertNotNull() ) ) );
+                        return ResolverResult.Success( this._parent.ConstructGenericType( definition, typeArgumentResults.SelectAsArray( r => r.Type ) ) );
                     }
 
                 case AliasQualifiedNameSyntax aliasQualifiedName:
@@ -355,38 +352,43 @@ public sealed class SerializableTypeIdResolver
                 return results.FirstOrDefault( r => !r.IsSuccess );
             }
 
-            return ResolverResult.Success( this._compilation.CreateTupleTypeSymbol( results.SelectAsImmutableArray( x => x.TypeSymbol ) ) );
+            return ResolverResult.Success( this._parent.CreateTupleType( results.SelectAsImmutableArray( x => x.Type ) ) );
         }
 
         public override ResolverResult DefaultVisit( SyntaxNode node ) => throw new InvalidOperationException( $"Unexpected node {node.Kind()}." );
 
+        // Based on Microsoft.CodeAnalysis.CSharp.SyntaxKindExtensions.GetSpecialType.
+        private static SpecialType GetRoslynSpecialType( SyntaxKind kind )
+            => kind switch
+            {
+                SyntaxKind.VoidKeyword => SpecialType.System_Void,
+                SyntaxKind.BoolKeyword => SpecialType.System_Boolean,
+                SyntaxKind.ByteKeyword => SpecialType.System_Byte,
+                SyntaxKind.SByteKeyword => SpecialType.System_SByte,
+                SyntaxKind.ShortKeyword => SpecialType.System_Int16,
+                SyntaxKind.UShortKeyword => SpecialType.System_UInt16,
+                SyntaxKind.IntKeyword => SpecialType.System_Int32,
+                SyntaxKind.UIntKeyword => SpecialType.System_UInt32,
+                SyntaxKind.LongKeyword => SpecialType.System_Int64,
+                SyntaxKind.ULongKeyword => SpecialType.System_UInt64,
+                SyntaxKind.DoubleKeyword => SpecialType.System_Double,
+                SyntaxKind.FloatKeyword => SpecialType.System_Single,
+                SyntaxKind.DecimalKeyword => SpecialType.System_Decimal,
+                SyntaxKind.StringKeyword => SpecialType.System_String,
+                SyntaxKind.CharKeyword => SpecialType.System_Char,
+                SyntaxKind.ObjectKeyword => SpecialType.System_Object,
+                _ => throw new AssertionFailedException( $"Unexpected syntax kind: {kind}" ),
+            };
+
         public override ResolverResult VisitPredefinedType( PredefinedTypeSyntax node )
         {
-            ITypeSymbol result = node.Keyword.Kind() switch
-            {
-                SyntaxKind.VoidKeyword => this._compilation.GetSpecialType( SpecialType.System_Void ),
-                SyntaxKind.BoolKeyword => this._compilation.GetSpecialType( SpecialType.System_Boolean ),
-                SyntaxKind.CharKeyword => this._compilation.GetSpecialType( SpecialType.System_Char ),
-                SyntaxKind.ObjectKeyword => this._compilation.GetSpecialType( SpecialType.System_Object ),
-                SyntaxKind.IntKeyword => this._compilation.GetSpecialType( SpecialType.System_Int32 ),
-                SyntaxKind.UIntKeyword => this._compilation.GetSpecialType( SpecialType.System_UInt32 ),
-                SyntaxKind.ShortKeyword => this._compilation.GetSpecialType( SpecialType.System_Int16 ),
-                SyntaxKind.UShortKeyword => this._compilation.GetSpecialType( SpecialType.System_UInt16 ),
-                SyntaxKind.ByteKeyword => this._compilation.GetSpecialType( SpecialType.System_Byte ),
-                SyntaxKind.SByteKeyword => this._compilation.GetSpecialType( SpecialType.System_SByte ),
-                SyntaxKind.LongKeyword => this._compilation.GetSpecialType( SpecialType.System_Int64 ),
-                SyntaxKind.ULongKeyword => this._compilation.GetSpecialType( SpecialType.System_UInt64 ),
-                SyntaxKind.FloatKeyword => this._compilation.GetSpecialType( SpecialType.System_Single ),
-                SyntaxKind.DoubleKeyword => this._compilation.GetSpecialType( SpecialType.System_Double ),
-                SyntaxKind.DecimalKeyword => this._compilation.GetSpecialType( SpecialType.System_Decimal ),
-                SyntaxKind.StringKeyword => this._compilation.GetSpecialType( SpecialType.System_String ),
+            var specialType = GetRoslynSpecialType( node.Keyword.Kind() );
 
-                _ => throw new InvalidOperationException( $"Unexpected predefined type: {node.Keyword.Kind()}" )
-            };
+            var result = this._parent.GetSpecialType( specialType );
 
             if ( !this._isNullOblivious && node.Keyword.Kind() is SyntaxKind.ObjectKeyword or SyntaxKind.StringKeyword )
             {
-                result = result.WithNullableAnnotation( NullableAnnotation.NotAnnotated );
+                result = this._parent.CreateNonNullableReferenceType( result );
             }
 
             return ResolverResult.Success( result );

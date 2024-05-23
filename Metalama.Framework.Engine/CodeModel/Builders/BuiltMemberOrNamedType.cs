@@ -26,7 +26,7 @@ internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrName
 
     public bool? HasNewKeyword => this.MemberOrNamedTypeBuilder.HasNewKeyword;
 
-    public INamedType DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType );
+    public INamedType? DeclaringType => this.Compilation.Factory.GetDeclaration( this.MemberOrNamedTypeBuilder.DeclaringType, ReferenceResolutionOptions.CanBeMissing );
 
     public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 

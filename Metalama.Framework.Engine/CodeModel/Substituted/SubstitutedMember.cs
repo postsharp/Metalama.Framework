@@ -33,11 +33,15 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
         this.GenericMap = new GenericMap( substitutedType.TypeArguments, sourceMember.Compilation.RoslynCompilation );
     }
 
-    protected IType Substitute( IType sourceType ) => this._sourceMember.Compilation.Factory.GetIType( this.GenericMap.Map( sourceType.GetSymbol() ) );
+    protected IType Substitute( IType sourceType )
+        => this._sourceMember.Compilation.Factory.GetIType(
+            this.GenericMap.Map( sourceType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) ) );
 
     public ICompilation Compilation => this._sourceMember.Compilation;
 
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
+
+    Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
 
     public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => this._sourceMember.DeclaringSyntaxReferences;
 
@@ -137,7 +141,9 @@ internal abstract class SubstitutedMember : IMemberImpl, ISubstitutedDeclaration
             }
             else
             {
-                return SubstitutedMemberFactory.Substitute( sourceOverriddenMember, baseType.GetSymbol() )
+                return SubstitutedMemberFactory.Substitute(
+                        sourceOverriddenMember,
+                        baseType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) )
                     .GetTarget( ReferenceResolutionOptions.Default );
             }
         }

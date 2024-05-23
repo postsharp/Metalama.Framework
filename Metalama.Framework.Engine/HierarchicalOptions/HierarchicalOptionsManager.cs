@@ -49,7 +49,7 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         }
 
         return
-            this._typeResolver.GetCompileTimeType( type.GetSymbol().AssertNotNull(), false );
+            this._typeResolver.GetCompileTimeType( type.GetSymbol().AssertSymbolNotNull(), false );
     }
 
     internal Task InitializeAsync(

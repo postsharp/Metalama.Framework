@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,7 +13,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
 {
     private ImmutableDictionary<string, MemberRef<T>>? _dictionary;
 
-    protected UniquelyNamedUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    protected UniquelyNamedUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation, declaringType ) { }
 
     private ImmutableDictionary<string, MemberRef<T>> GetInitializedDictionary()
         => this._dictionary ??= ImmutableDictionary<string, MemberRef<T>>.Empty.WithComparers( StringComparer.Ordinal, this.MemberRefComparer );
@@ -45,7 +44,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         else
         {
             // The dictionary was not yet populated.
-            if ( this.GetMember( member.Name ) != null )
+            if ( this.GetMemberRef( member.Name ).HasValue )
             {
                 throw new AssertionFailedException( $"Duplicate item: '{member}'." );
             }
@@ -58,9 +57,9 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         this.AddItem( member.ToRef() );
     }
 
-    protected abstract ISymbol? GetMember( string name );
+    protected abstract MemberRef<T>? GetMemberRef( string name );
 
-    protected abstract IEnumerable<ISymbol> GetMembers();
+    protected abstract IEnumerable<MemberRef<T>> GetMemberRefs();
 
     public void Remove( MemberRef<T> member )
     {
@@ -87,10 +86,10 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         else
         {
             // The dictionary was not yet populated.
-            if ( this.GetMember( member.Name ) == null )
+            if ( !this.GetMemberRef( member.Name ).HasValue )
             {
-                // Duplicate key.
-                throw new AssertionFailedException( $"Duplicate item: '{member}'." );
+                // Missing key.
+                throw new AssertionFailedException( $"Missing item: '{member}'." );
             }
             else
             {
@@ -117,10 +116,8 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         var dictionaryBuilder = dictionary.ToBuilder();
 
         // Add items discovered from source code.
-        foreach ( var symbol in this.GetMembers() )
+        foreach ( var memberRef in this.GetMemberRefs() )
         {
-            var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
-
             if ( !dictionary.ContainsKey( memberRef.Name ) )
             {
                 dictionaryBuilder[memberRef.Name] = memberRef;
@@ -152,9 +149,9 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         }
         else
         {
-            var symbol = this.GetMember( name );
+            var memberRef = this.GetMemberRef( name );
 
-            if ( symbol == null )
+            if ( !memberRef.HasValue )
             {
                 this._dictionary = dictionary.SetItem( name, default );
 
@@ -162,10 +159,9 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             }
             else
             {
-                var memberRef = new MemberRef<T>( symbol, this.Compilation.CompilationContext );
-                this._dictionary = dictionary.SetItem( name, memberRef );
+                this._dictionary = dictionary.SetItem( name, memberRef.Value );
 
-                return ImmutableArray.Create( memberRef );
+                return ImmutableArray.Create( memberRef.Value );
             }
         }
     }

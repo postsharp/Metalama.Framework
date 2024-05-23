@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -13,7 +14,9 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollection<INamedType>, INamedTypeCollectionImpl
 {
-    public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public TypeUpdatableCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringTypeOrNamespace ) : base(
+        compilation,
+        declaringTypeOrNamespace ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
     {
@@ -29,11 +32,13 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
             return IsIncludedInPartialCompilation( (INamedTypeSymbol) symbol );
 
             bool IsIncludedInPartialCompilation( INamedTypeSymbol t )
-                => t switch
+            {
+                return t switch
                 {
                     { ContainingType: { } containingType } => IsIncludedInPartialCompilation( containingType ),
                     _ => this.Compilation.PartialCompilation.Types.Contains( t.OriginalDefinition )
                 };
+            }
         }
         else
         {
@@ -43,23 +48,53 @@ internal sealed class TypeUpdatableCollection : NonUniquelyNamedUpdatableCollect
 
     protected override IEqualityComparer<MemberRef<INamedType>> MemberRefComparer => this.Compilation.CompilationContext.NamedTypeRefComparer;
 
-    protected override IEnumerable<ISymbol> GetSymbolsOfName( string name )
-        => this.DeclaringTypeOrNamespace.GetTypeMembers( name )
-            .Where( this.IsSymbolIncluded );
+    protected override ImmutableArray<MemberRef<INamedType>> GetMemberRefsOfName( string name )
+        => this.DeclaringTypeOrNamespace.Target switch
+        {
+            INamespaceOrTypeSymbol symbol =>
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
+                    .GetTypeMembers( name )
+                    .Where( this.IsSymbolIncluded )
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
 
-    protected override IEnumerable<ISymbol> GetSymbols()
-        => this.DeclaringTypeOrNamespace.GetTypeMembers()
-            .Where( this.IsSymbolIncluded );
+                // TODO: should return initial members of the builder.
+                ImmutableArray<MemberRef<INamedType>>.Empty,
+            _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+        };
+
+    protected override ImmutableArray<MemberRef<INamedType>> GetMemberRefs()
+        => this.DeclaringTypeOrNamespace.Target switch
+        {
+            INamespaceOrTypeSymbol symbol =>
+                symbol.TranslateIfNecessary( this.Compilation.CompilationContext )
+                    .GetTypeMembers()
+                    .Where( this.IsSymbolIncluded )
+                    .Select( s => new MemberRef<INamedType>( s, this.Compilation.CompilationContext ) )
+                    .ToImmutableArray(),
+            INamespaceOrNamedType =>
+
+                // TODO: should return initial members of the builder.
+                ImmutableArray<MemberRef<INamedType>>.Empty,
+            _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
+        };
 
     public IEnumerable<MemberRef<INamedType>> OfTypeDefinition( INamedType typeDefinition )
     {
         var comparer = (DeclarationEqualityComparer) this.Compilation.Comparers.GetTypeComparer( TypeComparison.Default );
 
+        // TODO: This should not use GetSymbol.
         return
-            this.GetSymbols()
-                .Where( t => comparer.Is( (ITypeSymbol) t, typeDefinition.GetSymbol(), ConversionKind.TypeDefinition ) )
-                .Where( this.IsSymbolIncluded )
-                .Select( x => new MemberRef<INamedType>( x, this.Compilation.CompilationContext ) )
+            this.GetMemberRefs()
+                .Where( t => comparer.Is( t, typeDefinition, ConversionKind.TypeDefinition ) )
+                .Where(
+                    t =>
+                    {
+                        var symbol = t.GetSymbol( this.Compilation.RoslynCompilation );
+
+                        return symbol == null || this.IsSymbolIncluded( symbol );
+                    } )
                 .ToImmutableArray();
     }
 }

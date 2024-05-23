@@ -299,6 +299,11 @@ internal class TestResult : IDisposable
 
         foreach ( var outputSyntaxTree in outputSyntaxTrees )
         {
+            if ( outputSyntaxTree.IsAuxiliary )
+            {
+                continue;
+            }
+            
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )

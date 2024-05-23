@@ -49,7 +49,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the containing declaration, such as a <see cref="INamedType"/> for nested
         /// types or for methods. For non-nested types, returns the containing assembly
-        /// (and not the namespace, use <see cref="INamedType.Namespace"/> for that).
+        /// (and not the namespace, use <see cref="INamedType.ContainingNamespace"/> for that).
         /// </summary>
         IDeclaration? ContainingDeclaration { get; }
 

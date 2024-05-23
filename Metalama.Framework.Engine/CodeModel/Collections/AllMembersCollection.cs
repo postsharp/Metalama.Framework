@@ -14,7 +14,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 {
     private volatile HashSet<T>? _members;
 
-    protected AllMembersCollection( NamedType declaringType )
+    protected AllMembersCollection( INamedTypeImpl declaringType )
     {
         this.DeclaringType = declaringType;
     }
@@ -23,7 +23,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 
     protected CompilationContext CompilationContext => this.DeclaringType.Compilation.CompilationContext;
 
-    private NamedType DeclaringType { get; }
+    private INamedTypeImpl DeclaringType { get; }
 
     public IEnumerable<T> OfName( string name ) => this.GetItemsCore( name );
 

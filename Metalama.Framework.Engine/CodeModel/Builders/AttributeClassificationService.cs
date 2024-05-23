@@ -61,7 +61,9 @@ internal sealed class AttributeClassificationService : IGlobalService, IDisposab
 
     public bool MustCopyTemplateAttribute( AttributeData attribute )
     {
-        var fullName = attribute.AttributeConstructor.AssertNotNull().ContainingType.GetFullName().AssertNotNull();
+        var fullName = attribute.AttributeConstructor.AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes )
+            .ContainingType.GetFullName()
+            .AssertNotNull();
 
         return !IsCompilerOrMetalamaAttribute( fullName );
     }

@@ -65,7 +65,7 @@ public static class DeclarationExtensions
                 ICompilation compilation => new[] { compilation.GlobalNamespace },
                 INamespace ns => EnumerableExtensions.Concat<IDeclaration>( ns.Namespaces, ns.Types ),
                 INamedType namedType => EnumerableExtensions.Concat<IDeclaration>(
-                        namedType.NestedTypes,
+                        namedType.Types,
                         namedType.Methods,
                         namedType.Constructors,
                         namedType.Fields,
@@ -83,19 +83,29 @@ public static class DeclarationExtensions
                 IHasAccessors member => member.Accessors,
                 _ => Enumerable.Empty<IDeclaration>()
             } );
+    
+    internal static Ref<ICompilationElement> ToTypedRef( this ISymbol symbol, CompilationContext compilationContext )
+        => Ref.FromSymbol( symbol, compilationContext );
 
-    internal static Ref<IDeclaration> ToTypedRef( this ISymbol symbol, CompilationContext compilationContext ) => Ref.FromSymbol( symbol, compilationContext );
+    internal static Ref<TCompilationElement> ToTypedRef<TCompilationElement>( this ISymbol symbol, CompilationContext compilationContext )
+        where TCompilationElement : class, ICompilationElement
+        => Ref.FromSymbol( symbol, compilationContext ).As<TCompilationElement>();
 
-    internal static Ref<T> ToTypedRef<T>( this T declaration )
-        where T : class, IDeclaration
-        => ((IDeclarationImpl) declaration).ToRef().As<T>();
+    internal static Ref<TCompilationElement> ToTypedRef<TCompilationElement>( this TCompilationElement compilationElement )
+        where TCompilationElement : class, ICompilationElement
+        => ((ICompilationElementImpl) compilationElement).ToRef().As<TCompilationElement>();
 
     internal static ISymbol? GetSymbol( this IDeclaration declaration, CompilationContext compilationContext )
-        => compilationContext.SymbolTranslator.Translate( declaration.GetSymbol().AssertNotNull(), declaration.GetCompilationModel().RoslynCompilation );
+        => declaration.GetSymbol() is { } symbol
+            ? compilationContext.SymbolTranslator.Translate( symbol, declaration.GetCompilationModel().RoslynCompilation )
+            : null;
+
+    internal static ISymbol GetSymbol( this SymbolBasedDeclaration declaration, CompilationContext compilationContext )
+        => compilationContext.SymbolTranslator.Translate( declaration.Symbol, declaration.GetCompilationModel().RoslynCompilation ).AssertSymbolNotNull();
 
     internal static MemberRef<T> ToMemberRef<T>( this T member )
         where T : class, IMemberOrNamedType
-        => new( ((IDeclarationImpl) member).ToRef() );
+        => new( member.ToTypedRef<IDeclaration>() );
 
     internal static Location? GetDiagnosticLocation( this IDeclaration declaration )
         => declaration switch
@@ -209,7 +219,7 @@ public static class DeclarationExtensions
     {
         if ( declaration.IsStatic )
         {
-            return context.SyntaxGenerator.Type( declaration.DeclaringType.GetSymbol() ).WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
+            return context.SyntaxGenerator.Type( declaration.DeclaringType ).WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
         }
 
         var definition = declaration.Definition;
@@ -219,7 +229,7 @@ public static class DeclarationExtensions
             return
                 SyntaxFactory.ParenthesizedExpression(
                         SyntaxFactory.CastExpression(
-                            context.SyntaxGenerator.Type( definition.GetExplicitInterfaceImplementation().DeclaringType.GetSymbol() ),
+                            context.SyntaxGenerator.Type( definition.GetExplicitInterfaceImplementation().DeclaringType ),
                             instance.Syntax ) )
                     .WithSimplifierAnnotationIfNecessary( context.SyntaxGenerationContext );
         }
@@ -438,7 +448,7 @@ public static class DeclarationExtensions
         switch ( @event )
         {
             case Event codeEvent:
-                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+                var eventSymbol = codeEvent.GetSymbol().AssertSymbolNotNull();
 
                 return eventSymbol.IsEventField();
 
@@ -498,7 +508,7 @@ public static class DeclarationExtensions
                         currentType.Fields.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Properties.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Events.OfName( declaration.Name ).FirstOrDefault()
-                        ?? currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault()
+                        ?? currentType.Types.OfName( declaration.Name ).FirstOrDefault()
                         ?? (IMemberOrNamedType?) currentType.Methods.OfName( declaration.Name ).FirstOrDefault();
 
                     if ( candidateMember != null )
@@ -540,7 +550,7 @@ public static class DeclarationExtensions
                         currentType.Fields.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Properties.OfName( declaration.Name ).FirstOrDefault()
                         ?? currentType.Events.OfName( declaration.Name ).FirstOrDefault()
-                        ?? (IMemberOrNamedType?) currentType.NestedTypes.OfName( declaration.Name ).FirstOrDefault();
+                        ?? (IMemberOrNamedType?) currentType.Types.OfName( declaration.Name ).FirstOrDefault();
 
                     if ( candidateNonMethod != null )
                     {
@@ -572,8 +582,41 @@ public static class DeclarationExtensions
         this T declaration,
         ICompilation newCompilation,
         ReferenceResolutionOptions options = ReferenceResolutionOptions.Default )
-        where T : IDeclaration
+        where T : class, IDeclaration
         => declaration.Compilation == newCompilation
             ? declaration
-            : (T) ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+            : ((CompilationModel) newCompilation).Factory.Translate( declaration, options ).AssertNotNull();
+
+    /// <summary>
+    /// Version of <see cref="IDeclaration.ContainingDeclaration"/> that behaves like <see cref="ISymbol.ContainingSymbol"/>,
+    /// i.e. returns containing namespace for top-level types.
+    /// </summary>
+    internal static IDeclaration? GetContainingDeclarationOrNamespace( this IDeclaration declaration )
+        => declaration.ContainingDeclaration is IAssembly && declaration is INamedType namedType
+            ? namedType.ContainingNamespace
+            : declaration.ContainingDeclaration;
+
+    internal static bool IsNullableReferenceType( this IType type ) => type is { IsNullable: true, IsReferenceType: not false };
+
+    internal static bool IsNullableValueType( this IType type ) => type is { IsNullable: true, IsReferenceType: false };
+
+    internal static INamedType? GetBaseType( this IType type )
+        => type switch
+        {
+            INamedType namedType => namedType.BaseType,
+            IArrayType => (INamedType) type.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(Array) ),
+            _ => null
+        };
+
+    internal static IEnumerable<INamedType> GetImplementedInterfaces( this IType type )
+        => type switch
+        {
+            INamedType namedType => namedType.ImplementedInterfaces,
+            IArrayType { Rank: 1 } arrayType => SymbolHelpers.ArrayGenericInterfaces.Select(
+                definitionSpecialType => type.GetCompilationModel()
+                    .Factory
+                    .GetNamedType( type.GetCompilationModel().RoslynCompilation.GetSpecialType( definitionSpecialType ) )
+                    .WithTypeArguments( arrayType.ElementType ) ),
+            _ => []
+        };
 }

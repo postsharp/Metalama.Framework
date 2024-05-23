@@ -10,5 +10,5 @@ internal static class StringNormalizer
     private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n)+)", RegexOptions.Compiled | RegexOptions.Multiline );
 
     internal static string NormalizeEndOfLines( this string? s, bool replaceWithSpace = false )
-        => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s!, replaceWithSpace ? " " : Environment.NewLine ).Trim();
+        => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, replaceWithSpace ? " " : Environment.NewLine ).Trim();
 }

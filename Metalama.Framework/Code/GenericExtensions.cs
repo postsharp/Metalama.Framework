@@ -177,7 +177,7 @@ namespace Metalama.Framework.Code
             switch ( declaration )
             {
                 case INamedType namedType:
-                    candidates = typeInstance.NestedTypes.OfName( namedType.Name );
+                    candidates = typeInstance.Types.OfName( namedType.Name );
 
                     break;
 

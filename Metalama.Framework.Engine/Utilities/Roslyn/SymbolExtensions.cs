@@ -134,10 +134,10 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         internal static IEnumerable<INamedTypeSymbol> GetAllTypes( this IAssemblySymbol assembly ) => assembly.GlobalNamespace.GetAllTypes();
 
         private static IEnumerable<INamedTypeSymbol> GetTypes( this INamespaceSymbol namespaceSymbol )
-            => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeRoot: true ).SelectMany( ns => ns.GetTypeMembers() );
+            => namespaceSymbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), true ).SelectMany( ns => ns.GetTypeMembers() );
 
         private static IEnumerable<INamedTypeSymbol> GetAllTypes( this INamespaceSymbol namespaceSymbol )
-            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), includeRoot: true ) );
+            => namespaceSymbol.GetTypes().SelectMany( type => type.SelectManyRecursive( t => t.GetTypeMembers(), true ) );
 
         internal static bool IsAccessor( this IMethodSymbol method )
             => method.MethodKind switch
@@ -157,8 +157,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentOutOfRangeException();
             }
 
-            return symbol.DeclaringSyntaxReferences.Any(
-                r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
+            return symbol.DeclaringSyntaxReferences.Any( r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
 
         public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
@@ -246,21 +245,19 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 type.InstanceConstructors.Any( ctor => ctor.Parameters.Length == 0 ));
 
         internal static bool IsVisibleTo( this ISymbol symbol, Compilation compilation, ISymbol otherSymbol )
-        {
-            return compilation.IsSymbolAccessibleWithin(
+            => compilation.IsSymbolAccessibleWithin(
                 symbol,
                 otherSymbol switch
                 {
                     INamedTypeSymbol type => type,
                     _ => otherSymbol.ContainingType
                 } );
-        }
 
         internal static bool IsPrimaryConstructor( this IMethodSymbol constructorSymbol )
         {
             var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
+            
 #if ROSLYN_4_8_0_OR_GREATER
-
             return
                 constructorSymbol is { MethodKind: MethodKind.Constructor }
                 && declarationSyntax is TypeDeclarationSyntax { ParameterList: not null };
@@ -291,9 +288,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         }
 
         internal static bool IsCompilerGenerated( this ISymbol declaration )
-        {
-            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) );
-        }
+            => declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) );
 
         /// <summary>
         /// Gets the kind of operator based represented by the method.
@@ -330,15 +325,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             } && containingType.ConstructedFrom.GetReflectionFullName() is "System.Threading.Tasks.Task" or "System.Threading.Tasks.Task`1";
 
         internal static bool IsExplicitInterfaceMemberImplementation( this ISymbol? symbol )
-        {
-            return symbol switch
+            => symbol switch
             {
                 IMethodSymbol method => method.ExplicitInterfaceImplementations.Length > 0,
                 IPropertySymbol property => property.ExplicitInterfaceImplementations.Length > 0,
                 IEventSymbol @event => @event.ExplicitInterfaceImplementations.Length > 0,
                 _ => false
             };
-        }
 
         /// <summary>
         /// Translate a symbol to a different <see cref="CompilationContext"/> if necessary, but only in
@@ -350,7 +343,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 #if DEBUG
             if ( symbol.BelongsToCompilation( compilation ) == false )
             {
-                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation ).AssertNotNull();
+                return (T) SymbolId.Create( symbol ).Resolve( compilation.Compilation ).AssertSymbolNotNull();
             }
 #endif
             return symbol;

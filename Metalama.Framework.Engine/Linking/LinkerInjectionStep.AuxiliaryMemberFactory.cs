@@ -268,7 +268,7 @@ internal sealed partial class LinkerInjectionStep
                 body = Block( ExpressionStatement( proceedExpression ) );
             }
 
-            returnType ??= syntaxGenerationContext.SyntaxGenerator.Type( method.ReturnType.GetSymbol() );
+            returnType ??= syntaxGenerationContext.SyntaxGenerator.Type( method.ReturnType );
 
             return MethodDeclaration(
                 List<AttributeListSyntax>(),
@@ -540,7 +540,7 @@ internal sealed partial class LinkerInjectionStep
                         this._finalCompilationModel,
                         syntaxGenerationContext,
                         indexer,
-                        this._injectionNameProvider.GetAuxiliaryType( advice.Aspect, indexer, syntaxGenerationContext ) ),
+                        this._injectionNameProvider.GetAuxiliaryType( advice.AspectInstance, indexer, syntaxGenerationContext ) ),
                     AccessorList(
                         List(
                             new[]

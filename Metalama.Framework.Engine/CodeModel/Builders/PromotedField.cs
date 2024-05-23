@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Services;
@@ -64,7 +65,8 @@ internal sealed class PromotedField : PropertyBuilder
 
             foreach ( var attribute in field.Attributes )
             {
-                if ( classificationService.MustMoveFromFieldToProperty( attribute.Type.GetSymbol() ) )
+                if ( classificationService.MustMoveFromFieldToProperty(
+                        attribute.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedAttributeTypes ) ) )
                 {
                     this.AddAttribute( attribute.ToAttributeConstruction() );
                 }

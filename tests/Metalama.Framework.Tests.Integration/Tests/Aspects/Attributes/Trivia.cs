@@ -31,7 +31,7 @@ public class IntroduceAttributeAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        foreach (var member in builder.Target.Members().Cast<IDeclaration>().Concat( builder.Target.NestedTypes ))
+        foreach (var member in builder.Target.Members().Cast<IDeclaration>().Concat( builder.Target.Types ))
         {
             builder.Advice.IntroduceAttribute( member, AttributeConstruction.Create( typeof(NewAttribute) ) );
         }
@@ -42,7 +42,7 @@ public class RemoveAttributeAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        foreach (var member in builder.Target.Members().Cast<IDeclaration>().Concat( builder.Target.NestedTypes ))
+        foreach (var member in builder.Target.Members().Cast<IDeclaration>().Concat( builder.Target.Types ))
         {
             builder.Advice.RemoveAttributes( member, typeof(OldAttribute) );
         }

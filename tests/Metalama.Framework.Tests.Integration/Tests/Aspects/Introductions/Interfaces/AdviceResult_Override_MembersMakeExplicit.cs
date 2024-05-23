@@ -7,6 +7,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
+using Metalama.Framework.Engine.Advising;
 
 #pragma warning disable CS0067
 
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 .Override(
                     aspectBuilder.Target.Methods.OfName( "Witness" ).Single(),
                     nameof(AdviceResultTemplates.WitnessTemplate),
-                    args: new { types = result.Interfaces, members = result.InterfaceMembers } );
+                    args: new { types = result.Interfaces, members = result.GetObsoleteInterfaceMembers() } );
         }
 
         [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]

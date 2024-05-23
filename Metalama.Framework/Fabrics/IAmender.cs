@@ -30,7 +30,7 @@ namespace Metalama.Framework.Fabrics
         /// <summary>
         /// Gets an object that allows to add child advice and to validate code and code references.
         /// </summary>
-        [Obsolete("The Outbound interface is now directly implemented by IAmender<T>.")]
+        [Obsolete( "The Outbound interface is now directly implemented by IAmender<T>." )]
         IAspectReceiver<T> Outbound { get; }
     }
 }

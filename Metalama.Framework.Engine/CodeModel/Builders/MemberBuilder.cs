@@ -97,7 +97,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                 tags,
                 advice.AspectLayerId,
                 context.SyntaxGenerationContext,
-                advice.Aspect,
+                advice.AspectInstance,
                 context.ServiceProvider,
                 MetaApiStaticity.Default ) );
 
@@ -200,7 +200,7 @@ internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder
                     TokenList(
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.PrivateKeyword ),
                         SyntaxFactoryEx.TokenWithTrailingSpace( SyntaxKind.StaticKeyword ) ),
-                    context.SyntaxGenerator.Type( targetType.GetSymbol() )
+                    context.SyntaxGenerator.Type( targetType )
                         .WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                     null,
                     Identifier( initializerName ),

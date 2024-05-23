@@ -134,10 +134,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 // Add the class to a namespace.
-                if ( !declaringType.Namespace.IsGlobalNamespace )
+                if ( !declaringType.ContainingNamespace.IsGlobalNamespace )
                 {
                     topDeclaration = NamespaceDeclaration(
-                        ParseName( declaringType.Namespace.FullName ),
+                        ParseName( declaringType.ContainingNamespace.FullName ),
                         default,
                         default,
                         SingletonList( topDeclaration ) );
@@ -183,7 +183,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             // Go through all types that will get generated constructors and index existing constructors.
             foreach ( var constructor in initialType.Constructors )
             {
-                existingSignatures.Add( constructor.Parameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) );
+                existingSignatures.Add(
+                    constructor.Parameters.SelectAsArray(
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )
@@ -196,7 +199,11 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 var initialParameters = initialConstructor.Parameters.ToImmutableArray();
 
-                if ( !existingSignatures.Add( finalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                if ( !existingSignatures.Add(
+                        finalParameters.SelectAsArray(
+                            p => (
+                                (ISymbol) p.Type.GetSymbol()
+                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -231,7 +238,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     var nonOptionalParameters = initialParameters.Where( p => p.DefaultValue == null ).ToArray();
                     var optionalParameters = initialParameters.Where( p => p.DefaultValue != null ).ToArray();
 
-                    if ( existingSignatures.Add( nonOptionalParameters.SelectAsArray( p => ((ISymbol) p.Type.GetSymbol(), p.RefKind) ) ) )
+                    if ( existingSignatures.Add(
+                            nonOptionalParameters.SelectAsArray(
+                                p => (
+                                    (ISymbol) p.Type.GetSymbol()
+                                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                                    p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(
@@ -262,13 +274,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             return constructors;
 
             static SyntaxToken GetArgumentRefToken( IParameter p )
-                => p.RefKind switch
+            {
+                return p.RefKind switch
                 {
                     RefKind.None or RefKind.In => default,
                     RefKind.Ref or RefKind.RefReadOnly => Token( SyntaxKind.RefKeyword ),
                     RefKind.Out => Token( SyntaxKind.OutKeyword ),
                     _ => throw new AssertionFailedException( $"Unsupported: {p.RefKind}" )
                 };
+            }
         }
 
         private static TypeDeclarationSyntax CreatePartialType( INamedType type, BaseListSyntax? baseList, SyntaxList<MemberDeclarationSyntax> members )
@@ -339,13 +353,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             }
 
             static SyntaxKind GetVariance( VarianceKind variance )
-                => variance switch
+            {
+                return variance switch
                 {
                     VarianceKind.None => SyntaxKind.None,
                     VarianceKind.In => SyntaxKind.InKeyword,
                     VarianceKind.Out => SyntaxKind.OutKeyword,
                     _ => throw new AssertionFailedException( $"Unknown variance: {variance}." )
                 };
+            }
 
             return TypeParameterList(
                 SeparatedList(

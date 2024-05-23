@@ -22,7 +22,7 @@ public sealed record SyntaxGenerationOptions : IProjectService
     }
 
     /// <summary>
-    /// Gets options that the creation of fully formatted code.
+    /// Gets options for creation of fully formatted code.
     /// </summary>
     public static SyntaxGenerationOptions Formatted { get; } = new( CodeFormattingOptions.Formatted );
 }

@@ -27,7 +27,10 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var symbol = this.GetCompilationModel().RoslynCompilation.CreatePointerTypeSymbol( pointedAtType.GetSymbol() );
+                var symbol =
+                    this.GetCompilationModel()
+                        .RoslynCompilation.CreatePointerTypeSymbol(
+                            pointedAtType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
                 return (ITypeImpl) this.GetCompilationModel().Factory.GetIType( symbol );
             }

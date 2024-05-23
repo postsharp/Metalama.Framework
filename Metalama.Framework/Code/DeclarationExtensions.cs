@@ -28,7 +28,7 @@ namespace Metalama.Framework.Code
 
             if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
             {
-                return namedType.Namespace.IsContainedIn( containingNamespace );
+                return namedType.ContainingNamespace.IsContainedIn( containingNamespace );
             }
 
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Code
             {
                 INamespace ns => ns,
                 ICompilation compilation => compilation.GlobalNamespace,
-                _ => declaration.GetTopmostNamedType()?.Namespace
+                _ => declaration.GetTopmostNamedType()?.ContainingNamespace
             };
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Code
             else
             {
                 return
-                    (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
+                    ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options )
                     ?? throw new InvalidOperationException(
                         $"The declaration '{compilationElement}' does not exist in the requested compilation. "
                         + $"Use TryForCompilation to avoid this exception." );
@@ -151,7 +151,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                translated = (T?) ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
+                translated = ((ICompilationInternal) compilation).Factory.Translate( compilationElement, options );
 
                 return translated != null;
             }

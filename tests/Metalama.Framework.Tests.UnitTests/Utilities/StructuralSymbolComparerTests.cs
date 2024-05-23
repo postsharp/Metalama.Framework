@@ -1,12 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
@@ -80,7 +83,17 @@ namespace D {}
             var compilation1 = testContext.CreateCompilationModel( code );
             var compilation2 = testContext.CreateCompilationModel( code );
 
-            AssertSymbolsEqual( compilation1, compilation2, StructuralSymbolComparer.Default );
+            AssertSymbolsEqual(
+                GetAllSymbols( compilation1 ),
+                GetAllSymbols( compilation2 ),
+                StructuralSymbolComparer.Default,
+                SymbolEqualityComparer.Default );
+
+            AssertSymbolsEqual(
+                GetAllDeclarations( compilation1 ),
+                GetAllDeclarations( compilation2 ),
+                StructuralDeclarationComparer.BypassSymbols,
+                CompilationElementEqualityComparer.Default );
         }
 
         [Fact]
@@ -99,21 +112,23 @@ class A
             using var testContext = this.CreateTestContext();
 
             var compilation = testContext.CreateCompilationModel( code );
-            var externalNamespace = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) )).Namespace;
-            var internalNamespace = compilation.Types.Single().Namespace;
+            var externalNamespace = ((INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) )).ContainingNamespace;
+            var internalNamespace = compilation.Types.Single().ContainingNamespace;
 
             Assert.NotSame( externalNamespace, internalNamespace );
 
             Assert.False( StructuralSymbolComparer.IncludeAssembly.Equals( externalNamespace.GetSymbol(), internalNamespace.GetSymbol() ) );
+            Assert.False( StructuralDeclarationComparer.IncludeAssembly.Equals( externalNamespace, internalNamespace ) );
         }
 
         // TODO: More tests.
 
-        private static void AssertSymbolsEqual( CompilationModel compilation1, CompilationModel compilation2, StructuralSymbolComparer comparer )
+        private static void AssertSymbolsEqual<T>(
+            IReadOnlyList<T> symbols1,
+            IReadOnlyList<T> symbols2,
+            IEqualityComparer<T> comparer,
+            IEqualityComparer<T> roslynEqualityComparer ) where T : notnull
         {
-            var symbols1 = GetAllSymbols( compilation1 );
-            var symbols2 = GetAllSymbols( compilation2 );
-
             Assert.Equal( symbols1.Count, symbols2.Count );
 
             // Do comparison of all symbols on the same position.
@@ -123,9 +138,9 @@ class A
                 Assert.Equal( comparer.GetHashCode( symbols1[i] ), comparer.GetHashCode( symbols2[i] ) );
             }
 
-            // Group symbol using SymbolEqualityComparer (we presume it's correct).
-            var groups1 = symbols1.GroupBy( x => x, SymbolEqualityComparer.Default ).Select( g => g.ToArray() ).ToArray();
-            var groups2 = symbols2.GroupBy( x => x, SymbolEqualityComparer.Default ).Select( g => g.ToArray() ).ToArray();
+            // Group symbol using Roslyn's equality comparer (we presume it's correct).
+            var groups1 = symbols1.GroupBy( x => x, roslynEqualityComparer ).Select( g => g.ToArray() ).ToArray();
+            var groups2 = symbols2.GroupBy( x => x, roslynEqualityComparer ).Select( g => g.ToArray() ).ToArray();
 
             Assert.Equal( groups1.Length, groups2.Length );
 
@@ -169,21 +184,58 @@ class A
                     }
                 }
             }
+        }
 
-            static IReadOnlyList<ISymbol> GetAllSymbols( CompilationModel compilation )
+        private static IReadOnlyList<ISymbol> GetAllSymbols( CompilationModel compilation )
+        {
+            var symbols = new List<ISymbol>();
+
+            foreach ( var syntaxTree in compilation.RoslynCompilation.SyntaxTrees )
             {
-                var symbols = new List<ISymbol>();
+                var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
+                var symbolFinder = new SymbolFinder( semanticModel, symbols );
 
-                foreach ( var syntaxTree in compilation.RoslynCompilation.SyntaxTrees )
-                {
-                    var semanticModel = compilation.RoslynCompilation.GetSemanticModel( syntaxTree );
-                    var symbolFinder = new SymbolFinder( semanticModel, symbols );
-
-                    symbolFinder.Visit( syntaxTree.GetRoot() );
-                }
-
-                return symbols;
+                symbolFinder.Visit( syntaxTree.GetRoot() );
             }
+
+            return symbols;
+        }
+
+        private static IReadOnlyList<ICompilationElement> GetAllDeclarations( CompilationModel compilation )
+        {
+            var symbols = GetAllSymbols( compilation );
+
+            return symbols.SelectAsReadOnlyList( s => compilation.Factory.GetCompilationElement( s ) ).WhereNotNull().ToArray();
+        }
+
+        private sealed class CompilationElementEqualityComparer : IEqualityComparer<ICompilationElement>
+        {
+            public static CompilationElementEqualityComparer Default { get; } = new();
+
+            private CompilationElementEqualityComparer() { }
+
+            [return: NotNullIfNotNull( nameof(element) )]
+            private static ISymbol? GetSymbol( ICompilationElement? element )
+            {
+                switch ( element )
+                {
+                    case null:
+                        return null;
+
+                    case IDeclaration declaration:
+                        return declaration.GetSymbol().AssertNotNull();
+
+                    case IType type:
+                        return type.GetSymbol().AssertNotNull();
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            public bool Equals( ICompilationElement? x, ICompilationElement? y ) => SymbolEqualityComparer.Default.Equals( GetSymbol( x ), GetSymbol( y ) );
+
+            public int GetHashCode( ICompilationElement element ) => SymbolEqualityComparer.Default.GetHashCode( GetSymbol( element ) );
         }
 
         private sealed class SymbolFinder : CSharpSyntaxWalker

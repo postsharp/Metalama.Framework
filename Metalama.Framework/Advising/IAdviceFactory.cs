@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
+// IMPORTANT: Keep XML doc in this file in sync with AdviserExtensions.
+
 namespace Metalama.Framework.Advising
 {
     /// <summary>
@@ -47,7 +49,7 @@ namespace Metalama.Framework.Advising
         /// </summary>
         /// <param name="targetType">The type into which the method must be introduced.</param>
         /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
-        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
+        ///     annotated with <see cref="TemplateAttribute"/>. This method can have parameters and a return type. The actual parameters and return type
         ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
         ///     method. The default scope depends on the scope of the template method.
@@ -75,8 +77,7 @@ namespace Metalama.Framework.Advising
         /// </summary>
         /// <param name="targetType">The type into which the finalizer must be introduced.</param>
         /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced finalizer. This method must be
-        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
-        ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
+        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type.</param>
         /// <param name="whenExists">Determines the implementation strategy when a finalizer is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
@@ -135,6 +136,15 @@ namespace Metalama.Framework.Advising
         ///     of the <see cref="meta"/> API.</param>
         IOverrideAdviceResult<IConstructor> Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null );
 
+        IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
+            INamedType targetType,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IConstructorBuilder>? buildConstructor = null,
+            object? args = null,
+            object? tags = null );
+
         /// <summary>
         /// Overrides a field or property by specifying a property template.
         /// </summary>
@@ -166,8 +176,22 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <seealso href="@overriding-fields-or-properties"/>
-        IOverrideAdviceResult<IProperty> OverrideAccessors(
+        IOverrideAdviceResult<IPropertyOrIndexer> OverrideAccessors(
             IFieldOrPropertyOrIndexer targetFieldOrPropertyOrIndexer,
+            in GetterTemplateSelector getTemplate = default,
+            string? setTemplate = null,
+            object? args = null,
+            object? tags = null );
+
+        IOverrideAdviceResult<IProperty> OverrideAccessors(
+            IFieldOrProperty targetFieldOrProperty,
+            in GetterTemplateSelector getTemplate = default,
+            string? setTemplate = null,
+            object? args = null,
+            object? tags = null );
+
+        IOverrideAdviceResult<IIndexer> OverrideAccessors(
+            IIndexer targetIndexer,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
             object? args = null,
@@ -665,7 +689,7 @@ namespace Metalama.Framework.Advising
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
-        IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
+        IAddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
             ContractDirection direction = ContractDirection.Default,
@@ -747,6 +771,12 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default );
 
+        IClassIntroductionAdviceResult IntroduceClass(
+            INamespaceOrNamedType targetNamespaceOrType,
+            string name,
+            TypeKind typeKind = TypeKind.Class,
+            Action<INamedTypeBuilder>? buildType = null );
+
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
         /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.
@@ -773,19 +803,5 @@ namespace Metalama.Framework.Advising
         /// <param name="templateProvider">An <see cref="ITemplateProvider"/>.</param>
         /// <returns>An <see cref="IAdviceFactory"/>.</returns>
         IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
-
-        // void Override(
-        //     IConstructor targetConstructor,
-        //     string template,
-        //     object? args = null,
-        //     object? tags = null );
-
-        // void IntroduceConstructor(
-        //     INamedType targetType,
-        //     string template,
-        //     IntroductionScope scope = IntroductionScope.Default,
-        //     OverrideStrategy whenExists = OverrideStrategy.Default,
-        //     object? args = null,
-        //     object? tags = null );
     }
 }

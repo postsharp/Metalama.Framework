@@ -71,7 +71,7 @@ internal sealed class ExternalAssemblyTypeCollection : INamedTypeCollection
             .Where(
                 t => ((DeclarationEqualityComparer) this._compilation.Comparers.Default).Is(
                     t,
-                    typeDefinition.GetSymbol().AssertNotNull(),
+                    typeDefinition.GetSymbol().AssertSymbolNotNull(),
                     ConversionKind.TypeDefinition ) )
             .Select( x => this._compilation.Factory.GetNamedType( x ) );
 

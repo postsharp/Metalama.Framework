@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class PropertyCollection : MemberCollection<IProperty>, IPropertyCollection
     {
-        public PropertyCollection( NamedType declaringType, PropertyUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
+        public PropertyCollection( INamedType declaringType, PropertyUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
 
         public IProperty this[ string name ] => this.OfName( name ).Single();
     }

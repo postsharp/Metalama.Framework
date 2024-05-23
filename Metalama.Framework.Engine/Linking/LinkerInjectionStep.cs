@@ -3,6 +3,8 @@
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Attributes;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
@@ -430,115 +432,125 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         TransformationCollection transformationCollection,
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
     {
+        if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
-            if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
+            lock ( replacedIntroduceDeclarationTransformations )
             {
-                lock ( replacedIntroduceDeclarationTransformations )
+                if ( replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation ) )
                 {
-                    if ( replacedIntroduceDeclarationTransformations.Contains( introduceDeclarationTransformation ) )
-                    {
-                        return;
-                    }
+                    return;
                 }
-            }
-
-            switch ( transformation )
-            {
-                case IInjectMemberTransformation injectMemberTransformation:
-                    // Transformed syntax tree must match insert position.
-                    Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxNode.SyntaxTree );
-
-                    // Create the SyntaxGenerationContext for the insertion point.
-                    var positionInSyntaxTree = GetSyntaxTreePosition( injectMemberTransformation.InsertPosition );
-
-                    var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
-                        this._syntaxGenerationOptions,
-                        injectMemberTransformation.TransformedSyntaxTree,
-                        positionInSyntaxTree );
-
-                    // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
-                    //       For introduction, this should be a compilation that INCLUDES the builder.
-                    //       But, if we pass the mutable compilation, it will get changed before the template is expanded.
-                    //       The expanded template should not see declarations added after it runs.
-
-                    // Call GetInjectedMembers.
-                    var injectionContext = new MemberInjectionContext(
-                        this._serviceProvider,
-                        diagnostics,
-                        nameProvider,
-                        aspectReferenceSyntaxProvider,
-                        lexicalScopeFactory,
-                        syntaxGenerationContext,
-                        input.CompilationModel );
-
-                    var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
-
-                    injectedMembers = PostProcessInjectedMembers( injectedMembers );
-
-                    transformationCollection.AddInjectedMembers( injectMemberTransformation, injectedMembers );
-
-                    break;
-
-                case IInjectInterfaceTransformation injectInterfaceTransformation:
-                    var introducedInterface = injectInterfaceTransformation.GetSyntax( this._syntaxGenerationOptions );
-                    transformationCollection.AddInjectedInterface( injectInterfaceTransformation, introducedInterface );
-
-                    break;
-            }
-
-            IEnumerable<InjectedMember> PostProcessInjectedMembers( IEnumerable<InjectedMember> injectedMembers )
-            {
-                if ( transformation is IntroducePropertyTransformation introducePropertyTransformation )
-                {
-                    bool hasSynthesizedSetter;
-
-                    lock ( buildersWithSynthesizedSetters )
-                    {
-                        hasSynthesizedSetter = buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration );
-                    }
-
-                    if ( hasSynthesizedSetter )
-                    {
-                        // This is a property which should have a synthesized setter added.
-                        injectedMembers =
-                            injectedMembers
-                                .Select(
-                                    im =>
-                                    {
-                                        switch ( im )
-                                        {
-                                            // ReSharper disable once MissingIndent
-                                            case
-                                            {
-                                                Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
-                                                Syntax: PropertyDeclarationSyntax propertyDeclaration
-                                            }:
-                                                return im.WithSyntax(
-                                                    propertyDeclaration.WithSynthesizedSetter(
-                                                        this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions ) ) );
-
-                                            case { Semantic: InjectedMemberSemantic.InitializerMethod }:
-                                                return im;
-
-                                            default:
-                                                throw new AssertionFailedException( $"Unexpected semantic for '{im.Declaration}'." );
-                                        }
-                                    } );
-                    }
-                }
-
-                return injectedMembers;
             }
         }
-    }
 
-    private static int GetSyntaxTreePosition( InsertPosition insertPosition )
-        => insertPosition.Relation switch
+        switch ( transformation )
         {
-            InsertPositionRelation.After => insertPosition.SyntaxNode.Span.End + 1,
-            InsertPositionRelation.Within => ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start - 1,
-            _ => 0
-        };
+            case IInjectMemberTransformation injectMemberTransformation:
+                // Transformed syntax tree must match insert position.
+                Invariant.Assert( injectMemberTransformation.TransformedSyntaxTree == injectMemberTransformation.InsertPosition.SyntaxTree );
+
+                // Create the SyntaxGenerationContext for the insertion point.
+                var syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
+                    this._syntaxGenerationOptions,
+                    injectMemberTransformation.InsertPosition );
+
+                // TODO: It smells that we pass original compilation here. Should be the compilation for the transformation.
+                //       For introduction, this should be a compilation that INCLUDES the builder.
+                //       But, if we pass the mutable compilation, it will get changed before the template is expanded.
+                //       The expanded template should not see declarations added after it runs.
+
+                // Call GetInjectedMembers.
+                var injectionContext = new MemberInjectionContext(
+                    this._serviceProvider,
+                    diagnostics,
+                    nameProvider,
+                    aspectReferenceSyntaxProvider,
+                    lexicalScopeFactory,
+                    syntaxGenerationContext,
+                    input.CompilationModel );
+
+                var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
+
+                injectedMembers = PostProcessInjectedMembers( injectedMembers );
+
+                transformationCollection.AddInjectedMembers( injectMemberTransformation, injectedMembers );
+
+                break;
+
+            case IInjectInterfaceTransformation injectInterfaceTransformation:
+                var introducedInterfaceSyntax = injectInterfaceTransformation.GetSyntax( this._syntaxGenerationOptions );
+                var introducedInterface = new LinkerInjectedInterface( injectInterfaceTransformation, introducedInterfaceSyntax );
+
+                switch ( injectInterfaceTransformation.TargetDeclaration )
+                {
+                    case NamedType sourceType:
+                        transformationCollection.AddInjectedInterface(
+                            (BaseTypeDeclarationSyntax) sourceType.GetPrimaryDeclarationSyntax().AssertNotNull(),
+                            introducedInterface );
+
+                        break;
+
+                    case BuiltNamedType builtType:
+                        transformationCollection.AddInjectedInterface( builtType.TypeBuilder, introducedInterface );
+
+                        break;
+
+                    case NamedTypeBuilder typeBuilder:
+                        transformationCollection.AddInjectedInterface( typeBuilder, introducedInterface );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unsupported: {injectInterfaceTransformation.TargetDeclaration}" );
+                }
+
+                break;
+        }
+
+        IEnumerable<InjectedMember> PostProcessInjectedMembers( IEnumerable<InjectedMember> injectedMembers )
+        {
+            if ( transformation is IntroducePropertyTransformation introducePropertyTransformation )
+            {
+                bool hasSynthesizedSetter;
+
+                lock ( buildersWithSynthesizedSetters )
+                {
+                    hasSynthesizedSetter = buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration );
+                }
+
+                if ( hasSynthesizedSetter )
+                {
+                    // This is a property which should have a synthesized setter added.
+                    injectedMembers =
+                        injectedMembers
+                            .Select(
+                                im =>
+                                {
+                                    switch ( im )
+                                    {
+                                        // ReSharper disable once MissingIndent
+                                        case
+                                        {
+                                            Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                            Syntax: PropertyDeclarationSyntax propertyDeclaration
+                                        }:
+                                            return im.WithSyntax(
+                                                propertyDeclaration.WithSynthesizedSetter(
+                                                    this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions ) ) );
+
+                                        case { Semantic: InjectedMemberSemantic.InitializerMethod }:
+                                            return im;
+
+                                        default:
+                                            throw new AssertionFailedException( $"Unexpected semantic for '{im.Declaration}'." );
+                                    }
+                                } );
+                }
+            }
+
+            return injectedMembers;
+        }
+    }
 
     private static void IndexOverrideTransformation(
         ITransformation transformation,
@@ -663,12 +675,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                                                            ?? (PropertyOrIndexerBuilder) ((BuiltPropertyOrIndexer) insertStatementTransformation.TargetMember)
                                                            .Builder;
 
-                            var positionInSyntaxTree = GetSyntaxTreePosition( propertyOrIndexerBuilder.ToInsertPosition() );
-
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                                 this._syntaxGenerationOptions,
-                                propertyOrIndexerBuilder.PrimarySyntaxTree.AssertNotNull(),
-                                positionInSyntaxTree );
+                                propertyOrIndexerBuilder );
 
                             propertyOrIndexer = propertyOrIndexerBuilder;
 
@@ -722,12 +731,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                             var methodBaseBuilder = methodBase as MethodBaseBuilder
                                                     ?? (MethodBaseBuilder) ((BuiltMethodBase) insertStatementTransformation.TargetMember).Builder;
 
-                            var positionInSyntaxTree = GetSyntaxTreePosition( methodBaseBuilder.ToInsertPosition() );
-
                             syntaxGenerationContext = this._compilationContext.GetSyntaxGenerationContext(
                                 this._syntaxGenerationOptions,
-                                methodBaseBuilder.PrimarySyntaxTree.AssertNotNull(),
-                                positionInSyntaxTree );
+                                methodBaseBuilder );
 
                             methodBase = methodBaseBuilder;
 
@@ -945,14 +951,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
     }
 
+    // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
+    //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
     private static bool RequiresAuxiliaryContractMember( IMember member, InsertStatementTransformationContextImpl insertStatementContext )
-        =>
-
-            // TODO: This is not optimal for cases with no output contracts, because we need this only to have "an override" to force other transformations.
-            //       But for these declarations, the auxiliary member is created always, even when there are no input contracts.
-            insertStatementContext.WasUsedForOutputContracts
-            || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
-                    or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
-                    or IMethod { IsPartial: true, HasImplementation: false }
-                && insertStatementContext.WasUsedForInputContracts);
+        => insertStatementContext.WasUsedForOutputContracts
+           || (member is IFieldOrProperty { IsAutoPropertyOrField: true }
+                   or IMethod { ContainingDeclaration: IFieldOrProperty { IsAutoPropertyOrField: true } }
+                   or IMethod { IsPartial: true, HasImplementation: false }
+               && insertStatementContext.WasUsedForInputContracts);
 }

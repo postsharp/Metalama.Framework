@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal sealed class ConstructorCollection : MethodBaseCollection<IConstructor>, IConstructorCollection
     {
-        public ConstructorCollection( NamedType declaringType, ConstructorUpdatableCollection sourceItems ) : base(
+        public ConstructorCollection( INamedType declaringType, ConstructorUpdatableCollection sourceItems ) : base(
             declaringType,
             sourceItems ) { }
     }

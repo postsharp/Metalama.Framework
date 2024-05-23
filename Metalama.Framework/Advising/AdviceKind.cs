@@ -31,5 +31,6 @@ public enum AdviceKind
     AddAnnotation,
     IntroduceConstructor,
     OverrideConstructor,
-    OverrideConstructorChainCall
+    OverrideConstructorChainCall,
+    IntroduceType,
 }

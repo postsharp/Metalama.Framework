@@ -1,7 +1,7 @@
-// --- __TopLevelStatements.cs ---
 using System;
-Console.WriteLine("TopLevelStatement"); // --- ProjectFabricTopLevelStatements.cs ---
-using  System ;  using  System . Linq ;  using  Metalama . Framework . Aspects ;  using  Metalama . Framework . Fabrics ;
+using System.Linq;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
 namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatements
 {
   /*

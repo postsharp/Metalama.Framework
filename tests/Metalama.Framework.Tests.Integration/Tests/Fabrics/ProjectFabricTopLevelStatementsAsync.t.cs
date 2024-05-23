@@ -1,10 +1,7 @@
-// --- __TopLevelStatementsAsync.cs ---
 using System;
-using System.Threading.Tasks;
-Console.WriteLine("TopLevelStatement1");
-await Task.Yield();
-Console.WriteLine("TopLevelStatement2"); // --- ProjectFabricTopLevelStatementsAsync.cs ---
-using  System ;  using  System . Linq ;  using  Metalama . Framework . Aspects ;  using  Metalama . Framework . Fabrics ;
+using System.Linq;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Fabrics;
 namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatementsAsync
 {
   /*

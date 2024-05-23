@@ -27,11 +27,11 @@ internal sealed class CapturedUserExpression : UserExpression
                TypedExpressionSyntax { ExpressionType: { } expressionType }
                    => this._compilation.GetCompilationModel().Factory.GetIType( expressionType ),
                IExpression expression => expression.Type,
-               ExpressionSyntax expressionSyntax => SymbolAnnotationMapper.TryFindExpressionTypeFromAnnotation(
+               ExpressionSyntax expressionSyntax => TypeAnnotationMapper.TryFindExpressionTypeFromAnnotation(
                    expressionSyntax,
-                   this._compilation.GetCompilationModel().CompilationContext,
+                   this._compilation.GetCompilationModel(),
                    out var type )
-                   ? this._compilation.GetCompilationModel().Factory.GetIType( type )
+                   ? type
                    : null,
                _ => null
            } ??

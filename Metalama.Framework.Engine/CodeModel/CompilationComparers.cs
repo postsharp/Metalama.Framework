@@ -6,12 +6,14 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
+// ReSharper disable once IdentifierTypo
 internal sealed class CompilationComparers : ICompilationComparers
 {
-    public CompilationComparers( ReflectionMapper reflectionMapper, Compilation compilation )
+    // ReSharper disable once IdentifierTypo
+    public CompilationComparers( Compilation compilation )
     {
-        this.Default = new DeclarationEqualityComparer( reflectionMapper, compilation, false );
-        this.IncludeNullability = new DeclarationEqualityComparer( reflectionMapper, compilation, true );
+        this.Default = new DeclarationEqualityComparer( compilation, false );
+        this.IncludeNullability = new DeclarationEqualityComparer( compilation, true );
     }
 
     public IDeclarationComparer Default { get; }

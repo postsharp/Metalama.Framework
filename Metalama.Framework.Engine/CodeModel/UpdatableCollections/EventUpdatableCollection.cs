@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class EventUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IEvent>
 {
-    public EventUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public EventUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation, declaringType.As<INamespaceOrNamedType>() ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol ) => symbol.Kind == SymbolKind.Event && base.IsSymbolIncluded( symbol );
 

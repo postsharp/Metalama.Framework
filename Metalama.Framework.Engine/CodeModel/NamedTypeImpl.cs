@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -131,16 +130,18 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public bool IsCanonicalGenericInstance => this.TypeSymbol.OriginalDefinition == this.TypeSymbol;
 
     [Memo]
-    public INamedTypeCollection NestedTypes
+    public INamedTypeCollection Types
         => new NamedTypeCollection(
             this._facade,
-            new TypeUpdatableCollection( this.Compilation, this.TypeSymbol ) );
+            this.Compilation.GetNamedTypeCollection( this.TypeSymbol.ToTypedRef<INamespaceOrNamedType>( this.Compilation.CompilationContext ) ) );
+
+    INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     [Memo]
     public IPropertyCollection Properties
         => new PropertyCollection(
             this._facade,
-            this.Compilation.GetPropertyCollection( this.TypeSymbol ) );
+            this.Compilation.GetPropertyCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IPropertyCollection AllProperties => new AllPropertiesCollection( this._facade );
@@ -149,7 +150,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IIndexerCollection Indexers
         => new IndexerCollection(
             this._facade,
-            this.Compilation.GetIndexerCollection( this.TypeSymbol ) );
+            this.Compilation.GetIndexerCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IIndexerCollection AllIndexers => new AllIndexersCollection( this._facade );
@@ -158,7 +159,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IFieldCollection Fields
         => new FieldCollection(
             this._facade,
-            this.Compilation.GetFieldCollection( this.TypeSymbol ) );
+            this.Compilation.GetFieldCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IFieldCollection AllFields => new AllFieldsCollection( this._facade );
@@ -173,7 +174,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IEventCollection Events
         => new EventCollection(
             this._facade,
-            this.Compilation.GetEventCollection( this.TypeSymbol ) );
+            this.Compilation.GetEventCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IEventCollection AllEvents => new AllEventsCollection( this._facade );
@@ -182,7 +183,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IMethodCollection Methods
         => new MethodCollection(
             this._facade,
-            this.Compilation.GetMethodCollection( this.TypeSymbol ) );
+            this.Compilation.GetMethodCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IMethodCollection AllMethods => new AllMethodsCollection( this._facade );
@@ -191,7 +192,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public IConstructorCollection Constructors
         => new ConstructorCollection(
             this._facade,
-            this.Compilation.GetConstructorCollection( this.TypeSymbol ) );
+            this.Compilation.GetConstructorCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) ) );
 
     [Memo]
     public IConstructor? PrimaryConstructor => this.GetPrimaryConstructorImpl();
@@ -203,7 +204,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     private IConstructor? GetPrimaryConstructorImpl()
     {
-        var constructors = this.Compilation.GetConstructorCollection( this.TypeSymbol );
+        var constructors = this.Compilation.GetConstructorCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ) );
 
         foreach ( var constructor in constructors )
         {
@@ -290,8 +291,10 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
             this.TypeSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.CompilationContext ) )
                 .ToReadOnlyList() );
 
+    INamespace INamedType.Namespace => this.ContainingNamespace;
+
     [Memo]
-    public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
+    public INamespace ContainingNamespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
     [Memo]
     public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
@@ -315,17 +318,22 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
     [Memo]
     public IImplementedInterfaceCollection AllImplementedInterfaces
-        => new AllImplementedInterfacesCollection( this._facade, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
+        => new AllImplementedInterfacesCollection(
+            this._facade,
+            this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
 
     [Memo]
     public IImplementedInterfaceCollection ImplementedInterfaces
-        => new ImplementedInterfacesCollection( this._facade, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
+        => new ImplementedInterfacesCollection(
+            this._facade,
+            this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol.ToTypedRef<INamedType>( this.Compilation.CompilationContext ), false ) );
 
     ICompilation ICompilationElement.Compilation => this.Compilation;
 
     IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
     {
-        var typeArgumentSymbols = typeArguments.SelectAsArray( a => a.GetSymbol() );
+        var typeArgumentSymbols =
+            typeArguments.SelectAsArray( a => a.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.ConstructedIntroducedTypes ) );
 
         var typeSymbol = this.TypeSymbol;
         var constructedTypeSymbol = typeSymbol.Construct( typeArgumentSymbols );
@@ -457,7 +465,9 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
         // TODO: Type introductions.
-        var symbolInterfaceMemberImplementationSymbol = this.TypeSymbol.FindImplementationForInterfaceMember( interfaceMember.GetSymbol().AssertNotNull() );
+        var symbolInterfaceMemberImplementationSymbol =
+            this.TypeSymbol.FindImplementationForInterfaceMember(
+                interfaceMember.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedInterfaceImplementation ) );
 
         var symbolInterfaceMemberImplementation =
             symbolInterfaceMemberImplementationSymbol != null
@@ -471,7 +481,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         {
             var introducedInterface =
                 this.Compilation
-                    .GetInterfaceImplementationCollection( this.TypeSymbol, false )
+                    .GetInterfaceImplementationCollection( currentType.ToTypedRef<INamedType>(), false )
                     .Introductions
                     .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
@@ -486,13 +496,13 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 // Which is later in inheritance?
                 if ( symbolInterfaceMemberImplementation == null || currentType.IsSubclassOf( symbolInterfaceMemberImplementation.DeclaringType ) )
                 {
-                    implementationMember = interfaceMemberImplementation;
+                    implementationMember = interfaceMemberImplementation.ForCompilation( this.Compilation );
 
                     return true;
                 }
                 else
                 {
-                    implementationMember = symbolInterfaceMemberImplementation;
+                    implementationMember = symbolInterfaceMemberImplementation.ForCompilation( this.Compilation );
 
                     return true;
                 }
@@ -503,7 +513,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
         if ( symbolInterfaceMemberImplementation != null )
         {
-            implementationMember = symbolInterfaceMemberImplementation;
+            implementationMember = symbolInterfaceMemberImplementation.ForCompilation( this.Compilation );
 
             return true;
         }

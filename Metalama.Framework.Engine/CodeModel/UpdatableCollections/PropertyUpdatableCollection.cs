@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class PropertyUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IProperty>
 {
-    public PropertyUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public PropertyUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation, declaringType.As<INamespaceOrNamedType>() ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol )
         => symbol.Kind == SymbolKind.Property

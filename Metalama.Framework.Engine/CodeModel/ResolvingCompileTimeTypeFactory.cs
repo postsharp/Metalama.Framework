@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal sealed class ResolvingCompileTimeTypeFactory : CompileTimeTypeFactory
 {
-    private readonly SerializableTypeIdResolver _serializableTypeIdResolver;
+    private readonly SerializableTypeIdResolverForSymbol _serializableTypeIdResolver;
 
-    public ResolvingCompileTimeTypeFactory( SerializableTypeIdResolver serializableTypeIdResolver )
+    public ResolvingCompileTimeTypeFactory( SerializableTypeIdResolverForSymbol serializableTypeIdResolver )
     {
         this._serializableTypeIdResolver = serializableTypeIdResolver;
     }

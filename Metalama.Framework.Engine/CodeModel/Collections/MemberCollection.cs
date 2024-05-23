@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
     {
         public INamedType DeclaringType { get; }
 
-        protected MemberCollection( NamedType declaringType, ISourceMemberCollection<TMember> sourceItems )
+        protected MemberCollection( INamedType declaringType, ISourceMemberCollection<TMember> sourceItems )
             : base( declaringType, sourceItems )
         {
             this.DeclaringType = declaringType;

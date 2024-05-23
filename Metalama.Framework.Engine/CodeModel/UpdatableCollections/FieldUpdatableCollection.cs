@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal sealed class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollection<IField>
 {
-    public FieldUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
+    public FieldUpdatableCollection( CompilationModel compilation, Ref<INamedType> declaringType ) : base( compilation, declaringType.As<INamespaceOrNamedType>() ) { }
 
     protected override bool IsSymbolIncluded( ISymbol symbol ) => symbol.Kind == SymbolKind.Field && base.IsSymbolIncluded( symbol );
 

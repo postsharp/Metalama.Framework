@@ -102,7 +102,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         this._dictionaryOfITypeType =
             syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Dictionary<string, IType>) ) );
 
-        this._iExpressionSymbol = this._runTimeCompilation.GetTypeByMetadataName( typeof(IExpression).FullName! ).AssertNotNull();
+        this._iExpressionSymbol = this._runTimeCompilation.GetTypeByMetadataName( typeof(IExpression).FullName! ).AssertSymbolNotNull();
     }
 
     public bool Success { get; private set; } = true;
@@ -647,7 +647,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
 
             case SyntaxKind.TypeOfExpression:
                 {
-                    var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertNotNull();
+                    var type = (ITypeSymbol) this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type ).AssertSymbolNotNull();
                     var typeOfString = this.MetaSyntaxFactory.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type ).ToString();
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(ITemplateSyntaxFactory.TypeOf) ) )
@@ -1127,7 +1127,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 foreach ( var argument in node.ArgumentList.Arguments )
                 {
                     var modifiedArgument = argument;
-                    var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument ).AssertNotNull();
+                    var parameter = this._syntaxTreeAnnotationMap.GetParameterSymbol( argument ).AssertSymbolNotNull();
 
                     if ( argument.Expression is not LiteralExpressionSyntax && argument.Expression.GetScopeFromAnnotation() == TemplatingScope.RunTimeOnly )
                     {
@@ -1390,7 +1390,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         foreach ( var parameter in node.ParameterList.Parameters )
         {
             var templateParameter = parameter;
-            var parameterSymbol = (IParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
+            var parameterSymbol = (IParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertSymbolNotNull();
             var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
 
             if ( !isCompileTime )
@@ -1423,7 +1423,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
         {
             foreach ( var parameter in node.TypeParameterList.Parameters )
             {
-                var parameterSymbol = (ITypeParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
+                var parameterSymbol = (ITypeParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertSymbolNotNull();
                 var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
 
                 if ( isCompileTime )
@@ -1591,7 +1591,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         var modifiers = TokenList( accessibilityModifiers ?? new[] { Token( SyntaxKind.PublicKeyword ).WithTrailingTrivia( Space ) } );
 
-        var templateSymbol = this._rootTemplateSymbol.AssertNotNull();
+        var templateSymbol = this._rootTemplateSymbol.AssertSymbolNotNull();
 
         void AddModifier( SyntaxKind kind )
         {
@@ -1786,7 +1786,6 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
                 this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( _templateSyntaxFactoryLocalName );
 
                 // var localSyntaxFactory = syntaxFactory.ForLocalFunction( "typeof(X)", map );
-
                 var map = this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Type), this._dictionaryOfITypeType );
 
                 this._currentMetaContext!.Statements.Add(
@@ -1869,7 +1868,7 @@ internal sealed partial class TemplateCompilerRewriter : MetaSyntaxRewriter, IDi
     {
         foreach ( var localFunctionDeclaration in statements.OfType<LocalFunctionStatementSyntax>() )
         {
-            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunctionDeclaration ).AssertNotNull();
+            var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( localFunctionDeclaration ).AssertSymbolNotNull();
             var declaredSymbolNameLocal = this.ReserveRunTimeSymbolName( symbol ).Identifier;
             this._currentMetaContext!.AddRunTimeSymbolLocal( symbol, declaredSymbolNameLocal );
         }

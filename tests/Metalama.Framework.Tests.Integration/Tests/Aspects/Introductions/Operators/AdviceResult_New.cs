@@ -2,6 +2,7 @@
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -9,52 +10,46 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var result =
                 builder.Advice.IntroduceBinaryOperator(
                     builder.Target,
                     nameof(Operator),
                     builder.Target,
-                    TypeFactory.GetType(SpecialType.Int32),
-                    TypeFactory.GetType(SpecialType.Int32),
+                    TypeFactory.GetType( SpecialType.Int32 ),
+                    TypeFactory.GetType( SpecialType.Int32 ),
                     OperatorKind.Addition,
-                    whenExists: OverrideStrategy.New);
+                    whenExists: OverrideStrategy.New );
 
-            if (result.Outcome != Advising.AdviceOutcome.Default)
+            if (result.Outcome != AdviceOutcome.Default)
             {
-                throw new InvalidOperationException($"Outcome was {result.Outcome} instead of Default.");
+                throw new InvalidOperationException( $"Outcome was {result.Outcome} instead of Default." );
             }
 
-            if (result.AdviceKind != Advising.AdviceKind.IntroduceOperator)
+            if (result.AdviceKind != AdviceKind.IntroduceOperator)
             {
-                throw new InvalidOperationException($"AdviceKind was {result.AdviceKind} instead of IntroduceOperator.");
-            }
-
-            if (result.AspectBuilder != builder)
-            {
-                throw new InvalidOperationException($"AspectBuilder was not the correct instance.");
+                throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of IntroduceOperator." );
             }
 
             if (!builder.Advice.MutableCompilation.Comparers.Default.Equals(
-                    result.Declaration.ForCompilation(builder.Advice.MutableCompilation), 
-                    builder.Target.ForCompilation(builder.Advice.MutableCompilation).Methods.OfName("op_Addition").Single()))
+                    result.Declaration.ForCompilation( builder.Advice.MutableCompilation ),
+                    builder.Target.ForCompilation( builder.Advice.MutableCompilation ).Methods.OfName( "op_Addition" ).Single() ))
             {
-                throw new InvalidOperationException($"Declaration was not correct.");
+                throw new InvalidOperationException( $"Declaration was not correct." );
             }
         }
 
         [Template]
-        public int Operator(dynamic? x, dynamic? y)
+        public int Operator( dynamic? x, dynamic? y )
         {
-            Console.WriteLine("Aspect code.");
+            Console.WriteLine( "Aspect code." );
+
             return meta.Proceed();
         }
     }
 
     // <target>
     [TestAspect]
-    public class TargetClass
-    {
-    }
+    public class TargetClass { }
 }

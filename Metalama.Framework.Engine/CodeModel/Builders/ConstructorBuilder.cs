@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
@@ -23,7 +24,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
     public IInjectMemberTransformation ToTransformation()
         => this.IsStatic
             ? new IntroduceStaticConstructorTransformation( this.ParentAdvice, this )
-            : new ReplaceDefaultConstructorTransformation( this.ParentAdvice, this );
+            : new IntroduceConstructorTransformation( this.ParentAdvice, this );
 
     // This is implemented by BuiltConstructor and there is no point to support it here.
     public IConstructor GetBaseConstructor() => throw new NotSupportedException();
@@ -36,7 +37,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
-    public ConstructorBuilder( INamedType targetType, Advice advice )
+    public ConstructorBuilder( Advice advice, INamedType targetType )
         : base( advice, targetType, null! ) { }
 
     public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );

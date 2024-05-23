@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CompileTime.Manifest;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
 {
