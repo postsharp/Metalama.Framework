@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0064 on ``: `Couldn't get initializer for 'TargetCode.methods': Cannot convert an instance of type RuntimeMethodInfo to a run-time expression.`
+// Error LAMA0064 on ``: `Couldn't get initializer for 'TargetCode.methods': Cannot convert an instance of type RuntimeMethodInfo to a run-time expression. If you are attempting to use a run-time expression as dynamic in compile-time code, that is not supported.`
