@@ -79,7 +79,7 @@ internal sealed class IncrementalAspectRepository : AspectRepository
     {
         this.VerifyDeclaration( declaration );
 
-        return this._aspects[declaration.ToTypedRef()].Any( a => a.AspectClass.Type == aspectType );
+        return this._aspects[declaration.ToTypedRef()].Any( a => aspectType.IsAssignableFrom( a.AspectClass.Type ) );
     }
 
     public override IEnumerable<IAspectInstance> GetAspectInstances( IDeclaration declaration )
