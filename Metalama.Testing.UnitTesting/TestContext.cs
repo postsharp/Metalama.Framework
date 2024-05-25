@@ -125,11 +125,6 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         var licenseConsumptionService = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
-        if ( contextOptions.IgnoreUserProfileLicenses )
-        {
-            licenseConsumptionService = licenseConsumptionService.WithoutLicense();
-        }
-
         backstageServices = backstageServices.WithService( licenseConsumptionService );
         backstageServices = backstageServices.WithService( new InMemoryConfigurationManager( backstageServices ), true );
 

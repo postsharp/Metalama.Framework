@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Licensing.Consumption.Sources;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.DesignTime.Contracts.EntryPoint;
@@ -202,8 +203,10 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
 
         if ( !projectOptions.IsTest || !string.IsNullOrEmpty( projectOptions.License ) )
         {
-            // We always ignore unattended licenses in a design-time process, but we ignore the user profile licenses only in tests.
-            projectServiceProvider = projectServiceProvider.AddProjectLicenseConsumptionManager( projectOptions.License );
+            projectServiceProvider = projectServiceProvider.AddProjectLicenseConsumptionManager(
+                projectOptions.License,
+                projectOptions.IgnoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None,
+                null );
         }
 
         return projectServiceProvider;
