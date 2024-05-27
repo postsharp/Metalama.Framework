@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.RunTime;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -1565,5 +1566,66 @@ class D{version}
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+    }
+
+    [Fact]
+    public async Task HasAspectInEligibilityFailsAsync()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            using System;
+            using System.Linq;
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Eligibility;
+
+            class Aspect : OverrideMethodAspect
+            {
+                public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+                {
+                    builder.MustSatisfy(method =>
+                    {
+                        var hasAspectEnhancements = method.DeclaringType.Methods.OfName("HasAspect").Single().Enhancements();
+
+                        if (!hasAspectEnhancements.HasAspect<Aspect>())
+                        {
+                            throw new Exception();
+                        }
+
+                        return true;
+                    }, _ => $"");
+                }
+
+                public override dynamic? OverrideMethod()
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            class TargetCode
+            {
+                private int Method(int a)
+                {
+                    return a;
+                }
+
+                [Aspect]
+                private void HasAspect() { }
+            }
+            """;
+
+        var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
+
+        var methodSymbol = compilation.GetSymbolsWithName( "Method" ).OfType<IMethodSymbol>().Single();
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation );
+
+        var exception = await Assert.ThrowsAsync<UserCodeException>( async () => await pipeline.ExecuteAsync( compilation, AsyncExecutionContext.Get() ) );
+
+        Assert.IsType<Exception>( exception.InnerException );
     }
 }
