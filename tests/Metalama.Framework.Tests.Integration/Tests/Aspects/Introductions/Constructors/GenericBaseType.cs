@@ -1,7 +1,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors.BaseInitializer;
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors.GenericBaseType;
 
 public class IntroductionAttribute : TypeAspect
 {
@@ -12,7 +12,9 @@ public class IntroductionAttribute : TypeAspect
             nameof(Template),
             buildConstructor: c =>
             {
+                var p = c.AddParameter("p", builder.Target.TypeParameters[0]);
                 c.InitializerKind = ConstructorInitializerKind.Base;
+                c.AddInitializerArgument(p);
             });
 
         builder.Advice.IntroduceConstructor(
@@ -20,9 +22,7 @@ public class IntroductionAttribute : TypeAspect
             nameof(Template),
             buildConstructor: c =>
             {
-                var p = c.AddParameter("p", typeof(int));
-                c.InitializerKind = ConstructorInitializerKind.Base;
-                c.AddInitializerArgument(p);
+                c.IsStatic = true;
             });
     }
 
@@ -32,15 +32,15 @@ public class IntroductionAttribute : TypeAspect
     }
 }
 
-internal class BaseClass
+internal class BaseClass<T>
 {
     public BaseClass() { }
 
-    public BaseClass(int value) { }
+    public BaseClass(T value) { }
 }
 
 // <target>
 [Introduction]
-internal class TargetClass : BaseClass 
+internal class TargetClass<T> : BaseClass<T>
 { 
 }

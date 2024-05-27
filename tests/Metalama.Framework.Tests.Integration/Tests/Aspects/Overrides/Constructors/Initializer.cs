@@ -37,6 +37,10 @@ public class OverrideAttribute : TypeAspect
 [Override]
 public class TargetClass
 {
+    public int F = 42;
+
+    public int P { get; } = 42;
+
     public TargetClass()
     {
         Console.WriteLine($"This is the original constructor.");

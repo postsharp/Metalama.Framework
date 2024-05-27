@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -191,7 +192,16 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             foreach ( var constructor in type.Constructors )
             {
-                var initialConstructor = constructor.Translate( initialCompilationModel );
+                if (!constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ))
+                {
+                    continue;
+                }
+
+                if (initialConstructor is BuiltDeclaration)
+                {
+                    continue;
+                }
+                
                 var finalConstructor = constructor.Translate( finalCompilationModel );
 
                 // TODO: Currently we don't see introduced parameters in builder code model.

@@ -18,11 +18,9 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
 
     public object? Invoke( params object?[]? args )
     {
-        // For some reason, overload resolution chooses the wrong overload in the template,
-        // so redirect to the correct one.
-        if ( args is [IEnumerable<IExpression> expressionArgs] )
+        if (this.Member.IsStatic)
         {
-            return this.Invoke( expressionArgs );
+            throw GeneralDiagnosticDescriptors.CannotInvokeStaticConstructor.CreateException( this.Member );
         }
 
         args ??= Array.Empty<object>();
@@ -52,8 +50,6 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         return new DelegateUserExpression(
             context =>
             {
-                SimpleNameSyntax name;
-
                 var receiverInfo = this.GetReceiverInfo( context );
 
                 var type = context.SyntaxGenerator.Type( this.Member.DeclaringType );

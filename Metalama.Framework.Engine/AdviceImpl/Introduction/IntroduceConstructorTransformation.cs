@@ -26,11 +26,9 @@ internal sealed class IntroduceConstructorTransformation
         Invariant.Assert( !introducedDeclaration.IsStatic );
         Invariant.Assert( !introducedDeclaration.IsRecordCopyConstructor() );
 
-        var targetType = introducedDeclaration.DeclaringType;
-
-        if ( introducedDeclaration.IsReplacingImplicit )
+        if ( !introducedDeclaration.ReplacedImplicit.IsDefault )
         {
-            this.ReplacedMember = targetType.Constructors.Single( c => c.IsImplicitInstanceConstructor() ).ToMemberRef<IMember>();
+            this.ReplacedMember = new MemberRef<IMember>( introducedDeclaration.ReplacedImplicit.As<IDeclaration>() );
         }
     }
 
@@ -74,7 +72,7 @@ internal sealed class IntroduceConstructorTransformation
         var syntax =
             ConstructorDeclaration(
                 constructorBuilder.GetAttributeLists( context ),
-                TokenList( Token( TriviaList(), SyntaxKind.PublicKeyword, TriviaList( Space ) ) ),
+                constructorBuilder.GetSyntaxModifierList(),
                 Identifier( constructorBuilder.DeclaringType.Name ),
                 context.SyntaxGenerator.ParameterList( constructorBuilder, context.Compilation ),
                 initializer,

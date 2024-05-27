@@ -1,7 +1,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors.ThisInitializer;
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors.ReplaceImplicitConstructor;
 
 public class IntroductionAttribute : TypeAspect
 {
@@ -10,12 +10,9 @@ public class IntroductionAttribute : TypeAspect
         builder.Advice.IntroduceConstructor(
             builder.Target,
             nameof(Template),
-            whenExists: OverrideStrategy.New,
             buildConstructor: c =>
             {
-                c.InitializerKind = ConstructorInitializerKind.This;
-                c.AddInitializerArgument(TypedConstant.Create(13));
-                c.AddInitializerArgument(TypedConstant.Create(42));
+                c.InitializerKind = ConstructorInitializerKind.Base;
             });
 
         builder.Advice.IntroduceConstructor(
@@ -24,9 +21,8 @@ public class IntroductionAttribute : TypeAspect
             buildConstructor: c =>
             {
                 var p = c.AddParameter("p", typeof(int));
-                c.InitializerKind = ConstructorInitializerKind.This;
+                c.InitializerKind = ConstructorInitializerKind.Base;
                 c.AddInitializerArgument(p);
-                c.AddInitializerArgument(TypedConstant.Create(42));
             });
     }
 
@@ -36,11 +32,15 @@ public class IntroductionAttribute : TypeAspect
     }
 }
 
+internal class BaseClass
+{
+    public BaseClass() { }
+
+    public BaseClass(int value) { }
+}
+
 // <target>
 [Introduction]
-internal class TargetClass 
-{
-    public TargetClass(int x, int y)
-    {
-    }
+internal class TargetClass : BaseClass 
+{ 
 }

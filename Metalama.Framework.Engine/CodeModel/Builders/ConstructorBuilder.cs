@@ -4,6 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -14,9 +15,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, IConstructorImpl
 {
-    public bool IsReplacingImplicit { get; set; }
+    private Ref<IConstructor> _replacedImplicit;
+    private ConstructorInitializerKind _initializerKind;
 
-    public ConstructorInitializerKind InitializerKind { get; set; }
+    public Ref<IConstructor> ReplacedImplicit 
+    {
+        get => this._replacedImplicit;
+        set
+        {
+            this.CheckNotFrozen();
+            this._replacedImplicit = value;
+        }
+    }
+
+    public ConstructorInitializerKind InitializerKind
+    {
+        get => this._initializerKind;
+        set
+        {
+            this.CheckNotFrozen();
+            this._initializerKind = value;
+        }
+    }
 
     public List<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
@@ -25,10 +45,16 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
     {
         this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
     }
+    public override Ref<IDeclaration> ToRef()
+        // Replacement of implicit constructor should use the implicit constructor as Ref.
+        => !this.ReplacedImplicit.IsDefault
+           ? this.ReplacedImplicit.As<IDeclaration>()
+           : base.ToRef();
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
-        // TODO: Checks.
+        this.CheckNotFrozen();
+
         this.InitializerArguments.Add( (expression, parameterName) );
     }
 
@@ -49,7 +75,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
     public override string Name
     {
         get => this.IsStatic ? ".cctor" : ".ctor";
-        set => throw new NotSupportedException();
+        set => throw new NotSupportedException( "Setting constructor name is not supported" );
     }
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;

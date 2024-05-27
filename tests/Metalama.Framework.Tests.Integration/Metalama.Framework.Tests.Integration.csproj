@@ -46,6 +46,27 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\DesignTime\IntroduceParameter_ExplicitParameterless - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\AdviceResult_Fail.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\AdviceResult_Ignore.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\AdviceResult_Override.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\BaseInitializer - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\CopyAttributes.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\CopyAttributes_CrossAssembly.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\ExistingDifferentSignature - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\ExistingDifferentSignature.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\Existing_PrimaryClass - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\GenericType - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\ParameterMapping.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\Parameters_Generic.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\Parameters_Named.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\ReplaceImplicitDefaultConstructor - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Constructors\Visibility.t.cs" />
+      <Compile Remove="Tests\Aspects\Invokers\Constructors\Simple - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Overrides\Constructors\Initializer - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="../../Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
         <ProjectReference Include="../../Metalama.Framework/Metalama.Framework.csproj" />
         <ProjectReference Include="../../Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)/Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
@@ -64,6 +85,87 @@
             <_Parameter1>EngineeringDataDirectory</_Parameter1>
             <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
         </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\DesignTime\IntroduceParameter_IntroducedConstructor.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>IntroduceParameter_IntroducedConstructor.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\AdviceResult_Fail.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\AdviceResult_Ignore.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\AdviceResult_Override.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\Existing_PrimaryClass_DifferentSignature.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Existing_PrimaryClass_DifferentSignature.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\Existing_PrimaryClass.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Existing_PrimaryClass.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\Existing_DifferentSignature.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Existing_DifferentSignature.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\GenericBaseType.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>GenericBaseType.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\GenericType.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>GenericType.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\CopyAttributes.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\CopyAttributes_CrossAssembly.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\ParameterMapping.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\Parameters_Generic.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\Parameters_Named.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\ReplaceImplicitStaticConstructor.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>ReplaceImplicitStaticConstructor.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Constructors\Visibility.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Invokers\Constructors\Static_Error.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Static_Error.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Overrides\Constructors\Implicit_Initializers.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Implicit_Initializers.cs</DependentUpon>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="C:\Dev\Metalama\tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Constructors\ReplaceImplicitConstructor.t.cs">
+        <DependentUpon>ReplaceImplicitConstructor.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
 </Project>

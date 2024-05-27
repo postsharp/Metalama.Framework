@@ -1,4 +1,4 @@
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_ImplicitParameterless
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParameter_IntroducedConstructor
 {
   partial class TestClass
   {
