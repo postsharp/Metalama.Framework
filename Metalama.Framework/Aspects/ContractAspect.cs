@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Aspects
 {
-    /// <summary>ad
+    /// <summary>
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
     /// <remarks>
@@ -296,7 +296,11 @@ namespace Metalama.Framework.Aspects
             }
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }
+        public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
+        { 
+            // We don't know the actual direction yet, but we can apply common eligibility rules.
+            BuildEligibilityForDirection( builder, ContractDirection.Default );
+        }
 
         /// <summary>
         /// Populates the <see cref="IEligibilityBuilder"/> for a field, property or indexer when the <see cref="ContractDirection"/> is known.
@@ -314,7 +318,11 @@ namespace Metalama.Framework.Aspects
             builder.AddRule( EligibilityRuleFactory.GetContractAdviceEligibilityRule( direction ) );
         }
 
-        public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
+        public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder )
+        {
+            // We don't know the actual direction yet, but we can apply common eligibility rules.
+            BuildEligibilityForDirection( builder, ContractDirection.Default );
+        }
 
         [Template]
         public abstract void Validate( dynamic? value );
