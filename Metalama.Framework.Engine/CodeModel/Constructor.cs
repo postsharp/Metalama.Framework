@@ -103,9 +103,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override System.Reflection.MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
 
-        public object? Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
+        public object Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
 
-        public object? Invoke( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).Invoke( args );
+        public object Invoke( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).Invoke( args );
 
         public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
     }

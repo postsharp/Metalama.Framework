@@ -467,7 +467,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     aspectReferenceSyntaxProvider,
                     lexicalScopeFactory,
                     syntaxGenerationContext,
-                    
                     input.CompilationModel );
 
                 var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );

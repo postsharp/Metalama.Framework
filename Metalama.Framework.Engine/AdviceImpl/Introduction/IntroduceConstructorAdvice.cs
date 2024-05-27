@@ -88,14 +88,24 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-        var existingImplicitConstructor = targetDeclaration.Constructors.FirstOrDefault( c => c.IsImplicitInstanceConstructor() );
-        var existingConstructor = targetDeclaration.Constructors.OfExactSignature( this.Builder );
+        var existingImplicitConstructor =
+            this.Builder.IsStatic
+                ? targetDeclaration.StaticConstructor?.IsImplicitlyDeclared == true
+                    ? targetDeclaration.StaticConstructor
+                    : null
+                : targetDeclaration.Constructors.FirstOrDefault( c => c.IsImplicitInstanceConstructor() );
+
+        var existingConstructor =
+            this.Builder.IsStatic
+                ? targetDeclaration.StaticConstructor
+                : targetDeclaration.Constructors.OfExactSignature( this.Builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?
         if ( existingConstructor == null || existingImplicitConstructor != null )
         {
-            if ( existingImplicitConstructor != null )
+            if ( existingImplicitConstructor != null && this.Builder.Parameters.Count == 0 )
             {
+                // Redirect if the builder has no parameters and the existing constructor is implicit.
                 this.Builder.ReplacedImplicit = existingImplicitConstructor.ToTypedRef();
             }
 

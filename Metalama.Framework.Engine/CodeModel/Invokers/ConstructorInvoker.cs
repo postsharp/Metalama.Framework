@@ -14,11 +14,11 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers;
 
 internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorInvoker
 {
-    public ConstructorInvoker( IConstructor constructor ) : base( constructor, InvokerOptions.Final, null) { }
+    public ConstructorInvoker( IConstructor constructor ) : base( constructor, InvokerOptions.Final, null ) { }
 
-    public object? Invoke( params object?[]? args )
+    public object Invoke( params object?[]? args )
     {
-        if (this.Member.IsStatic)
+        if ( this.Member.IsStatic )
         {
             throw GeneralDiagnosticDescriptors.CannotInvokeStaticConstructor.CreateException( this.Member );
         }
@@ -50,8 +50,6 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         return new DelegateUserExpression(
             context =>
             {
-                var receiverInfo = this.GetReceiverInfo( context );
-
                 var type = context.SyntaxGenerator.Type( this.Member.DeclaringType );
 
                 var arguments = this.Member.GetArguments(
@@ -59,18 +57,16 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
                     TypedExpressionSyntaxImpl.FromValues( args, context ),
                     context.SyntaxGenerationContext );
 
-                var receiver = receiverInfo.WithSyntax( this.Member.GetReceiverSyntax( receiverInfo.TypedExpressionSyntax, context ) );
-
                 return CreateObjectCreationExpression( type, arguments );
             },
-            this.Member.DeclaringType);
+            this.Member.DeclaringType );
     }
 
-    public object? Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
+    public object Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
 
     private static ExpressionSyntax CreateObjectCreationExpression(
         TypeSyntax type,
-        ArgumentSyntax[]? arguments )
+        IEnumerable<ArgumentSyntax>? arguments )
     {
         // TODO: Field initializers.
 

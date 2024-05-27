@@ -192,16 +192,16 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             foreach ( var constructor in type.Constructors )
             {
-                if (!constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ))
+                if ( !constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ) )
                 {
                     continue;
                 }
 
-                if (initialConstructor is BuiltDeclaration)
+                if ( initialConstructor is BuiltDeclaration )
                 {
                     continue;
                 }
-                
+
                 var finalConstructor = constructor.Translate( finalCompilationModel );
 
                 // TODO: Currently we don't see introduced parameters in builder code model.

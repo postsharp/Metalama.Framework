@@ -18,7 +18,7 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
     private Ref<IConstructor> _replacedImplicit;
     private ConstructorInitializerKind _initializerKind;
 
-    public Ref<IConstructor> ReplacedImplicit 
+    public Ref<IConstructor> ReplacedImplicit
     {
         get => this._replacedImplicit;
         set
@@ -41,15 +41,17 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
     public List<(IExpression Expression, string? ParameterName)> InitializerArguments { get; }
 
     public ConstructorBuilder( Advice advice, INamedType targetType )
-        : base( advice, targetType, null! ) 
+        : base( advice, targetType, null! )
     {
         this.InitializerArguments = new List<(IExpression Expression, string? ParameterName)>();
     }
+
     public override Ref<IDeclaration> ToRef()
+
         // Replacement of implicit constructor should use the implicit constructor as Ref.
         => !this.ReplacedImplicit.IsDefault
-           ? this.ReplacedImplicit.As<IDeclaration>()
-           : base.ToRef();
+            ? this.ReplacedImplicit.As<IDeclaration>()
+            : base.ToRef();
 
     public void AddInitializerArgument( IExpression expression, string? parameterName )
     {
@@ -86,9 +88,9 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public override System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
-    public object? Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public object Invoke( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public object? Invoke( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public object Invoke( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
     public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 }

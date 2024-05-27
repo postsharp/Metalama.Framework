@@ -196,7 +196,7 @@ internal sealed class AspectReferenceResolver
             // Resolved to the initial version of the symbol (before any aspects).
 
             if ( targetIntroductionInjectedMember == null
-                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                 || (targetIntroductionInjectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { IsDefault: false } replacedMember }
                      && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections ).GetSymbol() != null) )
             {
                 // There is no introduction, i.e. this is a user source symbol (or a promoted field) => reference the version present in source.
@@ -414,7 +414,7 @@ internal sealed class AspectReferenceResolver
             return null;
         }
 
-        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
+        if ( injectedMember.Transformation is IReplaceMemberTransformation { ReplacedMember: { IsDefault: false } replacedMemberRef } )
         {
             var replacedMember = replacedMemberRef.GetTarget(
                 this._finalCompilationModel,

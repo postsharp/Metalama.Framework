@@ -46,19 +46,20 @@ internal sealed class IntroduceConstructorTransformation
         var arguments =
             ArgumentList(
                 SeparatedList(
-                    constructorBuilder.InitializerArguments.SelectAsArray( a =>
-                        Argument(
-                            a.ParameterName != null
-                            ? NameColon( IdentifierName( a.ParameterName ) )
-                            : null,
-                            default,
-                            a.Expression.ToExpressionSyntax( syntaxSerializationContext ) ) ) ) );
+                    constructorBuilder.InitializerArguments.SelectAsArray(
+                        a =>
+                            Argument(
+                                a.ParameterName != null
+                                    ? NameColon( IdentifierName( a.ParameterName ) )
+                                    : null,
+                                default,
+                                a.Expression.ToExpressionSyntax( syntaxSerializationContext ) ) ) ) );
 
         var initializer =
             constructorBuilder.InitializerKind switch
             {
                 ConstructorInitializerKind.None => null,
-                ConstructorInitializerKind.Base => 
+                ConstructorInitializerKind.Base =>
                     ConstructorInitializer(
                         SyntaxKind.BaseConstructorInitializer,
                         arguments ),
@@ -66,7 +67,7 @@ internal sealed class IntroduceConstructorTransformation
                     ConstructorInitializer(
                         SyntaxKind.ThisConstructorInitializer,
                         arguments ),
-                var i => throw new AssertionFailedException($"Unsupported initializer kind: {i}"),
+                var i => throw new AssertionFailedException( $"Unsupported initializer kind: {i}" ),
             };
 
         var syntax =

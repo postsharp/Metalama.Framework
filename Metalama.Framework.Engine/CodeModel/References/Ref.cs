@@ -393,7 +393,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             T? Convert( ICompilationElement? compilationElement )
             {
-                if (compilationElement == null)
+                if ( compilationElement == null )
                 {
                     return null;
                 }

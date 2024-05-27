@@ -41,9 +41,9 @@ internal sealed class BuiltConstructor : BuiltMethodBase, IConstructorImpl
             // the default constructor of the base class.
             this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
 
-    public object? Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
+    public object Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
 
-    public object? Invoke( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).Invoke( args );
+    public object Invoke( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).Invoke( args );
 
     public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
 }

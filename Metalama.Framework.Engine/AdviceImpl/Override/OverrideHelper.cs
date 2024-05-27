@@ -58,7 +58,11 @@ internal static class OverrideHelper
             // If there is no 'this()' constructor, add one.
             if ( type.Constructors.FirstOrDefault() is { IsImplicitlyDeclared: true } implicitConstructor )
             {
-                var constructorBuilder = new ConstructorBuilder( advice, type ) { ReplacedImplicit = implicitConstructor.ToTypedRef() };
+                var constructorBuilder = new ConstructorBuilder( advice, type ) 
+                { 
+                    ReplacedImplicit = implicitConstructor.ToTypedRef(),
+                    Accessibility = Accessibility.Public
+                };
 
                 addTransformation( constructorBuilder.ToTransformation() );
             }
