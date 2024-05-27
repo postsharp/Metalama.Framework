@@ -83,7 +83,8 @@ public sealed partial class CompilationModel
 
     internal bool Contains( NamedTypeBuilder namedTypeBuilder )
         => this._namedTypes.TryGetValue(
-               ((INamespaceOrNamedType?) namedTypeBuilder.DeclaringType ?? namedTypeBuilder.Namespace ?? throw new AssertionFailedException()).ToTypedRef(),
+               ((INamespaceOrNamedType?) namedTypeBuilder.DeclaringType ?? namedTypeBuilder.ContainingNamespace ?? throw new AssertionFailedException())
+               .ToTypedRef(),
                out var namedTypes )
            && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
 
@@ -177,7 +178,7 @@ public sealed partial class CompilationModel
                 var sourceCollection = this.GetMemberCollection<TOwner, TDeclaration, TRef, TCollection>(
                     ref dictionary,
                     requestMutableCollection,
-                    substitutedType.OriginalDefinition.ToTypedRef<TOwner>(this.CompilationContext),
+                    substitutedType.OriginalDefinition.ToTypedRef<TOwner>( this.CompilationContext ),
                     createCollection,
                     createSubstitutedCollection );
 
@@ -423,6 +424,10 @@ public sealed partial class CompilationModel
                 var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.ToTypedRef(), true );
                 constructors.Remove( replaced.As<IConstructor>() );
 
+                break;
+
+            case IConstructor { IsStatic: true }:
+                // Nothing to do, static constructor is replaced in the collection earlier.
                 break;
 
             case IField replacedField:

@@ -6,11 +6,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "TestNestedType", TypeKind.Class);
+        var result = builder.Advice.IntroduceClass( builder.Target, "TestNestedType", TypeKind.Class );
 
-        builder.Advice.IntroduceField(result.Declaration, nameof(Field) );
+        builder.Advice.IntroduceField( result.Declaration, nameof(Field) );
     }
 
     [Template]
@@ -19,6 +19,4 @@ public class IntroductionAttribute : TypeAspect
 
 // <target>
 [IntroductionAttribute]
-public class TargetType
-{
-}
+public class TargetType { }

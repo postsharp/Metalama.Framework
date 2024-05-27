@@ -149,6 +149,6 @@ public class TestClass
     public string? Method() => null;
 }";
 
-        Assert.Equal( expectedTransformedProperty.Trim(), transformedProperty.Trim() );
+        AssertEx.EolInvariantEqual( expectedTransformedProperty.Trim(), transformedProperty.Trim() );
     }
 }

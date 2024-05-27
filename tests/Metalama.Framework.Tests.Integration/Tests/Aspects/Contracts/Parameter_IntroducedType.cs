@@ -9,38 +9,30 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
 {
     internal class TestAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var introducedType =
-                builder.Advice.IntroduceType(
-                    builder.Target,
-                    "IntroducedType",
-                    TypeKind.Class,
-                    buildType: b => 
-                    { 
-                        b.Accessibility = Accessibility.Public; 
-                    })
-                .Declaration;
+                builder.Advice.IntroduceClass(
+                        builder.Target,
+                        "IntroducedType",
+                        TypeKind.Class,
+                        buildType: b => { b.Accessibility = Accessibility.Public; } )
+                    .Declaration;
 
             // TODO: It's now necessary to translate the introduced type.
 
             var introducedMethod =
                 builder.Advice.IntroduceMethod(
-                    builder.Target.ForCompilation(builder.Advice.MutableCompilation),
-                    nameof(IntroducedMethodTemplate),
-                    buildMethod: b =>
-                    {
-                        b.AddParameter("p", introducedType);
-                    })
-                .Declaration;
+                        builder.Target.ForCompilation( builder.Advice.MutableCompilation ),
+                        nameof(IntroducedMethodTemplate),
+                        buildMethod: b => { b.AddParameter( "p", introducedType ); } )
+                    .Declaration;
 
-            builder.Advice.AddContract(introducedMethod.Parameters.Single(), nameof(ValidateTemplate));
+            builder.Advice.AddContract( introducedMethod.Parameters.Single(), nameof(ValidateTemplate) );
         }
 
         [Template]
-        public void IntroducedMethodTemplate()
-        {
-        }
+        public void IntroducedMethodTemplate() { }
 
         [Template]
         public void ValidateTemplate( dynamic? value )
@@ -54,7 +46,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
 
     // <target>
     [Test]
-    internal class Target
-    {
-    }
+    internal class Target { }
 }

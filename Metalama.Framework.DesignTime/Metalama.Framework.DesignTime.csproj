@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\Build\RoslynVersion\Latest.imports" />
+    <Import Project="../build/RoslynVersion/Latest.imports" />
     
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
@@ -15,14 +15,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
-        <ProjectReference Include="..\Metalama.Framework.DesignTime.Rpc\Metalama.Framework.DesignTime.Rpc.csproj" />
-        <ProjectReference Include="..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../Metalama.Framework.DesignTime.Contracts/Metalama.Framework.DesignTime.Contracts.csproj" />
+        <ProjectReference Include="../Metalama.Framework.DesignTime.Rpc/Metalama.Framework.DesignTime.Rpc.csproj" />
+        <ProjectReference Include="../Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)\Metalama.Framework.DesignTime\*.cs" Condition="Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
-        <Compile Include="..\.generated\$(ThisRoslynVersionNoPreview)-stubs\Metalama.Framework.DesignTime\*.cs" Condition="!Exists('..\.generated\$(ThisRoslynVersionNoPreview)')" />
+        <Compile Include="../.generated/$(ThisRoslynVersionNoPreview)/Metalama.Framework.DesignTime/*.cs" Condition="Exists('../.generated/$(ThisRoslynVersionNoPreview)')" />
+        <Compile Include="../.generated/$(ThisRoslynVersionNoPreview)-stubs/Metalama.Framework.DesignTime/*.cs" Condition="!Exists('../.generated/$(ThisRoslynVersionNoPreview)')" />
     </ItemGroup>
 
 </Project>

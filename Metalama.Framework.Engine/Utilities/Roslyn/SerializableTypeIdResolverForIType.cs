@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
@@ -28,12 +27,13 @@ public class SerializableTypeIdResolverForIType : SerializableTypeIdResolver<ITy
     protected override IType CreateArrayType( IType elementType, int rank ) => elementType.MakeArrayType( rank );
 
     protected override IType CreatePointerType( IType pointedAtType ) => pointedAtType.MakePointerType();
-    
+
     protected override IType CreateNullableType( IType elementType ) => elementType.ToNullableType();
 
     protected override IType CreateNonNullableReferenceType( IType referenceType ) => referenceType.ToNonNullableType();
 
-    protected override IType ConstructGenericType( IType genericType, IType[] typeArguments ) => genericType.AssertCast<INamedType>().WithTypeArguments( typeArguments );
+    protected override IType ConstructGenericType( IType genericType, IType[] typeArguments )
+        => genericType.AssertCast<INamedType>().WithTypeArguments( typeArguments );
 
     protected override IType CreateTupleType( ImmutableArray<IType> elementTypes )
     {
@@ -53,7 +53,7 @@ public class SerializableTypeIdResolverForIType : SerializableTypeIdResolver<ITy
         var candidates = ns switch
         {
             INamespace iNamespace => iNamespace.Types.OfName( name ).ConcatNotNull<INamespaceOrNamedType>( iNamespace.Namespaces.OfName( name ) ),
-            INamedType iNamedType => iNamedType.NestedTypes.OfName( name ),
+            INamedType iNamedType => iNamedType.Types.OfName( name ),
             _ => throw new AssertionFailedException( $"Unexpected type {ns.GetType()}." )
         };
 
@@ -72,6 +72,5 @@ public class SerializableTypeIdResolverForIType : SerializableTypeIdResolver<ITy
 
     protected override IType GetSpecialType( SpecialType specialType ) => this._compilation.Factory.GetSpecialType( specialType.ToOurSpecialType() );
 
-    protected override bool HasTypeParameterOfName( IType type, string name )
-        => type.AssertCast<INamedType>().TypeParameters.Any( t => t.Name == name );
+    protected override bool HasTypeParameterOfName( IType type, string name ) => type.AssertCast<INamedType>().TypeParameters.Any( t => t.Name == name );
 }

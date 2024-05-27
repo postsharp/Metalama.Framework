@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class ReferenceValidatorRunner
+public sealed class ReferenceValidatorRunner
 {
     private readonly IConcurrentTaskRunner _concurrentTaskRunner;
     private readonly ProjectServiceProvider _serviceProvider;
@@ -113,7 +113,7 @@ public class ReferenceValidatorRunner
 
                 static ISymbol? GetMember( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol.GetClosestContainingMember();
 
-                static ISymbol? GetDeclaration( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol;
+                static ISymbol GetDeclaration( ReferencingSymbolInfo symbol ) => symbol.ReferencingSymbol;
 
                 // Choose the grouping factor according to the desired granularity.
                 var getGroupingKeyFunc = (Func<ReferencingSymbolInfo, ISymbol?>) (validatorGroup.Key switch

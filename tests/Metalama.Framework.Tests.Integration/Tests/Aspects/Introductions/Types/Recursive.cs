@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,21 +7,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "Test", TypeKind.Class);
-        var innerResult = builder.Advice.IntroduceType(result.Declaration, "InnerTest", TypeKind.Class);
-        builder.Advice.IntroduceType(innerResult.Declaration, "InnerInnerTest", TypeKind.Class);
+        var introduced = builder.IntroduceClass( "Test", TypeKind.Class );
+        var inner = introduced.IntroduceClass( "InnerTest", TypeKind.Class );
+        inner.IntroduceClass( "InnerInnerTest", TypeKind.Class );
     }
 
     [Template]
-    public void Method()
-    {
-    }
+    public void Method() { }
 }
 
 // <target>
 [IntroductionAttribute]
-public class TargetType
-{
-}
+public class TargetType { }

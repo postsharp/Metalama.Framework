@@ -25,6 +25,6 @@ internal sealed record TestAssemblyMetadata(
 {
     public TestProjectReferences ToProjectReferences()
         => new(
-            this.AssemblyReferences.Select( x => x.ToMetadataReference()! ).ToImmutableArray(),
+            [..this.AssemblyReferences.Select( x => x.ToMetadataReference()! )],
             this.GlobalUsingsFile );
 }

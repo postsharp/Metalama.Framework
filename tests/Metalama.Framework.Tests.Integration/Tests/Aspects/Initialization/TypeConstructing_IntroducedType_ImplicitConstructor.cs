@@ -1,4 +1,4 @@
-#if TESTOPTIONS
+#if TEST_OPTIONS
 // @Skipped(Constructor introduction not finished)
 #endif
 
@@ -13,7 +13,7 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceType( builder.Target, "IntroducedType", TypeKind.Class ).Declaration;
+        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType", TypeKind.Class ).Declaration;
 
         builder.Advice.IntroduceField( introducedType, nameof(Field) );
 

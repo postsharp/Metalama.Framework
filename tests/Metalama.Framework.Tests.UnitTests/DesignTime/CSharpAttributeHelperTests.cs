@@ -367,7 +367,7 @@ namespace Test
 
             var newSyntax = newRoot.ToFullString();
 
-            Assert.Equal( expectedSyntax, newSyntax );
+            AssertEx.EolInvariantEqual( expectedSyntax, newSyntax );
         }
 
         [Fact]
@@ -398,7 +398,7 @@ namespace Test
 
             var newRoot = await this.AddAttributeAsync( "TestAttribute", originalDeclaration );
 
-            Assert.Equal( expectedSyntax, newRoot.ToFullString() );
+            AssertEx.EolInvariantEqual( expectedSyntax, newRoot.ToFullString() );
         }
 
         [Fact]
@@ -431,7 +431,7 @@ namespace Test
 
             var newRoot = await this.AddAttributeAsync( "TestAttribute", originalDeclaration );
 
-            Assert.Equal( expectedSyntax, newRoot.ToFullString() );
+            AssertEx.EolInvariantEqual( expectedSyntax, newRoot.ToFullString() );
         }
 
         [Fact]
@@ -469,7 +469,7 @@ namespace Test
 
             var newRoot = await this.AddAttributeAsync( "TestAttribute", originalDeclaration );
 
-            Assert.Equal( expectedSyntax, newRoot.ToFullString() );
+            AssertEx.EolInvariantEqual( expectedSyntax, newRoot.ToFullString() );
         }
 
         [Fact]
@@ -501,7 +501,7 @@ namespace Test
 
             var newRoot = await this.AddAttributeAsync( "TestAttribute", originalDeclaration );
 
-            Assert.Equal( expectedSyntax, newRoot.ToFullString() );
+            AssertEx.EolInvariantEqual( expectedSyntax, newRoot.ToFullString() );
         }
 
         [Fact( Skip = "TODO #29087" )]
@@ -573,7 +573,7 @@ namespace Test
 
             var newRoot = await this.AddAttributeAsync( "TestAttribute", originalDeclaration );
 
-            Assert.Equal( expectedSyntax, newRoot.ToFullString() );
+            AssertEx.EolInvariantEqual( expectedSyntax, newRoot.ToFullString() );
         }
 
         private Task<SyntaxNode> AddAttributeAsync( string attributeName, SyntaxNode originalMethodDeclaration )

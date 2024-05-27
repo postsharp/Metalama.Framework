@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -16,14 +17,13 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             var mementoType =
-                builder.Advice.IntroduceType(
+                builder.Advice.IntroduceClass(
                     builder.Target,
                     "Memento",
-                    TypeKind.Class,
                     buildType: b =>
                     {
                         b.Accessibility = Accessibility.Public;
-                    }).Declaration;
+                    });
 
             var mementoFields = new List<IField>();
 
@@ -34,23 +34,22 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                     continue;
                 }
 
-                var fieldResult = builder.Advice.IntroduceField(
-                    mementoType,
+                var field = mementoType.IntroduceField(
                     nameof(MementoField),
                     buildField: b =>
                     {
                         b.Name = fieldOrProperty.Name;
                         b.Type = fieldOrProperty.Type;
                         b.Accessibility = Accessibility.Public;
+                        b.Writeability = Writeability.ConstructorOnly;
                     });
 
-                mementoFields.Add(fieldResult.Declaration);
+                mementoFields.Add(field.Declaration);
             }
 
-            builder.Advice.ImplementInterface(mementoType, typeof(IMemento));
+            mementoType.ImplementInterface(typeof(IMemento));
 
-            builder.Advice.IntroduceConstructor(
-                mementoType,
+            mementoType.IntroduceConstructor(
                 nameof(MementoConstructorTemplate),
                 buildConstructor: b =>
                 {
@@ -61,7 +60,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 },
                 args: new { fields = mementoFields });
 
-            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType });
+            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType.Declaration });
         }
 
         [Template]
@@ -72,39 +71,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         {
             var mementoType = (INamedType)meta.Tags["mementoType"];
 
-            return 
-                BuildNewExpression(
-                    mementoType, 
-                    meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
-                .Value;
-        }
+            var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared);
 
-        public IExpression BuildNewExpression(INamedType mementoType, IEnumerable<IFieldOrProperty> fieldsOrProperties)
-        {
-            ExpressionBuilder expressionBuilder = new ExpressionBuilder();
-            expressionBuilder.AppendVerbatim("new ");
-            expressionBuilder.AppendTypeName(mementoType);
-            expressionBuilder.AppendVerbatim("(");
-
-            bool first = true;
-
-            foreach (var fieldOrProperty in fieldsOrProperties)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    expressionBuilder.AppendVerbatim(",");
-                }
-
-                expressionBuilder.AppendExpression(fieldOrProperty);
-            }
-
-            expressionBuilder.AppendVerbatim(")");
-
-            return expressionBuilder.ToExpression();
+            return mementoType.Constructors.Single().Invoke(fieldExpressions);
         }
 
         [InterfaceMember]
@@ -140,7 +109,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         void Restore(IMemento memento);
     }
 
-    public interface IMemento;
+    public interface IMemento { }
 
     // <target>
     [Memento]

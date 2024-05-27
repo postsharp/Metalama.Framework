@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -134,10 +135,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 // Add the class to a namespace.
-                if ( !declaringType.Namespace.IsGlobalNamespace )
+                if ( !declaringType.ContainingNamespace.IsGlobalNamespace )
                 {
                     topDeclaration = NamespaceDeclaration(
-                        ParseName( declaringType.Namespace.FullName ),
+                        ParseName( declaringType.ContainingNamespace.FullName ),
                         default,
                         default,
                         SingletonList( topDeclaration ) );
@@ -185,12 +186,22 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             {
                 existingSignatures.Add(
                     constructor.Parameters.SelectAsArray(
-                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ), p.RefKind) ) );
+                        p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                              p.RefKind) ) );
             }
 
             foreach ( var constructor in type.Constructors )
             {
-                var initialConstructor = constructor.Translate( initialCompilationModel );
+                if ( !constructor.TryForCompilation( initialCompilationModel, out var initialConstructor ) )
+                {
+                    continue;
+                }
+
+                if ( initialConstructor is BuiltDeclaration )
+                {
+                    continue;
+                }
+
                 var finalConstructor = constructor.Translate( finalCompilationModel );
 
                 // TODO: Currently we don't see introduced parameters in builder code model.
@@ -200,7 +211,9 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                 if ( !existingSignatures.Add(
                         finalParameters.SelectAsArray(
-                            p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ), p.RefKind) ) ) )
+                            p => (
+                                (ISymbol) p.Type.GetSymbol()
+                                    .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ), p.RefKind) ) ) )
                 {
                     continue;
                 }
@@ -237,8 +250,10 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
                     if ( existingSignatures.Add(
                             nonOptionalParameters.SelectAsArray(
-                                p => ((ISymbol) p.Type.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypes ),
-                                      p.RefKind) ) ) )
+                                p => (
+                                    (ISymbol) p.Type.GetSymbol()
+                                        .AssertSymbolNullNotImplemented( UnsupportedFeatures.DesignTimeIntroducedTypeConstructorParameters ),
+                                    p.RefKind) ) ) )
                     {
                         constructors.Add(
                             ConstructorDeclaration(

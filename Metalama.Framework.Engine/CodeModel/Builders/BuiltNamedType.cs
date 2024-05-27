@@ -5,9 +5,12 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Comparers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -30,7 +33,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public bool HasDefaultConstructor => this.TypeBuilder.HasDefaultConstructor;
 
-    public INamedType? BaseType => this.TypeBuilder.BaseType;
+    public INamedType? BaseType => this.Compilation.Factory.GetDeclaration( this.TypeBuilder.BaseType, ReferenceResolutionOptions.CanBeMissing );
 
     public IImplementedInterfaceCollection AllImplementedInterfaces
         => new AllImplementedInterfacesCollection(
@@ -42,12 +45,16 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
             this,
             this.Compilation.GetInterfaceImplementationCollection( this.TypeBuilder.ToRef().As<INamedType>(), false ) );
 
-    public INamespace Namespace => this.TypeBuilder.Namespace;
+    INamespace INamedType.Namespace => this.ContainingNamespace;
+
+    public INamespace ContainingNamespace => this.TypeBuilder.ContainingNamespace;
+
+    INamedTypeCollection INamedType.NestedTypes => this.Types;
 
     public string FullName => this.TypeBuilder.FullName;
 
     [Memo]
-    public INamedTypeCollection NestedTypes
+    public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
             this.Compilation.GetNamedTypeCollection( this.TypeBuilder.ToRef().As<INamespaceOrNamedType>() ) );
@@ -139,9 +146,9 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
 
     public ExecutionScope ExecutionScope => this.TypeBuilder.ExecutionScope;
 
-    public Microsoft.CodeAnalysis.ITypeSymbol? TypeSymbol => null;
+    public ITypeSymbol? TypeSymbol => null;
 
-    public Microsoft.CodeAnalysis.ISymbol? Symbol => null;
+    public ISymbol? Symbol => null;
 
     public bool Equals( SpecialType specialType ) => false;
 
@@ -162,7 +169,7 @@ internal sealed class BuiltNamedType : BuiltMemberOrNamedType, INamedTypeImpl
         throw new NotSupportedException( "Reflection types on introduced types are not yet supported." );
     }
 
-    protected override Microsoft.CodeAnalysis.ISymbol? GetSymbol() => this.TypeSymbol;
+    protected override ISymbol? GetSymbol() => this.TypeSymbol;
 
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {

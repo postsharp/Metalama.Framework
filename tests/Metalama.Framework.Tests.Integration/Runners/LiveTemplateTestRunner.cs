@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Testing.AspectTesting;
 using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +22,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
             GlobalServiceProvider serviceProvider,
             string? projectDirectory,
             TestProjectReferences references,
-            ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, references, logger ) { }
+            ITestOutputHelper? logger,
+            ILicenseKeyProvider? licenseKeyProvider )
+            : base( serviceProvider, projectDirectory, references, logger, licenseKeyProvider ) { }
 
         protected override async Task RunAsync(
             TestInput testInput,
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             await base.RunAsync( testInput, testResult, testContext );
 
-            var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput );
+            var serviceProvider = testContext.ServiceProvider.AddLicenseConsumptionManagerForTest( testInput, this.LicenseKeyProvider );
 
             var compilation = CompilationModel.CreateInitialInstance(
                 new ProjectModel( TestCompilationFactory.CreateEmptyCSharpCompilation( "test" ), serviceProvider ),

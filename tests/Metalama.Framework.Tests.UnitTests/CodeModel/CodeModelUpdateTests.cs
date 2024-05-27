@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.AdviceImpl.Attributes;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Testing.UnitTesting;
 using System;
 using System.Linq;
@@ -433,24 +432,24 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes );
+        Assert.Empty( immutableCompilation.Types.Single().Types );
 
         var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of nested types.
-        Assert.Empty( type.NestedTypes );
+        Assert.Empty( type.Types );
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
-        Assert.Single( type.NestedTypes );
+        Assert.Single( type.Types );
 
         // Assert that there is still no type in original compilation.
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes );
+        Assert.Empty( immutableCompilation.Types.Single().Types );
     }
 
     [Fact]
@@ -464,24 +463,24 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes.OfName( "T" ) );
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
 
         var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of nested types.
-        Assert.Empty( type.NestedTypes.OfName( "T" ) );
+        Assert.Empty( type.Types.OfName( "T" ) );
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
-        Assert.Single( type.NestedTypes.OfName( "T" ) );
+        Assert.Single( type.Types.OfName( "T" ) );
 
         // Assert that there is still no type in original compilation.
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes.OfName( "T" ) );
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
     }
 
     [Fact]
@@ -495,7 +494,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes );
+        Assert.Empty( immutableCompilation.Types.Single().Types );
 
         var compilation = immutableCompilation.CreateMutableClone();
 
@@ -506,10 +505,10 @@ class C
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
-        Assert.Single( type.NestedTypes );
+        Assert.Single( type.Types );
 
         // Assert that there is still no type in original compilation.
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes );
+        Assert.Empty( immutableCompilation.Types.Single().Types );
     }
 
     [Fact]
@@ -523,7 +522,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes.OfName( "T" ) );
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
 
         var compilation = immutableCompilation.CreateMutableClone();
 
@@ -534,10 +533,10 @@ class C
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the type has been added.
-        Assert.Single( type.NestedTypes.OfName( "T" ) );
+        Assert.Single( type.Types.OfName( "T" ) );
 
         // Assert that there is still no type in original compilation.
-        Assert.Empty( immutableCompilation.Types.Single().NestedTypes.OfName( "T" ) );
+        Assert.Empty( immutableCompilation.Types.Single().Types.OfName( "T" ) );
     }
 
     [Fact]
@@ -561,7 +560,7 @@ class C
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the method has been added.
-        Assert.Equal( 2, type.NestedTypes.OfName( "T" ).Count() );
+        Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
     }
 
     [Fact]
@@ -581,13 +580,13 @@ class C
         var type = Assert.Single( compilation.Types );
 
         // Instantiate the memoize the collection of nested types.
-        Assert.Single( type.NestedTypes.OfName( "T" ) );
+        Assert.Single( type.Types.OfName( "T" ) );
 
         // Add a nested type.
         var typeBuilder = new NamedTypeBuilder( null!, type, "T" );
         compilation.AddTransformation( typeBuilder.ToTransformation() );
 
         // Assert that the method has been added.
-        Assert.Equal( 2, type.NestedTypes.OfName( "T" ).Count() );
+        Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
     }
 }

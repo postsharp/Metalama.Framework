@@ -83,7 +83,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         // Find the nested type.
-        var nestedType = builder.Target.NestedTypes.OfName( "Optional" ).FirstOrDefault();
+        var nestedType = builder.Target.Types.OfName( "Optional" ).FirstOrDefault();
 
         if (nestedType == null)
         {

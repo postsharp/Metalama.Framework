@@ -12,23 +12,18 @@ internal class Aspect1 : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceType(builder.Target, "IntroducedType", TypeKind.Class).Declaration;
+        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType", TypeKind.Class ).Declaration;
 
-
-        builder.Outbound.SelectMany( t => t.NestedTypes ).AddAspect<Aspect2>();
+        builder.Outbound.SelectMany( t => t.Types ).AddAspect<Aspect2>();
     }
 }
 
 internal class Aspect2 : TypeAspect
 {
     [Introduce]
-    public void Foo()
-    {
-    }
+    public void Foo() { }
 }
 
 // <target>
 [Aspect1]
-internal class TargetCode
-{
-}
+internal class TargetCode { }

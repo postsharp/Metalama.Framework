@@ -130,6 +130,8 @@ internal sealed class SubstitutedMethod : SubstitutedMember, IMethodImpl
 
         IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
+        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
         public SerializableDeclarationId ToSerializableId() => this.GetSerializableId();
 
         public IAssembly DeclaringAssembly => this._targetMethod.DeclaringAssembly;

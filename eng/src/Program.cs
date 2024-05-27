@@ -6,15 +6,17 @@ using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
 using PostSharp.Engineering.BuildTools.Dependencies.Model;
+using PostSharp.Engineering.BuildTools.Docker;
 using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System.IO;
+using System.Runtime.InteropServices;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_2;
 
 var product = new Product( MetalamaDependencies.Metalama )
 {
-    Solutions = new Solution[]
-    {
+    Solutions =
+    [
         new DotNetSolution( "Metalama.sln" )
         {
             SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
@@ -23,8 +25,8 @@ var product = new Product( MetalamaDependencies.Metalama )
             
             // We don't run the tests for the whole solution because they are too slow and redundant. See #34277.
             TestMethod = BuildMethod.None,
-            FormatExclusions = new[]
-            {
+            FormatExclusions =
+            [
                 // Test payloads should not be formatted because it would break the test output comparison.
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
@@ -32,7 +34,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 
                 // XML formatting seems to be conflicting.
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
-            }
+            ]
         },
         new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
         {
@@ -48,7 +50,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         {
             IsTestOnly = true
         }
-    },
+    ],
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.Testing.UnitTesting.$(PackageVersion).nupkg",
@@ -60,8 +62,8 @@ var product = new Product( MetalamaDependencies.Metalama )
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.Tool.$(PackageVersion).nupkg" ),
-    ParametrizedDependencies = new[]
-    {
+    ParametrizedDependencies =
+    [
         DevelopmentDependencies.PostSharpEngineering.ToDependency(),
         MetalamaDependencies.MetalamaBackstage.ToDependency(),
         MetalamaDependencies.MetalamaCompiler.ToDependency(
@@ -69,29 +71,29 @@ var product = new Product( MetalamaDependencies.Metalama )
                 BuildConfiguration.Release, BuildConfiguration.Release, BuildConfiguration.Public
             ) ),
         MetalamaDependencies.MetalamaFrameworkRunTime.ToDependency()
-    },
-    SourceDependencies = new[] { MetalamaDependencies.MetalamaFrameworkPrivate },
-    ExportedProperties = { { @"eng\Versions.props", new[] { "RoslynApiMaxVersion" } } },
+    ],
+    SourceDependencies = [MetalamaDependencies.MetalamaFrameworkPrivate],
+    ExportedProperties = { { @"eng\Versions.props", ["RoslynApiMaxVersion"] } },
     Configurations = Product.DefaultConfigurations
         .WithValue(
             BuildConfiguration.Debug,
             c => c with
             {
-                AdditionalArtifactRules = new[]
-                {
+                AdditionalArtifactRules =
+                [
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
                     $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
 
                     // Do not upload uncompressed crash reports because they are too big.
-                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs",
-                }
+                    $@"-:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*.dmp=>logs"
+                ]
             } ),
-    SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } }
+    SupportedProperties = { { "PrepareStubs", "The prepare command generates stub files, instead of actual implementations." } },
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
-product.PrepareCompleted += TestLicensesCache.FetchOnPrepareCompleted;
+product.PrepareCompleted += args => TestLicenseKeyDownloader.Download( args.Context );
 
 var commandApp = new CommandApp();
 
@@ -125,7 +127,8 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     }
 
     var toolDirectory = Path.Combine( generatorDirectory, "bin", "Debug", "net8.0" );
-    var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter.exe" );
+    var toolExtension = RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ? ".exe" : "";
+    var toolPath = Path.Combine( toolDirectory, "Metalama.Framework.GenerateMetaSyntaxRewriter" + toolExtension );
     var srcDirectory = arg.Context.RepoDirectory;
     var commandLine = srcDirectory;
 

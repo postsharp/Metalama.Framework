@@ -872,8 +872,8 @@ internal sealed partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPip
     /// </summary>
     public bool IsCompileTimeSyntaxTreeOutdated( string name )
         => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees
-            && compileTimeSyntaxTrees.TryGetValue( name, out var isvalid )
-            && !isvalid;
+           && compileTimeSyntaxTrees.TryGetValue( name, out var isValid )
+           && !isValid;
 
     private IReadOnlyList<DesignTimeAspectInstance>? GetAspectInstancesOnSymbol( ISymbol symbol )
     {

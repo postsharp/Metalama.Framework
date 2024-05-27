@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             using var testContext = this.CreateSerializationTestContext( code );
 
             var compilation = testContext.Compilation;
-            IType single = compilation.Types.Single( t => t.Name == "Target" ).NestedTypes.Single( nt => nt.Name == "Sub" );
+            IType single = compilation.Types.Single( t => t.Name == "Target" ).Types.Single( nt => nt.Name == "Sub" );
 
             return testContext.Serialize<Type>( CompileTimeType.Create( single ) ).ToString();
         }

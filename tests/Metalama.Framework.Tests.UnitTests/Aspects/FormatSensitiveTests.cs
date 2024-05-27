@@ -96,6 +96,6 @@ public string Prop132
     }
 }";
 
-        Assert.Equal( expectedTransformedProperty.Trim(), transformedProperty.Trim() );
+        AssertEx.EolInvariantEqual( expectedTransformedProperty.Trim(), transformedProperty.Trim() );
     }
 }

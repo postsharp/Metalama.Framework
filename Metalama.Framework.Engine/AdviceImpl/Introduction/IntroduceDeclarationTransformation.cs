@@ -14,7 +14,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
 internal abstract class IntroduceDeclarationTransformation<T> : BaseTransformation, IIntroduceDeclarationTransformation,
-                                                                      IInjectMemberTransformation
+                                                                IInjectMemberTransformation
     where T : DeclarationBuilder
 {
     public T IntroducedDeclaration { get; }

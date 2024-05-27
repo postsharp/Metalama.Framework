@@ -22,17 +22,17 @@ public static class SerializableTypeIdGenerator
         return new SerializableTypeId( id );
     }
 
-    public static SerializableTypeId GetSerializableTypeId(this IType type, bool bypassSymbols = false)
+    public static SerializableTypeId GetSerializableTypeId( this IType type, bool bypassSymbols = false )
     {
-        var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type(type, bypassSymbols).ToString();
+        var id = SyntaxGenerationContext.Contextless.SyntaxGenerator.Type( type, bypassSymbols ).ToString();
 
-        if (type.IsNullable == false && type.IsReferenceType != false)
+        if ( type.IsNullable == false && type.IsReferenceType != false )
         {
             id += '!';
         }
 
         id = SerializableTypeIdResolverForIType.Prefix + id;
 
-        return new SerializableTypeId(id);
+        return new SerializableTypeId( id );
     }
 }

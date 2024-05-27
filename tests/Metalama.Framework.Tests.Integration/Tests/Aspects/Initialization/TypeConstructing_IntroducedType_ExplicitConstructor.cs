@@ -1,4 +1,4 @@
-#if TESTOPTIONS
+#if TEST_OPTIONS
 // @Skipped(Static constructor introduction)
 #endif
 
@@ -13,15 +13,15 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceType(builder.Target, "IntroducedType", TypeKind.Class).Declaration;
-        builder.Advice.IntroduceConstructor(introducedType, nameof(StaticConstructorTemplate), buildConstructor: b => { b.IsStatic = true; });
-        builder.Advice.AddInitializer(introducedType, nameof(Template), InitializerKind.BeforeTypeConstructor);
+        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType", TypeKind.Class ).Declaration;
+        builder.Advice.IntroduceConstructor( introducedType, nameof(StaticConstructorTemplate), buildConstructor: b => { b.IsStatic = true; } );
+        builder.Advice.AddInitializer( introducedType, nameof(Template), InitializerKind.BeforeTypeConstructor );
     }
 
     [Template]
     public void StaticConstructorTemplate()
     {
-        Console.WriteLine($"Static constructor");
+        Console.WriteLine( $"Static constructor" );
     }
 
     [Template]
@@ -33,6 +33,4 @@ public class Aspect : TypeAspect
 
 // <target>
 [Aspect]
-public class TargetCode
-{
-}
+public class TargetCode { }

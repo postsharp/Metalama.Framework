@@ -54,7 +54,7 @@ class User {
         {
             // Pure types
             var origin = this._topLevelTypes.Single( t => t.Name == "Origin" );
-            var nested = origin.NestedTypes.Single();
+            var nested = origin.Types.Single();
             var descendant = this._topLevelTypes.Single( t => t.Name == "Descendant" );
 
             this.TestSerializable(

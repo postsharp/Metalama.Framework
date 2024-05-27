@@ -5,7 +5,8 @@ public class TargetClass : BaseClass
   public int InvokerBefore
   {
     get
-    { // Invoke TargetClass.Property
+    {
+      // Invoke TargetClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_AspectHidden.BaseClass.Property;
       // Invoke BaseClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_AspectHidden.BaseClass.Property;
@@ -30,7 +31,8 @@ public class TargetClass : BaseClass
   public int InvokerAfter
   {
     get
-    { // Invoke TargetClass.Property
+    {
+      // Invoke TargetClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_AspectHidden.TargetClass.Property;
       // Invoke TargetClass.Property
       _ = global::Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Properties.BaseClassStatic_AspectHidden.TargetClass.Property;

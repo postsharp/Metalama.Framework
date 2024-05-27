@@ -36,7 +36,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal abstract Ref<IDeclaration> ToRef();
 
-        Ref<IDeclaration> IDeclarationImpl.ToRef() => this.ToRef();
+        Ref<ICompilationElement> ICompilationElementImpl.ToRef() => this.ToRef().As<ICompilationElement>();
+
+        Ref<IDeclaration> IDeclarationImpl.ToRef() => this.ToRef().As<IDeclaration>();
 
         public abstract IAssembly DeclaringAssembly { get; }
 

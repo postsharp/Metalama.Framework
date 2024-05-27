@@ -1,5 +1,5 @@
 [Aspect]
-class Target
+internal class Target
 {
   class TestType : global::System.Object
   {

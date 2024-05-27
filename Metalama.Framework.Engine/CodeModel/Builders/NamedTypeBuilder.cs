@@ -12,6 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -27,14 +30,14 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
         declaringNamespaceOrType as INamedType,
         name )
     {
-        this.Namespace = declaringNamespaceOrType switch
+        this.ContainingNamespace = declaringNamespaceOrType switch
         {
             INamespace @namespace => @namespace,
-            INamedType namedType => namedType.Namespace,
-            _ => throw new AssertionFailedException( $"Unsupported: {declaringNamespaceOrType}" ),
+            INamedType namedType => namedType.ContainingNamespace,
+            _ => throw new AssertionFailedException( $"Unsupported: {declaringNamespaceOrType}" )
         };
 
-        this.BaseType = ((CompilationModel) this.Namespace.Compilation).Factory.GetSpecialType( Code.SpecialType.Object );
+        this.BaseType = ((CompilationModel) this.ContainingNamespace.Compilation).Factory.GetSpecialType( SpecialType.Object );
     }
 
     public override void Freeze()
@@ -57,7 +60,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
         return builder;
     }
 
-    public override IDeclaration ContainingDeclaration => (IDeclaration?) this.DeclaringType ?? this.Namespace;
+    public override IDeclaration ContainingDeclaration => (IDeclaration?) this.DeclaringType ?? this.ContainingNamespace;
 
     public bool IsPartial
     {
@@ -89,17 +92,21 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
     [Memo]
     public IImplementedInterfaceCollection ImplementedInterfaces => new EmptyImplementedInterfaceCollection();
 
-    public INamespace Namespace { get; }
+    INamespace INamedType.Namespace => this.ContainingNamespace;
 
-    INamespace INamedType.Namespace => this.Namespace;
+    public INamespace ContainingNamespace { get; }
+
+    INamedTypeCollection INamedType.NestedTypes => this.Types;
+
+    INamespace INamedType.ContainingNamespace => this.ContainingNamespace;
 
     public string FullName
         => this.DeclaringType != null
             ? $"{this.DeclaringType.FullName}.{this.Name}"
-            : $"{this.Namespace.FullName}.{this.Name}";
+            : $"{this.ContainingNamespace.FullName}.{this.Name}";
 
     [Memo]
-    public INamedTypeCollection NestedTypes => new EmptyNamedTypeCollection();
+    public INamedTypeCollection Types => new EmptyNamedTypeCollection();
 
     [Memo]
     public IPropertyCollection Properties => new EmptyPropertyCollection( this );
@@ -156,9 +163,9 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public INamedType UnderlyingType => this;
 
-    public Code.TypeKind TypeKind => Code.TypeKind.Class;
+    public TypeKind TypeKind => TypeKind.Class;
 
-    public Code.SpecialType SpecialType => Code.SpecialType.None;
+    public SpecialType SpecialType => SpecialType.None;
 
     public bool? IsReferenceType => true;
 
@@ -173,12 +180,12 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public bool IsCanonicalGenericInstance => false;
 
-    Code.Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
+    Accessibility IMemberOrNamedType.Accessibility => this.Accessibility;
 
     [Memo]
     public IAttributeCollection Attributes => new AttributeBuilderCollection();
 
-    public int Depth => this.Namespace.Depth + 1;
+    public int Depth => this.ContainingNamespace.Depth + 1;
 
     public bool BelongsToCurrentProject => true;
 
@@ -194,7 +201,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public ITypeSymbol? TypeSymbol => null;
 
-    public bool Equals( Code.SpecialType specialType ) => false;
+    public bool Equals( SpecialType specialType ) => false;
 
     public bool Equals( IType? otherType, TypeComparison typeComparison )
         => this.Compilation.Comparers.GetTypeComparer( typeComparison ).Equals( this, otherType );

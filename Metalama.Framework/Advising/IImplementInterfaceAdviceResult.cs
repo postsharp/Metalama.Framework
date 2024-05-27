@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Advising;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Advising;
 /// method. The result can be used to introduce interface members using the extension methods in <see cref="AdviserExtensions"/>.
 /// </summary>
 [CompileTime]
-public interface IImplementInterfaceAdviceResult : IAdviceResult, IAdviser<INamedType>
+public interface IImplementInterfaceAdviceResult : IAdviceResult
 {
     /// <summary>
     /// Gets a list of interfaces that were considered when implementing the given interface.
@@ -27,11 +28,12 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult, IAdviser<IName
     /// <remarks>
     /// This property contains only members of interfaces that were implemented. Members of interfaces that were ignored are not included in the list.
     /// </remarks>
+    [Obsolete( "This property is no longer supported because members may be resolved after the call to the ImplementInterface method." )]
     IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
     /// <summary>
-    /// Returns an <see cref="IAdviser{T}"/> allowing to introduce explicit members.
+    /// Gets an <see cref="IAdviser{T}"/> allowing to introduce explicit members.
     /// </summary>
-    /// <returns></returns>
-    IAdviser<INamedType> WithExplicitImplementation();
+    [Obsolete( "Not implemented." )]
+    IAdviser<INamedType> ExplicitImplementation { get; }
 }

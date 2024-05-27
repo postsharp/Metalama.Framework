@@ -87,7 +87,7 @@ public sealed class ReferenceEnd
         return requestedGranularity switch
         {
             ReferenceGranularity.Namespace => this.Declaration as INamespace
-                                              ?? this.Declaration.GetClosestNamedType()?.Namespace
+                                              ?? this.Declaration.GetClosestNamedType()?.ContainingNamespace
                                               ?? throw new InvalidOperationException(
                                                   $"Cannot get the namespace of '{this.Declaration}' because it is a {this.Declaration.DeclarationKind}." ),
             ReferenceGranularity.Type => this.Declaration.GetClosestNamedType()

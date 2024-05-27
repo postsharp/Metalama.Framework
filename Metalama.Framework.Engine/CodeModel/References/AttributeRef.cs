@@ -29,12 +29,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, CompilationContext compilation )
         {
             // Find the parent declaration.
-            var resolved =
+            var (attributes, symbol) =
                 this._declaringDeclaration.GetAttributeData( compilation );
 
             // In the parent, find the AttributeData corresponding to the current item.
 
-            var attributeData = resolved.Attributes.SingleOrDefault(
+            var attributeData = attributes.SingleOrDefault(
                 a => a.ApplicationSyntaxReference != null && a.ApplicationSyntaxReference.Span == attributeSyntax.Span
                                                           && a.ApplicationSyntaxReference.SyntaxTree == attributeSyntax.SyntaxTree );
 
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             // Save the resolved AttributeData.
             this.Target = attributeData;
 
-            return (attributeData, resolved.Symbol);
+            return (attributeData, symbol);
         }
 
         public AttributeRef( AttributeData attributeData, Ref<IDeclaration> declaringDeclaration, CompilationContext compilationContext )
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             this.AttributeType = attributeType;
             this.Target = this._originalTarget = attributeSyntax;
-            this._declaringDeclaration = Ref.FromSymbol( declaration, compilationContext );
+            this._declaringDeclaration = Ref.FromSymbol<IDeclaration>( declaration, compilationContext );
         }
 
         public AttributeRef( AttributeBuilder builder )

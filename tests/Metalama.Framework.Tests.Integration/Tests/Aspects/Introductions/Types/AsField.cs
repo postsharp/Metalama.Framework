@@ -7,28 +7,33 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType", TypeKind.Class, buildType: t => { t.Accessibility = Accessibility.Public; });
-        var existingNested = builder.Target.NestedTypes.Single();
+        var result = builder.Advice.IntroduceClass(
+            builder.Target,
+            "IntroducedNestedType",
+            TypeKind.Class,
+            buildType: t => { t.Accessibility = Code.Accessibility.Public; } );
+
+        var existingNested = builder.Target.Types.Single();
 
         builder.Advice.IntroduceField(
-            builder.Target.ForCompilation(builder.Advice.MutableCompilation), 
-            nameof(FieldTemplate), 
-            buildField: b => 
+            builder.Target,
+            nameof(FieldTemplate),
+            buildField: b =>
             {
                 b.Name = "FieldWithIntroduced";
                 b.Type = result.Declaration;
-            });
+            } );
 
         builder.Advice.IntroduceField(
-            builder.Target.ForCompilation(builder.Advice.MutableCompilation),
+            builder.Target,
             nameof(FieldTemplate),
             buildField: b =>
             {
                 b.Name = "FieldWithExisting";
                 b.Type = existingNested;
-            });
+            } );
     }
 
     [Template]
@@ -39,7 +44,5 @@ public class IntroductionAttribute : TypeAspect
 [IntroductionAttribute]
 public class TargetType
 {
-    public class ExistingNestedType
-    {
-    }
+    public class ExistingNestedType { }
 }

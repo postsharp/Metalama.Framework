@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Comparers;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -13,18 +12,17 @@ using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
-internal sealed class DeclarationEqualityComparer : IDeclarationComparer
+internal sealed partial class DeclarationEqualityComparer : IDeclarationComparer
 {
-    private readonly Compilation _compilation;
-    private readonly ReflectionMapper _reflectionMapper;
-
     private readonly RefEqualityComparer<IDeclaration> _innerComparer;
+    private readonly Compilation _compilation;
+    private readonly Conversions _conversions;
 
-    public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation, bool includeNullability )
+    public DeclarationEqualityComparer( Compilation compilation, bool includeNullability )
     {
         this._innerComparer = includeNullability ? RefEqualityComparer<IDeclaration>.IncludeNullability : RefEqualityComparer<IDeclaration>.Default;
-        this._reflectionMapper = reflectionMapper;
         this._compilation = compilation;
+        this._conversions = new Conversions( this );
     }
 
     public bool Equals( IDeclaration? x, IDeclaration? y )
@@ -42,56 +40,60 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
 
     public int GetHashCode( INamedType obj ) => this._innerComparer.StructuralDeclarationComparer.GetHashCode( obj );
 
-    public bool Is( IType left, IType right, ConversionKind kind )
+    public bool Is( IType left, IType right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
+
+    /// <param name="bypassSymbols">
+    /// Does not use the symbol-based implementation, even when available. Used for testing.
+    /// Note that this mode is not fully implemented for conversions that only apply to built-in type (like built-in implicit numeric conversions),
+    /// because the types in question are guaranteed to be symbol-based and without introductions.
+    /// </param>
+    internal bool Is( IType left, IType right, ConversionKind kind, bool bypassSymbols )
     {
-        if ( left.GetSymbol() is { } leftSymbol && right.GetSymbol() is { } rightSymbol )
+        if ( kind != ConversionKind.TypeDefinition )
         {
-            return this.Is( leftSymbol, rightSymbol, kind );
-        }
-
-        if ( kind is not ConversionKind.Reference and not ConversionKind.Default || left is not INamedType leftType || right is not INamedType
-             || right is INamedType { IsGeneric: true } || right is INamedType { TypeKind: Code.TypeKind.Interface } )
-        {
-            // TODO: Implement.
-            throw new NotSupportedException( "Not yet supported on introduced types." );
-        }
-
-        var current = leftType;
-
-        while ( current != null )
-        {
-            if ( this._innerComparer.StructuralDeclarationComparer.Equals( current, right ) )
+            if ( ReferenceEquals( left, right ) )
             {
                 return true;
             }
-
-            current = current.BaseType;
         }
 
-        return false;
+        if ( left.GetSymbol() is { } leftSymbol && right.GetSymbol() is { } rightSymbol && !bypassSymbols )
+        {
+            // If there is conversion between the original symbols, there should be conversion between the modified types.
+            // If there is no conversion between symbols, we have to check the modified types because of introductions.
+            if ( this.Is( leftSymbol, rightSymbol, kind ) )
+            {
+                return true;
+            }
+        }
+
+        if ( kind == ConversionKind.TypeDefinition )
+        {
+            // Cannot use code based on Roslyn for this kind of conversion.
+
+            if ( right is not INamedType { IsCanonicalGenericInstance: true } rightNamedType )
+            {
+                throw new ArgumentException(
+                    $"{nameof(ConversionKind)}.{nameof(ConversionKind.TypeDefinition)} can only be used with canonical generic instance on the right side." );
+            }
+
+            return this.IsOfTypeDefinition( left, rightNamedType );
+        }
+
+        return this._conversions.HasConversion( left, right, kind );
     }
 
     public bool Is( MemberRef<INamedType> left, IType right, ConversionKind kind )
-    {
-        // This should not instantiate the type if not needed.
-        switch ( left.Target )
-        {
-            case ITypeSymbol symbol:
-                return this.Is( symbol, right.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ), kind );
+        => this.Is( left.GetTarget( right.Compilation ), right, kind );
 
-            case NamedTypeBuilder builder:
-                return this.Is( builder, right, kind );
+    public bool Is( IType left, Type right, ConversionKind kind ) => this.Is( left, right, kind, bypassSymbols: false );
 
-            default:
-                throw new AssertionFailedException( $"Unsupported: {left.Target}" );
-        }
-    }
-
-    public bool Is( IType left, Type right, ConversionKind kind )
+    internal bool Is( IType left, Type right, ConversionKind kind, bool bypassSymbols )
         => this.Is(
-            left.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.IntroducedTypeComparison ),
-            this._reflectionMapper.GetTypeSymbol( right ),
-            kind );
+            left,
+            left.GetCompilationModel().Factory.GetTypeByReflectionType( right ),
+            kind,
+            bypassSymbols );
 
     internal bool Is( ITypeSymbol left, ITypeSymbol right, ConversionKind kind )
     {
@@ -114,14 +116,7 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
                     $"{nameof(ConversionKind)}.{nameof(ConversionKind.TypeDefinition)} can only be used with unbound generic type on the right side." );
             }
 
-            switch ( left )
-            {
-                case INamedTypeSymbol leftNamedType:
-                    return IsOfTypeDefinition( leftNamedType, rightNamedType );
-
-                default:
-                    return false;
-            }
+            return IsOfTypeDefinition( left, rightNamedType );
         }
 
         var conversion = this._compilation.ClassifyConversion( left, right );
@@ -135,25 +130,25 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
                 return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true };
 
             case ConversionKind.Default:
-                return conversion is { IsIdentity: true } or { IsImplicit: true, IsReference: true } or { IsImplicit: true, IsBoxing: true };
+                return conversion is { IsIdentity: true } or ({ IsImplicit: true } and ({ IsReference: true } or { IsBoxing: true } or { IsNullable: true }));
 
             default:
                 throw new ArgumentOutOfRangeException( nameof(kind) );
         }
     }
 
-    private static bool IsOfTypeDefinition( INamedTypeSymbol type, INamedTypeSymbol typeDefinition )
+    private static bool IsOfTypeDefinition( ITypeSymbol type, INamedTypeSymbol typeDefinition )
     {
         // TODO: This can be optimized (e.g. when searching for interface definition, classes don't have to be checked for symbol equality).
 
         // Evaluate the current type.
 
-        if ( SymbolEqualityComparer.Default.Equals( type.ConstructedFrom, typeDefinition ) )
+        if ( SymbolEqualityComparer.Default.Equals( (type as INamedTypeSymbol)?.ConstructedFrom, typeDefinition ) )
         {
             return true;
         }
 
-        if ( typeDefinition is { TypeKind: RoslynTypeKind.Interface } )
+        if ( typeDefinition.TypeKind == RoslynTypeKind.Interface )
         {
             // When searching for an interface, we should consider interfaces defined by the evaluated type.
             if ( type.Interfaces.Any( i => IsOfTypeDefinition( i, typeDefinition ) ) )
@@ -164,5 +159,29 @@ internal sealed class DeclarationEqualityComparer : IDeclarationComparer
         }
 
         return type.BaseType != null && IsOfTypeDefinition( type.BaseType, typeDefinition );
+    }
+
+    private bool IsOfTypeDefinition( IType type, INamedType typeDefinition )
+    {
+        // TODO: This can be optimized (e.g. when searching for interface definition, classes don't have to be checked for symbol equality).
+
+        // Evaluate the current type.
+
+        if ( this.Equals( (type as INamedType)?.Definition, typeDefinition ) )
+        {
+            return true;
+        }
+
+        if ( typeDefinition.TypeKind == Code.TypeKind.Interface )
+        {
+            // When searching for an interface, we should consider interfaces defined by the evaluated type.
+            if ( type.GetImplementedInterfaces().Any( i => this.IsOfTypeDefinition( i, typeDefinition ) ) )
+            {
+                // The type implements interface that has the same definition.
+                return true;
+            }
+        }
+
+        return type.GetBaseType() != null && this.IsOfTypeDefinition( type.GetBaseType()!, typeDefinition );
     }
 }

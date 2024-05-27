@@ -3,6 +3,7 @@
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities;
@@ -11,6 +12,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -409,9 +411,26 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
         ProjectServiceProvider serviceProvider,
         PartialCompilation partialCompilation,
         string htmlExtension,
-        Func<string, FileDiffInfo?>? getDiffInfo = null )
+        Func<string, FileDiffInfo?>? getDiffInfo = null,
+        bool includeDiagnostics = false,
+        IEnumerable<Diagnostic>? additionalDiagnostics = null )
     {
         var compilation = partialCompilation.Compilation;
+
+        ImmutableDictionaryOfArray<string, Diagnostic>? diagnosticsBySyntaxTree;
+
+        if ( includeDiagnostics )
+        {
+            additionalDiagnostics ??= Enumerable.Empty<Diagnostic>();
+
+            diagnosticsBySyntaxTree = additionalDiagnostics.Concat( compilation.GetDiagnostics() )
+                .ToMultiValueDictionary( d => d.Location.SourceTree?.FilePath ?? "", d => d );
+        }
+        else
+        {
+            diagnosticsBySyntaxTree = null;
+        }
+
         var writer = new HtmlCodeWriter( serviceProvider, new HtmlCodeWriterOptions( true ) );
 
         var workspace = new AdhocWorkspace();
@@ -464,7 +483,9 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
 #endif
             var diffInfo = getDiffInfo?.Invoke( documentPath );
 
-            await writer.WriteAsync( document, textWriter, null, diffInfo );
+            var diagnostics = includeDiagnostics ? diagnosticsBySyntaxTree![documentPath] : ImmutableArray<Diagnostic>.Empty;
+
+            await writer.WriteAsync( document, textWriter, diagnostics, diffInfo );
         }
     }
 
@@ -472,14 +493,17 @@ public sealed class HtmlCodeWriter : FormattedCodeWriter
         IProjectOptions projectOptions,
         ProjectServiceProvider serviceProvider,
         PartialCompilation inputCompilation,
-        PartialCompilation outputCompilation )
+        PartialCompilation outputCompilation,
+        IEnumerable<Diagnostic>? additionalDiagnostics = null )
     {
         await WriteAllAsync(
             projectOptions,
             serviceProvider,
             inputCompilation,
             ".cs.html",
-            p => GetDiffInfoForPath( p, true ) );
+            p => GetDiffInfoForPath( p, true ),
+            true,
+            additionalDiagnostics );
 
         await WriteAllAsync(
             projectOptions,

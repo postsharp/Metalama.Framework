@@ -34,14 +34,13 @@ internal sealed partial class ContextualSyntaxGenerator
 
     static ContextualSyntaxGenerator()
     {
-        var type = WorkspaceHelper.CSharpWorkspacesAssembly.GetType("Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator")!;
-        var field = type.GetField("Instance", BindingFlags.Public | BindingFlags.Static)!;
-        _roslynSyntaxGenerator = (SyntaxGenerator)field.GetValue(null).AssertNotNull();
+        var type = WorkspaceHelper.CSharpWorkspacesAssembly.GetType( "Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
+        var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
+        _roslynSyntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
     }
 
     private readonly SyntaxGeneratorForIType _syntaxGeneratorForIType;
-    private readonly ConcurrentDictionary<IType, TypeSyntax> _typeSyntaxCache;
-    private readonly ConcurrentDictionary<ITypeSymbol, TypeSyntax> _typeSymbolSyntaxCache;
+    private readonly ConcurrentDictionary<Ref<IType>, TypeSyntax> _typeSyntaxCache;
 
     public bool IsNullAware { get; }
 
@@ -50,9 +49,8 @@ internal sealed partial class ContextualSyntaxGenerator
     internal ContextualSyntaxGenerator( SyntaxGenerationContext context, bool nullAware )
     {
         this.SyntaxGenerationContext = context;
-        this._syntaxGeneratorForIType = new(context.Options);
-        this._typeSyntaxCache = [];
-        this._typeSymbolSyntaxCache = new(SymbolEqualityComparer.IncludeNullability);
+        this._syntaxGeneratorForIType = new SyntaxGeneratorForIType( context.Options );
+        this._typeSyntaxCache = new ConcurrentDictionary<Ref<IType>, TypeSyntax>( RefEqualityComparer<IType>.IncludeNullability );
         this.IsNullAware = nullAware;
     }
 
@@ -167,7 +165,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
     public DefaultExpressionSyntax DefaultExpression( IType type )
         => SyntaxFactory.DefaultExpression( this.Type( type ) )
-            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext);
+            .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
 
     public ArrayCreationExpressionSyntax ArrayCreationExpression( TypeSyntax elementType, IEnumerable<SyntaxNode> elements )
     {
@@ -350,7 +348,7 @@ internal sealed partial class ContextualSyntaxGenerator
     {
         var member = type.GetMembers()
             .OfType<IFieldSymbol>()
-            .FirstOrDefault( f => f is { IsConst: true, ConstantValue: { } } && f.ConstantValue.Equals( value ) );
+            .FirstOrDefault( f => f is { IsConst: true, ConstantValue: not null } && f.ConstantValue.Equals( value ) );
 
         return this.EnumValueExpression( this.Type( type ), value, member?.Name );
     }
@@ -378,10 +376,10 @@ internal sealed partial class ContextualSyntaxGenerator
         {
             return
                 MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    type,
-                    this.IdentifierName( memberName ) )
-                .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        type,
+                        this.IdentifierName( memberName ) )
+                    .WithSimplifierAnnotationIfNecessary( this.SyntaxGenerationContext );
         }
     }
 
@@ -464,11 +462,30 @@ internal sealed partial class ContextualSyntaxGenerator
 
         if ( this.SyntaxGenerationContext.HasCompilationContext && type.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
         {
-            return this._typeSyntaxCache.AssertNotNull().GetOrAdd( type, static ( s, x ) => x.TypeCore( s ), this );
+            return this._typeSyntaxCache.AssertNotNull()
+                .GetOrAdd(
+                    type.ToTypedRef(),
+                    static ( _, x ) => x.This.TypeCore( x.Type ),
+                    (This: this, Type: type) );
         }
         else
         {
             return this.TypeCore( type );
+        }
+    }
+
+    public TypeSyntax Type( ITypeSymbol symbol )
+    {
+        if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
+        {
+            return this._typeSyntaxCache.GetOrAdd(
+                symbol.ToTypedRef<IType>( this.SyntaxGenerationContext.CompilationContext ),
+                static ( _, x ) => x.This.TypeCore( x.Type ),
+                (This: this, Type: symbol) );
+        }
+        else
+        {
+            return this.TypeCore( symbol );
         }
     }
 
@@ -478,7 +495,7 @@ internal sealed partial class ContextualSyntaxGenerator
 
         if ( !this.IsNullAware )
         {
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type: type ).Visit( typeSyntax ).AssertNotNull();
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax ).AssertNotNull();
         }
 
         if ( this.Options.TriviaMatters )
@@ -488,18 +505,6 @@ internal sealed partial class ContextualSyntaxGenerator
         }
 
         return typeSyntax;
-    }
-
-    public TypeSyntax Type( ITypeSymbol symbol )
-    {
-        if ( this.SyntaxGenerationContext.HasCompilationContext && symbol.BelongsToCompilation( this.SyntaxGenerationContext.CompilationContext ) == true )
-        {
-            return this._typeSymbolSyntaxCache.GetOrAdd( symbol, static ( s, x ) => x.TypeCore( s ), this );
-        }
-        else
-        {
-            return this.TypeCore( symbol );
-        }
     }
 
     private TypeSyntax TypeCore( ITypeSymbol symbol )
@@ -899,7 +904,7 @@ internal sealed partial class ContextualSyntaxGenerator
             TokenWithTrailingSpace( disableOrRestoreKind ),
             errorCodes,
             Token( default, SyntaxKind.EndOfDirectiveToken, this.SyntaxGenerationContext.ElasticEndOfLineTriviaList ),
-            isActive: true );
+            true );
 
     public ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand, IType? operandType )
     {

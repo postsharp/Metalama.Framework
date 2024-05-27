@@ -9,7 +9,15 @@ internal class TestAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var constructor = builder.Advice.IntroduceConstructor(builder.Target, nameof(ConstructorTemplate), buildConstructor: b => { b.AddParameter("p", typeof(object)); }).Declaration;
+        var constructor =
+            builder.Advice.IntroduceConstructor(
+                builder.Target,
+                nameof(ConstructorTemplate),
+                buildConstructor: b =>
+                {
+                    b.AddParameter("p", typeof(object));
+                }).Declaration;
+
         builder.Advice.AddContract(constructor.Parameters.Single(), nameof(ValidationTemplate));
     }
 

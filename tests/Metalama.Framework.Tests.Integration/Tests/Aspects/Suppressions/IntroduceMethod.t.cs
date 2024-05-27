@@ -3,13 +3,13 @@
 [SuppressWarning]
 internal class TargetClass
 {
-    // CS0219 expected
-    private void M1(string m)
-    {
-        var y = 0;
-    }
-    public void Introduced()
-    {
-        var x = 0;
-    }
+  // CS0219 expected
+  private void M1(string m)
+  {
+    var y = 0;
+  }
+  public void Introduced()
+  {
+    var x = 0;
+  }
 }

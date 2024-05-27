@@ -406,6 +406,8 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
 
                 Assert.Collection(
                     aspectInstance.Transformations,
+                    
+                    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
                         Assert.Equal( "Introduce the parameter 'p'.", transformation.Description );
@@ -418,11 +420,15 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
 
                 Assert.Collection(
                     aspectInstance.Transformations.OrderBy( i => i.TargetDeclarationId ),
+                    
+                    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
                         Assert.Equal( "Introduce the parameter 'p'.", transformation.Description );
                         Assert.Equal( "M:WithoutCtor.#ctor", transformation.TargetDeclarationId );
                     },
+                    
+                    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
                     transformation =>
                     {
                         Assert.Equal( "Introduce constructor 'WithoutCtor..ctor()'.", transformation.Description );

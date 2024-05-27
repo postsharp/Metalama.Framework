@@ -107,7 +107,7 @@ public sealed class CacheTests : UnitTestClass
         Assert.Equal( "1", cache.GetOrAdd( fileName, _ => "X" ) );
 
         // Wait more than the filesystem time resolution.
-        Thread.Sleep( 1 );
+        Thread.Sleep( 10 );
 
         // Update the file.
         File.WriteAllText( fileName, "2" );

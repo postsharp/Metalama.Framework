@@ -7,10 +7,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceType(builder.Target, "IntroducedNestedType", TypeKind.Class, buildType: t => { t.Accessibility = Accessibility.Public; });
-        var existingNested = builder.Target.NestedTypes.Single();
+        var result = builder.Advice.IntroduceClass(
+            builder.Target,
+            "IntroducedNestedType",
+            TypeKind.Class,
+            buildType: t => { t.Accessibility = Code.Accessibility.Public; } );
+
+        var existingNested = builder.Target.Types.Single();
 
         builder.Advice.IntroduceProperty(
             result.Declaration,
@@ -19,7 +24,7 @@ public class IntroductionAttribute : TypeAspect
             {
                 b.Name = "Property";
                 b.Type = result.Declaration;
-            });
+            } );
     }
 
     [Template]
@@ -30,7 +35,5 @@ public class IntroductionAttribute : TypeAspect
 [IntroductionAttribute]
 public class TargetType
 {
-    public class ExistingNestedType
-    {
-    }
+    public class ExistingNestedType { }
 }

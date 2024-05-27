@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsReferenceable = isReferenceable ?? syntax is IdentifierNameSyntax;
 
             // Infer nullability from the expression type if we have it.
-            if ( canBeNull == null && expressionType != null && expressionType.IsNullable != null )
+            if ( canBeNull == null && expressionType is { IsNullable: not null } )
             {
                 canBeNull = expressionType.IsNullable == true;
             }

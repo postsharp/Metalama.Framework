@@ -1,7 +1,3 @@
-#if TESTOPTIONS
-// @Skipped(Derived type support for introduced types)
-#endif
-
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
@@ -12,8 +8,8 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
     [Inheritable]
     internal class Aspect : TypeAspect
     {
-        [Introduce( WhenExists = OverrideStrategy.Override)]
-        private dynamic? Foo()
+        [Introduce( WhenExists = OverrideStrategy.Override, IsVirtual = true )]
+        public int Foo()
         {
             Console.WriteLine( "Introduced!" );
 
@@ -23,17 +19,23 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Introduced
 
     internal class Introduction : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceType(builder.Target, "Derived", TypeKind.Class, b => { b.BaseType = builder.Target.NestedTypes.Single(); });
+            builder.Advice.IntroduceClass(
+                builder.Target,
+                "IntroducedDerived",
+                TypeKind.Class,
+                b => { b.BaseType = builder.Target.Types.OfName( "BaseType" ).Single(); } );
         }
     }
 
     // <target>
     [Introduction]
-    internal class Targets
+    public class Targets
     {
         [Aspect]
-        private class BaseType { }
+        public class BaseType { }
+
+        public class ManualDerived : BaseType { }
     }
 }

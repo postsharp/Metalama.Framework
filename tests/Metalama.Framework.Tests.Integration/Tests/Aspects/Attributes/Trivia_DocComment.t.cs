@@ -1,9 +1,9 @@
-partial class TestTypes
+internal partial class TestTypes
 {
   /// <summary>
   /// </summary>
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia_DocComment.TestAttribute]
-  class C
+  private class C
   {
     /// <summary>
     /// </summary>
@@ -45,7 +45,7 @@ partial class TestTypes
   /// <summary>
   /// </summary>
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Trivia_DocComment.TestAttribute]
-  enum E
+  private enum E
   {
     /// <summary>
     /// </summary>

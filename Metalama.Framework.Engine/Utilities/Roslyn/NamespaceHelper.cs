@@ -18,13 +18,13 @@ internal static class NamespaceHelper
             return null;
         }
 
-            using var stringBuilder = StringBuilderPool.Default.Allocate();
+        using var stringBuilder = StringBuilderPool.Default.Allocate();
 
         void AppendNameRecursive( ISymbol s )
         {
             var (parent, separator) = s switch
             {
-                INamedTypeSymbol { ContainingType: { } } namedType => (namedType.ContainingType, '.'),
+                INamedTypeSymbol { ContainingType: not null } namedType => (namedType.ContainingType, '.'),
                 INamedTypeSymbol namedType => (namedType.ContainingNamespace, '.'),
                 INamespaceSymbol ns => (ns.ContainingNamespace, '.'),
                 _ => (s.ContainingSymbol, '.')
@@ -35,16 +35,16 @@ internal static class NamespaceHelper
                 AppendNameRecursive( parent );
             }
 
-                if ( stringBuilder.Value.Length > 0 )
+            if ( stringBuilder.Value.Length > 0 )
             {
-                    stringBuilder.Value.Append( separator );
+                stringBuilder.Value.Append( separator );
             }
 
-                stringBuilder.Value.Append( s.Name );
+            stringBuilder.Value.Append( s.Name );
         }
 
         AppendNameRecursive( symbol );
 
-            return stringBuilder.Value.ToString();
+        return stringBuilder.Value.ToString();
     }
 }

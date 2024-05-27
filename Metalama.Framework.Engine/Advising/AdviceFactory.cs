@@ -243,7 +243,11 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     public AdviceFactory<TNewTarget> WithDeclaration<TNewTarget>( TNewTarget target )
         where TNewTarget : IDeclaration
-        => new( target, this._state, this._templateClassInstance, this._layerName );
+    {
+        this.ValidateTarget( target );
+
+        return new AdviceFactory<TNewTarget>( target, this._state, this._templateClassInstance, this._layerName );
+    }
 
     public ICompilation MutableCompilation => this._state.CurrentCompilation;
 
@@ -276,16 +280,19 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     $"Cannot add an {AdviceKind.AddContract} advice of direction {contractDirection} to '{declaration}' because {justification}. Check the {nameof(EligibilityExtensions.IsContractAdviceEligible)}({nameof(ContractDirection)}.{contractDirection}) method." ) );
         }
 
-        this.ValidateTarget( declaration, Array.Empty<IDeclaration>() );
+        this.ValidateTarget( declaration );
     }
 
-    private void ValidateTarget( IDeclaration declaration, IDeclaration[] otherTargets )
+    private void ValidateTarget( IDeclaration declaration, IDeclaration[]? otherTargets = null )
     {
         ValidateOneTarget( declaration );
 
-        foreach ( var d in otherTargets )
+        if ( otherTargets != null )
         {
-            ValidateOneTarget( d );
+            foreach ( var d in otherTargets )
+            {
+                ValidateOneTarget( d );
+            }
         }
 
         void ValidateOneTarget( IDeclaration target )
@@ -302,12 +309,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(
                         $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." ) );
-            }
-
-            // Check other targets.
-            foreach ( var t in otherTargets )
-            {
-                ValidateOneTarget( t );
             }
         }
     }
@@ -872,6 +873,22 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
+    public IOverrideAdviceResult<IProperty> OverrideAccessors(
+        IFieldOrProperty targetFieldOrProperty,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => (IOverrideAdviceResult<IProperty>) this.OverrideAccessors( (IFieldOrPropertyOrIndexer) targetFieldOrProperty, getTemplate, setTemplate, args, tags );
+
+    public IOverrideAdviceResult<IIndexer> OverrideAccessors(
+        IIndexer targetIndexer,
+        in GetterTemplateSelector getTemplate = default,
+        string? setTemplate = null,
+        object? args = null,
+        object? tags = null )
+        => (IOverrideAdviceResult<IIndexer>) this.OverrideAccessors( (IFieldOrPropertyOrIndexer) targetIndexer, getTemplate, setTemplate, args, tags );
+
     public IIntroductionAdviceResult<IField> IntroduceField(
         INamedType targetType,
         string templateName,
@@ -1400,14 +1417,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     public IImplementInterfaceAdviceResult ImplementInterface(
         INamedType targetType,
-        INamedType interfaceType,
-        OverrideStrategy whenExists = OverrideStrategy.Default,
-        Action<IInterfaceImplementationBuilder>? implementInterface = null,
-        object? tags = null )
-        => throw new NotImplementedException();
-
-    public IImplementInterfaceAdviceResult ImplementInterface(
-        INamedType targetType,
         Type interfaceType,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         object? tags = null )
@@ -1416,14 +1425,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
             whenExists,
             tags );
-
-    public IImplementInterfaceAdviceResult ImplementInterface(
-        INamedType targetType,
-        Type interfaceType,
-        OverrideStrategy whenExists = OverrideStrategy.Default,
-        Action<IInterfaceImplementationBuilder>? implementInterface = null,
-        object? tags = null )
-        => throw new NotImplementedException();
 
     public IAddInitializerAdviceResult AddInitializer(
         INamedType targetType,
@@ -1722,10 +1723,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             pullAction,
             attributes );
 
-    public ITypeIntroductionAdviceResult IntroduceType(
+    public IClassIntroductionAdviceResult IntroduceClass(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
-        Code.TypeKind typeKind,
+        TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
         if ( this._templateClassInstance == null )
@@ -1733,9 +1734,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             throw new InvalidOperationException();
         }
 
-        if (typeKind is not TypeKind.Class)
+        if ( typeKind is not TypeKind.Class )
         {
-            throw new NotImplementedException("Introducing other kinds of types than classes is not implemented.");
+            throw new NotImplementedException( "Introducing other kinds of types than classes is not implemented." );
         }
 
         using ( this.WithNonUserCode() )
@@ -1754,42 +1755,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         .Execute( this._state ) );
         }
     }
-
-    public ITypeIntroductionAdviceResult IntroduceClass(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Class, buildType );
-
-    public ITypeIntroductionAdviceResult IntroduceStruct(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.Struct, buildType );
-
-    public ITypeIntroductionAdviceResult IntroduceRecordClass(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.RecordClass, buildType );
-
-    public ITypeIntroductionAdviceResult IntroduceRecordStruct(
-        INamespaceOrNamedType targetNamespaceOrType,
-        string name,
-        Action<INamedTypeBuilder>? buildType = null )
-        => this.IntroduceType( targetNamespaceOrType, name, TypeKind.RecordStruct, buildType );
-
-    public IIntroductionAdviceResult<INamedType> IntroduceEnum(
-        INamespaceOrNamedType targetType,
-        string typeName,
-        Action<IEnumTypeBuilder>? buildType = null )
-        => throw new NotImplementedException( "Introducing enum types is not implemented." );
-
-    public IIntroductionAdviceResult<INamedType> IntroduceDelegateType(
-        INamespaceOrNamedType targetType,
-        string typeName,
-        Action<IDelegateTypeBuilder>? buildType = null )
-        => throw new NotImplementedException( "Introducing delegate types is not implemented." );
 
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration
@@ -1812,5 +1777,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
-    private static ITypeIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamedType> result ) => new TypeIntroductionAdviceResult( adviceFactory, result );
+    private static IClassIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamedType> result )
+        => new ClassIntroductionAdviceResult( adviceFactory, result );
 }

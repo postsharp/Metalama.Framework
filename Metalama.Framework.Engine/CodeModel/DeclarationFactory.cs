@@ -439,13 +439,10 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
     public IDeclaration GetDeclarationFromId( SerializableDeclarationId declarationId )
     {
-        var declaration = declarationId.ResolveToDeclaration( this._compilationModel );
-
-        if ( declaration == null )
-        {
-            throw new InvalidOperationException(
+        var declaration =
+            declarationId.ResolveToDeclaration( this._compilationModel )
+            ?? throw new InvalidOperationException(
                 $"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'." );
-        }
 
         return declaration;
     }
@@ -493,11 +490,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
     private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
         => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
 
-    private IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
+    private IParameter? GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( parameterBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IParameter) this._defaultCache.GetOrAdd(
@@ -512,11 +516,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             static ( l, c ) => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, c ),
             this._compilationModel );
 
-    internal IMethod GetMethod( MethodBuilder methodBuilder, ReferenceResolutionOptions options )
+    internal IMethod? GetMethod( MethodBuilder methodBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( methodBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IMethod) this._defaultCache.GetOrAdd(
@@ -552,11 +563,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             },
             (me: this, options) );
 
-    internal IConstructor GetConstructor( ConstructorBuilder constructorBuilder, ReferenceResolutionOptions options )
+    internal IConstructor? GetConstructor( ConstructorBuilder constructorBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( constructorBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( constructorBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IConstructor) this._defaultCache.GetOrAdd(
@@ -565,11 +583,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
-    internal IField GetField( FieldBuilder fieldBuilder, ReferenceResolutionOptions options )
+    internal IField? GetField( FieldBuilder fieldBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( fieldBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IField) this._defaultCache.GetOrAdd(
@@ -578,7 +603,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
-    internal IFieldOrProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
+    internal IFieldOrProperty? GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         /*
         if ( propertyBuilder is PromotedField promotedField )
@@ -599,7 +624,14 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( propertyBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IProperty) this._defaultCache.GetOrAdd(
@@ -608,11 +640,18 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
-    internal IIndexer GetIndexer( IndexerBuilder indexerBuilder, ReferenceResolutionOptions options )
+    internal IIndexer? GetIndexer( IndexerBuilder indexerBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( indexerBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( indexerBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IIndexer) this._defaultCache.GetOrAdd(
@@ -621,24 +660,38 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
-    internal IEvent GetEvent( EventBuilder propertyBuilder, ReferenceResolutionOptions options )
+    internal IEvent? GetEvent( EventBuilder eventBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
-        if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
+        if ( options.MustExist() && !this._compilationModel.Contains( eventBuilder ) )
         {
-            throw CreateBuilderNotExists( propertyBuilder );
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( eventBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (IEvent) this._defaultCache.GetOrAdd(
-            Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
+            Ref.FromBuilder( eventBuilder ).As<ICompilationElement>(),
             static ( l, c ) => new BuiltEvent( c, (EventBuilder) l.Target! ),
             this._compilationModel );
     }
 
-    internal INamedType GetNamedType( NamedTypeBuilder namedTypeBuilder, ReferenceResolutionOptions options )
+    internal INamedType? GetNamedType( NamedTypeBuilder namedTypeBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
     {
         if ( options.MustExist() && !this._compilationModel.Contains( namedTypeBuilder ) )
         {
+            if ( throwIfMissing )
+            {
             throw CreateBuilderNotExists( namedTypeBuilder );
+        }
+            else
+            {
+                return null;
+            }
         }
 
         return (INamedType) this._defaultCache.GetOrAdd(
@@ -647,20 +700,20 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
-    internal IDeclaration GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default )
+    internal IDeclaration? GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default, bool throwIfMissing = true )
         => builder switch
         {
-            MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options ),
-            FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
-            PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
-            IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options ),
-            EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
-            BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
+            MethodBuilder methodBuilder => this.GetMethod( methodBuilder, options, throwIfMissing ),
+            FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options, throwIfMissing ),
+            PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options, throwIfMissing ),
+            IndexerBuilder indexerBuilder => this.GetIndexer( indexerBuilder, options, throwIfMissing ),
+            EventBuilder eventBuilder => this.GetEvent( eventBuilder, options, throwIfMissing ),
+            BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options, throwIfMissing ),
             AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),
             TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
             AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
-            ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options ),
-            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options ),
+            ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options, throwIfMissing ),
+            NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options, throwIfMissing ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global
@@ -707,7 +760,6 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         }
         else if ( declaration is NamedType namedType )
         {
-            // TODO: This would not work after type introductions, but that would require more changes.
             return (T) this.GetNamedType( (INamedTypeSymbol) namedType.Symbol );
         }
         else

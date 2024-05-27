@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\Build\RoslynVersion\Latest.imports" />
-    <Import Project="..\..\eng\Coverage.props" />
+    <Import Project="../../build/RoslynVersion/Latest.imports" />
+    <Import Project="../../eng/Coverage.props" />
 
     <PropertyGroup>
         <TargetFrameworks>netframework4.8;net8.0</TargetFrameworks>
@@ -33,13 +33,20 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Metalama.Framework.DesignTime.Contracts\Metalama.Framework.DesignTime.Contracts.csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework.DesignTime.VisualStudio$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime.VisualStudio$(ThisRoslynVersionProjectSuffix).csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework.Sdk\Metalama.Framework.Sdk.csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)\Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../../Metalama.Framework.DesignTime.Contracts/Metalama.Framework.DesignTime.Contracts.csproj" />
+        <ProjectReference Include="../../Metalama.Framework.DesignTime.VisualStudio$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.DesignTime.VisualStudio$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../../Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.Engine$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../../Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)/Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
+        <ProjectReference Include="../../Metalama.Framework.Sdk/Metalama.Framework.Sdk.csproj" />
+        <ProjectReference Include="../../Metalama.Framework/Metalama.Framework.csproj" />
+        <ProjectReference Include="../../Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix)/Metalama.Testing.AspectTesting$(ThisRoslynVersionProjectSuffix).csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>EngineeringDataDirectory</_Parameter1>
+            <_Parameter2>$(PostSharpEngineeringDataDirectory)</_Parameter2>
+        </AssemblyAttribute>
     </ItemGroup>
 
 </Project>

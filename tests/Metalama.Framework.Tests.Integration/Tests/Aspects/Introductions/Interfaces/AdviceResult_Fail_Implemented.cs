@@ -7,6 +7,7 @@ using Metalama.Framework.Code;
 using System;
 using System.Linq;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Engine.Advising;
 
 #pragma warning disable CS0067
 
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 throw new InvalidOperationException( $"AdviceKind was {result.AdviceKind} instead of ImplementInterface." );
             }
 
-            if (result.InterfaceMembers.Count != 0)
+            if (result.GetObsoleteInterfaceMembers().Count != 0)
             {
                 throw new InvalidOperationException( $"InterfaceMembers collection was not empty." );
             }
@@ -41,7 +42,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 .Override(
                     aspectBuilder.Target.Methods.OfName( "Witness" ).Single(),
                     nameof(AdviceResultTemplates.WitnessTemplate),
-                    args: new { types = result.Interfaces, members = result.InterfaceMembers } );
+                    args: new { types = result.Interfaces, members = result.GetObsoleteInterfaceMembers() } );
         }
 
         [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
