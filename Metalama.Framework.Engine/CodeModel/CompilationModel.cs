@@ -244,8 +244,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationModel"/> class that is based on a prototype instance but appends transformations.
         /// </summary>
-        /// <param name="prototype"></param>
-        /// <param name="observableTransformations"></param>
         private CompilationModel(
             CompilationModel prototype,
             IReadOnlyCollection<ITransformation>? observableTransformations,

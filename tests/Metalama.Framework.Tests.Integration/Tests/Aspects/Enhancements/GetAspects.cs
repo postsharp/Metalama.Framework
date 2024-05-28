@@ -3,32 +3,32 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Enhancements.HasAspect
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Enhancements.GetAspects
 {
     internal class Aspect : OverrideMethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
             var targetEnhancements = builder.Target.Enhancements();
 
-            if (!targetEnhancements.HasAspect<Aspect>())
+            if (!targetEnhancements.GetAspects<Aspect>().Any())
             {
                 throw new Exception();
             }
 
-            if (!targetEnhancements.HasAspect<OverrideMethodAspect>())
+            if (!builder.Target.Enhancements().GetAspects<OverrideMethodAspect>().Any())
             {
                 throw new Exception();
             }
 
             var noAspectEnhancements = builder.Target.DeclaringType.Methods.OfName("NoAspect").Single().Enhancements();
 
-            if (noAspectEnhancements.HasAspect<Aspect>())
+            if (noAspectEnhancements.GetAspects<Aspect>().Any())
             {
                 throw new Exception();
             }
 
-            if (noAspectEnhancements.HasAspect<OverrideMethodAspect>())
+            if (noAspectEnhancements.GetAspects<OverrideMethodAspect>().Any())
             {
                 throw new Exception();
             }

@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.RunTime;
 using Metalama.Framework.Tests.UnitTests.DesignTime.Mocks;
 using Metalama.Testing.UnitTesting;
@@ -1565,5 +1566,71 @@ class D{version}
         using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
         Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out _ ) );
+    }
+
+    [Fact]
+    public void HasAspectInEligibility()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            using System;
+            using System.Linq;
+            using Metalama.Framework.Aspects;
+            using Metalama.Framework.Code;
+            using Metalama.Framework.Eligibility;
+
+            class Aspect1 : OverrideMethodAspect
+            {
+                public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+                {
+                    builder.MustSatisfy(method => !method.Enhancements().HasAspect<Aspect2>(), _ => $"");
+                }
+
+                public override dynamic? OverrideMethod()
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            class Aspect2 : MethodAspect
+            {
+                public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+                {
+                    builder.MustSatisfy(method => !method.Enhancements().HasAspect<OverrideMethodAspect>(), _ => $"");
+                }
+            }
+            
+            class TargetCode
+            {
+                private void NoAspectMethod() {}
+            
+                [Aspect1]
+                private int Aspect1Method(int a)
+                {
+                    return a;
+                }
+
+                [Aspect2]
+                private void Aspect2Method() { }
+            }
+            """;
+
+        var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "code.cs", code } } );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation );
+
+        Assert.True( pipeline.TryExecute( compilation, default, out _ ) );
+
+        var noAspectMethod = compilation.GetSymbolsWithName( "NoAspectMethod" ).OfType<IMethodSymbol>().Single();
+        var aspect1Method = compilation.GetSymbolsWithName( "Aspect1Method" ).OfType<IMethodSymbol>().Single();
+        var aspect2Method = compilation.GetSymbolsWithName( "Aspect2Method" ).OfType<IMethodSymbol>().Single();
+
+        Assert.Equal( ["Aspect1", "Aspect2"], pipeline.GetEligibleAspects( compilation, noAspectMethod, default ).SelectAsArray( a => a.FullName ).OrderBy( a => a ) );
+        Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect1Method, default ) );
+        Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect2Method, default ) );
     }
 }
