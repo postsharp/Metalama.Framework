@@ -73,11 +73,6 @@ internal class Aspect : TypeAspect
         {
             throw new Exception( "Advice wasn't ignored." );
         }
-
-        if (implementInterfaceResult.GetObsoleteInterfaceMembers().Count != 1)
-        {
-            throw new Exception( $"Expected 1 implemented interface member, got {implementInterfaceResult.GetObsoleteInterfaceMembers().Count}." );
-        }
     }
 
     private static void AssertResult( IIntroductionAdviceResult<IDeclaration> result )
@@ -111,7 +106,7 @@ internal class Aspect : TypeAspect
     [Template]
     public object CloneMethod() => new Target();
 
-    [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+    [Introduce(WhenExists = OverrideStrategy.Ignore)]
     public object Clone() => new Target();
 }
 

@@ -2,12 +2,12 @@
 // @Include(../../Common/_ImplementInterfaceAdviceResultExtensions.cs)
 #endif
 
-
 using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.InvokingIntroduced;
 
@@ -30,10 +30,10 @@ internal class IntroduceAndInvokeAttribute : TypeAspect
         builder.Advice.IntroduceMethod(
             builder.Target,
             nameof(Invoke),
-            args: new { introduced = interfaceImplementation.GetObsoleteInterfaceMembers().Single().TargetMember } );
+            args: new { introduced = builder.Target.ForCompilation(builder.Advice.MutableCompilation).Methods.OfName(nameof(Bar)).Single() });
     }
 
-    [InterfaceMember]
+    [Introduce]
     public void Bar() { }
 
     [Template]

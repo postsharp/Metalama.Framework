@@ -27,7 +27,7 @@ internal sealed class SymbolValidator : SymbolVisitor<bool>
             _ => true
         };
 
-    private bool VisitTypedConstantValue( object value ) => !(value is ITypeSymbol type && !this.Visit( type ));
+    private bool VisitTypedConstantValue( object value ) => value is not ITypeSymbol type || this.Visit( type );
 
     public override bool DefaultVisit( ISymbol symbol ) => throw new NotImplementedException();
 

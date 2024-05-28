@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
@@ -29,16 +28,13 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
     private readonly TypedConstant _defaultValue;
 
     public IntroduceConstructorParameterAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance template,
-        IConstructor targetDeclaration,
-        ICompilation sourceCompilation,
-        string? layerName,
+        AdviceConstructorParameters<IConstructor> parameters,
         string parameterName,
         IType parameterType,
         Action<ParameterBuilder>? buildAction,
         Func<IParameter, IConstructor, PullAction>? pullActionFunc,
-        TypedConstant defaultValue ) : base( aspectInstance, template, targetDeclaration, sourceCompilation, layerName )
+        TypedConstant defaultValue )
+        : base( parameters )
     {
         this._parameterName = parameterName;
         this._parameterType = parameterType;

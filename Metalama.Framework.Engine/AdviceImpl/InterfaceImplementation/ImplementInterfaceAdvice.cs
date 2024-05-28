@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -30,23 +29,23 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
     private readonly INamedType _interfaceType;
     private readonly OverrideStrategy _overrideStrategy;
     private readonly IObjectReader _tags;
+    private readonly IAdviceFactoryImpl _adviceFactory;
 
     private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public ImplementInterfaceAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance template,
-        INamedType targetType,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         INamedType interfaceType,
         OverrideStrategy overrideStrategy,
-        string? layerName,
-        IObjectReader tags ) : base( aspectInstance, template, targetType, sourceCompilation, layerName )
+        IObjectReader tags,
+        IAdviceFactoryImpl adviceFactory )
+        : base( parameters )
     {
         this._interfaceType = interfaceType;
         this._overrideStrategy = overrideStrategy;
         this._interfaceSpecifications = new List<InterfaceSpecification>();
         this._tags = tags;
+        this._adviceFactory = adviceFactory;
     }
 
     public override AdviceKind AdviceKind => AdviceKind.ImplementInterface;
@@ -94,7 +93,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
         // When initializing, it is not known which types the target type is implementing.
         // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
-        // should be reported.            
+        // should be reported.
 
         var templateReflectionContext =
             this.TemplateInstance.TemplateClass.GetTemplateReflectionContext( ((CompilationModel) this.SourceCompilation).CompilationContext );
@@ -121,13 +120,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                 if ( memberTemplate == null )
                 {
-                    diagnosticAdder.Report(
-                        AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
-                            this.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ),
-                             InterfaceType: this._interfaceType,
-                             interfaceMember),
-                            this ) );
+                    // Do nothing. Interface members can (and should) be specified using [Introduce] or [ExplicitInterfaceMember] now.
                 }
                 else if ( !membersMatch( memberTemplate.Declaration ) )
                 {
@@ -304,7 +297,13 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                         continue;
 
                     case OverrideStrategy.Override:
-                        implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
+                        implementedInterfaces.Add(
+                            new ImplementationResult(
+                                interfaceSpecification.InterfaceType,
+                                InterfaceImplementationOutcome.Implement,
+                                this.TargetDeclaration,
+                                this._adviceFactory ) );
+
                         skipInterfaceBaseList = true;
 
                         break;
@@ -315,7 +314,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             }
             else
             {
-                implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement ) );
+                implementedInterfaces.Add(
+                    new ImplementationResult(
+                        interfaceSpecification.InterfaceType,
+                        InterfaceImplementationOutcome.Implement,
+                        this.TargetDeclaration,
+                        this._adviceFactory ) );
 
                 skipInterfaceBaseList = false;
             }
@@ -356,6 +360,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                         if ( existingMethod != null && !memberSpec.IsExplicit )
                         {
+#pragma warning disable CS0618 // Type is obsolete
                             switch ( memberSpec.OverrideStrategy )
                             {
                                 case { } when forceIgnore:
@@ -435,6 +440,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                     throw new AssertionFailedException(
                                         $"Unexpected value for InterfaceMemberOverrideStrategy: {memberSpec.OverrideStrategy}." );
                             }
+#pragma warning restore CS0618
                         }
                         else
                         {
@@ -488,6 +494,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                         if ( existingProperty != null && !memberSpec.IsExplicit )
                         {
+#pragma warning disable CS0618 // Type is obsolete
                             switch ( memberSpec.OverrideStrategy )
                             {
                                 case { } when forceIgnore:
@@ -569,6 +576,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 default:
                                     throw new NotImplementedException( $"The strategy OverrideStrategy.{this._overrideStrategy} is not implemented." );
                             }
+#pragma warning restore CS0618
                         }
                         else
                         {
@@ -739,6 +747,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                         if ( existingEvent != null && !memberSpec.IsExplicit )
                         {
+#pragma warning disable CS0618 // Type is obsolete
                             switch ( memberSpec.OverrideStrategy )
                             {
                                 case { } when forceIgnore:
@@ -820,6 +829,7 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
                                 default:
                                     throw new NotImplementedException( $"The strategy OverrideStrategy.{this._overrideStrategy} is not implemented." );
                             }
+#pragma warning restore CS0618
                         }
                         else
                         {

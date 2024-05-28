@@ -16,7 +16,7 @@ public class IntroduceInterfaceAttribute : TypeAspect
         builder.Advice.ImplementInterface( builder.Target, typeof(I) );
     }
 
-    [InterfaceMember( IsExplicit = true )]
+    [ExplicitInterfaceMember]
     public string? M
     {
         get
@@ -33,7 +33,7 @@ public class IntroduceInterfaceAttribute : TypeAspect
         }
     }
 
-    [InterfaceMember( IsExplicit = true )]
+    [ExplicitInterfaceMember]
     public string? N { get; set; } = default;
 }
 

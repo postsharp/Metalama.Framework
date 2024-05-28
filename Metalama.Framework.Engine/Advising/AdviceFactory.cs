@@ -32,24 +32,28 @@ namespace Metalama.Framework.Engine.Advising;
 internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     where T : IDeclaration
 {
-    private readonly string? _layerName;
-
-    private readonly TemplateClassInstance? _templateClassInstance;
-    private readonly CompilationModel _compilation;
-    private readonly IDeclaration _aspectTarget;
-    private readonly INamedType? _aspectTargetType;
     private readonly AdviceFactoryState _state;
+    private readonly TemplateClassInstance? _templateClassInstance;
+    private readonly string? _layerName;
+    private readonly INamedType? _explicitlyImplementedInterfaceType;
+
     private readonly ObjectReaderFactory _objectReaderFactory;
     private readonly OtherTemplateClassProvider _otherTemplateClassProvider;
 
+    private readonly CompilationModel _compilation;
+    private readonly IDeclaration _aspectTarget;
+    private readonly INamedType? _aspectTargetType;
+
     public T Target { get; }
 
-    public AdviceFactory( T target, AdviceFactoryState state, TemplateClassInstance? templateClassInstance, string? layerName )
+    public AdviceFactory( T target, AdviceFactoryState state, TemplateClassInstance? templateClassInstance, string? layerName, INamedType? explicitlyImplementedInterfaceType )
     {
         this.Target = target;
         this._state = state;
         this._templateClassInstance = templateClassInstance;
         this._layerName = layerName;
+        this._explicitlyImplementedInterfaceType = explicitlyImplementedInterfaceType;
+
         this._objectReaderFactory = state.ServiceProvider.GetRequiredService<ObjectReaderFactory>();
         this._otherTemplateClassProvider = state.ServiceProvider.GetRequiredService<OtherTemplateClassProvider>();
 
@@ -64,8 +68,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();
 
-    public AdviceFactory<T> WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
-        => new( this.Target, this._state, templateClassInstance, this._layerName );
+    private AdviceFactory<T> WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
+        => new( this.Target, this._state, templateClassInstance, this._layerName, this._explicitlyImplementedInterfaceType );
 
     IAdviceFactoryImpl IAdviceFactoryImpl.WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
         => this.WithTemplateClassInstance( templateClassInstance );
@@ -78,6 +82,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
         => this.WithTemplateProvider( TemplateProvider.FromInstance( templateProvider ) );
+
+    public IAdviceFactoryImpl WithExplicitInterfaceImplementation( INamedType explicitlyImplementedInterfaceType )
+        => new AdviceFactory<T>( this.Target, this._state, this._templateClassInstance, this._layerName, explicitlyImplementedInterfaceType );
 
     private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
         => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
@@ -246,12 +253,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         this.ValidateTarget( target );
 
-        return new AdviceFactory<TNewTarget>( target, this._state, this._templateClassInstance, this._layerName );
+        return new AdviceFactory<TNewTarget>( target, this._state, this._templateClassInstance, this._layerName, this._explicitlyImplementedInterfaceType );
     }
 
     public ICompilation MutableCompilation => this._state.CurrentCompilation;
 
-    private void CheckEligibility( IDeclaration declaration, AdviceKind adviceKind, params IDeclaration[] otherTargets )
+    private void Validate( IDeclaration declaration, AdviceKind adviceKind, params IDeclaration[] otherTargets )
     {
         var rule = EligibilityRuleFactory.GetAdviceEligibilityRule( adviceKind );
 
@@ -263,6 +270,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 MetalamaStringFormatter.Format(
                     $"Cannot add an {adviceKind} advice to '{declaration}' because {justification}. Check the {nameof(EligibilityExtensions.IsAdviceEligible)}({nameof(AdviceKind)}.{adviceKind}) method." ) );
         }
+
+        this.ValidateExplicitInterfaceImplementation( adviceKind );
 
         this.ValidateTarget( declaration, otherTargets );
     }
@@ -300,7 +309,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             // Check that the compilation match.
             if ( !ReferenceEquals( target.Compilation, this._compilation ) && !ReferenceEquals( target.Compilation, this._state.CurrentCompilation ) )
             {
-                throw new InvalidOperationException( MetalamaStringFormatter.Format( $"The target declaration is not in the current compilation." ) );
+                throw new InvalidOperationException( "The target declaration is not in the current compilation." );
             }
 
             // Check that the advised target is under the aspect target.
@@ -313,6 +322,27 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
+    private void ValidateExplicitInterfaceImplementation( AdviceKind adviceKind )
+    {
+        if ( this._explicitlyImplementedInterfaceType != null
+             && adviceKind is not (AdviceKind.IntroduceMethod or AdviceKind.IntroduceEvent or AdviceKind.IntroduceOperator or AdviceKind.IntroduceProperty
+                 or AdviceKind.IntroduceIndexer) )
+        {
+            throw new InvalidOperationException( $"The {adviceKind} advice cannot be applied when explicitly implementing an interface." );
+        }
+    }
+
+    private Advice.AdviceConstructorParameters<TDeclaration> GetAdviceConstructorParameters<TDeclaration>( TDeclaration target )
+        where TDeclaration : IDeclaration
+    {
+        if ( this._templateClassInstance == null )
+        {
+            throw new InvalidOperationException( "The template class instance cannot be null." );
+        }
+
+        return new( this._state.AspectInstance, this._templateClassInstance, target, this._compilation, this._layerName );
+    }
+
     public IOverrideAdviceResult<IMethod> Override(
         IMethod targetMethod,
         in MethodTemplateSelector templateSelector,
@@ -321,12 +351,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetMethod, AdviceKind.OverrideMethod );
+            this.Validate( targetMethod, AdviceKind.OverrideMethod );
 
             switch ( targetMethod.MethodKind )
             {
@@ -339,13 +364,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                             .ForOverride( @event.AddMethod, this.GetObjectReader( args ) );
 
                         return new OverrideEventAdvice(
-                                this._state.AspectInstance,
-                                this._templateClassInstance,
-                                @event,
-                                this._compilation,
-                                template,
-                                null,
-                                this._layerName,
+                                this.GetAdviceConstructorParameters( @event ),
+                                addTemplate: template,
+                                removeTemplate: null,
                                 this.GetObjectReader( tags ) )
                             .Execute( this._state )
                             .GetAccessor( e => e.AddMethod );
@@ -360,13 +381,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                             .ForOverride( @event.AddMethod, this.GetObjectReader( args ) );
 
                         return new OverrideEventAdvice(
-                                this._state.AspectInstance,
-                                this._templateClassInstance,
-                                @event,
-                                this._compilation,
-                                null,
-                                template,
-                                this._layerName,
+                                this.GetAdviceConstructorParameters( @event ),
+                                addTemplate: null,
+                                removeTemplate: template,
                                 this.GetObjectReader( tags ) )
                             .Execute( this._state )
                             .GetAccessor( e => e.RemoveMethod );
@@ -384,26 +401,18 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         {
                             case IProperty property:
                                 return new OverrideFieldOrPropertyAdvice(
-                                        this._state.AspectInstance,
-                                        this._templateClassInstance,
-                                        property,
-                                        this._compilation,
-                                        template,
-                                        null,
-                                        this._layerName,
+                                        this.GetAdviceConstructorParameters<IFieldOrProperty>( property ),
+                                        getTemplate: template,
+                                        setTemplate: null,
                                         this.GetObjectReader( tags ) )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.GetMethod );
 
                             case IIndexer indexer:
                                 return new OverrideIndexerAdvice(
-                                        this._state.AspectInstance,
-                                        this._templateClassInstance,
-                                        indexer,
-                                        this._compilation,
-                                        template,
-                                        null,
-                                        this._layerName,
+                                        this.GetAdviceConstructorParameters( indexer ),
+                                        getTemplate: template,
+                                        setTemplate: null,
                                         this.GetObjectReader( tags ) )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.GetMethod );
@@ -425,26 +434,18 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         {
                             case IProperty property:
                                 return new OverrideFieldOrPropertyAdvice(
-                                        this._state.AspectInstance,
-                                        this._templateClassInstance,
-                                        property,
-                                        this._compilation,
-                                        null,
-                                        template,
-                                        this._layerName,
+                                        this.GetAdviceConstructorParameters<IFieldOrProperty>( property ),
+                                        getTemplate: null,
+                                        setTemplate: template,
                                         this.GetObjectReader( tags ) )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.SetMethod );
 
                             case IIndexer indexer:
                                 return new OverrideIndexerAdvice(
-                                        this._state.AspectInstance,
-                                        this._templateClassInstance,
-                                        indexer,
-                                        this._compilation,
-                                        null,
-                                        template,
-                                        this._layerName,
+                                        this.GetAdviceConstructorParameters( indexer ),
+                                        getTemplate: null,
+                                        setTemplate: template,
                                         this.GetObjectReader( tags ) )
                                     .Execute( this._state )
                                     .GetAccessor( p => p.SetMethod );
@@ -462,12 +463,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                             .AssertNotNull();
 
                         return new OverrideMethodAdvice(
-                                this._state.AspectInstance,
-                                this._templateClassInstance,
-                                targetMethod,
-                                this._compilation,
+                                this.GetAdviceConstructorParameters( targetMethod ),
                                 template,
-                                this._layerName,
                                 this.GetObjectReader( tags ) )
                             .Execute( this._state );
                     }
@@ -484,30 +481,22 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         object? args = null,
         object? tags = null )
     {
-        if ( this._templateClassInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
         using ( this.WithNonUserCode() )
         {
-            this.CheckEligibility( targetType, AdviceKind.IntroduceMethod );
+            this.Validate( targetType, AdviceKind.IntroduceMethod );
 
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 !.Value
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new IntroduceMethodAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 scope,
                 whenExists,
                 buildMethod,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -520,26 +509,17 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         object? args = null,
         object? tags = null )
     {
-        if ( this._templateClassInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
         using ( this.WithNonUserCode() )
         {
-            this.CheckEligibility( targetType, AdviceKind.IntroduceFinalizer );
+            this.Validate( targetType, AdviceKind.IntroduceFinalizer );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new IntroduceFinalizerAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -559,36 +539,28 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
             if ( kind.GetCategory() != OperatorCategory.Unary )
             {
                 throw new InvalidOperationException(
-                    MetalamaStringFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
+                    MetalamaStringFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with kind {kind} as it is not an unary operator." ) );
             }
 
-            this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
+            this.Validate( targetType, AdviceKind.IntroduceOperator );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new IntroduceOperatorAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 kind,
-                inputType,
-                null,
+                leftOperandType: inputType,
+                rightOperandType: null,
                 resultType,
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 buildAction,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -608,27 +580,19 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
             if ( kind.GetCategory() != OperatorCategory.Binary )
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
             }
 
-            this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
+            this.Validate( targetType, AdviceKind.IntroduceOperator );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new IntroduceOperatorAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 kind,
                 leftType,
                 rightType,
@@ -636,8 +600,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 buildAction,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -656,12 +620,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceOperator );
+            this.Validate( targetType, AdviceKind.IntroduceOperator );
 
             var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -669,19 +628,16 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
 
             var advice = new IntroduceOperatorAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 operatorKind,
-                fromType,
-                null,
+                leftOperandType: fromType,
+                rightOperandType: null,
                 toType,
                 template.PartialForIntroduction( this.GetObjectReader( args ) ),
                 whenExists,
                 buildAction,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -695,12 +651,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetConstructor, AdviceKind.OverrideConstructor );
+            this.Validate( targetConstructor, AdviceKind.OverrideConstructor );
 
             var boundTemplate =
                 this.ValidateTemplateName( template, TemplateKind.Default, true )
@@ -708,12 +659,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     .ForOverride( targetConstructor, this.GetObjectReader( args ) );
 
             var advice = new OverrideConstructorAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetConstructor,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetConstructor ),
                 boundTemplate.AssertNotNull(),
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -729,29 +676,20 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         object? args = null,
         object? tags = null )
     {
-        if ( this._templateClassInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
         using ( this.WithNonUserCode() )
         {
-            this.CheckEligibility( targetType, AdviceKind.IntroduceConstructor );
+            this.Validate( targetType, AdviceKind.IntroduceConstructor );
 
             var template =
                 this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                     .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             return new IntroduceConstructorAdvice(
-                    this._state.AspectInstance,
-                    this._templateClassInstance,
-                    targetType,
-                    this._compilation,
+                    this.GetAdviceConstructorParameters( targetType ),
                     template.PartialForIntroduction( this.GetObjectReader( args ) ),
                     scope,
                     whenExists,
                     buildAction,
-                    this._layerName,
                     this.GetObjectReader( tags ) )
                 .Execute( this._state );
         }
@@ -764,12 +702,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetFieldOrProperty, AdviceKind.OverrideFieldOrPropertyOrIndexer );
+            this.Validate( targetFieldOrProperty, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
             // Set template represents both set and init accessors.
             var propertyTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
@@ -788,13 +721,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     : null;
 
             var advice = new OverrideFieldOrPropertyAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetFieldOrProperty,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetFieldOrProperty ),
                 getTemplate,
                 setTemplate,
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -815,7 +744,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 throw new InvalidOperationException();
             }
 
-            this.CheckEligibility( targetFieldOrPropertyOrIndexer, AdviceKind.OverrideFieldOrPropertyOrIndexer );
+            this.Validate( targetFieldOrPropertyOrIndexer, AdviceKind.OverrideFieldOrPropertyOrIndexer );
 
             // Set template represents both set and init accessors.
             var boundGetTemplate = targetFieldOrPropertyOrIndexer.GetMethod != null
@@ -840,13 +769,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 case IFieldOrProperty targetFieldOrProperty:
                     {
                         var advice = new OverrideFieldOrPropertyAdvice(
-                            this._state.AspectInstance,
-                            this._templateClassInstance,
-                            targetFieldOrProperty,
-                            this._compilation,
+                            this.GetAdviceConstructorParameters( targetFieldOrProperty ),
                             boundGetTemplate,
                             boundSetTemplate,
-                            this._layerName,
                             this.GetObjectReader( tags ) );
 
                         return advice.Execute( this._state );
@@ -855,13 +780,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 case IIndexer targetIndexer:
                     {
                         var advice = new OverrideIndexerAdvice(
-                            this._state.AspectInstance,
-                            this._templateClassInstance,
-                            targetIndexer,
-                            this._compilation,
+                            this.GetAdviceConstructorParameters( targetIndexer ),
                             boundGetTemplate,
                             boundSetTemplate,
-                            this._layerName,
                             this.GetObjectReader( tags ) );
 
                         return advice.Execute( this._state );
@@ -899,27 +820,18 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceField );
+            this.Validate( targetType, AdviceKind.IntroduceField );
 
             var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
                 .GetTemplateMember<IField>( this._compilation, this._state.ServiceProvider );
 
             var advice = new IntroduceFieldAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 null,
                 template,
                 scope,
                 whenExists,
                 buildField,
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -937,18 +849,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceField );
+            this.Validate( targetType, AdviceKind.IntroduceField );
 
             var advice = new IntroduceFieldAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 fieldName,
                 default,
                 scope,
@@ -958,7 +862,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     builder.Type = fieldType;
                     buildField?.Invoke( builder );
                 },
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -993,18 +896,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
+            this.Validate( targetType, AdviceKind.IntroduceProperty );
 
             var advice = new IntroducePropertyAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 propertyName,
                 propertyType,
                 default,
@@ -1013,8 +908,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 scope,
                 whenExists,
                 buildProperty,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -1047,12 +942,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
+            this.Validate( targetType, AdviceKind.IntroduceProperty );
 
             var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
@@ -1060,20 +950,17 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
             var advice = new IntroducePropertyAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
-                null,
-                null,
+                this.GetAdviceConstructorParameters( targetType ),
+                explicitName: null,
+                explicitType: null,
                 propertyTemplate,
                 accessorTemplates.Get?.PartialForIntroduction(),
                 accessorTemplates.Set?.PartialForIntroduction(),
                 scope,
                 whenExists,
                 buildProperty,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -1092,17 +979,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
             if ( getTemplate == null && setTemplate == null )
             {
                 throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
             }
 
-            this.CheckEligibility( targetType, AdviceKind.IntroduceProperty );
+            this.Validate( targetType, AdviceKind.IntroduceProperty );
 
             var boundGetTemplate = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1113,20 +995,17 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var parameterReaders = this.GetObjectReader( args );
 
             var advice = new IntroducePropertyAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 name,
-                null,
-                default,
+                explicitType: null,
+                propertyTemplate: null,
                 boundGetTemplate?.PartialForIntroduction( parameterReaders ),
                 boundSetTemplate?.PartialForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildProperty,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -1218,7 +1097,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
             }
 
-            this.CheckEligibility( targetType, AdviceKind.IntroduceIndexer );
+            this.Validate( targetType, AdviceKind.IntroduceIndexer );
 
             var boundGetTemplate = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                 ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1229,18 +1108,15 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var parameterReaders = this.GetObjectReader( args );
 
             var advice = new IntroduceIndexerAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 indices,
                 boundGetTemplate?.PartialForIntroduction( parameterReaders ),
                 boundSetTemplate?.PartialForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildIndexer,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -1256,11 +1132,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
             if ( invokeTemplate != null )
             {
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
@@ -1271,7 +1142,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                 throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
             }
 
-            this.CheckEligibility( targetEvent, AdviceKind.OverrideEvent );
+            this.Validate( targetEvent, AdviceKind.OverrideEvent );
 
             var boundAddTemplate =
                 this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
@@ -1284,13 +1155,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                     .ForOverride( targetEvent.RemoveMethod, this.GetObjectReader( args ) );
 
             var advice = new OverrideEventAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetEvent,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetEvent ),
                 boundAddTemplate,
                 boundRemoveTemplate,
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -1307,12 +1174,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
+            this.Validate( targetType, AdviceKind.IntroduceEvent );
 
             var eventTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
@@ -1320,19 +1182,16 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var (add, remove) = eventTemplate.GetAccessorTemplates();
 
             var advice = new IntroduceEventAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
-                null,
+                this.GetAdviceConstructorParameters( targetType ),
+                explicitName: null,
                 eventTemplate,
                 add?.PartialForIntroduction(),
                 remove?.PartialForIntroduction(),
                 scope,
                 whenExists,
                 buildEvent,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -1352,12 +1211,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.IntroduceEvent );
+            this.Validate( targetType, AdviceKind.IntroduceEvent );
 
             var boundAddTemplate = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
@@ -1368,19 +1222,16 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             var parameterReaders = this.GetObjectReader( args );
 
             var advice = new IntroduceEventAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 name,
-                default,
+                eventTemplate: null,
                 boundAddTemplate.PartialForIntroduction( parameterReaders ),
                 boundRemoveTemplate.PartialForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildEvent,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this._explicitlyImplementedInterfaceType );
 
             return advice.Execute( this._state );
         }
@@ -1394,22 +1245,14 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.ImplementInterface );
+            this.Validate( targetType, AdviceKind.ImplementInterface );
 
             var advice = new ImplementInterfaceAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetType ),
                 interfaceType,
                 whenExists,
-                this._layerName,
-                this.GetObjectReader( tags ) );
+                this.GetObjectReader( tags ),
+                this );
 
             return advice.Execute( this._state );
         }
@@ -1435,24 +1278,15 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.AddInitializer );
+            this.Validate( targetType, AdviceKind.AddInitializer );
 
             var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new TemplateBasedInitializeAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters<IMemberOrNamedType>( targetType ),
                 boundTemplate.ForInitializer( this.GetObjectReader( args ) ),
                 kind,
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -1466,21 +1300,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetType, AdviceKind.AddInitializer );
+            this.Validate( targetType, AdviceKind.AddInitializer );
 
             var advice = new SyntaxBasedInitializeAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetType,
-                this._compilation,
+                this.GetAdviceConstructorParameters<IMemberOrNamedType>( targetType ),
                 statement,
-                kind,
-                this._layerName );
+                kind );
 
             return advice.Execute( this._state );
         }
@@ -1490,24 +1315,15 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetConstructor, AdviceKind.AddInitializer );
+            this.Validate( targetConstructor, AdviceKind.AddInitializer );
 
             var boundTemplate = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
             var advice = new TemplateBasedInitializeAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetConstructor,
-                this._compilation,
+                this.GetAdviceConstructorParameters<IMemberOrNamedType>( targetConstructor ),
                 boundTemplate.ForInitializer( this.GetObjectReader( args ) ),
                 InitializerKind.BeforeInstanceConstructor,
-                this._layerName,
                 this.GetObjectReader( tags ) );
 
             return advice.Execute( this._state );
@@ -1518,21 +1334,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( targetConstructor, AdviceKind.AddInitializer );
+            this.Validate( targetConstructor, AdviceKind.AddInitializer );
 
             var advice = new SyntaxBasedInitializeAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                targetConstructor,
-                this._compilation,
+                this.GetAdviceConstructorParameters<IMemberOrNamedType>( targetConstructor ),
                 statement,
-                InitializerKind.BeforeInstanceConstructor,
-                this._layerName );
+                InitializerKind.BeforeInstanceConstructor );
 
             return advice.Execute( this._state );
         }
@@ -1572,13 +1379,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             }
 
             var advice = new ParameterContractAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance.AssertNotNull(),
-                targetParameter,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetParameter ),
                 boundTemplate,
                 kind,
-                this._layerName,
                 this.GetObjectReader( tags ),
                 this.GetObjectReader( args ) );
 
@@ -1601,13 +1404,9 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             }
 
             var advice = new FieldOrPropertyOrIndexerContractAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance.AssertNotNull(),
-                targetMember,
-                this._compilation,
+                this.GetAdviceConstructorParameters( targetMember ),
                 boundTemplate,
                 direction,
-                this._layerName,
                 this.GetObjectReader( tags ),
                 this.GetObjectReader( args ) );
 
@@ -1648,27 +1447,24 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         IDeclaration targetDeclaration,
         IAttributeData attribute,
         OverrideStrategy whenExists = OverrideStrategy.Default )
-        => new AddAttributeAdvice(
-            this._state.AspectInstance,
-            this._templateClassInstance!,
-            targetDeclaration,
-            this._compilation,
+    {
+        this.ValidateExplicitInterfaceImplementation( AdviceKind.IntroduceAttribute );
+
+        return new AddAttributeAdvice(
+            this.GetAdviceConstructorParameters( targetDeclaration ),
             attribute,
-            whenExists,
-            this._layerName ).Execute( this._state );
+            whenExists ).Execute( this._state );
+    }
 
     public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
     {
         using ( this.WithNonUserCode() )
         {
-            return
-                new RemoveAttributesAdvice(
-                    this._state.AspectInstance,
-                    this._templateClassInstance!,
-                    targetDeclaration,
-                    this._compilation,
-                    attributeType,
-                    this._layerName ).Execute( this._state );
+            this.ValidateExplicitInterfaceImplementation( AdviceKind.RemoveAttributes );
+
+            return new RemoveAttributesAdvice(
+                this.GetAdviceConstructorParameters( targetDeclaration ),
+                attributeType ).Execute( this._state );
         }
     }
 
@@ -1685,19 +1481,10 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
-            if ( this._templateClassInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            this.CheckEligibility( constructor, AdviceKind.IntroduceParameter );
+            this.Validate( constructor, AdviceKind.IntroduceParameter );
 
             var advice = new IntroduceConstructorParameterAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                constructor,
-                this._compilation,
-                this._layerName,
+                this.GetAdviceConstructorParameters( constructor ),
                 parameterName,
                 parameterType,
                 attributes.IsDefaultOrEmpty ? null : builder => builder.AddAttributes( attributes ),
@@ -1729,11 +1516,6 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
-        if ( this._templateClassInstance == null )
-        {
-            throw new InvalidOperationException();
-        }
-
         if ( typeKind is not TypeKind.Class )
         {
             throw new NotImplementedException( "Introducing other kinds of types than classes is not implemented." );
@@ -1741,18 +1523,15 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
         using ( this.WithNonUserCode() )
         {
-            return
-                AsAdviser(
-                    this,
-                    new IntroduceNamedTypeAdvice(
-                            this._state.AspectInstance,
-                            this._templateClassInstance,
-                            targetNamespaceOrType,
-                            name,
-                            this._compilation,
-                            buildType,
-                            this._layerName )
-                        .Execute( this._state ) );
+            this.ValidateExplicitInterfaceImplementation( AdviceKind.IntroduceType );
+
+            return AsAdviser(
+                this,
+                new IntroduceNamedTypeAdvice(
+                        this.GetAdviceConstructorParameters( targetNamespaceOrType ),
+                        name,
+                        buildType )
+                    .Execute( this._state ) );
         }
     }
 
@@ -1787,16 +1566,20 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     {
         using ( this.WithNonUserCode() )
         {
+            this.ValidateExplicitInterfaceImplementation( AdviceKind.AddAnnotation );
+
             if ( this._templateClassInstance == null )
             {
                 throw new InvalidOperationException();
             }
 
             var advice = new AddAnnotationAdvice(
-                this._state.AspectInstance,
-                this._templateClassInstance,
-                declaration,
-                this._compilation,
+                new(
+                    this._state.AspectInstance,
+                    this._templateClassInstance,
+                    declaration,
+                    this._compilation,
+                    LayerName: null ),
                 new AnnotationInstance( annotation, export, declaration.ToTypedRef<IDeclaration>() ) );
 
             advice.Execute( this._state );

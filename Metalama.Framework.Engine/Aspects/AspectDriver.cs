@@ -217,7 +217,8 @@ internal sealed class AspectDriver : IAspectDriver
                 targetDeclaration,
                 adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                layer );
+                layer,
+                explicitlyImplementedInterfaceType: null );
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses

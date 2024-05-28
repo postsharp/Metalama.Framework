@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Advising;
 
 /// <summary>
-/// Represents the result of the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
+/// Represents the result of the <see cref="IAdviceFactory.ImplementInterface(INamedType,INamedType,OverrideStrategy,object?)"/>
 /// method. The result can be used to introduce interface members using the extension methods in <see cref="AdviserExtensions"/>.
 /// </summary>
 [CompileTime]
@@ -23,7 +23,7 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult
     IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; }
 
     /// <summary>
-    /// Gets a list of interface members that were considered when implementing the given interface.
+    /// Gets a list of interface members specified using <see cref="InterfaceMemberAttribute"/> or <see cref="ExplicitInterfaceMemberAttribute"/> that were considered when implementing the given interface.
     /// </summary>
     /// <remarks>
     /// This property contains only members of interfaces that were implemented. Members of interfaces that were ignored are not included in the list.
@@ -32,8 +32,8 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult
     IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; }
 
     /// <summary>
-    /// Gets an <see cref="IAdviser{T}"/> allowing to introduce explicit members.
+    /// Gets an <see cref="IAdviser{T}"/> allowing to introduce explicit members to the primary implemented interface.
+    /// For introducing memebers to its base interfaces, use the <see cref="Interfaces"/> property.
     /// </summary>
-    [Obsolete( "Not implemented." )]
     IAdviser<INamedType> ExplicitImplementation { get; }
 }

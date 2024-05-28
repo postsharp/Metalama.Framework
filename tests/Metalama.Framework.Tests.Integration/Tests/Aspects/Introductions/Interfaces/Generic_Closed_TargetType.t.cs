@@ -1,2 +1,7 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly implement interface 'IInterface<TargetClass>' in the type 'TargetClass' because the aspect type does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member 'IInterface<TargetClass>.Foo(TargetClass)'.`
+[Introduction]
+public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Generic_Closed_TargetType.IInterface<global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Generic_Closed_TargetType.TargetClass>
+{
+    public void Foo(global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Generic_Closed_TargetType.TargetClass t)
+    {
+    }
+}

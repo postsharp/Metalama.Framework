@@ -3,16 +3,17 @@
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
+using Metalama.Backstage.Licensing.Consumption.Sources;
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Metalama.Testing.AspectTesting.Licensing
 {
     internal sealed class TestFrameworkLicenseStatus
     {
-        private bool IsLicensed { get; }
+        private readonly ImmutableArray<LicensingMessage> _messages;
 
-        private IReadOnlyList<LicensingMessage> Messages { get; }
+        private bool IsLicensed { get; }
 
         public TestFrameworkLicenseStatus( string testProjectName, string? projectLicense, bool ignoreUserProfileLicenses )
         {
@@ -27,9 +28,7 @@ namespace Metalama.Testing.AspectTesting.Licensing
                 AddSupportServices = false,
                 LicensingOptions = new LicensingInitializationOptions()
                 {
-                    ProjectLicense = projectLicense,
-                    IgnoreUnattendedProcessLicense = ignoreUserProfileLicenses,
-                    IgnoreUserProfileLicenses = ignoreUserProfileLicenses
+                    IgnoreUnattendedProcessLicense = ignoreUserProfileLicenses, IgnoreUserProfileLicenses = ignoreUserProfileLicenses
                 }
             };
 
@@ -37,11 +36,13 @@ namespace Metalama.Testing.AspectTesting.Licensing
             builder.AddBackstageServices( options );
             var serviceProvider = builder.ServiceProvider;
 
-            var licenseConsumptionManager = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
+            var consumer = serviceProvider.GetRequiredBackstageService<ILicenseConsumptionService>()
+                .CreateConsumer(
+                    projectLicense,
+                    ignoreUserProfileLicenses ? LicenseSourceKind.All : LicenseSourceKind.None,
+                    out this._messages );
 
-            this.IsLicensed = licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, testProjectName );
-
-            this.Messages = licenseConsumptionManager.Messages;
+            this.IsLicensed = consumer.CanConsume( LicenseRequirement.Professional, testProjectName );
         }
 
         public void ThrowIfNotLicensed()
@@ -53,9 +54,9 @@ namespace Metalama.Testing.AspectTesting.Licensing
 
             var message = "The Metalama Test Framework cannot be used because this feature is not covered by your license.";
 
-            if ( this.Messages.Count > 0 )
+            if ( this._messages.Length > 0 )
             {
-                message += Environment.NewLine + string.Join( Environment.NewLine, this.Messages );
+                message += Environment.NewLine + string.Join( Environment.NewLine, this._messages );
             }
 
             throw new InvalidLicenseException( message );

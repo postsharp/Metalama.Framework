@@ -7,6 +7,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 internal sealed record TemplateClassMemberParameter(
     int SourceIndex,
     string Name,
+    ITypeSymbol? Type,
     bool IsCompileTime,
     int? TemplateIndex,
     bool HasDefaultValue = false,
@@ -16,6 +17,7 @@ internal sealed record TemplateClassMemberParameter(
         : this(
             parameterSymbol.Ordinal,
             parameterSymbol.Name,
+            parameterSymbol.Type,
             isCompileTime,
             templateIndex,
             parameterSymbol.HasExplicitDefaultValue,

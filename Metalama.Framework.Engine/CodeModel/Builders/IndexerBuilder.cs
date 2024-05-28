@@ -67,7 +67,7 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 
-    public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations { get; } = Array.Empty<IIndexer>();
+    public IReadOnlyList<IIndexer> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IIndexer>();
 
     public override bool IsExplicitInterfaceImplementation => this.ExplicitInterfaceImplementations.Count > 0;
 
@@ -107,4 +107,6 @@ internal sealed class IndexerBuilder : PropertyOrIndexerBuilder, IIndexerBuilder
 
         return this.AddParameter( name, iType, refKind, typeConstant );
     }
+
+    public void SetExplicitInterfaceImplementation( IIndexer interfaceIndexer ) => this.ExplicitInterfaceImplementations = [interfaceIndexer];
 }

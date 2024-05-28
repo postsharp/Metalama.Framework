@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -25,10 +24,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
     private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceOperatorAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         OperatorKind operatorKind,
         IType leftOperandType,
         IType? rightOperandType,
@@ -36,24 +32,15 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         PartiallyBoundTemplateMethod template,
         OverrideStrategy overrideStrategy,
         Action<IMethodBuilder>? buildAction,
-        string? layerName,
-        IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            null,
-            template.TemplateMember,
-            IntroductionScope.Static,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        IObjectReader tags,
+        INamedType? explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName: null, template.TemplateMember, IntroductionScope.Static, overrideStrategy, buildAction, tags )
     {
         this._template = template;
 
-        this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
+        this.Builder = new MethodBuilder( this, parameters.TargetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
+
+        this.Builder.IsStatic = true;
 
         var runtimeParameters = template.TemplateMember.TemplateClassMember.RunTimeParameters;
 
@@ -68,6 +55,8 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         }
 
         this.Builder.ReturnType = resultType;
+
+        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

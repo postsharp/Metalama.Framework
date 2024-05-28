@@ -1,4 +1,8 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly implement interface 'IInterface' in the type 'TargetClass' because the aspect type does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member 'IInterface.Event'.`
-// Error LAMA0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly implement interface 'IInterface' in the type 'TargetClass' because the aspect type does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member 'IInterface.Method()'.`
-// Error LAMA0510 on `TargetClass`: `The aspect 'Introduction' cannot implicitly implement interface 'IInterface' in the type 'TargetClass' because the aspect type does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member 'IInterface.Property'.`
+// Final Compilation.Emit failed.
+// Error CS0535 on `global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MissingMembers.IInterface`: `'TargetClass' does not implement interface member 'IInterface.Event'`
+// Error CS0535 on `global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MissingMembers.IInterface`: `'TargetClass' does not implement interface member 'IInterface.Method()'`
+// Error CS0535 on `global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MissingMembers.IInterface`: `'TargetClass' does not implement interface member 'IInterface.Property'`
+[Introduction]
+public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MissingMembers.IInterface
+{
+}

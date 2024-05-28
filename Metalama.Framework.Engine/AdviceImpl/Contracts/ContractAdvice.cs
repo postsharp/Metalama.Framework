@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
@@ -21,16 +20,12 @@ internal abstract class ContractAdvice<T> : Advice<AddContractAdviceResult<T>>
     protected IObjectReader TemplateArguments { get; }
 
     protected ContractAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        T targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<T> parameters,
         TemplateMember<IMethod> template,
         ContractDirection direction,
-        string? layerName,
         IObjectReader tags,
         IObjectReader templateArguments )
-        : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName )
+        : base( parameters )
     {
         Invariant.Assert( direction is ContractDirection.Input or ContractDirection.Output or ContractDirection.Both );
 

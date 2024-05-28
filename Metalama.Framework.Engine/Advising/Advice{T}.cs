@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
-using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
@@ -113,12 +111,7 @@ internal abstract class Advice<T> : Advice
         return adviceResult;
     }
 
-    protected Advice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance template,
-        IDeclaration targetDeclaration,
-        ICompilation sourceCompilation,
-        string? layerName ) : base( aspectInstance, template, targetDeclaration, sourceCompilation, layerName ) { }
+    protected Advice( AdviceConstructorParameters parameters ) : base( parameters ) { }
 
     protected T CreateFailedResult( Diagnostic diagnostic )
         => new() { Diagnostics = ImmutableArray.Create( diagnostic ), Outcome = AdviceOutcome.Error, AdviceKind = this.AdviceKind };

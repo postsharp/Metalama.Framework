@@ -16,7 +16,7 @@ public class TheAspect : TypeAspect
         }
     }
 
-    [InterfaceMember]
+    [Introduce(WhenExists = OverrideStrategy.Ignore)]
     public void Dispose() { }
 }
 

@@ -220,18 +220,16 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         var memberId = SymbolId.Create( declaringSymbol );
 
-        switch ( attributeData.AttributeClass?.Name )
+        var templateAttributeType = attributeData.AttributeClass?.Name switch
         {
-            case nameof(TemplateAttribute):
-            case nameof(TestTemplateAttribute):
-                return new TemplateInfo( memberId, TemplateAttributeType.Template, (IAdviceAttribute?) attributeInstance );
+            nameof(TemplateAttribute) or nameof(TestTemplateAttribute) => TemplateAttributeType.Template,
+#pragma warning disable CS0618 // Type is obsolete
+            nameof(InterfaceMemberAttribute) or nameof(ExplicitInterfaceMemberAttribute) => TemplateAttributeType.InterfaceMember,
+#pragma warning restore CS0618
+            _ => TemplateAttributeType.DeclarativeAdvice
+        };
 
-            case nameof(InterfaceMemberAttribute):
-                return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, (IAdviceAttribute?) attributeInstance );
-
-            default:
-                return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, (IAdviceAttribute?) attributeInstance );
-        }
+        return new TemplateInfo( memberId, templateAttributeType, (IAdviceAttribute?) attributeInstance );
     }
 
     private static TemplatingScope? GetTemplatingScope( AttributeData attribute )
@@ -243,7 +241,9 @@ internal sealed class SymbolClassifier : ISymbolClassifier
             nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
             nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
             nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
-            nameof(InterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
+#pragma warning disable CS0618 // Type is obsolete
+            nameof(InterfaceMemberAttribute) or nameof(ExplicitInterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
+#pragma warning restore CS0618
             _ => null
         };
 
