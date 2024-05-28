@@ -37,7 +37,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         Action<IPropertyBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
     {
         this._getTemplate = getTemplate;
         this._setTemplate = setTemplate;
@@ -70,8 +70,6 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         }
 
         this.Builder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
-
-        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(
