@@ -12,13 +12,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 {
     public string FullName
-        => this.ParentNamespace != null
-            ? $"{this.ParentNamespace.FullName}.{this.Name}"
+        => this.ContainingNamespace != null
+            ? $"{this.ContainingNamespace.FullName}.{this.Name}"
             : throw new AssertionFailedException("There should be a parent namespace.");
 
     public bool IsGlobalNamespace => false;
 
-    public INamespace? ParentNamespace { get; }
+    public INamespace? ContainingNamespace { get; }
+
+    INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     [Memo]
     public INamedTypeCollection Types => new EmptyNamedTypeCollection();
@@ -28,7 +30,7 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public bool IsPartial => throw new NotImplementedException();
 
-    public override IDeclaration? ContainingDeclaration => this.ParentNamespace;
+    public override IDeclaration? ContainingDeclaration => this.ContainingNamespace;
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Namespace;
 
@@ -36,9 +38,9 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 
     public IntroduceNamespaceTransformation ToTransformation() => new( this.ParentAdvice, this );
 
-    public NamespaceBuilder( Advice advice, INamespace parentNamespace, string name ) : base( advice, name )
+    public NamespaceBuilder( Advice advice, INamespace containingNamespace, string name ) : base( advice, name )
     {
-        this.ParentNamespace = parentNamespace;
+        this.ContainingNamespace = containingNamespace;
     }
 
     public INamespace? GetDescendant( string ns )

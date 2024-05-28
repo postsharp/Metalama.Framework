@@ -777,6 +777,10 @@ namespace Metalama.Framework.Advising
             TypeKind typeKind = TypeKind.Class,
             Action<INamedTypeBuilder>? buildType = null );
 
+        INamespaceIntroductionAdviceResult IntroduceNamespace(
+            INamespace targetNamespace,
+            string name);
+
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved
         /// using the <see cref="DeclarationEnhancements{T}.GetAnnotations{TAnnotation}"/> method of the <see cref="DeclarationExtensions.Enhancements{T}"/> object.

@@ -24,7 +24,9 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     public bool IsGlobalNamespace => this._namespaceBuilder.IsGlobalNamespace;
 
-    public INamespace? ParentNamespace => this._namespaceBuilder.ParentNamespace;
+    public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
+
+    INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     public INamedTypeCollection Types
         => new NamedTypeCollection(

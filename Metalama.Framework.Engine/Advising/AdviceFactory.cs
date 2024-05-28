@@ -1756,6 +1756,32 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         }
     }
 
+    public INamespaceIntroductionAdviceResult IntroduceNamespace(
+        INamespace targetNamespace,
+        string name )
+    {
+        // TODO: Dependency on template class instance should not be required.
+        if ( this._templateClassInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            return
+                AsAdviser(
+                    this,
+                    new IntroduceNamespaceAdvice(
+                            this._state.AspectInstance,
+                            this._templateClassInstance,
+                            targetNamespace,
+                            name,
+                            this._compilation,
+                            this._layerName )
+                        .Execute( this._state ) );
+        }
+    }
+
     public void AddAnnotation<TDeclaration>( TDeclaration declaration, IAnnotation<TDeclaration> annotation, bool export = false )
         where TDeclaration : class, IDeclaration
     {
@@ -1779,4 +1805,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     private static IClassIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamedType> result )
         => new ClassIntroductionAdviceResult( adviceFactory, result );
+
+    private static INamespaceIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamespace> result )
+        => new NamespaceIntroductionAdviceResult( adviceFactory, result );
 }

@@ -1,0 +1,38 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Advising;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Services;
+using Metalama.Framework.Engine.Transformations;
+using System;
+
+namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
+
+internal class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace, NamespaceBuilder>
+{
+    public override AdviceKind AdviceKind => AdviceKind.IntroduceNamespace;
+
+    public IntroduceNamespaceAdvice(
+        IAspectInstanceInternal aspect,
+        TemplateClassInstance templateInstance,
+        INamespace targetNamespace,
+        string name,
+        ICompilation sourceCompilation,
+        string? layerName ) : base( aspect, templateInstance, targetNamespace, sourceCompilation, null, layerName )
+    {
+        this.Builder = new NamespaceBuilder( this, targetNamespace, name );
+    }
+
+    protected override IntroductionAdviceResult<INamespace> Implement(
+        ProjectServiceProvider serviceProvider,
+        CompilationModel compilation,
+        Action<ITransformation> addTransformation )
+    {
+        addTransformation( this.Builder.ToTransformation() );
+
+        return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+    }
+}
