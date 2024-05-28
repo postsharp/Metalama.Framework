@@ -34,7 +34,7 @@
         <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all" />
 
         <!-- Resharper annotations -->
-        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
+        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="all" />
      
     </ItemGroup>
     
