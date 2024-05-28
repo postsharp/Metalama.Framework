@@ -72,11 +72,13 @@ internal sealed class AttributeClassificationService : IGlobalService, IDisposab
     {
         if ( fullAttributeName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
              fullAttributeName is "System.Runtime.CompilerServices.NullableAttribute" or
+                 "System.Runtime.CompilerServices.NullableContextAttribute" or
                  "System.Runtime.CompilerServices.CompilerGeneratedAttribute" or
                  "System.Runtime.CompilerServices.AsyncStateMachineAttribute" or
                  "System.Runtime.CompilerServices.IteratorStateMachineAttribute" or
                  "System.Runtime.CompilerServices.AsyncIteratorStateMachineAttribute" or
-                 "System.Diagnostics.DebuggerBrowsableAttribute" )
+                 "System.Diagnostics.DebuggerBrowsableAttribute" or
+                 "System.Diagnostics.DebuggerStepThroughAttribute" )
         {
             return true;
         }

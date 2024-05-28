@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
@@ -20,14 +19,8 @@ internal sealed class AddAttributeAdvice : Advice<AddAttributeAdviceResult>
     private readonly IAttributeData _attribute;
     private readonly OverrideStrategy _overrideStrategy;
 
-    public AddAttributeAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance template,
-        IDeclaration targetDeclaration,
-        CompilationModel sourceCompilation,
-        IAttributeData attribute,
-        OverrideStrategy overrideStrategy,
-        string? layerName ) : base( aspectInstance, template, targetDeclaration, sourceCompilation, layerName )
+    public AddAttributeAdvice( AdviceConstructorParameters parameters, IAttributeData attribute, OverrideStrategy overrideStrategy )
+        : base( parameters )
     {
         this._attribute = attribute;
         this._overrideStrategy = overrideStrategy;

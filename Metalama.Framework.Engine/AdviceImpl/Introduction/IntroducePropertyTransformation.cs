@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -49,7 +50,7 @@ internal class IntroducePropertyTransformation : IntroduceMemberTransformation<P
                 syntaxGenerator.Type( propertyBuilder.Type ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 propertyBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
-                        (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations[0].DeclaringType ) )
+                        (NameSyntax) syntaxGenerator.Type( propertyBuilder.ExplicitInterfaceImplementations.Single().DeclaringType ) )
                     : null,
                 propertyBuilder.GetCleanName(),
                 GenerateAccessorList(),

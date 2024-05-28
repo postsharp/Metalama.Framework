@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -24,32 +23,17 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
     private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceConstructorAdvice(
-        IAspectInstanceInternal aspect,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IConstructorBuilder>? buildAction,
-        string? layerName,
         IObjectReader tags )
-        : base(
-            aspect,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            null,
-            template.TemplateMember,
-            scope,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        : base( parameters, null, template.TemplateMember, scope, overrideStrategy, buildAction, tags )
     {
         this._template = template;
 
-        this.Builder = new ConstructorBuilder( this, targetDeclaration );
+        this.Builder = new ConstructorBuilder( this, parameters.TargetDeclaration );
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;

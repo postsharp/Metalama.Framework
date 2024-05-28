@@ -21,10 +21,10 @@ public class IntroduceAspectAttribute : TypeAspect
         aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
     }
 
-    [InterfaceMember]
+    [Introduce]
     public int AutoProperty { get; set; }
 
-    [InterfaceMember]
+    [Introduce]
     public int Property
     {
         get
@@ -39,13 +39,13 @@ public class IntroduceAspectAttribute : TypeAspect
         }
     }
 
-    [InterfaceMember]
+    [Introduce]
     public void IntroducedMethod()
     {
         Console.WriteLine("Introduced interface member");
     }
 
-    [InterfaceMember]
+    [Introduce]
     public event EventHandler? Event
     {
         add
@@ -59,7 +59,7 @@ public class IntroduceAspectAttribute : TypeAspect
         }
     }
 
-    [InterfaceMember]
+    [Introduce]
     public event EventHandler? EventField;
 }
 

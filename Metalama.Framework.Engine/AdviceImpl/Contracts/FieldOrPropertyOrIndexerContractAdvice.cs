@@ -4,7 +4,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
@@ -16,24 +15,12 @@ namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 internal class FieldOrPropertyOrIndexerContractAdvice : ContractAdvice<IFieldOrPropertyOrIndexer>
 {
     public FieldOrPropertyOrIndexerContractAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IFieldOrPropertyOrIndexer targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<IFieldOrPropertyOrIndexer> parameters,
         TemplateMember<IMethod> template,
         ContractDirection direction,
-        string? layerName,
         IObjectReader tags,
-        IObjectReader templateArguments ) : base(
-        aspectInstance,
-        templateInstance,
-        targetDeclaration,
-        sourceCompilation,
-        template,
-        direction,
-        layerName,
-        tags,
-        templateArguments ) { }
+        IObjectReader templateArguments )
+        : base( parameters, template, direction, tags, templateArguments ) { }
 
     protected override AddContractAdviceResult<IFieldOrPropertyOrIndexer> Implement(
         ProjectServiceProvider serviceProvider,

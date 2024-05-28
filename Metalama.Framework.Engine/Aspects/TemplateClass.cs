@@ -251,6 +251,7 @@ public abstract class TemplateClass : IDiagnosticSource
                                 new TemplateClassMemberParameter(
                                     typeParameter.Ordinal,
                                     typeParameter.Name,
+                                    Type: null,
                                     isCompileTime,
                                     allTemplateParametersCount ) );
 

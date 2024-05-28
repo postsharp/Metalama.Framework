@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -24,30 +23,15 @@ internal sealed class IntroduceFinalizerAdvice : IntroduceMemberAdvice<IMethod, 
     private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceFinalizerAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
         OverrideStrategy overrideStrategy,
-        string? layerName,
         IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            null,
-            template.TemplateMember,
-            IntroductionScope.Instance,
-            overrideStrategy,
-            _ => { },
-            layerName,
-            tags )
+        : base( parameters, null, template.TemplateMember, IntroductionScope.Instance, overrideStrategy, _ => { }, tags )
     {
         this._template = template;
 
-        this.Builder = new MethodBuilder( this, targetDeclaration, "Finalize", DeclarationKind.Finalizer );
+        this.Builder = new MethodBuilder( this, parameters.TargetDeclaration, "Finalize", DeclarationKind.Finalizer );
     }
 
     protected override void InitializeCore(

@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -17,16 +16,8 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
     private readonly BoundTemplateMethod? _getTemplate;
     private readonly BoundTemplateMethod? _setTemplate;
 
-    public OverrideIndexerAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IIndexer targetDeclaration,
-        ICompilation sourceCompilation,
-        BoundTemplateMethod? getTemplate,
-        BoundTemplateMethod? setTemplate,
-        string? layerName,
-        IObjectReader tags )
-        : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
+    public OverrideIndexerAdvice( AdviceConstructorParameters<IIndexer> parameters, BoundTemplateMethod? getTemplate, BoundTemplateMethod? setTemplate, IObjectReader tags )
+        : base( parameters, tags )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
         this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();

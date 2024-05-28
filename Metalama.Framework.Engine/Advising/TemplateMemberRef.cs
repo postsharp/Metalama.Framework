@@ -9,7 +9,9 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Microsoft.CodeAnalysis;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -47,7 +49,12 @@ internal readonly struct TemplateMemberRef
         var templateReflectionContext = this._templateMember.TemplateClass.GetTemplateReflectionContext( compilation.CompilationContext );
         var type = templateReflectionContext.Compilation.GetTypeByMetadataNameSafe( this._templateMember.TemplateClass.FullName );
 
-        var symbol = type.GetSingleMemberIncludingBase( this._templateMember.Name, classifier.IsTemplate );
+        var parameters = this._templateMember.Parameters;
+
+        var symbol = type.GetSingleMemberIncludingBase(
+            this._templateMember.Name,
+            symbol => classifier.IsTemplate( symbol )
+                && symbol.GetParameters().Select( p => p.Type ).SequenceEqual( parameters.Select( p => p.Type ) ) );
 
         var declaration = templateReflectionContext.GetCompilationModel( compilation ).Factory.GetDeclaration( symbol );
 

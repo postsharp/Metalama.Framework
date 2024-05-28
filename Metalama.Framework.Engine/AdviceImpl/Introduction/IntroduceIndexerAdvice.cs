@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
@@ -24,30 +23,16 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
     private readonly PartiallyBoundTemplateMethod? _setTemplate;
 
     public IntroduceIndexerAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         IReadOnlyList<(IType Type, string Name)> indices,
         PartiallyBoundTemplateMethod? getTemplate,
         PartiallyBoundTemplateMethod? setTemplate,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IIndexerBuilder>? buildAction,
-        string? layerName,
-        IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            "this[]",
-            null,
-            scope,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        IObjectReader tags,
+        INamedType? explicitlyImplementedInterfaceType )
+        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, tags )
     {
         this._getTemplate = getTemplate;
         this._setTemplate = setTemplate;
@@ -55,16 +40,14 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         var hasGet = getTemplate != null;
         var hasSet = setTemplate != null;
 
-        this.Builder = new IndexerBuilder(
-            this,
-            targetDeclaration,
-            hasGet,
-            hasSet );
+        this.Builder = new IndexerBuilder( this, parameters.TargetDeclaration, hasGet, hasSet );
 
         foreach ( var pair in indices )
         {
             this.Builder.AddParameter( pair.Name, pair.Type );
         }
+
+        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceIndexer;

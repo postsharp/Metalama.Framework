@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating.Statements;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -14,14 +13,8 @@ internal sealed class SyntaxBasedInitializeAdvice : InitializeAdvice
 {
     private readonly IStatement _statement;
 
-    public SyntaxBasedInitializeAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IMemberOrNamedType targetDeclaration,
-        ICompilation sourceCompilation,
-        IStatement statement,
-        InitializerKind kind,
-        string? layerName ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, kind, layerName )
+    public SyntaxBasedInitializeAdvice( AdviceConstructorParameters<IMemberOrNamedType> parameters, IStatement statement, InitializerKind kind )
+        : base( parameters, kind )
     {
         this._statement = statement;
     }

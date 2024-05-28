@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -26,32 +25,20 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
     private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     public IntroduceMethodAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         PartiallyBoundTemplateMethod template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IMethodBuilder>? buildAction,
-        string? layerName,
-        IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            null,
-            template.TemplateMember,
-            scope,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        IObjectReader tags,
+        INamedType? explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName: null, template.TemplateMember, scope, overrideStrategy, buildAction, tags )
     {
         this._template = template;
 
-        this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
+        this.Builder = new MethodBuilder( this, parameters.TargetDeclaration, this.MemberName );
+
+        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

@@ -27,13 +27,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IDerivedInterface), OverrideStrategy.Fail );
         }
 
-        [InterfaceMember]
+        [Introduce]
         public int Foo()
         {
             return meta.Proceed();
         }
 
-        [InterfaceMember]
+        [Introduce]
         public int Bar()
         {
             return meta.Proceed();

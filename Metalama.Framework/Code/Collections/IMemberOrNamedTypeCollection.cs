@@ -22,6 +22,5 @@ public interface IMemberOrNamedTypeCollection<out T> : IReadOnlyCollection<T>
     /// as opposed to the full, namespace-prefixed name.
     /// </summary>
     /// <param name="name">The member name (not including the namespace, for types).</param>
-    /// <returns></returns>
     IEnumerable<T> OfName( string name );
 }
