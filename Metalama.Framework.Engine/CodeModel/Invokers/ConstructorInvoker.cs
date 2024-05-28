@@ -3,7 +3,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -45,6 +47,8 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         return this.InvokeConstructor( args );
     }
 
+    public object Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
+
     private IExpression InvokeConstructor( object?[] args )
     {
         return new DelegateUserExpression(
@@ -57,29 +61,104 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
                     TypedExpressionSyntaxImpl.FromValues( args, context ),
                     context.SyntaxGenerationContext );
 
-                return CreateObjectCreationExpression( type, arguments );
+                return CreateObjectCreationExpression( type, arguments, null );
             },
             this.Member.DeclaringType );
     }
 
-    public object Invoke( IEnumerable<IExpression> args ) => this.Invoke( args.ToArray<object>() );
+    public IObjectCreationExpression CreateInvokeExpression()
+        => new ObjectCreationExpression(
+            this.Member,
+            _ => Array.Empty<ExpressionSyntax>() );
+
+    public IObjectCreationExpression CreateInvokeExpression( params object?[] args )
+        => new ObjectCreationExpression(
+            this.Member,
+            context => TypedExpressionSyntaxImpl.FromValues( args, context ).SelectAsArray( tes => tes.Syntax ) );
+
+    public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args )
+        => new ObjectCreationExpression(
+            this.Member,
+            context => args.SelectAsArray( arg => arg.ToExpressionSyntax( context ) ) );
+
+    public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args )
+        => new ObjectCreationExpression(
+            this.Member,
+            context => args.Select( arg => arg.ToExpressionSyntax( context ) ) );
 
     private static ExpressionSyntax CreateObjectCreationExpression(
         TypeSyntax type,
-        IEnumerable<ArgumentSyntax>? arguments )
+        IEnumerable<ArgumentSyntax> arguments,
+        InitializerExpressionSyntax? initializerExpression )
     {
-        // TODO: Field initializers.
-
         var expression =
             ObjectCreationExpression(
                 type,
                 ArgumentList( SeparatedList( arguments ) ),
-                null );
+                initializerExpression );
 
         // Not using any aspect reference because these are not supported for constructor invocations.
 
         return expression;
     }
 
-    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => this.InvokeConstructor( args.ToArray<object>() );
+    private sealed class ObjectCreationExpression : UserExpression, IObjectCreationExpression
+    {
+        private readonly IConstructor _constructor;
+        private readonly Func<SyntaxSerializationContext, IEnumerable<ExpressionSyntax>> _argumentFactory;
+
+        public override IType Type => this._constructor.DeclaringType;
+
+        public ObjectCreationExpression( IConstructor constructor, Func<SyntaxSerializationContext, IEnumerable<ExpressionSyntax>> argumentFactory )
+        {
+            this._constructor = constructor;
+            this._argumentFactory = argumentFactory;
+        }
+
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        {
+            return CreateObjectCreationExpression(
+                syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
+                this._argumentFactory( syntaxSerializationContext ).Select( e => Argument( e ) ),
+                null );
+        }
+
+        public IExpression WithObjectInitializer( params (IFieldOrProperty FieldOrProperty, IExpression Value)[] initializationExpressions )
+            => new ObjectCreationExpressionWithObjectInitializer( this._constructor, this._argumentFactory, initializationExpressions );
+    }
+
+    private sealed class ObjectCreationExpressionWithObjectInitializer : UserExpression
+    {
+        private readonly IConstructor _constructor;
+        private readonly Func<SyntaxSerializationContext, IEnumerable<ExpressionSyntax>> _argumentFactory;
+        private readonly (IFieldOrProperty FieldOrProperty, IExpression Value)[] _initializers;
+
+        public override IType Type => this._constructor.DeclaringType;
+
+        public ObjectCreationExpressionWithObjectInitializer(
+            IConstructor constructor,
+            Func<SyntaxSerializationContext, IEnumerable<ExpressionSyntax>> argumentFactory,
+            (IFieldOrProperty FieldOrProperty, IExpression Value)[] initializers )
+        {
+            this._constructor = constructor;
+            this._argumentFactory = argumentFactory;
+            this._initializers = initializers;
+        }
+
+        protected override ExpressionSyntax ToSyntax( SyntaxSerializationContext syntaxSerializationContext )
+        {
+            return CreateObjectCreationExpression(
+                syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
+                this._argumentFactory( syntaxSerializationContext ).Select( e => Argument( e ) ),
+                InitializerExpression(
+                    SyntaxKind.ObjectInitializerExpression,
+                    SeparatedList<ExpressionSyntax>(
+                        this._initializers.SelectAsArray(
+                            i =>
+                                AssignmentExpression(
+                                    SyntaxKind.SimpleAssignmentExpression,
+                                    IdentifierName( i.FieldOrProperty.Name ),
+                                    i.Value.ToExpressionSyntax( syntaxSerializationContext ) ) ) ) ) );
+        }
+    }
 }

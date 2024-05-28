@@ -92,5 +92,11 @@ internal class ConstructorBuilder : MethodBaseBuilder, IConstructorBuilder, ICon
 
     public object Invoke( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 
-    public IExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+    public IObjectCreationExpression CreateInvokeExpression() => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+
+    public IObjectCreationExpression CreateInvokeExpression( params object?[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+
+    public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
+
+    public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => throw new NotSupportedException( "Constructor builders cannot be invoked." );
 }

@@ -21,8 +21,12 @@ namespace Metalama.Framework.Code.Invokers
         /// </summary>
         dynamic? Invoke( IEnumerable<IExpression> args );
 
-        // TODO: Field initializers.
+        IObjectCreationExpression CreateInvokeExpression();
 
-        IExpression CreateInvokeExpression( IEnumerable<IExpression> args );
+        IObjectCreationExpression CreateInvokeExpression( params dynamic?[] args );
+
+        IObjectCreationExpression CreateInvokeExpression( params IExpression[] args );
+
+        IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args );
     }
 }
