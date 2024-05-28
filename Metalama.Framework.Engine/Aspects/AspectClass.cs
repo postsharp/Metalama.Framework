@@ -405,11 +405,11 @@ public sealed class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDr
     }
 
     [Memo]
-    private IReadOnlyCollection<IAspectClassImpl> DescendantClassesImpl => this.SelectManyRecursive( x => x._childAspectClasses, includeRoot: true );
+    private IReadOnlyCollection<IAspectClassImpl> DescendantClassesAndSelfImpl => this.SelectManyRecursive( x => x._childAspectClasses, includeRoot: true );
 
-    public IReadOnlyCollection<IAspectClass> DescendantClasses => this.DescendantClassesImpl;
+    public IReadOnlyCollection<IAspectClass> DescendantClassesAndSelf => this.DescendantClassesAndSelfImpl;
 
-    IReadOnlyCollection<IAspectClassImpl> IAspectClassImpl.DescendantClassesAndSelf => this.DescendantClassesImpl;
+    IReadOnlyCollection<IAspectClassImpl> IAspectClassImpl.DescendantClassesAndSelf => this.DescendantClassesAndSelfImpl;
 
     public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )
         => this._eligibilityHelper.AssertNotNull().GetIneligibilityJustification( requestedEligibility, describedObject );
