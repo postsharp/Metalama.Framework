@@ -382,7 +382,7 @@ internal sealed partial class DesignTimeAspectPipeline
 
                 var diagnosticAdder = new DiagnosticBag();
 
-                var licenseConsumptionService = state._pipeline.ServiceProvider.GetService<IProjectLicenseConsumptionService>();
+                var licenseConsumptionService = state._pipeline.ServiceProvider.GetService<IProjectLicenseConsumer>();
 
                 var projectLicenseInfo = ProjectLicenseInfo.Get( licenseConsumptionService );
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
+using System;
 
 namespace Metalama.Framework.Aspects
 {
@@ -9,11 +10,12 @@ namespace Metalama.Framework.Aspects
     /// Member conflict behavior of interface introduction advice.
     /// </summary>
     [CompileTime]
+    [Obsolete( "Use [Introduce] and make sure the member is public, or use [ExplicitInterfaceMember] instead of [InterfaceMember]." )]
     public enum InterfaceMemberOverrideStrategy
     {
         /// <summary>
         /// The behavior depends on the <see cref="OverrideStrategy"/> specified when calling the <see cref="IAdviceFactory.ImplementInterface(INamedType,INamedType,OverrideStrategy,object?)"/>
-        /// method. When set to <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>, the default value is <see cref="Fail"/>. When set to <see cref="OverrideStrategy.Override"/>,
+        /// method. When set to <see cref="OverrideStrategy.Fail"/>, the default value is <see cref="Fail"/>. When set to <see cref="OverrideStrategy.Override"/>,
         /// the strategy is to override.
         /// </summary>
         Default = 0,

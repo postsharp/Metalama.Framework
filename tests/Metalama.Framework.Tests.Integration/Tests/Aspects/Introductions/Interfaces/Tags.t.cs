@@ -1,60 +1,60 @@
 [Introduction]
 public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Tags.IInterface1, global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Tags.IInterface2
 {
-  public global::System.Int32 Property1
-  {
-    get
+    public global::System.Int32 Property1
     {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface1.");
-      return (global::System.Int32)42;
+        get
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+            return (global::System.Int32)42;
+        }
+        set
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+        }
     }
-    set
+    public global::System.Int32 Property2
     {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface1.");
+        get
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+            return (global::System.Int32)42;
+        }
+        set
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+        }
     }
-  }
-  public global::System.Int32 Property2
-  {
-    get
+    public global::System.Int32 InterfaceMethod1()
     {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface2.");
-      return (global::System.Int32)42;
+        global::System.Console.WriteLine("This introduced member has Tag? False.");
+        return default(global::System.Int32);
     }
-    set
+    public global::System.Int32 InterfaceMethod2()
     {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface2.");
+        global::System.Console.WriteLine("This introduced member has Tag? False.");
+        return default(global::System.Int32);
     }
-  }
-  public global::System.Int32 InterfaceMethod1()
-  {
-    global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface1.");
-    return default(global::System.Int32);
-  }
-  public global::System.Int32 InterfaceMethod2()
-  {
-    global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface2.");
-    return default(global::System.Int32);
-  }
-  public event global::System.EventHandler Event1
-  {
-    add
+    public event global::System.EventHandler? Event1
     {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface1.");
+        add
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+        }
+        remove
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+        }
     }
-    remove
+    public event global::System.EventHandler? Event2
     {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface1.");
+        add
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+        }
+        remove
+        {
+            global::System.Console.WriteLine("This introduced member has Tag? False.");
+        }
     }
-  }
-  public event global::System.EventHandler Event2
-  {
-    add
-    {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface2.");
-    }
-    remove
-    {
-      global::System.Console.WriteLine("This is introduced interface member with Tag TestValue_For_Interface2.");
-    }
-  }
 }

@@ -39,22 +39,22 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                     args: new { types = result.Interfaces, members = result.GetObsoleteInterfaceMembers() } );
         }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+        [Introduce(WhenExists = OverrideStrategy.Ignore)]
         public void BaseMethod() { }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+        [Introduce(WhenExists = OverrideStrategy.Ignore)]
         public int BaseProperty { get; set; }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+        [Introduce(WhenExists = OverrideStrategy.Ignore)]
         public event EventHandler? BaseEvent;
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+        [Introduce(WhenExists = OverrideStrategy.Ignore)]
         public void Method() { }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+        [Introduce(WhenExists = OverrideStrategy.Ignore)]
         public int Property { get; set; }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Ignore )]
+        [Introduce(WhenExists = OverrideStrategy.Ignore)]
         public event EventHandler? Event;
     }
 

@@ -17,14 +17,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int Method()
         {
             Console.WriteLine("This is introduced interface method.");
             return 42;
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int Property
         {
             get
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public event EventHandler Event
         {
             add

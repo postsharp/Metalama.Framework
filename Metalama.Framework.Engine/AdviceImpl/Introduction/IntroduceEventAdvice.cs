@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
@@ -26,10 +25,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
     private readonly PartiallyBoundTemplateMethod? _removeTemplate;
 
     public IntroduceEventAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         string? explicitName,
         TemplateMember<IEvent>? eventTemplate,
         PartiallyBoundTemplateMethod? addTemplate,
@@ -37,32 +33,23 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IEventBuilder>? buildAction,
-        string? layerName,
-        IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            explicitName,
-            eventTemplate,
-            scope,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        IObjectReader tags,
+        INamedType? explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName, eventTemplate, scope, overrideStrategy, buildAction, tags )
     {
         this._addTemplate = addTemplate;
         this._removeTemplate = removeTemplate;
 
         this.Builder = new EventBuilder(
             this,
-            targetDeclaration,
+            parameters.TargetDeclaration,
             this.MemberName,
             eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField() == true,
             tags );
 
         this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
+
+        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

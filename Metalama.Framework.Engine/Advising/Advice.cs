@@ -18,33 +18,28 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
 
     public Ref<IDeclaration> TargetDeclaration { get; }
 
-    public AspectLayerId AspectLayerId { get; }
-
     /// <summary>
     /// Gets the compilation from which the advice was instantiated.
     /// </summary>
     public ICompilation SourceCompilation { get; }
 
+    public AspectLayerId AspectLayerId { get; }
+    
     public abstract AdviceKind AdviceKind { get; }
 
-    protected Advice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance template,
-        IDeclaration targetDeclaration,
-        ICompilation sourceCompilation,
-        string? layerName )
+    protected Advice( AdviceConstructorParameters parameters )
     {
 #if DEBUG
-        if ( targetDeclaration.DeclaringAssembly.IsExternal )
+        if ( parameters.TargetDeclaration.DeclaringAssembly.IsExternal )
         {
-            throw new AssertionFailedException( $"Cannot override '{targetDeclaration}' because it is external." );
+            throw new AssertionFailedException( $"Cannot override '{parameters.TargetDeclaration}' because it is external." );
         }
 #endif
-        this.AspectInstance = aspectInstance;
-        this.TemplateInstance = template;
-        this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();
-        this.SourceCompilation = sourceCompilation;
-        this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, layerName );
+        this.AspectInstance = parameters.AspectInstance;
+        this.TemplateInstance = parameters.TemplateInstance;
+        this.TargetDeclaration = parameters.TargetDeclaration.AssertNotNull().ToTypedRef();
+        this.SourceCompilation = parameters.SourceCompilation;
+        this.AspectLayerId = new AspectLayerId( this.AspectInstance.AspectClass, parameters.LayerName );
     }
 
     IAspectInstance IAspectDeclarationOrigin.AspectInstance => this.AspectInstance;
@@ -58,4 +53,34 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     public AdviceResult Execute( IAdviceExecutionContext context ) => this.ExecuteCore( context );
 
     protected abstract AdviceResult ExecuteCore( IAdviceExecutionContext context );
+
+    /// <summary>
+    /// Parameter object containing parameters shared by constructors of all advice types.
+    /// </summary>
+    public record struct AdviceConstructorParameters(
+        IAspectInstanceInternal AspectInstance,
+        TemplateClassInstance TemplateInstance,
+        IDeclaration TargetDeclaration,
+        ICompilation SourceCompilation,
+        string? LayerName );
+
+    /// <summary>
+    /// Generic version of parameter object containing parameters shared by constructors of all advice types.
+    /// </summary>
+    public record struct AdviceConstructorParameters<T>(
+        IAspectInstanceInternal AspectInstance,
+        TemplateClassInstance TemplateInstance,
+        T TargetDeclaration,
+        ICompilation SourceCompilation,
+        string? LayerName )
+        where T : IDeclaration
+    {
+        public static implicit operator AdviceConstructorParameters( AdviceConstructorParameters<T> parameters )
+            => new(
+                parameters.AspectInstance,
+                parameters.TemplateInstance,
+                parameters.TargetDeclaration,
+                parameters.SourceCompilation,
+                parameters.LayerName );
+    }
 }

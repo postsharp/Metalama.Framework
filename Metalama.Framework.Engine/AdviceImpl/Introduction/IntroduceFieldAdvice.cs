@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
@@ -16,37 +15,20 @@ using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
-// ReSharper disable once UnusedType.Global
-// TODO: Use this type and remove the warning waiver.
 
 internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IField, FieldBuilder>
 {
     public IntroduceFieldAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         string? explicitName,
         TemplateMember<IField>? fieldTemplate,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IFieldBuilder>? buildAction,
-        string? layerName,
         IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            explicitName,
-            fieldTemplate,
-            scope,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, tags )
     {
-        this.Builder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
+        this.Builder = new FieldBuilder( this, parameters.TargetDeclaration, this.MemberName, tags );
         this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
     }
 

@@ -1,0 +1,119 @@
+﻿using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+#pragma warning disable CS0067
+
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Tags_ExplicitInterface
+{
+    /*
+     * Tests that tags are correctly passed to templates of interface members.
+     */
+
+    public interface IInterface1
+    {
+        int InterfaceMethod1();
+
+        event EventHandler Event1;
+
+        int Property1 { get; set; }
+    }
+
+    public interface IInterface2
+    {
+        int InterfaceMethod2();
+
+        event EventHandler Event2;
+
+        int Property2 { get; set; }
+    }
+
+    public class IntroductionAttribute : TypeAspect
+    {
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
+        {
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface1), tags: new { TestTag = "TestValue_For_Interface1" } );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" } );
+        }
+
+        [ExplicitInterfaceMember]
+        public int InterfaceMethod1()
+        {
+            Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+
+            return meta.Proceed();
+        }
+
+        [ExplicitInterfaceMember]
+        public event EventHandler? Event1
+        {
+            add
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+            }
+
+            remove
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+            }
+        }
+
+        [ExplicitInterfaceMember]
+        public int Property1
+        {
+            get
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+
+                return 42;
+            }
+
+            set
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+            }
+        }
+
+        [ExplicitInterfaceMember]
+        public int InterfaceMethod2()
+        {
+            Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+
+            return meta.Proceed();
+        }
+
+        [ExplicitInterfaceMember]
+        public event EventHandler? Event2
+        {
+            add
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+            }
+
+            remove
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+            }
+        }
+
+        [ExplicitInterfaceMember]
+        public int Property2
+        {
+            get
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+
+                return 42;
+            }
+
+            set
+            {
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
+            }
+        }
+    }
+
+    // <target>
+    [Introduction]
+    public class TargetClass { }
+}

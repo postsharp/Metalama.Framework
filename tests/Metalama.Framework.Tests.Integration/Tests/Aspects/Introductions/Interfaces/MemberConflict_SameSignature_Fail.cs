@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int Method()
         {
             Console.WriteLine( "This is introduced interface method." );
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             return 42;
         }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int Property
         {
             get
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public event EventHandler Event
         {
             add

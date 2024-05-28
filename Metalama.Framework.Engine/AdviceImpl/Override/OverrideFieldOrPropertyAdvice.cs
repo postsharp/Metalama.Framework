@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -18,15 +17,11 @@ internal sealed class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFiel
     private readonly BoundTemplateMethod? _setTemplate;
 
     public OverrideFieldOrPropertyAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IFieldOrProperty targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<IFieldOrProperty> parameters,
         BoundTemplateMethod? getTemplate,
         BoundTemplateMethod? setTemplate,
-        string? layerName,
         IObjectReader tags )
-        : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
+        : base( parameters, tags )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();
         this._setTemplate = setTemplate.ExplicitlyImplementedOrNull();

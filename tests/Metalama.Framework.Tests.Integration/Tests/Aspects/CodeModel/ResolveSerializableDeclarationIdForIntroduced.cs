@@ -32,13 +32,13 @@ internal class IntroduceMembersAttribute : TypeAspect
     private void IndexerSet( int i, int value ) { }
 
     [Template]
-    private static bool NotOperator( dynamic x ) => false;
+    public static bool NotOperator( dynamic x ) => false;
 
     [Template]
-    private static int PlusOperator( dynamic x, dynamic y ) => 0;
+    public static int PlusOperator( dynamic x, dynamic y ) => 0;
 
     [Template]
-    private static bool CastOperator( dynamic x ) => true;
+    public static bool CastOperator( dynamic x ) => true;
 
     [Template]
     private void Finalizer() { }

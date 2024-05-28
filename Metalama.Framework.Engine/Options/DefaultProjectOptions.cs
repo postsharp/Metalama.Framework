@@ -83,6 +83,8 @@ public class DefaultProjectOptions : IProjectOptions
 
     public virtual string? License => null;
 
+    public virtual bool IgnoreUserProfileLicense => false;
+
     public virtual bool? WriteLicenseUsageData => null;
 
     public virtual bool RoslynIsCompileTimeOnly => true;

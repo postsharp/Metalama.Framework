@@ -41,14 +41,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [Introduce]
         [TestAspect]
         public void Method()
         {
             Console.WriteLine("Introduced interface member");
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [Introduce]
         [TestAspect]
         public int Property
         {
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [Introduce]
         [TestAspect]
         public int AutoProperty
         {
@@ -75,11 +75,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             set;
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [Introduce]
         [TestAspect]
         public event EventHandler? EventField;
 
-        [InterfaceMember(IsExplicit = false)]
+        [Introduce]
         [TestAspect]
         public event EventHandler? Event
         {

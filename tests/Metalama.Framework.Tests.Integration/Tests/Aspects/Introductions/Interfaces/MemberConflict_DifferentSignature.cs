@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember]
+        [Introduce]
         public int Method()
         {
             Console.WriteLine( "This is introduced interface method." );

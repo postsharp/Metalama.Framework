@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -17,16 +16,8 @@ internal sealed class OverrideEventAdvice : OverrideMemberAdvice<IEvent, IEvent>
     private readonly BoundTemplateMethod? _addTemplate;
     private readonly BoundTemplateMethod? _removeTemplate;
 
-    public OverrideEventAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IEvent targetDeclaration,
-        ICompilation sourceCompilation,
-        BoundTemplateMethod? addTemplate,
-        BoundTemplateMethod? removeTemplate,
-        string? layerName,
-        IObjectReader tags )
-        : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
+    public OverrideEventAdvice( AdviceConstructorParameters<IEvent> parameters, BoundTemplateMethod? addTemplate, BoundTemplateMethod? removeTemplate, IObjectReader tags )
+        : base( parameters, tags )
     {
         Invariant.Assert( addTemplate != null || removeTemplate != null );
 

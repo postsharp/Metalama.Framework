@@ -1,4 +1,3 @@
-// Warning CS8618 on `PropertyChanged`: `Non-nullable event 'PropertyChanged' must contain a non-null value when exiting constructor. Consider declaring the event as nullable.`
 [NotifyPropertyChanged]
 internal class Car : global::System.ComponentModel.INotifyPropertyChanged
 {
@@ -42,5 +41,5 @@ internal class Car : global::System.ComponentModel.INotifyPropertyChanged
   {
     this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
   }
-  public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+  public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
 }

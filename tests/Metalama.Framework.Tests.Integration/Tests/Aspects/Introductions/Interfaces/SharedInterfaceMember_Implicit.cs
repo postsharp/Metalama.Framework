@@ -5,7 +5,7 @@ using System;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.SharedInterfaceMember_Implicit
 {
     /*
-     * Tests that a single implicit interface member matching two interfaces results in an error.
+     * Tests that a single implicit interface member matching two interfaces works.
      */
 
     public class IntroductionAttribute : TypeAspect
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Share
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2) );
         }
 
-        [InterfaceMember( IsExplicit = false )]
+        [Introduce]
         public void Method()
         {
             Console.WriteLine( "Interface member." );

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
@@ -37,5 +38,6 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
 
-    public IAdviser<INamedType> ExplicitImplementation => throw new NotImplementedException();
+    public IAdviser<INamedType> ExplicitImplementation
+        => this.Interfaces.FirstOrDefault() ?? throw new InvalidOperationException( "No interfaces were implemented, so explicit implementation is not possible." );
 }

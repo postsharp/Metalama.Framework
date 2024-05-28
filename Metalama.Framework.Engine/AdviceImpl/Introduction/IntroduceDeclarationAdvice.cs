@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using System;
@@ -18,13 +17,8 @@ internal abstract class IntroduceDeclarationAdvice<TIntroduced, TBuilder> : Advi
 
     public Action<TBuilder>? BuildAction { get; }
 
-    protected IntroduceDeclarationAdvice(
-        IAspectInstanceInternal aspect,
-        TemplateClassInstance templateInstance,
-        IDeclaration targetDeclaration,
-        ICompilation sourceCompilation,
-        Action<TBuilder>? buildAction,
-        string? layerName ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
+    protected IntroduceDeclarationAdvice( AdviceConstructorParameters parameters, Action<TBuilder>? buildAction )
+        : base( parameters )
     {
         this.BuildAction = buildAction;
 

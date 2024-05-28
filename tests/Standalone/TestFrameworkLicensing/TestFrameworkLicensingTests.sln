@@ -10,6 +10,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSuiteTestsAllowed", "TestSuiteTestsAllowed/TestSuiteTestsAllowed.csproj", "{FB2DF3AB-CBC2-4EF2-883F-56288D9EC7EA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FEFBE86D-C38C-4274-8699-7A95D3D757A3}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSuiteTestsFobidden", "TestSuiteTestsFobidden/TestSuiteTestsFobidden.csproj", "{9CA96FB9-36C7-4EA9-8A47-147DAAF42E2F}"
 EndProject

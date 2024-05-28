@@ -13,7 +13,7 @@ public class TheAspect : TypeAspect
         builder.Advice.ImplementInterface( builder.Target, typeof(IDisposable), whenExists: OverrideStrategy.Override );
     }
 
-    [InterfaceMember]
+    [Introduce(WhenExists = OverrideStrategy.Override)]
     public void Dispose()
     {
         meta.Proceed();
@@ -30,6 +30,5 @@ internal class C : IDisposable
 }
 
 // <target>
-
 [TheAspect]
 internal class D : C { }

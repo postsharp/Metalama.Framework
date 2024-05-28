@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
@@ -236,6 +237,14 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
             // TODO: Currently Roslyn does not expose the event field in the symbol model and therefore we cannot find it.
             => null;
+
+        internal static ImmutableArray<IParameterSymbol> GetParameters( this ISymbol symbol )
+            => symbol switch
+            {
+                IMethodSymbol method => method.Parameters,
+                IPropertySymbol property => property.Parameters,
+                _ => ImmutableArray<IParameterSymbol>.Empty
+            };
 
         internal static SymbolId GetSymbolId( this ISymbol? symbol ) => SymbolId.Create( symbol );
 
