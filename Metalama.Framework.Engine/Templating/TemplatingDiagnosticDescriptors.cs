@@ -527,7 +527,7 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> TemplatesHaveToBeInTemplateProvider
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaredSymbol, INamedTypeSymbol ContainingType)> TemplatesHaveToBeInTemplateProvider
             = new(
                 "LAMA0274",
                 "Templates have to be contained in an aspect, fabric, or a type implementing ITemplateProvider.",

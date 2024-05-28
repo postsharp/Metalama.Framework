@@ -37,7 +37,7 @@ public static class DiagnosticDescriptorExtensions
     {
         var argumentArray = ConvertDiagnosticArguments( arguments );
 
-        return definition.CreateRoslynDiagnostic( location, argumentArray, null, additionalLocations, codeFixes, deduplicationKey, properties );
+        return definition.CreateRoslynDiagnosticImpl( location, argumentArray, null, additionalLocations, codeFixes, deduplicationKey, properties );
     }
 
     /// <summary>
@@ -56,10 +56,11 @@ public static class DiagnosticDescriptorExtensions
     {
         var argumentArray = ConvertDiagnosticArguments( arguments );
 
-        return definition.CreateRoslynDiagnostic( location, argumentArray, diagnosticSource, additionalLocations, codeFixes, deduplicationKey, properties );
+        return definition.CreateRoslynDiagnosticImpl( location, argumentArray, diagnosticSource, additionalLocations, codeFixes, deduplicationKey, properties );
     }
 
-    internal static Diagnostic CreateRoslynDiagnostic(
+    // If this was named CreateRoslynDiagnostic, type safety of the generic versions would be lost.
+    internal static Diagnostic CreateRoslynDiagnosticNonGeneric(
         this IDiagnosticDefinition definition,
         Location? location,
         object? arguments,
