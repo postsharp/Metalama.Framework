@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
+using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using System.Linq;
 using Xunit;
@@ -397,5 +398,60 @@ class C
         var implementingClass = Assert.Single( finalCompilation.GetDerivedTypes( implementedInterface ) );
 
         Assert.Same( derivedClass, implementingClass );
+    }
+
+    [Fact]
+    public void InterfaceImplementation()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            interface I
+            {
+                void Foo();
+            }
+
+            class Target;
+
+            class Derived : Target;
+            """;
+
+        var initialCompilation = testContext.CreateCompilationModel( code );
+
+        var targetType = initialCompilation.Types.OfName( "Target" ).Single();
+        var interfaceType = initialCompilation.Types.OfName( "I" ).Single();
+        var interfaceMethod = interfaceType.Methods.Single();
+
+        var implementedInterfaceMethod = new MethodBuilder( null!, targetType, "Foo" );
+
+        var implementInterface = new IntroduceInterfaceTransformation( null!, targetType, interfaceType, new() { [interfaceMethod] = implementedInterfaceMethod } );
+
+        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
+            [implementedInterfaceMethod.ToTransformation(), implementInterface],
+            null,
+            null );
+
+        var targetType2 = finalCompilation.Types.OfName( "Target" ).Single();
+        var derivedType2 = finalCompilation.Types.OfName( "Derived" ).Single();
+        var interfaceType2 = finalCompilation.Types.OfName( "I" ).Single();
+        var interfaceMethod2 = interfaceType2.Methods.Single();
+        var targetTypeMethod2 = targetType2.Methods.Single();
+
+        var implementations2 = finalCompilation.GetDerivedTypes( interfaceType2 );
+
+        Assert.Single( targetType2.ImplementedInterfaces );
+        Assert.Single( targetType2.AllImplementedInterfaces );
+        Assert.Contains( targetType2, implementations2 );
+        Assert.Contains( derivedType2, implementations2 );
+
+        Assert.Empty( derivedType2.ImplementedInterfaces );
+        Assert.Single( derivedType2.AllImplementedInterfaces );
+
+        Assert.True( targetType2.TryFindImplementationForInterfaceMember( interfaceMethod2, out var implementedMethod ) );
+        Assert.Same( targetTypeMethod2, implementedMethod );
+
+        Assert.True( derivedType2.TryFindImplementationForInterfaceMember( interfaceMethod2, out var derivedImplementedMethod ) );
+        Assert.Same( targetTypeMethod2, derivedImplementedMethod );
     }
 }

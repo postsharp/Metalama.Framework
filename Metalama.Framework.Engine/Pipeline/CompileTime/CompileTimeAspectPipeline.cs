@@ -117,7 +117,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             return default;
         }
 
-        var licenseConsumptionService = this.ServiceProvider.GetService<IProjectLicenseConsumptionService>();
+        var licenseConsumptionService = this.ServiceProvider.GetService<IProjectLicenseConsumer>();
 
         var projectLicenseInfo = ProjectLicenseInfo.Get( licenseConsumptionService );
 

@@ -126,6 +126,9 @@ public partial class MSBuildProjectOptions : DefaultProjectOptions
     public override string? License => this.GetStringOption( MSBuildPropertyNames.MetalamaLicense );
 
     [Memo]
+    public override bool IgnoreUserProfileLicense => this.GetBooleanOption( MSBuildPropertyNames.MetalamaIgnoreUserLicenses );
+
+    [Memo]
     public override bool WriteHtml => this.GetBooleanOption( MSBuildPropertyNames.MetalamaWriteHtml );
 
     [Memo]

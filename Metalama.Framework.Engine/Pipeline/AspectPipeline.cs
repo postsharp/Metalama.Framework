@@ -205,7 +205,7 @@ public abstract class AspectPipeline : IDisposable
 
         // Initialize the licensing service with redistribution licenses.
         // Add the license verifier.
-        var licenseConsumptionManager = projectServiceProviderWithProject.GetService<ProjectLicenseConsumptionService>();
+        var licenseConsumptionManager = projectServiceProviderWithProject.GetService<ProjectLicenseConsumer>();
 
         if ( licenseConsumptionManager != null )
         {
