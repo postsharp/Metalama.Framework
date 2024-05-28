@@ -5,11 +5,7 @@
     
     <PropertyGroup>
         
-        <_MetalamaApplicationDataDirectoryAppData>$(AppData)\.metalama</_MetalamaApplicationDataDirectoryAppData>
-        <_MetalamaApplicationDataDirectoryUserProfile>$(UserProfile)\.metalama</_MetalamaApplicationDataDirectoryUserProfile>
-        <_MetalamaApplicationDataDirectory Condition="'$(_MetalamaApplicationDataDirectory)'=='' and Exists('$(_MetalamaApplicationDataDirectoryAppData)')">$(_MetalamaApplicationDataDirectoryAppData)</_MetalamaApplicationDataDirectory>
-        <_MetalamaApplicationDataDirectory Condition="'$(_MetalamaApplicationDataDirectory)'=='' and Exists('$(_MetalamaApplicationDataDirectoryUserProfile)')">$(_MetalamaApplicationDataDirectoryUserProfile)</_MetalamaApplicationDataDirectory>
-        <_TestLicenseKeysCacheFile>$(_MetalamaApplicationDataDirectory)\TestLicenseKeysCache\TestLicenseKeys1.g.props</_TestLicenseKeysCacheFile>
+        <_TestLicenseKeysCacheFile>$(PostSharpEngineeringDataDirectory)\TestLicenseKeys1.g.props</_TestLicenseKeysCacheFile>
 
         <!-- This property ensures the warning is only emitted once per build. -->
         <_MissingTestLicenseKeysCacheWarningEmitted>false</_MissingTestLicenseKeysCacheWarningEmitted>

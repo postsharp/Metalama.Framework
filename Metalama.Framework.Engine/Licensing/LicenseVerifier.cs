@@ -31,7 +31,7 @@ public sealed class LicenseVerifier : IProjectService
     private const string _licenseUsageSubdirectoryName = "LicenseUsage";
     internal const string LicenseUsageFilePrefix = "usage-";
 
-    private readonly IProjectLicenseConsumptionService _licenseConsumptionService;
+    private readonly IProjectLicenseConsumer _licenseConsumer;
     private readonly ITempFileManager _tempFileManager;
     private readonly IToastNotificationDetectionService? _toastNotificationDetectionService;
     private readonly IProjectOptions _projectOptions;
@@ -53,7 +53,7 @@ public sealed class LicenseVerifier : IProjectService
 
     internal LicenseVerifier( in ProjectServiceProvider serviceProvider )
     {
-        this._licenseConsumptionService = serviceProvider.GetRequiredService<IProjectLicenseConsumptionService>();
+        this._licenseConsumer = serviceProvider.GetRequiredService<IProjectLicenseConsumer>();
         this._tempFileManager = serviceProvider.Global.GetRequiredBackstageService<ITempFileManager>();
         this._toastNotificationDetectionService = serviceProvider.Global.GetBackstageService<IToastNotificationDetectionService>();
         this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
@@ -70,7 +70,7 @@ public sealed class LicenseVerifier : IProjectService
             : assemblyName;
     }
 
-    private bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumptionService service )
+    private bool IsValidRedistributionProject( CompileTimeProject project, IDiagnosticAdder diagnosticAdder, IProjectLicenseConsumer service )
     {
         var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
 
@@ -81,8 +81,10 @@ public sealed class LicenseVerifier : IProjectService
             return false;
         }
 
-        if ( !service.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
+        if ( !service.Service.TryValidateRedistributionLicenseKey( licenseKey, projectAssemblyName, out var licensingMessages ) )
         {
+            licensingMessages.Report( diagnosticAdder.Report );
+
             Interlocked.Increment( ref this._reportedErrorCount );
             diagnosticAdder.Report( LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, projectAssemblyName ) );
 
@@ -102,7 +104,7 @@ public sealed class LicenseVerifier : IProjectService
 
         foreach ( var closureProject in project.ClosureProjects )
         {
-            if ( this.IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumptionService ) )
+            if ( this.IsValidRedistributionProject( closureProject, diagnosticAdder, this._licenseConsumer ) )
             {
                 this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
             }
@@ -114,7 +116,7 @@ public sealed class LicenseVerifier : IProjectService
     private bool IsProjectWithValidRedistributionLicense( CompileTimeProject project ) => this._redistributionLicenseFeaturesByProject.ContainsKey( project );
 
     private bool CanConsumeForCurrentProject( LicenseRequirement requirement )
-        => this._licenseConsumptionService.CanConsume( requirement, this._projectOptions.ProjectName );
+        => this._licenseConsumer.CanConsume( requirement, this._projectOptions.ProjectName );
 
     internal void VerifyCanAddChildAspect( in AspectPredecessor predecessor ) => this.VerifyFabric( predecessor, "add an aspect" );
 
@@ -149,7 +151,7 @@ public sealed class LicenseVerifier : IProjectService
 
     internal bool VerifyCanApplyLiveTemplate( in ProjectServiceProvider serviceProvider, IAspectClass aspectClass, IDiagnosticAdder diagnostics )
     {
-        var manager = serviceProvider.GetService<IProjectLicenseConsumptionService>();
+        var manager = serviceProvider.GetService<IProjectLicenseConsumer>();
 
         if ( manager == null )
         {
@@ -250,11 +252,11 @@ public sealed class LicenseVerifier : IProjectService
                 // 2. We have a license string, but one not eligible for Metalama.
                 // 3. We have a project-bound license string and the project name does not match.
 
-                var diagnostic = string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString )
+                var diagnostic = string.IsNullOrEmpty( this._licenseConsumer.LicenseString )
                     ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
                     : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
                         null,
-                        this._licenseConsumptionService.LicenseString! );
+                        this._licenseConsumer.LicenseString! );
 
                 diagnostics.Report( diagnostic );
             }
@@ -265,7 +267,7 @@ public sealed class LicenseVerifier : IProjectService
             {
                 hasLicenseError = true;
 
-                if ( string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) )
+                if ( string.IsNullOrEmpty( this._licenseConsumer.LicenseString ) )
                 {
                     diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
                 }
@@ -283,11 +285,11 @@ public sealed class LicenseVerifier : IProjectService
         if ( areLicensedFeaturesUsed )
         {
             this._toastNotificationDetectionService?.Detect(
-                new ToastNotificationDetectionOptions { HasValidLicense = !string.IsNullOrEmpty( this._licenseConsumptionService.LicenseString ) } );
+                new ToastNotificationDetectionOptions { HasValidLicense = !string.IsNullOrEmpty( this._licenseConsumer.LicenseString ) } );
         }
 
         // Write consumption data to disk if required.
-        if ( hasLicenseError && (this._projectOptions.WriteLicenseUsageData ?? this._licenseConsumptionService.IsTrialLicense) )
+        if ( hasLicenseError && (this._projectOptions.WriteLicenseUsageData ?? this._licenseConsumer.IsTrialLicense) )
         {
             var directory = GetConsumptionDataDirectory( this._tempFileManager );
 

@@ -12,23 +12,17 @@ namespace Metalama.Framework.Engine.Pipeline;
 /// </summary>
 internal sealed class SourceTransformerApplicationInfo : ApplicationInfoBase
 {
-    private readonly bool _ignoreUnattendedProcess;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="SourceTransformerApplicationInfo"/> class.
     /// </summary>
-    public SourceTransformerApplicationInfo( bool isLongRunningProcess, bool ignoreUnattendedProcess )
+    public SourceTransformerApplicationInfo( bool isLongRunningProcess )
         : base( typeof(SourceTransformerApplicationInfo).Assembly )
     {
-        this._ignoreUnattendedProcess = ignoreUnattendedProcess;
         this.IsLongRunningProcess = isLongRunningProcess;
     }
 
     /// <inheritdoc />
     public override ProcessKind ProcessKind => ProcessKind.Compiler;
-
-    /// <inheritdoc />
-    public override bool IsUnattendedProcess( ILoggerFactory loggerFactory ) => !this._ignoreUnattendedProcess && base.IsUnattendedProcess( loggerFactory );
 
     /// <inheritdoc />
     public override bool IsLongRunningProcess { get; }
