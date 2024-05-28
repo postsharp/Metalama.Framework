@@ -1420,7 +1420,7 @@ class D{version}
         var services = new AdditionalServiceCollection();
 
         services.AddProjectService(
-            serviceProvider => new ProjectLicenseConsumptionService(
+            serviceProvider => ProjectLicenseConsumer.Create(
                 BackstageServiceFactory.CreateTestLicenseConsumptionService( serviceProvider.Underlying, null ) ) );
 
         using var testContext = this.CreateTestContext();
