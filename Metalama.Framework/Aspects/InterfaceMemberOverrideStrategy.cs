@@ -10,7 +10,7 @@ namespace Metalama.Framework.Aspects
     /// Member conflict behavior of interface introduction advice.
     /// </summary>
     [CompileTime]
-    [Obsolete( "Use [Introduce] or [ExplicitInterfaceMember] instead of [InterfaceMember]." )]
+    [Obsolete( "Use [Introduce] and make sure the member is public, or use [ExplicitInterfaceMember] instead of [InterfaceMember]." )]
     public enum InterfaceMemberOverrideStrategy
     {
         /// <summary>
