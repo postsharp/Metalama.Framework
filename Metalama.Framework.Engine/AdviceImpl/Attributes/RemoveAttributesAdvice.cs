@@ -3,7 +3,6 @@
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
@@ -16,18 +15,7 @@ internal sealed class RemoveAttributesAdvice : Advice<RemoveAttributesAdviceResu
 {
     private readonly INamedType _attributeType;
 
-    public RemoveAttributesAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance template,
-        IDeclaration targetDeclaration,
-        ICompilation sourceCompilation,
-        INamedType attributeType,
-        string? layerName ) : base(
-        aspectInstance,
-        template,
-        targetDeclaration,
-        sourceCompilation,
-        layerName )
+    public RemoveAttributesAdvice( AdviceConstructorParameters parameters, INamedType attributeType ) : base( parameters )
     {
         this._attributeType = attributeType;
     }

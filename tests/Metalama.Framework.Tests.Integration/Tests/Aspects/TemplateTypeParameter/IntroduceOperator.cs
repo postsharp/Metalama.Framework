@@ -38,19 +38,19 @@ public class Aspect : TypeAspect
     }
 
     [Template]
-    private T? BinaryOperator<[CompileTime] T>( [CompileTime] int x, T y, int p3 ) where T : class
+    public static T? BinaryOperator<[CompileTime] T>( [CompileTime] int x, T y, int p3 ) where T : class
     {
         return default;
     }
 
     [Template]
-    private T? UnaryOperator<[CompileTime] T>([CompileTime] int x, T y) where T : class
+    public static T? UnaryOperator<[CompileTime] T>([CompileTime] int x, T y) where T : class
     {
         return default;
     }
 
     [Template]
-    private int ConversionOperator<[CompileTime] T>([CompileTime] int x, T y) where T : class
+    public static int ConversionOperator<[CompileTime] T>([CompileTime] int x, T y) where T : class
     {
         return default;
     }

@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Override;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CompileTime;
@@ -27,10 +26,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
     private readonly bool _isProgrammaticAutoProperty;
 
     public IntroducePropertyAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        INamedType targetDeclaration,
-        ICompilation sourceCompilation,
+        AdviceConstructorParameters<INamedType> parameters,
         string? explicitName,
         IType? explicitType,
         TemplateMember<IProperty>? propertyTemplate,
@@ -39,20 +35,9 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<IPropertyBuilder>? buildAction,
-        string? layerName,
-        IObjectReader tags )
-        : base(
-            aspectInstance,
-            templateInstance,
-            targetDeclaration,
-            sourceCompilation,
-            explicitName,
-            propertyTemplate,
-            scope,
-            overrideStrategy,
-            buildAction,
-            layerName,
-            tags )
+        IObjectReader tags,
+        INamedType? explicitlyImplementedInterfaceType )
+        : base( parameters, explicitName, propertyTemplate, scope, overrideStrategy, buildAction, tags )
     {
         this._getTemplate = getTemplate;
         this._setTemplate = setTemplate;
@@ -69,7 +54,7 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
 
         this.Builder = new PropertyBuilder(
             this,
-            targetDeclaration,
+            parameters.TargetDeclaration,
             name,
             hasGet,
             hasSet,
@@ -85,6 +70,8 @@ internal sealed class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty,
         }
 
         this.Builder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
+
+        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

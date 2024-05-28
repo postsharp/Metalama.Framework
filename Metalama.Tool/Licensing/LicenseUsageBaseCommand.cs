@@ -32,7 +32,9 @@ internal abstract class LicenseUsageBaseCommand : BaseCommand<LicenseUsageComman
         // Check license settings.
         var licenseService = context.ServiceProvider.GetRequiredBackstageService<ILicenseConsumptionService>();
 
-        if ( !licenseService.IsTrialLicense )
+        var licenseConsumer = licenseService.CreateConsumer();
+
+        if ( !licenseConsumer.IsTrialLicense )
         {
             context.Console.WriteWarning(
                 "The trial mode is currently not activated. License usage data is therefore only being collected " +

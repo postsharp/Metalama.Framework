@@ -4,7 +4,6 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
@@ -17,14 +16,8 @@ internal sealed class OverrideConstructorAdvice : OverrideMemberAdvice<IConstruc
 {
     private readonly BoundTemplateMethod _boundTemplate;
 
-    public OverrideConstructorAdvice(
-        IAspectInstanceInternal aspectInstance,
-        TemplateClassInstance templateInstance,
-        IConstructor targetDeclaration,
-        ICompilation sourceCompilation,
-        BoundTemplateMethod boundTemplate,
-        string? layerName,
-        IObjectReader tags ) : base( aspectInstance, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
+    public OverrideConstructorAdvice( AdviceConstructorParameters<IConstructor> parameters, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        : base( parameters, tags )
     {
         this._boundTemplate = boundTemplate;
     }

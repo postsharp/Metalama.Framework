@@ -72,7 +72,6 @@ internal class TargetClass
     await global::System.Threading.Tasks.Task.Yield();
     return (global::System.Int32)42;
   }
-  [global::System.Diagnostics.DebuggerStepThroughAttribute]
   public async global::System.Threading.Tasks.Task<global::System.Int32> IntroducedMethod_TaskAsync()
   {
     global::System.Console.WriteLine("Override");
@@ -83,7 +82,6 @@ internal class TargetClass
     global::System.Console.WriteLine("Introduced");
     await global::System.Threading.Tasks.Task.Yield();
   }
-  [global::System.Diagnostics.DebuggerStepThroughAttribute]
   public async void IntroducedMethod_VoidAsync()
   {
     global::System.Console.WriteLine("Override");

@@ -38,22 +38,22 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public void BaseMethod() { }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int BaseProperty { get; set; }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public event EventHandler? BaseEvent;
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public void Method() { }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public int Property { get; set; }
 
-        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Fail )]
+        [Introduce(WhenExists = OverrideStrategy.Fail)]
         public event EventHandler? Event;
     }
 

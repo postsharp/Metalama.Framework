@@ -3,7 +3,6 @@
 using JetBrains.Annotations;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Tools;
-using System;
 
 namespace Metalama.Framework.Engine.Utilities.Diagnostics;
 
@@ -25,13 +24,5 @@ public static class BackstageServiceFactoryInitializer
         {
             InitializeMetalamaServices();
         }
-    }
-
-    internal static IServiceProvider CreateInitialized( BackstageInitializationOptions options )
-    {
-        var serviceProvider = BackstageServiceFactory.CreateServiceProvider( WithTools( options ) );
-        InitializeMetalamaServices();
-
-        return serviceProvider;
     }
 }

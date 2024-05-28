@@ -5,4 +5,7 @@ using Metalama.Framework.Services;
 
 namespace Metalama.Framework.Engine.Licensing;
 
-public interface IProjectLicenseConsumptionService : ILicenseConsumptionService, IProjectService;
+public interface IProjectLicenseConsumer : ILicenseConsumer, IProjectService
+{
+    ILicenseConsumptionService Service { get; }
+}

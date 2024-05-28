@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
+using System;
 using System.Collections.Concurrent;
 using Xunit.Abstractions;
 
@@ -18,13 +20,13 @@ internal sealed class XunitLoggerFactory : ILoggerFactory
         this._verbose = verbose;
     }
 
-    public void Dispose() { }
-
     public ILogger GetLogger( string category )
         => this._loggers.GetOrAdd( category, static ( c, me ) => new Logger( c, me._testOutputHelper, me._verbose ), this );
 
     void ILoggerFactory.Flush() { }
 
+    public IDisposable EnterScope( string scope ) => default(DisposableAction);
+    
     private sealed class Logger : ILogger
     {
         private readonly string _prefix;

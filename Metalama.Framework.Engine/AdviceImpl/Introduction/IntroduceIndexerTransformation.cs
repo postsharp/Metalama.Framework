@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
@@ -29,7 +30,7 @@ internal sealed class IntroduceIndexerTransformation : IntroduceMemberTransforma
                 syntaxGenerator.Type( indexerBuilder.Type ).WithOptionalTrailingTrivia( ElasticSpace, context.SyntaxGenerationContext.Options ),
                 indexerBuilder.ExplicitInterfaceImplementations.Count > 0
                     ? ExplicitInterfaceSpecifier(
-                        (NameSyntax) syntaxGenerator.Type( indexerBuilder.ExplicitInterfaceImplementations[0].DeclaringType ) )
+                        (NameSyntax) syntaxGenerator.Type( indexerBuilder.ExplicitInterfaceImplementations.Single().DeclaringType ) )
                     : null,
                 Token( SyntaxKind.ThisKeyword ),
                 context.SyntaxGenerator.ParameterList( indexerBuilder, context.Compilation ),

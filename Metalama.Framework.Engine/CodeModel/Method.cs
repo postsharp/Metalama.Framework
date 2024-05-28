@@ -119,7 +119,7 @@ internal sealed class Method : MethodBase, IMethodImpl
 
     [Memo]
     public IReadOnlyList<IMethod> ExplicitInterfaceImplementations
-        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( m => this.Compilation.Factory.GetMethod( m ) )
+        => ((IMethodSymbol) this.Symbol).ExplicitInterfaceImplementations.Select( this.Compilation.Factory.GetMethod )
             .ToReadOnlyList();
 
     public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );

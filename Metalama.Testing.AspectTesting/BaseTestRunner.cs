@@ -4,6 +4,7 @@ using DiffEngine;
 using JetBrains.Annotations;
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Infrastructure;
+using Metalama.Backstage.Licensing.Consumption.Sources;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Diagnostics;
@@ -427,7 +428,8 @@ internal abstract partial class BaseTestRunner
                         dependencyProject,
                         testResult,
                         testContext,
-                        dependencyLicenseKey );
+                        dependencyLicenseKey,
+                        testInput.Options.IgnoreUserProfileLicenses.GetValueOrDefault() );
 
                 if ( dependencyReference == null )
                 {
@@ -453,7 +455,8 @@ internal abstract partial class BaseTestRunner
         Project emptyProject,
         TestResult testResult,
         TestContext testContext,
-        string? licenseKey = null )
+        string? licenseKey,
+        bool ignoreUserProfileLicense )
     {
         // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
         var name = "dependency_" + RandomIdGenerator.GenerateId();
@@ -467,7 +470,10 @@ internal abstract partial class BaseTestRunner
         if ( !string.IsNullOrEmpty( licenseKey ) )
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
-            serviceProvider = serviceProvider.Underlying.AddProjectLicenseConsumptionManager( licenseKey! );
+            serviceProvider = serviceProvider.Underlying.AddProjectLicenseConsumptionManager(
+                licenseKey!,
+                ignoreUserProfileLicense ? LicenseSourceKind.All : LicenseSourceKind.None,
+                _ => { } );
         }
 
         // Transform with Metalama.

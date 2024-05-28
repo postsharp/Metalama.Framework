@@ -95,15 +95,6 @@ namespace Metalama.Framework.Engine.Advising
 
         // Sub-range 510-519: Interface implementation diagnostics.
 
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
-            MissingDeclarativeInterfaceMember = new(
-                "LAMA0510",
-                "Declarative interface member is missing.",
-                "The aspect '{0}' cannot implicitly implement interface '{2}' in the type '{1}' because the aspect type" +
-                " does not contain a member marked with [InterfaceMember] attribute corresponding to the interface member '{3}'.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember DeclarativeIntroduction,
                 IMember InterfaceMember)>
             DeclarativeInterfaceMemberDoesNotMatch = new(

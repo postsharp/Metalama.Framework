@@ -60,27 +60,28 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 },
                 args: new { fields = mementoFields });
 
-            builder.Advice.ImplementInterface(builder.Target, typeof(IOriginator), tags: new { mementoType = mementoType.Declaration });
+            builder.ImplementInterface( typeof(IOriginator));
+
+            var args = new { mementoType = mementoType.Declaration };
+
+            builder.Advice.IntroduceMethod(builder.Target, nameof(Save), args: args);
+            builder.Advice.IntroduceMethod(builder.Target, nameof(Restore), args: args);
         }
 
         [Template]
         private object? MementoField;
 
-        [InterfaceMember]
-        public IMemento Save()
+        [Template]
+        public IMemento Save(INamedType mementoType)
         {
-            var mementoType = (INamedType)meta.Tags["mementoType"];
-
             var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared);
 
             return mementoType.Constructors.Single().Invoke(fieldExpressions);
         }
 
-        [InterfaceMember]
-        public void Restore(IMemento memento)
+        [Template]
+        public void Restore( IMemento memento, INamedType mementoType )
         {
-            var mementoType = (INamedType)meta.Tags["mementoType"];
-
             foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
             {
                 var mementoField = mementoType.FieldsAndProperties.OfName(fieldOrProperty.Name).Single();

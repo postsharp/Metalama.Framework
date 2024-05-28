@@ -16,12 +16,15 @@ internal sealed partial class ImplementInterfaceAdvice
 
         public TemplateMember<IMember>? Template { get; }
 
-        public bool IsExplicit => ((InterfaceMemberAttribute?) this.Template?.TemplateClassMember.Attribute).AssertNotNull().IsExplicit;
+        public bool IsExplicit => ((IInterfaceMemberAttribute?) this.Template?.TemplateClassMember.Attribute).AssertNotNull().IsExplicit;
 
         public IObjectReader? Tags { get; }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         public InterfaceMemberOverrideStrategy OverrideStrategy
-            => ((InterfaceMemberAttribute?) this.Template?.TemplateClassMember.Attribute).AssertNotNull().WhenExists;
+            => (this.Template?.TemplateClassMember.Attribute as InterfaceMemberAttribute)?.WhenExists
+               ?? InterfaceMemberOverrideStrategy.MakeExplicit;
+#pragma warning restore CS0618
 
         public MemberSpecification(
             IMember interfaceMember,

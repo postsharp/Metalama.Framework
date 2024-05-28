@@ -17,10 +17,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [InterfaceMember]
+        [Introduce]
         public int AutoProperty { get; set; } = 42;
 
-        [InterfaceMember]
+        [Introduce]
         public event EventHandler? EventField = default;
     }
 
