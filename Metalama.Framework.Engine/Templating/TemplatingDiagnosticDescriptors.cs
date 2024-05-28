@@ -229,11 +229,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<ISymbol> CannotUseProceedOutOfTemplate
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)> CannotUseTemplateOnlyOutOfTemplate
             = new(
                 "LAMA0233",
-                "Cannot use the 'meta.Proceed' method out of a template.",
-                "Cannot use the 'meta.Proceed' method in '{0}' because it is not a template.",
+                "Cannot use a template-only method out of a template.",
+                "Cannot use '{1}' in '{0}' because it is only allowed inside a template.",
                 _category,
                 Error );
 

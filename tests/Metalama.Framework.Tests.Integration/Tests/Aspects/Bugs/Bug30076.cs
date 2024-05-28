@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076
             stringBuilder.AddText(".");
             stringBuilder.AddText(meta.Target.Method.Name);
             stringBuilder.AddText("(");
-            var i = meta.CompileTime(0);
+            var i = 0;
             foreach(var p in meta.Target.Parameters)
             {
                 var comma = i > 0 ? ", " : string.Empty;

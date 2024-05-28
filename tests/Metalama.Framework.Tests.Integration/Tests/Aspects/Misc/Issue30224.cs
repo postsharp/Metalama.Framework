@@ -26,7 +26,7 @@ public class Aspect : OverrideMethodAspect
 
         stringBuilder.AddText( "(" );
 
-        var i = meta.CompileTime( 0 );
+        var i = 0;
 
         foreach (var prop in meta.Target.Parameters)
         {

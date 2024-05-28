@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Templating
                 // This allows to reduce redundant messages.
                 base.VisitCore( node );
 
-                // If the scope is null (e.g. in a using statement), we should not analyze.
+                // If the scope is null (e.g. in a using directive), we should not analyze.
                 if ( !this._currentScope.HasValue )
                 {
                     return;
@@ -121,35 +121,31 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( referencedScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                     {
-                        // ReSharper disable once MissingIndent
-                        var isProceed = referencedSymbol is
+                        if ( !this.IsInTemplate && !IsTypeOfOrNameOf() )
                         {
-                            ContainingSymbol.Name: nameof(meta),
-                            Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
-                        };
-
-                        if ( isProceed && !this.IsInTemplate )
-                        {
-                            // Cannot reference 'meta.Proceed' out of a template.
-                            if ( AvoidDuplicates( referencedSymbol ) )
+                            if ( this._classifier.IsTemplateOnly( referencedSymbol ) )
                             {
-                                this.Report(
-                                    TemplatingDiagnosticDescriptors.CannotUseProceedOutOfTemplate.CreateRoslynDiagnostic(
-                                        node.GetLocation(),
-                                        this._currentDeclaration! ) );
+                                // Cannot reference template-only symbol outside of a template, except in a nameof().
+                                if ( AvoidDuplicates( referencedSymbol ) )
+                                {
+                                    this.Report(
+                                        TemplatingDiagnosticDescriptors.CannotUseTemplateOnlyOutOfTemplate.CreateRoslynDiagnostic(
+                                            node.GetLocation(),
+                                            (this._currentDeclaration!, referencedSymbol) ) );
+                                }
                             }
-                        }
-                        else if ( !(this._currentScope.Value.MustExecuteAtCompileTime() || this.IsInTemplate) && !IsTypeOfOrNameOf() )
-                        {
-                            // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
-                            // because these are transformed by the CompileTimeCompilationBuilder.
-
-                            if ( AvoidDuplicates( referencedSymbol ) )
+                            else if ( !this._currentScope.Value.MustExecuteAtCompileTime() )
                             {
-                                this.Report(
-                                    TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
-                                        node.GetLocation(),
-                                        (this._currentDeclaration!, referencedSymbol, this._currentScope.Value) ) );
+                                // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
+                                // because these are transformed by the CompileTimeCompilationBuilder.
+
+                                if ( AvoidDuplicates( referencedSymbol ) )
+                                {
+                                    this.Report(
+                                        TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
+                                            node.GetLocation(),
+                                            (this._currentDeclaration!, referencedSymbol, this._currentScope.Value) ) );
+                                }
                             }
                         }
                     }

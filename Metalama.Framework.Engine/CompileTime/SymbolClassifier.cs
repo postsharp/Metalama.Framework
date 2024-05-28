@@ -88,6 +88,8 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
     private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo;
     private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo;
+    private readonly ConcurrentDictionary<ISymbol, bool> _cacheIsTemplateOnly;
+
     private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
     private readonly IAttributeDeserializer _attributeDeserializer;
     private readonly ILogger _logger;
@@ -119,8 +121,10 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         this._referenceAssemblyLocator = referenceAssemblyLocator;
         this._symbolEqualityComparer = compilationContext.SymbolComparer;
+
         this._cacheNonInheritedTemplateInfo = new ConcurrentDictionary<ISymbol, TemplateInfo>( this._symbolEqualityComparer );
         this._cacheInheritedTemplateInfo = new ConcurrentDictionary<ISymbol, TemplateInfo>( this._symbolEqualityComparer );
+        this._cacheIsTemplateOnly = new ConcurrentDictionary<ISymbol, bool>( this._symbolEqualityComparer );
 
         this._caches = Enumerable.Range( 0, (int) GetTemplatingScopeOptions.Count )
             .Select( _ => new ConcurrentDictionary<ISymbol, TemplatingScope?>( this._symbolEqualityComparer ) )
@@ -278,6 +282,35 @@ internal sealed class SymbolClassifier : ISymbolClassifier
 
         return this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, ImmutableLinkedList<ISymbol>.Empty, null )
             .GetValueOrDefault( TemplatingScope.RunTimeOnly );
+    }
+
+    public bool IsTemplateOnly( ISymbol symbol ) => this._cacheIsTemplateOnly.GetOrAdd( symbol, static ( s, x ) => x.IsTemplateOnlyCore( s ), this );
+
+    private bool IsTemplateOnlyCore( ISymbol symbol )
+    {
+        // Symbols that aren't compile-time-only can't be template-only.
+        var isCompileTimeOnly = this.GetTemplatingScope( symbol ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+
+        if ( !isCompileTimeOnly )
+        {
+            return false;
+        }
+
+        // Check whether the symbols is marked with [CompileTime(isTemplateOnly: true)].
+        var compileTimeAttribute = symbol.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) );
+
+        if ( compileTimeAttribute is { ConstructorArguments: [{ Value: true }] } )
+        {
+            return true;
+        }
+
+        // Check the containing symbol.
+        if ( symbol.ContainingSymbol is { } containingSymbol && this.IsTemplateOnly( containingSymbol ) )
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public void ReportScopeError( SyntaxNode node, ISymbol symbol, IDiagnosticAdder diagnosticAdder )
@@ -881,6 +914,22 @@ internal sealed class SymbolClassifier : ISymbolClassifier
                     }
             }
         }
+
+        TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
+        {
+            // From attributes.
+            var scopeFromAttributes = symbol
+                .GetAttributes()
+                .Select( GetTemplatingScope )
+                .FirstOrDefault( s => s != null );
+
+            if ( scopeFromAttributes != null )
+            {
+                tracer?.CreateChild( symbol.OriginalDefinition ).SetResult( scopeFromAttributes );
+            }
+
+            return scopeFromAttributes;
+        }
     }
 
     private void CheckRecursion( ImmutableLinkedList<ISymbol> symbolsBeingProcessed )
@@ -972,18 +1021,6 @@ internal sealed class SymbolClassifier : ISymbolClassifier
             (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => OnConflict(),
             _ => throw new AssertionFailedException( $"Invalid combination: ({baseTypeScope}, {combinedScope})" )
         };
-    }
-
-    // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-    private static TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
-    {
-        // From attributes.
-        var scopeFromAttributes = symbol
-            .GetAttributes()
-            .Select( GetTemplatingScope )
-            .FirstOrDefault( s => s != null );
-
-        return scopeFromAttributes;
     }
 
     private bool TryGetWellKnownScope( ISymbol symbol, GetTemplatingScopeOptions options, out TemplatingScope? scope )

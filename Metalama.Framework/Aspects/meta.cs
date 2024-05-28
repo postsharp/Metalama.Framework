@@ -51,6 +51,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static dynamic? Proceed() => throw CreateException();
 
         /// <summary>
@@ -61,6 +62,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static Task<dynamic?> ProceedAsync() => throw CreateException();
 
         /// <summary>
@@ -68,6 +70,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static IEnumerable<dynamic?> ProceedEnumerable() => throw CreateException();
 
         /// <summary>
@@ -75,6 +78,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw CreateException();
 
 #if NET5_0_OR_GREATER
@@ -83,6 +87,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw CreateException();
 
         /// <summary>
@@ -90,6 +95,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw CreateException();
 #endif
 
@@ -99,6 +105,7 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@debugging-aspects"/>
         [TemplateKeyword]
         [ExcludeFromCodeCoverage]
+        [CompileTime( isTemplateOnly: true )]
         public static void DebugBreak() => CurrentContext.DebugBreak();
 
         /// <summary>
@@ -113,6 +120,7 @@ namespace Metalama.Framework.Aspects
         [return: NotNullIfNotNull( "expression" )]
         [return: CompileTime]
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static T? CompileTime<T>( T? expression )
         {
             CheckContext();
@@ -130,6 +138,7 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@templates"/>
         [TemplateKeyword]
         [return: NotNullIfNotNull( "value" )]
+        [CompileTime( isTemplateOnly: true )]
         public static T? RunTime<T>( T? value )
         {
             CheckContext();
@@ -208,6 +217,7 @@ namespace Metalama.Framework.Aspects
         /// <returns></returns>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, (object?) value );
 
         /// <summary>
@@ -219,6 +229,7 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InsertComment( params string?[] lines ) => throw CreateException();
 
         /// <summary>
@@ -226,6 +237,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InsertStatement( IStatement statement ) => throw CreateException();
 
         /// <summary>
@@ -234,6 +246,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InsertStatement( IExpression statement ) => throw CreateException();
 
         /// <summary>
@@ -243,6 +256,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InsertStatement( string statement ) => throw CreateException();
 
         /// <summary>
@@ -252,6 +266,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="templateProvider">A <see cref="TemplateProvider"/>.</param>
         /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InvokeTemplate( string templateName, TemplateProvider templateProvider, object? args = null ) => throw CreateException();
 
         /// <summary>
@@ -261,6 +276,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="templateProvider">An optional <see cref="TemplateProvider"/>, or <see langword="default"/> for the current template provider (usually the current aspect).</param>
         /// <param name="args">Compile-time template arguments that will be passed to the template.</param>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InvokeTemplate( string templateName, ITemplateProvider? templateProvider = null, object? args = null ) => throw CreateException();
 
         /// <summary>
@@ -269,12 +285,14 @@ namespace Metalama.Framework.Aspects
         /// <param name="templateInvocation">Object that contains information about the called template method.</param>
         /// <param name="args">Compile-time template arguments that will be passed to the template, in addition to arguments from <paramref name="templateInvocation"/>.</param>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void InvokeTemplate( TemplateInvocation templateInvocation, object? args = null ) => throw CreateException();
 
         /// <summary>
         /// Inserts a <c>return;</c> statement into the target code.
         /// </summary>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void Return() => throw CreateException();
 
         /// <summary>
@@ -283,6 +301,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="value">The value to return.</param>
         [TemplateKeyword]
+        [CompileTime( isTemplateOnly: true )]
         public static void Return( dynamic? value ) => throw CreateException();
     }
 }

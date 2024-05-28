@@ -132,6 +132,7 @@ public static class ExpressionFactory
     /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions. The expression cannot be <c>dynamic</c>. If
     /// you have a dynamic expression, do not call this method, but cast the dynamic expression to <see cref="IExpression"/>.</param>
     /// <seealso href="@templates"/>
+    [CompileTime( isTemplateOnly: true )]
     public static IExpression Capture( dynamic? expression ) => SyntaxBuilder.CurrentImplementation.Capture( (object?) expression );
 
     /// <summary>

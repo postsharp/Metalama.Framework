@@ -2,9 +2,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
-using Xunit.Sdk;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AppendExpressionNewException;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.CaptureExpression_CompileTime;
 
 class TestAspect : OverrideMethodAspect
 {
