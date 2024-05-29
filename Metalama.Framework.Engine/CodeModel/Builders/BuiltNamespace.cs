@@ -3,42 +3,45 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 {
-    private readonly NamespaceBuilder _namespaceBuilder;
+    public NamespaceBuilder NamespaceBuilder { get; }
 
     public BuiltNamespace( CompilationModel compilation, NamespaceBuilder builder ) : base( compilation )
     {
-        this._namespaceBuilder = builder;
+        this.NamespaceBuilder = builder;
     }
 
-    public override DeclarationBuilder Builder => this._namespaceBuilder;
+    public override DeclarationBuilder Builder => this.NamespaceBuilder;
 
-    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this._namespaceBuilder;
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.NamespaceBuilder;
 
-    public string FullName => this._namespaceBuilder.FullName;
+    public string FullName => this.NamespaceBuilder.FullName;
 
-    public bool IsGlobalNamespace => this._namespaceBuilder.IsGlobalNamespace;
+    public bool IsGlobalNamespace => this.NamespaceBuilder.IsGlobalNamespace;
 
-    public INamespace? ContainingNamespace => this._namespaceBuilder.ContainingNamespace;
+    public INamespace? ContainingNamespace => this.NamespaceBuilder.ContainingNamespace;
 
     INamespace? INamespace.ParentNamespace => this.ContainingNamespace;
 
     public INamedTypeCollection Types
         => new NamedTypeCollection(
             this,
-            this.Compilation.GetNamedTypeCollection( this._namespaceBuilder.ToRef().As<INamespaceOrNamedType>() ) );
+            this.Compilation.GetNamedTypeCollection( this.NamespaceBuilder.ToRef().As<INamespaceOrNamedType>() ) );
 
     public INamespaceCollection Namespaces
         => new NamespaceCollection(
             this,
-            this.Compilation.GetNamespaceCollection( this._namespaceBuilder.ToRef().As<INamespace>() ) );
+            this.Compilation.GetNamespaceCollection( this.NamespaceBuilder.ToRef().As<INamespace>() ) );
 
     public bool IsPartial => throw new System.NotImplementedException();
+
+    public override SyntaxTree? PrimarySyntaxTree => this.NamespaceBuilder.PrimarySyntaxTree;
 
     public INamespace? GetDescendant( string ns )
     {

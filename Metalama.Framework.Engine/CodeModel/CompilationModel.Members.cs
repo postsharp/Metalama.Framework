@@ -88,6 +88,13 @@ public sealed partial class CompilationModel
                out var namedTypes )
            && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
 
+    internal bool Contains( NamespaceBuilder namespaceBuilder )
+        => this._namespaces.TryGetValue(
+               (namespaceBuilder.ContainingNamespace ?? namespaceBuilder.ContainingNamespace ?? throw new AssertionFailedException())
+               .ToTypedRef(),
+               out var namespaces )
+           && namespaces.Contains( namespaceBuilder.ToTypedRef<INamespace>() );
+
     private bool Contains( DeclarationBuilder builder )
         => builder switch
         {
@@ -540,6 +547,15 @@ public sealed partial class CompilationModel
                     true );
 
                 types.Add( namedType.ToMemberRef() );
+
+                break;
+
+            case INamespace @namespace:
+                var namespaces = this.GetNamespaceCollection(
+                    @namespace.ContainingNamespace.AssertNotNull().ToTypedRef().As<INamespace>(),
+                    true );
+
+                namespaces.Add( @namespace.ToMemberRef() );
 
                 break;
 

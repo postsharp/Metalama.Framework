@@ -46,7 +46,7 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
 
     protected override IEqualityComparer<MemberRef<INamespace>> MemberRefComparer => this.Compilation.CompilationContext.NamespaceRefComparer;
 
-    protected override MemberRef<INamespace>? GetMemberRef( string name )
+    protected override MemberRef<INamespace> GetMemberRef( string name )
         => this.DeclaringTypeOrNamespace.Target switch
         {
             INamespaceSymbol symbol =>
@@ -55,10 +55,9 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
                     .Where( n => n.Name == name )
                     .Where( this.IsSymbolIncluded )
                     .Select( s => new MemberRef<INamespace>( s, this.Compilation.CompilationContext ) )
-                    .Single(),
-            INamespaceOrNamedType =>
-                // TODO: should return initial members of the builder.
-                null,
+                    .FirstOrDefault(),
+            INamespace =>
+                default,
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
         };
 
@@ -71,9 +70,7 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
                     .Where( this.IsSymbolIncluded )
                     .Select( s => new MemberRef<INamespace>( s, this.Compilation.CompilationContext ) )
                     .ToImmutableArray(),
-            INamespaceOrNamedType =>
-
-                // TODO: should return initial members of the builder.
+            INamespace =>
                 ImmutableArray<MemberRef<INamespace>>.Empty,
             _ => throw new AssertionFailedException( $"Unsupported {this.DeclaringTypeOrNamespace.Target}" )
         };

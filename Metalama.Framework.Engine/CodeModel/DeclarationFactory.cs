@@ -700,6 +700,26 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             this._compilationModel );
     }
 
+    internal INamespace? GetNamespace( NamespaceBuilder namespaceBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
+    {
+        if ( options.MustExist() && !this._compilationModel.Contains( namespaceBuilder ) )
+        {
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( namespaceBuilder );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return (INamespace) this._defaultCache.GetOrAdd(
+            Ref.FromBuilder( namespaceBuilder ).As<ICompilationElement>(),
+            static ( l, c ) => new BuiltNamespace( c, (NamespaceBuilder) l.Target! ),
+            this._compilationModel );
+    }
+
     internal IDeclaration? GetDeclaration( IDeclarationBuilder builder, ReferenceResolutionOptions options = default, bool throwIfMissing = true )
         => builder switch
         {
@@ -714,6 +734,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
             ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options, throwIfMissing ),
             NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options, throwIfMissing ),
+            NamespaceBuilder namespaceBuilder => this.GetNamespace( namespaceBuilder, options, throwIfMissing ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global

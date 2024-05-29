@@ -5,5 +5,6 @@ namespace Metalama.Framework.Engine.Transformations;
 internal enum InsertPositionRelation
 {
     After,
-    Within
+    Within,
+    Root
 }

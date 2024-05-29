@@ -350,10 +350,10 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ), members.Add );
+                this.AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ), originalNode.SyntaxTree, members, syntaxGenerationContext );
             }
 
-            AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ), members.Add );
+            this.AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ), originalNode.SyntaxTree, members, syntaxGenerationContext );
 
             // If the type has no braces, add them.
             if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
@@ -403,120 +403,122 @@ internal sealed partial class LinkerInjectionStep
             node = this.ReplaceAttributes( node, rewrittenAttributes );
 
             return node;
+        }
 
-            // TODO: Try to avoid closure allocation.
-            void AddInjectionsOnPosition( InsertPosition position, Action<MemberDeclarationSyntax> addAction )
+        private void AddInjectionsOnPosition<T>( InsertPosition position, SyntaxTree originalSyntaxTree, List<T> targetList, SyntaxGenerationContext syntaxGenerationContext ) 
+            where T : SyntaxNode
+        {
+            var injectedMembersAtPosition = this._transformationCollection.GetInjectedMembersOnPosition( position );
+
+            foreach ( var injectedMember in injectedMembersAtPosition )
             {
-                var injectedMembersAtPosition = this._transformationCollection.GetInjectedMembersOnPosition( position );
+                // We should inject into a correct syntax tree.
+                Invariant.Assert( injectedMember.TargetSyntaxTree == originalSyntaxTree );
 
-                foreach ( var injectedMember in injectedMembersAtPosition )
+                // Allow for tracking of the node inserted.
+                // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
+                var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
+
+                switch ( injectedMember.Declaration )
                 {
-                    // We should inject into a correct syntax tree.
-                    Invariant.Assert( injectedMember.TargetSyntaxTree == originalNode.SyntaxTree );
+                    case IMethodBase methodBase:
+                        // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
+                        var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
+                        var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
 
-                    // Allow for tracking of the node inserted.
-                    // IMPORTANT: This need to be here and cannot be in injectedMember.Syntax, result of TrackNodes is not trackable!
-                    var injectedNode = injectedMember.Syntax.TrackNodes( injectedMember.Syntax );
+                        injectedNode = InjectStatementsIntoMemberDeclaration( methodBase, entryStatements, exitStatements, (MemberDeclarationSyntax) injectedNode );
 
-                    switch ( injectedMember.Declaration )
-                    {
-                        case IMethod or IConstructor:
-                            // TODO: AssertNotNull is needed due to some weird bug in Roslyn.
-                            var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
-                            var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
+                        break;
 
-                            injectedNode = InjectStatementsIntoMemberDeclaration( injectedMember.Declaration, entryStatements, exitStatements, injectedNode );
+                    case IPropertyOrIndexer propertyOrIndexer:
+                        if ( propertyOrIndexer.GetMethod != null )
+                        {
+                            var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
+                                propertyOrIndexer.GetMethod,
+                                injectedMember );
 
-                            break;
+                            var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod, injectedMember );
 
-                        case IPropertyOrIndexer propertyOrIndexer:
-                            if ( propertyOrIndexer.GetMethod != null )
-                            {
-                                var getEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
-                                    propertyOrIndexer.GetMethod,
-                                    injectedMember );
+                            injectedNode = InjectStatementsIntoMemberDeclaration(
+                                propertyOrIndexer.GetMethod,
+                                getEntryStatements,
+                                getExitStatements,
+                                (MemberDeclarationSyntax) injectedNode );
+                        }
 
-                                var getExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.GetMethod, injectedMember );
+                        if ( propertyOrIndexer.SetMethod != null )
+                        {
+                            var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
+                                propertyOrIndexer.SetMethod,
+                                injectedMember );
 
-                                injectedNode = InjectStatementsIntoMemberDeclaration(
-                                    propertyOrIndexer.GetMethod,
-                                    getEntryStatements,
-                                    getExitStatements,
-                                    injectedNode );
-                            }
+                            var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod, injectedMember );
 
-                            if ( propertyOrIndexer.SetMethod != null )
-                            {
-                                var setEntryStatements = this._transformationCollection.GetInjectedEntryStatements(
-                                    propertyOrIndexer.SetMethod,
-                                    injectedMember );
+                            injectedNode = InjectStatementsIntoMemberDeclaration(
+                                propertyOrIndexer.SetMethod,
+                                setEntryStatements,
+                                setExitStatements,
+                                (MemberDeclarationSyntax) injectedNode );
+                        }
 
-                                var setExitStatements = this._transformationCollection.GetInjectedExitStatements( propertyOrIndexer.SetMethod, injectedMember );
-
-                                injectedNode = InjectStatementsIntoMemberDeclaration(
-                                    propertyOrIndexer.SetMethod,
-                                    setEntryStatements,
-                                    setExitStatements,
-                                    injectedNode );
-                            }
-
-                            break;
-                    }
-
-                    injectedNode = injectedNode
-                        .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
-                        .WithGeneratedCodeAnnotation(
-                            injectedMember.Transformation?.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation
-                            ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
-
-                    switch ( injectedNode )
-                    {
-                        case ConstructorDeclarationSyntax constructorDeclaration:
-                            {
-                                if ( injectedMember.DeclarationBuilder != null &&
-                                     this._transformationCollection.TryGetMemberLevelTransformations(
-                                         injectedMember.DeclarationBuilder.AssertNotNull(),
-                                         out var memberLevelTransformations ) )
-                                {
-                                    injectedNode = this.ApplyMemberLevelTransformations(
-                                        constructorDeclaration,
-                                        memberLevelTransformations,
-                                        syntaxGenerationContext );
-                                }
-
-                                break;
-                            }
-
-                        case TypeDeclarationSyntax typeDeclaration:
-
-                            var typeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
-                            var injectedTypeMembers = new List<MemberDeclarationSyntax>();
-
-                            AddInjectionsOnPosition(
-                                new InsertPosition( InsertPositionRelation.Within, typeBuilder ),
-                                injectedTypeMembers.Add );
-
-                            typeDeclaration = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
-
-                            var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
-
-                            if ( injectedInterfaces.Count > 0 )
-                            {
-                                typeDeclaration = (TypeDeclarationSyntax) typeDeclaration.AddBaseListTypes( injectedInterfaces.SelectAsArray( i => i.Syntax ) );
-                            }
-
-                            injectedNode = typeDeclaration;
-
-                            break;
-                    }
-
-                    addAction( injectedNode );
+                        break;
                 }
+
+                injectedNode = injectedNode
+                    .WithOptionalLeadingTrivia( syntaxGenerationContext.TwoElasticEndOfLinesTriviaList, syntaxGenerationContext.Options )
+                    .WithGeneratedCodeAnnotation(
+                        injectedMember.Transformation?.ParentAdvice.AspectInstance.AspectClass.GeneratedCodeAnnotation
+                        ?? FormattingAnnotations.SystemGeneratedCodeAnnotation );
+
+                switch ( injectedNode )
+                {
+                    case ConstructorDeclarationSyntax constructorDeclaration:
+                        {
+                            if ( injectedMember.DeclarationBuilder != null &&
+                                 this._transformationCollection.TryGetMemberLevelTransformations(
+                                     injectedMember.DeclarationBuilder.AssertNotNull(),
+                                     out var memberLevelTransformations ) )
+                            {
+                                injectedNode = this.ApplyMemberLevelTransformations(
+                                    constructorDeclaration,
+                                    memberLevelTransformations,
+                                    syntaxGenerationContext );
+                            }
+
+                            break;
+                        }
+
+                    case TypeDeclarationSyntax typeDeclaration:
+
+                        var typeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var injectedTypeMembers = new List<MemberDeclarationSyntax>();
+
+                        this.AddInjectionsOnPosition(
+                            new InsertPosition( InsertPositionRelation.Within, typeBuilder ),
+                            originalSyntaxTree, 
+                            injectedTypeMembers, 
+                            syntaxGenerationContext );
+
+                        typeDeclaration = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
+
+                        var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
+
+                        if ( injectedInterfaces.Count > 0 )
+                        {
+                            typeDeclaration = (TypeDeclarationSyntax) typeDeclaration.AddBaseListTypes( injectedInterfaces.SelectAsArray( i => i.Syntax ) );
+                        }
+
+                        injectedNode = typeDeclaration;
+
+                        break;
+                }
+
+                targetList.Add( (T)injectedNode );
             }
         }
 
         private static MemberDeclarationSyntax InjectStatementsIntoMemberDeclaration(
-            IMemberOrNamedType contextDeclaration,
+            IMember contextDeclaration,
             IReadOnlyList<StatementSyntax> entryStatements,
             IReadOnlyList<StatementSyntax> exitStatements,
             MemberDeclarationSyntax currentNode )
@@ -1303,6 +1305,8 @@ internal sealed partial class LinkerInjectionStep
                 outputLists,
                 outputTrivias,
                 ref syntaxGenerationContext );
+
+            
 
             return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
         }

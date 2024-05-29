@@ -1550,13 +1550,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             return
                 AsAdviser(
                     this,
-                    new IntroduceNamespaceAdvice(
-                            this._state.AspectInstance,
-                            this._templateClassInstance,
-                            targetNamespace,
-                            name,
-                            this._compilation,
-                            this._layerName )
+                    new IntroduceNamespaceAdvice( this.GetAdviceConstructorParameters( targetNamespace ), name )
                         .Execute( this._state ) );
         }
     }

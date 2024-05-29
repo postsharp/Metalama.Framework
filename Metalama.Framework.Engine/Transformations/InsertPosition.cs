@@ -22,34 +22,57 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     /// <summary>
     /// Gets the builder into which the new node should be inserted.
     /// </summary>
-    public NamedTypeBuilder? TypeBuilder { get; }
+    public NamedDeclarationBuilder? DeclarationBuilder { get; }
 
     /// <summary>
     /// Gets the target syntax tree of the insertion.
     /// </summary>
-    public SyntaxTree SyntaxTree => this.SyntaxNode?.SyntaxTree ?? this.TypeBuilder.AssertNotNull().PrimarySyntaxTree.AssertNotNull();
+    public SyntaxTree SyntaxTree { get; }
 
     public InsertPosition( InsertPositionRelation relation, MemberDeclarationSyntax node )
     {
         this.Relation = relation;
         this.SyntaxNode = node;
+        this.SyntaxTree = node.SyntaxTree;
     }
 
     public InsertPosition( InsertPositionRelation relation, NamedTypeBuilder builder )
     {
         this.Relation = relation;
-        this.TypeBuilder = builder;
+        this.DeclarationBuilder = builder;
+        this.SyntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
+    }
+
+    public InsertPosition( InsertPositionRelation relation, NamespaceBuilder builder )
+    {
+        this.Relation = relation;
+        this.DeclarationBuilder = builder;
+        this.SyntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
+    }
+
+    public InsertPosition(SyntaxTree introducedSyntaxTree)
+    {
+        this.Relation = InsertPositionRelation.Root;
+        this.SyntaxTree = introducedSyntaxTree;
     }
 
     public override bool Equals( object? obj ) => obj is InsertPosition position && this.Equals( position );
 
     public bool Equals( InsertPosition other )
-        => this.Relation == other.Relation && this.SyntaxNode == other.SyntaxNode && this.TypeBuilder == other.TypeBuilder;
+        => this.Relation == other.Relation 
+           && this.SyntaxNode == other.SyntaxNode
+           && this.DeclarationBuilder == other.DeclarationBuilder 
+           && this.SyntaxTree == other.SyntaxTree;
 
-    public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.TypeBuilder );
+    public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.DeclarationBuilder, this.SyntaxTree );
 
     public override string ToString()
         => this.SyntaxNode != null
             ? $"{this.Relation} {this.SyntaxNode.Kind()} in {this.SyntaxNode.SyntaxTree.FilePath}"
-            : $"{this.Relation} {this.TypeBuilder.AssertNotNull().FullName} (built type)";
+            : this.DeclarationBuilder switch
+            {
+                NamedTypeBuilder namedTypeBuilder => $"{this.Relation} {namedTypeBuilder.AssertNotNull().FullName} (built type)",
+                NamespaceBuilder namespaceBuilder => $"{this.Relation} {namespaceBuilder.AssertNotNull().FullName} (built namespace)",
+                _ => throw new AssertionFailedException( $"Unexpected: {this.DeclarationBuilder}" ),
+            };
 }

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -53,7 +54,7 @@ internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
         => this.Target switch
         {
             ISymbol symbol => symbol.Name,
-            IMemberOrNamedTypeBuilder builder => builder.Name,
+            NamedDeclarationBuilder builder => builder.Name,
             _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target?.GetType()}'." )
         };
 

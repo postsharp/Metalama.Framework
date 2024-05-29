@@ -12,6 +12,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
 
+// TODO: This class is misused for injection of types into introduced namespaces. It should be refactored after implementation of targeting specific syntax trees.
+
 /// <summary>
 /// Represents a member to be introduced in a type and encapsulates the information needed by the <see cref="AspectLinker"/>
 /// to perform the linking.
@@ -30,7 +32,7 @@ internal class InjectedMember
     /// <summary>
     /// Gets the syntax of the introduced member.
     /// </summary>
-    public MemberDeclarationSyntax Syntax { get; }
+    public SyntaxNode Syntax { get; }
 
     /// <summary>
     /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMember"/>.
@@ -47,7 +49,7 @@ internal class InjectedMember
     /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
     /// are not suppressed from the introduced member.
     /// </summary>
-    public IMemberOrNamedType Declaration { get; }
+    public INamedDeclaration Declaration { get; }
 
     public SyntaxTree TargetSyntaxTree
         => this.Transformation != null
@@ -56,10 +58,10 @@ internal class InjectedMember
 
     public InjectedMember(
         IInjectMemberTransformation injectMemberTransformation,
-        MemberDeclarationSyntax syntax,
+        SyntaxNode syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        MemberOrNamedTypeBuilder declaration ) : this(
+        NamedDeclarationBuilder declaration ) : this(
         injectMemberTransformation,
         declaration.DeclarationKind,
         syntax,
@@ -69,10 +71,10 @@ internal class InjectedMember
 
     public InjectedMember(
         OverrideMemberTransformation overrideMemberTransformation,
-        MemberDeclarationSyntax syntax,
+        SyntaxNode syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
-        IMemberOrNamedType declaration ) : this(
+        INamedDeclaration declaration ) : this(
         overrideMemberTransformation,
         overrideMemberTransformation.OverriddenDeclaration.DeclarationKind,
         syntax,
@@ -82,7 +84,7 @@ internal class InjectedMember
 
     protected InjectedMember(
         InjectedMember prototype,
-        MemberDeclarationSyntax syntax ) : this(
+        SyntaxNode syntax ) : this(
         prototype.Transformation,
         prototype.Kind,
         syntax,
@@ -93,10 +95,10 @@ internal class InjectedMember
     internal InjectedMember(
         ITransformation? transformation,
         DeclarationKind kind,
-        MemberDeclarationSyntax syntax,
+        SyntaxNode syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
-        IMemberOrNamedType declaration )
+        INamedDeclaration declaration )
     {
         this.Transformation = transformation;
         this.Syntax = syntax;

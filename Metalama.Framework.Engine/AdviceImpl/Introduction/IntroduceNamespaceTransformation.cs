@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
@@ -18,4 +19,6 @@ internal sealed class IntroduceNamespaceTransformation : IntroduceDeclarationTra
     {
         return Array.Empty<InjectedMember>();
     }
+
+    public override SyntaxTree TransformedSyntaxTree => this.IntroducedDeclaration.PrimarySyntaxTree;
 }

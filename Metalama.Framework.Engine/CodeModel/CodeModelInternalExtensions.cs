@@ -66,6 +66,25 @@ internal static class CodeModelInternalExtensions
                     InsertPositionRelation.Within,
                     (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
+            case NamedTypeBuilder { ContainingNamespace: NamespaceBuilder containingNamespaceBuilder }:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    containingNamespaceBuilder );
+
+            case NamedTypeBuilder { ContainingNamespace: BuiltNamespace containingNamespace }:
+                return new InsertPosition(
+                    InsertPositionRelation.Within,
+                    containingNamespace.NamespaceBuilder );
+
+            case NamespaceBuilder { ContainingNamespace: NamespaceBuilder containingNamespaceBuilder }:
+                return new InsertPosition( InsertPositionRelation.Within, containingNamespaceBuilder );
+
+            case NamespaceBuilder { ContainingNamespace: BuiltNamespace containingNamespace }:
+                return new InsertPosition( InsertPositionRelation.Within, containingNamespace.NamespaceBuilder );
+
+            case NamespaceBuilder { ContainingNamespace: { } } namespaceBuilder:
+                return new InsertPosition( namespaceBuilder.PrimarySyntaxTree );
+
             case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
                 return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
 

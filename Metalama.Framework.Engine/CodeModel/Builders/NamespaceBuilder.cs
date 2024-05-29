@@ -5,6 +5,8 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -43,8 +45,14 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         this.ContainingNamespace = containingNamespace;
     }
 
+    [Memo]
+    public override SyntaxTree PrimarySyntaxTree => 
+        this.ContainingNamespace.AssertNotNull().GetPrimarySyntaxTree()
+        ?? CSharpSyntaxTree.ParseText( "" );
+
     public INamespace? GetDescendant( string ns )
     {
+        // TODO: Implement this.
         return null;
     }
 

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
@@ -15,15 +14,10 @@ internal class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace,
 {
     public override AdviceKind AdviceKind => AdviceKind.IntroduceNamespace;
 
-    public IntroduceNamespaceAdvice(
-        IAspectInstanceInternal aspect,
-        TemplateClassInstance templateInstance,
-        INamespace targetNamespace,
-        string name,
-        ICompilation sourceCompilation,
-        string? layerName ) : base( aspect, templateInstance, targetNamespace, sourceCompilation, null, layerName )
+    public IntroduceNamespaceAdvice(AdviceConstructorParameters<INamespace> parameters,
+        string name ) : base( parameters, null )
     {
-        this.Builder = new NamespaceBuilder( this, targetNamespace, name );
+        this.Builder = new NamespaceBuilder( this, parameters.TargetDeclaration.AssertNotNull(), name );
     }
 
     protected override IntroductionAdviceResult<INamespace> Implement(

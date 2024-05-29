@@ -2,9 +2,7 @@
 
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Transformations;
 using System.Linq;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CodeModel;
@@ -36,7 +34,7 @@ class C
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
 
         var type2 = Assert.Single( mutableCompilation2.Types );
-        var nestedType = Assert.Single( type2.NestedTypes );
+        var nestedType = Assert.Single( type2.Types );
 
         // Instantiate the memoize the collection of methods of the nested type.
         Assert.Empty( nestedType.Methods );
@@ -49,7 +47,7 @@ class C
         Assert.Single( nestedType.Methods );
 
         // Assert that there is still no method in original compilation.
-        Assert.Empty( immutableCompilation2.Types.Single().NestedTypes.Single().Methods );
+        Assert.Empty( immutableCompilation2.Types.Single().Types.Single().Methods );
     }
 
     [Fact]
@@ -77,7 +75,7 @@ class C
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
 
         var type2 = Assert.Single( mutableCompilation2.Types );
-        var nestedType = Assert.Single( type2.NestedTypes );
+        var nestedType = Assert.Single( type2.Types );
 
         // Instantiate the memoize the collection of methods of the nested type.
         Assert.Empty( nestedType.Methods.OfName( "M" ) );
@@ -90,7 +88,7 @@ class C
         Assert.Single( nestedType.Methods.OfName( "M" ) );
 
         // Assert that there is still no method in original compilation.
-        Assert.Empty( immutableCompilation2.Types.Single().NestedTypes.Single().Methods.OfName( "M" ) );
+        Assert.Empty( immutableCompilation2.Types.Single().Types.Single().Methods.OfName( "M" ) );
     }
 
     [Fact]
@@ -118,7 +116,7 @@ class C
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
 
         var type2 = Assert.Single( mutableCompilation2.Types );
-        var nestedType = Assert.Single( type2.NestedTypes );
+        var nestedType = Assert.Single( type2.Types );
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
@@ -128,7 +126,7 @@ class C
         Assert.Single( nestedType.Methods );
 
         // Assert that there is still no method in original compilation.
-        Assert.Empty( immutableCompilation2.Types.Single().NestedTypes.Single().Methods );
+        Assert.Empty( immutableCompilation2.Types.Single().Types.Single().Methods );
     }
 
     [Fact]
@@ -156,7 +154,7 @@ class C
         var mutableCompilation2 = immutableCompilation2.CreateMutableClone();
 
         var type2 = Assert.Single( mutableCompilation2.Types );
-        var nestedType = Assert.Single( type2.NestedTypes );
+        var nestedType = Assert.Single( type2.Types );
 
         // Add a method.
         var methodBuilder = new MethodBuilder( null!, nestedType, "M" );
@@ -166,7 +164,7 @@ class C
         Assert.Single( nestedType.Methods.OfName( "M" ) );
 
         // Assert that there is still no method in original compilation.
-        Assert.Empty( immutableCompilation2.Types.Single().NestedTypes.Single().Methods.OfName( "M" ) );
+        Assert.Empty( immutableCompilation2.Types.Single().Types.Single().Methods.OfName( "M" ) );
     }
 
     [Fact]
@@ -196,7 +194,7 @@ class C
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
             [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface], null, null );
 
-        var baseClass = finalCompilation.Types.OfName( "Target" ).Single().NestedTypes.OfName( "B" ).Single();
+        var baseClass = finalCompilation.Types.OfName( "Target" ).Single().Types.OfName( "B" ).Single();
 
         var derivedClass = Assert.Single( finalCompilation.GetDerivedTypes( baseClass ) );
 

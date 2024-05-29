@@ -77,6 +77,8 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         ConcurrentDictionary<IMember, AuxiliaryMemberTransformations> auxiliaryMemberTransformations = new( input.CompilationModel.Comparers.Default );
 
+        var existingSyntaxTrees = input.CompilationModel.PartialCompilation.SyntaxTrees.Values.ToHashSet();
+
         void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
         {
             // Transformations need to be sorted here because some transformations require a LexicalScope to get an unique name, and it
@@ -86,7 +88,10 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // IntroduceDeclarationTransformation instances need to be indexed first.
             foreach ( var transformation in sortedTransformations )
             {
-                IndexIntroduceDeclarationTransformation( transformation, transformationCollection );
+                this.IndexIntroduceDeclarationTransformation(
+                    existingSyntaxTrees,
+                    transformation, 
+                    transformationCollection );
             }
 
             // Replace transformations need to be indexed second.
@@ -158,6 +163,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     IMember member => member.DeclaringType,
                     INamedType type => type,
                     IParameter parameter => GetCanonicalTargetDeclaration( parameter.ContainingDeclaration.AssertNotNull() ),
+                    INamespace @namespace => @namespace.Compilation,
                     ICompilation compilation => compilation,
                     var d => throw new AssertionFailedException( $"Unsupported: {d}" )
                 };
@@ -249,7 +255,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var inputCompilation = input.CompilationModel.PartialCompilation;
         var transformations = new ConcurrentQueue<SyntaxTreeTransformation>();
 
-        async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
+        async Task RewriteSyntaxTreeAsync( (SyntaxTree InitialSyntaxTree, bool Added) treeRecord )
         {
             Rewriter rewriter = new(
                 this,
@@ -257,21 +263,37 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 input.CompilationModel,
                 syntaxTreeForGlobalAttributes );
 
-            var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
+            var oldRoot = await treeRecord.InitialSyntaxTree.GetRootAsync( cancellationToken );
             var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
 
             if ( oldRoot != newRoot )
             {
-                var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
+                var intermediateSyntaxTree = treeRecord.InitialSyntaxTree.WithRootAndOptions( newRoot, treeRecord.InitialSyntaxTree.Options );
 
-                transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( initialSyntaxTree, intermediateSyntaxTree ) );
+                if ( treeRecord.Added )
+                {
+                    transformations.Enqueue( SyntaxTreeTransformation.AddTree( intermediateSyntaxTree ) );
+                }
+                else
+                { 
+                    transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( treeRecord.InitialSyntaxTree, intermediateSyntaxTree ) );
+                }
             }
         }
 
-        await this._concurrentTaskRunner.RunConcurrentlyAsync( inputCompilation.SyntaxTrees.Values, RewriteSyntaxTreeAsync, cancellationToken );
+        await
+            this._concurrentTaskRunner.RunConcurrentlyAsync(
+                inputCompilation.SyntaxTrees.Values.Select( t => (t, false) ).Concat( transformationCollection.IntroducedSyntaxTrees.Select( t => (t, true) ) ),
+                RewriteSyntaxTreeAsync,
+                cancellationToken );
 
         var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( inputCompilation.LanguageOptions );
         transformations.Enqueue( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
+
+        foreach (var syntaxTree in transformationCollection.IntroducedSyntaxTrees)
+        {
+            transformations.Enqueue( SyntaxTreeTransformation.AddTree( syntaxTree ) );
+        }
 
         var intermediateCompilation = inputCompilation.Update( transformations );
 
@@ -343,13 +365,18 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
     }
 
-    private static void IndexIntroduceDeclarationTransformation( ITransformation transformation, TransformationCollection transformationCollection )
+    private void IndexIntroduceDeclarationTransformation( HashSet<SyntaxTree> existingSyntaxTrees, ITransformation transformation, TransformationCollection transformationCollection )
     {
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
             transformationCollection.AddIntroduceTransformation(
                 introduceDeclarationTransformation.DeclarationBuilder,
                 introduceDeclarationTransformation );
+
+            if ( !existingSyntaxTrees.Contains(transformation.TransformedSyntaxTree) )
+            {
+                transformationCollection.AddIntroducedSyntaxTree( transformation.TransformedSyntaxTree );
+            }
         }
     }
 
