@@ -25,7 +25,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
             throw GeneralDiagnosticDescriptors.CannotInvokeStaticConstructor.CreateException( this.Member );
         }
 
-        args ??= Array.Empty<object>();
+        args ??= [];
 
         var parametersCount = this.Member.Parameters.Count;
 
@@ -119,11 +119,17 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
-                this._argumentFactory( syntaxSerializationContext ).Select( e => Argument( e ) ),
+                this._argumentFactory( syntaxSerializationContext ).Select( Argument ),
                 null );
         }
 
         public IExpression WithObjectInitializer( params (IFieldOrProperty FieldOrProperty, IExpression Value)[] initializationExpressions )
+            => new ObjectCreationExpressionWithObjectInitializer(
+                this._constructor,
+                this._argumentFactory,
+                initializationExpressions.SelectAsReadOnlyList( x => (x.FieldOrProperty.Name, x.Value) ) );
+
+        public IExpression WithObjectInitializer( params (string FieldOrPropertyName, IExpression Value)[] initializationExpressions )
             => new ObjectCreationExpressionWithObjectInitializer( this._constructor, this._argumentFactory, initializationExpressions );
     }
 
@@ -131,14 +137,14 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
     {
         private readonly IConstructor _constructor;
         private readonly Func<SyntaxSerializationContext, IEnumerable<ExpressionSyntax>> _argumentFactory;
-        private readonly (IFieldOrProperty FieldOrProperty, IExpression Value)[] _initializers;
+        private readonly IReadOnlyList<(string FieldOrPropertyName, IExpression Value)> _initializers;
 
         public override IType Type => this._constructor.DeclaringType;
 
         public ObjectCreationExpressionWithObjectInitializer(
             IConstructor constructor,
             Func<SyntaxSerializationContext, IEnumerable<ExpressionSyntax>> argumentFactory,
-            (IFieldOrProperty FieldOrProperty, IExpression Value)[] initializers )
+            IReadOnlyList<(string FieldOrPropertyName, IExpression Value)> initializers )
         {
             this._constructor = constructor;
             this._argumentFactory = argumentFactory;
@@ -149,7 +155,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
         {
             return CreateObjectCreationExpression(
                 syntaxSerializationContext.SyntaxGenerator.Type( this._constructor.DeclaringType ),
-                this._argumentFactory( syntaxSerializationContext ).Select( e => Argument( e ) ),
+                this._argumentFactory( syntaxSerializationContext ).Select( Argument ),
                 InitializerExpression(
                     SyntaxKind.ObjectInitializerExpression,
                     SeparatedList<ExpressionSyntax>(
@@ -157,7 +163,7 @@ internal sealed class ConstructorInvoker : Invoker<IConstructor>, IConstructorIn
                             i =>
                                 AssignmentExpression(
                                     SyntaxKind.SimpleAssignmentExpression,
-                                    IdentifierName( i.FieldOrProperty.Name ),
+                                    IdentifierName( i.FieldOrPropertyName ),
                                     i.Value.ToExpressionSyntax( syntaxSerializationContext ) ) ) ) ) );
         }
     }

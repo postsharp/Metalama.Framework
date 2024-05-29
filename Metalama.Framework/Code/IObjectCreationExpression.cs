@@ -15,5 +15,9 @@ namespace Metalama.Framework.Code
     public interface IObjectCreationExpression : IExpression
     {
         public IExpression WithObjectInitializer( params (IFieldOrProperty FieldOrProperty, IExpression Value)[] initializationExpressions );
+
+        public IExpression WithObjectInitializer( params (string FieldOrPropertyName, IExpression Value)[] initializationExpressions );
+
+        // TODO: WithCollectionInitializer, WithDictionaryInitializer, WithComplexInitializer.
     }
 }
