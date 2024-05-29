@@ -31,10 +31,10 @@
 
     <ItemGroup>
         <!-- Validate async code -->
-        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="$(MicrosoftVisualStudioThreadingVersion)" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" PrivateAssets="all" />
 
         <!-- Resharper annotations -->
-        <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="all" />
+        <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
      
     </ItemGroup>
     

@@ -10,6 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Metalama.Framework.TestApp.Aspects\Metalama.Framework.TestApp.Aspects.csproj" />
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 </Project>

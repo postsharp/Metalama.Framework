@@ -1,0 +1,55 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- Set versions of dependencies that need special treatment or consist of multiple packages of the same version. -->
+  <PropertyGroup>
+    <!-- MSBuild v17.4.0 does not support .NET 6.0 and there seems to be no benefit in referencing a high version. -->
+    <MicrosoftBuildVersion>17.3.2</MicrosoftBuildVersion>
+    <!-- This cannot be called just "PostSharpVersion", because that conflicts with a property used by PostSharp. -->
+    <PostSharpPackageVersion>2024.0.2-preview</PostSharpPackageVersion>
+    <!-- RoslynApiMinVersion is the minimal version of the Roslyn API we support. By contrast, RoslynVersion is the version of Roslyn from which Metalama is forked. -->
+    <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
+    <RoslynApiMaxVersion>4.8.0</RoslynApiMaxVersion>
+    <RoslynVersion>4.8.0</RoslynVersion>
+    <!-- xUnitApiVersion is the version of xUnit against which we build the testing framework -->
+    <xUnitApiVersion>2.4.1</xUnitApiVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="DiffPlex" Version="1.7.1" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2023.3.0" />
+    <PackageVersion Include="K4os.Hash.xxHash" Version="1.0.8" />
+    <PackageVersion Include="LibGit2Sharp" Version="0.26.2" />
+    <PackageVersion Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
+    <PackageVersion Include="Metalama.Backstage.Commands" Version="$(MetalamaBackstageVersion)" />
+    <PackageVersion Include="Metalama.Compiler" Version="$(MetalamaCompilerVersion)" />
+    <PackageVersion Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+    <PackageVersion Include="Metalama.Framework.RunTime" Version="$(MetalamaFrameworkRunTimeVersion)" />
+    <PackageVersion Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+    <PackageVersion Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" />
+    <PackageVersion Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildVersion)" />
+    <PackageVersion Include="Microsoft.Build.Locator" Version="1.5.5" />
+    <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.Net.Compilers.Toolset" Version="$(RoslynVersion)" />
+    <!-- This property is also used in Metalama.Framework.Private\Directory.Packages.props. -->
+    <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60" />
+    <!-- We should match the versions used by the lowest version of Roslyn we support.-->
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="PostSharp.Engineering.BuildTools" Version="$(PostSharpEngineeringVersion)" />
+    <PackageVersion Include="PostSharp.Patterns.Model" Version="$(PostSharpPackageVersion)" />
+    <PackageVersion Include="StreamJsonRpc" Version="2.8.28" />
+    <!-- This should match the version used by Roslyn in RoslynApiMinVersion -->
+    <PackageVersion Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageVersion Include="System.Linq.Parallel" Version="4.3.0"/>
+    <PackageVersion Include="System.Reflection.Emit" Version="4.7.0" />
+    <PackageVersion Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <PackageVersion Include="xunit.assert" Version="$(xUnitApiVersion)" />
+    <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
+    <PackageVersion Include="xunit.extensibility.core" Version="$(xUnitApiVersion)" />
+    <PackageVersion Include="xunit.extensibility.execution" Version="$(xUnitApiVersion)" />
+  </ItemGroup>
+</Project>

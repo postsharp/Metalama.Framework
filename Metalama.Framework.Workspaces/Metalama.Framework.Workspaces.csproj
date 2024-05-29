@@ -19,17 +19,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Linq.Parallel" Version="4.3.0"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(RoslynVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(RoslynVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(RoslynVersion)" />
-        <PackageReference Include="Microsoft.Build.Locator" Version="1.5.5" />
+        <PackageReference Include="System.Linq.Parallel" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" VersionOverride="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" VersionOverride="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" VersionOverride="$(RoslynVersion)" />
+        <PackageReference Include="Microsoft.Build.Locator" />
         
         <!-- MSBuild v17.4.0 does not support .NET 6.0 and there seems to be no benefit in referencing a high version. -->
-        <PackageReference Include="Microsoft.Build" Version="17.3.2" ExcludeAssets="runtime" />
-        <PackageReference Include="Microsoft.Build.Framework" Version="17.3.2" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Framework" ExcludeAssets="runtime" />
 
         <!-- The following references handle [Memo] -->
         <ProjectReference Include="..\source-dependencies\Metalama.Framework.Private\src\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists('..\source-dependencies\Metalama.Framework.Private')" />
