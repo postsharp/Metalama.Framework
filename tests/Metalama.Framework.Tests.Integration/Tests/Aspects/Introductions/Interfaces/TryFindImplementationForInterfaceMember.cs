@@ -15,7 +15,7 @@ public class IntroduceInterfaceAttribute : TypeAspect
         aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
     }
 
-    [ExplicitInterfaceMember]
+    [InterfaceMember(IsExplicit = true)]
     public void M1(int i) { }
 
     [Introduce]

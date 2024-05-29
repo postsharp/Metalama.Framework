@@ -23,10 +23,10 @@ internal class IntroductionAttribute : TypeAspect
         builder.Advice.ImplementInterface( builder.Target, typeof(Interface) );
     }
 
-    [ExplicitInterfaceMember]
+    [InterfaceMember( IsExplicit = true )]
     public event EventHandler? EventField_Default = default;
 
-    [ExplicitInterfaceMember]
+    [InterfaceMember( IsExplicit = true )]
     public event EventHandler? EventField = Foo;
 
     [Introduce]

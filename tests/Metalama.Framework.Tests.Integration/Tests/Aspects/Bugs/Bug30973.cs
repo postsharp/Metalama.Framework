@@ -74,14 +74,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
             builder.Advice.ImplementInterface(builder.Target, typeof(IIntroducedInterface));
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public int InterfaceMethod()
         {
             Console.WriteLine("This is introduced interface member.");
             return meta.Proceed();
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public event EventHandler? InterfaceEvent
         {
             add
@@ -97,10 +97,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
             }
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public event EventHandler? InterfaceEventField;
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public int Property
         {
             get
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30973
             }
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public string? AutoProperty { get; set; }
     }
 

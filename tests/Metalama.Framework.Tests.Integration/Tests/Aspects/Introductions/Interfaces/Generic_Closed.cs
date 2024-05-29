@@ -32,13 +32,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( TypeFactory.GetType( typeof(Tuple<int, int>) ) ) );
         }
 
-        [Introduce]
+        [InterfaceMember]
         public void Foo( int t ) { }
 
-        [Introduce]
+        [InterfaceMember]
         public void Foo( int[] t ) { }
 
-        [Introduce]
+        [InterfaceMember]
         public void Foo( Tuple<int, int> t ) { }
     }
 

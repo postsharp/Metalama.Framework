@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event PropertyChangedEventHandler? PropertyChanged;
 
         [Introduce]

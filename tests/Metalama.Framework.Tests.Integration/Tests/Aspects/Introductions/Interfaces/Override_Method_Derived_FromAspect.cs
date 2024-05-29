@@ -14,7 +14,7 @@ public class TheAspect : TypeAspect
         builder.Advice.ImplementInterface( builder.Target, typeof(IDisposable), whenExists: OverrideStrategy.Override );
     }
 
-    [Introduce(WhenExists = OverrideStrategy.Override)]
+    [InterfaceMember]
     public virtual void Dispose()
     {
         meta.Proceed();

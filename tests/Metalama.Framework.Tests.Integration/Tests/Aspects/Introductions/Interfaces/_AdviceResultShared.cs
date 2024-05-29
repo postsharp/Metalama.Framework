@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         [Template]
         public void WitnessTemplate(
             [CompileTime] IReadOnlyCollection<IInterfaceImplementationResult> types,
-            [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult> members )
+            [CompileTime] IReadOnlyCollection<IInterfaceMemberImplementationResult>? members )
         {
             foreach (var type in types)
             {

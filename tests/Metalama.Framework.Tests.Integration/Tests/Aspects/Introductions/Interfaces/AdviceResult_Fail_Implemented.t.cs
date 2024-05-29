@@ -1,7 +1,3 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.BaseEvent' into type 'TargetClass' because it is already defined in type 'TargetClass'. Use a different OverrideStrategy or skip the member.`
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.BaseMethod()' into type 'TargetClass' because it is already defined in type 'TargetClass'. Use a different OverrideStrategy or skip the member.`
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.BaseProperty' into type 'TargetClass' because it is already defined in type 'TargetClass'. Use a different OverrideStrategy or skip the member.`
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.Event' into type 'TargetClass' because it is already defined in type 'TargetClass'. Use a different OverrideStrategy or skip the member.`
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.Method()' into type 'TargetClass' because it is already defined in type 'TargetClass'. Use a different OverrideStrategy or skip the member.`
-// Error LAMA0500 on `TargetClass`: `The aspect 'Introduction' cannot introduce member 'TargetClass.Property' into type 'TargetClass' because it is already defined in type 'TargetClass'. Use a different OverrideStrategy or skip the member.`
+// Error LAMA0512 on `TargetClass`: `The aspect 'Introduction' cannot implement interface 'IBaseInterface' in the type 'TargetClass' because the type already implements it and WhenExists is set to Fail.`
+// Error LAMA0512 on `TargetClass`: `The aspect 'Introduction' cannot implement interface 'IInterface' in the type 'TargetClass' because the type already implements it and WhenExists is set to Fail.`

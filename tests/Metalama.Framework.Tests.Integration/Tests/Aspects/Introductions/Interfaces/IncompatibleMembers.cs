@@ -7,7 +7,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IncompatibleMembers
 {
     /*
-     * Tests that when aspect members marked with [Introduce] are not compatible with interface members of the same signature
+     * Tests that when aspect members marked with [InterfaceMember] are not compatible with interface members of the same signature
      */
 
     public interface IInterface
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [Introduce]
+        [InterfaceMember]
         public long Method()
         {
             Console.WriteLine( "This is introduced interface member." );
@@ -34,7 +34,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             return meta.Proceed();
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event UnhandledExceptionEventHandler? Event
         {
             add
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public long Property
         {
             get

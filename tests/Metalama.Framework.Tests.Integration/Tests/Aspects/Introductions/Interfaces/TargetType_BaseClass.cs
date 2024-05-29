@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [Introduce]
+        [InterfaceMember]
         public void IntroducedMethod()
         {
             Console.WriteLine( "Introduced interface member" );
