@@ -785,8 +785,8 @@ public static class AdviserExtensions
 
     /// <summary>
     /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
-    /// Interface members can be introduced by marking an aspect member by <see cref="InterfaceMemberAttribute"/>, 
-    /// <see cref="IntroduceAttribute"/> or programmatically using <c>Introduce</c> methods.
+    /// Interface members can be introduced declaratively by marking an aspect member by <see cref="InterfaceMemberAttribute"/> or 
+    /// <see cref="IntroduceAttribute"/>, or programmatically using <c>Introduce</c> methods for public implementations of <c>result.ExplicitImplementations.Introduce</c> for private implementations.
     /// </summary>
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="interfaceType">The type of the implemented interface.</param>
