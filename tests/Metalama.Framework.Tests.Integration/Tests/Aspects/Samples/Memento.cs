@@ -68,6 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         [InterfaceMember]
         public IMemento Save()
         {
+            var mementoType = (INamedType)meta.Tags["mementoType"];
             var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared);
 
             return mementoType.Constructors.Single().Invoke(fieldExpressions);
