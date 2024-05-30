@@ -54,6 +54,22 @@ internal sealed class AttributeUpdatableCollection : UpdatableDeclarationCollect
                     action( new AttributeRef( attribute, this._parent, this.Compilation.CompilationContext ) );
                 }
 
+                if ( this.Compilation.TryGetRedirectedDeclaration( this._parent, out var redirectedDeclaration ) )
+                {
+                    // If the declaration was redirected, we need to add the attributes from the builder.
+                    if ( redirectedDeclaration.Target is IDeclarationBuilder redirectedBuilder )
+                    {
+                        foreach ( var attribute in redirectedBuilder.Attributes )
+                        {
+                            action( new AttributeRef( (AttributeBuilder) attribute ) );
+                        }
+                    }
+                    else
+                    {
+                        Invariant.Assert( false );
+                    }
+                }
+
                 break;
 
             case IDeclarationBuilder builder:

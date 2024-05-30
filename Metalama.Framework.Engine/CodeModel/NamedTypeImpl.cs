@@ -481,7 +481,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         {
             var introducedInterface =
                 this.Compilation
-                    .GetInterfaceImplementationCollection( currentType.ToTypedRef<INamedType>(), false )
+                    .GetInterfaceImplementationCollection( currentType.ToTypedRef(), false )
                     .Introductions
                     .SingleOrDefault( i => this.Compilation.Comparers.Default.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 

@@ -392,6 +392,10 @@ public sealed partial class CompilationModel
 
                 break;
 
+            case IConstructor { IsStatic: true }:
+                // Nothing to do, static constructor is replaced in the collection earlier.
+                break;
+
             case IField replacedField:
                 var fields = this.GetFieldCollection( replacedField.DeclaringType.ToTypedRef(), true );
                 fields.Remove( replaced.As<IField>() );

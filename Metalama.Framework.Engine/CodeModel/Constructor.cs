@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -101,5 +102,17 @@ namespace Metalama.Framework.Engine.CodeModel
         protected override IMemberOrNamedType GetDefinition() => this.Definition;
 
         public override System.Reflection.MethodBase ToMethodBase() => CompileTimeConstructorInfo.Create( this );
+
+        public object Invoke( params object?[] args ) => new ConstructorInvoker( this ).Invoke( args );
+
+        public object Invoke( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).Invoke( args );
+
+        public IObjectCreationExpression CreateInvokeExpression() => new ConstructorInvoker( this ).CreateInvokeExpression();
+
+        public IObjectCreationExpression CreateInvokeExpression( params object?[] args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
+
+        public IObjectCreationExpression CreateInvokeExpression( params IExpression[] args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
+
+        public IObjectCreationExpression CreateInvokeExpression( IEnumerable<IExpression> args ) => new ConstructorInvoker( this ).CreateInvokeExpression( args );
     }
 }

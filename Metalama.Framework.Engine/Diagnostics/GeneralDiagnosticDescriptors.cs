@@ -340,6 +340,10 @@ namespace Metalama.Framework.Engine.Diagnostics
                 Warning,
                 "Code formatting is enabled. Build performance could be significantly affected." );
 
+        internal static readonly DiagnosticDefinition<IConstructor>
+            CannotInvokeStaticConstructor =
+                new( "LAMA0067", _category, "Constructor '{0}' cannot be invoked because it is static.", Error, "Static constructor cannot be invoked." );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         internal static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(
