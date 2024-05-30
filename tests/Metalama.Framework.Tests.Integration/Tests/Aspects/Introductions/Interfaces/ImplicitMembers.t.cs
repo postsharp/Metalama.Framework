@@ -32,7 +32,7 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
     global::System.Console.WriteLine("This is introduced interface member.");
     return default(global::System.Int32);
   }
-  public event global::System.EventHandler? Event
+  public event global::System.EventHandler Event
   {
     add
     {

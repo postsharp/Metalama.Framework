@@ -38,29 +38,29 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 throw new InvalidOperationException( $"InterfaceMembers collection was not empty." );
             }
 
-            aspectBuilder.Advice.WithTemplateProvider(new AdviceResultTemplates())
+            aspectBuilder.Advice.WithTemplateProvider( new AdviceResultTemplates() )
                 .Override(
-                    aspectBuilder.Target.Methods.OfName("Witness").Single(),
+                    aspectBuilder.Target.Methods.OfName( "Witness" ).Single(),
                     nameof(AdviceResultTemplates.WitnessTemplate),
                     args: new { types = result.Interfaces, members = result.GetObsoleteInterfaceMembers() } );
         }
 
-        [Introduce]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
         public void BaseMethod() { }
 
-        [Introduce]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
         public int BaseProperty { get; set; }
 
-        [Introduce]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
         public event EventHandler? BaseEvent;
 
-        [Introduce]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
         public void Method() { }
 
-        [Introduce]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
         public int Property { get; set; }
 
-        [Introduce]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.Default )]
         public event EventHandler? Event;
     }
 

@@ -35,7 +35,7 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
         Action<IEventBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName, eventTemplate, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, explicitName, eventTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
     {
         this._addTemplate = addTemplate;
         this._removeTemplate = removeTemplate;
@@ -48,8 +48,6 @@ internal sealed class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, IEven
             tags );
 
         this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
-
-        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

@@ -36,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 (INamedType)TypeFactory.GetType( typeof(IInterface) ) );
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public int InterfaceMethod()
         {
             Console.WriteLine( "This is introduced interface member." );
@@ -44,10 +44,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             return meta.Proceed();
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler? EventField;
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler? Event
         {
             add
@@ -60,10 +60,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public int AutoProperty { get; set; }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public int Property
         {
             get

@@ -26,7 +26,7 @@ internal sealed class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, IFiel
         OverrideStrategy overrideStrategy,
         Action<IFieldBuilder>? buildAction,
         IObjectReader tags )
-        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, explicitName, fieldTemplate, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
     {
         this.Builder = new FieldBuilder( this, parameters.TargetDeclaration, this.MemberName, tags );
         this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();

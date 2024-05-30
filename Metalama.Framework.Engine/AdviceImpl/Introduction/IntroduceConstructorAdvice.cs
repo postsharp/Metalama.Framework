@@ -30,7 +30,7 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         OverrideStrategy overrideStrategy,
         Action<IConstructorBuilder>? buildAction,
         IObjectReader tags )
-        : base( parameters, null, template.TemplateMember, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, null, template.TemplateMember, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
 

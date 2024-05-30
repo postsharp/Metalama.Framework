@@ -59,16 +59,16 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
             builder.Advice.ImplementInterface( builder.Target, typeof(IntroducedInterface) );
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = false )]
         public event EventHandler? IntroducedEvent;
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = false )]
         public event EventHandler? InitializerIntroducedEvent = Bar;
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler? ExplicitIntroducedEvent;
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler? InitializerExplicitIntroducedEvent = Bar;
 
         [Introduce]

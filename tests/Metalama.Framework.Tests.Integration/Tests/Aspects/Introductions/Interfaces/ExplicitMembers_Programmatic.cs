@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
 
 public interface IInterface
 {
-    int InterfaceMethod();
+    int InterfaceMethod(int i);
 
     event EventHandler Event;
 
@@ -38,11 +38,11 @@ public class IntroductionAttribute : TypeAspect
     }
 
     [Template]
-    public int InterfaceMethod()
+    public int InterfaceMethod(int i)
     {
         Console.WriteLine( "This is introduced interface member." );
 
-        return meta.Proceed();
+        return i;
     }
 
     [Template]
@@ -51,13 +51,11 @@ public class IntroductionAttribute : TypeAspect
         add
         {
             Console.WriteLine( "This is introduced interface member." );
-            meta.Proceed();
         }
 
         remove
         {
             Console.WriteLine( "This is introduced interface member." );
-            meta.Proceed();
         }
     }
 
@@ -71,13 +69,12 @@ public class IntroductionAttribute : TypeAspect
         {
             Console.WriteLine( "This is introduced interface member." );
 
-            return meta.Proceed();
+            return 42;
         }
 
         set
         {
             Console.WriteLine( "This is introduced interface member." );
-            meta.Proceed();
         }
     }
 

@@ -32,13 +32,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             builder.Outbound.SelectMany( x => x.Methods ).AddAspect( x => new OverrideAttribute() );
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private void IntroducedVoidMethod()
         {
             Console.WriteLine( "Introduced" );
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private int IntroducedMethod()
         {
             Console.WriteLine( "Introduced" );
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             return 42;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private T IntroducedGenericMethod<T>( T value )
         {
             Console.WriteLine( "Introduced" );
@@ -54,14 +54,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             return value;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private async Task IntroducedAsyncVoidMethod()
         {
             Console.WriteLine( "Introduced" );
             await Task.Yield();
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private async Task<int> IntroducedAsyncMethod()
         {
             Console.WriteLine( "Introduced" );
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             return 42;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private IEnumerable<int> IntroducedIteratorMethod()
         {
             Console.WriteLine( "Introduced" );
@@ -78,7 +78,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             yield return 42;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private async IAsyncEnumerable<int> IntroducedAsyncIteratorMethod()
         {
             Console.WriteLine( "Introduced" );

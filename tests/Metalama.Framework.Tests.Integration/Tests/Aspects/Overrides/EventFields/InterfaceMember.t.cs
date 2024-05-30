@@ -36,6 +36,34 @@ internal class TargetClass : Interface, global::Metalama.Framework.Tests.Integra
   public static void Bar(global::System.Object? sender, global::System.EventArgs args)
   {
   }
+  private event global::System.EventHandler? _initializerIntroducedEvent = (global::System.EventHandler? )Bar;
+  public event global::System.EventHandler? InitializerIntroducedEvent
+  {
+    add
+    {
+      global::System.Console.WriteLine("This is the add template.");
+      this._initializerIntroducedEvent += value;
+    }
+    remove
+    {
+      global::System.Console.WriteLine("This is the remove template.");
+      this._initializerIntroducedEvent -= value;
+    }
+  }
+  private event global::System.EventHandler? _introducedEvent;
+  public event global::System.EventHandler? IntroducedEvent
+  {
+    add
+    {
+      global::System.Console.WriteLine("This is the add template.");
+      this._introducedEvent += value;
+    }
+    remove
+    {
+      global::System.Console.WriteLine("This is the remove template.");
+      this._introducedEvent -= value;
+    }
+  }
   private event global::System.EventHandler? _explicitIntroducedEvent;
   event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.InterfaceMember.IntroducedInterface.ExplicitIntroducedEvent
   {
@@ -62,34 +90,6 @@ internal class TargetClass : Interface, global::Metalama.Framework.Tests.Integra
     {
       global::System.Console.WriteLine("This is the remove template.");
       this._initializerExplicitIntroducedEvent -= value;
-    }
-  }
-  private event global::System.EventHandler? _initializerIntroducedEvent = (global::System.EventHandler? )Bar;
-  event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.InterfaceMember.IntroducedInterface.InitializerIntroducedEvent
-  {
-    add
-    {
-      global::System.Console.WriteLine("This is the add template.");
-      this._initializerIntroducedEvent += value;
-    }
-    remove
-    {
-      global::System.Console.WriteLine("This is the remove template.");
-      this._initializerIntroducedEvent -= value;
-    }
-  }
-  private event global::System.EventHandler? _introducedEvent;
-  event global::System.EventHandler? global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.EventFields.InterfaceMember.IntroducedInterface.IntroducedEvent
-  {
-    add
-    {
-      global::System.Console.WriteLine("This is the add template.");
-      this._introducedEvent += value;
-    }
-    remove
-    {
-      global::System.Console.WriteLine("This is the remove template.");
-      this._introducedEvent -= value;
     }
   }
 }

@@ -66,10 +66,10 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
         }
     }
 
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
+    [InterfaceMember]
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
+    [Introduce( WhenExists = OverrideStrategy.Ignore )]
     protected void OnPropertyChanged( string name ) => PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( name ) );
 
     [Template]
@@ -133,10 +133,10 @@ public class TrackChangesAttribute : TypeAspect
         }
     }
 
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
+    [InterfaceMember]
     public bool? HasChanges { get; protected set; }
 
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
+    [InterfaceMember]
     public bool IsTrackingChanges
     {
         get => HasChanges.HasValue;
@@ -156,7 +156,7 @@ public class TrackChangesAttribute : TypeAspect
         }
     }
 
-    [Introduce(WhenExists = OverrideStrategy.Ignore)]
+    [InterfaceMember]
     public void ResetChanges()
     {
         if (IsTrackingChanges)

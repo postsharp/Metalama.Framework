@@ -23,7 +23,7 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult
     IReadOnlyCollection<IInterfaceImplementationResult> Interfaces { get; }
 
     /// <summary>
-    /// Gets a list of interface members specified using <see cref="InterfaceMemberAttribute"/> or <see cref="ExplicitInterfaceMemberAttribute"/> that were considered when implementing the given interface.
+    /// Gets a list of interface members specified using <see cref="InterfaceMemberAttribute"/> that were considered when implementing the given interface.
     /// </summary>
     /// <remarks>
     /// This property contains only members of interfaces that were implemented. Members of interfaces that were ignored are not included in the list.

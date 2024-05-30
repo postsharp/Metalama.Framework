@@ -6,14 +6,14 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceMemberRef
 {
-    public class IntroductionAttribute : TypeAspect
+    public class IntroduceAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             builder.Advice.ImplementInterface( builder.Target, typeof(IInterface) );
         }
 
-        [Introduce]
+        [Framework.Aspects.Introduce]
         public void SomeMethod()
         {
             Method();
@@ -21,16 +21,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
             Event += EventHandler;
         }
 
-        [Introduce]
+        [Framework.Aspects.Introduce]
         private void EventHandler( object? sender, EventArgs a ) { }
 
-        [Introduce]
+        [InterfaceMember]
         public void Method() { }
 
-        [Introduce]
+        [InterfaceMember]
         public int Property { get; set; }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler? Event;
     }
 
@@ -44,6 +44,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
     }
 
     // <target>
-    [Introduction]
+    [Introduce]
     internal class Program { }
 }

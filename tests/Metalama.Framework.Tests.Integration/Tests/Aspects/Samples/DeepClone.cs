@@ -87,7 +87,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.DeepClone
             return clone;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private object Clone() => meta.This.Clone();
     }
 

@@ -30,13 +30,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
             aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private void Method()
         {
             Console.WriteLine("Introduced interface member");
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private int Property
         {
             get
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
             }
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         public int Property_PrivateSetter
         {
             get
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
             }
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private int Property_GetOnly
         {
             get
@@ -71,19 +71,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
             }
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private int Property_ExpressionBody => 42;
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private int AutoProperty { get; set; }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         public int AutoProperty_PrivateSetter { get; private set; }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private event EventHandler? EventField;
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         private event EventHandler? Event
         {
             add { }

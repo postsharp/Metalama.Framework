@@ -32,7 +32,7 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         Action<IIndexerBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, "this[]", template: null, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
     {
         this._getTemplate = getTemplate;
         this._setTemplate = setTemplate;
@@ -46,8 +46,6 @@ internal sealed class IntroduceIndexerAdvice : IntroduceMemberAdvice<IIndexer, I
         {
             this.Builder.AddParameter( pair.Name, pair.Type );
         }
-
-        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     public override AdviceKind AdviceKind => AdviceKind.IntroduceIndexer;
