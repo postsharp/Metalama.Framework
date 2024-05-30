@@ -17,8 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             var mementoType =
-                builder.Advice.IntroduceClass(
-                    builder.Target,
+                builder.IntroduceClass(
                     "Memento",
                     buildType: b =>
                     {
@@ -64,8 +63,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
 
             var args = new { mementoType = mementoType.Declaration };
 
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Save), args: args);
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Restore), args: args);
+            builder.IntroduceMethod(nameof(Save), args: args);
+            builder.IntroduceMethod(nameof(Restore), args: args);
         }
 
         [Template]
