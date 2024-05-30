@@ -391,8 +391,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             ReferenceResolutionOptions options,
             bool throwIfMissing )
         {
-            T Convert( ICompilationElement compilationElement )
+            T? Convert( ICompilationElement? compilationElement )
             {
+                if ( compilationElement == null )
+                {
+                    return null;
+                }
+
                 if ( compilationElement is not T safeCast )
                 {
                     // Throw an exception with a better exception message for better troubleshooting.
@@ -440,7 +445,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             .AssertNotNull() );
 
                 case IDeclarationBuilder builder:
-                    return Convert( compilation.Factory.GetDeclaration( builder, options ) );
+                    return Convert( compilation.Factory.GetDeclaration( builder, options, throwIfMissing ) );
 
                 case ISubstitutedDeclaration substitutedDeclaration:
                     return Convert( compilation.Factory.GetDeclaration( substitutedDeclaration ) );

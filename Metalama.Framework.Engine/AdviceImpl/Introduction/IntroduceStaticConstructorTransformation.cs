@@ -14,7 +14,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>
+internal sealed class IntroduceStaticConstructorTransformation : IntroduceMemberTransformation<ConstructorBuilder>, IReplaceMemberTransformation
 {
     public IntroduceStaticConstructorTransformation( Advice advice, ConstructorBuilder introducedDeclaration ) : base( advice, introducedDeclaration )
     {
@@ -49,7 +49,7 @@ internal sealed class IntroduceStaticConstructorTransformation : IntroduceMember
         };
     }
 
-    private MemberRef<IMember> ReplacedMember { get; }
+    public MemberRef<IMember> ReplacedMember { get; }
 
     public override InsertPosition InsertPosition
         => this.ReplacedMember.Target != null

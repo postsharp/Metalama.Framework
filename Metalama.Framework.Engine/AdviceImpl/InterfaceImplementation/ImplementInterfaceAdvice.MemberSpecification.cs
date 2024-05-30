@@ -23,7 +23,7 @@ internal sealed partial class ImplementInterfaceAdvice
 #pragma warning disable CS0618 // Type or member is obsolete
         public InterfaceMemberOverrideStrategy OverrideStrategy
             => (this.Template?.TemplateClassMember.Attribute as InterfaceMemberAttribute)?.WhenExists
-                ?? InterfaceMemberOverrideStrategy.MakeExplicit;
+               ?? InterfaceMemberOverrideStrategy.MakeExplicit;
 #pragma warning restore CS0618
 
         public MemberSpecification(

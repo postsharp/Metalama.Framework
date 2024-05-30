@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
@@ -78,7 +79,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             {
                 canBeNull = expressionType.IsNullable == true;
             }
-            
+
             this.CanBeNull = canBeNull ?? true;
         }
 
@@ -127,6 +128,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             }
         }
 
+        [return: NotNullIfNotNull( nameof(array) )]
         internal static TypedExpressionSyntaxImpl[]? FromValues( object?[]? array, SyntaxSerializationContext serializationContext )
         {
             switch ( array )

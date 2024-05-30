@@ -201,7 +201,7 @@ internal static class TypeAnnotationMapper
             return false;
         }
 
-        type = compilationModel.Factory.Translate( type ).AssertNotNull( $"The type '{type}' could not be translated." );
+        type = compilationModel.Factory.Translate( type, ReferenceResolutionOptions.CanBeMissing ).AssertNotNull( $"The type '{type}' could not be translated." );
 
         return true;
     }
