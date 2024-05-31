@@ -296,16 +296,31 @@ internal sealed class SymbolClassifier : ISymbolClassifier
             return false;
         }
 
-        // Check whether the symbols is marked with [CompileTime(isTemplateOnly: true)].
+        // Check whether the symbol is marked with [CompileTime(isTemplateOnly: true)].
         var compileTimeAttribute = symbol.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(CompileTimeAttribute) );
 
-        if ( compileTimeAttribute is { ConstructorArguments: [{ Value: true }] } )
+        if ( compileTimeAttribute is { ConstructorArguments: [{ Value: true }, ..] } )
         {
             return true;
         }
 
         // Check the containing symbol.
         if ( symbol.ContainingSymbol is { } containingSymbol && this.IsTemplateOnly( containingSymbol ) )
+        {
+            return true;
+        }
+
+        // Check whether any type in the symbol signature is dynamic.
+        var types = symbol switch
+        {
+            IMethodSymbol method => method.Parameters.Select( p => p.Type ).Append( method.ReturnType ),
+            IPropertySymbol property => property.Parameters.Select( p => p.Type ).Append( property.Type ),
+            IFieldSymbol field => [field.Type],
+            IEventSymbol @event => [@event.Type],
+            _ => []
+        };
+
+        if ( types.Any( t => this.GetTemplatingScope( t ) == TemplatingScope.Dynamic ) )
         {
             return true;
         }

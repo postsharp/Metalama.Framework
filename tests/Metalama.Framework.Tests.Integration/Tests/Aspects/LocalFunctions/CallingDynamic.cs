@@ -50,7 +50,7 @@ internal class C
 
     public C( object o ) { }
 
-    public C( object o, Func<object, bool> f ) { }
+    public C( object? o, Func<object, bool> f ) { }
 
     public bool CanExecute( object? x ) => x != null;
 

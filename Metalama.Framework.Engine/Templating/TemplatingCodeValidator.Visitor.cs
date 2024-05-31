@@ -128,10 +128,48 @@ namespace Metalama.Framework.Engine.Templating
                                 // Cannot reference template-only symbol outside of a template, except in a nameof().
                                 if ( AvoidDuplicates( referencedSymbol ) )
                                 {
+                                    string? explanation = null;
+
+                                    switch (referencedSymbol.ContainingType.GetReflectionFullName(), referencedSymbol.Name)
+                                    {
+                                        case ("Metalama.Framework.Aspects.meta", "This"):
+                                            explanation = " Use ExpressionFactory.This() instead of meta.This.";
+
+                                            break;
+
+                                        case ("Metalama.Framework.Code.IExpression", "Value"):
+                                            var expression = node.Parent is MemberAccessExpressionSyntax memberAccess
+                                                ? memberAccess.Expression.ToString()
+                                                : "expression";
+
+                                            explanation = $" Use '{expression}' directly instead of accessing '{expression}.Value'.";
+
+                                            break;
+
+                                        case ("Metalama.Framework.Code.SyntaxBuilders.SyntaxBuilder", "AppendExpression"):
+                                            if ( node.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: [var argument] } )
+                                            {
+                                                var argumentType = this._semanticModel.GetTypeInfo( argument.Expression ).Type;
+
+                                                if ( IsLiteralType( argumentType ) )
+                                                {
+                                                    explanation =
+                                                        $" Use 'AppendLiteral({argument.Expression})' instead of 'AppendExpression({argument.Expression})'.";
+                                                }
+                                            }
+
+                                            break;
+                                    }
+
                                     this.Report(
                                         TemplatingDiagnosticDescriptors.CannotUseTemplateOnlyOutOfTemplate.CreateRoslynDiagnostic(
                                             node.GetLocation(),
-                                            (this._currentDeclaration!, referencedSymbol) ) );
+                                            (this._currentDeclaration!, referencedSymbol, explanation) ) );
+
+                                    static bool IsLiteralType( ITypeSymbol? type )
+                                        => type?.GetReflectionFullName() is "System.Int32" or "System.UInt32"
+                                            or "System.Int16" or "System.UInt16" or "System.Int64" or "System.UInt64" or "System.Byte" or "System.SByte"
+                                            or "System.Double" or "System.Single" or "System.Decimal" or "System.String";
                                 }
                             }
                             else if ( !this._currentScope.Value.MustExecuteAtCompileTime() )

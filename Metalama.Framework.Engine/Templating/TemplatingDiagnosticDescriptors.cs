@@ -229,11 +229,11 @@ namespace Metalama.Framework.Engine.Templating
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)> CannotUseTemplateOnlyOutOfTemplate
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol, string? Explanation)> CannotUseTemplateOnlyOutOfTemplate
             = new(
                 "LAMA0233",
                 "Cannot use a template-only method out of a template.",
-                "Cannot use '{1}' in '{0}' because it is only allowed inside a template.",
+                "Cannot use '{1}' in '{0}' because it is only allowed inside a template.{2}",
                 _category,
                 Error );
 

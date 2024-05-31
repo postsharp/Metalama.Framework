@@ -157,6 +157,11 @@ public static class ExpressionFactory
     public static IExpression This( INamedType type ) => SyntaxBuilder.CurrentImplementation.ThisExpression( type );
 
     /// <summary>
+    /// Gets a <c>this</c> expression for the current type when inside a template.
+    /// </summary>
+    public static IExpression This() => This( meta.Target.Type );
+
+    /// <summary>
     /// Returns the same expression, but assuming it has a different type <see cref="IHasType.Type"/>. This method does not generate
     /// any cast (unlike <see cref="CastTo(Metalama.Framework.Code.IExpression,Metalama.Framework.Code.IType)"/>) and should only
     /// be used when the of the type given expression is wrongly infered.

@@ -14,7 +14,7 @@ namespace Metalama.Framework.Aspects;
     AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
     | AttributeTargets.Assembly | AttributeTargets.ReturnValue | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field
     | AttributeTargets.Constructor | AttributeTargets.Event | AttributeTargets.Parameter | AttributeTargets.GenericParameter )]
-public sealed class CompileTimeAttribute( bool isTemplateOnly ) : ScopeAttribute
+public sealed class CompileTimeAttribute( bool isTemplateOnly, string? reason = null ) : ScopeAttribute
 {
     public CompileTimeAttribute() : this( isTemplateOnly: false ) { }
 
@@ -22,4 +22,6 @@ public sealed class CompileTimeAttribute( bool isTemplateOnly ) : ScopeAttribute
     /// Gets a value indicating whether the target declaration can only be used from templates, but not from other compile-time code.
     /// </summary>
     public bool IsTemplateOnly { get; } = isTemplateOnly;
+
+    public string? Reason { get; } = reason;
 }

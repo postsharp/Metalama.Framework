@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.CodeModel.TypedConstant_;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CodeModel.TypedConstant_;
 
 class Aspect : OverrideMethodAspect
 {
@@ -19,10 +19,9 @@ class Aspect : OverrideMethodAspect
         return expressionBuilder.ToValue();
     }
 
-    [CompileTime]
-    object GetExpression() => TypedConstant.Create(42);
+    IExpression GetExpression() => TypedConstant.Create(42);
 
-    void Append(ExpressionBuilder expressionBuilder) => expressionBuilder.AppendExpression((object)TypedConstant.Create(42));
+    void Append(ExpressionBuilder expressionBuilder) => expressionBuilder.AppendExpression(TypedConstant.Create(42));
 }
 
 [CompileTime]

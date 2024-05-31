@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
                 else
                 {
                     stringBuilder.AddText( $"{comma}{p.Name} = {{" );
-                    stringBuilder.AddExpression( p.Value );
+                    stringBuilder.AddExpression( p );
                     stringBuilder.AddText( "}" );
                 }
 

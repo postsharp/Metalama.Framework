@@ -51,7 +51,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static dynamic? Proceed() => throw CreateException();
 
         /// <summary>
@@ -62,7 +61,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static Task<dynamic?> ProceedAsync() => throw CreateException();
 
         /// <summary>
@@ -78,7 +76,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static IEnumerator<dynamic?> ProceedEnumerator() => throw CreateException();
 
 #if NET5_0_OR_GREATER
@@ -87,7 +84,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static IAsyncEnumerable<dynamic?> ProceedAsyncEnumerable() => throw CreateException();
 
         /// <summary>
@@ -95,7 +91,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static IAsyncEnumerator<dynamic?> ProceedAsyncEnumerator() => throw CreateException();
 #endif
 
@@ -217,7 +212,6 @@ namespace Metalama.Framework.Aspects
         /// <returns></returns>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, (object?) value );
 
         /// <summary>
@@ -301,7 +295,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="value">The value to return.</param>
         [TemplateKeyword]
-        [CompileTime( isTemplateOnly: true )]
         public static void Return( dynamic? value ) => throw CreateException();
     }
 }
