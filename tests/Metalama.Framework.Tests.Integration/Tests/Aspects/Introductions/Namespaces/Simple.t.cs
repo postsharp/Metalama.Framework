@@ -1,1 +1,14 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// --- Simple.cs ---
+// Warning CS8618 on `Field`: `Non-nullable field 'Field' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
+[IntroductionAttribute]
+public class TargetType
+{
+  private global::Implementation.Test Field;
+}
+// --- Implementation.cs ---
+namespace Implementation
+{
+  class Test : global::System.Object
+  {
+  }
+}

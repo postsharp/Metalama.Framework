@@ -406,7 +406,7 @@ internal sealed partial class LinkerInjectionStep
         }
 
         private void AddInjectionsOnPosition<T>( InsertPosition position, SyntaxTree originalSyntaxTree, List<T> targetList, SyntaxGenerationContext syntaxGenerationContext ) 
-            where T : SyntaxNode
+            where T : MemberDeclarationSyntax
         {
             var injectedMembersAtPosition = this._transformationCollection.GetInjectedMembersOnPosition( position );
 
@@ -443,7 +443,7 @@ internal sealed partial class LinkerInjectionStep
                                 propertyOrIndexer.GetMethod,
                                 getEntryStatements,
                                 getExitStatements,
-                                (MemberDeclarationSyntax) injectedNode );
+                                injectedNode );
                         }
 
                         if ( propertyOrIndexer.SetMethod != null )
@@ -458,7 +458,7 @@ internal sealed partial class LinkerInjectionStep
                                 propertyOrIndexer.SetMethod,
                                 setEntryStatements,
                                 setExitStatements,
-                                (MemberDeclarationSyntax) injectedNode );
+                                injectedNode );
                         }
 
                         break;
@@ -509,6 +509,21 @@ internal sealed partial class LinkerInjectionStep
                         }
 
                         injectedNode = typeDeclaration;
+
+                        break;
+
+                    case NamespaceDeclarationSyntax namespaceDeclaration:
+
+                        var namespaceBuilder = (NamespaceBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var injectedNamespaceMembers = new List<MemberDeclarationSyntax>();
+
+                        this.AddInjectionsOnPosition(
+                            new InsertPosition( InsertPositionRelation.Within, namespaceBuilder ),
+                            originalSyntaxTree,
+                            injectedNamespaceMembers,
+                            syntaxGenerationContext );
+
+                        injectedNode = namespaceDeclaration.WithMembers( namespaceDeclaration.Members.AddRange( injectedNamespaceMembers ) );
 
                         break;
                 }
@@ -1306,9 +1321,22 @@ internal sealed partial class LinkerInjectionStep
                 outputTrivias,
                 ref syntaxGenerationContext );
 
-            
+            var injections = new List<MemberDeclarationSyntax>();
 
-            return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
+            this.AddInjectionsOnPosition(
+                new InsertPosition( node.SyntaxTree ),
+                node.SyntaxTree,
+                injections,
+                this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, false, false, "\n" ) );
+
+            if ( injections.Count > 0 )
+            {
+                return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) ).WithMembers( node.Members.AddRange( injections ) );
+            }
+            else
+            {
+                return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
+            }
         }
     }
 }

@@ -251,11 +251,18 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
 #pragma warning restore CA1307
 
-        // Rewrite syntax trees.
         var inputCompilation = input.CompilationModel.PartialCompilation;
+
+        // Add syntax trees that were introduced (typically empty). These are trees currently created by transformation and the 
+        // intermediate registry needs to create a map of transformation target syntax tree to modified syntax tree.
+        var compilationWithIntroducedTrees =
+            input.CompilationModel.PartialCompilation.Update(
+                transformationCollection.IntroducedSyntaxTrees.Select( x => SyntaxTreeTransformation.AddTree( x ) ).ToList() );
+
+        // Update the syntax trees and create a new partial compilation.
         var transformations = new ConcurrentQueue<SyntaxTreeTransformation>();
 
-        async Task RewriteSyntaxTreeAsync( (SyntaxTree InitialSyntaxTree, bool Added) treeRecord )
+        async Task RewriteSyntaxTreeAsync( SyntaxTree initialSyntaxTree )
         {
             Rewriter rewriter = new(
                 this,
@@ -263,39 +270,27 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 input.CompilationModel,
                 syntaxTreeForGlobalAttributes );
 
-            var oldRoot = await treeRecord.InitialSyntaxTree.GetRootAsync( cancellationToken );
+            var oldRoot = await initialSyntaxTree.GetRootAsync( cancellationToken );
             var newRoot = rewriter.Visit( oldRoot ).AssertNotNull();
 
             if ( oldRoot != newRoot )
             {
-                var intermediateSyntaxTree = treeRecord.InitialSyntaxTree.WithRootAndOptions( newRoot, treeRecord.InitialSyntaxTree.Options );
+                var intermediateSyntaxTree = initialSyntaxTree.WithRootAndOptions( newRoot, initialSyntaxTree.Options );
 
-                if ( treeRecord.Added )
-                {
-                    transformations.Enqueue( SyntaxTreeTransformation.AddTree( intermediateSyntaxTree ) );
-                }
-                else
-                { 
-                    transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( treeRecord.InitialSyntaxTree, intermediateSyntaxTree ) );
-                }
+                transformations.Enqueue( SyntaxTreeTransformation.ReplaceTree( initialSyntaxTree, intermediateSyntaxTree ) );
             }
         }
 
         await
             this._concurrentTaskRunner.RunConcurrentlyAsync(
-                inputCompilation.SyntaxTrees.Values.Select( t => (t, false) ).Concat( transformationCollection.IntroducedSyntaxTrees.Select( t => (t, true) ) ),
+                compilationWithIntroducedTrees.SyntaxTrees.Values,
                 RewriteSyntaxTreeAsync,
                 cancellationToken );
 
-        var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( inputCompilation.LanguageOptions );
+        var helperSyntaxTree = injectionHelperProvider.GetLinkerHelperSyntaxTree( compilationWithIntroducedTrees.LanguageOptions );
         transformations.Enqueue( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
-        foreach (var syntaxTree in transformationCollection.IntroducedSyntaxTrees)
-        {
-            transformations.Enqueue( SyntaxTreeTransformation.AddTree( syntaxTree ) );
-        }
-
-        var intermediateCompilation = inputCompilation.Update( transformations );
+        var intermediateCompilation = compilationWithIntroducedTrees.Update( transformations );
 
         // Report the linker intermediate compilation to tooling/tests.
         this._serviceProvider.GetService<ILinkerObserver>()
@@ -304,6 +299,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var injectionRegistry = new LinkerInjectionRegistry(
             transformationComparer,
             intermediateCompilation,
+            transformationCollection.IntroducedSyntaxTrees,
             transformations,
             transformationCollection.InjectedMembers,
             transformationCollection.BuilderToTransformationMap,

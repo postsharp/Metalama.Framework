@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             finalCompilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
-                            .Select( m => m.Syntax );
+                            .Select( m => (MemberDeclarationSyntax) m.Syntax );
 
                         members = members.AddRange( injectedMembers );
                     }

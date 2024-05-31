@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.Linking;
 // ReSharper disable MemberCanBeMadeStatic.Global
 internal sealed class LinkerInjectionHelperProvider
 {
+    public const string SyntaxTreeName = "__LinkerInjectionHelpers__.cs";
+
     public const string HelperTypeName = "__LinkerInjectionHelpers__";
     public const string ConstructorMemberName = "__Constructor";
     public const string FinalizeMemberName = "__Finalize";
@@ -35,7 +37,6 @@ internal sealed class LinkerInjectionHelperProvider
     private const string _auxiliaryTypeName = "__Auxiliary";
     private const string _ordinalTypeName = "__Ordinal";
     private const string _compositeOrdinalTypeName = "__CompositeOrdinal";
-    private const string _syntaxTreeName = "__LinkerInjectionHelpers__.cs";
 
     private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
@@ -265,7 +266,7 @@ internal class {HelperTypeName}
 
         return CSharpSyntaxTree.ParseText(
             code,
-            path: _syntaxTreeName,
+            path: SyntaxTreeName,
             encoding: Encoding.UTF8,
             options: options.ToParseOptions() );
     }

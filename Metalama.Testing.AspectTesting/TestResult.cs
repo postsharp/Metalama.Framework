@@ -141,6 +141,17 @@ internal class TestResult : IDisposable
     internal async Task AddInputDocumentAsync( Document document, string? path )
         => this._syntaxTrees.Add( await TestSyntaxTree.CreateAsync( path, document, this ) );
 
+    internal async Task AddIntroducedSyntaxTreeAsync( string filePath )
+    {
+        // TODO: Adding a document to the input project is a hack.
+        var document = this.InputProject.AddDocument( filePath, SyntaxFactory.CompilationUnit(), filePath: filePath );
+        var testSyntaxTree = await TestSyntaxTree.CreateAsync( filePath, document, this );
+
+        this.InputProject = document.Project;
+
+        this._syntaxTrees.Add( testSyntaxTree );
+    }
+
     private static string CleanMessage( string text )
     {
         // Remove local-specific stuff.
@@ -297,6 +308,37 @@ internal class TestResult : IDisposable
                 ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).AsEnumerable()
                 : this.SyntaxTrees.Take( 1 );
 
+        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault();
+        var outputTreesByFilePath = outputSyntaxTrees.ToDictionary( x => x.InputPath, x => x );
+
+        // Assign diagnostics to syntax trees.
+        var diagnosticsBySyntaxTree = new Dictionary<TestSyntaxTree, List<Diagnostic>>();
+
+        foreach(var diagnostic in this.Diagnostics )
+        {
+            var diagnosticsSourceFilePath = diagnostic.Location.SourceTree.FilePath;
+            if ( outputTreesByFilePath.TryGetValue(diagnosticsSourceFilePath, out var diagnosticSourceSyntaxTree))
+            {
+                if ( !diagnosticsBySyntaxTree.TryGetValue( diagnosticSourceSyntaxTree, out var diagnostics ) )
+                {
+                    diagnostics = new List<Diagnostic>();
+                    diagnosticsBySyntaxTree.Add( diagnosticSourceSyntaxTree, diagnostics );
+                }
+
+                diagnostics.Add( diagnostic );
+            }
+            else
+            {
+                if (!diagnosticsBySyntaxTree.TryGetValue(primaryOutputTree, out var diagnostics))
+                {
+                    diagnostics = new List<Diagnostic>();
+                    diagnosticsBySyntaxTree.Add(primaryOutputTree, diagnostics);
+                }
+
+                diagnostics.Add(diagnostic);
+            }
+        }
+
         foreach ( var outputSyntaxTree in outputSyntaxTrees )
         {
             if ( outputSyntaxTree.IsAuxiliary )
@@ -380,25 +422,34 @@ internal class TestResult : IDisposable
             // Adding the diagnostics as trivia.
             List<SyntaxTrivia> comments = new();
 
-            if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
-                                   || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
+            if ( diagnosticsBySyntaxTree.TryGetValue( outputSyntaxTree, out var diagnosticsForOutputTree ) )
             {
-                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
-            }
+                if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
+                                   || diagnosticsForOutputTree.All( c => c.Severity != DiagnosticSeverity.Error )) )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
 
-            // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
-
-            comments.AddRange(
-                this.Diagnostics
+                // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
+                comments.AddRange(
+                    diagnosticsForOutputTree
                     .Where(
-                        d => d.Id != "LAMA0222" &&
-                             (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
-                    .OrderBy( d => d.Location.SourceSpan.Start )
-                    .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
-                    .SelectMany( this.GetDiagnosticComments )
-                    .Select( SyntaxFactory.Comment )
-                    .ToReadOnlyList() );
+                            d => d.Id != "LAMA0222" &&
+                                 (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                                  || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
+                        .OrderBy( d => d.Location.SourceSpan.Start )
+                        .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
+                        .SelectMany( this.GetDiagnosticComments )
+                        .Select( SyntaxFactory.Comment )
+                        .ToReadOnlyList() );
+            }
+            else
+            {
+                if ( !this.Success )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
+            }
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 

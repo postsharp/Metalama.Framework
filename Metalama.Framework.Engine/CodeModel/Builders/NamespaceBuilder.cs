@@ -7,16 +7,18 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
 {
     public string FullName
-        => this.ContainingNamespace != null
+        => !this.ContainingNamespace.AssertNotNull().IsGlobalNamespace
             ? $"{this.ContainingNamespace.FullName}.{this.Name}"
-            : throw new AssertionFailedException("There should be a parent namespace.");
+            : this.Name;
 
     public bool IsGlobalNamespace => false;
 
@@ -46,9 +48,14 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     }
 
     [Memo]
-    public override SyntaxTree PrimarySyntaxTree => 
-        this.ContainingNamespace.AssertNotNull().GetPrimarySyntaxTree()
-        ?? CSharpSyntaxTree.ParseText( "" );
+    public override SyntaxTree PrimarySyntaxTree =>
+        CSharpSyntaxTree.Create(
+            CompilationUnit(
+                List<ExternAliasDirectiveSyntax>(),
+                List<UsingDirectiveSyntax>(),
+                List<AttributeListSyntax>(),
+                List<MemberDeclarationSyntax>() ),
+            path: this.FullName + ".cs" );
 
     public INamespace? GetDescendant( string ns )
     {

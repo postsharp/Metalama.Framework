@@ -32,7 +32,7 @@ internal class InjectedMember
     /// <summary>
     /// Gets the syntax of the introduced member.
     /// </summary>
-    public SyntaxNode Syntax { get; }
+    public MemberDeclarationSyntax Syntax { get; }
 
     /// <summary>
     /// Gets the <see cref="AspectLayerId"/> that emitted the current <see cref="InjectedMember"/>.
@@ -58,7 +58,7 @@ internal class InjectedMember
 
     public InjectedMember(
         IInjectMemberTransformation injectMemberTransformation,
-        SyntaxNode syntax,
+        MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
         NamedDeclarationBuilder declaration ) : this(
@@ -71,7 +71,7 @@ internal class InjectedMember
 
     public InjectedMember(
         OverrideMemberTransformation overrideMemberTransformation,
-        SyntaxNode syntax,
+        MemberDeclarationSyntax syntax,
         AspectLayerId aspectLayerId,
         InjectedMemberSemantic semantic,
         INamedDeclaration declaration ) : this(
@@ -84,7 +84,7 @@ internal class InjectedMember
 
     protected InjectedMember(
         InjectedMember prototype,
-        SyntaxNode syntax ) : this(
+        MemberDeclarationSyntax syntax ) : this(
         prototype.Transformation,
         prototype.Kind,
         syntax,
@@ -95,7 +95,7 @@ internal class InjectedMember
     internal InjectedMember(
         ITransformation? transformation,
         DeclarationKind kind,
-        SyntaxNode syntax,
+        MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,
         InjectedMemberSemantic semantic,
         INamedDeclaration declaration )
