@@ -29,6 +29,7 @@ namespace Metalama.Framework.Aspects
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     [Layers( BuildLayer )]
+    [Inheritable]
     public abstract partial class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
         // Build after the default null-named layer so that other aspects can first inspect applications of ContractAspect-derived aspects

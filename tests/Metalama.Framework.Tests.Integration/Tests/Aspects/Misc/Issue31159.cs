@@ -10,7 +10,7 @@ public class DerivedAspect : BaseAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
-        // Don't call base, so that applying the aspect to interface method is not forbidden.
+        base.BuildEligibility(builder);
     }
 
     public override void Validate( dynamic? value )
