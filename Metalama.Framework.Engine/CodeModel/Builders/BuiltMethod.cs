@@ -61,7 +61,7 @@ internal sealed class BuiltMethod : BuiltMethodBase, IMethodImpl
             this,
             this._methodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter> ).ToReadOnlyList() );
 
-    public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
+    public IReadOnlyList<IType> TypeArguments => this.TypeParameters;
 
     public bool IsGeneric => this._methodBuilder.IsGeneric;
 

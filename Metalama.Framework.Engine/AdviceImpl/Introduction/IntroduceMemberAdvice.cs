@@ -23,6 +23,8 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 {
     private readonly IntroductionScope _scope;
 
+    private readonly INamedType? _explicitlyImplementedInterfaceType;
+
     protected new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
     protected string MemberName { get; }
@@ -40,7 +42,8 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
         Action<TBuilder>? buildAction,
-        IObjectReader tags )
+        IObjectReader tags,
+        INamedType? explicitlyImplementedInterfaceType )
         : base( parameters, buildAction )
     {
         var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
@@ -69,6 +72,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
 
         this.OverrideStrategy = overrideStrategy;
         this.Tags = tags;
+        this._explicitlyImplementedInterfaceType = explicitlyImplementedInterfaceType;
     }
 
     protected virtual void InitializeCore(
@@ -125,6 +129,8 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         this.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
 
         this.BuildAction?.Invoke( this.Builder );
+
+        SetBuilderExplicitInterfaceImplementation( this.Builder, this._explicitlyImplementedInterfaceType );
     }
 
     protected override void Validate( in ProjectServiceProvider serviceProvider, CompilationModel compilation, IDiagnosticAdder diagnosticAdder )
@@ -189,7 +195,7 @@ internal abstract class IntroduceMemberAdvice<TTemplate, TIntroduced, TBuilder> 
         }
     }
 
-    protected static void SetBuilderExplicitInterfaceImplementation( TBuilder builder, INamedType? explicitlyImplementedInterfaceType )
+    private static void SetBuilderExplicitInterfaceImplementation( TBuilder builder, INamedType? explicitlyImplementedInterfaceType )
     {
         if ( explicitlyImplementedInterfaceType == null )
         {

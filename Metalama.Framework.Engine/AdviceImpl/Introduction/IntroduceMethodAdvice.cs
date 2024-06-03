@@ -32,13 +32,11 @@ internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, IMe
         Action<IMethodBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName: null, template.TemplateMember, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, explicitName: null, template.TemplateMember, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
     {
         this._template = template;
 
         this.Builder = new MethodBuilder( this, parameters.TargetDeclaration, this.MemberName );
-
-        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

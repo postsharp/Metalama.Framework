@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -462,6 +463,26 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
         }
     }
 
+    private static IMember? FindMemberOfSignature( INamedType type, IMember member )
+    {
+        IMember? candidate = member switch
+        {
+            IMethod method => type.Methods.OfExactSignature( method ),
+            IConstructor constructor => type.Constructors.OfExactSignature( constructor ),
+            IProperty property => type.Properties.OfName( property.Name ).SingleOrDefault(),
+            IIndexer indexer => type.Indexers.OfExactSignature( indexer ),
+            IEvent @event => type.Events.OfName( @event.Name ).SingleOrDefault(),
+            _ => throw new AssertionFailedException( $"Unexpected member kind: {member.DeclarationKind}." )
+        };
+
+        if ( StructuralDeclarationComparer.ContainingDeclarationOblivious.Equals( candidate, member ) )
+        {
+            return candidate;
+        }
+
+        return null;
+    }
+
     public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
     {
         // TODO: Type introductions.
@@ -490,7 +511,18 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
                 // TODO: Generics.
                 if ( !introducedInterface.MemberMap.TryGetValue( interfaceMember, out var interfaceMemberImplementation ) )
                 {
-                    throw new AssertionFailedException( $"The interface member '{interfaceMember}' was not found in the interface map." );
+                    var candidate = FindMemberOfSignature( currentType, interfaceMember );
+
+                    if ( candidate?.Accessibility == Accessibility.Public )
+                    {
+                        interfaceMemberImplementation = candidate;
+                    }
+                    else
+                    {
+                        implementationMember = null;
+
+                        return false;
+                    }
                 }
 
                 // Which is later in inheritance?

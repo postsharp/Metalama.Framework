@@ -55,7 +55,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             // but this is not possible in the current version of Metalama.
         }
 
-        [Introduce]
+        [InterfaceMember]
         public DirtyState DirtyState { get; protected set; }
 
         [Template]

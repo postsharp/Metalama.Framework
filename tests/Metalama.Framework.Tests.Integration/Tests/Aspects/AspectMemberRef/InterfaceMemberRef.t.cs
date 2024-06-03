@@ -1,4 +1,4 @@
-[Introduction]
+[Introduce]
 internal class Program : global::Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceMemberRef.IInterface
 {
   public global::System.Int32 Property { get; set; }

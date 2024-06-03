@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public int Method()
         {
             Console.WriteLine( "This is introduced interface method." );
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             return 42;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public int Property
         {
             get
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         public event EventHandler Event
         {
             add

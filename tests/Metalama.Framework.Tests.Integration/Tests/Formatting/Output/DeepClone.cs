@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
             return clone;
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember( IsExplicit = true )]
         private object Clone()
         {
             return meta.This.Clone();

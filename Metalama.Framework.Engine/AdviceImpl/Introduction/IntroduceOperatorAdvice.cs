@@ -34,7 +34,7 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         Action<IMethodBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName: null, template.TemplateMember, IntroductionScope.Static, overrideStrategy, buildAction, tags )
+        : base( parameters, explicitName: null, template.TemplateMember, IntroductionScope.Static, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
     {
         this._template = template;
 
@@ -55,8 +55,6 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         }
 
         this.Builder.ReturnType = resultType;
-
-        SetBuilderExplicitInterfaceImplementation( this.Builder, explicitlyImplementedInterfaceType );
     }
 
     protected override void InitializeCore(

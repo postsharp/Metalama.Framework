@@ -17,8 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             var mementoType =
-                builder.Advice.IntroduceClass(
-                    builder.Target,
+                builder.IntroduceClass(
                     "Memento",
                     buildType: b =>
                     {
@@ -60,29 +59,27 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 },
                 args: new { fields = mementoFields });
 
-            builder.ImplementInterface( typeof(IOriginator));
-
-            var args = new { mementoType = mementoType.Declaration };
-
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Save), args: args);
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Restore), args: args);
+            builder.ImplementInterface( typeof(IOriginator), tags: new { mementoType = mementoType.Declaration } );
         }
 
         [Template]
         private object? MementoField;
 
-        [Template]
-        public IMemento Save(INamedType mementoType)
+        [InterfaceMember]
+        public IMemento Save()
         {
+            var mementoType = (INamedType)meta.Tags["mementoType"];
             var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared);
 
             return mementoType.Constructors.Single().Invoke(fieldExpressions);
         }
 
-        [Template]
-        public void Restore( IMemento memento, INamedType mementoType )
+        [InterfaceMember]
+        public void Restore( IMemento memento )
         {
-            foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared))
+            var mementoType = (INamedType)meta.Tags["mementoType"];
+
+            foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where( f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared ))
             {
                 var mementoField = mementoType.FieldsAndProperties.OfName(fieldOrProperty.Name).Single();
 
