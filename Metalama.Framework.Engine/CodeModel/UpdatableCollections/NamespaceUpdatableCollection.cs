@@ -27,14 +27,14 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
         {
             // For types defined in the current assembly, we need to take partial compilations into account.
 
-            return IsIncludedInPartialCompilation( (INamedTypeSymbol) symbol );
+            return IsIncludedInPartialCompilation( (INamespaceSymbol) symbol );
 
-            bool IsIncludedInPartialCompilation( INamedTypeSymbol t )
+            bool IsIncludedInPartialCompilation( INamespaceSymbol t )
             {
                 return t switch
                 {
-                    { ContainingType: { } containingType } => IsIncludedInPartialCompilation( containingType ),
-                    _ => this.Compilation.PartialCompilation.Types.Contains( t.OriginalDefinition )
+                    { ContainingNamespace: { IsGlobalNamespace: false } containingNamespace} => IsIncludedInPartialCompilation( containingNamespace ),
+                    _ => this.Compilation.PartialCompilation.Namespaces.Contains( t.OriginalDefinition )
                 };
             }
         }

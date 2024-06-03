@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -351,10 +350,18 @@ internal sealed partial class LinkerInjectionStep
                 }
 
                 // We have to call AddIntroductionsOnPosition outside of the previous suppression scope, otherwise we don't get new suppressions.
-                this.AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.After, member ), originalNode.SyntaxTree, members, syntaxGenerationContext );
+                this.AddInjectionsOnPosition(
+                    new InsertPosition( InsertPositionRelation.After, member ),
+                    originalNode.SyntaxTree,
+                    members,
+                    syntaxGenerationContext );
             }
 
-            this.AddInjectionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ), originalNode.SyntaxTree, members, syntaxGenerationContext );
+            this.AddInjectionsOnPosition(
+                new InsertPosition( InsertPositionRelation.Within, node ),
+                originalNode.SyntaxTree,
+                members,
+                syntaxGenerationContext );
 
             // If the type has no braces, add them.
             if ( node.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
@@ -406,7 +413,11 @@ internal sealed partial class LinkerInjectionStep
             return node;
         }
 
-        private void AddInjectionsOnPosition<T>( InsertPosition position, SyntaxTree originalSyntaxTree, List<T> targetList, SyntaxGenerationContext syntaxGenerationContext ) 
+        private void AddInjectionsOnPosition<T>(
+            InsertPosition position,
+            SyntaxTree originalSyntaxTree,
+            List<T> targetList,
+            SyntaxGenerationContext syntaxGenerationContext )
             where T : MemberDeclarationSyntax
         {
             var injectedMembersAtPosition = this._transformationCollection.GetInjectedMembersOnPosition( position );
@@ -427,9 +438,13 @@ internal sealed partial class LinkerInjectionStep
                         var entryStatements = this._transformationCollection.GetInjectedEntryStatements( injectedMember );
                         var exitStatements = this._transformationCollection.GetInjectedExitStatements( injectedMember );
 
-                        injectedNode = InjectStatementsIntoMemberDeclaration( methodBase, entryStatements, exitStatements, (MemberDeclarationSyntax) injectedNode );
+                        injectedNode = InjectStatementsIntoMemberDeclaration(
+                            methodBase,
+                            entryStatements,
+                            exitStatements,
+                            injectedNode );
 
-                        break;                        
+                        break;
 
                     case IPropertyOrIndexer propertyOrIndexer:
                         if ( propertyOrIndexer.GetMethod != null )
@@ -496,8 +511,8 @@ internal sealed partial class LinkerInjectionStep
 
                         this.AddInjectionsOnPosition(
                             new InsertPosition( InsertPositionRelation.Within, typeBuilder ),
-                            originalSyntaxTree, 
-                            injectedTypeMembers, 
+                            originalSyntaxTree,
+                            injectedTypeMembers,
                             syntaxGenerationContext );
 
                         typeDeclaration = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
@@ -529,7 +544,7 @@ internal sealed partial class LinkerInjectionStep
                         break;
                 }
 
-                targetList.Add( (T)injectedNode );
+                targetList.Add( (T) injectedNode );
             }
         }
 
@@ -1332,7 +1347,11 @@ internal sealed partial class LinkerInjectionStep
 
             if ( injections.Count > 0 )
             {
-                return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) ).WithMembers( node.Members.AddRange( injections ) );
+                return 
+                    ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!)
+                    .PartialUpdate( 
+                        attributeLists: List( outputLists ),
+                        members: node.Members.AddRange( injections ) );
             }
             else
             {
@@ -1340,7 +1359,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+        public override SyntaxNode VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
         {
             var injections = new List<MemberDeclarationSyntax>();
 
@@ -1360,7 +1379,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public override SyntaxNode? VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
+        public override SyntaxNode VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
         {
             var injections = new List<MemberDeclarationSyntax>();
 
@@ -1372,7 +1391,8 @@ internal sealed partial class LinkerInjectionStep
 
             if ( injections.Count > 0 )
             {
-                return ((FileScopedNamespaceDeclarationSyntax) base.VisitFileScopedNamespaceDeclaration( node )!).WithMembers( node.Members.AddRange( injections ) );
+                return ((FileScopedNamespaceDeclarationSyntax) base.VisitFileScopedNamespaceDeclaration( node )!).WithMembers(
+                    node.Members.AddRange( injections ) );
             }
             else
             {

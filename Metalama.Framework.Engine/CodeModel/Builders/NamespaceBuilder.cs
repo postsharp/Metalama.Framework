@@ -48,8 +48,8 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
     }
 
     [Memo]
-    public override SyntaxTree PrimarySyntaxTree =>
-        CSharpSyntaxTree.Create(
+    public override SyntaxTree PrimarySyntaxTree
+        => CSharpSyntaxTree.Create(
             CompilationUnit(
                 List<ExternAliasDirectiveSyntax>(),
                 List<UsingDirectiveSyntax>(),

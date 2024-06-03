@@ -2,10 +2,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -20,15 +20,19 @@ internal sealed class IntroduceNamespaceTransformation : IntroduceDeclarationTra
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        var @namespace = (INamespace)this.IntroducedDeclaration;
+        var @namespace = (INamespace) this.IntroducedDeclaration;
 
         yield return new InjectedMember(
             this,
             NamespaceDeclaration(
+                Token( TriviaList(), SyntaxKind.NamespaceKeyword, TriviaList( ElasticSpace ) ),
                 ParseName( @namespace.FullName ),
+                Token( TriviaList(), SyntaxKind.OpenBraceToken, TriviaList( context.SyntaxGenerationContext.ElasticEndOfLineTrivia ) ),
                 List<ExternAliasDirectiveSyntax>(),
                 List<UsingDirectiveSyntax>(),
-                List<MemberDeclarationSyntax>() ),
+                List<MemberDeclarationSyntax>(),
+                Token( TriviaList( context.SyntaxGenerationContext.ElasticEndOfLineTrivia ), SyntaxKind.CloseBraceToken, TriviaList() ),
+                default ),
             this.ParentAdvice.AspectLayerId,
             InjectedMemberSemantic.Introduction,
             this.IntroducedDeclaration );

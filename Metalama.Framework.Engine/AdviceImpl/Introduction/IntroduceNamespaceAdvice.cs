@@ -14,7 +14,8 @@ internal class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace,
 {
     public override AdviceKind AdviceKind => AdviceKind.IntroduceNamespace;
 
-    public IntroduceNamespaceAdvice(AdviceConstructorParameters<INamespace> parameters,
+    public IntroduceNamespaceAdvice(
+        AdviceConstructorParameters<INamespace> parameters,
         string name ) : base( parameters, null )
     {
         this.Builder = new NamespaceBuilder( this, parameters.TargetDeclaration.AssertNotNull(), name );

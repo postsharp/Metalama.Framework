@@ -88,9 +88,9 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
             // IntroduceDeclarationTransformation instances need to be indexed first.
             foreach ( var transformation in sortedTransformations )
             {
-                this.IndexIntroduceDeclarationTransformation(
+                IndexIntroduceDeclarationTransformation(
                     existingSyntaxTrees,
-                    transformation, 
+                    transformation,
                     transformationCollection );
             }
 
@@ -251,13 +251,11 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
 #pragma warning restore CA1307
 
-        var inputCompilation = input.CompilationModel.PartialCompilation;
-
         // Add syntax trees that were introduced (typically empty). These are trees currently created by transformation and the 
         // intermediate registry needs to create a map of transformation target syntax tree to modified syntax tree.
         var compilationWithIntroducedTrees =
             input.CompilationModel.PartialCompilation.Update(
-                transformationCollection.IntroducedSyntaxTrees.Select( x => SyntaxTreeTransformation.AddTree( x ) ).ToList() );
+                transformationCollection.IntroducedSyntaxTrees.Select( SyntaxTreeTransformation.AddTree ).ToReadOnlyList() );
 
         // Update the syntax trees and create a new partial compilation.
         var transformations = new ConcurrentQueue<SyntaxTreeTransformation>();
@@ -361,7 +359,10 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         }
     }
 
-    private void IndexIntroduceDeclarationTransformation( HashSet<SyntaxTree> existingSyntaxTrees, ITransformation transformation, TransformationCollection transformationCollection )
+    private static void IndexIntroduceDeclarationTransformation(
+        HashSet<SyntaxTree> existingSyntaxTrees,
+        ITransformation transformation,
+        TransformationCollection transformationCollection )
     {
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )
         {
@@ -369,7 +370,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 introduceDeclarationTransformation.DeclarationBuilder,
                 introduceDeclarationTransformation );
 
-            if ( !existingSyntaxTrees.Contains(transformation.TransformedSyntaxTree) )
+            if ( !existingSyntaxTrees.Contains( transformation.TransformedSyntaxTree ) )
             {
                 transformationCollection.AddIntroducedSyntaxTree( transformation.TransformedSyntaxTree );
             }

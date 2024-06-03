@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal readonly struct InsertPosition : IEquatable<InsertPosition>
 {
+    private readonly SyntaxTree? _syntaxTree;
+
     /// <summary>
     /// Gets the relation of the insert position to the specified node.
     /// </summary>
@@ -27,33 +29,33 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     /// <summary>
     /// Gets the target syntax tree of the insertion.
     /// </summary>
-    public SyntaxTree SyntaxTree { get; }
+    public SyntaxTree SyntaxTree => this._syntaxTree.AssertNotNull();
 
-    public InsertPosition( InsertPositionRelation relation, MemberDeclarationSyntax node )
+    public InsertPosition( InsertPositionRelation relation, MemberDeclarationSyntax? node )
     {
         this.Relation = relation;
         this.SyntaxNode = node;
-        this.SyntaxTree = node.SyntaxTree;
+        this._syntaxTree = node?.SyntaxTree;
     }
 
     public InsertPosition( InsertPositionRelation relation, NamedTypeBuilder builder )
     {
         this.Relation = relation;
         this.DeclarationBuilder = builder;
-        this.SyntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
+        this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
     }
 
     public InsertPosition( InsertPositionRelation relation, NamespaceBuilder builder )
     {
         this.Relation = relation;
         this.DeclarationBuilder = builder;
-        this.SyntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
+        this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
     }
 
     public InsertPosition(SyntaxTree introducedSyntaxTree)
     {
         this.Relation = InsertPositionRelation.Root;
-        this.SyntaxTree = introducedSyntaxTree;
+        this._syntaxTree = introducedSyntaxTree;
     }
 
     public override bool Equals( object? obj ) => obj is InsertPosition position && this.Equals( position );
