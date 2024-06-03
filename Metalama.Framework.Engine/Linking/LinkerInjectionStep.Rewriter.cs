@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Editing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -428,7 +429,7 @@ internal sealed partial class LinkerInjectionStep
 
                         injectedNode = InjectStatementsIntoMemberDeclaration( methodBase, entryStatements, exitStatements, (MemberDeclarationSyntax) injectedNode );
 
-                        break;
+                        break;                        
 
                     case IPropertyOrIndexer propertyOrIndexer:
                         if ( propertyOrIndexer.GetMethod != null )
@@ -1336,6 +1337,46 @@ internal sealed partial class LinkerInjectionStep
             else
             {
                 return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
+            }
+        }
+
+        public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
+        {
+            var injections = new List<MemberDeclarationSyntax>();
+
+            this.AddInjectionsOnPosition(
+                new InsertPosition( InsertPositionRelation.Within, node ),
+                node.SyntaxTree,
+                injections,
+                this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, false, false, "\n" ) );
+
+            if ( injections.Count > 0 )
+            {
+                return ((NamespaceDeclarationSyntax) base.VisitNamespaceDeclaration( node )!).WithMembers( node.Members.AddRange( injections ) );
+            }
+            else
+            {
+                return (NamespaceDeclarationSyntax) base.VisitNamespaceDeclaration( node )!;
+            }
+        }
+
+        public override SyntaxNode? VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
+        {
+            var injections = new List<MemberDeclarationSyntax>();
+
+            this.AddInjectionsOnPosition(
+                new InsertPosition( InsertPositionRelation.Within, node ),
+                node.SyntaxTree,
+                injections,
+                this.CompilationContext.GetSyntaxGenerationContext( this.SyntaxGenerationOptions, false, false, "\n" ) );
+
+            if ( injections.Count > 0 )
+            {
+                return ((FileScopedNamespaceDeclarationSyntax) base.VisitFileScopedNamespaceDeclaration( node )!).WithMembers( node.Members.AddRange( injections ) );
+            }
+            else
+            {
+                return (FileScopedNamespaceDeclarationSyntax) base.VisitFileScopedNamespaceDeclaration( node )!;
             }
         }
     }

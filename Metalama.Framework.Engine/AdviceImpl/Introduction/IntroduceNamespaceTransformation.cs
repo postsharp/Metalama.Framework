@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
@@ -19,28 +20,12 @@ internal sealed class IntroduceNamespaceTransformation : IntroduceDeclarationTra
 
     public override IEnumerable<InjectedMember> GetInjectedMembers( MemberInjectionContext context )
     {
-        // Assembly the qualified namespace name.
-        var namespaceStack = new Stack<INamespace>();
-        var currentNamespace = (INamespace)this.IntroducedDeclaration;
-
-        while ( !currentNamespace.AssertNotNull().IsGlobalNamespace )
-        {
-            namespaceStack.Push( currentNamespace );
-            currentNamespace = currentNamespace.ContainingNamespace;
-        }
-
-        NameSyntax currentName = IdentifierName( Identifier( TriviaList( ElasticSpace ), namespaceStack.Pop().Name, TriviaList() ) );
-
-        while ( namespaceStack.Count > 0 )
-        {
-            var @namespace = namespaceStack.Pop();
-            currentName = QualifiedName( currentName, IdentifierName( @namespace.Name ) );
-        }
+        var @namespace = (INamespace)this.IntroducedDeclaration;
 
         yield return new InjectedMember(
             this,
             NamespaceDeclaration(
-                currentName,
+                ParseName( @namespace.FullName ),
                 List<ExternAliasDirectiveSyntax>(),
                 List<UsingDirectiveSyntax>(),
                 List<MemberDeclarationSyntax>() ),

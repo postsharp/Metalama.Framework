@@ -307,6 +307,9 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             .InputSyntaxTrees
             .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
 
+        // TODO: This selects a single syntax tree and uses it as input tree of all "independent" introduced syntax trees.
+        var inputSyntaxTreeForDetached = pipelineResults.InputSyntaxTrees.First().Value;
+
         List<DesignTimeReferenceValidatorInstance>? externalValidators = null;
 
         // Split diagnostic by syntax tree.
@@ -366,9 +369,17 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         // Split introductions by original syntax tree.
         foreach ( var introduction in pipelineResults.IntroducedSyntaxTrees )
         {
-            var filePath = introduction.SourceSyntaxTree.FilePath;
+            var filePath = introduction.SourceSyntaxTree?.FilePath ?? inputSyntaxTreeForDetached.FilePath;
             var builder = resultBuilders[filePath];
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
+
+            if (introduction.SourceSyntaxTree == null)
+            {
+                // TODO: This is a temporary hack until we have a proper way to handle "independent" introduced syntax trees.
+                builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, inputSyntaxTreeForDetached, introduction.GeneratedSyntaxTree ));
+                continue;
+            }
+
             builder.Introductions.Add( introduction );
         }
 

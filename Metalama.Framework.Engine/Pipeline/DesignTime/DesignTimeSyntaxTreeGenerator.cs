@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Services;
@@ -47,30 +48,67 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
-            var observableTransformations =
+            var transformationsByTarget =
                 transformations
                     .Where(
                         t => t.Observability == TransformationObservability.Always && t is not IReplaceMemberTransformation
-                                                                                   && t.TargetDeclaration is INamedType or IConstructor )
+                                                                                   && t.TargetDeclaration is INamedType or IConstructor or INamespace )
                     .GroupBy(
                         t =>
                             t.TargetDeclaration switch
                             {
+                                INamespace @namespace => (INamespaceOrNamedType) @namespace,
                                 INamedType namedType => namedType,
                                 IConstructor constructor => constructor.DeclaringType,
                                 _ => throw new AssertionFailedException( $"Unsupported: {t.TargetDeclaration.DeclarationKind}" )
-                            } );
+                            } )
+                    .ToDictionary( g => g.Key.ToTypedRef(), g => g.AsEnumerable() );
 
             var taskScheduler = serviceProvider.GetRequiredService<IConcurrentTaskRunner>();
 
-            await taskScheduler.RunConcurrentlyAsync( observableTransformations, ProcessTransformationsOnType, cancellationToken );
+            await taskScheduler.RunConcurrentlyAsync( transformationsByTarget, ProcessTransformationsOnTypeOrNamespace, cancellationToken );
 
-            void ProcessTransformationsOnType( IGrouping<INamedType, ITransformation> transformationsOnType )
+            void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<Ref<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup)
+            {
+                var target = transformationGroup.Key.GetTarget( finalCompilationModel );
+
+                switch ( target )
+                {
+                    case INamedType namedType:
+                        ProcessTransformationsOnType( namedType, transformationGroup.Value );
+                        break;
+
+                    case INamespace @namespace:
+                        ProcessTransformationsOnNamespace( @namespace, transformationGroup.Value );
+                        break;
+
+                    default:
+                        throw new AssertionFailedException( $"Unsupported: {transformationGroup.Key}" );
+                }
+            }
+
+            void ProcessTransformationsOnNamespace( INamespace @namespace, IEnumerable<ITransformation> transformations )
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var declaringType = transformationsOnType.Key;
 
-                if ( !declaringType.IsPartial )
+                var orderedTransformations = transformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
+
+                foreach ( var transformation in orderedTransformations )
+                {
+                    if ( transformation is IIntroduceDeclarationTransformation { DeclarationBuilder: INamedType namedTypeBuilder } introduceDeclarationTransformation
+                        && !transformationsByTarget.ContainsKey( introduceDeclarationTransformation.DeclarationBuilder.ToTypedRef().As<INamespaceOrNamedType>() ) )
+                    {
+                        // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
+                        ProcessTransformationsOnType( namedTypeBuilder.ToTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
+                    }
+                }
+            }
+
+            void ProcessTransformationsOnType( INamedType declaringType, IEnumerable<ITransformation> transformations )
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if ( declaringType is { IsPartial: false, Origin.Kind: not DeclarationOriginKind.Aspect } )
                 {
                     // If the type is not marked as partial, we can emit a diagnostic and a code fix, but not a partial class itself.
                     diagnostics.Report(
@@ -79,7 +117,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     return;
                 }
 
-                var orderedTransformations = transformationsOnType.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
+                var orderedTransformations = transformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
                 // Process members.
                 BaseListSyntax? baseList = null;
@@ -105,7 +143,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                             finalCompilationModel );
 
                         var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
-                            .Select( m => (MemberDeclarationSyntax) m.Syntax );
+                            .Select( m => m.Syntax );
 
                         members = members.AddRange( injectedMembers );
                     }
@@ -118,7 +156,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
 
                 members = members.AddRange(
-                    CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, transformationsOnType.Key ) );
+                    CreateInjectedConstructors( initialCompilationModel, finalCompilationModel, syntaxGenerationContext, declaringType ) );
 
                 // Create a class.
                 var classDeclaration = CreatePartialType( declaringType, baseList, members );
@@ -176,7 +214,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             INamedType type )
         {
             // TODO: This will not work properly with universal constructor builders.
-            var initialType = type.Translate( initialCompilationModel );
+            var initialType = type.Translate( initialCompilationModel, ReferenceResolutionOptions.CanBeMissing );
 
             var constructors = new List<ConstructorDeclarationSyntax>();
             var existingSignatures = new HashSet<(ISymbol Type, RefKind RefKind)[]>( new ConstructorSignatureEqualityComparer() );

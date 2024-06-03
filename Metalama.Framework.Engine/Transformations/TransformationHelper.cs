@@ -138,7 +138,9 @@ internal static class TransformationHelper
         var insertOffset = insertPosition switch
         {
             { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
-            { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: BaseTypeDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: NamespaceDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: FileScopedNamespaceDeclarationSyntax node } => node.Name.Span.End,
             _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." ),
         };
 

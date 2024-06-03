@@ -76,13 +76,20 @@ internal static class CodeModelInternalExtensions
                     InsertPositionRelation.Within,
                     containingNamespace.NamespaceBuilder );
 
-            case NamespaceBuilder { ContainingNamespace: NamespaceBuilder containingNamespaceBuilder }:
-                return new InsertPosition( InsertPositionRelation.Within, containingNamespaceBuilder );
+            case NamedTypeBuilder { ContainingNamespace: Namespace codeNamespace }:
+                var primaryNamespaceDeclaration = codeNamespace.GetSymbol().AssertNotNull().GetPrimaryDeclaration();
 
-            case NamespaceBuilder { ContainingNamespace: BuiltNamespace containingNamespace }:
-                return new InsertPosition( InsertPositionRelation.Within, containingNamespace.NamespaceBuilder );
+                switch ( primaryNamespaceDeclaration )
+                {
+                    case NamespaceDeclarationSyntax @namespace:
+                        return new InsertPosition( InsertPositionRelation.Within, @namespace );
+                    case FileScopedNamespaceDeclarationSyntax fileScopedNamespace:
+                        return new InsertPosition( InsertPositionRelation.Within, fileScopedNamespace );
+                    default:
+                        throw new AssertionFailedException( $"Unexpected primary declaration: '{primaryNamespaceDeclaration}'." );
+                }
 
-            case NamespaceBuilder { ContainingNamespace: { } } namespaceBuilder:
+            case NamespaceBuilder namespaceBuilder:
                 return new InsertPosition( namespaceBuilder.PrimarySyntaxTree );
 
             case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:

@@ -313,7 +313,11 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             }
 
             // Check that the advised target is under the aspect target.
-            if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
+            // The situation where the target was introduced by the current aspect is allowed.
+            var currentTarget = target.ForCompilation( this.MutableCompilation );
+            if ( !currentTarget.IsContainedIn( this._aspectTargetType ?? this._aspectTarget )
+                 && !(currentTarget.Origin is IAspectDeclarationOrigin { AspectInstance: { } originAspect }
+                      && originAspect == this._state.AspectInstance) )
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(
