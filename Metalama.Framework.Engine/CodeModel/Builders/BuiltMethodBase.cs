@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltMethodBase : BuiltMember, IMethodBaseImpl
 {
-    protected BuiltMethodBase(CompilationModel compilation ) : base( compilation ) { }
+    protected BuiltMethodBase( CompilationModel compilation ) : base( compilation ) { }
 
     protected abstract MethodBaseBuilder MethodBaseBuilder { get; }
 

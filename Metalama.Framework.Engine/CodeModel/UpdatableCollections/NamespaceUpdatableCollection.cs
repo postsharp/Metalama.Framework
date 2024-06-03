@@ -33,7 +33,7 @@ internal sealed class NamespaceUpdatableCollection : UniquelyNamedUpdatableColle
             {
                 return t switch
                 {
-                    { ContainingNamespace: { IsGlobalNamespace: false } containingNamespace} => IsIncludedInPartialCompilation( containingNamespace ),
+                    { ContainingNamespace: { IsGlobalNamespace: false } containingNamespace } => IsIncludedInPartialCompilation( containingNamespace ),
                     _ => this.Compilation.PartialCompilation.Namespaces.Contains( t.OriginalDefinition )
                 };
             }

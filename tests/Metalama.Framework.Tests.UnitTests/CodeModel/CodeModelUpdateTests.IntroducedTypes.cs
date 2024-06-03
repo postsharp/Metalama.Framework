@@ -181,7 +181,7 @@ class C
 
         var initialCompilation = testContext.CreateCompilationModel( code );
 
-        var target = initialCompilation.Types.OfName("Target").Single();
+        var target = initialCompilation.Types.OfName( "Target" ).Single();
 
         var baseType = new NamedTypeBuilder( null!, target, "B" );
 
@@ -192,7 +192,9 @@ class C
         var implementInterface = new IntroduceInterfaceTransformation( null!, derivedType, interfaceType, [] );
 
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
-            [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface], null, null );
+            [baseType.ToTransformation(), derivedType.ToTransformation(), implementInterface],
+            null,
+            null );
 
         var baseClass = finalCompilation.Types.OfName( "Target" ).Single().Types.OfName( "B" ).Single();
 

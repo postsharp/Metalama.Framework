@@ -41,15 +41,10 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
 
     public bool IsPartial => throw new System.NotImplementedException();
 
-    public override SyntaxTree? PrimarySyntaxTree => this.NamespaceBuilder.PrimarySyntaxTree;
+    public override SyntaxTree PrimarySyntaxTree => this.NamespaceBuilder.PrimarySyntaxTree;
 
-    public INamespace? GetDescendant( string ns )
-    {
-        throw new System.NotImplementedException();
-    }
+    public INamespace GetDescendant( string ns ) => throw new System.NotImplementedException();
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( DerivedTypesOptions options = DerivedTypesOptions.Default )
-    {
-        throw new System.NotImplementedException();
-    }
+        => throw new System.NotSupportedException();
 }

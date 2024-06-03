@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             PartialCompilation partialCompilation,
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
-            IReadOnlyCollection<ITransformation> transformations,
+            IEnumerable<ITransformation> transformations,
             UserDiagnosticSink diagnostics,
             TestableCancellationToken cancellationToken )
         {
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             await taskScheduler.RunConcurrentlyAsync( transformationsByTarget, ProcessTransformationsOnTypeOrNamespace, cancellationToken );
 
-            void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<Ref<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup)
+            void ProcessTransformationsOnTypeOrNamespace( KeyValuePair<Ref<INamespaceOrNamedType>, IEnumerable<ITransformation>> transformationGroup )
             {
                 var target = transformationGroup.Key.GetTarget( finalCompilationModel );
 
@@ -76,10 +76,12 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 {
                     case INamedType namedType:
                         ProcessTransformationsOnType( namedType, transformationGroup.Value );
+
                         break;
 
-                    case INamespace @namespace:
-                        ProcessTransformationsOnNamespace( @namespace, transformationGroup.Value );
+                    case INamespace:
+                        ProcessTransformationsOnNamespace( transformationGroup.Value );
+
                         break;
 
                     default:
@@ -87,16 +89,20 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
             }
 
-            void ProcessTransformationsOnNamespace( INamespace @namespace, IEnumerable<ITransformation> transformations )
+            void ProcessTransformationsOnNamespace( IEnumerable<ITransformation> namespaceTransformations )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var orderedTransformations = transformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
+                var orderedTransformations = namespaceTransformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
                 foreach ( var transformation in orderedTransformations )
                 {
-                    if ( transformation is IIntroduceDeclarationTransformation { DeclarationBuilder: INamedType namedTypeBuilder } introduceDeclarationTransformation
-                        && !transformationsByTarget.ContainsKey( introduceDeclarationTransformation.DeclarationBuilder.ToTypedRef().As<INamespaceOrNamedType>() ) )
+                    if ( transformation is IIntroduceDeclarationTransformation
+                         {
+                             DeclarationBuilder: INamedType namedTypeBuilder
+                         } introduceDeclarationTransformation
+                         && !transformationsByTarget.ContainsKey(
+                             introduceDeclarationTransformation.DeclarationBuilder.ToTypedRef().As<INamespaceOrNamedType>() ) )
                     {
                         // If this is an introduced type that does not have any transformations, we will "process" it to get the empty type.
                         ProcessTransformationsOnType( namedTypeBuilder.ToTypedRef().GetTarget( finalCompilationModel ), Array.Empty<ITransformation>() );
@@ -104,7 +110,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 }
             }
 
-            void ProcessTransformationsOnType( INamedType declaringType, IEnumerable<ITransformation> transformations )
+            void ProcessTransformationsOnType( INamedType declaringType, IEnumerable<ITransformation> typeTransformations )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -117,7 +123,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     return;
                 }
 
-                var orderedTransformations = transformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
+                var orderedTransformations = typeTransformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
                 // Process members.
                 BaseListSyntax? baseList = null;
@@ -129,29 +135,32 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if ( transformation is IInjectMemberTransformation injectMemberTransformation )
+                    switch ( transformation )
                     {
-                        // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
-                        // TODO: Implement support for initializable transformations.
-                        var introductionContext = new MemberInjectionContext(
-                            serviceProvider,
-                            diagnostics,
-                            injectionNameProvider,
-                            aspectReferenceSyntaxProvider,
-                            lexicalScopeFactory,
-                            syntaxGenerationContext,
-                            finalCompilationModel );
+                        case IInjectMemberTransformation injectMemberTransformation:
+                            // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
+                            // TODO: Implement support for initializable transformations.
+                            var introductionContext = new MemberInjectionContext(
+                                serviceProvider,
+                                diagnostics,
+                                injectionNameProvider,
+                                aspectReferenceSyntaxProvider,
+                                lexicalScopeFactory,
+                                syntaxGenerationContext,
+                                finalCompilationModel );
 
-                        var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
-                            .Select( m => m.Syntax );
+                            var injectedMembers = injectMemberTransformation.GetInjectedMembers( introductionContext )
+                                .Select( m => m.Syntax );
 
-                        members = members.AddRange( injectedMembers );
-                    }
+                            members = members.AddRange( injectedMembers );
 
-                    if ( transformation is IInjectInterfaceTransformation injectInterfaceTransformation )
-                    {
-                        baseList ??= BaseList();
-                        baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
+                            break;
+
+                        case IInjectInterfaceTransformation injectInterfaceTransformation:
+                            baseList ??= BaseList();
+                            baseList = baseList.AddTypes( injectInterfaceTransformation.GetSyntax( syntaxGenerationContext.Options ) );
+
+                            break;
                     }
                 }
 
@@ -207,7 +216,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             return additionalSyntaxTreeDictionary.Values.AsReadOnly();
         }
 
-        private static IReadOnlyList<ConstructorDeclarationSyntax> CreateInjectedConstructors(
+        private static IEnumerable<ConstructorDeclarationSyntax> CreateInjectedConstructors(
             CompilationModel initialCompilationModel,
             CompilationModel finalCompilationModel,
             SyntaxGenerationContext syntaxGenerationContext,

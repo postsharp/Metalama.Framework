@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Threading;
-using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking
 
             async Task ProcessTransformationAsync( SyntaxTreeTransformation modifiedSyntaxTree )
             {
-                if ( modifiedSyntaxTree.Kind == SyntaxTreeTransformationKind.Add && modifiedSyntaxTree.FilePath == LinkerInjectionHelperProvider.SyntaxTreeName )
+                if ( modifiedSyntaxTree is { Kind: SyntaxTreeTransformationKind.Add, FilePath: LinkerInjectionHelperProvider.SyntaxTreeName } )
                 {
                     // This is an intermediate tree we added and we don't need it in the final compilation.
                     transformations.Enqueue( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.NewTree.AssertNotNull() ) );

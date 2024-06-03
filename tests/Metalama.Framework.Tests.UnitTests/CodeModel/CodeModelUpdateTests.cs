@@ -640,7 +640,7 @@ class C
         compilation.AddTransformation( namespaceBuilder.ToTransformation() );
 
         // Assert that the type has been added.
-        Assert.NotNull( globalNamespace.Namespaces.OfName("N") );
+        Assert.NotNull( globalNamespace.Namespaces.OfName( "N" ) );
 
         // Assert that there is still no type in original compilation.
         Assert.Null( immutableCompilation.GlobalNamespace.Namespaces.OfName( "N" ) );

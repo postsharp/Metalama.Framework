@@ -100,7 +100,10 @@ internal static class TransformationHelper
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
     }
 
-    public static SyntaxGenerationContext GetSyntaxGenerationContext( this CompilationContext compilationContext, SyntaxGenerationOptions options, IDeclaration declaration )
+    public static SyntaxGenerationContext GetSyntaxGenerationContext(
+        this CompilationContext compilationContext,
+        SyntaxGenerationOptions options,
+        IDeclaration declaration )
     {
         switch ( declaration )
         {
@@ -122,14 +125,17 @@ internal static class TransformationHelper
         }
     }
 
-    public static SyntaxGenerationContext GetSyntaxGenerationContext( this CompilationContext compilationContext, SyntaxGenerationOptions options, InsertPosition insertPosition )
+    public static SyntaxGenerationContext GetSyntaxGenerationContext(
+        this CompilationContext compilationContext,
+        SyntaxGenerationOptions options,
+        InsertPosition insertPosition )
     {
         if ( insertPosition is { Relation: InsertPositionRelation.Within, DeclarationBuilder: IDeclarationBuilder containingBuilder } )
         {
             return GetSyntaxGenerationContext( compilationContext, options, containingBuilder );
         }
 
-        if (insertPosition is { Relation: InsertPositionRelation.Root } )
+        if ( insertPosition is { Relation: InsertPositionRelation.Root } )
         {
             // TODO: This is temporary.
             return compilationContext.GetSyntaxGenerationContext( options, false, false, "\n" );

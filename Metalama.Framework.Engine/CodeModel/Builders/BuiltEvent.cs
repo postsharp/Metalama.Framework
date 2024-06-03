@@ -19,7 +19,7 @@ internal sealed class BuiltEvent : BuiltMember, IEventImpl
         this.EventBuilder = builder;
     }
 
-    public sealed override DeclarationBuilder Builder => this.EventBuilder;
+    public override DeclarationBuilder Builder => this.EventBuilder;
 
     protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.EventBuilder;
 

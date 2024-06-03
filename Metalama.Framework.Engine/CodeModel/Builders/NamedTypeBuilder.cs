@@ -243,7 +243,9 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
         throw new NotImplementedException();
     }
 
-    public override SyntaxTree? PrimarySyntaxTree => 
-        // TODO: This is a bit of circular dependency.
-        this.ToInsertPosition().SyntaxTree;
+    public override SyntaxTree PrimarySyntaxTree
+        =>
+
+            // TODO: This is a bit of circular dependency.
+            this.ToInsertPosition().SyntaxTree;
 }

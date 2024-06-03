@@ -14,7 +14,9 @@ internal class EmptyNamespaceCollection : INamespaceCollection
 
     public INamespace? OfName( string name ) => null;
 
+#pragma warning disable CA1822
     public IEnumerable<INamespace> OfTypeDefinition( INamedType typeDefinition ) => Array.Empty<INamespace>();
+#pragma warning restore CA1822
 
     public IEnumerator<INamespace> GetEnumerator() => ((IEnumerable<INamespace>) Array.Empty<INamespace>()).GetEnumerator();
 

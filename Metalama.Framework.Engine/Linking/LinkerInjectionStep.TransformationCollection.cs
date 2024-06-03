@@ -63,6 +63,7 @@ internal sealed partial class LinkerInjectionStep
         // ReSharper disable once InconsistentlySynchronizedField
         public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
 
+        // ReSharper disable once InconsistentlySynchronizedField
         public ISet<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )

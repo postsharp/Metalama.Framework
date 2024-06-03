@@ -25,7 +25,7 @@ internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
-    protected sealed override MemberBuilder MemberBuilder => this.PropertyBuilder;
+    protected override MemberBuilder MemberBuilder => this.PropertyBuilder;
 
     protected override PropertyOrIndexerBuilder PropertyOrIndexerBuilder => this.PropertyBuilder;
 

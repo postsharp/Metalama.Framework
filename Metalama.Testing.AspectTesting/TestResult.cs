@@ -144,10 +144,10 @@ internal class TestResult : IDisposable
     internal async Task AddIntroducedSyntaxTreeAsync( string filePath )
     {
         // TODO: Adding a document to the input project is a hack.
-        if (this.InputProject == null)
+        if ( this.InputProject == null )
         {
-            throw new InvalidOperationException("Project is null.");
-        }   
+            throw new InvalidOperationException( "Project is null." );
+        }
 
         var document = this.InputProject.AddDocument( filePath, SyntaxFactory.CompilationUnit(), filePath: filePath );
         this.InputProject = document.Project;
@@ -310,11 +310,11 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).AsEnumerable()
-                : this.SyntaxTrees.Take( 1 );
+                ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
+                : this.SyntaxTrees.Take( 1 ).ToArray();
 
-        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary);
-        var outputTreesByFilePath = outputSyntaxTrees.Where(x => x.InputPath != null).ToDictionary( x => x.InputPath!, x => x );
+        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary );
+        var outputTreesByFilePath = outputSyntaxTrees.Where( x => x.InputPath != null ).ToDictionary( x => x.InputPath!, x => x );
 
         // Assign diagnostics to syntax trees.
         var diagnosticsBySyntaxTree = new Dictionary<TestSyntaxTree, List<Diagnostic>>();
@@ -322,6 +322,7 @@ internal class TestResult : IDisposable
         foreach ( var diagnostic in this.Diagnostics )
         {
             var diagnosticsSourceFilePath = diagnostic.Location.SourceTree?.FilePath;
+
             if ( diagnosticsSourceFilePath != null && outputTreesByFilePath.TryGetValue( diagnosticsSourceFilePath, out var diagnosticSourceSyntaxTree ) )
             {
                 if ( !diagnosticsBySyntaxTree.TryGetValue( diagnosticSourceSyntaxTree, out var diagnostics ) )
@@ -350,7 +351,7 @@ internal class TestResult : IDisposable
             {
                 continue;
             }
-            
+
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )
@@ -430,7 +431,7 @@ internal class TestResult : IDisposable
             if ( diagnosticsBySyntaxTree.TryGetValue( outputSyntaxTree, out var diagnosticsForOutputTree ) )
             {
                 if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
-                                   || diagnosticsForOutputTree.All( c => c.Severity != DiagnosticSeverity.Error )) )
+                                       || diagnosticsForOutputTree.All( c => c.Severity != DiagnosticSeverity.Error )) )
                 {
                     comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
                 }
@@ -438,7 +439,7 @@ internal class TestResult : IDisposable
                 // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
                 comments.AddRange(
                     diagnosticsForOutputTree
-                    .Where(
+                        .Where(
                             d => d.Id != "LAMA0222" &&
                                  (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
                                   || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )

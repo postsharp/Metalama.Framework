@@ -77,14 +77,16 @@ internal static class CodeModelInternalExtensions
                     containingNamespace.NamespaceBuilder );
 
             case NamedTypeBuilder { ContainingNamespace: Namespace codeNamespace }:
-                var primaryNamespaceDeclaration = codeNamespace.GetSymbol().AssertNotNull().GetPrimaryDeclaration();
+                var primaryNamespaceDeclaration = codeNamespace.GetSymbol().AssertSymbolNotNull().GetPrimaryDeclaration();
 
                 switch ( primaryNamespaceDeclaration )
                 {
                     case NamespaceDeclarationSyntax @namespace:
                         return new InsertPosition( InsertPositionRelation.Within, @namespace );
+
                     case FileScopedNamespaceDeclarationSyntax fileScopedNamespace:
                         return new InsertPosition( InsertPositionRelation.Within, fileScopedNamespace );
+
                     default:
                         throw new AssertionFailedException( $"Unexpected primary declaration: '{primaryNamespaceDeclaration}'." );
                 }

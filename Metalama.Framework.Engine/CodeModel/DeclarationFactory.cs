@@ -496,8 +496,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( parameterBuilder );
-        }
+                throw CreateBuilderNotExists( parameterBuilder );
+            }
             else
             {
                 return null;
@@ -522,8 +522,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( methodBuilder );
-        }
+                throw CreateBuilderNotExists( methodBuilder );
+            }
             else
             {
                 return null;
@@ -569,8 +569,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( constructorBuilder );
-        }
+                throw CreateBuilderNotExists( constructorBuilder );
+            }
             else
             {
                 return null;
@@ -589,8 +589,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( fieldBuilder );
-        }
+                throw CreateBuilderNotExists( fieldBuilder );
+            }
             else
             {
                 return null;
@@ -626,8 +626,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( propertyBuilder );
-        }
+                throw CreateBuilderNotExists( propertyBuilder );
+            }
             else
             {
                 return null;
@@ -646,8 +646,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( indexerBuilder );
-        }
+                throw CreateBuilderNotExists( indexerBuilder );
+            }
             else
             {
                 return null;
@@ -667,7 +667,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             if ( throwIfMissing )
             {
                 throw CreateBuilderNotExists( eventBuilder );
-        }
+            }
             else
             {
                 return null;
@@ -686,8 +686,8 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
         {
             if ( throwIfMissing )
             {
-            throw CreateBuilderNotExists( namedTypeBuilder );
-        }
+                throw CreateBuilderNotExists( namedTypeBuilder );
+            }
             else
             {
                 return null;

@@ -24,13 +24,13 @@ internal sealed class SymbolClassificationService : ITemplateInfoService
 
     public ITemplateInfo GetTemplateInfo( ISymbol symbol )
         => symbol.ContainingAssembly != null
-           ? this.GetManifest( symbol.ContainingAssembly )?.GetTemplateInfo( symbol ) ?? NullTemplateInfo.Instance
-           : NullTemplateInfo.Instance;
+            ? this.GetManifest( symbol.ContainingAssembly )?.GetTemplateInfo( symbol ) ?? NullTemplateInfo.Instance
+            : NullTemplateInfo.Instance;
 
     public ExecutionScope GetExecutionScope( ISymbol symbol )
         => symbol.ContainingAssembly != null
-           ? this.GetManifest( symbol.ContainingAssembly )?.GetExecutionScope( symbol ) ?? ExecutionScope.RunTime
-           : ExecutionScope.RunTime;
+            ? this.GetManifest( symbol.ContainingAssembly )?.GetExecutionScope( symbol ) ?? ExecutionScope.RunTime
+            : ExecutionScope.RunTime;
 
     public bool IsTemplate( ISymbol symbol )
         => symbol.ContainingAssembly != null

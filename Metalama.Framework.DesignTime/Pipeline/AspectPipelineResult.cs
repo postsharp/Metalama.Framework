@@ -373,10 +373,11 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             var builder = resultBuilders[filePath];
             builder.Introductions ??= ImmutableArray.CreateBuilder<IntroducedSyntaxTree>();
 
-            if (introduction.SourceSyntaxTree == null)
+            if ( introduction.SourceSyntaxTree == null )
             {
                 // TODO: This is a temporary hack until we have a proper way to handle "independent" introduced syntax trees.
-                builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, inputSyntaxTreeForDetached, introduction.GeneratedSyntaxTree ));
+                builder.Introductions.Add( new IntroducedSyntaxTree( introduction.Name, inputSyntaxTreeForDetached, introduction.GeneratedSyntaxTree ) );
+
                 continue;
             }
 

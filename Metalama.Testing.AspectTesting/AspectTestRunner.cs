@@ -209,7 +209,7 @@ internal class AspectTestRunner : BaseTestRunner
         testResult.HasOutputCode = true;
         testResult.DiagnosticSuppressions = pipelineResult.DiagnosticSuppressions;
 
-        foreach ( var addTransformation in pipelineResult.SyntaxTreeTransformations.Where( t => t.Kind == Compiler.SyntaxTreeTransformationKind.Add) )
+        foreach ( var addTransformation in pipelineResult.SyntaxTreeTransformations.Where( t => t.Kind == Compiler.SyntaxTreeTransformationKind.Add ) )
         {
             await testResult.AddIntroducedSyntaxTreeAsync( addTransformation.FilePath );
         }

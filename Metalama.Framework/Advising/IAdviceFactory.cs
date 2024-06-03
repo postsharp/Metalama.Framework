@@ -783,7 +783,7 @@ namespace Metalama.Framework.Advising
 
         INamespaceIntroductionAdviceResult IntroduceNamespace(
             INamespace targetNamespace,
-            string name);
+            string name );
 
         /// <summary>
         /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved

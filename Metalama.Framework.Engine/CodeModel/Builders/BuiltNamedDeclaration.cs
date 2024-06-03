@@ -6,9 +6,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal abstract class BuiltNamedDeclaration : BuiltDeclaration, INamedDeclaration
 {
-    protected BuiltNamedDeclaration( CompilationModel compilation ) : base( compilation )
-    {
-    }
+    protected BuiltNamedDeclaration( CompilationModel compilation ) : base( compilation ) { }
 
     protected abstract NamedDeclarationBuilder NamedDeclarationBuilder { get; }
 

@@ -52,7 +52,7 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
         this._syntaxTree = builder.PrimarySyntaxTree.AssertNotNull();
     }
 
-    public InsertPosition(SyntaxTree introducedSyntaxTree)
+    public InsertPosition( SyntaxTree introducedSyntaxTree )
     {
         this.Relation = InsertPositionRelation.Root;
         this._syntaxTree = introducedSyntaxTree;
@@ -61,9 +61,9 @@ internal readonly struct InsertPosition : IEquatable<InsertPosition>
     public override bool Equals( object? obj ) => obj is InsertPosition position && this.Equals( position );
 
     public bool Equals( InsertPosition other )
-        => this.Relation == other.Relation 
+        => this.Relation == other.Relation
            && this.SyntaxNode == other.SyntaxNode
-           && this.DeclarationBuilder == other.DeclarationBuilder 
+           && this.DeclarationBuilder == other.DeclarationBuilder
            && this.SyntaxTree == other.SyntaxTree;
 
     public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode, this.DeclarationBuilder, this.SyntaxTree );
