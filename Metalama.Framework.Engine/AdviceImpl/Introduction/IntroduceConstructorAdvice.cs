@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -29,14 +30,39 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         OverrideStrategy overrideStrategy,
         Action<IConstructorBuilder>? buildAction,
         IObjectReader tags )
-        : base( parameters, null, template.TemplateMember, scope, overrideStrategy, buildAction, tags )
+        : base( parameters, null, template.TemplateMember, scope, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType: null )
     {
         this._template = template;
 
         this.Builder = new ConstructorBuilder( this, parameters.TargetDeclaration );
     }
 
-    public override AdviceKind AdviceKind => AdviceKind.IntroduceFinalizer;
+    protected override void InitializeCore(
+        ProjectServiceProvider serviceProvider,
+        IDiagnosticAdder diagnosticAdder,
+        TemplateAttributeProperties? templateAttributeProperties )
+    {
+        base.InitializeCore( serviceProvider, diagnosticAdder, templateAttributeProperties );
+
+        var typeRewriter = TemplateTypeRewriter.Get( this._template );
+
+        var runtimeParameters = this.Template.AssertNotNull().TemplateClassMember.RunTimeParameters;
+
+        foreach ( var runtimeParameter in runtimeParameters )
+        {
+            var templateParameter = this.Template.AssertNotNull().Declaration.Parameters[runtimeParameter.SourceIndex];
+
+            var parameterBuilder = this.Builder.AddParameter(
+                templateParameter.Name,
+                typeRewriter.Visit( templateParameter.Type ),
+                templateParameter.RefKind,
+                templateParameter.DefaultValue );
+
+            CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
+        }
+    }
+
+    public override AdviceKind AdviceKind => AdviceKind.IntroduceConstructor;
 
     protected override IntroductionAdviceResult<IConstructor> Implement(
         ProjectServiceProvider serviceProvider,
@@ -46,28 +72,29 @@ internal sealed class IntroduceConstructorAdvice : IntroduceMemberAdvice<IMethod
         // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-        var existingConstructor = targetDeclaration.Constructors.OfExactSignature( this.Builder );
+        var existingImplicitConstructor =
+            this.Builder.IsStatic
+                ? targetDeclaration.StaticConstructor?.IsImplicitlyDeclared == true
+                    ? targetDeclaration.StaticConstructor
+                    : null
+                : targetDeclaration.Constructors.FirstOrDefault( c => c.IsImplicitInstanceConstructor() );
+
+        var existingConstructor =
+            this.Builder.IsStatic
+                ? targetDeclaration.StaticConstructor
+                : targetDeclaration.Constructors.OfExactSignature( this.Builder );
 
         // TODO: Introduce attributes that are added not present on the existing member?
-        if ( existingConstructor == null )
+        if ( existingConstructor == null || existingImplicitConstructor != null )
         {
-            // Check that there is no other member named the same, which is possible, but very unlikely.
-            var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
-
-            if ( existingOtherMember != null )
+            if ( existingImplicitConstructor != null && this.Builder.Parameters.Count == 0 )
             {
-                return
-                    this.CreateFailedResult(
-                        AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
-                            targetDeclaration.GetDiagnosticLocation(),
-                            (this.AspectInstance.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind),
-                            this ) );
+                // Redirect if the builder has no parameters and the existing constructor is implicit.
+                this.Builder.ReplacedImplicit = existingImplicitConstructor.ToTypedRef();
             }
 
             // There is no existing declaration, we will introduce and override the introduced.
             var overriddenConstructor = new OverrideConstructorTransformation( this, this.Builder, this._template.ForIntroduction( this.Builder ), this.Tags );
-            this.Builder.IsOverride = false;
-            this.Builder.HasNewKeyword = this.Builder.IsNew = false;
 
             addTransformation( this.Builder.ToTransformation() );
             addTransformation( overriddenConstructor );

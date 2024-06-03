@@ -32,13 +32,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             builder.Outbound.SelectMany( x => x.Methods ).AddAspect( x => new OverrideAttribute() );
         }
 
-        [Introduce]
+        [InterfaceMember( IsExplicit = false )]
         public void IntroducedVoidMethod()
         {
             Console.WriteLine( "Introduced" );
         }
 
-        [Introduce]
+        [InterfaceMember( IsExplicit = false )]
         public int IntroducedMethod()
         {
             Console.WriteLine( "Introduced" );
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             return 42;
         }
 
-        [Introduce]
+        [InterfaceMember( IsExplicit = false )]
         public T IntroducedGenericMethod<T>( T value )
         {
             Console.WriteLine( "Introduced" );
@@ -54,38 +54,38 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
             return value;
         }
 
-        //[Introduce]
-        //public async Task IntroducedAsyncVoidMethod()
-        //{
-        //    Console.WriteLine( "Introduced" );
-        //    await Task.Yield();
-        //}
+        [InterfaceMember( IsExplicit = false )]
+        public async Task IntroducedAsyncVoidMethod()
+        {
+            Console.WriteLine( "Introduced" );
+            await Task.Yield();
+        }
 
-        //[Introduce]
-        //public async Task<int> IntroducedAsyncMethod()
-        //{
-        //    Console.WriteLine( "Introduced" );
-        //    await Task.Yield();
+        [InterfaceMember( IsExplicit = false )]
+        public async Task<int> IntroducedAsyncMethod()
+        {
+            Console.WriteLine( "Introduced" );
+            await Task.Yield();
 
-        //    return 42;
-        //}
+            return 42;
+        }
 
-        //[Introduce]
-        //public IEnumerable<int> IntroducedIteratorMethod()
-        //{
-        //    Console.WriteLine( "Introduced" );
+        [InterfaceMember( IsExplicit = false )]
+        public IEnumerable<int> IntroducedIteratorMethod()
+        {
+            Console.WriteLine( "Introduced" );
 
-        //    yield return 42;
-        //}
+            yield return 42;
+        }
 
-        //[Introduce]
-        //public async IAsyncEnumerable<int> IntroducedAsyncIteratorMethod()
-        //{
-        //    Console.WriteLine( "Introduced" );
-        //    await Task.Yield();
+        [InterfaceMember( IsExplicit = false )]
+        public async IAsyncEnumerable<int> IntroducedAsyncIteratorMethod()
+        {
+            Console.WriteLine( "Introduced" );
+            await Task.Yield();
 
-        //    yield return 42;
-        //}
+            yield return 42;
+        }
     }
 
     public interface Interface

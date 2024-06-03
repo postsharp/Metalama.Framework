@@ -7,7 +7,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Tags
 {
     /*
-     * Tests that tags are not passed to interface members implemented using [Introduce].
+     * Tests that tags are correctly passed to templates of interface members.
      */
 
     public interface IInterface1
@@ -36,79 +36,79 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" } );
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int InterfaceMethod1()
         {
-            Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+            Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
             return meta.Proceed();
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler? Event1
         {
             add
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
 
             remove
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int Property1
         {
             get
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
                 return 42;
             }
 
             set
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int InterfaceMethod2()
         {
-            Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+            Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
             return meta.Proceed();
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler? Event2
         {
             add
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
 
             remove
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int Property2
         {
             get
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
 
                 return 42;
             }
 
             set
             {
-                Console.WriteLine( $"This introduced member has Tag? {meta.Tags.ContainsKey("TestTag")}." );
+                Console.WriteLine( $"This is introduced interface member with Tag {meta.Tags["TestTag"]}." );
             }
         }
     }

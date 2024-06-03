@@ -38,15 +38,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [Introduce]
+        [InterfaceMember]
         public T Method<T>(T x)
         {
             Console.WriteLine("Introduced");
             return x;
         }
 
-        [Introduce]
-        public int Property
+        [InterfaceMember]
+        public int Property 
         { 
             get
             {
@@ -60,10 +60,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int AutoProperty { get; set; }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler Event
         {
             add
@@ -77,10 +77,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [Introduce]
+        [InterfaceMember]
         public event EventHandler? EventField;
 
-        [Introduce]
+        [InterfaceMember]
         public async Task<int> AsyncMethod()
         {
             Console.WriteLine("Introduced");
@@ -88,14 +88,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             return 42;
         }
 
-        [Introduce]
+        [InterfaceMember]
         public IEnumerable<int> Iterator()
         {
             Console.WriteLine("Introduced");
             yield return 42;
         }
 
-        [Introduce]
+        [InterfaceMember]
         public async IAsyncEnumerable<int> AsyncIterator()
         {
             Console.WriteLine("Introduced");

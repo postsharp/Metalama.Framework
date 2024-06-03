@@ -24,19 +24,23 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IDerivedInterface));
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface), OverrideStrategy.Ignore);
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IDerivedInterface), tags: new { Source = "Derived" });
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IBaseInterface), OverrideStrategy.Ignore, tags: new { Source = "Base" });
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int Foo()
         {
+            Console.WriteLine($"This is introduced interface member by {meta.Tags["Source"]} (should be Derived).");
+
             return meta.Proceed();
         }
 
-        [Introduce]
+        [InterfaceMember]
         public int Bar()
         {
+            Console.WriteLine($"This is introduced interface member by {meta.Tags["Source"]} (should be Derived).");
+
             return meta.Proceed();
         }
     }

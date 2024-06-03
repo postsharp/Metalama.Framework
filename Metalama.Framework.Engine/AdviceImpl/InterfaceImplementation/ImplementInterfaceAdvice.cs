@@ -298,7 +298,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
 
                     case OverrideStrategy.Override:
                         implementedInterfaces.Add(
-                            new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement, this.TargetDeclaration, this._adviceFactory ) );
+                            new ImplementationResult(
+                                interfaceSpecification.InterfaceType,
+                                InterfaceImplementationOutcome.Implement,
+                                this.TargetDeclaration,
+                                this._adviceFactory ) );
+
                         skipInterfaceBaseList = true;
 
                         break;
@@ -309,7 +314,12 @@ internal sealed partial class ImplementInterfaceAdvice : Advice<ImplementInterfa
             }
             else
             {
-                implementedInterfaces.Add( new ImplementationResult( interfaceSpecification.InterfaceType, InterfaceImplementationOutcome.Implement, this.TargetDeclaration, this._adviceFactory ) );
+                implementedInterfaces.Add(
+                    new ImplementationResult(
+                        interfaceSpecification.InterfaceType,
+                        InterfaceImplementationOutcome.Implement,
+                        this.TargetDeclaration,
+                        this._adviceFactory ) );
 
                 skipInterfaceBaseList = false;
             }

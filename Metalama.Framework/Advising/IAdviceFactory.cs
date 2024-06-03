@@ -589,14 +589,14 @@ namespace Metalama.Framework.Advising
 
         /// <summary>
         /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
-        /// Interface members can be introduced by marking an aspect member by <see cref="IntroduceAttribute"/>,
-        /// <see cref="ExplicitInterfaceMemberAttribute"/> or programmatically using <c>Introduce</c> methods.
+        /// Interface members can be introduced by marking an aspect member by <see cref="InterfaceMemberAttribute"/>, 
+        /// <see cref="IntroduceAttribute"/> or programmatically using <c>Introduce</c> methods.
         /// </summary>
         /// <param name="targetType">The type that must implement the new interface.</param>
         /// <param name="interfaceType">The type of the implemented interface.</param>
         /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An optional opaque object of anonymous type passed to <see cref="ExplicitInterfaceMemberAttribute"/> templates and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An optional opaque object of anonymous type passed to <see cref="InterfaceMemberAttribute"/> templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API. This parameter does not affect members introduced using <see cref="IntroduceAttribute"/> or programmatically.</param>
         /// <seealso href="@implementing-interfaces"/>
         IImplementInterfaceAdviceResult ImplementInterface(
@@ -607,14 +607,14 @@ namespace Metalama.Framework.Advising
 
         /// <summary>
         /// Makes a type implement a new interface specified as a reflection <see cref="Type"/>.
-        /// Interface members can be introduced by marking an aspect member by <see cref="IntroduceAttribute"/>,
-        /// <see cref="ExplicitInterfaceMemberAttribute"/> or programmatically using <c>Introduce</c> methods.
+        /// Interface members can be introduced by marking an aspect member by <see cref="InterfaceMemberAttribute"/>, 
+        /// <see cref="IntroduceAttribute"/> or programmatically using <c>Introduce</c> methods.
         /// </summary>
         /// <param name="targetType">The type that must implement the new interface.</param>
         /// <param name="interfaceType">The type of the implemented interface.</param>
         /// <param name="whenExists">Determines the implementation strategy when the interface is already implemented by the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="tags">An optional opaque object of anonymous type passed to <see cref="ExplicitInterfaceMemberAttribute"/> templates and exposed under the <see cref="meta.Tags"/> property of the
+        /// <param name="tags">An optional opaque object of anonymous type passed to <see cref="InterfaceMemberAttribute"/> templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API. This parameter does not affect members introduced using <see cref="IntroduceAttribute"/> or programmatically.</param>
         /// <seealso href="@implementing-interfaces"/>
         IImplementInterfaceAdviceResult ImplementInterface(

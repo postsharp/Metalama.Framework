@@ -227,9 +227,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
         var templateAttributeType = attributeData.AttributeClass?.Name switch
         {
             nameof(TemplateAttribute) or nameof(TestTemplateAttribute) => TemplateAttributeType.Template,
-#pragma warning disable CS0618 // Type is obsolete
-            nameof(InterfaceMemberAttribute) or nameof(ExplicitInterfaceMemberAttribute) => TemplateAttributeType.InterfaceMember,
-#pragma warning restore CS0618
+            nameof(InterfaceMemberAttribute) => TemplateAttributeType.InterfaceMember,
             _ => TemplateAttributeType.DeclarativeAdvice
         };
 
@@ -245,9 +243,7 @@ internal sealed class SymbolClassifier : ISymbolClassifier
             nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
             nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
             nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
-#pragma warning disable CS0618 // Type is obsolete
-            nameof(InterfaceMemberAttribute) or nameof(ExplicitInterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
-#pragma warning restore CS0618
+            nameof(InterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
             _ => null
         };
 

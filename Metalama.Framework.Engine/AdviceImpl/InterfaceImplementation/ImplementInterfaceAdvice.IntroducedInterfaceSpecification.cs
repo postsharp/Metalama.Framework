@@ -12,8 +12,7 @@ internal sealed partial class ImplementInterfaceAdvice
         public INamedType InterfaceType { get; }
 
         /// <summary>
-        /// Gets specifications of interface members using the <see cref="Framework.Aspects.ExplicitInterfaceMemberAttribute"/>
-        /// or the (obsolete) <see cref="Framework.Aspects.InterfaceMemberAttribute"/>.
+        /// Gets specifications of interface members using the <see cref="Framework.Aspects.InterfaceMemberAttribute"/>.
         /// </summary>
         public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
 

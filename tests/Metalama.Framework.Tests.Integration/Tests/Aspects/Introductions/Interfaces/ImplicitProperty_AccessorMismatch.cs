@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         public int TemplateWithInit
         {
             init
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [Introduce]
+        [InterfaceMember(IsExplicit = false)]
         public int TemplateWithoutInit
         {
             set

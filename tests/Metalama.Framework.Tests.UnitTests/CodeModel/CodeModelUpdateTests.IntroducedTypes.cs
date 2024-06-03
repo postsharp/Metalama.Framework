@@ -1,7 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
-using Metalama.Framework.Engine.AdviceImpl.Introduction;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using System.Linq;
 using Xunit;
@@ -189,8 +191,7 @@ class C
         var type1 = Assert.Single( mutableCompilation1.Types );
 
         // Add a type.
-        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        typeBuilder.BaseType = type1.Types.Single();
+        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" ) { BaseType = type1.Types.Single() };
         var originalBaseMethodCount = type1.Types.Single().AllMethods.Count;
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
@@ -239,8 +240,7 @@ class C
         var type1 = Assert.Single( mutableCompilation1.Types );
 
         // Add a type.
-        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        typeBuilder.BaseType = type1.Types.Single();
+        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" ) { BaseType = type1.Types.Single() };
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -288,8 +288,7 @@ class C
         var type1 = Assert.Single( mutableCompilation1.Types );
 
         // Add a type.
-        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        typeBuilder.BaseType = type1.Types.Single();
+        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" ) { BaseType = type1.Types.Single() };
         var originalBaseMethodCount = type1.Types.Single().AllMethods.Count;
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
@@ -334,8 +333,7 @@ class C
         var type1 = Assert.Single( mutableCompilation1.Types );
 
         // Add a type.
-        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" );
-        typeBuilder.BaseType = type1.Types.Single();
+        var typeBuilder = new NamedTypeBuilder( null!, type1, "T" ) { BaseType = type1.Types.Single() };
         mutableCompilation1.AddTransformation( typeBuilder.ToTransformation() );
 
         var immutableCompilation2 = mutableCompilation1.CreateImmutableClone();
@@ -356,6 +354,79 @@ class C
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation2.Types.Single().Types.OfName( "B" ).Single().Methods.OfName( "M" ) );
         Assert.Empty( immutableCompilation2.Types.Single().Types.OfName( "T" ).Single().AllMethods.OfName( "M" ) );
+    }
+
+    [Fact]
+    public void ReplaceImplicitConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            class Target;
+            """;
+
+        var initialCompilation = testContext.CreateCompilationModel( code );
+
+        var target = initialCompilation.Types.OfName( "Target" ).Single();
+
+        var introducedConstructor = new ConstructorBuilder( null!, target );
+        introducedConstructor.AddParameter( "p", typeof(int) );
+        introducedConstructor.ReplacedImplicit = target.Constructors.Single().ToTypedRef();
+
+        var implicitCtor = Assert.Single( target.Constructors );
+
+        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
+            [introducedConstructor.ToTransformation()],
+            null,
+            null );
+
+        var target2 = finalCompilation.Types.OfName( "Target" ).Single();
+        var constructor2 = Assert.Single( target2.Constructors );
+
+        Assert.Equal( implicitCtor.Name, introducedConstructor.Name );
+        Assert.Same( constructor2, introducedConstructor.ForCompilation<IConstructor>( finalCompilation ) );
+
+        // NB: This a weird. It's caused by the introduced constructor replacing the implicit one.
+        //     If another parameterless constructor is introduced afterwards, the implicit constructor will still translate to the
+        //     one with parameters.
+
+        Assert.Same( constructor2, implicitCtor.ForCompilation( finalCompilation ) );
+    }
+
+    [Fact]
+    public void ReplaceImplicitStaticConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code =
+            """
+            class Target
+            {
+                public static int f = 42;
+            }
+            """;
+
+        var initialCompilation = testContext.CreateCompilationModel( code );
+
+        var target = initialCompilation.Types.OfName( "Target" ).Single();
+
+        var introducedStaticConstructor =
+            new ConstructorBuilder( null!, target ) { IsStatic = true, ReplacedImplicit = target.StaticConstructor.AssertNotNull().ToTypedRef() };
+
+        Assert.NotNull( target.StaticConstructor );
+
+        var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
+            [introducedStaticConstructor.ToTransformation()],
+            null,
+            null );
+
+        var target2 = finalCompilation.Types.OfName( "Target" ).Single();
+        var staticConstructor2 = target2.StaticConstructor;
+
+        Assert.Equal( target.StaticConstructor.Name, introducedStaticConstructor.Name );
+        Assert.Same( introducedStaticConstructor.ForCompilation<IConstructor>( finalCompilation ), staticConstructor2 );
+        Assert.Same( target.StaticConstructor.ForCompilation( finalCompilation ), staticConstructor2 );
     }
 
     [Fact]
@@ -425,7 +496,11 @@ class C
 
         var implementedInterfaceMethod = new MethodBuilder( null!, targetType, "Foo" );
 
-        var implementInterface = new IntroduceInterfaceTransformation( null!, targetType, interfaceType, new() { [interfaceMethod] = implementedInterfaceMethod } );
+        var implementInterface = new IntroduceInterfaceTransformation(
+            null!,
+            targetType,
+            interfaceType,
+            new() { [interfaceMethod] = implementedInterfaceMethod } );
 
         var finalCompilation = initialCompilation.WithTransformationsAndAspectInstances(
             [implementedInterfaceMethod.ToTransformation(), implementInterface],
@@ -438,7 +513,7 @@ class C
         var interfaceMethod2 = interfaceType2.Methods.Single();
         var targetTypeMethod2 = targetType2.Methods.Single();
 
-        var implementations2 = finalCompilation.GetDerivedTypes( interfaceType2 );
+        var implementations2 = finalCompilation.GetDerivedTypes( interfaceType2 ).ToArray();
 
         Assert.Single( targetType2.ImplementedInterfaces );
         Assert.Single( targetType2.AllImplementedInterfaces );

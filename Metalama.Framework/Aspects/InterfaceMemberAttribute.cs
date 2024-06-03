@@ -12,7 +12,6 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     [PublicAPI]
-    [Obsolete( "Use [Introduce] and make sure the member is public, or use [ExplicitInterfaceMember] instead." )]
     public sealed class InterfaceMemberAttribute : TemplateAttribute, IInterfaceMemberAttribute
     {
         /// <summary>

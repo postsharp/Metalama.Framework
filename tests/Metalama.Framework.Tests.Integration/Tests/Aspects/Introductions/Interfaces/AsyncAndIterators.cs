@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
-        [Introduce]
+        [InterfaceMember]
         public async Task<int> AsyncMethod()
         {
             Console.WriteLine( "Introduced" );
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             return 42;
         }
 
-        [Introduce]
+        [InterfaceMember]
         public IEnumerable<int> Iterator()
         {
             Console.WriteLine( "Introduced" );
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             yield return 42;
         }
 
-        [Introduce]
+        [InterfaceMember]
         public async IAsyncEnumerable<int> AsyncIterator()
         {
             Console.WriteLine( "Introduced" );

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Share
             aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface2));
         }
 
-        [ExplicitInterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public void Method()
         {
             Console.WriteLine("Interface member.");

@@ -44,10 +44,8 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         private static bool IsTemplate( ISymbol symbol )
-#pragma warning disable CS0618 // Type is obsolete
             => symbol.GetAttributes()
-                .Any( a => a.AttributeClass?.Name is nameof(TemplateAttribute) or nameof(InterfaceMemberAttribute) or nameof(ExplicitInterfaceMemberAttribute) );
-#pragma warning restore CS0618
+                .Any( a => a.AttributeClass?.Name is nameof(TemplateAttribute) or nameof(InterfaceMemberAttribute) );
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {

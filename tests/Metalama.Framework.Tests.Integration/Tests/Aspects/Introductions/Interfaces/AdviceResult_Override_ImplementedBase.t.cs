@@ -16,7 +16,18 @@ public class TargetClass : IBaseInterface, global::Metalama.Framework.Tests.Inte
       this._baseProperty = value;
     }
   }
-  public event EventHandler? BaseEvent;
+  private event EventHandler? _baseEvent;
+  public event EventHandler? BaseEvent
+  {
+    add
+    {
+      this._baseEvent += value;
+    }
+    remove
+    {
+      this._baseEvent -= value;
+    }
+  }
   public void Method()
   {
   }
@@ -32,10 +43,27 @@ public class TargetClass : IBaseInterface, global::Metalama.Framework.Tests.Inte
       this._property = value;
     }
   }
-  public event EventHandler? Event;
+  private event EventHandler? _event;
+  public event EventHandler? Event
+  {
+    add
+    {
+      this._event += value;
+    }
+    remove
+    {
+      this._event -= value;
+    }
+  }
   public void Witness()
   {
     global::System.Console.WriteLine("InterfaceType: IInterface, Action: Implement");
     global::System.Console.WriteLine("InterfaceType: IBaseInterface, Action: Implement");
+    global::System.Console.WriteLine("Member: IInterface.Method(), Action: Override, Target: TargetClass.Method()");
+    global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IInterface.Property, Action: Override, Target: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.AdviceResult_Override_ImplementedBase.TargetClass.Property");
+    global::System.Console.WriteLine("Member: IInterface.Event, Action: Override, Target: TargetClass.Event");
+    global::System.Console.WriteLine("Member: IBaseInterface.BaseMethod(), Action: Override, Target: TargetClass.BaseMethod()");
+    global::System.Console.WriteLine("Member: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IBaseInterface.BaseProperty, Action: Override, Target: Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.AdviceResult_Override_ImplementedBase.TargetClass.BaseProperty");
+    global::System.Console.WriteLine("Member: IBaseInterface.BaseEvent, Action: Override, Target: TargetClass.BaseEvent");
   }
 }
