@@ -78,6 +78,9 @@ namespace Metalama.Framework.Aspects
 
         private ContractDirection GetEffectiveDirection( IAspectBuilder aspectBuilder )
         {
+            var predecessors = aspectBuilder.AspectInstance.Predecessors;
+            var isInherited = !predecessors.IsDefaultOrEmpty && predecessors[0].Kind == AspectPredecessorKind.Inherited;
+
             var direction = this.GetDefinedDirection( aspectBuilder );
 
             if ( direction == ContractDirection.Default )
@@ -88,10 +91,8 @@ namespace Metalama.Framework.Aspects
                 // have an implicit setter, and this would change the interpretation of the default behavior.
 
                 IDeclaration baseDeclaration;
-                var predecessors = aspectBuilder.AspectInstance.Predecessors;
 
-                if ( aspectBuilder.Target.DeclarationKind is DeclarationKind.Property &&
-                     !predecessors.IsDefaultOrEmpty && predecessors[0].Kind == AspectPredecessorKind.Inherited )
+                if ( aspectBuilder.Target.DeclarationKind is DeclarationKind.Property or DeclarationKind.Indexer && isInherited )
                 {
                     baseDeclaration = predecessors[0].Instance.TargetDeclaration.GetTarget( aspectBuilder.Target.Compilation );
                 }
@@ -101,6 +102,14 @@ namespace Metalama.Framework.Aspects
                 }
 
                 direction = ContractAspectHelper.GetEffectiveDirection( direction, baseDeclaration );
+            }
+
+            // We then need to restrict the direction based on the target declaration.
+            // For example, a read-write base property with a read-only override needs to have the input direction removed.
+            // But do this only for inherited contracts, so that invalid direction is still an error otherwise.
+            if ( isInherited )
+            {
+                direction = direction.Restrict( ContractAspectHelper.GetPossibleDirection( aspectBuilder.Target ) );
             }
 
             // Combine secondary instances if any.
