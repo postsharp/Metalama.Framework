@@ -144,10 +144,15 @@ internal class TestResult : IDisposable
     internal async Task AddIntroducedSyntaxTreeAsync( string filePath )
     {
         // TODO: Adding a document to the input project is a hack.
-        var document = this.InputProject.AddDocument( filePath, SyntaxFactory.CompilationUnit(), filePath: filePath );
-        var testSyntaxTree = await TestSyntaxTree.CreateAsync( filePath, document, this );
+        if (this.InputProject == null)
+        {
+            throw new InvalidOperationException("Project is null.");
+        }   
 
+        var document = this.InputProject.AddDocument( filePath, SyntaxFactory.CompilationUnit(), filePath: filePath );
         this.InputProject = document.Project;
+
+        var testSyntaxTree = await TestSyntaxTree.CreateAsync( filePath, document, this );
 
         this._syntaxTrees.Add( testSyntaxTree );
     }
@@ -308,16 +313,16 @@ internal class TestResult : IDisposable
                 ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).AsEnumerable()
                 : this.SyntaxTrees.Take( 1 );
 
-        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault();
-        var outputTreesByFilePath = outputSyntaxTrees.ToDictionary( x => x.InputPath, x => x );
+        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary);
+        var outputTreesByFilePath = outputSyntaxTrees.Where(x => x.InputPath != null).ToDictionary( x => x.InputPath!, x => x );
 
         // Assign diagnostics to syntax trees.
         var diagnosticsBySyntaxTree = new Dictionary<TestSyntaxTree, List<Diagnostic>>();
 
-        foreach(var diagnostic in this.Diagnostics )
+        foreach ( var diagnostic in this.Diagnostics )
         {
-            var diagnosticsSourceFilePath = diagnostic.Location.SourceTree.FilePath;
-            if ( outputTreesByFilePath.TryGetValue(diagnosticsSourceFilePath, out var diagnosticSourceSyntaxTree))
+            var diagnosticsSourceFilePath = diagnostic.Location.SourceTree?.FilePath;
+            if ( diagnosticsSourceFilePath != null && outputTreesByFilePath.TryGetValue( diagnosticsSourceFilePath, out var diagnosticSourceSyntaxTree ) )
             {
                 if ( !diagnosticsBySyntaxTree.TryGetValue( diagnosticSourceSyntaxTree, out var diagnostics ) )
                 {
@@ -327,15 +332,15 @@ internal class TestResult : IDisposable
 
                 diagnostics.Add( diagnostic );
             }
-            else
+            else if ( primaryOutputTree != null )
             {
-                if (!diagnosticsBySyntaxTree.TryGetValue(primaryOutputTree, out var diagnostics))
+                if ( !diagnosticsBySyntaxTree.TryGetValue( primaryOutputTree, out var diagnostics ) )
                 {
                     diagnostics = new List<Diagnostic>();
-                    diagnosticsBySyntaxTree.Add(primaryOutputTree, diagnostics);
+                    diagnosticsBySyntaxTree.Add( primaryOutputTree, diagnostics );
                 }
 
-                diagnostics.Add(diagnostic);
+                diagnostics.Add( diagnostic );
             }
         }
 

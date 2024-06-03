@@ -23,12 +23,18 @@ internal sealed class SymbolClassificationService : ITemplateInfoService
     }
 
     public ITemplateInfo GetTemplateInfo( ISymbol symbol )
-        => this.GetManifest( symbol.ContainingAssembly )?.GetTemplateInfo( symbol ) ?? NullTemplateInfo.Instance;
+        => symbol.ContainingAssembly != null
+           ? this.GetManifest( symbol.ContainingAssembly )?.GetTemplateInfo( symbol ) ?? NullTemplateInfo.Instance
+           : NullTemplateInfo.Instance;
 
     public ExecutionScope GetExecutionScope( ISymbol symbol )
-        => this.GetManifest( symbol.ContainingAssembly )?.GetExecutionScope( symbol ) ?? ExecutionScope.RunTime;
+        => symbol.ContainingAssembly != null
+           ? this.GetManifest( symbol.ContainingAssembly )?.GetExecutionScope( symbol ) ?? ExecutionScope.RunTime
+           : ExecutionScope.RunTime;
 
-    public bool IsTemplate( ISymbol symbol ) => this.GetManifest( symbol.ContainingAssembly )?.IsTemplate( symbol ) ?? false;
+    public bool IsTemplate( ISymbol symbol )
+        => symbol.ContainingAssembly != null
+           && (this.GetManifest( symbol.ContainingAssembly )?.IsTemplate( symbol ) ?? false);
 
     public bool IsCompileTimeParameter( IParameterSymbol symbol ) => this.GetExecutionScope( symbol ) == ExecutionScope.CompileTime;
 
