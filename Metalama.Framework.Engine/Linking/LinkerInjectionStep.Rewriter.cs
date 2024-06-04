@@ -516,35 +516,46 @@ internal sealed partial class LinkerInjectionStep
                             syntaxGenerationContext );
 
                         typeDeclaration = typeDeclaration.WithMembers( typeDeclaration.Members.AddRange( injectedTypeMembers ) );
-
-                        var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
-
-                        if ( injectedInterfaces.Count > 0 )
-                        {
-                            typeDeclaration = (TypeDeclarationSyntax) typeDeclaration.AddBaseListTypes( injectedInterfaces.SelectAsArray( i => i.Syntax ) );
-                        }
-
-                        injectedNode = typeDeclaration;
+                        injectedNode = AddInjectedInterfaces( typeBuilder, typeDeclaration );
 
                         break;
 
                     case NamespaceDeclarationSyntax namespaceDeclaration:
+                        // This handles named types injected into a namespace.
 
-                        var namespaceBuilder = (NamespaceBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
-                        var injectedNamespaceMembers = new List<MemberDeclarationSyntax>();
+                        var namespaceTypeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
+                        var injectedNamedTypeMembers = new List<MemberDeclarationSyntax>();
 
                         this.AddInjectionsOnPosition(
-                            new InsertPosition( InsertPositionRelation.Within, namespaceBuilder ),
+                            new InsertPosition( InsertPositionRelation.Within, namespaceTypeBuilder ),
                             originalSyntaxTree,
-                            injectedNamespaceMembers,
+                            injectedNamedTypeMembers,
                             syntaxGenerationContext );
 
-                        injectedNode = namespaceDeclaration.WithMembers( namespaceDeclaration.Members.AddRange( injectedNamespaceMembers ) );
+                        var namespaceTypeDeclaration = (TypeDeclarationSyntax)namespaceDeclaration.Members.Single();
+                        namespaceTypeDeclaration = namespaceTypeDeclaration.WithMembers( namespaceTypeDeclaration.Members.AddRange( injectedNamedTypeMembers ) );
+                        namespaceTypeDeclaration = AddInjectedInterfaces( namespaceTypeBuilder, namespaceTypeDeclaration );
+
+                        injectedNode = namespaceDeclaration.WithMembers( SingletonList<MemberDeclarationSyntax>( namespaceTypeDeclaration ) );
 
                         break;
                 }
 
                 targetList.Add( (T) injectedNode );
+
+                TypeDeclarationSyntax AddInjectedInterfaces( NamedTypeBuilder typeBuilder, TypeDeclarationSyntax typeDeclaration )
+                {
+                    var injectedInterfaces = this._transformationCollection.GetIntroducedInterfacesForTypeBuilder( typeBuilder );
+
+                    if ( injectedInterfaces.Count > 0 )
+                    {
+                        return (TypeDeclarationSyntax) typeDeclaration.AddBaseListTypes( injectedInterfaces.SelectAsArray( i => i.Syntax ) );
+                    }
+                    else
+                    {
+                        return typeDeclaration;
+                    }
+                }
             }
         }
 

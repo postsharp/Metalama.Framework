@@ -23,9 +23,9 @@ internal class InjectedMember
     public DeclarationKind Kind { get; }
 
     /// <summary>
-    /// Gets the <see cref="IInjectMemberTransformation" /> that created this object.
+    /// Gets the <see cref="ISyntaxTreeTransformation" /> that created this object.
     /// </summary>
-    public ITransformation? Transformation { get; }
+    public ISyntaxTreeTransformation? Transformation { get; }
 
     public IDeclarationBuilder? DeclarationBuilder => (this.Transformation as IIntroduceDeclarationTransformation)?.DeclarationBuilder;
 
@@ -93,7 +93,7 @@ internal class InjectedMember
         prototype.Declaration ) { }
 
     internal InjectedMember(
-        ITransformation? transformation,
+        ISyntaxTreeTransformation? transformation,
         DeclarationKind kind,
         MemberDeclarationSyntax syntax,
         AspectLayerId? aspectLayerId,

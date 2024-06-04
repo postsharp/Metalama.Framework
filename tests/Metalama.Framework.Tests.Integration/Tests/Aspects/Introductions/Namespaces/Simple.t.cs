@@ -5,7 +5,7 @@ public class TargetType
 {
   private global::Implementation.Test Field;
 }
-// --- Implementation.cs ---
+// --- Implementation.Test.cs ---
 namespace Implementation
 {
   class Test : global::System.Object

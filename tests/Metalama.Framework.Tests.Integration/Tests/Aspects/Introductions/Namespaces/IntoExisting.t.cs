@@ -3,12 +3,12 @@
 [IntroductionAttribute]
 public class TargetType
 {
-  private global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Namespaces.IntoExisting.Implementation.Test Field;
+  private global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Namespaces.IntoExisting.Implementation.TestClass Field;
 }
-// --- Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Namespaces.IntoExisting.Implementation.cs ---
+// --- Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Namespaces.IntoExisting.Implementation.TestClass.cs ---
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Namespaces.IntoExisting.Implementation
 {
-  class Test : global::System.Object
+  class TestClass : global::System.Object
   {
   }
 }

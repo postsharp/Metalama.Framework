@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal interface IMemberLevelTransformation : ITransformation
+internal interface IMemberLevelTransformation : ITransformation, ISyntaxTreeTransformation
 {
     /// <summary>
     /// Gets a target method base of this code transformation.

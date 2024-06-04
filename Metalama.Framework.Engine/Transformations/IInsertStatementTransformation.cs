@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Transformations;
 /// <summary>
 /// Represents a code transformation that insert statements into the target member.
 /// </summary>
-internal interface IInsertStatementTransformation : ITransformation
+internal interface IInsertStatementTransformation : ITransformation, ISyntaxTreeTransformation
 {
     /// <summary>
     /// Provides an list of inserted statements.

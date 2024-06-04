@@ -38,7 +38,7 @@ internal abstract class BuiltDeclaration : BaseDeclaration
     public override IDeclaration? ContainingDeclaration
         => this.Compilation.Factory.GetDeclaration( this.Builder.ContainingDeclaration, ReferenceResolutionOptions.CanBeMissing );
 
-    public override SyntaxTree? PrimarySyntaxTree => this.ContainingDeclaration?.GetPrimarySyntaxTree();
+    public sealed override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
 
     [Memo]
     public override IAttributeCollection Attributes

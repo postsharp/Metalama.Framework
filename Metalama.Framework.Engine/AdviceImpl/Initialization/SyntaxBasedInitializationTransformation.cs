@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
-internal sealed class SyntaxBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
+internal sealed class SyntaxBasedInitializationTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
     private readonly IConstructor _targetConstructor;
     private readonly Func<SyntaxGenerationContext, StatementSyntax> _initializationStatement;

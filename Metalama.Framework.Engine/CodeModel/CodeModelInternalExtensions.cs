@@ -66,33 +66,9 @@ internal static class CodeModelInternalExtensions
                     InsertPositionRelation.Within,
                     (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
-            case NamedTypeBuilder { ContainingNamespace: NamespaceBuilder containingNamespaceBuilder }:
+            case NamedTypeBuilder { ContainingNamespace: INamespace } topLevelType:
                 return new InsertPosition(
-                    InsertPositionRelation.Within,
-                    containingNamespaceBuilder );
-
-            case NamedTypeBuilder { ContainingNamespace: BuiltNamespace containingNamespace }:
-                return new InsertPosition(
-                    InsertPositionRelation.Within,
-                    containingNamespace.NamespaceBuilder );
-
-            case NamedTypeBuilder { ContainingNamespace: Namespace codeNamespace }:
-                var primaryNamespaceDeclaration = codeNamespace.GetSymbol().AssertSymbolNotNull().GetPrimaryDeclaration();
-
-                switch ( primaryNamespaceDeclaration )
-                {
-                    case NamespaceDeclarationSyntax @namespace:
-                        return new InsertPosition( InsertPositionRelation.Within, @namespace );
-
-                    case FileScopedNamespaceDeclarationSyntax fileScopedNamespace:
-                        return new InsertPosition( InsertPositionRelation.Within, fileScopedNamespace );
-
-                    default:
-                        throw new AssertionFailedException( $"Unexpected primary declaration: '{primaryNamespaceDeclaration}'." );
-                }
-
-            case NamespaceBuilder namespaceBuilder:
-                return new InsertPosition( namespaceBuilder.PrimarySyntaxTree );
+                    topLevelType.PrimarySyntaxTree );
 
             case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
                 return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );

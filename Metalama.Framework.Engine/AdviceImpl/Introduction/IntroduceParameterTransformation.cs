@@ -13,7 +13,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal sealed class IntroduceParameterTransformation : BaseTransformation, IMemberLevelTransformation
+internal sealed class IntroduceParameterTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
     public IMember TargetMember => this.Parameter.DeclaringMember;
 

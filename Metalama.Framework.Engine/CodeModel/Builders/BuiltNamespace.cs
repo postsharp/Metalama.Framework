@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
@@ -40,8 +39,6 @@ internal sealed class BuiltNamespace : BuiltNamedDeclaration, INamespace
             this.Compilation.GetNamespaceCollection( this.NamespaceBuilder.ToRef().As<INamespace>() ) );
 
     public bool IsPartial => throw new System.NotImplementedException();
-
-    public override SyntaxTree PrimarySyntaxTree => this.NamespaceBuilder.PrimarySyntaxTree;
 
     public INamespace GetDescendant( string ns ) => throw new System.NotImplementedException();
 

@@ -79,7 +79,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         var existingSyntaxTrees = input.CompilationModel.PartialCompilation.SyntaxTrees.Values.ToHashSet();
 
-        void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
+        void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ISyntaxTreeTransformation> transformationGroup )
         {
             // Transformations need to be sorted here because some transformations require a LexicalScope to get an unique name, and it
             // will give deterministic results only when called in a deterministic order.
@@ -145,14 +145,14 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         // It's imperative that order of transformations is preserved while grouping by syntax tree.
         // The syntax tree we group by must be the main syntax tree of the enclosing type. We should never run transformations
         // of a partial type in parallel.
-        var transformationsByCanonicalSyntaxTree = input.Transformations.GroupBy( GetCanonicalSyntaxTree );
+        var transformationsByCanonicalSyntaxTree = input.Transformations.OfType<ISyntaxTreeTransformation>().GroupBy( GetCanonicalSyntaxTree );
 
-        static SyntaxTree GetCanonicalSyntaxTree( ITransformation transformation )
+        static SyntaxTree GetCanonicalSyntaxTree( ISyntaxTreeTransformation syntaxTreeTransformation )
         {
-            return GetCanonicalTargetDeclaration( transformation.TargetDeclaration ) switch
+            return GetCanonicalTargetDeclaration( syntaxTreeTransformation.TargetDeclaration ) switch
             {
                 INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
-                ICompilation => transformation.TransformedSyntaxTree,
+                ICompilation => syntaxTreeTransformation.TransformedSyntaxTree,
                 var d => throw new AssertionFailedException( $"Unsupported: {d}" )
             };
 
@@ -326,7 +326,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
     }
 
     private static void IndexNodesWithModifiedAttributes(
-        ITransformation transformation,
+        ISyntaxTreeTransformation transformation,
         TransformationCollection transformationCollection )
     {
         // We only need to index transformations on syntax (i.e. on source code) because introductions on generated code
@@ -361,7 +361,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
     private static void IndexIntroduceDeclarationTransformation(
         HashSet<SyntaxTree> existingSyntaxTrees,
-        ITransformation transformation,
+        ISyntaxTreeTransformation transformation,
         TransformationCollection transformationCollection )
     {
         if ( transformation is IIntroduceDeclarationTransformation introduceDeclarationTransformation )

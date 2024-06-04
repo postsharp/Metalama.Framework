@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TEST_OPTIONS
+// @OutputAllSyntaxTrees
+#endif
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

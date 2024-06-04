@@ -6,10 +6,7 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -47,15 +44,7 @@ internal class NamespaceBuilder : NamedDeclarationBuilder, INamespace
         this.ContainingNamespace = containingNamespace;
     }
 
-    [Memo]
-    public override SyntaxTree PrimarySyntaxTree
-        => CSharpSyntaxTree.Create(
-            CompilationUnit(
-                List<ExternAliasDirectiveSyntax>(),
-                List<UsingDirectiveSyntax>(),
-                List<AttributeListSyntax>(),
-                List<MemberDeclarationSyntax>() ),
-            path: this.FullName + ".cs" );
+    public override SyntaxTree PrimarySyntaxTree => throw new NotSupportedException();
 
     public INamespace? GetDescendant( string ns )
     {

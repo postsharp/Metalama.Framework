@@ -7,13 +7,12 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
-internal abstract class IntroduceDeclarationTransformation<T> : BaseTransformation, IIntroduceDeclarationTransformation,
+internal abstract class IntroduceDeclarationTransformation<T> : BaseSyntaxTreeTransformation, IIntroduceDeclarationTransformation,
                                                                 IInjectMemberTransformation
     where T : DeclarationBuilder
 {
@@ -31,8 +30,6 @@ internal abstract class IntroduceDeclarationTransformation<T> : BaseTransformati
     IDeclarationBuilder IIntroduceDeclarationTransformation.DeclarationBuilder => this.IntroducedDeclaration;
 
     public override IDeclaration TargetDeclaration => this.IntroducedDeclaration.ContainingDeclaration.AssertNotNull();
-
-    public override SyntaxTree TransformedSyntaxTree => this.IntroducedDeclaration.PrimarySyntaxTree.AssertNotNull();
 
     public override TransformationKind TransformationKind => TransformationKind.IntroduceMember;
 

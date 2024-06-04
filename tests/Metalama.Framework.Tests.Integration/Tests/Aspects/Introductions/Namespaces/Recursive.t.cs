@@ -5,15 +5,7 @@ public class TargetType
 {
   private global::Outer.Middle.Inner.Test Field;
 }
-// --- Outer.cs ---
-namespace Outer
-{
-}
-// --- Outer.Middle.cs ---
-namespace Outer.Middle
-{
-}
-// --- Outer.Middle.Inner.cs ---
+// --- Outer.Middle.Inner.Test.cs ---
 namespace Outer.Middle.Inner
 {
   class Test : global::System.Object

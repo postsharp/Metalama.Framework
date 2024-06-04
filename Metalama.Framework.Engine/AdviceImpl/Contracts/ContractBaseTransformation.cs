@@ -13,7 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Contracts;
 
-internal abstract class ContractBaseTransformation : BaseTransformation, IInsertStatementTransformation
+internal abstract class ContractBaseTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
     private readonly TemplateMember<IMethod> _template;
     private readonly IObjectReader _templateArguments;

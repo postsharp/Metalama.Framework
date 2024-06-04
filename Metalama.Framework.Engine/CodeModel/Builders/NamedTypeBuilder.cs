@@ -8,10 +8,14 @@ using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -214,38 +218,38 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public Type ToType() => throw new NotImplementedException();
 
-    public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
-    {
-        throw new NotSupportedException( "This method is not supported on the builder." );
-    }
+    public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember ) 
+        => throw new NotSupportedException( "This method is not supported on the builder." );
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
     public IntroduceNamedTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
 
-    IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
-    {
-        throw new NotSupportedException( "This method is not supported on the builder." );
-    }
+    IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member ) 
+        => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
-    {
-        throw new NotSupportedException( "This method is not supported on the builder." );
-    }
+    bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember ) 
+        => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor )
-    {
-        return visitor.Visit( this );
-    }
+    ITypeImpl ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
-    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments )
-    {
-        throw new NotImplementedException();
-    }
+    IGeneric IGenericInternal.ConstructGenericInstance( IReadOnlyList<IType> typeArguments ) => throw new NotImplementedException();
 
+    [Memo]
     public override SyntaxTree PrimarySyntaxTree
         =>
-
-            // TODO: This is a bit of circular dependency.
-            this.ToInsertPosition().SyntaxTree;
+        this.ContainingDeclaration switch
+        {
+            INamespace =>
+                CSharpSyntaxTree.Create(
+                    CompilationUnit(
+                        List<ExternAliasDirectiveSyntax>(),
+                        List<UsingDirectiveSyntax>(),
+                        List<AttributeListSyntax>(),
+                        List<MemberDeclarationSyntax>() ),
+                    path: this.FullName + ".cs",
+                    encoding: Encoding.UTF8 ),
+            INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
+            _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" ) 
+        };
 }

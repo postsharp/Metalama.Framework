@@ -1052,6 +1052,11 @@ public static class AdviserExtensions
             typeKind,
             buildType );
 
+    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<ICompilation> adviser, string name )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+            adviser.Target.GlobalNamespace,
+            name );
+
     public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<INamespace> adviser, string name ) 
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
             adviser.Target,
