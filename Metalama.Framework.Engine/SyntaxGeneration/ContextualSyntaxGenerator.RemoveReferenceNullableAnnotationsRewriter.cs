@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.SyntaxGeneration
 {
@@ -116,7 +117,12 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
                 else
                 {
                     // Keep it.
-                    return base.VisitNullableType( node );
+                    var type = (INamedTypeSymbol) this._type;
+
+                    using ( this.WithType( type.TypeArguments.Single() ) )
+                    {
+                        return base.VisitNullableType( node );
+                    }
                 }
             }
 
@@ -219,7 +225,12 @@ namespace Metalama.Framework.Engine.SyntaxGeneration
                 else
                 {
                     // Keep it.
-                    return base.VisitNullableType( node );
+                    var type = (INamedType) this._type;
+
+                    using ( this.WithType( type.TypeArguments.Single() ) )
+                    {
+                        return base.VisitNullableType( node );
+                    }
                 }
             }
 
