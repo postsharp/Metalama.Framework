@@ -45,7 +45,9 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
             context.Options.IsLongRunningProcess,
             licenseOptions.IgnoreUnattendedProcessLicense );
 
-        var backstageOptions = new BackstageInitializationOptions( applicationInfo, context.Compilation.AssemblyName )
+        var projectName = context.Compilation.AssemblyName;
+
+        var backstageOptions = new BackstageInitializationOptions( applicationInfo, projectName )
         {
             AddLicensing = true,
             AddUserInterface = true,
@@ -58,23 +60,7 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
         // and we manage disposal of services at the end of the source transformer's lifetime.
         var serviceProvider = BackstageServiceFactoryInitializer.CreateInitialized( backstageOptions );
 
-        // Initialize usage reporting.
-        try
-        {
-            if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && context.Compilation.AssemblyName != null &&
-                 usageReporter.ShouldReportSession( context.Compilation.AssemblyName ) )
-            {
-                usageReporter.StartSession( "TransformerUsage" );
-            }
-        }
-        catch ( Exception e )
-        {
-            ReportException( e, serviceProvider, false );
-
-            // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
-        }
-
-        return new CompilerServiceProvider( serviceProvider );
+        return new CompilerServiceProvider( serviceProvider, projectName );
     }
 
     private sealed class CompilerServiceProvider : IDisposableServiceProvider
@@ -82,12 +68,29 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
         private readonly IServiceProvider _serviceProvider;
         private readonly LoggerAdapter _logger;
         private readonly ExceptionReporterAdapter _exceptionReporter;
+        private readonly IDisposable? _usageReportingSession;
 
-        public CompilerServiceProvider( IServiceProvider serviceProvider )
+        public CompilerServiceProvider( IServiceProvider serviceProvider, string? projectName )
         {
             this._serviceProvider = serviceProvider;
             this._logger = new LoggerAdapter( serviceProvider.GetLoggerFactory().GetLogger( "Compiler" ) );
             this._exceptionReporter = new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() );
+            
+            // Initialize usage reporting.
+            try
+            {
+                if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && projectName != null
+                                                                                                && usageReporter.ShouldReportSession( projectName ) )
+                {
+                    this._usageReportingSession = usageReporter.StartSession( "TransformerUsage" );
+                }
+            }
+            catch ( Exception e )
+            {
+                ReportException( e, serviceProvider, false );
+
+                // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
+            }
         }
 
         public object? GetService( Type serviceType )
@@ -113,7 +116,7 @@ public sealed class SourceTransformer : ISourceTransformerWithServices
             // Report usage.
             try
             {
-                this._serviceProvider.GetBackstageService<IUsageReporter>()?.StopSession();
+                this._usageReportingSession?.Dispose();
             }
             catch ( Exception e )
             {
