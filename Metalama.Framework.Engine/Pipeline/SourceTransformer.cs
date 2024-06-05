@@ -58,22 +58,6 @@ namespace Metalama.Framework.Engine.Pipeline
             
             var serviceProvider = BackstageServiceFactory.ServiceProvider;
 
-            // Initialize usage reporting.
-            try
-            {
-                if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && context.Compilation.AssemblyName != null &&
-                     usageReporter.ShouldReportSession( context.Compilation.AssemblyName ) )
-                {
-                    usageReporter.StartSession( "TransformerUsage" );
-                }
-            }
-            catch ( Exception e )
-            {
-                ReportException( e, serviceProvider, false );
-
-                // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
-            }
-            
             // Enforce licensing.
             if ( serviceProvider.GetBackstageService<ILicenseConsumptionService>() is { } licenseManager )
             {
@@ -97,7 +81,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
-            return new CompilerServiceProvider( serviceProvider );
+            return new CompilerServiceProvider( serviceProvider, context.Compilation.AssemblyName );
         }
 
         private sealed class CompilerServiceProvider : IDisposableServiceProvider
@@ -105,12 +89,29 @@ namespace Metalama.Framework.Engine.Pipeline
             private readonly IServiceProvider _serviceProvider;
             private readonly LoggerAdapter _logger;
             private readonly ExceptionReporterAdapter _exceptionReporter;
+            private readonly IDisposable? _usageReportingSession;
 
-            public CompilerServiceProvider( IServiceProvider serviceProvider )
+            public CompilerServiceProvider( IServiceProvider serviceProvider, string? projectName )
             {
                 this._serviceProvider = serviceProvider;
                 this._logger = new LoggerAdapter( serviceProvider.GetLoggerFactory().GetLogger( "Compiler" ) );
                 this._exceptionReporter = new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() );
+                
+                // Initialize usage reporting.
+                try
+                {
+                    if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && projectName != null
+                                                                                                    && usageReporter.ShouldReportSession( projectName ) )
+                    {
+                        this._usageReportingSession = usageReporter.StartSession( "TransformerUsage" );
+                    }
+                }
+                catch ( Exception e )
+                {
+                    ReportException( e, serviceProvider, false );
+
+                    // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
+                }
             }
 
             public object? GetService( Type serviceType )
@@ -136,7 +137,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 // Report usage.
                 try
                 {
-                    this._serviceProvider.GetBackstageService<IUsageReporter>()?.StopSession();
+                    this._usageReportingSession?.Dispose();
                 }
                 catch ( Exception e )
                 {
