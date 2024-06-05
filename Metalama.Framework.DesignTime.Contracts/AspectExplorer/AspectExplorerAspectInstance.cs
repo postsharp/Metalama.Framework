@@ -16,12 +16,32 @@ public struct AspectExplorerAspectInstance
 }
 
 [PublicAPI]
+[Guid( "415F68C2-FFAD-4176-9062-53C3658E5F18" )]
+public struct AspectExplorerAspectInstance2
+{
+    public ISymbol TargetDeclaration;
+    public AspectExplorerDeclarationKind TargetDeclarationKind;
+    public AspectExplorerAspectTransformation2[] Transformations;
+}
+
+[PublicAPI]
 [Guid( "E758C91B-E335-4D53-AA30-82BBCCBF428A" )]
 public struct AspectExplorerAspectTransformation
 {
     public ISymbol TargetDeclaration;
     public AspectExplorerDeclarationKind TargetDeclarationKind;
     public string Description;
+}
+
+[PublicAPI]
+[Guid( "E0C881D8-C8FF-4988-B73D-CDEB6561CEBD" )]
+public struct AspectExplorerAspectTransformation2
+{
+    public ISymbol TargetDeclaration;
+    public AspectExplorerDeclarationKind TargetDeclarationKind;
+    public string Description;
+    public ISymbol? TransformedDeclaration;
+    public string? FilePath;
 }
 
 [PublicAPI]

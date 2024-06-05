@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
@@ -30,26 +31,26 @@ public abstract class PreviewPipelineBasedService
     protected async
         Task<(bool Success,
             string[]? ErrorMessages,
-            SyntaxTree? SyntaxTree,
             ProjectServiceProvider? ServiceProvider,
             AspectPipelineConfiguration? Configuration,
             PartialCompilation? PartialCompilation )> PrepareExecutionAsync(
             ProjectKey projectKey,
             string syntaxTreeName,
+            IEnumerable<string> additionalSyntaxTreeNames,
             TestableCancellationToken cancellationToken )
     {
         var project = await this.WorkspaceProvider.GetProjectAsync( projectKey, cancellationToken );
 
         if ( project == null )
         {
-            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null, null);
+            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null);
         }
 
         var compilation = await project.GetCompilationAsync( cancellationToken );
 
         if ( compilation == null )
         {
-            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null, null);
+            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null);
         }
 
         // Get the pipeline for the compilation.
@@ -57,24 +58,23 @@ public abstract class PreviewPipelineBasedService
 
         if ( pipeline == null )
         {
-            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null, null);
-        }
-
-        // Find the syntax tree of the given name.
-        var syntaxTree = compilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
-
-        if ( syntaxTree == null )
-        {
-            // This could happen during initialization if the pipeline did not receive the whole compilation yet.
-
-            return (false, new[] { "Cannot find the syntax tree in the compilation." }, null, null, null, null);
+            return (false, new[] { "The project has not been fully loaded yet." }, null, null, null);
         }
 
         // Get a compilation _without_ generated code, and map the target symbol.
         var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
         var sourceCompilation = compilation.RemoveSyntaxTrees( generatedFiles );
 
-        var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
+        // Find the syntax tree of the given name.
+        var syntaxTree = sourceCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
+
+        var allTrees = additionalSyntaxTreeNames
+            .Select( name => sourceCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == name ) )
+            .Concat( syntaxTree )
+            .WhereNotNull()
+            .ToArray();
+
+        var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, allTrees );
 
         // Resume all pipelines.
         var executionContext = AsyncExecutionContext.Get();
@@ -85,7 +85,7 @@ public abstract class PreviewPipelineBasedService
 
         if ( !getConfigurationResult.IsSuccessful )
         {
-            return (false, getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray(), null,
+            return (false, getConfigurationResult.Diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray(),
                     null, null, null);
         }
 
@@ -96,7 +96,7 @@ public abstract class PreviewPipelineBasedService
 
         if ( !transitiveAspectManifest.IsSuccessful )
         {
-            return (false, transitiveAspectManifest.Diagnostics.Select( x => x.ToString() ).ToArray(), null, null, null, null);
+            return (false, transitiveAspectManifest.Diagnostics.Select( x => x.ToString() ).ToArray(), null, null, null);
         }
 
         // For preview, we need to override a few options, especially to enable code formatting. We do this by replacing only the options
@@ -108,6 +108,6 @@ public abstract class PreviewPipelineBasedService
 
         var previewConfiguration = designTimeConfiguration.WithServiceProvider( previewServiceProvider );
 
-        return (true, null, syntaxTree, previewServiceProvider, previewConfiguration, partialCompilation);
+        return (true, null, previewServiceProvider, previewConfiguration, partialCompilation);
     }
 }

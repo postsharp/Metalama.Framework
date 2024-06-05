@@ -6,13 +6,14 @@ using Metalama.Framework.DesignTime.AspectExplorer;
 using Metalama.Framework.DesignTime.Contracts.AspectExplorer;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.AspectExplorer;
 
-internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
+internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
@@ -50,10 +51,39 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         return aspectClasses.Select( ResolveOrNull ).WhereNotNull().ToArray();
     }
 
+    private static AspectExplorerAspectInstance ToVersion1( AspectExplorerAspectInstance2 aspectInstance )
+        => new()
+        {
+            TargetDeclaration = aspectInstance.TargetDeclaration,
+            TargetDeclarationKind = aspectInstance.TargetDeclarationKind,
+            Transformations = aspectInstance.Transformations.Select( ToVersion1 ).ToArray()
+        };
+
+    private static AspectExplorerAspectTransformation ToVersion1( AspectExplorerAspectTransformation2 transformation )
+        => new()
+        {
+            TargetDeclaration = transformation.TargetDeclaration,
+            TargetDeclarationKind = transformation.TargetDeclarationKind,
+            Description = transformation.Description
+        };
+
     public async Task GetAspectInstancesAsync(
         Compilation compilation,
         INamedTypeSymbol aspectClass,
         IEnumerable<AspectExplorerAspectInstance>[] result,
+        CancellationToken cancellationToken )
+    {
+        var version2Result = new IEnumerable<AspectExplorerAspectInstance2>[1];
+
+        await this.GetAspectInstancesAsync( compilation, aspectClass, version2Result, cancellationToken );
+
+        result[0] = version2Result[0].Select( ToVersion1 ).ToArray();
+    }
+
+    public async Task GetAspectInstancesAsync(
+        Compilation compilation,
+        INamedTypeSymbol aspectClass,
+        IEnumerable<AspectExplorerAspectInstance2>[] result,
         CancellationToken cancellationToken )
     {
         var projectKey = compilation.GetProjectKey();
@@ -71,7 +101,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
 
         result[0] = GetAspectInstances().ToArray();
 
-        IEnumerable<AspectExplorerAspectInstance> GetAspectInstances()
+        IEnumerable<AspectExplorerAspectInstance2> GetAspectInstances()
         {
             foreach ( var aspectInstance in aspectInstances )
             {
@@ -82,7 +112,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
                     continue;
                 }
 
-                yield return new AspectExplorerAspectInstance
+                yield return new()
                 {
                     TargetDeclaration = targetDeclaration,
                     TargetDeclarationKind = targetDeclarationKind,
@@ -91,7 +121,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
             }
         }
 
-        IEnumerable<AspectExplorerAspectTransformation> GetTransformations( AspectDatabaseAspectInstance aspectInstance )
+        IEnumerable<AspectExplorerAspectTransformation2> GetTransformations( AspectDatabaseAspectInstance aspectInstance )
         {
             foreach ( var transformation in aspectInstance.Transformations )
             {
@@ -102,9 +132,16 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
                     continue;
                 }
 
-                yield return new AspectExplorerAspectTransformation
+                var transformedDeclaration = ResolveToSymbol( transformation.TransformedDeclarationId, out var transformedDeclarationKind );
+                Invariant.Assert( transformedDeclarationKind == default );
+
+                yield return new()
                 {
-                    TargetDeclaration = targetDeclaration, TargetDeclarationKind = targetDeclarationKind, Description = transformation.Description
+                    TargetDeclaration = targetDeclaration,
+                    TargetDeclarationKind = targetDeclarationKind,
+                    Description = transformation.Description,
+                    TransformedDeclaration = transformedDeclaration,
+                    FilePath = transformation.FilePath
                 };
             }
         }

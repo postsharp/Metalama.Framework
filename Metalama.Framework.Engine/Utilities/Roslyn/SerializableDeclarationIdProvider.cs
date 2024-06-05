@@ -260,6 +260,12 @@ public static class SerializableDeclarationIdProvider
         }
         else
         {
+            // Special case for the global namespace that's not handled by GetFirstSymbolForDeclarationId, see https://github.com/dotnet/roslyn/issues/66976.
+            if ( id.Id == "N:" )
+            {
+                return compilation.Assembly.GlobalNamespace;
+            }
+
             return DocumentationCommentId.GetFirstSymbolForDeclarationId( id.ToString(), compilation );
         }
     }

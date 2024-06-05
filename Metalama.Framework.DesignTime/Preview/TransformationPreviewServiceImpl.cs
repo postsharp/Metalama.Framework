@@ -19,9 +19,12 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
     internal async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
+        IEnumerable<string>? additionalSyntaxTreeNames = null,
         TestableCancellationToken cancellationToken = default )
     {
-        var preparation = await this.PrepareExecutionAsync( projectKey, syntaxTreeName, cancellationToken );
+        additionalSyntaxTreeNames ??= [];
+
+        var preparation = await this.PrepareExecutionAsync( projectKey, syntaxTreeName, additionalSyntaxTreeNames, cancellationToken );
 
         if ( !preparation.Success )
         {
@@ -49,7 +52,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
             return SerializablePreviewTransformationResult.Failure( errorMessages );
         }
 
-        var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[preparation.SyntaxTree!.FilePath];
+        var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[syntaxTreeName];
 
         return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), errorMessages );
     }
@@ -57,6 +60,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
     Task<SerializablePreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
+        IEnumerable<string> additionalSyntaxTreeNames,
         CancellationToken cancellationToken )
-        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken.ToTestable() );
+        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, additionalSyntaxTreeNames, cancellationToken.ToTestable() );
 }

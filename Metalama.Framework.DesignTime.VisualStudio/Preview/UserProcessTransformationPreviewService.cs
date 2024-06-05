@@ -9,10 +9,11 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using RoslynProject = Microsoft.CodeAnalysis.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 {
-    internal sealed class UserProcessTransformationPreviewService : ITransformationPreviewService
+    internal sealed class UserProcessTransformationPreviewService : ITransformationPreviewService2
     {
         private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
@@ -21,8 +22,9 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }
 
-        public async Task PreviewTransformationAsync(
+        private async Task PreviewTransformationAsync(
             Document document,
+            IEnumerable<string> additionalFilePaths,
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken )
         {
@@ -47,11 +49,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 
             var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken );
 
-            var unformattedResult = await analysisProcessApi.PreviewTransformationAsync( projectKey, syntaxTree.FilePath, cancellationToken );
+            var unformattedResult = await analysisProcessApi.PreviewTransformationAsync( projectKey, syntaxTree.FilePath, additionalFilePaths, cancellationToken );
 
             if ( !unformattedResult.IsSuccessful )
             {
-                result[0] = PreviewTransformationResult.Failure( unformattedResult.ErrorMessages ?? Array.Empty<string>() );
+                result[0] = PreviewTransformationResult.Failure( unformattedResult.ErrorMessages ?? [] );
 
                 return;
             }
@@ -59,6 +61,21 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var formattedSyntaxTree = await FormatOutputAsync( document, unformattedResult, cancellationToken );
 
             result[0] = PreviewTransformationResult.Success( formattedSyntaxTree.AssertNotNull(), unformattedResult.ErrorMessages );
+        }
+
+        public Task PreviewTransformationAsync( Document document, IPreviewTransformationResult[] result, CancellationToken cancellationToken )
+            => this.PreviewTransformationAsync( document, [], result, cancellationToken );
+
+        public Task PreviewGeneratedFileAsync(
+            RoslynProject project,
+            string filePath,
+            string[] additionalFilePaths,
+            IPreviewTransformationResult[] result,
+            CancellationToken cancellationToken )
+        {
+            var emptyDocument = project.AddDocument( Path.GetFileName( filePath ), SyntaxFactory.CompilationUnit(), filePath: filePath );
+
+            return this.PreviewTransformationAsync( emptyDocument, additionalFilePaths, result, cancellationToken );
         }
 
         internal static async Task<SyntaxTree?> FormatOutputAsync(

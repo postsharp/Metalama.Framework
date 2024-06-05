@@ -26,3 +26,14 @@ public interface IAspectDatabaseService : ICompilerService
 
     event Action<string> AspectInstancesChanged;
 }
+
+[ComImport]
+[Guid( "99E80D57-0C81-4461-B956-ECB1A7C3AA18" )]
+public interface IAspectDatabaseService2 : IAspectDatabaseService
+{
+    Task GetAspectInstancesAsync(
+        Compilation compilation,
+        INamedTypeSymbol aspectClass,
+        IEnumerable<AspectExplorerAspectInstance2>[] result,
+        CancellationToken cancellationToken );
+}

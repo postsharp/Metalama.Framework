@@ -175,9 +175,16 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
                     aspectInstance.Advice
                         .SelectMany( advice => advice.Transformations )
                         .Select(
-                            transformation => new AspectDatabaseAspectTransformation(
-                                GetSerializableIdForOriginalDeclaration( transformation.TargetDeclaration ),
-                                transformation.ToString()! ) )
+                            transformation =>
+                            {
+                                var transformedDeclaration = transformation.IntroducedDeclaration ?? transformation.TargetDeclaration;
+
+                                return new AspectDatabaseAspectTransformation(
+                                    GetSerializableIdForOriginalDeclaration( transformation.TargetDeclaration ),
+                                    transformation.ToString()!,
+                                    transformedDeclaration.GetClosestNamedType() is { } transformedType ? GetSerializableIdForOriginalDeclaration( transformedType ) : null,
+                                    transformedDeclaration.GetPrimarySyntaxTree()?.FilePath );
+                            } )
                         .ToArray() ) );
 
         static string GetSerializableIdForOriginalDeclaration( IDeclaration declaration )
@@ -209,12 +216,11 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             .Select(
                 aspectInstance => new AspectDatabaseAspectInstance(
                     GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
-                    new[]
-                    {
+                    [
                         new AspectDatabaseAspectTransformation(
                             GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                             $"Provide the '{aspectInstance.AspectClass}' aspect." )
-                    } ) );
+                    ] ) );
 
         return transformationAspectInstances.Concat( predecessorAspectInstances ).ToArray();
     }
