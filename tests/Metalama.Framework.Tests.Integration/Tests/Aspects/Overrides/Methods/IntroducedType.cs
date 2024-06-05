@@ -8,7 +8,7 @@ internal class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var typeResult = builder.Advice.IntroduceClass( builder.Target, "TestType", TypeKind.Class );
+        var typeResult = builder.Advice.IntroduceClass( builder.Target, "TestType" );
         var methodResult = builder.Advice.IntroduceMethod( typeResult.Declaration, nameof(IntroducedMethod) );
 
         builder.Advice.Override( methodResult.Declaration, nameof(OverrideTemplate) );

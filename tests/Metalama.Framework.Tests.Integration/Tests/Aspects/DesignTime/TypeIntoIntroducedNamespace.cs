@@ -14,7 +14,7 @@ public class IntroductionAttribute : TypeAspect
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
         var @namespace = builder.Advice.IntroduceNamespace(builder.Target.ContainingNamespace, "IntroducedNamespace");
-        builder.Advice.IntroduceClass(@namespace.Declaration, "TestType", TypeKind.Class);
+        builder.Advice.IntroduceClass(@namespace.Declaration, "TestType");
     }
 }
 

@@ -9,7 +9,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        var type = builder.Advice.IntroduceClass(builder.Target, "TestType", TypeKind.Class);
+        var type = builder.Advice.IntroduceClass(builder.Target, "TestType");
         type.ImplementInterface(typeof(ITestInterface));
     }
 }

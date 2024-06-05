@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.IntroduceClass(builder.Target.ContainingNamespace, "TestType", TypeKind.Class);
+            builder.Advice.IntroduceClass(builder.Target.ContainingNamespace, "TestType");
         }
     }
 

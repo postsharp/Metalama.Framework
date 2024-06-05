@@ -778,7 +778,6 @@ namespace Metalama.Framework.Advising
         IClassIntroductionAdviceResult IntroduceClass(
             INamespaceOrNamedType targetNamespaceOrType,
             string name,
-            TypeKind typeKind = TypeKind.Class,
             Action<INamedTypeBuilder>? buildType = null );
 
         INamespaceIntroductionAdviceResult IntroduceNamespace(

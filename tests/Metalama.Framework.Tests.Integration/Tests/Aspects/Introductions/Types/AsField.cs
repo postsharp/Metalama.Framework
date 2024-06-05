@@ -12,7 +12,6 @@ public class IntroductionAttribute : TypeAspect
         var result = builder.Advice.IntroduceClass(
             builder.Target,
             "IntroducedNestedType",
-            TypeKind.Class,
             buildType: t => { t.Accessibility = Code.Accessibility.Public; } );
 
         var existingNested = builder.Target.Types.Single();

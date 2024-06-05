@@ -1518,14 +1518,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     public IClassIntroductionAdviceResult IntroduceClass(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
-        TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
-        if ( typeKind is not TypeKind.Class )
-        {
-            throw new NotImplementedException( "Introducing other kinds of types than classes is not implemented." );
-        }
-
         using ( this.WithNonUserCode() )
         {
             this.ValidateExplicitInterfaceImplementation( AdviceKind.IntroduceType );

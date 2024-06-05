@@ -1044,12 +1044,10 @@ public static class AdviserExtensions
     public static IClassIntroductionAdviceResult IntroduceClass(
         this IAdviser<INamespaceOrNamedType> adviser,
         string name,
-        TypeKind typeKind = TypeKind.Class,
         Action<INamedTypeBuilder>? buildType = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
             adviser.Target,
             name,
-            typeKind,
             buildType );
 
     public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<ICompilation> adviser, string name )

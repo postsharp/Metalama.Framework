@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeIntoType
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.IntroduceClass("TestType", TypeKind.Class);
+            builder.IntroduceClass("TestType");
         }
     }
 
