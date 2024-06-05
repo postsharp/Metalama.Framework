@@ -97,7 +97,7 @@ namespace Metalama.Testing.AspectTesting
         {
             if ( syntaxNode != null )
             {
-                if (this.InputDocument == null)
+                if ( this.InputDocument == null )
                 {
                     throw new AssertionFailedException( "Introduced syntax trees cannot have compile-time code." );
                 }
@@ -126,7 +126,7 @@ namespace Metalama.Testing.AspectTesting
 
                 default:
                     throw new ArgumentOutOfRangeException(
-                        nameof( syntaxNode ),
+                        nameof(syntaxNode),
                         $"The root of the document must be a CompilationUnitSyntax or a MemberDeclarationSyntax but it is a {syntaxNode.Kind()}." );
             }
 
@@ -146,7 +146,10 @@ namespace Metalama.Testing.AspectTesting
             }
             else
             {
-                outputDocument = this._parent.OutputProject!.AddDocument( syntaxNode.SyntaxTree.FilePath, compilationUnit, filePath: syntaxNode.SyntaxTree.FilePath );
+                outputDocument = this._parent.OutputProject!.AddDocument(
+                    syntaxNode.SyntaxTree.FilePath,
+                    compilationUnit,
+                    filePath: syntaxNode.SyntaxTree.FilePath );
 
                 this._parent.OutputProject = outputDocument.Project;
             }

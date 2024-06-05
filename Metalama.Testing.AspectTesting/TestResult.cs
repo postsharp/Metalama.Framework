@@ -2,6 +2,7 @@
 
 using JetBrains.Annotations;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -223,7 +224,7 @@ internal class TestResult : IDisposable
         {
             TestSyntaxTree? testSyntaxTree;
 
-            if (introducedSyntaxTreePaths.Contains(syntaxTree.FilePath))
+            if ( introducedSyntaxTreePaths.Contains( syntaxTree.FilePath ) )
             {
                 testSyntaxTree = TestSyntaxTree.CreateIntroduced( this );
 
@@ -231,7 +232,8 @@ internal class TestResult : IDisposable
             }
             else
             {
-                testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => x.InputDocument != null && StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+                testSyntaxTree = this.SyntaxTrees.SingleOrDefault(
+                    x => x.InputDocument != null && StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
 
                 if ( testSyntaxTree == null )
                 {
@@ -303,7 +305,7 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.OrderBy( x => x.InputPath ?? x.OutputDocument.FilePath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
+                ? this.SyntaxTrees.OrderBy( x => x.InputPath ?? x.OutputDocument.AssertNotNull().FilePath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
                 : this.SyntaxTrees.Take( 1 ).ToArray();
 
         var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary );
