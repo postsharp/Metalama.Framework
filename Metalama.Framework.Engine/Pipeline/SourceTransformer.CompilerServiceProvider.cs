@@ -23,6 +23,7 @@ public sealed partial class SourceTransformer
         private readonly ILoggerFactory _loggerFactory;
         private readonly Dictionary<Type, object> _services = new();
         private readonly IDisposable _scope;
+        private readonly IDisposable? _session;
 
         public CompilerServiceProvider( IServiceProvider serviceProvider, AnalyzerConfigOptionsProvider contextAnalyzerConfigOptionsProvider )
         {
@@ -36,6 +37,22 @@ public sealed partial class SourceTransformer
             this._services.Add( typeof(ILoggerFactory), this._loggerFactory );
             this._services.Add( typeof(ILogger), new LoggerAdapter( this._loggerFactory.GetLogger( "Compiler" ) ) );
             this._services.Add( typeof(IExceptionReporter), new ExceptionReporterAdapter( serviceProvider.GetBackstageService<IExceptionReporter>() ) );
+            
+            // Initialize usage reporting.
+            try
+            {
+                if ( serviceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && options.AssemblyName != null
+                                                                                                && usageReporter.ShouldReportSession( options.AssemblyName ) )
+                {
+                    this._session = usageReporter.StartSession( "TransformerUsage" );
+                }
+            }
+            catch ( Exception e )
+            {
+                ReportException( e, serviceProvider, false );
+
+                // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
+            }
         }
 
         public object? GetService( Type serviceType )
@@ -50,7 +67,7 @@ public sealed partial class SourceTransformer
             // Report usage.
             try
             {
-                this._serviceProvider.GetBackstageService<IUsageReporter>()?.StopSession();
+                this._session?.Dispose();
             }
             catch ( Exception e )
             {

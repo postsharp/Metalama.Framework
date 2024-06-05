@@ -5,7 +5,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Backstage.Licensing.Consumption.Sources;
-using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
@@ -53,22 +52,6 @@ public sealed partial class SourceTransformer : ISourceTransformerWithServices
         }
 
         var backstageServiceProvider = BackstageServiceFactory.ServiceProvider;
-
-        // Initialize usage reporting.
-        try
-        {
-            if ( backstageServiceProvider.GetBackstageService<IUsageReporter>() is { } usageReporter && context.Compilation.AssemblyName != null &&
-                 usageReporter.ShouldReportSession( context.Compilation.AssemblyName ) )
-            {
-                usageReporter.StartSession( "TransformerUsage" );
-            }
-        }
-        catch ( Exception e )
-        {
-            ReportException( e, backstageServiceProvider, false );
-
-            // We don't re-throw here as we don't want compiler to crash because of usage reporting exceptions.
-        }
 
         return new CompilerServiceProvider( backstageServiceProvider, context.AnalyzerConfigOptionsProvider );
     }
