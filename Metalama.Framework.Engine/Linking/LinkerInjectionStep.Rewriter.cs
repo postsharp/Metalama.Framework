@@ -532,7 +532,7 @@ internal sealed partial class LinkerInjectionStep
                             injectedNamedTypeMembers,
                             syntaxGenerationContext );
 
-                        var namespaceTypeDeclaration = (TypeDeclarationSyntax)namespaceDeclaration.Members.Single();
+                        var namespaceTypeDeclaration = (TypeDeclarationSyntax) namespaceDeclaration.Members.Single();
                         namespaceTypeDeclaration = namespaceTypeDeclaration.WithMembers( namespaceTypeDeclaration.Members.AddRange( injectedNamedTypeMembers ) );
                         namespaceTypeDeclaration = AddInjectedInterfaces( namespaceTypeBuilder, namespaceTypeDeclaration );
 

@@ -12,12 +12,14 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+
 #if NET5_0_OR_GREATER
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
@@ -192,7 +194,7 @@ internal class AspectTestRunner : BaseTestRunner
         var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
         var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject!.Id )!.GetCompilationAsync();
 
-        await testResult.SetOutputCompilationAsync( transformedCompilation! );
+        await testResult.SetOutputCompilationAsync( transformedCompilation!, new HashSet<string>() );
         testResult.HasOutputCode = true;
 
         return true;
@@ -209,12 +211,13 @@ internal class AspectTestRunner : BaseTestRunner
         testResult.HasOutputCode = true;
         testResult.DiagnosticSuppressions = pipelineResult.DiagnosticSuppressions;
 
-        foreach ( var addTransformation in pipelineResult.SyntaxTreeTransformations.Where( t => t.Kind == Compiler.SyntaxTreeTransformationKind.Add ) )
-        {
-            await testResult.AddIntroducedSyntaxTreeAsync( addTransformation.FilePath );
-        }
+        var introducedSyntaxTreePaths = 
+            pipelineResult.SyntaxTreeTransformations
+            .Where( t => t.Kind == Compiler.SyntaxTreeTransformationKind.Add )
+            .Select( t => t.NewTree.AssertNotNull().FilePath )
+            .ToHashSet();
 
-        await testResult.SetOutputCompilationAsync( resultCompilation );
+        await testResult.SetOutputCompilationAsync( resultCompilation, introducedSyntaxTreePaths );
 
         if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
         {

@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal interface IInjectInterfaceTransformation : ITransformation, ISyntaxTreeTransformation
+internal interface IInjectInterfaceTransformation : ISyntaxTreeTransformation
 {
     BaseTypeSyntax GetSyntax( SyntaxGenerationOptions options );
 }

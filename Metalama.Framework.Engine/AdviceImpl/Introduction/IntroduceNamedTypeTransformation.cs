@@ -48,7 +48,7 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
             case INamedType:
                 return new[] { new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
 
-            case INamespace containingNamespace:
+            case INamespace:
                 var namespaceDeclaration =
                     NamespaceDeclaration(
                         Token( TriviaList(), SyntaxKind.NamespaceKeyword, TriviaList( ElasticSpace ) ),

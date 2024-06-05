@@ -141,22 +141,6 @@ internal class TestResult : IDisposable
     internal async Task AddInputDocumentAsync( Document document, string? path )
         => this._syntaxTrees.Add( await TestSyntaxTree.CreateAsync( path, document, this ) );
 
-    internal async Task AddIntroducedSyntaxTreeAsync( string filePath )
-    {
-        // TODO: Adding a document to the input project is a hack.
-        if ( this.InputProject == null )
-        {
-            throw new InvalidOperationException( "Project is null." );
-        }
-
-        var document = this.InputProject.AddDocument( filePath, SyntaxFactory.CompilationUnit(), filePath: filePath );
-        this.InputProject = document.Project;
-
-        var testSyntaxTree = await TestSyntaxTree.CreateAsync( filePath, document, this );
-
-        this._syntaxTrees.Add( testSyntaxTree );
-    }
-
     private static string CleanMessage( string text )
     {
         // Remove local-specific stuff.
@@ -226,7 +210,7 @@ internal class TestResult : IDisposable
         }
     }
 
-    internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation )
+    internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation, HashSet<string> introducedSyntaxTreePaths )
     {
         if ( this.InputCompilation == null ||
              this.TestInput == null ||
@@ -237,18 +221,27 @@ internal class TestResult : IDisposable
 
         foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
         {
-            var testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+            TestSyntaxTree? testSyntaxTree;
 
-            if ( testSyntaxTree == null )
+            if (introducedSyntaxTreePaths.Contains(syntaxTree.FilePath))
             {
-                // This is the "Intrinsics" syntax tree.
-                continue;
+                testSyntaxTree = TestSyntaxTree.CreateIntroduced( this );
+
+                this._syntaxTrees.Add( testSyntaxTree );
+            }
+            else
+            {
+                testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => x.InputDocument != null && StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+
+                if ( testSyntaxTree == null )
+                {
+                    // This is the "Intrinsics" syntax tree.
+                    continue;
+                }
             }
 
-            var syntaxNode = await syntaxTree.GetRootAsync();
-
             // Format the output code.
-            await testSyntaxTree.SetRunTimeCodeAsync( syntaxNode );
+            await testSyntaxTree.SetRunTimeCodeAsync( await syntaxTree.GetRootAsync() );
         }
     }
 
@@ -310,7 +303,7 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
+                ? this.SyntaxTrees.OrderBy( x => x.InputPath ?? x.OutputDocument.FilePath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
                 : this.SyntaxTrees.Take( 1 ).ToArray();
 
         var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary );
@@ -468,7 +461,7 @@ internal class TestResult : IDisposable
                     CSharpSyntaxTree.Create(
                         consolidatedCompilationUnit,
                         path: Path.GetFileName(
-                            outputSyntaxTree.InputPath
+                            outputSyntaxTree.InputPath ?? outputSyntaxTree.OutputDocument?.FilePath
                             ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
             }
         }

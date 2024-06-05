@@ -39,7 +39,7 @@ namespace Metalama.Testing.AspectTesting
                 var originalSyntaxTree =
                     this._testResult.SyntaxTrees
                         .Select( ( item, index ) => (item, index) )
-                        .Single( x => x.item.InputSyntaxTree.FilePath == sourceSyntaxRoot.SyntaxTree.FilePath )
+                        .Single( x => x.item.InputSyntaxTree != null && x.item.InputSyntaxTree.FilePath == sourceSyntaxRoot.SyntaxTree.FilePath )
                         .item;
 
                 SyntaxNode previousRoot;

@@ -800,7 +800,7 @@ internal abstract partial class BaseTestRunner
         StreamWriter? outputTextWriter = null;
         List<Diagnostic>? inputDiagnostics = null;
 
-        if ( testResult.TestInput!.Options.WriteInputHtml == true )
+        if ( testResult.TestInput!.Options.WriteInputHtml == true && testSyntaxTree.InputDocument != null )
         {
             testSyntaxTree.HtmlInputPath = Path.Combine(
                 htmlDirectory,
@@ -812,8 +812,8 @@ internal abstract partial class BaseTestRunner
 
             // Add diagnostics to the input tree.
             inputDiagnostics = new List<Diagnostic>();
-            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.FilePath ) );
-            var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree );
+            inputDiagnostics.AddRange( testResult.Diagnostics.Where( d => d.Location.SourceTree?.FilePath == testSyntaxTree.InputSyntaxTree.AssertNotNull().FilePath ) );
+            var semanticModel = compilationWithDesignTimeTrees.AssertNotNull().GetSemanticModel( testSyntaxTree.InputSyntaxTree.AssertNotNull() );
 
             foreach ( var diagnostic in semanticModel.GetDiagnostics().Where( d => !testResult.TestInput.ShouldIgnoreDiagnostic( d.Id ) ) )
             {
@@ -838,14 +838,14 @@ internal abstract partial class BaseTestRunner
         {
             testSyntaxTree.HtmlOutputPath = Path.Combine(
                 htmlDirectory,
-                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument.FilePath ) + FileExtensions.TransformedHtml );
+                Path.GetFileNameWithoutExtension( testSyntaxTree.InputDocument?.FilePath ?? testSyntaxTree.OutputDocument.AssertNotNull().FilePath ) + FileExtensions.TransformedHtml );
 
             this.Logger?.WriteLine( "HTML of output: " + testSyntaxTree.HtmlOutputPath );
 
             outputTextWriter = new StreamWriter( this._fileSystem.Open( testSyntaxTree.HtmlOutputPath, FileMode.Create ) );
         }
 
-        if ( writeDiff && inputTextWriter != null && outputTextWriter != null )
+        if ( writeDiff && inputTextWriter != null && outputTextWriter != null && testSyntaxTree.InputDocument != null )
         {
             using ( inputTextWriter.IgnoreAsyncDisposable() )
             using ( outputTextWriter.IgnoreAsyncDisposable() )
@@ -860,7 +860,7 @@ internal abstract partial class BaseTestRunner
         }
         else
         {
-            if ( inputTextWriter != null )
+            if ( inputTextWriter != null && testSyntaxTree.InputDocument != null )
             {
                 using ( inputTextWriter.IgnoreAsyncDisposable() )
                 {

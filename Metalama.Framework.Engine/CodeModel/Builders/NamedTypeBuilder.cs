@@ -218,17 +218,17 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     public Type ToType() => throw new NotImplementedException();
 
-    public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember ) 
+    public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
     public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.FullName;
 
     public IntroduceNamedTypeTransformation ToTransformation() => new( this.ParentAdvice, this );
 
-    IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member ) 
+    IReadOnlyList<IMember> INamedTypeImpl.GetOverridingMembers( IMember member )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
-    bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember ) 
+    bool INamedTypeImpl.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
         => throw new NotSupportedException( "This method is not supported on the builder." );
 
     ITypeImpl ITypeImpl.Accept( TypeRewriter visitor ) => visitor.Visit( this );
@@ -237,8 +237,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
 
     [Memo]
     public override SyntaxTree PrimarySyntaxTree
-        =>
-        this.ContainingDeclaration switch
+        => this.ContainingDeclaration switch
         {
             INamespace =>
                 CSharpSyntaxTree.Create(
@@ -250,6 +249,6 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
                     path: this.FullName + ".cs",
                     encoding: Encoding.UTF8 ),
             INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
-            _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" ) 
+            _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };
 }
