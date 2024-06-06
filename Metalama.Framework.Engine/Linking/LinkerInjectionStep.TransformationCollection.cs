@@ -49,6 +49,8 @@ internal sealed partial class LinkerInjectionStep
 
         private readonly HashSet<ITransformation> _transformationsCausingAuxiliaryOverrides;
 
+        private readonly HashSet<SyntaxTree> _introducedSyntaxTrees;
+
         public IReadOnlyCollection<InjectedMember> InjectedMembers => this._injectedMembers;
 
         public IReadOnlyDictionary<IDeclarationBuilder, IIntroduceDeclarationTransformation> BuilderToTransformationMap => this._builderToTransformationMap;
@@ -60,6 +62,9 @@ internal sealed partial class LinkerInjectionStep
 
         // ReSharper disable once InconsistentlySynchronizedField
         public ISet<ITransformation> TransformationsCausingAuxiliaryOverrides => this._transformationsCausingAuxiliaryOverrides;
+
+        // ReSharper disable once InconsistentlySynchronizedField
+        public ISet<SyntaxTree> IntroducedSyntaxTrees => this._introducedSyntaxTrees;
 
         public TransformationCollection( CompilationModel finalCompilationModel, TransformationLinkerOrderComparer comparer )
         {
@@ -86,6 +91,7 @@ internal sealed partial class LinkerInjectionStep
 
             this._lateTypeLevelTransformations = new ConcurrentDictionary<INamedType, LateTypeLevelTransformations>( finalCompilationModel.Comparers.Default );
             this._transformationsCausingAuxiliaryOverrides = new HashSet<ITransformation>();
+            this._introducedSyntaxTrees = new HashSet<SyntaxTree>();
         }
 
         public void AddInjectedMember( InjectedMember injectedMember )
@@ -568,5 +574,13 @@ internal sealed partial class LinkerInjectionStep
                     transformation.OrderWithinPipelineStepAndType,
                     transformation.OrderWithinPipelineStepAndTypeAndAspectInstance )
                 : new MemberLayerIndex( 0, 0, 0 );
+
+        public void AddIntroducedSyntaxTree( SyntaxTree transformedSyntaxTree )
+        {
+            lock ( this._introducedSyntaxTrees )
+            {
+                this._introducedSyntaxTrees.Add( transformedSyntaxTree );
+            }
+        }
     }
 }

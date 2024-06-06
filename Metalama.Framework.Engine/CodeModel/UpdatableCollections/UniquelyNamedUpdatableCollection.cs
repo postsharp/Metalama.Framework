@@ -9,7 +9,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCollection<T>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
     private ImmutableDictionary<string, MemberRef<T>>? _dictionary;
 
@@ -44,7 +44,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         else
         {
             // The dictionary was not yet populated.
-            if ( this.GetMemberRef( member.Name ).HasValue )
+            if ( !this.GetMemberRef( member.Name ).IsDefault )
             {
                 throw new AssertionFailedException( $"Duplicate item: '{member}'." );
             }
@@ -57,7 +57,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         this.AddItem( member.ToRef() );
     }
 
-    protected abstract MemberRef<T>? GetMemberRef( string name );
+    protected abstract MemberRef<T> GetMemberRef( string name );
 
     protected abstract IEnumerable<MemberRef<T>> GetMemberRefs();
 
@@ -86,7 +86,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         else
         {
             // The dictionary was not yet populated.
-            if ( !this.GetMemberRef( member.Name ).HasValue )
+            if ( this.GetMemberRef( member.Name ).IsDefault )
             {
                 // Missing key.
                 throw new AssertionFailedException( $"Missing item: '{member}'." );
@@ -151,7 +151,7 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         {
             var memberRef = this.GetMemberRef( name );
 
-            if ( !memberRef.HasValue )
+            if ( memberRef.IsDefault )
             {
                 this._dictionary = dictionary.SetItem( name, default );
 
@@ -159,9 +159,9 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
             }
             else
             {
-                this._dictionary = dictionary.SetItem( name, memberRef.Value );
+                this._dictionary = dictionary.SetItem( name, memberRef );
 
-                return ImmutableArray.Create( memberRef.Value );
+                return ImmutableArray.Create( memberRef );
             }
         }
     }

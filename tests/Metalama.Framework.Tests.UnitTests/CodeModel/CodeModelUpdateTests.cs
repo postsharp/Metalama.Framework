@@ -589,4 +589,120 @@ class C
         // Assert that the method has been added.
         Assert.Equal( 2, type.Types.OfName( "T" ).Count() );
     }
+
+    [Fact]
+    public void AddNamespace_DontInitializeBefore_Complete()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var globalNamespace = compilation.GlobalNamespace;
+
+        // Add a namespace.
+        var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
+        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.Single( globalNamespace.Namespaces );
+
+        // Assert that there is still no namespace in original compilation.
+        Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
+    }
+
+    [Fact]
+    public void AddNamespace_DontInitializeBefore_OfName()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var globalNamespace = compilation.GlobalNamespace;
+
+        // Add a namespace.
+        var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
+        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.NotNull( globalNamespace.Namespaces.OfName( "N" ) );
+
+        // Assert that there is still no type in original compilation.
+        Assert.Null( immutableCompilation.GlobalNamespace.Namespaces.OfName( "N" ) );
+    }
+
+    [Fact]
+    public void AddNamespace_InitializeBefore_Complete()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"
+class C
+{    
+    class T<U>;
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var globalNamespace = compilation.GlobalNamespace;
+
+        // Instantiate the memoize the collection of nested types.
+        Assert.Empty( globalNamespace.Namespaces );
+
+        // Add a namespace.
+        var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
+        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.Single( globalNamespace.Namespaces );
+
+        // Assert that there is still no namespace in original compilation.
+        Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
+    }
+
+    [Fact]
+    public void AddNamespace_InitializeBefore_ByName()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = @"";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.GlobalNamespace.Namespaces );
+
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var globalNamespace = compilation.GlobalNamespace;
+
+        // Instantiate the memoize the collection of nested types.
+        Assert.Null( globalNamespace.Namespaces.OfName( "N" ) );
+
+        // Add a namespace.
+        var namespaceBuilder = new NamespaceBuilder( null!, globalNamespace, "N" );
+        compilation.AddTransformation( namespaceBuilder.ToTransformation() );
+
+        // Assert that the type has been added.
+        Assert.NotNull( globalNamespace.Namespaces.OfName( "N" ) );
+
+        // Assert that there is still no type in original compilation.
+        Assert.Null( immutableCompilation.GlobalNamespace.Namespaces.OfName( "N" ) );
+    }
 }

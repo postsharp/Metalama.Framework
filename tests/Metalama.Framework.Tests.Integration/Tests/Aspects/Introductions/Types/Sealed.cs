@@ -9,7 +9,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.IntroduceClass( "SealedType", TypeKind.Class, buildType: t => { t.IsSealed = true; } );
+        var introducedType = builder.IntroduceClass( "SealedType", buildType: t => { t.IsSealed = true; } );
     }
 }
 

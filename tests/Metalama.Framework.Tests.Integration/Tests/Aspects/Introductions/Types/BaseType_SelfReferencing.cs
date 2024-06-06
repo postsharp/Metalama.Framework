@@ -16,7 +16,6 @@ public class IntroductionAttribute : TypeAspect
         builder.Advice.IntroduceClass(
             builder.Target,
             "TestNestedType",
-            TypeKind.Class,
             buildType: t => { t.BaseType = builder.Target.WithTypeArguments( t ); } );
     }
 }

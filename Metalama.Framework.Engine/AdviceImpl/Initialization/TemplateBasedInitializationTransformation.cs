@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Initialization;
 
-internal sealed class TemplateBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
+internal sealed class TemplateBasedInitializationTransformation : BaseSyntaxTreeTransformation, IInsertStatementTransformation
 {
     private readonly IConstructor _targetConstructor;
     private readonly BoundTemplateMethod _boundTemplate;

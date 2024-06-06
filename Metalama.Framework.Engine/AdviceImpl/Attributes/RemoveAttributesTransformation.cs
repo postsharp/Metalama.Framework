@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
-internal sealed class RemoveAttributesTransformation : BaseTransformation, ITransformation
+internal sealed class RemoveAttributesTransformation : BaseSyntaxTreeTransformation, ITransformation
 {
     public INamedType AttributeType { get; }
 

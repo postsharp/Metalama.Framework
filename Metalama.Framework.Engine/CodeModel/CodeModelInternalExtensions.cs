@@ -66,6 +66,10 @@ internal static class CodeModelInternalExtensions
                     InsertPositionRelation.Within,
                     (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
+            case NamedTypeBuilder topLevelType:
+                return new InsertPosition(
+                    topLevelType.PrimarySyntaxTree );
+
             case IMemberBuilder { DeclaringType: NamedTypeBuilder declaringBuilder }:
                 return new InsertPosition( InsertPositionRelation.Within, declaringBuilder );
 

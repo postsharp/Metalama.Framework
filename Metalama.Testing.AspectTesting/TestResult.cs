@@ -219,20 +219,32 @@ internal class TestResult : IDisposable
             throw new InvalidOperationException( "The object has not been properly initialized." );
         }
 
+        var introducedSyntaxTreePaths = this.InputCompilation.SyntaxTrees.Select( t => t.FilePath ).ToHashSet();
+
         foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
         {
-            var testSyntaxTree = this.SyntaxTrees.SingleOrDefault( x => StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+            TestSyntaxTree? testSyntaxTree;
 
-            if ( testSyntaxTree == null )
+            if ( !introducedSyntaxTreePaths.Contains( syntaxTree.FilePath ) )
             {
-                // This is the "Intrinsics" syntax tree.
-                continue;
+                testSyntaxTree = TestSyntaxTree.CreateIntroduced( this );
+
+                this._syntaxTrees.Add( testSyntaxTree );
+            }
+            else
+            {
+                testSyntaxTree = this.SyntaxTrees.SingleOrDefault(
+                    x => x.InputDocument != null && StringComparer.Ordinal.Equals( x.InputDocument.FilePath, syntaxTree.FilePath ) );
+
+                if ( testSyntaxTree == null )
+                {
+                    // This is the "Intrinsics" syntax tree.
+                    continue;
+                }
             }
 
-            var syntaxNode = await syntaxTree.GetRootAsync();
-
             // Format the output code.
-            await testSyntaxTree.SetRunTimeCodeAsync( syntaxNode );
+            await testSyntaxTree.SetRunTimeCodeAsync( await syntaxTree.GetRootAsync() );
         }
     }
 
@@ -294,8 +306,40 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.OrderBy( x => x.InputPath, StringComparer.InvariantCultureIgnoreCase ).AsEnumerable()
-                : this.SyntaxTrees.Take( 1 );
+                ? this.SyntaxTrees.OrderBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
+                : this.SyntaxTrees.Take( 1 ).ToArray();
+
+        var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary );
+        var outputTreesByFilePath = outputSyntaxTrees.Where( x => x.InputPath != null ).ToDictionary( x => x.InputPath!, x => x );
+
+        // Assign diagnostics to syntax trees.
+        var diagnosticsBySyntaxTree = new Dictionary<TestSyntaxTree, List<Diagnostic>>();
+
+        foreach ( var diagnostic in this.Diagnostics )
+        {
+            var diagnosticsSourceFilePath = diagnostic.Location.SourceTree?.FilePath;
+
+            if ( diagnosticsSourceFilePath != null && outputTreesByFilePath.TryGetValue( diagnosticsSourceFilePath, out var diagnosticSourceSyntaxTree ) )
+            {
+                if ( !diagnosticsBySyntaxTree.TryGetValue( diagnosticSourceSyntaxTree, out var diagnostics ) )
+                {
+                    diagnostics = new List<Diagnostic>();
+                    diagnosticsBySyntaxTree.Add( diagnosticSourceSyntaxTree, diagnostics );
+                }
+
+                diagnostics.Add( diagnostic );
+            }
+            else if ( primaryOutputTree != null )
+            {
+                if ( !diagnosticsBySyntaxTree.TryGetValue( primaryOutputTree, out var diagnostics ) )
+                {
+                    diagnostics = new List<Diagnostic>();
+                    diagnosticsBySyntaxTree.Add( primaryOutputTree, diagnostics );
+                }
+
+                diagnostics.Add( diagnostic );
+            }
+        }
 
         foreach ( var outputSyntaxTree in outputSyntaxTrees )
         {
@@ -303,7 +347,7 @@ internal class TestResult : IDisposable
             {
                 continue;
             }
-            
+
             var consolidatedCompilationUnit = SyntaxFactory.CompilationUnit();
 
             if ( this.HasOutputCode && outputSyntaxTree is { OutputRunTimeSyntaxRoot: not null } && this.TestInput.Options.RemoveOutputCode != true )
@@ -380,25 +424,34 @@ internal class TestResult : IDisposable
             // Adding the diagnostics as trivia.
             List<SyntaxTrivia> comments = new();
 
-            if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
-                                   || this.Diagnostics.All( c => c.Severity != DiagnosticSeverity.Error )) )
+            if ( diagnosticsBySyntaxTree.TryGetValue( outputSyntaxTree, out var diagnosticsForOutputTree ) )
             {
-                comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                if ( !this.Success && (this.TestInput!.Options.ReportErrorMessage.GetValueOrDefault()
+                                       || diagnosticsForOutputTree.All( c => c.Severity != DiagnosticSeverity.Error )) )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
+
+                // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
+                comments.AddRange(
+                    diagnosticsForOutputTree
+                        .Where(
+                            d => d.Id != "LAMA0222" &&
+                                 (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
+                                  || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
+                        .OrderBy( d => d.Location.SourceSpan.Start )
+                        .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
+                        .SelectMany( this.GetDiagnosticComments )
+                        .Select( SyntaxFactory.Comment )
+                        .ToReadOnlyList() );
             }
-
-            // We exclude LAMA0222 from the results because it contains randomly-generated info and tests need to be deterministic.
-
-            comments.AddRange(
-                this.Diagnostics
-                    .Where(
-                        d => d.Id != "LAMA0222" &&
-                             (this.TestInput!.Options.IncludeAllSeverities.GetValueOrDefault()
-                              || d.Severity >= DiagnosticSeverity.Warning) && !this.TestInput.ShouldIgnoreDiagnostic( d.Id ) )
-                    .OrderBy( d => d.Location.SourceSpan.Start )
-                    .ThenBy( d => d.GetMessage( CultureInfo.InvariantCulture ), StringComparer.Ordinal )
-                    .SelectMany( this.GetDiagnosticComments )
-                    .Select( SyntaxFactory.Comment )
-                    .ToReadOnlyList() );
+            else
+            {
+                if ( !this.Success )
+                {
+                    comments.Add( SyntaxFactory.Comment( $"// {this.ErrorMessage} \n" ) );
+                }
+            }
 
             consolidatedCompilationUnit = consolidatedCompilationUnit.WithLeadingTrivia( comments );
 
@@ -411,7 +464,7 @@ internal class TestResult : IDisposable
                     CSharpSyntaxTree.Create(
                         consolidatedCompilationUnit,
                         path: Path.GetFileName(
-                            outputSyntaxTree.InputPath
+                            outputSyntaxTree.FilePath
                             ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
             }
         }

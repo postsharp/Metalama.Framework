@@ -88,13 +88,16 @@ internal sealed partial class LinkerInjectionStep
                 }
             }
 
-            // Order by accessibility.
-            var accessibilityComparison =
-                GetAccessibilityOrder( declaration.Accessibility ).CompareTo( GetAccessibilityOrder( otherDeclaration.Accessibility ) );
-
-            if ( accessibilityComparison != 0 )
+            if ( declaration is IMemberOrNamedType memberOrNamedType && otherDeclaration is IMemberOrNamedType otherMemberOrNamedType )
             {
-                return accessibilityComparison;
+                // Order by accessibility.
+                var accessibilityComparison =
+                    GetAccessibilityOrder( memberOrNamedType.Accessibility ).CompareTo( GetAccessibilityOrder( otherMemberOrNamedType.Accessibility ) );
+
+                if ( accessibilityComparison != 0 )
+                {
+                    return accessibilityComparison;
+                }
             }
 
             // Order by implemented interface.
@@ -206,7 +209,7 @@ internal sealed partial class LinkerInjectionStep
 
         private static int GetSemanticOrder( InjectedMemberSemantic semantic ) => semantic != InjectedMemberSemantic.InitializerMethod ? 0 : 1;
 
-        private static IMemberOrNamedType GetDeclaration( InjectedMember injectedMember )
+        private static INamedDeclaration GetDeclaration( InjectedMember injectedMember )
         {
             var declaration = injectedMember.Declaration;
 

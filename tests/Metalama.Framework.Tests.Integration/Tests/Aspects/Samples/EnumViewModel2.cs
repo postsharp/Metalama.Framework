@@ -26,7 +26,6 @@ public class EnumViewModelAttribute : TypeAspect
         var viewModelType = builder.Advice.IntroduceClass(
                 builder.Target,
                 enumType.Name + "ViewModel",
-                TypeKind.Class,
                 b => { b.Accessibility = Accessibility.Public; } )
             .Declaration;
 

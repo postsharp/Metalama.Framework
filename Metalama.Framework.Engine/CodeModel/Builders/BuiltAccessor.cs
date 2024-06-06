@@ -18,7 +18,7 @@ internal sealed class BuiltAccessor : BuiltDeclaration, IMethodImpl
     private readonly BuiltMember _builtMember;
     private readonly AccessorBuilder _accessorBuilder;
 
-    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builder )
+    public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
     {
         this._builtMember = builtMember;
         this._accessorBuilder = builder;

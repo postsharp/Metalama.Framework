@@ -9,11 +9,14 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public string Name { get; }
 
-        public SyntaxTree SourceSyntaxTree { get; }
+        /// <summary>
+        /// Gets the source syntax tree or null if the generated syntax tree does not have a source syntax tree.
+        /// </summary>
+        public SyntaxTree? SourceSyntaxTree { get; }
 
         public SyntaxTree GeneratedSyntaxTree { get; }
 
-        internal IntroducedSyntaxTree( string name, SyntaxTree sourceSyntaxTree, SyntaxTree generatedSyntaxTree )
+        public IntroducedSyntaxTree( string name, SyntaxTree? sourceSyntaxTree, SyntaxTree generatedSyntaxTree )
         {
             IdentifierHelper.ValidateSyntaxTreeName( name );
 

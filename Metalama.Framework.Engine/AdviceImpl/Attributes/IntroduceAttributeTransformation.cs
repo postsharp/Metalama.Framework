@@ -12,7 +12,7 @@ using System;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Attributes;
 
-internal sealed class IntroduceAttributeTransformation : BaseTransformation, IIntroduceDeclarationTransformation
+internal sealed class IntroduceAttributeTransformation : BaseSyntaxTreeTransformation, IIntroduceDeclarationTransformation
 {
     public AttributeBuilder AttributeBuilder { get; }
 

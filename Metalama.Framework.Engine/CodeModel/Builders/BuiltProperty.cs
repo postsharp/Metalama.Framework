@@ -12,9 +12,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltProperty : BuiltPropertyOrIndexer, IPropertyImpl
 {
-    public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( builder, compilation ) { }
+    public PropertyBuilder PropertyBuilder { get; }
 
-    public PropertyBuilder PropertyBuilder => (PropertyBuilder) this.MemberBuilder;
+    public BuiltProperty( CompilationModel compilation, PropertyBuilder builder ) : base( compilation ) 
+    {
+        this.PropertyBuilder = builder;
+    }
+
+    public override DeclarationBuilder Builder => this.PropertyBuilder;
+
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.PropertyBuilder;
+
+    protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
+
+    protected override MemberBuilder MemberBuilder => this.PropertyBuilder;
+
+    protected override PropertyOrIndexerBuilder PropertyOrIndexerBuilder => this.PropertyBuilder;
 
     public bool? IsAutoPropertyOrField => this.PropertyBuilder.IsAutoPropertyOrField;
 

@@ -9,9 +9,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introduced = builder.IntroduceClass( "Test", TypeKind.Class );
-        var inner = introduced.IntroduceClass( "InnerTest", TypeKind.Class );
-        inner.IntroduceClass( "InnerInnerTest", TypeKind.Class );
+        var introduced = builder.IntroduceClass( "Test" );
+        var inner = introduced.IntroduceClass( "InnerTest" );
+        inner.IntroduceClass( "InnerInnerTest" );
     }
 
     [Template]

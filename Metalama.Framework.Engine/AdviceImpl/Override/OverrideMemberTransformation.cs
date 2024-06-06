@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Override;
 
-internal abstract class OverrideMemberTransformation : BaseTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
+internal abstract class OverrideMemberTransformation : BaseSyntaxTreeTransformation, IInjectMemberTransformation, IOverrideDeclarationTransformation
 {
     protected IObjectReader Tags { get; }
 

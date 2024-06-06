@@ -3,9 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.Transformations;
@@ -23,8 +21,6 @@ internal abstract class BaseTransformation : ITransformation
     public abstract IDeclaration TargetDeclaration { get; }
 
     IAspectClass ITransformationBase.AspectClass => this.ParentAdvice.AspectInstance.AspectClass;
-
-    public virtual SyntaxTree TransformedSyntaxTree => this.TargetDeclaration.GetPrimarySyntaxTree().AssertNotNull();
 
     public Advice ParentAdvice { get; }
 

@@ -8,7 +8,7 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var type = builder.Advice.IntroduceClass( builder.Target, "IntroducedType", TypeKind.Class ).Declaration;
+        var type = builder.Advice.IntroduceClass( builder.Target, "IntroducedType" ).Declaration;
 
         builder.Advice.IntroduceMethod(
             builder.Target,

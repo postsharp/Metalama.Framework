@@ -100,7 +100,10 @@ internal static class TransformationHelper
         return originalParameterList.WithAdditionalParameters( (overriddenByParameterType, AspectReferenceSyntaxProvider.LinkerOverrideParamName) );
     }
 
-    public static SyntaxGenerationContext GetSyntaxGenerationContext( this CompilationContext compilationContext, SyntaxGenerationOptions options, IDeclaration declaration )
+    public static SyntaxGenerationContext GetSyntaxGenerationContext(
+        this CompilationContext compilationContext,
+        SyntaxGenerationOptions options,
+        IDeclaration declaration )
     {
         switch ( declaration )
         {
@@ -122,17 +125,28 @@ internal static class TransformationHelper
         }
     }
 
-    public static SyntaxGenerationContext GetSyntaxGenerationContext( this CompilationContext compilationContext, SyntaxGenerationOptions options, InsertPosition insertPosition )
+    public static SyntaxGenerationContext GetSyntaxGenerationContext(
+        this CompilationContext compilationContext,
+        SyntaxGenerationOptions options,
+        InsertPosition insertPosition )
     {
-        if ( insertPosition is { Relation: InsertPositionRelation.Within, TypeBuilder: IDeclarationBuilder containingBuilder } )
+        if ( insertPosition is { Relation: InsertPositionRelation.Within, DeclarationBuilder: IDeclarationBuilder containingBuilder } )
         {
             return GetSyntaxGenerationContext( compilationContext, options, containingBuilder );
+        }
+
+        if ( insertPosition is { Relation: InsertPositionRelation.Root } )
+        {
+            // TODO: This is temporary.
+            return compilationContext.GetSyntaxGenerationContext( options, false, false, "\n" );
         }
 
         var insertOffset = insertPosition switch
         {
             { Relation: InsertPositionRelation.After, SyntaxNode: { } node } => node.Span.End + 1,
-            { Relation: InsertPositionRelation.Within, SyntaxNode: { } node } => ((BaseTypeDeclarationSyntax) node).CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: BaseTypeDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: NamespaceDeclarationSyntax node } => node.CloseBraceToken.Span.Start - 1,
+            { Relation: InsertPositionRelation.Within, SyntaxNode: FileScopedNamespaceDeclarationSyntax node } => node.Name.Span.End,
             _ => throw new AssertionFailedException( $"Unsupported {insertPosition}." ),
         };
 
