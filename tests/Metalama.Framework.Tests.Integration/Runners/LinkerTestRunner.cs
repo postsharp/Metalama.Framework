@@ -91,7 +91,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             testResult.OutputCompilation = cleanCompilation;
             testResult.HasOutputCode = true;
 
-            await testResult.SetOutputCompilationAsync( cleanCompilation, new() );
+            await testResult.SetOutputCompilationAsync( cleanCompilation );
 
             // Attempt to Emit the result.
             var emitResult = cleanCompilation.Emit( Stream.Null );

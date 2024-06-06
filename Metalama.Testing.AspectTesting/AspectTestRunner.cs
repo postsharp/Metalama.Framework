@@ -211,13 +211,7 @@ internal class AspectTestRunner : BaseTestRunner
         testResult.HasOutputCode = true;
         testResult.DiagnosticSuppressions = pipelineResult.DiagnosticSuppressions;
 
-        var introducedSyntaxTreePaths =
-            pipelineResult.SyntaxTreeTransformations
-                .Where( t => t.Kind == Compiler.SyntaxTreeTransformationKind.Add )
-                .Select( t => t.NewTree.AssertNotNull().FilePath )
-                .ToHashSet();
-
-        await testResult.SetOutputCompilationAsync( resultCompilation, introducedSyntaxTreePaths );
+        await testResult.SetOutputCompilationAsync( resultCompilation );
 
         if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
         {

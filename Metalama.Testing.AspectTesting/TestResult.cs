@@ -211,7 +211,7 @@ internal class TestResult : IDisposable
         }
     }
 
-    internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation, HashSet<string> introducedSyntaxTreePaths )
+    internal async Task SetOutputCompilationAsync( Compilation runTimeCompilation )
     {
         if ( this.InputCompilation == null ||
              this.TestInput == null ||
@@ -220,11 +220,13 @@ internal class TestResult : IDisposable
             throw new InvalidOperationException( "The object has not been properly initialized." );
         }
 
+        var introducedSyntaxTreePaths = this.InputCompilation.SyntaxTrees.Select( t => t.FilePath ).ToHashSet();
+
         foreach ( var syntaxTree in runTimeCompilation.SyntaxTrees )
         {
             TestSyntaxTree? testSyntaxTree;
 
-            if ( introducedSyntaxTreePaths.Contains( syntaxTree.FilePath ) )
+            if ( !introducedSyntaxTreePaths.Contains( syntaxTree.FilePath ) )
             {
                 testSyntaxTree = TestSyntaxTree.CreateIntroduced( this );
 
@@ -305,7 +307,7 @@ internal class TestResult : IDisposable
         // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
         var outputSyntaxTrees =
             this.TestInput.Options.OutputAllSyntaxTrees == true
-                ? this.SyntaxTrees.OrderBy( x => x.InputPath ?? x.OutputDocument.AssertNotNull().FilePath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
+                ? this.SyntaxTrees.OrderBy( x => x.FilePath, StringComparer.InvariantCultureIgnoreCase ).ToArray()
                 : this.SyntaxTrees.Take( 1 ).ToArray();
 
         var primaryOutputTree = outputSyntaxTrees.FirstOrDefault( t => !t.IsAuxiliary );
@@ -463,7 +465,7 @@ internal class TestResult : IDisposable
                     CSharpSyntaxTree.Create(
                         consolidatedCompilationUnit,
                         path: Path.GetFileName(
-                            outputSyntaxTree.InputPath ?? outputSyntaxTree.OutputDocument?.FilePath
+                            outputSyntaxTree.FilePath
                             ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
             }
         }
