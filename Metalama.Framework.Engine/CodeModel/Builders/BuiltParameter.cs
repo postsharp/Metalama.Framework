@@ -13,7 +13,7 @@ internal sealed class BuiltParameter : BuiltDeclaration, IParameterImpl
 {
     private readonly BaseParameterBuilder _parameterBuilder;
 
-    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public BuiltParameter( BaseParameterBuilder builder, CompilationModel compilation ) : base( compilation )
     {
         this._parameterBuilder = builder;
     }

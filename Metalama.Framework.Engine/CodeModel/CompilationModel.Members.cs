@@ -34,6 +34,7 @@ public sealed partial class CompilationModel
     private ImmutableDictionary<Ref<INamedType>, IConstructorBuilder> _staticConstructors;
     private ImmutableDictionary<Ref<INamedType>, IMethodBuilder> _finalizers;
     private ImmutableDictionary<Ref<INamespaceOrNamedType>, TypeUpdatableCollection> _namedTypes;
+    private ImmutableDictionary<Ref<INamespace>, NamespaceUpdatableCollection> _namespaces;
 
     internal ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance> Annotations { get; private set; }
 
@@ -86,6 +87,13 @@ public sealed partial class CompilationModel
                .ToTypedRef(),
                out var namedTypes )
            && namedTypes.Contains( namedTypeBuilder.ToTypedRef<INamedType>() );
+
+    internal bool Contains( NamespaceBuilder namespaceBuilder )
+        => this._namespaces.TryGetValue(
+               (namespaceBuilder.ContainingNamespace ?? namespaceBuilder.ContainingNamespace ?? throw new AssertionFailedException())
+               .ToTypedRef(),
+               out var namespaces )
+           && namespaces.Contains( namespaceBuilder.ToTypedRef<INamespace>() );
 
     private bool Contains( DeclarationBuilder builder )
         => builder switch
@@ -317,6 +325,39 @@ public sealed partial class CompilationModel
         return collection;
     }
 
+    internal NamespaceUpdatableCollection GetNamespaceCollection( Ref<INamespace> declaringNamespace, bool mutable = false )
+    {
+        if ( mutable && !this.IsMutable )
+        {
+            // Cannot get a mutable collection when the model is immutable.
+            throw new InvalidOperationException();
+        }
+
+        // If the model is mutable, we need to return a mutable collection because it may be mutated after the
+        // front-end collection is returned.
+        var returnMutableCollection = mutable || this.IsMutable;
+
+        if ( this._namespaces.TryGetValue( declaringNamespace, out var collection ) )
+        {
+            if ( !ReferenceEquals( collection.Compilation, this ) && returnMutableCollection )
+            {
+                // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
+                // We need to take a copy of it.
+                collection = (NamespaceUpdatableCollection) collection.Clone( this.Compilation );
+                this._namespaces = this._namespaces.SetItem( declaringNamespace, collection );
+            }
+
+            return collection;
+        }
+        else
+        {
+            collection = new NamespaceUpdatableCollection( this, declaringNamespace );
+            this._namespaces = this._namespaces.SetItem( declaringNamespace, collection );
+        }
+
+        return collection;
+    }
+
     internal void AddTransformation( ITransformation transformation )
     {
         if ( !this.IsMutable )
@@ -506,6 +547,15 @@ public sealed partial class CompilationModel
                     true );
 
                 types.Add( namedType.ToMemberRef() );
+
+                break;
+
+            case INamespace @namespace:
+                var namespaces = this.GetNamespaceCollection(
+                    @namespace.ContainingNamespace.AssertNotNull().ToTypedRef().As<INamespace>(),
+                    true );
+
+                namespaces.Add( @namespace.ToMemberRef() );
 
                 break;
 

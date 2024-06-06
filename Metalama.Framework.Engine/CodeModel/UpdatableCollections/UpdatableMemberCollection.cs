@@ -7,7 +7,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
 internal abstract class UpdatableMemberCollection<T> : UpdatableDeclarationCollection<T>, ISourceMemberCollection<T>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
     protected UpdatableMemberCollection( CompilationModel compilation, Ref<INamespaceOrNamedType> declaringType ) : base( compilation )
     {

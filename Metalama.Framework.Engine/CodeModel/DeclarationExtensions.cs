@@ -104,7 +104,7 @@ public static class DeclarationExtensions
         => compilationContext.SymbolTranslator.Translate( declaration.Symbol, declaration.GetCompilationModel().RoslynCompilation ).AssertSymbolNotNull();
 
     internal static MemberRef<T> ToMemberRef<T>( this T member )
-        where T : class, IMemberOrNamedType
+        where T : class, INamedDeclaration
         => new( member.ToTypedRef<IDeclaration>() );
 
     internal static Location? GetDiagnosticLocation( this IDeclaration declaration )

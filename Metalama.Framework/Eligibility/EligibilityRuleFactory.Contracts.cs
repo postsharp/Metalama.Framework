@@ -145,6 +145,7 @@ public static partial class EligibilityRuleFactory
 
                         AddCommonParameterRules( parameter );
                         AddCommonReturnParameterRules( parameter );
+                        parameter.DeclaringMember().DeclaringType().AddRule( declaringTypeRule );
                     } );
 
             _contractEligibilityBoth = CreateRule<IDeclaration>(

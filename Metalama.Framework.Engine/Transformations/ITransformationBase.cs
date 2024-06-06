@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Introspection;
-using Microsoft.CodeAnalysis;
 using System;
 
 namespace Metalama.Framework.Engine.Transformations;
@@ -11,8 +10,6 @@ namespace Metalama.Framework.Engine.Transformations;
 public interface ITransformationBase
 {
     IAspectClass AspectClass { get; }
-
-    SyntaxTree TransformedSyntaxTree { get; }
 
     IDeclaration TargetDeclaration { get; }
 

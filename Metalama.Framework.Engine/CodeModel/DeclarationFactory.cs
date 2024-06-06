@@ -532,7 +532,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IMethod) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltMethod( (MethodBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltMethod( c, (MethodBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -579,7 +579,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IConstructor) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( constructorBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltConstructor( (ConstructorBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltConstructor( c, (ConstructorBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -599,7 +599,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IField) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltField( (FieldBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltField( c, (FieldBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -636,7 +636,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IProperty) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltProperty( (PropertyBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltProperty( c, (PropertyBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -656,7 +656,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IIndexer) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( indexerBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltIndexer( (IndexerBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltIndexer( c, (IndexerBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -676,7 +676,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (IEvent) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( eventBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltEvent( (EventBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltEvent( c, (EventBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -696,7 +696,27 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
 
         return (INamedType) this._defaultCache.GetOrAdd(
             Ref.FromBuilder( namedTypeBuilder ).As<ICompilationElement>(),
-            static ( l, c ) => new BuiltNamedType( (NamedTypeBuilder) l.Target!, c ),
+            static ( l, c ) => new BuiltNamedType( c, (NamedTypeBuilder) l.Target! ),
+            this._compilationModel );
+    }
+
+    internal INamespace? GetNamespace( NamespaceBuilder namespaceBuilder, ReferenceResolutionOptions options, bool throwIfMissing = true )
+    {
+        if ( options.MustExist() && !this._compilationModel.Contains( namespaceBuilder ) )
+        {
+            if ( throwIfMissing )
+            {
+                throw CreateBuilderNotExists( namespaceBuilder );
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return (INamespace) this._defaultCache.GetOrAdd(
+            Ref.FromBuilder( namespaceBuilder ).As<ICompilationElement>(),
+            static ( l, c ) => new BuiltNamespace( c, (NamespaceBuilder) l.Target! ),
             this._compilationModel );
     }
 
@@ -714,6 +734,7 @@ public sealed class DeclarationFactory : IDeclarationFactory, ISdkDeclarationFac
             AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
             ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder, options, throwIfMissing ),
             NamedTypeBuilder namedTypeBuilder => this.GetNamedType( namedTypeBuilder, options, throwIfMissing ),
+            NamespaceBuilder namespaceBuilder => this.GetNamespace( namespaceBuilder, options, throwIfMissing ),
 
             // This is for linker tests (fake builders), which resolve to themselves.
             // ReSharper disable once SuspiciousTypeConversion.Global

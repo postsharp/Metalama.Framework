@@ -313,7 +313,12 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
             }
 
             // Check that the advised target is under the aspect target.
-            if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
+            // The situation where the target was introduced by the current aspect is allowed.
+            var currentTarget = target.ForCompilation( this.MutableCompilation );
+            
+            if ( !currentTarget.IsContainedIn( this._aspectTargetType ?? this._aspectTarget )
+                 && !(currentTarget.Origin is IAspectDeclarationOrigin { AspectInstance: { } originAspect }
+                      && originAspect == this._state.AspectInstance) )
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(
@@ -1513,14 +1518,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
     public IClassIntroductionAdviceResult IntroduceClass(
         INamespaceOrNamedType targetNamespaceOrType,
         string name,
-        TypeKind typeKind,
         Action<INamedTypeBuilder>? buildType = null )
     {
-        if ( typeKind is not TypeKind.Class )
-        {
-            throw new NotImplementedException( "Introducing other kinds of types than classes is not implemented." );
-        }
-
         using ( this.WithNonUserCode() )
         {
             this.ValidateExplicitInterfaceImplementation( AdviceKind.IntroduceType );
@@ -1532,6 +1531,26 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
                         name,
                         buildType )
                     .Execute( this._state ) );
+        }
+    }
+
+    public INamespaceIntroductionAdviceResult IntroduceNamespace(
+        INamespace targetNamespace,
+        string name )
+    {
+        // TODO: Dependency on template class instance should not be required.
+        if ( this._templateClassInstance == null )
+        {
+            throw new InvalidOperationException();
+        }
+
+        using ( this.WithNonUserCode() )
+        {
+            return
+                AsAdviser(
+                    this,
+                    new IntroduceNamespaceAdvice( this.GetAdviceConstructorParameters( targetNamespace ), name )
+                        .Execute( this._state ) );
         }
     }
 
@@ -1562,4 +1581,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
     private static IClassIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamedType> result )
         => new ClassIntroductionAdviceResult( adviceFactory, result );
+
+    private static INamespaceIntroductionAdviceResult AsAdviser( AdviceFactory<T> adviceFactory, IIntroductionAdviceResult<INamespace> result )
+        => new NamespaceIntroductionAdviceResult( adviceFactory, result );
 }

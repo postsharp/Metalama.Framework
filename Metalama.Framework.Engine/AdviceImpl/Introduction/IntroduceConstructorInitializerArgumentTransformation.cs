@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 /// <summary>
 /// A transformation that appends an argument to the initializer call of a constructor.
 /// </summary>
-internal sealed class IntroduceConstructorInitializerArgumentTransformation : BaseTransformation, IMemberLevelTransformation
+internal sealed class IntroduceConstructorInitializerArgumentTransformation : BaseSyntaxTreeTransformation, IMemberLevelTransformation
 {
     private IConstructor Constructor { get; }
 

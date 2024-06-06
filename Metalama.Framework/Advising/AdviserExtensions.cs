@@ -1044,13 +1044,21 @@ public static class AdviserExtensions
     public static IClassIntroductionAdviceResult IntroduceClass(
         this IAdviser<INamespaceOrNamedType> adviser,
         string name,
-        TypeKind typeKind = TypeKind.Class,
         Action<INamedTypeBuilder>? buildType = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceClass(
             adviser.Target,
             name,
-            typeKind,
             buildType );
+
+    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<ICompilation> adviser, string name )
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+            adviser.Target.GlobalNamespace,
+            name );
+
+    public static INamespaceIntroductionAdviceResult IntroduceNamespace( this IAdviser<INamespace> adviser, string name ) 
+        => ((IAdviserInternal) adviser).AdviceFactory.IntroduceNamespace(
+            adviser.Target,
+            name );
 
     /// <summary>
     /// Adds a custom annotation to a declaration. An annotation is an arbitrary but serializable object that can then be retrieved

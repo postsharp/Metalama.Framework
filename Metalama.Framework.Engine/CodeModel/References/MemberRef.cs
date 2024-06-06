@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Microsoft.CodeAnalysis;
 using System;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.References;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
-    where T : class, IMemberOrNamedType
+    where T : class, INamedDeclaration
 {
     private readonly Ref<T> _underlying;
 
@@ -53,7 +54,7 @@ internal readonly struct MemberRef<T> : IMemberRef<T>, IEquatable<MemberRef<T>>
         => this.Target switch
         {
             ISymbol symbol => symbol.Name,
-            IMemberOrNamedTypeBuilder builder => builder.Name,
+            NamedDeclarationBuilder builder => builder.Name,
             _ => throw new AssertionFailedException( $"Unexpected target type '{this.Target?.GetType()}'." )
         };
 

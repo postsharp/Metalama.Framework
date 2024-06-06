@@ -1,8 +1,6 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618
-
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Method_Partial
 {
     internal class NotNullAttribute : ContractAspect

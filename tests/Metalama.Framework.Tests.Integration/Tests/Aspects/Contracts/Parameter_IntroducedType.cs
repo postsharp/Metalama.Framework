@@ -15,7 +15,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
                 builder.Advice.IntroduceClass(
                         builder.Target,
                         "IntroducedType",
-                        TypeKind.Class,
                         buildType: b => { b.Accessibility = Accessibility.Public; } )
                     .Declaration;
 

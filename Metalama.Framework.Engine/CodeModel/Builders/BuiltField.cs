@@ -13,16 +13,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders;
 
 internal sealed class BuiltField : BuiltMember, IFieldImpl
 {
-    public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public FieldBuilder FieldBuilder { get; }
+
+    public BuiltField( CompilationModel compilation, FieldBuilder builder ) : base( compilation )
     {
         this.FieldBuilder = builder;
     }
 
-    public FieldBuilder FieldBuilder { get; }
+    public override DeclarationBuilder Builder => this.FieldBuilder;
 
-    protected override MemberBuilder MemberBuilder => this.FieldBuilder;
+    protected override NamedDeclarationBuilder NamedDeclarationBuilder => this.FieldBuilder;
 
     protected override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.FieldBuilder;
+
+    protected override MemberBuilder MemberBuilder => this.FieldBuilder;
 
     public Writeability Writeability => this.FieldBuilder.Writeability;
 

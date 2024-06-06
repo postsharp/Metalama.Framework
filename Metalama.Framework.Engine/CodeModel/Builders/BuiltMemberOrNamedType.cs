@@ -6,15 +6,13 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
-internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrNamedType
+internal abstract class BuiltMemberOrNamedType : BuiltNamedDeclaration, IMemberOrNamedType
 {
-    protected BuiltMemberOrNamedType( CompilationModel compilation, MemberOrNamedTypeBuilder builder ) : base( compilation, builder ) { }
+    protected BuiltMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
 
     protected abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
 
     public Accessibility Accessibility => this.MemberOrNamedTypeBuilder.Accessibility;
-
-    public string Name => this.MemberOrNamedTypeBuilder.Name;
 
     public bool IsAbstract => this.MemberOrNamedTypeBuilder.IsAbstract;
 

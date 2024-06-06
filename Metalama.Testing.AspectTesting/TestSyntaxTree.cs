@@ -20,12 +20,12 @@ namespace Metalama.Testing.AspectTesting
     {
         private readonly TestResult _parent;
 
-        private TestSyntaxTree( string? inputPath, Document document, TestResult parent, SyntaxTree syntaxTree )
+        private TestSyntaxTree( string? inputPath, Document? inputDocument, TestResult parent, SyntaxTree? inputSyntaxTree )
         {
-            this.InputDocument = document;
+            this.InputDocument = inputDocument;
             this._parent = parent;
             this.InputPath = inputPath;
-            this.InputSyntaxTree = syntaxTree;
+            this.InputSyntaxTree = inputSyntaxTree;
         }
 
         public static async Task<TestSyntaxTree> CreateAsync( string? inputPath, Document document, TestResult parent )
@@ -35,21 +35,38 @@ namespace Metalama.Testing.AspectTesting
             return new TestSyntaxTree( inputPath, document, parent, syntaxTree.AssertNotNull() );
         }
 
+        public static TestSyntaxTree CreateIntroduced( TestResult parent )
+        {
+            return new TestSyntaxTree( null, null, parent, null );
+        }
+
         public bool IsAuxiliary => this.InputPath != null && Path.GetFileName( this.InputPath ).StartsWith( "_", StringComparison.Ordinal );
 
+        /// <summary>
+        /// Gets the file path of the syntax tree. For input syntax trees, this is an absolute path of the input document.
+        /// For introduced syntax trees, this is a relative path under which the syntax tree was introduced. 
+        /// </summary>
+        public string FilePath => this.InputPath ?? this.OutputDocument?.FilePath ?? throw new InvalidOperationException("The test syntax tree does not have a path.");
+
+        /// <summary>
+        /// Gets the input path from which the syntax tree was loaded. For introduced syntax trees, this is <c>null</c>.
+        /// </summary>
         public string? InputPath { get; }
 
         /// <summary>
-        /// Gets the input <see cref="Document" />.
+        /// Gets the input <see cref="Document" />. For introduced syntax trees, this is <c>null</c>.
         /// </summary>
-        public Document InputDocument { get; }
+        public Document? InputDocument { get; }
 
+        /// <summary>
+        /// Gets the output document.
+        /// </summary>
         public Document? OutputDocument { get; private set; }
 
         /// <summary>
-        /// Gets the input <see cref="SyntaxTree" />.
+        /// Gets the input <see cref="SyntaxTree" />. For introduced syntax trees, this is <c>null</c>.
         /// </summary>
-        public SyntaxTree InputSyntaxTree { get; }
+        public SyntaxTree? InputSyntaxTree { get; }
 
         /// <summary>
         /// Gets the root <see cref="SyntaxNode" /> of the output run-time syntax tree.
@@ -86,6 +103,11 @@ namespace Metalama.Testing.AspectTesting
         {
             if ( syntaxNode != null )
             {
+                if ( this.InputDocument == null )
+                {
+                    throw new AssertionFailedException( "Introduced syntax trees cannot have compile-time code." );
+                }
+
                 var formattedOutput = Formatter.Format( syntaxNode, this.InputDocument.Project.Solution.Workspace );
                 this.OutputCompileTimeSyntaxRoot = formattedOutput;
                 this.OutputCompileTimePath = transformedTemplatePath;
@@ -116,24 +138,38 @@ namespace Metalama.Testing.AspectTesting
 
             this._parent.OutputProject ??= this._parent.InputProject;
 
-            var documentName = Path.GetFileName( this.InputDocument.FilePath )!;
+            Document outputDocument;
 
-            var document =
-                this._parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
-                    .AddDocument( documentName, compilationUnit );
+            if ( this.InputDocument != null )
+            {
+                var documentName = Path.GetFileName( this.InputDocument.FilePath )!;
 
-            this._parent.OutputProject = document.Project;
+                outputDocument =
+                    this._parent.OutputProject!.RemoveDocument( this.InputDocument.Id )
+                        .AddDocument( documentName, compilationUnit );
+
+                this._parent.OutputProject = outputDocument.Project;
+            }
+            else
+            {
+                outputDocument = this._parent.OutputProject!.AddDocument(
+                    syntaxNode.SyntaxTree.FilePath,
+                    compilationUnit,
+                    filePath: syntaxNode.SyntaxTree.FilePath );
+
+                this._parent.OutputProject = outputDocument.Project;
+            }
 
             if ( this._parent.TestInput!.Options.FormatOutput.GetValueOrDefault() )
             {
                 var codeFormatter = new CodeFormatter();
 
-                this.OutputDocument = await codeFormatter.FormatAsync( document );
+                this.OutputDocument = await codeFormatter.FormatAsync( outputDocument );
                 this.OutputRunTimeSyntaxRoot = (CompilationUnitSyntax) (await this.OutputDocument.GetSyntaxRootAsync())!;
             }
             else
             {
-                this.OutputDocument = document;
+                this.OutputDocument = outputDocument;
                 this.OutputRunTimeSyntaxRoot = compilationUnit;
             }
         }

@@ -14,7 +14,7 @@ internal class TypeIntroducingAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceClass( builder.Target, "TestType", TypeKind.Class );
+        var result = builder.Advice.IntroduceClass( builder.Target, "TestType" );
         builder.WithTarget( result.Declaration ).Outbound.AddAspect<IntroducingAspect>();
         builder.WithTarget( result.Declaration ).Outbound.AddAspect<AddAttributeAspect>();
     }

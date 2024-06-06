@@ -11,7 +11,7 @@ internal sealed class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
 {
     private readonly TypeParameterBuilder _typeParameterBuilder;
 
-    public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
+    public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation )
     {
         this._typeParameterBuilder = builder;
     }

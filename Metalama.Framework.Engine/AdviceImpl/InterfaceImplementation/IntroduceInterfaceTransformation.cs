@@ -12,7 +12,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.AdviceImpl.InterfaceImplementation;
 
-internal sealed class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation, IInjectInterfaceTransformation
+internal sealed class IntroduceInterfaceTransformation : BaseSyntaxTreeTransformation, IIntroduceInterfaceTransformation, IInjectInterfaceTransformation
 {
     public IDeclaration ContainingDeclaration => this.TargetType;
 
