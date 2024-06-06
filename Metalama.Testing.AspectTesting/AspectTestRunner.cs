@@ -12,7 +12,6 @@ using Metalama.Testing.AspectTesting.Licensing;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -194,7 +193,7 @@ internal class AspectTestRunner : BaseTestRunner
         var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );
         var transformedCompilation = await transformedSolution.GetProject( testResult.InputProject!.Id )!.GetCompilationAsync();
 
-        await testResult.SetOutputCompilationAsync( transformedCompilation!, new HashSet<string>() );
+        await testResult.SetOutputCompilationAsync( transformedCompilation! );
         testResult.HasOutputCode = true;
 
         return true;
