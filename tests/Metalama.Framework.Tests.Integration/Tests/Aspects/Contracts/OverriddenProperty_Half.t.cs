@@ -1,13 +1,13 @@
-internal class Target
+// Warning CS8618 on `Default`: `Non-nullable property 'Default' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.`
+class C : B
 {
-  private string? q;
-  [NotNull]
-  public string P
+  public override string Default => "C";
+  public override string Both
   {
     get
     {
       global::System.String returnValue;
-      returnValue = "p";
+      returnValue = "C";
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();
@@ -15,13 +15,13 @@ internal class Target
       return returnValue;
     }
   }
-  [NotNull]
-  public string Q
+  public override string Input => "C";
+  public override string Output
   {
     get
     {
       global::System.String returnValue;
-      returnValue = q!;
+      returnValue = "C";
       if (returnValue == null)
       {
         throw new global::System.ArgumentNullException();

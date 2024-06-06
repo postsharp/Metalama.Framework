@@ -370,6 +370,11 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeImpl
 
                 break;
 
+            case DeclarationKind.Indexer:
+                members = this.Indexers;
+
+                break;
+
             default:
                 return Array.Empty<IMember>();
         }

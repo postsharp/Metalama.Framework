@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.NoneDirection;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Disable;
 
 internal class NotNullAttribute : ContractAspect
 {
