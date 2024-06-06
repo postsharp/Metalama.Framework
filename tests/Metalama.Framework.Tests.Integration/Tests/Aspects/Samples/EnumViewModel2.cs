@@ -105,12 +105,7 @@ public class EnumViewModelAttribute : TypeAspect
     [Template]
     public void ConstructorTemplate( [CompileTime] IField valueField )
     {
-        var builder = new ExpressionBuilder();
-
-        builder.AppendVerbatim( $"this.{valueField.Name}=" );
-        builder.AppendExpression( meta.Target.Parameters[0].Value );
-
-        meta.InsertStatement( builder.ToExpression() );
+        valueField.Value = meta.Target.Parameters[0].Value;
     }
 }
 
