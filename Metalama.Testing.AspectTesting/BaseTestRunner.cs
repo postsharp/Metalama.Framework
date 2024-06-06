@@ -768,6 +768,11 @@ internal abstract partial class BaseTestRunner
 
             foreach ( var syntaxTree in testResult.SyntaxTrees )
             {
+                if ( syntaxTree.InputDocument == null )
+                {
+                    continue;
+                }
+
                 var isTargetCode = Path.GetFileName( syntaxTree.InputPath )!.Count( c => c == '.' ) == 1;
 
                 await this.WriteHtmlAsync(
