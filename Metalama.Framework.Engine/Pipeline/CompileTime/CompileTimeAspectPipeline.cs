@@ -59,7 +59,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        new[] { SupportedCSharpVersions.FormatSupportedVersions() } ) );
+                        SupportedCSharpVersions.FormatSupportedVersions() ) );
 
                 return false;
             }
@@ -100,7 +100,7 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
         // Report error if the compilation does not have the METALAMA preprocessor symbol.
         if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
         {
-            diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnostic( null, null ) );
+            diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnostic( null, default ) );
 
             return default;
         }

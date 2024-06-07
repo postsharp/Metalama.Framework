@@ -253,7 +253,7 @@ public sealed class LicenseVerifier : IProjectService
                 // 3. We have a project-bound license string and the project name does not match.
 
                 var diagnostic = string.IsNullOrEmpty( this._licenseConsumer.LicenseString )
-                    ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null )
+                    ? LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, default )
                     : LicensingDiagnosticDescriptors.InvalidLicenseKeyRegistered.CreateRoslynDiagnostic(
                         null,
                         this._licenseConsumer.LicenseString! );
@@ -269,7 +269,7 @@ public sealed class LicenseVerifier : IProjectService
 
                 if ( string.IsNullOrEmpty( this._licenseConsumer.LicenseString ) )
                 {
-                    diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, null ) );
+                    diagnostics.Report( LicensingDiagnosticDescriptors.NoLicenseKeyRegistered.CreateRoslynDiagnostic( null, default ) );
                 }
                 else
                 {

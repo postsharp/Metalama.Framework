@@ -5,14 +5,13 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076
 {
-   //The logging of parameters requires a little more work if we are to get anything meaningful back.
+    //The logging of parameters requires a little more work if we are to get anything meaningful back.
     //We'll use an interpolated string to render the parameter(s) and result.
     //We will aslo need to ensure that we allow for void methods that do not actually return anything.
     internal class LogAttribute : OverrideMethodAspect
     {
         #region Private Methods
 
-        [CompileTime]
         private static InterpolatedStringBuilder BuildInterpolatedString()
         {
             var stringBuilder = new InterpolatedStringBuilder();
@@ -21,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076
             stringBuilder.AddText(".");
             stringBuilder.AddText(meta.Target.Method.Name);
             stringBuilder.AddText("(");
-            var i = meta.CompileTime(0);
+            var i = 0;
             foreach(var p in meta.Target.Parameters)
             {
                 var comma = i > 0 ? ", " : string.Empty;
@@ -32,7 +31,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076
                 } else
                 {
                     stringBuilder.AddText($"{comma}{p.Name} = {{");
-                    stringBuilder.AddExpression(p.Value);
+                    stringBuilder.AddExpression(p);
                     stringBuilder.AddText("}");
                 }
 

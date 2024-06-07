@@ -250,7 +250,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             var resolvedLocation = GetLocation( location );
             var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
-            this.Report( diagnostic.Definition.CreateRoslynDiagnostic( resolvedLocation, diagnostic.Arguments, source, codeFixes: codeFixTitles ) );
+            this.Report( diagnostic.Definition.CreateRoslynDiagnosticNonGeneric( resolvedLocation, diagnostic.Arguments, source, codeFixes: codeFixTitles ) );
         }
 
         void IDiagnosticSink.Suppress( ISuppression suppression, IDeclaration scope, IDiagnosticSource source )
