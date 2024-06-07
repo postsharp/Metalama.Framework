@@ -26,21 +26,21 @@ public class Aspect : OverrideMethodAspect
 
         stringBuilder.AddText( "(" );
 
-        var i = meta.CompileTime( 0 );
+        var i = 0;
 
-        foreach (var prop in meta.Target.Parameters)
+        foreach (var param in meta.Target.Parameters)
         {
             var comma = i > 0 ? ", " : "";
 
-            if (prop.RefKind == RefKind.Out)
+            if (param.RefKind == RefKind.Out)
             {
-                stringBuilder.AddText( $"{comma}{prop.Name} = " );
+                stringBuilder.AddText( $"{comma}{param.Name} = " );
             }
             else
             {
-                stringBuilder.AddText( prop.Name );
+                stringBuilder.AddText( param.Name );
                 stringBuilder.AddText( " : " );
-                var json = JsonSerializer.Serialize( prop.Value );
+                var json = JsonSerializer.Serialize( param.Value );
                 stringBuilder.AddText( json );
             }
 

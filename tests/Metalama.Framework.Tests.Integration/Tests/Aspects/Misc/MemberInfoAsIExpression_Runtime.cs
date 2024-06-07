@@ -15,7 +15,7 @@ public sealed class TestAspect : TypeAspect
         var method = typeof(RunTimeOrCompileTimeClass).GetMethod("M");
 
         var arrayBuilder = new ArrayBuilder(typeof(MethodInfo));
-        arrayBuilder.Add(method);
+        arrayBuilder.Add(method.ToExpression());
 
         var methodsInvalidatedByField = builder.Advice.IntroduceField(
             builder.Target,

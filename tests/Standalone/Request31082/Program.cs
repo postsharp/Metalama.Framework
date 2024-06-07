@@ -47,7 +47,7 @@ public class LoggingAttribute : OverrideMethodAspect
 
 		stringBuilder.AddText("(");
 
-		var i = meta.CompileTime(0);
+		var i = 0;
 
 		foreach (var prop in meta.Target.Parameters)
 		{
@@ -59,14 +59,14 @@ public class LoggingAttribute : OverrideMethodAspect
 			if (prop.Type.ToType() == typeof(string))
 			{
 				stringBuilder.AddText("'");
-				stringBuilder.AddExpression(prop.Value);
+				stringBuilder.AddExpression(prop);
 				stringBuilder.AddText("'");
 			}
 			else
 			{
 				stringBuilder.AddText(prop.Name);
 				stringBuilder.AddText(" : ");
-				stringBuilder.AddExpression(prop.Value);
+				stringBuilder.AddExpression(prop);
 			}
 
 			i++;
