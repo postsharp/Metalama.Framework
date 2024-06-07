@@ -518,6 +518,7 @@ internal sealed partial class LinkerInjectionStep
                                     Syntax: PropertyDeclarationSyntax
                                 }:
                                     injectedNode = propertyDeclaration.WithSynthesizedSetter( syntaxGenerationContext );
+
                                     break;
 
                                 case { Semantic: InjectedMemberSemantic.InitializerMethod }:
@@ -559,7 +560,10 @@ internal sealed partial class LinkerInjectionStep
                             syntaxGenerationContext );
 
                         var namespaceTypeDeclaration = (TypeDeclarationSyntax) namespaceDeclaration.Members.Single();
-                        namespaceTypeDeclaration = namespaceTypeDeclaration.WithMembers( namespaceTypeDeclaration.Members.AddRange( injectedNamedTypeMembers ) );
+
+                        namespaceTypeDeclaration =
+                            namespaceTypeDeclaration.WithMembers( namespaceTypeDeclaration.Members.AddRange( injectedNamedTypeMembers ) );
+
                         namespaceTypeDeclaration = AddInjectedInterfaces( namespaceTypeBuilder, namespaceTypeDeclaration );
 
                         injectedNode = namespaceDeclaration.WithMembers( SingletonList<MemberDeclarationSyntax>( namespaceTypeDeclaration ) );
@@ -1384,9 +1388,9 @@ internal sealed partial class LinkerInjectionStep
 
             if ( injections.Count > 0 )
             {
-                return 
+                return
                     ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!)
-                    .PartialUpdate( 
+                    .PartialUpdate(
                         attributeLists: List( outputLists ),
                         members: node.Members.AddRange( injections ) );
             }

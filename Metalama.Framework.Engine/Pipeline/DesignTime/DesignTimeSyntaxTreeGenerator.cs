@@ -123,13 +123,13 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     return;
                 }
 
-                if (IsInNonPartialSourceType(declaringType))
+                if ( IsInNonPartialSourceType( declaringType ) )
                 {
                     // If the declaring type is not located in a partial source type, we need to skip it. The warning is needed because it was done for the parent type.
                     return;
                 }
 
-                bool IsInNonPartialSourceType( INamedType declaringType )
+                static bool IsInNonPartialSourceType( INamedType declaringType )
                 {
                     var currentType = declaringType;
 

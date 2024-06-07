@@ -70,7 +70,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
-        HashSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
 
         ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl>
             pendingInsertStatementContexts = new( input.CompilationModel.Comparers.Default );

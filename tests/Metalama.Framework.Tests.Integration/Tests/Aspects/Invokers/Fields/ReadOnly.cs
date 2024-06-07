@@ -19,6 +19,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Rea
  * Tests invokers targeting an read-only field.
  */
 
+#pragma warning disable CS0169
+
 public class IntroduceFieldAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)

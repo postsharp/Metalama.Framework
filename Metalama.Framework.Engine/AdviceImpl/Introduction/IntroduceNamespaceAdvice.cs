@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 

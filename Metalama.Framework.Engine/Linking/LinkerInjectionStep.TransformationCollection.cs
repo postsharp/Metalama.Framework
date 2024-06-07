@@ -168,7 +168,7 @@ internal sealed partial class LinkerInjectionStep
 
         public void AddAutoPropertyWithSynthesizedSetter( IPropertyBuilder property )
         {
-            Invariant.Assert( property.IsAutoPropertyOrField == true && property.Writeability == Writeability.ConstructorOnly );
+            Invariant.Assert( property is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } );
 
             lock ( this._autoPropertyWithSynthesizedSetterSyntax )
             {
@@ -187,7 +187,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMethodBase targetMethod, IReadOnlyList<InsertedStatement> statements )
+        public void AddInsertedStatements( IMethodBase targetMethod, IEnumerable<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
@@ -244,13 +244,13 @@ internal sealed partial class LinkerInjectionStep
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
         // ReSharper disable once InconsistentlySynchronizedField
-        public bool IsAutoPropertyWithSynthesizedSetter( IPropertyBuilder propertyBuilder)
+        public bool IsAutoPropertyWithSynthesizedSetter( IPropertyBuilder propertyBuilder )
             => this._autoPropertyWithSynthesizedSetterBuilders.Contains( propertyBuilder );
 
         // ReSharper disable once InconsistentlySynchronizedField
         public bool IsNodeWithModifiedAttributes( SyntaxNode node ) => this._nodesWithModifiedAttributes.Contains( node );
 
-        public IReadOnlyList<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
+        public IEnumerable<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
         {
             if ( this._injectedMembersByInsertPosition.TryGetValue( position, out var injectedMembers ) )
             {

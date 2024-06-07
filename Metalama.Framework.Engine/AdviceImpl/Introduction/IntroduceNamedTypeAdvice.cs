@@ -36,7 +36,7 @@ internal class IntroduceNamedTypeAdvice : IntroduceDeclarationAdvice<INamedType,
         Action<ITransformation> addTransformation )
     {
         var targetDeclaration = this.TargetDeclaration.As<INamespaceOrNamedType>().GetTarget( compilation );
-        var existingType = targetDeclaration.Types.OfName( this.Builder.Name ).Where( t => this.Builder.TypeParameters.Count == t.TypeParameters.Count ).FirstOrDefault();
+        var existingType = targetDeclaration.Types.OfName( this.Builder.Name ).FirstOrDefault( t => this.Builder.TypeParameters.Count == t.TypeParameters.Count );
 
         if ( existingType == null )
         {
