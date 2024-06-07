@@ -251,5 +251,13 @@ namespace Metalama.Framework.Engine.Advising
                 "The aspect '{0}' cannot introduce parameter '{1}' to '{2}' because the target declaration already has a parameter '{3}'.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Type, INamespaceOrNamedType TargetNamespaceOrType)>
+            CannotIntroduceNewTypeWhenItAlreadyExists = new(
+                "LAMA0531",
+                "Cannot introduce a new type because a member with the same name and type parameters already exists.",
+                "The aspect '{0}' cannot introduce type '{1}' into '{2}' because the type is already declared in the type.",
+                _category,
+                Error );
     }
 }

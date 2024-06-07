@@ -7,18 +7,21 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeIntoType;
+namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeWithInterfaceIntoNonPartialType;
 
 public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.IntroduceClass("TestType");
+        var memento = builder.IntroduceClass("Memento");
+        memento.ImplementInterface(typeof(IMemento));
     }
 }
 
+interface IMemento { }
+
 // <target>
 [Introduction]
-internal partial class TargetClass
+internal class TargetClass
 {
 }

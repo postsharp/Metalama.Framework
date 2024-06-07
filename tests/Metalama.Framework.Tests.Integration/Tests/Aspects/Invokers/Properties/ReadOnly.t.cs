@@ -1,7 +1,7 @@
 [IntroduceField]
 public class TestClass
 {
-  public int Property { get; init; }
+  public int Property { get; }
   private readonly int _overriddenProperty;
   [OverrideProperty]
   public int OverriddenProperty
@@ -11,7 +11,7 @@ public class TestClass
       global::System.Console.WriteLine("Overridden");
       return this._overriddenProperty;
     }
-    init
+    private init
     {
       global::System.Console.WriteLine("Overridden");
       this._overriddenProperty = value;
@@ -54,7 +54,7 @@ public class TestClass
     this.Property = 42;
     this.OverriddenProperty = 42;
   }
-  public global::System.Int32 IntroducedProperty { get; init; }
+  public global::System.Int32 IntroducedProperty { get; }
   private readonly global::System.Int32 _overriddenIntroducedProperty;
   public global::System.Int32 OverriddenIntroducedProperty
   {
@@ -63,7 +63,7 @@ public class TestClass
       global::System.Console.WriteLine("Overridden");
       return this._overriddenIntroducedProperty;
     }
-    init
+    private init
     {
       global::System.Console.WriteLine("Overridden");
       this._overriddenIntroducedProperty = value;

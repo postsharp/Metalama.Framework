@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.AdviceImpl.Introduction;
 
@@ -26,8 +27,18 @@ internal class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-        addTransformation( this.Builder.ToTransformation() );
+        var targetDeclaration = this.TargetDeclaration.As<INamespace>().GetTarget( compilation );
+        var existingNamespace = targetDeclaration.Namespaces.OfName( this.Builder.Name );
 
-        return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+        if ( existingNamespace == null )
+        {
+            addTransformation( this.Builder.ToTransformation() );
+
+            return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+        }
+        else
+        {
+            return this.CreateSuccessResult( AdviceOutcome.Ignore, existingNamespace );
+        }
     }
 }
