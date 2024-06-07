@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Templating
                 // This allows to reduce redundant messages.
                 base.VisitCore( node );
 
-                // If the scope is null (e.g. in a using statement), we should not analyze.
+                // If the scope is null (e.g. in a using directive), we should not analyze.
                 if ( !this._currentScope.HasValue )
                 {
                     return;
@@ -121,35 +121,69 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( referencedScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly )
                     {
-                        // ReSharper disable once MissingIndent
-                        var isProceed = referencedSymbol is
+                        if ( !this.IsInTemplate && !IsTypeOfOrNameOf() )
                         {
-                            ContainingSymbol.Name: nameof(meta),
-                            Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
-                        };
-
-                        if ( isProceed && !this.IsInTemplate )
-                        {
-                            // Cannot reference 'meta.Proceed' out of a template.
-                            if ( AvoidDuplicates( referencedSymbol ) )
+                            if ( this._classifier.IsTemplateOnly( referencedSymbol ) )
                             {
-                                this.Report(
-                                    TemplatingDiagnosticDescriptors.CannotUseProceedOutOfTemplate.CreateRoslynDiagnostic(
-                                        node.GetLocation(),
-                                        this._currentDeclaration! ) );
+                                // Cannot reference template-only symbol outside of a template, except in a nameof().
+                                if ( AvoidDuplicates( referencedSymbol ) )
+                                {
+                                    string? explanation = null;
+
+                                    switch (referencedSymbol.ContainingType.GetReflectionFullName(), referencedSymbol.Name)
+                                    {
+                                        case ("Metalama.Framework.Aspects.meta", "This"):
+                                            explanation = " Use ExpressionFactory.This() instead of meta.This.";
+
+                                            break;
+
+                                        case ("Metalama.Framework.Code.IExpression", "Value"):
+                                            var expression = node.Parent is MemberAccessExpressionSyntax memberAccess
+                                                ? memberAccess.Expression.ToString()
+                                                : "expression";
+
+                                            explanation = $" Use '{expression}' directly instead of accessing '{expression}.Value'.";
+
+                                            break;
+
+                                        case ("Metalama.Framework.Code.SyntaxBuilders.SyntaxBuilder", "AppendExpression"):
+                                            if ( node.Parent?.Parent is InvocationExpressionSyntax { ArgumentList.Arguments: [var argument] } )
+                                            {
+                                                var argumentType = this._semanticModel.GetTypeInfo( argument.Expression ).Type;
+
+                                                if ( IsLiteralType( argumentType ) )
+                                                {
+                                                    explanation =
+                                                        $" Use 'AppendLiteral({argument.Expression})' instead of 'AppendExpression({argument.Expression})'.";
+                                                }
+                                            }
+
+                                            break;
+                                    }
+
+                                    this.Report(
+                                        TemplatingDiagnosticDescriptors.CannotUseTemplateOnlyOutOfTemplate.CreateRoslynDiagnostic(
+                                            node.GetLocation(),
+                                            (this._currentDeclaration!, referencedSymbol, explanation) ) );
+
+                                    static bool IsLiteralType( ITypeSymbol? type )
+                                        => type?.GetReflectionFullName() is "System.Int32" or "System.UInt32"
+                                            or "System.Int16" or "System.UInt16" or "System.Int64" or "System.UInt64" or "System.Byte" or "System.SByte"
+                                            or "System.Double" or "System.Single" or "System.Decimal" or "System.String";
+                                }
                             }
-                        }
-                        else if ( !(this._currentScope.Value.MustExecuteAtCompileTime() || this.IsInTemplate) && !IsTypeOfOrNameOf() )
-                        {
-                            // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
-                            // because these are transformed by the CompileTimeCompilationBuilder.
-
-                            if ( AvoidDuplicates( referencedSymbol ) )
+                            else if ( !this._currentScope.Value.MustExecuteAtCompileTime() )
                             {
-                                this.Report(
-                                    TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
-                                        node.GetLocation(),
-                                        (this._currentDeclaration!, referencedSymbol, this._currentScope.Value) ) );
+                                // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
+                                // because these are transformed by the CompileTimeCompilationBuilder.
+
+                                if ( AvoidDuplicates( referencedSymbol ) )
+                                {
+                                    this.Report(
+                                        TemplatingDiagnosticDescriptors.CannotReferenceCompileTimeOnly.CreateRoslynDiagnostic(
+                                            node.GetLocation(),
+                                            (this._currentDeclaration!, referencedSymbol, this._currentScope.Value) ) );
+                                }
                             }
                         }
                     }

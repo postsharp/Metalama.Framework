@@ -13,7 +13,7 @@ public class Aspect : TypeAspect
         builder.Advice.IntroduceField(builder.Target, "constField", typeof(int), buildField: field =>
         {
             field.Writeability = Writeability.None;
-            field.InitializerExpression = ExpressionFactory.Capture(42);
+            field.InitializerExpression = ExpressionFactory.Literal(42);
         });
     }
 }

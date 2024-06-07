@@ -18,6 +18,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         TemplatingScope GetTemplatingScope( ISymbol symbol );
 
+        bool IsTemplateOnly( ISymbol symbol );
+
         void ReportScopeError( SyntaxNode node, ISymbol symbol, IDiagnosticAdder diagnosticAdder );
     }
 }

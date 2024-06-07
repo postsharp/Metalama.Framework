@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -28,33 +29,33 @@ public sealed class TestAspect : TypeAspect
 
             if (type.Name == nameof(RunTimeClass))
             {
-                arrayBuilder.Add(type);
+                arrayBuilder.Add(type.ToExpression());
             }
 
             foreach (var member in members)
             {
-                arrayBuilder.Add(member.ToMemberInfo());
+                arrayBuilder.Add(member.ToMemberInfo().ToExpression());
 
                 if (member is IField field)
                 {
-                    arrayBuilder.Add(field.ToFieldInfo());
+                    arrayBuilder.Add(field.ToFieldInfo().ToExpression());
                 }
 
                 if (member is IProperty property)
                 {
-                    arrayBuilder.Add(property.ToPropertyInfo());
+                    arrayBuilder.Add(property.ToPropertyInfo().ToExpression());
                 }
 
                 if (member is IMethod method)
                 {
-                    arrayBuilder.Add(method.ReturnParameter.ToParameterInfo());
+                    arrayBuilder.Add(method.ReturnParameter.ToParameterInfo().ToExpression());
                 }
 
                 if (member is IHasParameters hasParameters)
                 {
                     foreach (var parameter in hasParameters.Parameters)
                     {
-                        arrayBuilder.Add(parameter.ToParameterInfo());
+                        arrayBuilder.Add(parameter.ToParameterInfo().ToExpression());
                     }
                 }
             }

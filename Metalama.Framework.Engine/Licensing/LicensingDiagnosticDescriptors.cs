@@ -40,7 +40,7 @@ public static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Invalid redistribution license of '{0}' assembly." );
 
-    internal static readonly DiagnosticDefinition<(string Title, string Origin)> CodeActionNotAvailable =
+    internal static readonly DiagnosticDefinition<(string Title, object Origin)> CodeActionNotAvailable =
         new(
             "LAMA0805",
             Severity.Error,

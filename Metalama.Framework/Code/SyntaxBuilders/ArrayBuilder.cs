@@ -48,6 +48,11 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         public void Add( dynamic? expression ) => this._items.Add( (object?) expression );
 
         /// <summary>
+        /// Adds an item to the array.
+        /// </summary>
+        public void Add( IExpression expression ) => this._items.Add( expression );
+
+        /// <summary>
         /// Returns a clone of the current <see cref="ArrayBuilder"/>.
         /// </summary>
         public IExpression ToExpression() => SyntaxBuilder.CurrentImplementation.BuildArray( this );

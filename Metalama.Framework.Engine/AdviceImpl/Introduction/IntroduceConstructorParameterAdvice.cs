@@ -62,7 +62,7 @@ internal sealed class IntroduceConstructorParameterAdvice : Advice<IntroduceCons
             return this.CreateFailedResult(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterAlreadyExists.CreateRoslynDiagnostic(
                     constructor.GetDiagnosticLocation(),
-                    (this.AspectInstance.AspectClass.ShortName, this._parameterName, constructor, existingParameter, existingParameter),
+                    (this.AspectInstance.AspectClass.ShortName, this._parameterName, constructor, existingParameter),
                     this ) );
         }
 
