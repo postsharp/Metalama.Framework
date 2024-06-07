@@ -147,6 +147,11 @@ namespace Metalama.Framework.Code
         /// </summary>
         Task_T,
 
+        /// <summary>
+        /// <see cref="System.Char" />.
+        /// </summary>
+        Char,
+
         // Must be last.
 
         /// <summary>
