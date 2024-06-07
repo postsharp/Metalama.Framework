@@ -148,7 +148,7 @@ namespace Metalama.Framework.Code
         Task_T,
 
         /// <summary>
-        /// <see cref="System.Char" />.
+        /// <see cref="char" />.
         /// </summary>
         Char,
 
