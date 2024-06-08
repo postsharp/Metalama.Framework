@@ -99,7 +99,7 @@ internal sealed class AspectDriver : IAspectDriver
 
             foreach ( var options in optionList )
             {
-                declaration.GetCompilationModel().HierarchicalOptionsManager.SetAspectOptions( declaration, options );
+                declaration.GetCompilationModel().HierarchicalOptionsManager.AssertNotNull().SetAspectOptions( declaration, options );
             }
         }
     }

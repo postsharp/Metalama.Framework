@@ -524,7 +524,8 @@ internal sealed partial class DesignTimeAspectPipeline
                 ?? ImmutableArray<InheritableAspectInstance>.Empty;
 
             var inheritableOptions =
-                pipelineResultValue?.LastCompilationModel.HierarchicalOptionsManager.GetInheritableOptions( pipelineResultValue.LastCompilationModel, true )
+                pipelineResultValue?.LastCompilationModel.HierarchicalOptionsManager.AssertNotNull()
+                    .GetInheritableOptions( pipelineResultValue.LastCompilationModel, true )
                     .ToReadOnlyList() ?? ImmutableArray<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>>.Empty;
 
             var referenceValidators = pipelineResultValue?.ReferenceValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty;
