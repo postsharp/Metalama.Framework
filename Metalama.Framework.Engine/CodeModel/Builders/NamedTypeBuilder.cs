@@ -256,7 +256,7 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
                         : $"{this.FullName}.cs",
                     options: this.Compilation.RoslynCompilation.SyntaxTrees.FirstOrDefault() switch
                     {
-                        { Options.Features: { } features } => CSharpParseOptions.Default.WithFeatures( features ),
+                        { Options: CSharpParseOptions options } => options,
                         _ => CSharpParseOptions.Default,
                     },
                     encoding: Encoding.UTF8 ),
