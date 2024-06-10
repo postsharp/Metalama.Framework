@@ -489,24 +489,9 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
         foreach ( var transformation in pipelineResults.Transformations )
         {
             var targetSymbol = transformation.TargetDeclaration.GetSymbol();
+            var primarySyntaxReference = targetSymbol?.GetPrimarySyntaxReference();
 
-            if ( targetSymbol == null )
-            {
-                // Transformations on introduced declarations are not represented at design time at the moment.
-                continue;
-            }
-
-            var primarySyntaxReference = targetSymbol.GetPrimarySyntaxReference();
-
-            if ( primarySyntaxReference == null )
-            {
-                // This is a transformation of an implicitly declared declaration that is implicitly declared even after syntax generator is executed.
-                // E.g. appending parameters to implicit constructor of a non-partial type.
-                continue;
-            }
-
-            var syntaxTree = primarySyntaxReference.SyntaxTree;
-            var filePath = syntaxTree.FilePath;
+            var filePath = primarySyntaxReference?.SyntaxTree.FilePath ?? inputSyntaxTreeForDetached.FilePath;
             var builder = resultBuilders[filePath];
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 
