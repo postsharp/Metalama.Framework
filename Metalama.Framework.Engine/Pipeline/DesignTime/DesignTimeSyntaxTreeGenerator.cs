@@ -123,6 +123,25 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     return;
                 }
 
+                if ( IsInNonPartialSourceType( declaringType ) )
+                {
+                    // If the declaring type is not located in a partial source type, we need to skip it. The warning is needed because it was done for the parent type.
+                    return;
+                }
+
+                static bool IsInNonPartialSourceType( INamedType declaringType )
+                {
+                    var currentType = declaringType;
+
+                    // Go to the closest type that does not originate in an aspect.
+                    while ( currentType.Origin.Kind is DeclarationOriginKind.Aspect && currentType.DeclaringType != null )
+                    {
+                        currentType = currentType.DeclaringType;
+                    }
+
+                    return currentType.Origin.Kind is not DeclarationOriginKind.Aspect && !currentType.IsPartial;
+                }
+
                 var orderedTransformations = typeTransformations.OrderBy( x => x, TransformationLinkerOrderComparer.Instance );
 
                 // Process members.

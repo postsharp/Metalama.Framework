@@ -182,6 +182,12 @@ internal class TargetClass
       _ = this._introducedGetOnlyAutoProperty;
       return this._introducedGetOnlyAutoProperty;
     }
+    private init
+    {
+      global::System.Console.WriteLine("This is the overridden setter.");
+      global::System.Console.WriteLine("This is the overridden setter.");
+      this._introducedGetOnlyAutoProperty = value;
+    }
   }
   private global::System.Int32 IntroducedProperty_IntroduceAndOverride
   {
