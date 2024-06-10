@@ -81,7 +81,8 @@ public readonly struct DeclarationEnhancements<T>
     /// <seealso href="@exposing-options"/>
     public TOptions GetOptions<TOptions>()
         where TOptions : class, IHierarchicalOptions<T>, new()
-        => ((ICompilationInternal) this.Declaration.Compilation).HierarchicalOptionsManager.GetOptions<TOptions>( this.Declaration );
+        => (TOptions?) ((ICompilationInternal) this.Declaration.Compilation).HierarchicalOptionsManager.GetOptions( this.Declaration, typeof(TOptions) )
+           ?? new TOptions();
 
     /// <summary>
     /// Gets the list of annotations of a given type on the current declaration.

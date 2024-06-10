@@ -208,7 +208,8 @@ public sealed class CompileTimeAspectPipeline : AspectPipeline
             // Create a manifest for transitive aspects and validators.
             var inheritableOptions =
                 result.Value.FirstCompilationModel.AssertNotNull()
-                    .HierarchicalOptionsManager.GetInheritableOptions( result.Value.LastCompilationModel, false )
+                    .HierarchicalOptionsManager.AssertNotNull()
+                    .GetInheritableOptions( result.Value.LastCompilationModel, false )
                     .ToImmutableDictionary();
 
             var annotations = result.Value.LastCompilationModel.GetExportedAnnotations();

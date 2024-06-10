@@ -191,6 +191,7 @@ namespace Metalama.Framework.Code
                      or SpecialType.UInt32
                      or SpecialType.UInt64
                      or SpecialType.String
+                     or SpecialType.Char
                      or SpecialType.Double
                      or SpecialType.Single
                      or SpecialType.Boolean

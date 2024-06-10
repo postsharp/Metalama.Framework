@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Collections.Immutable;
@@ -61,8 +60,6 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
         var projectServiceProvider = pipelineConfiguration.ServiceProvider;
 
-        var sdkOptionsManager = new SdkHierarchicalOptionsManager( compilationModel );
-
         var context = new AspectWeaverContext(
             this._aspectClass,
             aspectInstances,
@@ -72,8 +69,9 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             input.Project,
             this._aspectClass.GeneratedCodeAnnotation,
             compilationModel.CompilationContext,
-            cancellationToken,
-            sdkOptionsManager );
+            compilationModel.Factory,
+            compilationModel.HierarchicalOptionsManager.AssertNotNull(),
+            cancellationToken );
 
         var executionContext = new UserCodeExecutionContext(
             projectServiceProvider,

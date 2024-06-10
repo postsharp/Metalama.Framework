@@ -474,7 +474,8 @@ internal sealed class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdde
     {
         foreach ( var source in optionsSources )
         {
-            await this.LastCompilation.HierarchicalOptionsManager.AddSourceAsync( source, this.LastCompilation, this._diagnostics, cancellationToken );
+            await this.LastCompilation.HierarchicalOptionsManager.AssertNotNull()
+                .AddSourceAsync( source, this.LastCompilation, this._diagnostics, cancellationToken );
         }
     }
 
