@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <Target Name="Build">
+        <Exec Command="msbuild LamaDebug.sln /t:Restore,Build /v:m /p:Configuration=LamaDebug" />
+        <Exec Command="dotnet build LamaDebug.sln /t:Restore,Build /v:m /p:Configuration=LamaDebug" />
+    </Target>
+</Project>
