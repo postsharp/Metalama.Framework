@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal AspectRepository AspectRepository { get; }
 
-        public HierarchicalOptionsManager HierarchicalOptionsManager { get; }
+        public HierarchicalOptionsManager? HierarchicalOptionsManager { get; }
 
         internal IExternalAnnotationProvider? ExternalAnnotationProvider { get; }
 
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         IHierarchicalOptionsManager ICompilationInternal.HierarchicalOptionsManager
-            => this.HierarchicalOptionsManager.AssertNotNull( $"The {nameof(this.HierarchicalOptionsManager)} has not been supplied." );
+            => this.HierarchicalOptionsManager ?? NullHierarchicalOptionsManager.Instance;
 
         private readonly Lazy<DerivedTypeIndex> _derivedTypes;
 
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Annotations = annotations ?? ImmutableDictionaryOfArray<Ref<IDeclaration>, AnnotationInstance>.Empty;
 
             this.AspectRepository = aspectRepository ?? new IncrementalAspectRepository( this );
-            this.HierarchicalOptionsManager = hierarchicalOptionsManager ?? new HierarchicalOptionsManager( project.ServiceProvider );
+            this.HierarchicalOptionsManager = hierarchicalOptionsManager;
 
             // If the MetricManager is not provided, we create an instance. This allows to test metrics independently from the pipeline.
             this.MetricManager = project.ServiceProvider.GetService<MetricManager>()
