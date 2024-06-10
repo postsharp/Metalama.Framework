@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -105,9 +106,13 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
     INamespace INamedType.ContainingNamespace => this.ContainingNamespace;
 
     public string FullName
-        => this.DeclaringType != null
-            ? $"{this.DeclaringType.FullName}.{this.Name}"
-            : $"{this.ContainingNamespace.FullName}.{this.Name}";
+        => this switch
+        {
+            { DeclaringType: not null } => $"{this.DeclaringType.FullName}.{this.Name}",
+            { ContainingNamespace.IsGlobalNamespace: true } => this.Name,
+            { ContainingNamespace.IsGlobalNamespace: false } => $"{this.ContainingNamespace.FullName}.{this.Name}",
+            _ => throw new AssertionFailedException( $"Unsupported: {this}" ),
+        };
 
     [Memo]
     public INamedTypeCollection Types => new EmptyNamedTypeCollection();
@@ -246,7 +251,14 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
                         List<UsingDirectiveSyntax>(),
                         List<AttributeListSyntax>(),
                         List<MemberDeclarationSyntax>() ),
-                    path: this.FullName + ".cs",
+                    path: this.TypeParameters.Count > 0
+                        ? $"{this.FullName}`{this.TypeParameters.Count}.cs"
+                        : $"{this.FullName}.cs",
+                    options: this.Compilation.RoslynCompilation.SyntaxTrees.FirstOrDefault() switch
+                    {
+                        { Options.Features: { } features } => CSharpParseOptions.Default.WithFeatures( features ),
+                        _ => CSharpParseOptions.Default,
+                    },
                     encoding: Encoding.UTF8 ),
             INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
