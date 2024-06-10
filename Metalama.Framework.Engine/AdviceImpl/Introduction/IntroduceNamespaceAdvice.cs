@@ -26,8 +26,18 @@ internal class IntroduceNamespaceAdvice : IntroduceDeclarationAdvice<INamespace,
         CompilationModel compilation,
         Action<ITransformation> addTransformation )
     {
-        addTransformation( this.Builder.ToTransformation() );
+        var targetDeclaration = this.TargetDeclaration.As<INamespace>().GetTarget( compilation );
+        var existingNamespace = targetDeclaration.Namespaces.OfName( this.Builder.Name );
 
-        return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+        if ( existingNamespace == null )
+        {
+            addTransformation( this.Builder.ToTransformation() );
+
+            return this.CreateSuccessResult( AdviceOutcome.Default, this.Builder );
+        }
+        else
+        {
+            return this.CreateSuccessResult( AdviceOutcome.Ignore, existingNamespace );
+        }
     }
 }

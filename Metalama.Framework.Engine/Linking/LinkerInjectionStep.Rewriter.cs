@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -504,6 +505,32 @@ internal sealed partial class LinkerInjectionStep
                             break;
                         }
 
+                    case PropertyDeclarationSyntax propertyDeclaration:
+                        if ( injectedMember.DeclarationBuilder is IPropertyBuilder propertyBuilder
+                             && this._transformationCollection.IsAutoPropertyWithSynthesizedSetter( propertyBuilder ) )
+                        {
+                            switch ( injectedMember )
+                            {
+                                // ReSharper disable once MissingIndent
+                                case
+                                {
+                                    Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                    Syntax: PropertyDeclarationSyntax
+                                }:
+                                    injectedNode = propertyDeclaration.WithSynthesizedSetter( syntaxGenerationContext );
+
+                                    break;
+
+                                case { Semantic: InjectedMemberSemantic.InitializerMethod }:
+                                    break;
+
+                                default:
+                                    throw new AssertionFailedException( $"Unexpected semantic for '{propertyBuilder}'." );
+                            }
+                        }
+
+                        break;
+
                     case TypeDeclarationSyntax typeDeclaration:
 
                         var typeBuilder = (NamedTypeBuilder) injectedMember.DeclarationBuilder.AssertNotNull();
@@ -533,7 +560,10 @@ internal sealed partial class LinkerInjectionStep
                             syntaxGenerationContext );
 
                         var namespaceTypeDeclaration = (TypeDeclarationSyntax) namespaceDeclaration.Members.Single();
-                        namespaceTypeDeclaration = namespaceTypeDeclaration.WithMembers( namespaceTypeDeclaration.Members.AddRange( injectedNamedTypeMembers ) );
+
+                        namespaceTypeDeclaration =
+                            namespaceTypeDeclaration.WithMembers( namespaceTypeDeclaration.Members.AddRange( injectedNamedTypeMembers ) );
+
                         namespaceTypeDeclaration = AddInjectedInterfaces( namespaceTypeBuilder, namespaceTypeDeclaration );
 
                         injectedNode = namespaceDeclaration.WithMembers( SingletonList<MemberDeclarationSyntax>( namespaceTypeDeclaration ) );
@@ -1358,9 +1388,9 @@ internal sealed partial class LinkerInjectionStep
 
             if ( injections.Count > 0 )
             {
-                return 
+                return
                     ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!)
-                    .PartialUpdate( 
+                    .PartialUpdate(
                         attributeLists: List( outputLists ),
                         members: node.Members.AddRange( injections ) );
             }

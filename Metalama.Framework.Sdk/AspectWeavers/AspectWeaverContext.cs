@@ -6,7 +6,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Options;
@@ -31,7 +30,8 @@ namespace Metalama.Framework.Engine.AspectWeavers;
 public sealed partial class AspectWeaverContext
 {
     private readonly Action<Diagnostic> _addDiagnostic;
-    private readonly ISdkHierarchicalOptionsManager _optionsManager;
+    private readonly ISdkDeclarationFactory _declarationFactory;
+    private readonly IHierarchicalOptionsManager _optionsManager;
 
     private IPartialCompilation _compilation;
 
@@ -75,8 +75,15 @@ public sealed partial class AspectWeaverContext
     public ICompilationServices CompilationServices { get; }
 
     public T GetOptions<T>( ISymbol symbol )
-        where T : IHierarchicalOptions
-        => (T) this._optionsManager.GetOptions( symbol, typeof(T) );
+        where T : IHierarchicalOptions, new()
+    {
+        if ( !this._declarationFactory.TryGetDeclaration( symbol, out var declaration ) )
+        {
+            return new T();
+        }
+
+        return (T) this._optionsManager.GetOptions( declaration, typeof(T) ) ?? new T();
+    }
 
     private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
         => cancellationToken == default ? this.CancellationToken : cancellationToken;
@@ -169,13 +176,15 @@ public sealed partial class AspectWeaverContext
         IProject project,
         SyntaxAnnotation generatedCodeAnnotation,
         ICompilationServices compilationServices,
-        CancellationToken cancellationToken,
-        ISdkHierarchicalOptionsManager optionsManager )
+        ISdkDeclarationFactory declarationFactory,
+        IHierarchicalOptionsManager optionsManager,
+        CancellationToken cancellationToken )
     {
         this.AspectClass = aspectClass;
         this.AspectInstances = aspectInstances;
         this._compilation = compilation;
         this._addDiagnostic = addDiagnostic;
+        this._declarationFactory = declarationFactory;
         this.Project = project;
         this.GeneratedCodeAnnotation = generatedCodeAnnotation;
         this.CancellationToken = cancellationToken;

@@ -29,6 +29,8 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
     private ProjectSpecificCompileTimeTypeResolver? _typeResolver;
 
+    public bool IsInitialized { get; private set; }
+
     internal HierarchicalOptionsManager( in ProjectServiceProvider serviceProvider )
     {
         this._serviceProvider = serviceProvider;
@@ -60,6 +62,15 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         IUserDiagnosticSink diagnosticSink,
         CancellationToken cancellationToken )
     {
+        if ( this.IsInitialized )
+        {
+            throw new InvalidOperationException();
+        }
+        else
+        {
+            this.IsInitialized = true;
+        }
+
         // Initialize all default options. We need to do this during initialization because we need a diagnostic sink and won't have it later.
 
         foreach ( var optionTypeName in project.ClosureOptionTypes )
@@ -144,6 +155,11 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
 
     private OptionTypeNode GetOptionTypeNode( string optionTypeName )
     {
+        if ( !this.IsInitialized )
+        {
+            throw new InvalidOperationException( $"The {nameof(HierarchicalOptionsManager)} has not been initialized." );
+        }
+
         if ( !this._optionTypes.TryGetValue( optionTypeName, out var optionTypeNode ) )
         {
             throw new AssertionFailedException( $"The option type '{optionTypeName}' is not a part of the current project." );
@@ -152,22 +168,18 @@ public sealed partial class HierarchicalOptionsManager : IHierarchicalOptionsMan
         return optionTypeNode;
     }
 
-    internal IHierarchicalOptions GetOptions( IDeclaration declaration, Type optionsType )
+    public IHierarchicalOptions GetOptions( IDeclaration declaration, Type optionsType )
     {
         var optionTypeNode = this.GetOptionTypeNode( optionsType.FullName.AssertNotNull() );
 
         return optionTypeNode.GetOptions( declaration ).AssertNotNull();
     }
 
-    public TOptions GetOptions<TOptions>( IDeclaration declaration )
-        where TOptions : class, IHierarchicalOptions, new()
-        => (TOptions) this.GetOptions( declaration, typeof(TOptions) );
-
     public IEnumerable<KeyValuePair<HierarchicalOptionsKey, IHierarchicalOptions>>
         GetInheritableOptions( ICompilation compilation, bool withSyntaxTree )
         => this._optionTypes.Where( s => s.Value.Metadata is { InheritedByDerivedTypes: true } or { InheritedByOverridingMembers: true } )
             .SelectMany( s => s.Value.GetInheritableOptions( compilation, withSyntaxTree ) );
 
-    internal void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
+    public void SetAspectOptions( IDeclaration declaration, IHierarchicalOptions options )
         => this.GetOptionTypeNode( options.GetType().FullName.AssertNotNull() ).SetAspectOptions( declaration, options );
 }

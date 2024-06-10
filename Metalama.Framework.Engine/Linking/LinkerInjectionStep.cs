@@ -70,7 +70,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations = new();
-        HashSet<PropertyBuilder> buildersWithSynthesizedSetters = new();
 
         ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl>
             pendingInsertStatementContexts = new( input.CompilationModel.Comparers.Default );
@@ -111,7 +110,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     transformation,
                     transformationCollection,
                     auxiliaryMemberTransformations,
-                    buildersWithSynthesizedSetters,
                     pendingInsertStatementContexts );
 
                 this.IndexInjectTransformation(
@@ -121,7 +119,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     lexicalScopeFactory,
                     injectionNameProvider,
                     aspectReferenceSyntaxProvider,
-                    buildersWithSynthesizedSetters,
                     transformationCollection,
                     replacedIntroduceDeclarationTransformations );
 
@@ -186,7 +183,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                 transformationCollection.AddTransformationCausingAuxiliaryOverride( pair.Value.OriginTransformation );
 
                 // This may be the only "override" present, so make sure all other effects of overrides are present.
-                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection, buildersWithSynthesizedSetters );
+                AddSynthesizedSetterForPropertyIfRequired( pair.Key, transformationCollection );
 
                 auxiliaryMemberTransformations
                     .GetOrAdd( pair.Key, _ => new AuxiliaryMemberTransformations() )
@@ -452,7 +449,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
         LexicalScopeFactory lexicalScopeFactory,
         LinkerInjectionNameProvider nameProvider,
         LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
-        IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
         TransformationCollection transformationCollection,
         HashSet<IIntroduceDeclarationTransformation> replacedIntroduceDeclarationTransformations )
     {
@@ -495,8 +491,6 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
                 var injectedMembers = injectMemberTransformation.GetInjectedMembers( injectionContext );
 
-                injectedMembers = PostProcessInjectedMembers( injectedMembers );
-
                 transformationCollection.AddInjectedMembers( injectMemberTransformation, injectedMembers );
 
                 break;
@@ -530,57 +524,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
                 break;
         }
-
-        IEnumerable<InjectedMember> PostProcessInjectedMembers( IEnumerable<InjectedMember> injectedMembers )
-        {
-            if ( transformation is IntroducePropertyTransformation introducePropertyTransformation )
-            {
-                bool hasSynthesizedSetter;
-
-                lock ( buildersWithSynthesizedSetters )
-                {
-                    hasSynthesizedSetter = buildersWithSynthesizedSetters.Contains( introducePropertyTransformation.IntroducedDeclaration );
-                }
-
-                if ( hasSynthesizedSetter )
-                {
-                    // This is a property which should have a synthesized setter added.
-                    injectedMembers =
-                        injectedMembers
-                            .Select(
-                                im =>
-                                {
-                                    switch ( im )
-                                    {
-                                        // ReSharper disable once MissingIndent
-                                        case
-                                        {
-                                            Semantic: InjectedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
-                                            Syntax: PropertyDeclarationSyntax propertyDeclaration
-                                        }:
-                                            return im.WithSyntax(
-                                                propertyDeclaration.WithSynthesizedSetter(
-                                                    this._compilationContext.GetSyntaxGenerationContext( this._syntaxGenerationOptions ) ) );
-
-                                        case { Semantic: InjectedMemberSemantic.InitializerMethod }:
-                                            return im;
-
-                                        default:
-                                            throw new AssertionFailedException( $"Unexpected semantic for '{im.Declaration}'." );
-                                    }
-                                } );
-                }
-            }
-
-            return injectedMembers;
-        }
     }
 
     private static void IndexOverrideTransformation(
         ITransformation transformation,
         TransformationCollection transformationCollection,
         ConcurrentDictionary<IMember, AuxiliaryMemberTransformations> auxiliaryMemberTransformations,
-        HashSet<PropertyBuilder> buildersWithSynthesizedSetters,
         ConcurrentDictionary<IMember, InsertStatementTransformationContextImpl> pendingInsertStatementContexts )
     {
         if ( transformation is not IOverrideDeclarationTransformation overrideDeclarationTransformation )
@@ -590,8 +539,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         AddSynthesizedSetterForPropertyIfRequired(
             overrideDeclarationTransformation.OverriddenDeclaration,
-            transformationCollection,
-            buildersWithSynthesizedSetters );
+            transformationCollection );
 
         if ( overrideDeclarationTransformation.OverriddenDeclaration is IConstructor { IsPrimary: true } overriddenConstructor )
         {
@@ -623,8 +571,7 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
     private static void AddSynthesizedSetterForPropertyIfRequired(
         IDeclaration overriddenDeclaration,
-        TransformationCollection transformationCollection,
-        HashSet<PropertyBuilder> buildersWithSynthesizedSetters )
+        TransformationCollection transformationCollection )
     {
         // If this is an auto-property that does not override a base property, we can add synthesized init-only setter.
         // If this is overridden property we need to:
@@ -645,18 +592,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
                     break;
 
                 case BuiltProperty { PropertyBuilder: var builder }:
-                    lock ( buildersWithSynthesizedSetters )
-                    {
-                        buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
-                    }
+                    transformationCollection.AddAutoPropertyWithSynthesizedSetter( builder.AssertNotNull() );
 
                     break;
 
                 case PropertyBuilder builder:
-                    lock ( buildersWithSynthesizedSetters )
-                    {
-                        buildersWithSynthesizedSetters.Add( builder.AssertNotNull() );
-                    }
+                    transformationCollection.AddAutoPropertyWithSynthesizedSetter( builder.AssertNotNull() );
 
                     break;
 
