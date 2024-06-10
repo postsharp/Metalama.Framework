@@ -170,7 +170,7 @@ internal sealed partial class LinkerInjectionStep
         {
             Invariant.Assert( property is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } );
 
-            lock ( this._autoPropertyWithSynthesizedSetterSyntax )
+            lock ( this._autoPropertyWithSynthesizedSetterBuilders )
             {
                 this._autoPropertyWithSynthesizedSetterBuilders.Add( property );
             }

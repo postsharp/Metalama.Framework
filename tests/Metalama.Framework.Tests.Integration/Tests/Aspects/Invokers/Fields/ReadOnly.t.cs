@@ -25,34 +25,34 @@ public class TestClass
   {
     // --- Before ---
     // Base
-    this.IntroducedField = 42;
-    this._overriddenIntroducedField = 42;
     this.Field = 42;
+    this.IntroducedField = 42;
     this._overriddenField = 42;
+    this._overriddenIntroducedField = 42;
     // Current
-    this.IntroducedField = 42;
-    this._overriddenIntroducedField = 42;
     this.Field = 42;
+    this.IntroducedField = 42;
     this._overriddenField = 42;
+    this._overriddenIntroducedField = 42;
     // Final
-    this.IntroducedField = 42;
-    this.OverriddenIntroducedField = 42;
     this.Field = 42;
+    this.IntroducedField = 42;
     this.OverriddenField = 42;
+    this.OverriddenIntroducedField = 42;
     // --- After ---
     // Base
-    this.IntroducedField = 42;
     this.Field = 42;
+    this.IntroducedField = 42;
     this.OverriddenField = 42;
     this.OverriddenIntroducedField = 42;
     // Current
-    this.IntroducedField = 42;
     this.Field = 42;
+    this.IntroducedField = 42;
     this.OverriddenField = 42;
     this.OverriddenIntroducedField = 42;
     // Final
-    this.IntroducedField = 42;
     this.Field = 42;
+    this.IntroducedField = 42;
     this.OverriddenField = 42;
     this.OverriddenIntroducedField = 42;
   }

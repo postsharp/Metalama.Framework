@@ -23,36 +23,36 @@ public class TestClass
   {
     // --- Before ---
     // Base
-    this._overriddenIntroducedProperty = 42;
     this.IntroducedProperty = 42;
-    this.Property = 42;
+    this._overriddenIntroducedProperty = 42;
     this._overriddenProperty = 42;
+    this.Property = 42;
     // Current
+    this.IntroducedProperty = 42;
     this._overriddenIntroducedProperty = 42;
-    this.IntroducedProperty = 42;
-    this.Property = 42;
     this._overriddenProperty = 42;
-    // Final
-    this.OverriddenIntroducedProperty = 42;
-    this.IntroducedProperty = 42;
     this.Property = 42;
+    // Final
+    this.IntroducedProperty = 42;
+    this.OverriddenIntroducedProperty = 42;
     this.OverriddenProperty = 42;
+    this.Property = 42;
     // --- After ---
     // Base
-    this.OverriddenIntroducedProperty = 42;
     this.IntroducedProperty = 42;
-    this.Property = 42;
+    this.OverriddenIntroducedProperty = 42;
     this.OverriddenProperty = 42;
+    this.Property = 42;
     // Current
-    this.OverriddenIntroducedProperty = 42;
     this.IntroducedProperty = 42;
-    this.Property = 42;
+    this.OverriddenIntroducedProperty = 42;
     this.OverriddenProperty = 42;
+    this.Property = 42;
     // Final
-    this.OverriddenIntroducedProperty = 42;
     this.IntroducedProperty = 42;
-    this.Property = 42;
+    this.OverriddenIntroducedProperty = 42;
     this.OverriddenProperty = 42;
+    this.Property = 42;
   }
   public global::System.Int32 IntroducedProperty { get; }
   private readonly global::System.Int32 _overriddenIntroducedProperty;

@@ -66,21 +66,21 @@ public class InvokeBeforeAttribute : ConstructorAspect
 
         meta.InsertComment("Base");
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties)
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
             fieldOrProperty.With(InvokerOptions.Base).Value = 42;
         }
 
         meta.InsertComment("Current");
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties)
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
         {
             fieldOrProperty.With(InvokerOptions.Current).Value = 42;
         }
 
         meta.InsertComment("Final");
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties)
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
         {
             fieldOrProperty.With(InvokerOptions.Final).Value = 42;
         }
@@ -105,21 +105,21 @@ public class InvokeAfterAttribute : ConstructorAspect
 
         meta.InsertComment("Base");
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties)
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
         {
             fieldOrProperty.With(InvokerOptions.Base).Value = 42;
         }
 
         meta.InsertComment("Current");
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties)
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
         {
             fieldOrProperty.With(InvokerOptions.Current).Value = 42;
         }
 
         meta.InsertComment("Final");
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties)
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
         {
             fieldOrProperty.With(InvokerOptions.Final).Value = 42;
         }
