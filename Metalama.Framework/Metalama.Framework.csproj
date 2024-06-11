@@ -30,8 +30,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-        <PackageReference Include="Metalama.Framework.RunTime" Version="$(MetalamaFrameworkRunTimeVersion)" />
+        <PackageReference Include="System.Collections.Immutable" />
+        <PackageReference Include="Metalama.Framework.RunTime" />
     </ItemGroup>
 
     <!-- Packaging -->

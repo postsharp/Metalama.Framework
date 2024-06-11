@@ -28,8 +28,8 @@
 
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
 
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynApiMinVersion)" />
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" VersionOverride="$(RoslynApiMinVersion)" />
+        <PackageReference Include="Metalama.Compiler.Sdk" />
 
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="Analyzers;Build;BuildTransitive" />
 

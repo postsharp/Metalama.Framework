@@ -49,7 +49,7 @@
 
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="none" />
 
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" PrivateAssets="none" />
+        <PackageReference Include="Microsoft.CSharp" PrivateAssets="none" />
     </ItemGroup>
 
 
