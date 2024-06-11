@@ -103,6 +103,8 @@ return commandApp.Run( args );
 
 static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
 {
+    TestLicenseKeyDownloader.Download( arg.Context );
+
     arg.Context.Console.WriteHeading( "Generating code" );
 
     var generatorDirectory =

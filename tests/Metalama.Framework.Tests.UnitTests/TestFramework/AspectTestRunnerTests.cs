@@ -209,9 +209,9 @@ public class Program
             }
         }
 
-        private sealed record Message( string Text ) : IMessageSinkMessage
+        private sealed class Message( string text ) : LongLivedMarshalByRefObject, IMessageSinkMessage
         {
-            public override string ToString() => this.Text;
+            public override string ToString() => text;
         }
     }
 }

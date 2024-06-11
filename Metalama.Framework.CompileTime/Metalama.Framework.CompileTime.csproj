@@ -27,8 +27,8 @@
         <!-- Intentionally skipping Microsoft.CSharp to be sure not to have support for dynamic code at compile time,
              but we need the support in the IDE -->
 
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-        <PackageReference Include="Metalama.Framework.RunTime" Version="$(MetalamaFrameworkRunTimeVersion)" />
+        <PackageReference Include="System.Collections.Immutable" />
+        <PackageReference Include="Metalama.Framework.RunTime" />
 
         <!-- The following references change 'dynamic' into 'object' -->
         <ProjectReference Include="../source-dependencies/Metalama.Framework.Private/src/Metalama.SourceTransformer/Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" Condition="Exists('../source-dependencies/Metalama.Framework.Private')" />
