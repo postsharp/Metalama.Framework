@@ -84,6 +84,6 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         ITypeInfo ITestClass.Class => this;
 
-        ITestCollection ITestClass.TestCollection => this._testFactory.Collection;
+        ITestCollection ITestClass.TestCollection => this._testFactory.TestCollection;
     }
 }

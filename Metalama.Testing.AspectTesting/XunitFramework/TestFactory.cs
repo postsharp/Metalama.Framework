@@ -47,7 +47,8 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
             this.ProjectProperties = projectProperties;
             this.ProjectName = Path.GetFileName( this.ProjectProperties.SourceDirectory );
-            this.Collection = new TestCollection( this );
+            this.TestAssembly = new TestAssembly( this );
+            this.TestCollection = new TestCollection( this.TestAssembly );
             this.AssemblyInfo = assemblyInfo;
             this.ServiceProvider = serviceProvider;
             this.TestInputFactory = new TestInput.Factory( serviceProvider );
@@ -58,7 +59,9 @@ namespace Metalama.Testing.AspectTesting.XunitFramework
 
         public TestClass GetTestType( string? relativePath ) => this._types.GetOrAdd( relativePath ?? "", static ( p, me ) => new TestClass( me, p ), this );
 
-        public TestCollection Collection { get; }
+        public TestCollection TestCollection { get; }
+
+        public TestAssembly TestAssembly { get; }
 
         public IAssemblyInfo AssemblyInfo { get; }
     }

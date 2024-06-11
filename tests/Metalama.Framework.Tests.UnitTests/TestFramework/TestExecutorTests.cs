@@ -20,15 +20,15 @@ public sealed class TestExecutorTests : UnitTestClass
     [InlineData(
         "Error!",
         "**ERROR**",
-        "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestFailed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
+        "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestFailed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
         "/* Empty */",
         "// --- No output compilation units ---",
-        "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestPassed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
+        "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestPassed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
         "// @Skipped",
         "",
-        "TestCollectionStarting,TestAssemblyStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestSkipped,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestAssemblyFinished,TestCollectionFinished" )]
+        "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestSkipped,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     public void EventSequence( string testInput, string expectedTestOutput, string expectedEventSequence )
     {
         using var testContext = this.CreateTestContext();
