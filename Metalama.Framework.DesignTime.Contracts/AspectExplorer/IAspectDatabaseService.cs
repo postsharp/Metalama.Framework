@@ -34,6 +34,6 @@ public interface IAspectDatabaseService2 : IAspectDatabaseService
     Task GetAspectInstancesAsync(
         Compilation compilation,
         INamedTypeSymbol aspectClass,
-        IEnumerable<AspectExplorerAspectInstance2>[] result,
+        IEnumerable<IAspectExplorerAspectInstance>[] result,
         CancellationToken cancellationToken );
 }
