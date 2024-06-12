@@ -1,6 +1,6 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClass;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Initializer;
 using System;
 using System.Linq;
 using Metalama.Framework.Advising;
@@ -8,10 +8,10 @@ using Metalama.Framework.Code.Invokers;
 
 [assembly: AspectOrder( AspectOrderDirection.RunTime, typeof(OverrideAndInitializeAttribute), typeof(ResetInitializerAttribute) )]
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClass;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Initializer;
 
 /*
- * Tests invokers targeting a field declared in the base class.
+ * Tests invokers targeting a field with an initializer.
  */
 
 public class ResetInitializerAttribute : TypeAspect

@@ -164,7 +164,18 @@ public static class SerializableDeclarationIdProvider
                 return TryGetSerializableId( eventRaisePseudoAccessor.DeclaringMember, DeclarationRefTargetKind.EventRaise, out id );
 
             default:
-                var documentationId = DeclarationDocumentationCommentId.CreateDeclarationId( declaration );
+                string documentationId;
+
+                try
+                {
+                    documentationId = DeclarationDocumentationCommentId.CreateDeclarationId( declaration );
+                }
+                catch ( InvalidOperationException exception )
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot get a DeclarationDocumentationCommentId for '{declaration}' ({declaration.DeclarationKind}).",
+                        exception );
+                }
 
                 if ( targetKind == DeclarationRefTargetKind.Default )
                 {

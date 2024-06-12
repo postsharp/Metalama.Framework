@@ -34,6 +34,7 @@ internal sealed partial class LinkerInjectionStep
         private readonly ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>> _injectedInterfacesByTargetTypeBuilder;
         private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
         private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
+        private readonly HashSet<IPropertyBuilder> _autoPropertyWithSynthesizedSetterBuilders;
         private readonly ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>> _additionalDeclarationFlags;
         private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
         private readonly ConcurrentDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
@@ -75,6 +76,7 @@ internal sealed partial class LinkerInjectionStep
             this._injectedInterfacesByTargetTypeBuilder = new ConcurrentDictionary<INamedTypeBuilder, List<LinkerInjectedInterface>>();
             this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
+            this._autoPropertyWithSynthesizedSetterBuilders = new HashSet<IPropertyBuilder>();
             this._additionalDeclarationFlags = new ConcurrentDictionary<PropertyDeclarationSyntax, List<AspectLinkerDeclarationFlags>>();
             this._nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
             this._symbolMemberLevelTransformations = new ConcurrentDictionary<SyntaxNode, MemberLevelTransformations>();
@@ -164,6 +166,16 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
+        public void AddAutoPropertyWithSynthesizedSetter( IPropertyBuilder property )
+        {
+            Invariant.Assert( property is { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly } );
+
+            lock ( this._autoPropertyWithSynthesizedSetterBuilders )
+            {
+                this._autoPropertyWithSynthesizedSetterBuilders.Add( property );
+            }
+        }
+
         // ReSharper disable once UnusedMember.Local
         public void AddDeclarationWithAdditionalFlags( PropertyDeclarationSyntax declaration, AspectLinkerDeclarationFlags flags )
         {
@@ -175,7 +187,7 @@ internal sealed partial class LinkerInjectionStep
             }
         }
 
-        public void AddInsertedStatements( IMethodBase targetMethod, IReadOnlyList<InsertedStatement> statements )
+        public void AddInsertedStatements( IMethodBase targetMethod, IEnumerable<InsertedStatement> statements )
         {
             // PERF: Synchronization should not be needed because we are in the same syntax tree (if not, this would be non-deterministic and thus wrong).
             //       Assertions should be added first.
@@ -232,9 +244,13 @@ internal sealed partial class LinkerInjectionStep
             => this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
 
         // ReSharper disable once InconsistentlySynchronizedField
+        public bool IsAutoPropertyWithSynthesizedSetter( IPropertyBuilder propertyBuilder )
+            => this._autoPropertyWithSynthesizedSetterBuilders.Contains( propertyBuilder );
+
+        // ReSharper disable once InconsistentlySynchronizedField
         public bool IsNodeWithModifiedAttributes( SyntaxNode node ) => this._nodesWithModifiedAttributes.Contains( node );
 
-        public IReadOnlyList<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
+        public IEnumerable<InjectedMember> GetInjectedMembersOnPosition( InsertPosition position )
         {
             if ( this._injectedMembersByInsertPosition.TryGetValue( position, out var injectedMembers ) )
             {

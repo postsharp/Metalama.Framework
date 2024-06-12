@@ -13,3 +13,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types
   {
   }
 }
+// --- Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.IntoNamespace.TargetNamespace.TestType`1.cs ---
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.IntoNamespace.TargetNamespace
+{
+  class TestType<T> : global::System.Object
+  {
+  }
+}

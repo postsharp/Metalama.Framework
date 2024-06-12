@@ -36,6 +36,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 RoslynSpecialType.System_UInt32 => SpecialType.UInt32,
                 RoslynSpecialType.System_UInt64 => SpecialType.UInt64,
                 RoslynSpecialType.System_String => SpecialType.String,
+                RoslynSpecialType.System_Char => SpecialType.Char,
                 RoslynSpecialType.System_Decimal => SpecialType.Decimal,
                 RoslynSpecialType.System_Single => SpecialType.Single,
                 RoslynSpecialType.System_Double => SpecialType.Double,
@@ -61,6 +62,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 SpecialType.UInt32 => RoslynSpecialType.System_UInt32,
                 SpecialType.UInt64 => RoslynSpecialType.System_UInt64,
                 SpecialType.String => RoslynSpecialType.System_String,
+                SpecialType.Char => RoslynSpecialType.System_Char,
                 SpecialType.Decimal => RoslynSpecialType.System_Decimal,
                 SpecialType.Single => RoslynSpecialType.System_Single,
                 SpecialType.Double => RoslynSpecialType.System_Double,
@@ -158,7 +160,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 throw new ArgumentOutOfRangeException();
             }
 
-            return symbol.DeclaringSyntaxReferences.Any( r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
+            return symbol.DeclaringSyntaxReferences.Any(
+                r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
 
         public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
@@ -265,7 +268,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         internal static bool IsPrimaryConstructor( this IMethodSymbol constructorSymbol )
         {
             var declarationSyntax = constructorSymbol.GetPrimaryDeclaration();
-            
+
 #if ROSLYN_4_8_0_OR_GREATER
             return
                 constructorSymbol is { MethodKind: MethodKind.Constructor }
