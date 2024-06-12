@@ -491,7 +491,13 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
             var targetSymbol = transformation.TargetDeclaration.GetSymbol();
             var primarySyntaxReference = targetSymbol?.GetPrimarySyntaxReference();
 
-            var filePath = primarySyntaxReference?.SyntaxTree.FilePath ?? inputSyntaxTreeForDetached.FilePath;
+            var filePath = primarySyntaxReference?.SyntaxTree.FilePath;
+
+            if ( filePath == null || !resultBuilders.ContainsKey( filePath ) )
+            {
+                filePath = inputSyntaxTreeForDetached.FilePath;
+            }
+
             var builder = resultBuilders[filePath];
             builder.Transformations ??= ImmutableArray.CreateBuilder<DesignTimeTransformation>();
 

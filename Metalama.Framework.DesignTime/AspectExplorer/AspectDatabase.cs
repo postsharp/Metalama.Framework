@@ -211,16 +211,18 @@ public sealed class AspectDatabase : IGlobalService, IRpcApi
             };
         }
 
+#pragma warning disable IDE0300 // Don't use collection literal, since <>z__ReadOnlyArray`1 can't be deserialized here.
         var predecessorAspectInstances = aspectInstances
             .Where( aspectInstance => aspectInstance.Predecessors.Any( predecessor => GetPredecessorFullName( predecessor.Instance ) == aspectClassFullName ) )
             .Select(
                 aspectInstance => new AspectDatabaseAspectInstance(
                     GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
-                    [
+                    new[] {
                         new AspectDatabaseAspectTransformation(
                             GetSerializableIdForOriginalDeclaration( aspectInstance.TargetDeclaration ),
                             $"Provide the '{aspectInstance.AspectClass}' aspect." )
-                    ] ) );
+                    } ) );
+#pragma warning restore IDE0300
 
         return transformationAspectInstances.Concat( predecessorAspectInstances ).ToArray();
     }
