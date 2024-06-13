@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Pipeline
             private readonly IServiceProvider _serviceProvider;
             private readonly LoggerAdapter _logger;
             private readonly ExceptionReporterAdapter _exceptionReporter;
-            private readonly IDisposable? _usageReportingSession;
+            private readonly IUsageSession? _usageReportingSession;
 
             public CompilerServiceProvider( IServiceProvider serviceProvider, string? projectName )
             {
