@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-    <PackageReference Include="System.Interactive.Async" Version="3.2.0" PrivateAssets="all" />
+    <PackageReference Include="Metalama.Framework" />
+    <PackageReference Include="System.Interactive.Async" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

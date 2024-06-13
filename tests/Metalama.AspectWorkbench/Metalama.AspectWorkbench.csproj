@@ -9,8 +9,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="PostSharp.Patterns.Model" Version="$(PostSharpPackageVersion)" />
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="PostSharp.Patterns.Model" />
+        <PackageReference Include="Metalama.Compiler.Sdk" />
     </ItemGroup>
 
     <ItemGroup>

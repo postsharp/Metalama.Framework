@@ -56,21 +56,18 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DiffPlex" Version="$(DiffPlexVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(ThisRoslynVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="$(ThisRoslynVersion)" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(ThisRoslynVersion)" />
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)">
-            <GeneratePathProperty>True</GeneratePathProperty>
-        </PackageReference>
-        <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
-
-        <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" />
-        <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
-        <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
-        <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-        <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
+        <PackageReference Include="DiffPlex" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" VersionOverride="$(ThisRoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" VersionOverride="$(ThisRoslynVersion)" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" VersionOverride="$(ThisRoslynVersion)" />
+        <PackageReference Include="Metalama.Compiler.Sdk" GeneratePathProperty="true" />
+        <PackageReference Include="Metalama.Backstage" />
+        <PackageReference Include="Microsoft.Bcl.HashCode" />
+        <PackageReference Include="K4os.Hash.xxHash" />
+        <PackageReference Include="Microsoft.CSharp" />
+        <PackageReference Include="Newtonsoft.Json" />
+        <PackageReference Include="System.Reflection.Emit" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" />
     </ItemGroup>
 
     <ItemGroup>
@@ -84,20 +81,6 @@ added because the package already contains file 'analyzers\dotnet\cs\Metalama.Fr
         <ProjectReference Include="..\Metalama.Framework.Engine.Analyzers\Metalama.Framework.Engine.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
-    <!-- This is a work-around of PostSharp not preserving the public-signing flag. (#29763) -->
-    <ItemGroup>
-        <PackageReference Include="FakeSign" Version="0.9.2" PrivateAssets="all" GeneratePathProperty="true" />
-    </ItemGroup>
-
-    <PropertyGroup>
-        <_FixPublicSigningTouchFile>$(MSBuildThisFileDirectory)\obj\$(Configuration)\$(TargetFramework)\fakesign_touch</_FixPublicSigningTouchFile>
-    </PropertyGroup>
-
-    <Target Name="FixPublicSigning" Inputs="@(IntermediateAssembly->'%(FullPath)')" Outputs="$(_FixPublicSigningTouchFile)" AfterTargets="PostSharp">
-        <Exec Command="$(PkgFakeSign)\tools\FakeSign.exe $(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll" />
-        <Touch Files="$(_FixPublicSigningTouchFile)" AlwaysCreate="True" ContinueOnError="True" />
-    </Target>
-    
     <!-- Include system types as managed resources -->
     <Import Sdk="PostSharp.Engineering.Sdk" Project="Assets.props" />
 
