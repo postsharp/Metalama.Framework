@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)"/>
+    <PackageReference Include="System.ComponentModel.Annotations" />
+    <PackageReference Include="Metalama.Framework" />
 
     <MetalamaCompileTimePackage Include="System.ComponentModel.Annotations"/>
 
