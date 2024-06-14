@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" />
-      <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
+      <PackageReference Include="Metalama.Backstage" />
+      <PackageReference Include="StreamJsonRpc" />
     </ItemGroup>
     
     <ItemGroup>

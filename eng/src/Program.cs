@@ -13,8 +13,8 @@ using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Defin
 
 var product = new Product( MetalamaDependencies.Metalama )
 {
-    Solutions = new Solution[]
-    {
+    Solutions =
+    [
         new DotNetSolution( "Metalama.sln" )
         {
             SolutionFilterPathForInspectCode = "Metalama.LatestRoslyn.slnf",
@@ -23,8 +23,8 @@ var product = new Product( MetalamaDependencies.Metalama )
             
             // We don't run the tests for the whole solution because they are too slow and redundant. See #34277.
             TestMethod = BuildMethod.None,
-            FormatExclusions = new[]
-            {
+            FormatExclusions =
+            [
                 // Test payloads should not be formatted because it would break the test output comparison.
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
@@ -32,7 +32,7 @@ var product = new Product( MetalamaDependencies.Metalama )
 
                 // XML formatting seems to be conflicting.
                 "**\\*.props", "**\\*.targets", "**\\*.csproj", "**\\*.md", "**\\*.xml", "**\\*.config"
-            }
+            ]
         },
         new DotNetSolution( "Metalama.LatestRoslyn.slnf" )
         {
@@ -48,7 +48,7 @@ var product = new Product( MetalamaDependencies.Metalama )
         {
             IsTestOnly = true
         }
-    },
+    ],
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.Testing.UnitTesting.$(PackageVersion).nupkg",
@@ -91,7 +91,6 @@ var product = new Product( MetalamaDependencies.Metalama )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
-product.PrepareCompleted += TestLicensesCache.FetchOnPrepareCompleted;
 
 var commandApp = new CommandApp();
 
@@ -101,6 +100,8 @@ return commandApp.Run( args );
 
 static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
 {
+    TestLicenseKeyDownloader.Download( arg.Context );
+
     arg.Context.Console.WriteHeading( "Generating code" );
 
     var generatorDirectory =
