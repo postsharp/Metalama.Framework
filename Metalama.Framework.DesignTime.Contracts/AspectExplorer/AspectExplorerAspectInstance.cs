@@ -18,6 +18,7 @@ public struct AspectExplorerAspectInstance
 }
 
 [PublicAPI]
+[ComImport]
 [Guid( "415F68C2-FFAD-4176-9062-53C3658E5F18" )]
 public interface IAspectExplorerAspectInstance
 {
@@ -37,6 +38,7 @@ public struct AspectExplorerAspectTransformation
 }
 
 [PublicAPI]
+[ComImport]
 [Guid( "E0C881D8-C8FF-4988-B73D-CDEB6561CEBD" )]
 public interface IAspectExplorerAspectTransformation
 {
