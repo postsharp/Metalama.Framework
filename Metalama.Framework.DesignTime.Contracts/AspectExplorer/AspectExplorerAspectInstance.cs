@@ -2,10 +2,12 @@
 
 using JetBrains.Annotations;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.DesignTime.Contracts.AspectExplorer;
 
+[Obsolete]
 [PublicAPI]
 [Guid( "AF977B33-AA8C-4481-9B7E-B14A67200429" )]
 public struct AspectExplorerAspectInstance
@@ -24,6 +26,7 @@ public interface IAspectExplorerAspectInstance
     public IAspectExplorerAspectTransformation[] Transformations { get; }
 }
 
+[Obsolete]
 [PublicAPI]
 [Guid( "E758C91B-E335-4D53-AA30-82BBCCBF428A" )]
 public struct AspectExplorerAspectTransformation

@@ -51,6 +51,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
         return aspectClasses.Select( ResolveOrNull ).WhereNotNull().ToArray();
     }
 
+#pragma warning disable CS0612 // Type or member is obsolete
     private static AspectExplorerAspectInstance ToVersion1( IAspectExplorerAspectInstance aspectInstance )
         => new()
         {
@@ -79,6 +80,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
 
         result[0] = version2Result[0].Select( ToVersion1 ).ToArray();
     }
+#pragma warning restore CS0612
 
     public async Task GetAspectInstancesAsync(
         Compilation compilation,
