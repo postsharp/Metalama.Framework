@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.TestFramework;
 
-internal sealed class TestAssemblyInfo : IAssemblyInfo
+internal sealed class TestAssemblyInfo : LongLivedMarshalByRefObject, IAssemblyInfo
 {
     public TestAssemblyInfo( string assemblyPath )
     {

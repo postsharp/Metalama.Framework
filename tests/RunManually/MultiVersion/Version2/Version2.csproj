@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Version1\Version1.csproj"/>
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 
 </Project>

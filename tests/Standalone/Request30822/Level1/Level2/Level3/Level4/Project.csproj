@@ -11,7 +11,7 @@
 
   <ItemGroup>
       <Compile Include="..\..\..\..\GlobalAssemblyInfo.cs" Link="GlobalAssemblyInfo.cs" />
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)"/>
+    <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 
   <Target Name="Verify" AfterTargets="Build">
