@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Metalama.Framework.TestApp.Library/Metalama.Framework.TestApp.Library.csproj" />
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 
 </Project>

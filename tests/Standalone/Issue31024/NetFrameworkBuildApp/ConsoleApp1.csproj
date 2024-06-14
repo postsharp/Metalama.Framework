@@ -55,9 +55,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Metalama.Framework">
-      <Version>$(MetalamaVersion)</Version>
-    </PackageReference>
+    <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)/Microsoft.CSharp.targets" />
 </Project>
