@@ -379,11 +379,7 @@ namespace Metalama.Framework.Engine.CodeModel
                    .OrderBy( x => x.FilePath.Length )
                    .ThenBy( x => x.FilePath )
                    .FirstOrDefault()
-               ?? this.SyntaxTrees
-                   .OrderBy( t => t.Key.Length )
-                   .ThenBy( t => t.Key )
-                   .First()
-                   .Value;
+                ?? this.Compilation.CreateEmptySyntaxTree( "MetalamaAssemblyAttributes.cs" );
 
         private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.Services;
@@ -131,12 +132,14 @@ internal sealed class TestWorkspaceProvider : WorkspaceProvider
         }
     }
 
-    public Document GetDocument( string projectName, string documentName )
+    public Document GetDocument( string projectName, string documentName ) => this.GetDocumentOrNull( projectName, documentName ).AssertNotNull();
+
+    public Document? GetDocumentOrNull( string projectName, string documentName )
     {
         var projectData = this._projectIdsByProjectName[projectName];
-        var documentId = projectData.Documents[documentName];
+        projectData.Documents.TryGetValue( documentName, out var documentId );
 
-        return this._workspace.CurrentSolution.GetDocument( documentId ).AssertNotNull();
+        return this._workspace.CurrentSolution.GetDocument( documentId );
     }
 
     public override void Dispose()

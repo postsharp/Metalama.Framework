@@ -215,6 +215,12 @@ internal sealed partial class LinkerInjectionStep : AspectLinkerPipelineStep<Asp
 
         var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
+        if ( !input.CompilationModel.PartialCompilation.SyntaxTrees.ContainsKey( syntaxTreeForGlobalAttributes.FilePath )
+            && input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() ).Any() )
+        {
+            transformationCollection.AddIntroducedSyntaxTree( syntaxTreeForGlobalAttributes );
+        }
+
         // Replace wildcard AssemblyVersionAttribute with actual version.
         var attributes = input.CompilationModel.GetAttributeCollection( input.CompilationModel.ToRef() );
         var assemblyVersionAttributeType = (INamedType) input.CompilationModel.Factory.GetTypeByReflectionType( typeof(AssemblyVersionAttribute) );

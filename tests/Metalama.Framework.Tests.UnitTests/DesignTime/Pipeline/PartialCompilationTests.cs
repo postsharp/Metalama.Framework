@@ -241,7 +241,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             var code = new Dictionary<string, string>() { ["AAA.cs"] = "", ["AA.cs"] = "" };
             var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
-            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+            Assert.Equal( "MetalamaAssemblyAttributes.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
 
         [Fact]
@@ -250,7 +250,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
             var code = new Dictionary<string, string>() { ["BB.cs"] = "", ["AA.cs"] = "" };
             var compilation = PartialCompilation.CreateComplete( TestCompilationFactory.CreateCSharpCompilation( code ) );
 
-            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+            Assert.Equal( "MetalamaAssemblyAttributes.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
         }
 
         [Fact]

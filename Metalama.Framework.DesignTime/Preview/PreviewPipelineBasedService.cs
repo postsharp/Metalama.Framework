@@ -65,6 +65,12 @@ public abstract class PreviewPipelineBasedService
         var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
         var sourceCompilation = compilation.RemoveSyntaxTrees( generatedFiles );
 
+        // Have to run the pipeline to get the dependencies.
+        if ( pipeline.Status == DesignTimeAspectPipelineStatus.Default )
+        {
+            await pipeline.ExecuteAsync( compilation, AsyncExecutionContext.Get(), cancellationToken );
+        }
+
         // Get all syntax trees that the given syntax tree depends on.
         var dependenciesByDependentFilePath = pipeline.Dependencies.DependenciesByMasterProject.GetValueOrDefault( projectKey ).DependenciesByDependentFilePath;
 

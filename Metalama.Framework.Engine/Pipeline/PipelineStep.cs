@@ -29,11 +29,6 @@ internal abstract class PipelineStep
     /// <summary>
     /// Executes the step.
     /// </summary>
-    /// <param name="compilation"></param>
-    /// <param name="diagnostics"></param>
-    /// <param name="stepIndex"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     public abstract Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
         IUserDiagnosticSink diagnostics,

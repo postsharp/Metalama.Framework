@@ -117,9 +117,14 @@ public sealed class CompilationContext : ICompilationServices, ITemplateReflecti
         int nodeSpanStart,
         bool isPartial = false )
     {
-        var semanticModel = this.Compilation.GetCachedSemanticModel( tree );
-        var nullableContext = semanticModel.GetNullableContext( nodeSpanStart );
-        var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) == 0;
+        bool? isNullOblivious = null;
+
+        if ( this.Compilation.ContainsSyntaxTree( tree ) )
+        {
+            var semanticModel = this.Compilation.GetCachedSemanticModel( tree );
+            var nullableContext = semanticModel.GetNullableContext( nodeSpanStart );
+            isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) == 0;
+        }
 
         return this.GetSyntaxGenerationContext( options, isPartial, isNullOblivious );
     }
