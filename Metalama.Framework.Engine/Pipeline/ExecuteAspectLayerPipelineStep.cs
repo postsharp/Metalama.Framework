@@ -141,9 +141,21 @@ internal sealed class ExecuteAspectLayerPipelineStep : PipelineStep
                     this.Parent.AddAspectSources( aspectResult.AspectSources, true, cancellationToken );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );
                     await this.Parent.AddOptionsSourcesAsync( aspectResult.OptionsSources, cancellationToken );
-                    this.Parent.AddTransformations( aspectResult.Transformations );
 
-                    foreach ( var transformation in aspectResult.Transformations )
+                    var transformations = aspectResult.Transformations;
+                    var partialCompilation = this.Parent.FirstCompilation.PartialCompilation;
+
+                    // Filter out transformations that are not considered observed by the partial compilation.
+                    if ( partialCompilation.IsPartial )
+                    {
+                        transformations = transformations.Where(
+                            t => t is not ISyntaxTreeTransformation syntaxTreeTransformation
+                                || partialCompilation.IsSyntaxTreeObserved( syntaxTreeTransformation.TransformedSyntaxTree.FilePath ) ).ToImmutableArray();
+                    }
+
+                    this.Parent.AddTransformations( transformations );
+
+                    foreach ( var transformation in transformations )
                     {
                         if ( transformation.Observability != TransformationObservability.None )
                         {

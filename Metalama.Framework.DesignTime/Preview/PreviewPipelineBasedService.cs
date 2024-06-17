@@ -85,7 +85,7 @@ public abstract class PreviewPipelineBasedService
             .WhereNotNull()
             .ToArray();
 
-        var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, trees );
+        var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, trees, ImmutableHashSet.Create( syntaxTreeName ) );
 
         // Resume all pipelines.
         var executionContext = AsyncExecutionContext.Get();
