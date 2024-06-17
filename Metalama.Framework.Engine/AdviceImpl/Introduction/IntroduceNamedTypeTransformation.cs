@@ -46,7 +46,11 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
         switch ( typeBuilder.ContainingDeclaration )
         {
             case INamedType:
-                return new[] { new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
+            case INamespace { IsGlobalNamespace: true }:
+                return new[]
+                {
+                    new InjectedMember( this, type, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration )
+                };
 
             case INamespace:
                 var namespaceDeclaration =
@@ -60,7 +64,15 @@ internal sealed class IntroduceNamedTypeTransformation : IntroduceDeclarationTra
                         Token( TriviaList( context.SyntaxGenerationContext.ElasticEndOfLineTrivia ), SyntaxKind.CloseBraceToken, TriviaList() ),
                         default );
 
-                return new[] { new InjectedMember( this, namespaceDeclaration, this.ParentAdvice.AspectLayerId, InjectedMemberSemantic.Introduction, this.IntroducedDeclaration ) };
+                return new[]
+                {
+                    new InjectedMember(
+                        this,
+                        namespaceDeclaration,
+                        this.ParentAdvice.AspectLayerId,
+                        InjectedMemberSemantic.Introduction,
+                        this.IntroducedDeclaration )
+                };
 
             default:
                 throw new AssertionFailedException( $"Unsupported containing declaration type '{typeBuilder.ContainingDeclaration.GetType()}'." );

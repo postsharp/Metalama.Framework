@@ -46,7 +46,8 @@ namespace Metalama.Testing.AspectTesting
         /// Gets the file path of the syntax tree. For input syntax trees, this is an absolute path of the input document.
         /// For introduced syntax trees, this is a relative path under which the syntax tree was introduced. 
         /// </summary>
-        public string FilePath => this.InputPath ?? this.OutputDocument?.FilePath ?? throw new InvalidOperationException("The test syntax tree does not have a path.");
+        public string FilePath
+            => this.InputPath ?? this.OutputDocument?.FilePath ?? throw new InvalidOperationException( "The test syntax tree does not have a path." );
 
         /// <summary>
         /// Gets the input path from which the syntax tree was loaded. For introduced syntax trees, this is <c>null</c>.

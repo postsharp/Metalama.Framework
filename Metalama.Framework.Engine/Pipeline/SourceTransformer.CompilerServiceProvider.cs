@@ -23,7 +23,7 @@ public sealed partial class SourceTransformer
         private readonly ILoggerFactory _loggerFactory;
         private readonly Dictionary<Type, object> _services = new();
         private readonly IDisposable _scope;
-        private readonly IDisposable? _session;
+        private readonly IUsageSession? _session;
 
         public CompilerServiceProvider( IServiceProvider serviceProvider, AnalyzerConfigOptionsProvider contextAnalyzerConfigOptionsProvider )
         {

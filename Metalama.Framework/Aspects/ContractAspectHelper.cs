@@ -41,9 +41,9 @@ internal static class ContractAspectHelper
             _ => throw new ArgumentOutOfRangeException( $"Unexpected combination: ({a}, {b})" )
         };
 
-    internal static ContractDirection GetPossibleDirection( IDeclaration targetDeclaration ) =>
-        targetDeclaration switch
-        { 
+    internal static ContractDirection GetPossibleDirection( IDeclaration targetDeclaration )
+        => targetDeclaration switch
+        {
             IParameter { IsReturnParameter: true } => ContractDirection.Output,
             IParameter { RefKind: RefKind.Out } => ContractDirection.Output,
             IParameter { RefKind: RefKind.Ref } => ContractDirection.Both,

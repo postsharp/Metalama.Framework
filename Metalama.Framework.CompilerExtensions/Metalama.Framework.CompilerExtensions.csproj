@@ -10,10 +10,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true">
+        <PackageReference Include="Metalama.Compiler.Sdk" PrivateAssets="true">
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
-        <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
+        <PackageReference Include="System.Reflection.Emit" />
     </ItemGroup>
      
     <ItemGroup>

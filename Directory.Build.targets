@@ -30,11 +30,9 @@
     </PropertyGroup>
 
 
-    <ItemGroup>    
-        <PackageReference Include="Metalama.Compiler" Version="$(MetalamaCompilerVersion)" PrivateAssets="all"
-                          Condition="'$(UseMetalamaCompiler)'=='Private'"/>
-        <PackageReference Include="Metalama.Compiler" Version="$(MetalamaCompilerVersion)"
-                          Condition="'$(UseMetalamaCompiler)'=='Public'"/>
+    <ItemGroup>
+        <PackageReference Include="Metalama.Compiler" PrivateAssets="all" Condition="'$(UseMetalamaCompiler)'=='Private'" />
+        <PackageReference Include="Metalama.Compiler" Condition="'$(UseMetalamaCompiler)'=='Public'"/>
     </ItemGroup>
 
     <PropertyGroup>
