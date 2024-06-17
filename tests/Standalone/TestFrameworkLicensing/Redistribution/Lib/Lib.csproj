@@ -11,7 +11,7 @@
 
   
   <ItemGroup>
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="Metalama.Framework" />
   </ItemGroup>
 
 

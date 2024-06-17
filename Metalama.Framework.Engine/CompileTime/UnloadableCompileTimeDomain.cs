@@ -49,10 +49,19 @@ namespace Metalama.Framework.Engine.CompileTime
             // When using LoadFromAssemblyPath, the file is locked and the lock is not disposed when the AssemblyLoadContext is unloaded.
             // Therefore, we're loading from bytes.
 
-            using var peStream = RetryHelper.Retry( () => File.OpenRead( path ) );
-            var pdbPath = Path.ChangeExtension( path, ".pdb" );
-            using var pdbStream = File.Exists( pdbPath ) ? RetryHelper.Retry( () => File.OpenRead( pdbPath ) ) : null;
-            var assembly = this._assemblyLoadContext.AssertNotNull().LoadFromStream( peStream, pdbStream );
+            Assembly assembly;
+            
+            try
+            {
+                using var peStream = RetryHelper.Retry( () => File.OpenRead( path ) );
+                var pdbPath = Path.ChangeExtension( path, ".pdb" );
+                using var pdbStream = File.Exists( pdbPath ) ? RetryHelper.Retry( () => File.OpenRead( pdbPath ) ) : null;
+                assembly = this._assemblyLoadContext.AssertNotNull().LoadFromStream( peStream, pdbStream );
+            }
+            catch ( Exception e )
+            {
+                throw new FileLoadException( $"Cannot load '{path}': {e.Message}", e );
+            }
 
             lock ( this._loadedAssemblies )
             {

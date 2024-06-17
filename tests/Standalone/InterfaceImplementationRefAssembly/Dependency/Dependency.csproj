@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+    <PackageReference Include="Metalama.Framework" />
 	  <InternalsVisibleTo Include="Tests" />
   </ItemGroup>
 
