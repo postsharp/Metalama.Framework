@@ -256,7 +256,7 @@ namespace Metalama.Framework.Engine.Advising
             CannotIntroduceNewTypeWhenItAlreadyExists = new(
                 "LAMA0531",
                 "Cannot introduce a new type because a type with the same name and type parameters already exists.",
-                "The aspect '{0}' cannot introduce type '{1}' into '{2}' because the type is already declared in the type.",
+                "The aspect '{0}' cannot introduce type '{1}' into '{2}' because the type already exists.",
                 _category,
                 Error );
     }

@@ -386,7 +386,6 @@ public sealed class RemotingTests : UnitTestClass
         public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
             ProjectKey projectKey,
             string syntaxTreeName,
-            IEnumerable<string> additionalSyntaxTreeNames,
             CancellationToken cancellationToken )
         {
             return Task.FromResult(

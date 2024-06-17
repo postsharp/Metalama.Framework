@@ -28,7 +28,6 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        IEnumerable<string>? additionalSyntaxTreeNames = null,
         CancellationToken cancellationToken = default );
 
     /// <summary>

@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
         }
 
-        protected override void OnUsingDeclaration() => UserCodeExecutionContext.CurrentOrNull?.AddDependency( this );
+        protected override void OnUsingDeclaration() => UserCodeExecutionContext.CurrentOrNull?.AddDependencyFrom( this );
 
         public override bool CanBeInherited
         {

@@ -26,12 +26,11 @@ public static class TransformationPreviewServiceExtensions
         this ITransformationPreviewService2 service,
         Project project,
         string filePath,
-        string[] additionalFilePaths,
         CancellationToken cancellationToken = default )
     {
         var result = new IPreviewTransformationResult[1];
 
-        await service.PreviewGeneratedFileAsync( project, filePath, additionalFilePaths, result, cancellationToken );
+        await service.PreviewGeneratedFileAsync( project, filePath, result, cancellationToken );
 
         return result[0];
     }

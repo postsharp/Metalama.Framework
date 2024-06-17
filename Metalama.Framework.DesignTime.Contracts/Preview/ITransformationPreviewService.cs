@@ -38,11 +38,9 @@ namespace Metalama.Framework.DesignTime.Contracts.Preview
         /// </summary>
         /// <param name="project">The project that contains the file that is being previewed.</param>
         /// <param name="filePath">Path to the generated file that is being previewed. This file shouldn't exist in the original project.</param>
-        /// <param name="additionalFilePaths">Paths to files in the original project that lead to the content of <paramref name="filePath"/> being generated. Typically, this is the file where the aspect attribute is.</param>
         Task PreviewGeneratedFileAsync(
             Project project,
             string filePath,
-            string[] additionalFilePaths,
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken );
     }

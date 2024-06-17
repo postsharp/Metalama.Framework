@@ -22,9 +22,8 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }
 
-        private async Task PreviewTransformationAsync(
+        public async Task PreviewTransformationAsync(
             Document document,
-            IEnumerable<string> additionalFilePaths,
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken )
         {
@@ -49,7 +48,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 
             var analysisProcessApi = await this._userProcessEndpoint.GetApiAsync( projectKey, nameof(this.PreviewTransformationAsync), cancellationToken );
 
-            var unformattedResult = await analysisProcessApi.PreviewTransformationAsync( projectKey, syntaxTree.FilePath, additionalFilePaths, cancellationToken );
+            var unformattedResult = await analysisProcessApi.PreviewTransformationAsync( projectKey, syntaxTree.FilePath, cancellationToken );
 
             if ( !unformattedResult.IsSuccessful )
             {
@@ -63,19 +62,15 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             result[0] = PreviewTransformationResult.Success( formattedSyntaxTree.AssertNotNull(), unformattedResult.ErrorMessages );
         }
 
-        public Task PreviewTransformationAsync( Document document, IPreviewTransformationResult[] result, CancellationToken cancellationToken )
-            => this.PreviewTransformationAsync( document, [], result, cancellationToken );
-
         public Task PreviewGeneratedFileAsync(
             RoslynProject project,
             string filePath,
-            string[] additionalFilePaths,
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken )
         {
             var emptyDocument = project.AddDocument( Path.GetFileName( filePath ), SyntaxFactory.CompilationUnit(), filePath: filePath );
 
-            return this.PreviewTransformationAsync( emptyDocument, additionalFilePaths, result, cancellationToken );
+            return this.PreviewTransformationAsync( emptyDocument, result, cancellationToken );
         }
 
         internal static async Task<SyntaxTree?> FormatOutputAsync(

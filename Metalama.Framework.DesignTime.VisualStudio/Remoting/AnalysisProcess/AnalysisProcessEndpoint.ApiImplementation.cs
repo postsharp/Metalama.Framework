@@ -63,12 +63,11 @@ internal sealed partial class AnalysisProcessEndpoint
         public Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
             ProjectKey projectKey,
             string syntaxTreeName,
-            IEnumerable<string>? additionalSyntaxTreeNames,
             CancellationToken cancellationToken )
         {
             var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
 
-            return implementation.PreviewTransformationAsync( projectKey, syntaxTreeName, additionalSyntaxTreeNames ?? [], cancellationToken );
+            return implementation.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken );
         }
 
         public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )

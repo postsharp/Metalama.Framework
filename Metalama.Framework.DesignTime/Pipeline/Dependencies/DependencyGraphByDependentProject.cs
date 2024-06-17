@@ -27,7 +27,7 @@ internal readonly struct DependencyGraphByDependentProject
 
     public bool IsEmpty => this.DependenciesByMasterFilePath.Count == 0 && this.DependenciesByMasterPartialType.Count == 0;
 
-    private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByDependentFilePath;
+    internal ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterProject> DependenciesByDependentFilePath { get; }
 
     public DependencyGraphByDependentProject( ProjectKey projectKey ) : this(
         projectKey,
@@ -44,12 +44,12 @@ internal readonly struct DependencyGraphByDependentProject
         this.ProjectKey = projectKey;
         this.DependenciesByMasterFilePath = dependenciesByMasterFilePath;
         this.DependenciesByMasterPartialType = dependenciesByMasterPartialType;
-        this._dependenciesByDependentFilePath = dependenciesByDependentFilePath;
+        this.DependenciesByDependentFilePath = dependenciesByDependentFilePath;
     }
 
     public bool TryRemoveDependentSyntaxTree( string dependentFilePath, out DependencyGraphByDependentProject newDependenciesGraph )
     {
-        if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies ) )
+        if ( !this.DependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies ) )
         {
             // There is nothing to do because the dependency was not present.
             newDependenciesGraph = this;
@@ -103,7 +103,7 @@ internal readonly struct DependencyGraphByDependentProject
             this.ProjectKey,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
             dependenciesByMasterPartialTypesBuilder.ToImmutable(),
-            this._dependenciesByDependentFilePath.Remove( dependentFilePath ) );
+            this.DependenciesByDependentFilePath.Remove( dependentFilePath ) );
 
         return true;
     }
@@ -114,7 +114,7 @@ internal readonly struct DependencyGraphByDependentProject
         out DependencyGraphByDependentProject newDependenciesGraph )
     {
         // Check if there is any change.
-        if ( this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies )
+        if ( this.DependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies )
              && dependencies.IsStructurallyEqual( oldDependencies ) )
         {
             newDependenciesGraph = this;
@@ -203,7 +203,7 @@ internal readonly struct DependencyGraphByDependentProject
             this.ProjectKey,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
             dependenciesByMasterPartialTypeBuilder.ToImmutable(),
-            this._dependenciesByDependentFilePath.SetItem( dependentFilePath, dependencies ) );
+            this.DependenciesByDependentFilePath.SetItem( dependentFilePath, dependencies ) );
 
         return true;
     }

@@ -19,12 +19,9 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
     internal async Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        IEnumerable<string>? additionalSyntaxTreeNames = null,
         TestableCancellationToken cancellationToken = default )
     {
-        additionalSyntaxTreeNames ??= [];
-
-        var preparation = await this.PrepareExecutionAsync( projectKey, syntaxTreeName, additionalSyntaxTreeNames, cancellationToken );
+        var preparation = await this.PrepareExecutionAsync( projectKey, syntaxTreeName, cancellationToken );
 
         if ( !preparation.Success )
         {
@@ -60,7 +57,6 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
     Task<SerializablePreviewTransformationResult> ITransformationPreviewServiceImpl.PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        IEnumerable<string> additionalSyntaxTreeNames,
         CancellationToken cancellationToken )
-        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, additionalSyntaxTreeNames, cancellationToken.ToTestable() );
+        => this.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken.ToTestable() );
 }

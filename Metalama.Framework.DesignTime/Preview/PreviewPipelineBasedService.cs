@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.SyntaxGeneration;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Preview;
 
@@ -36,7 +37,6 @@ public abstract class PreviewPipelineBasedService
             PartialCompilation? PartialCompilation )> PrepareExecutionAsync(
             ProjectKey projectKey,
             string syntaxTreeName,
-            IEnumerable<string> additionalSyntaxTreeNames,
             TestableCancellationToken cancellationToken )
     {
         var project = await this.WorkspaceProvider.GetProjectAsync( projectKey, cancellationToken );
@@ -65,16 +65,21 @@ public abstract class PreviewPipelineBasedService
         var generatedFiles = compilation.SyntaxTrees.Where( SourceGeneratorHelper.IsGeneratedFile );
         var sourceCompilation = compilation.RemoveSyntaxTrees( generatedFiles );
 
-        // Find the syntax tree of the given name.
-        var syntaxTree = sourceCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
+        // Get all syntax trees that the given syntax tree depends on.
+        var dependenciesByDependentFilePath = pipeline.Dependencies.DependenciesByMasterProject.GetValueOrDefault( projectKey ).DependenciesByDependentFilePath;
 
-        var allTrees = additionalSyntaxTreeNames
+        var syntaxTreeNames = EnumerableExtensions.SelectManyRecursive(
+            [syntaxTreeName],
+            treeName => dependenciesByDependentFilePath?.GetValueOrDefault( treeName )?.MasterFilePathsAndHashes.Keys ?? [],
+            includeRoot: true );
+
+        // Find the syntax trees of the given names.
+        var trees = syntaxTreeNames
             .Select( name => sourceCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == name ) )
-            .Concat( syntaxTree )
             .WhereNotNull()
             .ToArray();
 
-        var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, allTrees );
+        var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, trees );
 
         // Resume all pipelines.
         var executionContext = AsyncExecutionContext.Get();

@@ -221,7 +221,7 @@ public sealed class CodeLensServiceImpl : PreviewPipelineBasedService, ICodeLens
         }
 
         // Execute the pipeline.
-        var preparation = await this.PrepareExecutionAsync( projectKey, codePointData.FilePath, [], cancellationToken );
+        var preparation = await this.PrepareExecutionAsync( projectKey, codePointData.FilePath, cancellationToken );
 
         if ( !preparation.Success )
         {
