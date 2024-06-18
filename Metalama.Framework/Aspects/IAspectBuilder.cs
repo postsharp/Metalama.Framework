@@ -6,6 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Project;
 using Metalama.Framework.Serialization;
+using System;
 using System.Threading;
 
 namespace Metalama.Framework.Aspects
@@ -82,6 +83,10 @@ namespace Metalama.Framework.Aspects
         /// Returns a copy of the current <see cref="IAspectBuilder"/>, for use in the current execution context,
         /// but for a different <see cref="Target"/> declaration.
         /// </summary>
+        IAspectBuilder<T> With<T>( T declaration )
+            where T : class, IDeclaration;
+        
+        [Obsolete("Use the With method.")]
         IAspectBuilder<T> WithTarget<T>( T newTarget )
             where T : class, IDeclaration;
     }
@@ -111,6 +116,10 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         IAspectReceiver<TAspectTarget> Outbound { get; }
         
+        new IAspectBuilder<T> With<T>( T declaration )
+            where T : class, IDeclaration;
+        
+        [Obsolete("Use the With method.")]
         new IAspectBuilder<T> WithTarget<T>( T newTarget )
             where T : class, IDeclaration;
     }

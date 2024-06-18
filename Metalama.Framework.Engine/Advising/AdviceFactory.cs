@@ -246,7 +246,7 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
         return selectedTemplate;
     }
 
-    IAdviser<TNewDeclaration> IAdviser<T>.WithTarget<TNewDeclaration>( TNewDeclaration target ) => this.WithDeclaration( target );
+    IAdviser<TNewDeclaration> IAdviser<T>.With<TNewDeclaration>( TNewDeclaration declaration ) => this.WithDeclaration( declaration );
 
     public AdviceFactory<TNewTarget> WithDeclaration<TNewTarget>( TNewTarget target )
         where TNewTarget : IDeclaration

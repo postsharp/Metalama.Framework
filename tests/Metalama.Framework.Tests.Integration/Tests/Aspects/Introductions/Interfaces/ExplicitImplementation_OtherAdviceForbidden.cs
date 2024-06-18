@@ -53,14 +53,14 @@ public class IntroductionAttribute : TypeAspect
 
         try
         {
-            explicitImplementation.WithTarget(builder.Target);
+            explicitImplementation.With(builder.Target);
         }
         catch (NotSupportedException)
         {
             return;
         }
 
-        throw new Exception("WithTarget did not throw.");
+        throw new Exception("With did not throw.");
     }
 
     [Template]

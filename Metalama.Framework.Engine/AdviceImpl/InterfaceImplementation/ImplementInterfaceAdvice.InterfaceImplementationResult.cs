@@ -34,7 +34,7 @@ internal sealed partial class ImplementInterfaceAdvice
 
         public INamedType Target => this._targetDeclaration.GetTarget( ReferenceResolutionOptions.Default );
 
-        IAdviser<TNewDeclaration> IAdviser<INamedType>.WithTarget<TNewDeclaration>( TNewDeclaration target )
+        IAdviser<TNewDeclaration> IAdviser<INamedType>.With<TNewDeclaration>( TNewDeclaration declaration )
             => throw new NotSupportedException( "Can't change the target for an explicit interface implementation adviser." );
 
         private readonly IAdviceFactory? _adviceFactory;
