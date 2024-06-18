@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.HierarchicalOptions;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Services;
@@ -466,7 +467,9 @@ internal sealed partial class AspectPipelineResult : ITransitiveAspectsManifest
                 var predecessorDeclarationSymbol = predecessor.Instance switch
                 {
                     IAspectInstance predecessorAspect => reflectionMapper.GetTypeSymbol( predecessorAspect.Aspect.GetType() ),
-                    IFabricInstance fabricInstance => reflectionMapper.GetTypeSymbol( fabricInstance.Fabric.GetType() ),
+                    // Can't use fabricInstance.Fabric.GetType() here, because for type fabrics,
+                    // we need the original type (e.g. C.Fabric), not the rewritten type (e.g. C_Fabric).
+                    IFabricInstance fabricInstance => compilationContext.Compilation.GetTypeByMetadataName( ((IFabricInstanceInternal) fabricInstance).FabricTypeFullName ),
                     _ => null
                 };
 
