@@ -124,6 +124,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 {
                     var sourceAbsolutePath = syntaxTree.InputPath;
 
+                    // Skip introduced trees.
+                    if ( sourceAbsolutePath == null )
+                    {
+                        continue;
+                    }
+
                     // Input.
                     var expectedInputHtmlPath = Path.Combine(
                         Path.GetDirectoryName( sourceAbsolutePath )!,

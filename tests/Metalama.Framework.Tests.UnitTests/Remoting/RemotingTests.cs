@@ -133,8 +133,7 @@ public sealed class RemotingTests : UnitTestClass
 
         var result = await (await client.GetServerApiAsync( "test" )).PreviewTransformationAsync(
             ProjectKeyFactory.CreateTest( "myProjectId" ),
-            "syntaxTreeName",
-            CancellationToken.None );
+            "syntaxTreeName" );
 
         Assert.True( result.IsSuccessful );
         AssertEx.EolInvariantEqual( "class TransformedCode {}", result.TransformedSyntaxTree?.Text );

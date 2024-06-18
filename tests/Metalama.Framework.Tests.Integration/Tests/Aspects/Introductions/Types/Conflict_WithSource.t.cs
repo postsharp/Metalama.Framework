@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed.
-// Error LAMA0531 on `TargetType`: `The aspect 'Introduction' cannot introduce type 'Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.Conflict_WithSource.TargetType.TestNestedType' into 'TargetType' because the type is already declared in the type.`
+// Error LAMA0531 on `TargetType`: `The aspect 'Introduction' cannot introduce type 'Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.Conflict_WithSource.TargetType.TestNestedType' into 'TargetType' because the type already exists.`
