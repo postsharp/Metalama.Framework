@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_Introduced;
@@ -16,7 +16,7 @@ internal class TestAttribute : TypeAspect
                     buildConstructor: b => { b.AddParameter( "p", typeof(object) ); } )
                 .Declaration;
 
-        builder.Advice.AddContract( constructor.Parameters.Single(), nameof(ValidationTemplate) );
+        builder.With( constructor.Parameters.Single() ).AddContract( nameof(ValidationTemplate) );
     }
 
     [Template]

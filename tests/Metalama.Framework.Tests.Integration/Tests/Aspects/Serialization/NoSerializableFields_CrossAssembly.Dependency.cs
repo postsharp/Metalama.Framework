@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Serialization.NoSerializableFields_CrossAssembly;

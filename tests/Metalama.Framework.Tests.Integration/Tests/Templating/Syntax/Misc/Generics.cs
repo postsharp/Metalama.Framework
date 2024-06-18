@@ -1,4 +1,5 @@
 #pragma warning disable CS8600, CS8603, CS8618, CS0169, CS0067
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 

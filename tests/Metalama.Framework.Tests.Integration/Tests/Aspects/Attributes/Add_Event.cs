@@ -1,6 +1,6 @@
 using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 
@@ -18,12 +18,12 @@ public class MyAspect : EventAspect
 
         if (builder.Target.AddMethod != null)
         {
-            builder.Advice.IntroduceAttribute( builder.Target.AddMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
+            builder.With( builder.Target.AddMethod ).IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
 
         if (builder.Target.RemoveMethod != null)
         {
-            builder.Advice.IntroduceAttribute( builder.Target.RemoveMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
+            builder.With( builder.Target.RemoveMethod ).IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
     }
 }

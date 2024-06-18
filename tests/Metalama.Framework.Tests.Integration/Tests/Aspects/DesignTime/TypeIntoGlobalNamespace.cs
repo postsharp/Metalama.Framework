@@ -2,6 +2,7 @@
 // @DesignTime
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,7 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeIntoGlobalN
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceClass( builder.Target.Compilation.GlobalNamespace, "TestType" );
+            builder.With( builder.Target.Compilation.GlobalNamespace ).IntroduceClass( "TestType" );
         }
     }
 

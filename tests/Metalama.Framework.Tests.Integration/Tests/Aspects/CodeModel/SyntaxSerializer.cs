@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Reflection;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer

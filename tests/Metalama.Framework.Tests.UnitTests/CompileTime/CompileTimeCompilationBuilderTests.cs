@@ -727,7 +727,6 @@ public class ReferencedClass
         {
             const string code = """
                                 using System;
-                                using Metalama.Framework.Advising;
                                 using Metalama.Framework.Aspects; 
 
                                 [CompileTime]

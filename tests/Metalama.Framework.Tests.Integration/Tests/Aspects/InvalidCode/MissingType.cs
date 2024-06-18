@@ -1,5 +1,5 @@
 #if TESTRUNNER
-using Metalama.Framework.Advising; 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects; 
 using System.Linq;
 #endif

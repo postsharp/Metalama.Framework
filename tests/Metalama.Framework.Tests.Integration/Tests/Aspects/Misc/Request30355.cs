@@ -6,8 +6,8 @@
 
 using System.ComponentModel;
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
@@ -61,7 +61,7 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
 
         foreach (var property in builder.Target.Properties.Where( p => !p.IsAbstract && p.Writeability == Writeability.All ))
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.With( property ).OverrideAccessors( null, nameof(OverridePropertySetter) );
         }
     }
 
@@ -109,8 +109,8 @@ internal class OptionalValueTypeAttribute : TypeAspect
         foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ?? false ))
         {
             // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
-            var builtProperty = builder.Advice.IntroduceProperty(
-                    nestedType,
+            var builtProperty = builder.With( nestedType )
+                .IntroduceProperty(
                     nameof(OptionalPropertyTemplate),
                     buildProperty: p =>
                     {
@@ -120,10 +120,10 @@ internal class OptionalValueTypeAttribute : TypeAspect
                 .Declaration;
 
             // Override the property in the target type so that it is forwarded to the nested type.
-            builder.Advice.Override(
-                property,
-                nameof(OverridePropertyTemplate),
-                tags: new { optionalProperty = builtProperty } );
+            builder.With( property )
+                .Override(
+                    nameof(OverridePropertyTemplate),
+                    tags: new { optionalProperty = builtProperty } );
         }
     }
 

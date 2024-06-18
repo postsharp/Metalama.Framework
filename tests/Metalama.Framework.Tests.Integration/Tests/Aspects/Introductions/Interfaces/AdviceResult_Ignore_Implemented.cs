@@ -2,8 +2,8 @@
 // @Include(_AdviceResultShared.cs)
 # endif
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            var result = aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface), OverrideStrategy.Ignore );
+            var result = aspectBuilder.ImplementInterface( typeof(IInterface), OverrideStrategy.Ignore );
 
             if (result.Outcome != AdviceOutcome.Ignore)
             {

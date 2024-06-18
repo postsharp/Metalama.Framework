@@ -859,15 +859,15 @@ public static class AdviserExtensions
     /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
     /// <param name="kind">The type of initializer to add.</param>
+    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
     ///     <see cref="meta"/> API.</param>
-    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     public static IAddInitializerAdviceResult AddInitializer(
         this IAdviser<INamedType> adviser,
         string template,
         InitializerKind kind,
         object? args = null,
-        object? tags = null)
+        object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.AddInitializer(
             adviser.Target,
             template,
@@ -897,9 +897,9 @@ public static class AdviserExtensions
     /// </summary>
     /// <param name="adviser">An adviser for a constructor.</param>
     /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
+    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     /// <param name="tags">An optional opaque object of anonymous type  passed to templates and exposed under the <see cref="meta.Tags"/> property of the
     ///     <see cref="meta"/> API.</param>
-    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     public static IAddInitializerAdviceResult AddInitializer(
         this IAdviser<IConstructor> adviser,
         string template,
@@ -931,9 +931,9 @@ public static class AdviserExtensions
     /// <param name="adviser">An adviser for a parameter.</param>
     /// <param name="template">The name of the template method. This method must have a single run-time parameter named <c>value</c>, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
     /// <param name="direction">Direction of the data flow to which the contract should apply. See <see cref="ContractDirection"/> for details.</param>
+    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
     ///     <see cref="meta"/> API.</param>
-    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     public static IAddContractAdviceResult<IParameter> AddContract(
         this IAdviser<IParameter> adviser,
         string template,
@@ -955,9 +955,9 @@ public static class AdviserExtensions
     /// <param name="adviser">An adviser for a field, or an property or an indexer.</param>
     /// <param name="template">The name of the template method. This method must have a single run-time parameter named <c>value</c>, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
     /// <param name="direction">Direction of the data flow to which the contract should apply. See <see cref="ContractDirection"/> for details.</param>
+    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
     ///     <see cref="meta"/> API.</param>
-    /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
     public static IAddContractAdviceResult<IFieldOrPropertyOrIndexer> AddContract(
         this IAdviser<IFieldOrPropertyOrIndexer> adviser,
         string template,
@@ -1114,4 +1114,33 @@ public static class AdviserExtensions
             adviser.Target,
             annotation,
             export );
+
+    public static IAdviser<TDeclaration> WithTemplateProvider<TDeclaration>(
+        this IAdviser<TDeclaration> adviser,
+        ITemplateProvider templateProvider )
+        => new Adviser<TDeclaration>( adviser.Target, ((IAdviserInternal) adviser).AdviceFactory.WithTemplateProvider( templateProvider ) );
+
+    private class Adviser<T> : IAdviser<T>, IAdviserInternal
+    {
+        public T Target { get; }
+
+        public IAdviceFactory AdviceFactory { get; }
+
+        public Adviser( T target, IAdviceFactory adviceFactory )
+        {
+            this.Target = target;
+            this.AdviceFactory = adviceFactory;
+        }
+
+        public IAdviser<TNewDeclaration> With<TNewDeclaration>( TNewDeclaration declaration )
+            where TNewDeclaration : IDeclaration
+        {
+            if ( !declaration.IsContainedIn( declaration ) && declaration.DeclarationKind is not (DeclarationKind.Compilation or DeclarationKind.Namespace) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(declaration), $"'{declaration}' is not contained in '{this.Target}'." );
+            }
+
+            return new Adviser<TNewDeclaration>( declaration, this.AdviceFactory );
+        }
+    }
 }

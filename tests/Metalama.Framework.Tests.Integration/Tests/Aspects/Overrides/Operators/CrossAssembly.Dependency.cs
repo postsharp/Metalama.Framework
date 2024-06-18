@@ -1,5 +1,5 @@
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossAssembly;
 using System;
@@ -62,7 +62,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.CrossA
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(Template) );
+                builder.With( method ).Override( nameof(Template) );
             }
         }
 

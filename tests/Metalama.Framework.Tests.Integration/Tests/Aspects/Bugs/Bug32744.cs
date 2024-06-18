@@ -1,6 +1,7 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32744;
 
 #pragma warning disable CS8321
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 public class TestAttribute : OverrideMethodAspect

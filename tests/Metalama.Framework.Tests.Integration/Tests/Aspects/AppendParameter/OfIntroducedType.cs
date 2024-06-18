@@ -1,5 +1,5 @@
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Linq;
 
@@ -12,7 +12,7 @@ public class MyAspect : TypeAspect
         var introducedType = builder.IntroduceClass( "X", buildType: b => { b.Accessibility = Accessibility.Public; } )
             .Declaration;
 
-        builder.Advice.IntroduceParameter( builder.Target.Constructors.Single(), "p", introducedType, TypedConstant.Default( introducedType ) );
+        builder.With( builder.Target.Constructors.Single() ).IntroduceParameter( "p", introducedType, TypedConstant.Default( introducedType ) );
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Introduced_Derived
@@ -14,7 +14,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Intro
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var introductionResult = builder.IntroduceFinalizer( nameof(IntroduceTemplate) );
-            builder.Advice.Override( introductionResult.Declaration, nameof(OverrideTemplate) );
+            builder.With( introductionResult.Declaration ).Override( nameof(OverrideTemplate) );
         }
 
         [Template]

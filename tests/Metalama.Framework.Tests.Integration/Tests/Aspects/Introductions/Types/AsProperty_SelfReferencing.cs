@@ -1,6 +1,6 @@
 ﻿using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AsProperty_SelfReferencing;
@@ -15,14 +15,14 @@ public class IntroductionAttribute : TypeAspect
 
         var existingNested = builder.Target.Types.Single();
 
-        builder.Advice.IntroduceProperty(
-            result.Declaration,
-            nameof(PropertyTemplate),
-            buildProperty: b =>
-            {
-                b.Name = "Property";
-                b.Type = result.Declaration;
-            } );
+        builder.With( result.Declaration )
+            .IntroduceProperty(
+                nameof(PropertyTemplate),
+                buildProperty: b =>
+                {
+                    b.Name = "Property";
+                    b.Type = result.Declaration;
+                } );
     }
 
     [Template]

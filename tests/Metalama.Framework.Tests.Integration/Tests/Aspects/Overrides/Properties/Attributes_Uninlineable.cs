@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Attributes_Uninlineable;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override( property, nameof(Template) );
+                builder.With( property ).Override( nameof(Template) );
             }
         }
 

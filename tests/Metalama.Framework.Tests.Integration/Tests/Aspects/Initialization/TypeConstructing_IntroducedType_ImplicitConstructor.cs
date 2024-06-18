@@ -15,9 +15,9 @@ public class Aspect : TypeAspect
     {
         var introducedType = builder.IntroduceClass( "IntroducedType" ).Declaration;
 
-        builder.Advice.IntroduceField( introducedType, nameof(Field) );
+        builder.With( introducedType ).IntroduceField( nameof(Field) );
 
-        builder.Advice.AddInitializer( introducedType, nameof(Template), InitializerKind.BeforeTypeConstructor );
+        builder.With( introducedType ).AddInitializer( nameof(Template), InitializerKind.BeforeTypeConstructor );
     }
 
     [Template]

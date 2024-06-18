@@ -8,9 +8,7 @@ public class InvokerAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        var t = builder.Advice.IntroduceClass(
-            builder.Target.DeclaringType!,
-            "IntroducedType" );
+        var t = builder.With( builder.Target.DeclaringType! ).IntroduceClass( "IntroducedType" );
 
         var c = t.IntroduceConstructor( nameof(ConstructorTemplate) );
 

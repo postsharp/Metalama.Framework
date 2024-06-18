@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
             base.BuildAspect( builder );
 
             var constructor = builder.Target.Constructors.Single();
-            builder.Advice.AddInitializer( constructor, StatementFactory.Parse( "_ = 42;" ) );
+            builder.With( constructor ).AddInitializer( StatementFactory.Parse( "_ = 42;" ) );
         }
     }
 

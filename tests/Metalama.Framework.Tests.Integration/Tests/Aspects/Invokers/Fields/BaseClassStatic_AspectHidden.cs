@@ -1,5 +1,5 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.BaseClassStatic_AspectHidden;

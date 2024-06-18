@@ -2,6 +2,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.IteratorP
 
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -13,14 +14,13 @@ public sealed class TestAttribute : TypeAspect
 
         foreach (var property in builder.Target.Properties)
         {
-            builder.Advice.AddContract(
-                property,
-                nameof(ValidateParameter),
-                direction: ContractDirection.Input );
+            builder.With( property )
+                .AddContract(
+                    nameof(ValidateParameter),
+                    direction: ContractDirection.Input );
 
             // #32616
-            //builder.Advice.AddContract(
-            //    property,
+            //builder.With( //    property ).AddContract(
             //    nameof(ValidateParameter),
             //    direction: ContractDirection.Output);
         }

@@ -95,24 +95,24 @@ internal class IntroduceMembersAttribute : TypeAspect
         results.Add( builder.IntroduceFinalizer( nameof(Finalizer) ) );
 
         results.Add(
-            builder.Advice.IntroduceParameter(
-                builder.Target.Constructors.First(),
-                "x",
-                typeof(int),
-                TypedConstant.Create( 42 ),
-                pullAction: ( p, c ) =>
-                {
-                    try
+            builder.With( builder.Target.Constructors.First() )
+                .IntroduceParameter(
+                    "x",
+                    typeof(int),
+                    TypedConstant.Create( 42 ),
+                    pullAction: ( p, c ) =>
                     {
-                        builderIds.Add( p.ToSerializableId().Id );
-                    }
-                    catch (NotSupportedException ex)
-                    {
-                        builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
-                    }
+                        try
+                        {
+                            builderIds.Add( p.ToSerializableId().Id );
+                        }
+                        catch (NotSupportedException ex)
+                        {
+                            builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
+                        }
 
-                    return PullAction.None;
-                } ) );
+                        return PullAction.None;
+                    } ) );
 
         builder.IntroduceMethod(
             nameof(GetIds),

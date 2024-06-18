@@ -1,7 +1,10 @@
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32522;
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System.Collections.Immutable;
 

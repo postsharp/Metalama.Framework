@@ -2,6 +2,7 @@
 // @LanguageVersion(10)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -18,7 +19,7 @@ public class IntroduceAspectAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
     {
-        aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+        aspectBuilder.ImplementInterface( typeof(IInterface) );
     }
 
     [InterfaceMember]

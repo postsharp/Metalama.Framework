@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -13,10 +14,10 @@ public class OverrideAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddContract( builder.Target.Constructors.Single().Parameters.Single(), nameof(InitializerTemplate), args: new { i = 1 } );
-        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { i = 1 } );
-        builder.Advice.AddContract( builder.Target.Constructors.Single().Parameters.Single(), nameof(InitializerTemplate), args: new { i = 2 } );
-        builder.Advice.Override( builder.Target.Constructors.Single(), nameof(Template), args: new { i = 2 } );
+        builder.With( builder.Target.Constructors.Single().Parameters.Single() ).AddContract( nameof(InitializerTemplate), args: new { i = 1 } );
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template), args: new { i = 1 } );
+        builder.With( builder.Target.Constructors.Single().Parameters.Single() ).AddContract( nameof(InitializerTemplate), args: new { i = 2 } );
+        builder.With( builder.Target.Constructors.Single() ).Override( nameof(Template), args: new { i = 2 } );
     }
 
     [Template]

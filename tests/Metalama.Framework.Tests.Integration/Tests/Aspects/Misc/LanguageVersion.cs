@@ -3,6 +3,7 @@
 // @LanguageVersion(8.0)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 // This reproduces #30669.

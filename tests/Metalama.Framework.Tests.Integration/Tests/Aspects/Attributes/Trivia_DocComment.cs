@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Fabrics;
@@ -24,10 +24,10 @@ public sealed class TestAspect : TypeAspect
 
         foreach (var property in builder.Target.FieldsAndProperties)
         {
-            builder.Advice.IntroduceAttribute(
-                property,
-                AttributeConstruction.Create( ( (INamedType)TypeFactory.GetType( typeof(TestAttribute) ) ).Constructors.Single() ),
-                OverrideStrategy.Override );
+            builder.With( property )
+                .IntroduceAttribute(
+                    AttributeConstruction.Create( ( (INamedType)TypeFactory.GetType( typeof(TestAttribute) ) ).Constructors.Single() ),
+                    OverrideStrategy.Override );
         }
     }
 }

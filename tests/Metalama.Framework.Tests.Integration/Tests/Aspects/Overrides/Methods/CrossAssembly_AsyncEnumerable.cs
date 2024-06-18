@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER)
+#endif
 
 using System;
 using System.Collections.Generic;

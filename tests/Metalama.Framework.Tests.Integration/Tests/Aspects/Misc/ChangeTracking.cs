@@ -1,5 +1,5 @@
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 
@@ -24,10 +24,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
                         } )
                     .Declaration;
 
-                builder.Advice.Override(
-                    property,
-                    nameof(OverrideProperty),
-                    tags: new { isSpecifiedProperty = isSpecifiedProperty } );
+                builder.With( property )
+                    .Override(
+                        nameof(OverrideProperty),
+                        tags: new { isSpecifiedProperty = isSpecifiedProperty } );
             }
         }
 

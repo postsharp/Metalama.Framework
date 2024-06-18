@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -15,7 +16,7 @@ internal class Aspect : PropertyAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod( builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody = GetPropertyBody( builder.Target ) } );
+        builder.With( builder.Target.DeclaringType ).IntroduceMethod( nameof(PropertyBody), args: new { propertyBody = GetPropertyBody( builder.Target ) } );
     }
 
     private string? GetPropertyBody( IProperty property )

@@ -5,7 +5,7 @@
 using System;
 using System.Text;
 using Metalama.Testing.AspectTesting;
-using Metalama.Framework.Advising; 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects; 
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.New.NewInvalidType

@@ -5,6 +5,7 @@
 #if ROSLYN_4_8_0_OR_GREATER
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.IntroducedParameter_Multiple;
@@ -23,8 +24,8 @@ public class Override1Attribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override( constructor, nameof(Template), args: new { i = 1 } );
-            builder.Advice.IntroduceParameter( constructor, "introduced", TypeFactory.GetType( SpecialType.Int32 ), TypedConstant.Create( 42 ) );
+            builder.With( constructor ).Override( nameof(Template), args: new { i = 1 } );
+            builder.With( constructor ).IntroduceParameter( "introduced", TypeFactory.GetType( SpecialType.Int32 ), TypedConstant.Create( 42 ) );
         }
     }
 
@@ -48,7 +49,7 @@ public class Override2Attribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override( constructor, nameof(Template), args: new { i = 2 } );
+            builder.With( constructor ).Override( nameof(Template), args: new { i = 2 } );
         }
     }
 

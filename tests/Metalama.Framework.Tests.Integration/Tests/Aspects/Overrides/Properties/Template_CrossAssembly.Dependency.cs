@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override( property, nameof(Override) );
+                builder.With( property ).Override( nameof(Override) );
             }
         }
 

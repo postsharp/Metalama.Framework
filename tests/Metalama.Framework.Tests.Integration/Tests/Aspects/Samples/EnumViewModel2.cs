@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -29,8 +29,8 @@ public class EnumViewModelAttribute : TypeAspect
             .Declaration;
 
         var valueField =
-            builder.Advice.IntroduceField(
-                    viewModelType,
+            builder.With( viewModelType )
+                .IntroduceField(
                     nameof(FieldTemplate),
                     buildField: b =>
                     {
@@ -41,8 +41,8 @@ public class EnumViewModelAttribute : TypeAspect
                 .Declaration;
 
         var constructor =
-            builder.Advice.IntroduceConstructor(
-                    viewModelType,
+            builder.With( viewModelType )
+                .IntroduceConstructor(
                     nameof(ConstructorTemplate),
                     buildConstructor: b =>
                     {
@@ -71,11 +71,11 @@ public class EnumViewModelAttribute : TypeAspect
         // Introduce a property into the view-model type for each enum member.
         foreach (var member in enumType.Fields)
         {
-            builder.Advice.IntroduceProperty(
-                viewModelType,
-                template,
-                tags: new { member },
-                buildProperty: p => p.Name = "Is" + member.Name );
+            builder.With( viewModelType )
+                .IntroduceProperty(
+                    template,
+                    tags: new { member },
+                    buildProperty: p => p.Name = "Is" + member.Name );
         }
     }
 

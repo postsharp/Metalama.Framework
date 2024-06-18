@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,7 +20,7 @@ public class OverrideAttribute : TypeAspect
                 continue;
             }
 
-            builder.Advice.Override( constructor, nameof(Template) );
+            builder.With( constructor ).Override( nameof(Template) );
         }
     }
 

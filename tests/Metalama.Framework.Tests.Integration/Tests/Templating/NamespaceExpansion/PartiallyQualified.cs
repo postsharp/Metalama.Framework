@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion.PartiallyQualified.ChildNs;

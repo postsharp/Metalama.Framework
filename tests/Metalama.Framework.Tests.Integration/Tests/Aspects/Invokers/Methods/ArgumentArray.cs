@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
@@ -14,7 +15,7 @@ public class TestAttribute : MethodAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod( builder.Target.DeclaringType, nameof(GetMethodInvokerDelegate), args: new { method = builder.Target } );
+        builder.With( builder.Target.DeclaringType ).IntroduceMethod( nameof(GetMethodInvokerDelegate), args: new { method = builder.Target } );
     }
 
     [Template]

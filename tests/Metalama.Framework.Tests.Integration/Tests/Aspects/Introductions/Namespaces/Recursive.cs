@@ -1,4 +1,6 @@
-﻿// @OutputAllSyntaxTrees
+﻿#if TEST_OPTIONS
+// @OutputAllSyntaxTrees
+#endif
 
 using System;
 using Metalama.Framework.Advising;
@@ -9,14 +11,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Names
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var outerNamespace = builder.Advice.IntroduceNamespace(builder.Target.Compilation.GlobalNamespace, "Outer");
-        var middleNamespace = outerNamespace.IntroduceNamespace("Middle");
-        var innerNamespace = middleNamespace.IntroduceNamespace("Inner");
-        var @class = innerNamespace.IntroduceClass("Test");
+        var outerNamespace = builder.With( builder.Target.Compilation ).IntroduceNamespace( "Outer" );
+        var middleNamespace = outerNamespace.IntroduceNamespace( "Middle" );
+        var innerNamespace = middleNamespace.IntroduceNamespace( "Inner" );
+        var @class = innerNamespace.IntroduceClass( "Test" );
 
-        builder.IntroduceField("Field", @class.Declaration);
+        builder.IntroduceField( "Field", @class.Declaration );
     }
 }
 

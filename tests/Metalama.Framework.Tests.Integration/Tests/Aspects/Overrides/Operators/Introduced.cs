@@ -1,6 +1,6 @@
 ﻿using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Introduced;
 
@@ -18,7 +18,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Introd
         {
             foreach (var o in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
-                builder.Advice.Override( o, nameof(Template) );
+                builder.With( o ).Override( nameof(Template) );
             }
         }
 

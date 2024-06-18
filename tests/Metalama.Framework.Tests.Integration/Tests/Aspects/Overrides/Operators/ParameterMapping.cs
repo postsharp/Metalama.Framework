@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,13 +13,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Parame
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(
-                builder.Target.Methods.Single( m => m.OperatorKind == OperatorKind.Addition ),
-                nameof(InvertedParameters) );
+            builder.With( builder.Target.Methods.Single( m => m.OperatorKind == OperatorKind.Addition ) ).Override( nameof(InvertedParameters) );
 
-            builder.Advice.Override(
-                builder.Target.Methods.Single( m => m.OperatorKind == OperatorKind.ExplicitConversion ),
-                nameof(DifferentlyNamedParameter) );
+            builder.With( builder.Target.Methods.Single( m => m.OperatorKind == OperatorKind.ExplicitConversion ) )
+                .Override( nameof(DifferentlyNamedParameter) );
         }
 
         [Template]

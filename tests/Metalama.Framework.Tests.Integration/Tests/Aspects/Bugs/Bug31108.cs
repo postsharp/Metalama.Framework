@@ -2,6 +2,7 @@
 // @Skipped(#31108)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 using System.Collections.Generic;

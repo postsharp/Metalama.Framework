@@ -1,6 +1,7 @@
 #pragma warning disable CS8321
 
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.LocalFunctionNullability;

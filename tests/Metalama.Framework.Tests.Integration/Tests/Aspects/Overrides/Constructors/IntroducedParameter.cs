@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -14,9 +15,9 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override( constructor, nameof(Template), args: new { i = 1 } );
-            builder.Advice.IntroduceParameter( constructor, "introduced", TypeFactory.GetType( SpecialType.Int32 ), TypedConstant.Create( 42 ) );
-            builder.Advice.Override( constructor, nameof(Template), args: new { i = 2 } );
+            builder.With( constructor ).Override( nameof(Template), args: new { i = 1 } );
+            builder.With( constructor ).IntroduceParameter( "introduced", TypeFactory.GetType( SpecialType.Int32 ), TypedConstant.Create( 42 ) );
+            builder.With( constructor ).Override( nameof(Template), args: new { i = 2 } );
         }
     }
 

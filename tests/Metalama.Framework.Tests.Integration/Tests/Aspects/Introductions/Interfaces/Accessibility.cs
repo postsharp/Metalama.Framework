@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -35,7 +36,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
         [InterfaceMember( IsExplicit = false )]

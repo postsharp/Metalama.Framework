@@ -2,6 +2,7 @@
 // @RequiredConstant(NET5_0_OR_GREATER) - Default interface members need to be supported by the runtime.
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 

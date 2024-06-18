@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,17 +13,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Paramete
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override(
-                builder.Target.Methods.OfName( "Method_InvertedParameters" ).Single(),
-                nameof(InvertedParameters) );
+            builder.With( builder.Target.Methods.OfName( "Method_InvertedParameters" ).Single() ).Override( nameof(InvertedParameters) );
 
-            builder.Advice.Override(
-                builder.Target.Methods.OfName( "Method_SelectFirstParameter" ).Single(),
-                nameof(SelectFirstParameter) );
+            builder.With( builder.Target.Methods.OfName( "Method_SelectFirstParameter" ).Single() ).Override( nameof(SelectFirstParameter) );
 
-            builder.Advice.Override(
-                builder.Target.Methods.OfName( "Method_SelectSecondParameter" ).Single(),
-                nameof(SelectSecondParameter) );
+            builder.With( builder.Target.Methods.OfName( "Method_SelectSecondParameter" ).Single() ).Override( nameof(SelectSecondParameter) );
         }
 
         [Template]

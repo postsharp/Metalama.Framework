@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -16,7 +17,7 @@ internal class NotNullAttribute : MethodAspect
                           && !p.Type.IsNullable.GetValueOrDefault()
                           && p.Type.IsReferenceType.GetValueOrDefault() ))
         {
-            builder.Advice.AddContract( parameter, nameof(Validate), args: new { parameterName = parameter.Name } );
+            builder.With( parameter ).AddContract( nameof(Validate), args: new { parameterName = parameter.Name } );
         }
     }
 

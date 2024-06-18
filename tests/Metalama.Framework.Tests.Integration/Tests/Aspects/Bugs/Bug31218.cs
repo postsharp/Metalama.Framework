@@ -2,6 +2,7 @@
 // @KeepDisabledCode
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -25,19 +26,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                                   && !p.Type.IsNullable.GetValueOrDefault()
                                   && p.Type.IsReferenceType.GetValueOrDefault() ))
                 {
-                    builder.Advice.AddContract(
-                        parameter,
-                        nameof(ValidateParameter),
-                        args: new { parameterName = parameter.Name } );
+                    builder.With( parameter )
+                        .AddContract(
+                            nameof(ValidateParameter),
+                            args: new { parameterName = parameter.Name } );
                 }
 
                 if (method.ReturnType.IsReferenceType.GetValueOrDefault()
                     && !method.ReturnType.IsNullable.GetValueOrDefault())
                 {
-                    builder.Advice.AddContract(
-                        method.ReturnParameter,
-                        nameof(ValidateMethodResult),
-                        args: new { methodName = method.Name } );
+                    builder.With( method.ReturnParameter )
+                        .AddContract(
+                            nameof(ValidateMethodResult),
+                            args: new { methodName = method.Name } );
                 }
             }
 
@@ -50,10 +51,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                                   && !p.Type.IsNullable.GetValueOrDefault()
                                   && p.Type.IsReferenceType.GetValueOrDefault() ))
                 {
-                    builder.Advice.AddContract(
-                        parameter,
-                        nameof(ValidateParameter),
-                        args: new { parameterName = parameter.Name } );
+                    builder.With( parameter )
+                        .AddContract(
+                            nameof(ValidateParameter),
+                            args: new { parameterName = parameter.Name } );
                 }
             }
 
@@ -65,17 +66,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31218
                              && p.Type.IsReferenceType.GetValueOrDefault() ) )
                     )
             {
-                builder.Advice.AddContract(
-                    property,
-                    nameof(ValidatePropertyGetter),
-                    ContractDirection.Output,
-                    args: new { propertyName = property.Name } );
+                builder.With( property )
+                    .AddContract(
+                        nameof(ValidatePropertyGetter),
+                        ContractDirection.Output,
+                        args: new { propertyName = property.Name } );
 
-                builder.Advice.AddContract(
-                    property,
-                    nameof(ValidatePropertySetter),
-                    ContractDirection.Input,
-                    args: new { propertyName = property.Name } );
+                builder.With( property )
+                    .AddContract(
+                        nameof(ValidatePropertySetter),
+                        ContractDirection.Input,
+                        args: new { propertyName = property.Name } );
             }
         }
 

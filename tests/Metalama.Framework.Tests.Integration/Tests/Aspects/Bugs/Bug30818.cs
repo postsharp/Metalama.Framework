@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30818;
 
@@ -51,7 +51,7 @@ public sealed class OnPropertyChangedAspect : TypeAspect
     {
         foreach (var property in builder.Target.FieldsAndProperties.Where( f => !f.IsImplicitlyDeclared ))
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.With( property ).OverrideAccessors( null, nameof(OverridePropertySetter) );
         }
     }
 

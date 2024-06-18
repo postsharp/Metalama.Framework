@@ -323,7 +323,8 @@ internal sealed partial class AdviceFactory<T> : IAdviser<T>, IAdviceFactoryImpl
 
             if ( !currentTarget.IsContainedIn( this._aspectTargetType ?? this._aspectTarget )
                  && !(currentTarget.Origin is IAspectDeclarationOrigin { AspectInstance: { } originAspect }
-                      && originAspect == this._state.AspectInstance) )
+                      && originAspect == this._state.AspectInstance)
+                 && target.DeclarationKind is not ( DeclarationKind.Namespace or DeclarationKind.Compilation ) )
             {
                 throw new InvalidOperationException(
                     MetalamaStringFormatter.Format(

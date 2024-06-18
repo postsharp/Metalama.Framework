@@ -1,6 +1,7 @@
 #pragma warning disable CS0067
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.RunTimeOnlyType;

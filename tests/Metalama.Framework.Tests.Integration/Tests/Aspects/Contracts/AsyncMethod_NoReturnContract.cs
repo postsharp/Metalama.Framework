@@ -3,6 +3,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMeth
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,10 +20,10 @@ public sealed class TestAttribute : TypeAspect
                               && !p.Type.IsNullable.GetValueOrDefault()
                               && p.Type.IsReferenceType.GetValueOrDefault() ))
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
         }
     }

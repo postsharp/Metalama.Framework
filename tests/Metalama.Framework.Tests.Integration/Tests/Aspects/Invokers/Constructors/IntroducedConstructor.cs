@@ -1,5 +1,5 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Constructors.IntroducedConstructor;
@@ -8,10 +8,10 @@ public class InvokerAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        var c = builder.Advice.IntroduceConstructor(
-            builder.Target.DeclaringType!,
-            nameof(ConstructorTemplate),
-            buildConstructor: b => { b.AddParameter( "x", typeof(int) ); } );
+        var c = builder.With( builder.Target.DeclaringType! )
+            .IntroduceConstructor(
+                nameof(ConstructorTemplate),
+                buildConstructor: b => { b.AddParameter( "x", typeof(int) ); } );
 
         builder.Override(
             nameof(Template),

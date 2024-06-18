@@ -1,6 +1,6 @@
 using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.IntroducedType;
@@ -10,9 +10,9 @@ internal class Aspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var typeResult = builder.IntroduceClass( "TestType" );
-        var methodResult = builder.Advice.IntroduceProperty( typeResult.Declaration, nameof(IntroducedProperty) );
+        var methodResult = builder.With( typeResult.Declaration ).IntroduceProperty( nameof(IntroducedProperty) );
 
-        builder.Advice.Override( methodResult.Declaration, nameof(OverrideTemplate) );
+        builder.With( methodResult.Declaration ).Override( nameof(OverrideTemplate) );
     }
 
     [Template]

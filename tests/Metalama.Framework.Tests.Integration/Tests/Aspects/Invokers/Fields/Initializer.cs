@@ -1,5 +1,5 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Initializer;
 using System;
@@ -39,8 +39,8 @@ public class OverrideAndInitializeAttribute : TypeAspect
         var f = builder.Target.Fields.OfName( "TestField" ).Single();
         var p = builder.Target.Properties.OfName( "TestProperty" ).Single();
 
-        builder.Advice.Override( f, nameof(Template) );
-        builder.Advice.Override( p, nameof(Template) );
+        builder.With( f ).Override( nameof(Template) );
+        builder.With( p ).Override( nameof(Template) );
     }
 
     [Template]

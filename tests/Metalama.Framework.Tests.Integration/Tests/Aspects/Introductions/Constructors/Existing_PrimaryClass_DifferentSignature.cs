@@ -4,8 +4,8 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS9113 // Parameter is unread.

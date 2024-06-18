@@ -3,6 +3,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 # endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 

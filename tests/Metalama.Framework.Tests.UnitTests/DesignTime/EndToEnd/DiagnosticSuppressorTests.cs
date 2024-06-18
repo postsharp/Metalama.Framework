@@ -172,7 +172,7 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
         var suppression = Assert.Single( suppressions );
 
         Assert.Equal(
-            "code.cs(23,12): warning CS8618: Non-nullable field 'o1' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.",
+            "code.cs(24,12): warning CS8618: Non-nullable field 'o1' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.",
             suppression.SuppressedDiagnostic.ToString() );
     }
 
@@ -206,6 +206,6 @@ public sealed class DiagnosticSuppressorTests : UnitTestClass
 
         var suppression = Assert.Single( suppressions );
 
-        Assert.Equal( "code.cs(18,9): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
+        Assert.Equal( "code.cs(19,9): warning CS0169: The field 'TargetClass._field' is never used", suppression.SuppressedDiagnostic.ToString() );
     }
 }

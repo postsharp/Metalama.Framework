@@ -1,5 +1,5 @@
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAssembly;
 using System;
@@ -30,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.CrossAs
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.OverrideAccessors( indexer, nameof(Template), nameof(Template) );
+                builder.With( indexer ).OverrideAccessors( nameof(Template), nameof(Template) );
             }
         }
 

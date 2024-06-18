@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Layers.Introduction
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.Override( method, nameof(OverrideMethod), args: new { layerName = builder.Layer ?? "First" } );
+                builder.With( method ).Override( nameof(OverrideMethod), args: new { layerName = builder.Layer ?? "First" } );
             }
         }
 

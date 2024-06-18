@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,10 +13,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Param
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.OverrideAccessors(
-                builder.Target.Properties.Single(),
-                null,
-                nameof(RenamedValueParameter) );
+            builder.With( builder.Target.Properties.Single() )
+                .OverrideAccessors(
+                    null,
+                    nameof(RenamedValueParameter) );
         }
 
         [Template]

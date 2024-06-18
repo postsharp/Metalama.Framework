@@ -6,6 +6,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.IteratorI
 
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,23 +20,22 @@ public sealed class TestAttribute : TypeAspect
         {
             foreach (var parameter in indexer.GetMethod!.Parameters)
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
 
             foreach (var parameter in indexer.SetMethod!.Parameters)
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
 
             // TODO: #32616
-            //builder.Advice.AddContract(
-            //    indexer.GetMethod!.ReturnParameter,
+            //builder.With( //    indexer.GetMethod!.ReturnParameter ).AddContract(
             //    nameof(ValidateParameter),
             //    args: new { parameterName = indexer.GetMethod!.ReturnParameter.Name });
         }

@@ -2,8 +2,8 @@
 // @Skipped(constructed generics are not supported)
 #endif
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AddTypeParameter_WithTypeArguments;

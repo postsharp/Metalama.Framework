@@ -26,7 +26,11 @@ public sealed class TestExecutorTests : UnitTestClass
         "// --- No output compilation units ---",
         "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestPassed,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     [InlineData(
-        "// @Skipped",
+        """
+        #if TEST_OPTIONS
+        // @Skipped
+        #endif
+        """,
         "",
         "TestAssemblyStarting,TestCollectionStarting,TestClassStarting,TestMethodStarting,TestCaseStarting,TestStarting,TestSkipped,TestFinished,TestCaseFinished,TestMethodFinished,TestClassFinished,TestCollectionFinished,TestAssemblyFinished" )]
     public void EventSequence( string testInput, string expectedTestOutput, string expectedEventSequence )

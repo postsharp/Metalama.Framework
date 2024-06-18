@@ -71,7 +71,7 @@ internal class IntroduceMembersAttribute : TypeAspect
 
         builder.IntroduceFinalizer( nameof(Finalizer) );
 
-        builder.Advice.IntroduceParameter( builder.Target.Constructors.First(), "x", typeof(int), TypedConstant.Create( 42 ) );
+        builder.With( builder.Target.Constructors.First() ).IntroduceParameter( "x", typeof(int), TypedConstant.Create( 42 ) );
     }
 }
 

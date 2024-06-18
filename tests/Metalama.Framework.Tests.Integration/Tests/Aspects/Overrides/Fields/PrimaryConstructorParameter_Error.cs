@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 using Metalama.Framework.Code;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.Override( field, nameof(OverrideTemplate) );
+                builder.With( field ).Override( nameof(OverrideTemplate) );
             }
         }
 

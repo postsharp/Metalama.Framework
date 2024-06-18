@@ -4,7 +4,7 @@
 #endif
 
 #if NET6_0_OR_GREATER && ROSLYN_4_4_0_OR_GREATER
-using Metalama.Framework.Advising; 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects; 
 
 #pragma warning disable CS0169

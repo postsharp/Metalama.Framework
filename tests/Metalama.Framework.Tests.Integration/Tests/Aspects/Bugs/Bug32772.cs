@@ -2,6 +2,7 @@
 // @ExcludeAssemblyAttributes(true)
 # endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 #if TESTRUNNER

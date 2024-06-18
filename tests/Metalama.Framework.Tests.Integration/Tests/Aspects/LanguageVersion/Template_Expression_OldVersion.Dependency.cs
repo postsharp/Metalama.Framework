@@ -1,5 +1,6 @@
 #if ROSLYN_4_4_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LanguageVersion.Template_Expression_OldVersion;

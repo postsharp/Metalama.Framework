@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -17,7 +18,7 @@ public class IntroduceAttributeAspect : TypeAspect
     {
         foreach (var member in builder.Target.Members())
         {
-            builder.Advice.IntroduceAttribute( member, AttributeConstruction.Create( typeof(NewAttribute) ) );
+            builder.With( member ).IntroduceAttribute( AttributeConstruction.Create( typeof(NewAttribute) ) );
         }
     }
 }

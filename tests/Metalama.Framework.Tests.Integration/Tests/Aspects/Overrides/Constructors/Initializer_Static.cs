@@ -1,6 +1,6 @@
 ﻿using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Constructors.Initializer_Static;
@@ -14,9 +14,9 @@ public class OverrideAttribute : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         builder.AddInitializer( nameof(InitializerTemplate), kind: InitializerKind.BeforeTypeConstructor, args: new { i = 1 } );
-        builder.Advice.Override( builder.Target.StaticConstructor, nameof(Template), args: new { i = 1 } );
+        builder.With( builder.Target.StaticConstructor! ).Override( nameof(Template), args: new { i = 1 } );
         builder.AddInitializer( nameof(InitializerTemplate), kind: InitializerKind.BeforeTypeConstructor, args: new { i = 2 } );
-        builder.Advice.Override( builder.Target.StaticConstructor, nameof(Template), args: new { i = 2 } );
+        builder.With( builder.Target.StaticConstructor! ).Override( nameof(Template), args: new { i = 2 } );
     }
 
     [Template]

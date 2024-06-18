@@ -1,5 +1,5 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System;
@@ -17,9 +17,7 @@ public class InvokerAspect : MethodAspect
     {
         var anotherMethod = builder.Target.DeclaringType!.Methods.OfName( "Method" ).Single();
 
-        builder.Advice.Override(
-            anotherMethod,
-            nameof(AnotherMethodTemplate) );
+        builder.With( anotherMethod ).Override( nameof(AnotherMethodTemplate) );
 
         builder.Override(
             nameof(Template),

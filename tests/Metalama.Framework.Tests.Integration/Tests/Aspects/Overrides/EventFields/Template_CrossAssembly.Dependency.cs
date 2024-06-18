@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFiel
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors( @event, nameof(Override), nameof(Override), null );
+                builder.With( @event ).OverrideAccessors( nameof(Override), nameof(Override), null );
             }
         }
 

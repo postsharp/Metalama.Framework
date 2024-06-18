@@ -2,6 +2,7 @@
 // @DesignTime
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -17,8 +18,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.IntroduceParame
         {
             foreach (var constructor in builder.Target.Constructors)
             {
-                builder.Advice.IntroduceParameter( constructor, "introduced1", typeof(int), TypedConstant.Create( 42 ) );
-                builder.Advice.IntroduceParameter( constructor, "introduced2", typeof(string), TypedConstant.Create( "42" ) );
+                builder.With( constructor ).IntroduceParameter( "introduced1", typeof(int), TypedConstant.Create( 42 ) );
+                builder.With( constructor ).IntroduceParameter( "introduced2", typeof(string), TypedConstant.Create( "42" ) );
             }
         }
     }

@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.NormalTemplate.AsyncMethod

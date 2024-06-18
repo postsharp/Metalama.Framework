@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,7 +11,7 @@ public sealed class TestAspect : TypeAspect
     {
         foreach (var property in builder.Target.Properties)
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.With( property ).OverrideAccessors( null, nameof(OverridePropertySetter) );
         }
     }
 

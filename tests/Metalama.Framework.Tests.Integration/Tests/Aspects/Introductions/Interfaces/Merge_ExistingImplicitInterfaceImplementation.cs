@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -26,9 +27,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(
-                aspectBuilder.Target,
-                (INamedType)TypeFactory.GetType( typeof(ISuperInterface) ) );
+            aspectBuilder.ImplementInterface( (INamedType)TypeFactory.GetType( typeof(ISuperInterface) ) );
         }
 
         [Introduce]

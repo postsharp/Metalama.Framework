@@ -2,6 +2,7 @@ using System;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.NestedNestedAspect;
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 [CompileTime]

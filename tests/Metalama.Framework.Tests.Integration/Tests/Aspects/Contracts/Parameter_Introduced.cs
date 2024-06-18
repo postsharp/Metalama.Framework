@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -14,14 +15,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
         {
             foreach (var constructor in builder.Target.Constructors)
             {
-                var parameter = builder.Advice.IntroduceParameter(
-                        constructor,
+                var parameter = builder.With( constructor )
+                    .IntroduceParameter(
                         "dependency",
                         typeof(int),
                         TypedConstant.Create( 0 ) )
                     .Declaration;
 
-                builder.Advice.AddContract( parameter, nameof(Validate) );
+                builder.With( parameter ).AddContract( nameof(Validate) );
             }
         }
 

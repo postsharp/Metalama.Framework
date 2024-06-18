@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Linq;
@@ -12,7 +13,7 @@ public class IntroduceParametersAttribute : TypeAspect
 
         for (var i = 0; i < 3; i++)
         {
-            builder.Advice.IntroduceParameter( builder.Target.Constructors.Single(), $"p{i}", typeof(int), TypedConstant.Create( 0 ) );
+            builder.With( builder.Target.Constructors.Single() ).IntroduceParameter( $"p{i}", typeof(int), TypedConstant.Create( 0 ) );
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.UseProceedInTemplate;
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 internal class RetryAttribute : OverrideMethodAspect

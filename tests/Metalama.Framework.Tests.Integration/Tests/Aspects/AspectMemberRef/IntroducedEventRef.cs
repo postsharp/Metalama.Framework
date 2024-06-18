@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.IntroducedEventRef

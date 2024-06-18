@@ -12,7 +12,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var type = builder.Advice.IntroduceClass( builder.Target.ContainingNamespace, "TestType" );
+        var type = builder.With( builder.Target.ContainingNamespace ).IntroduceClass( "TestType" );
         type.ImplementInterface( typeof(ITestInterface) );
     }
 }

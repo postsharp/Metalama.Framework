@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples;
@@ -18,7 +18,7 @@ public class CountChangesAttribute : TypeAspect
                     buildProperty: b => b.Name = $"{property.Name}ChangeCount" )
                 .Declaration;
 
-            builder.Advice.Override( property, nameof(IncrementCounter), tags: new { CounterProperty = counterProperty } );
+            builder.With( property ).Override( nameof(IncrementCounter), tags: new { CounterProperty = counterProperty } );
 
             counterProperties.Add( counterProperty );
         }

@@ -5,8 +5,8 @@
 #if ROSLYN_4_8_0_OR_GREATER
 
 using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.RefReadonlyParameter_OverrideBase;

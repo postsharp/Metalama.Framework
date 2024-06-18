@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.TemplateReturnType;

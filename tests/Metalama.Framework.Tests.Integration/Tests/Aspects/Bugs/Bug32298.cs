@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,7 +11,7 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var field in builder.Target.ForCompilation( builder.Advice.MutableCompilation ).Fields)
         {
-            builder.Advice.Override( field, nameof(Template) );
+            builder.With( field ).Override( nameof(Template) );
         }
     }
 

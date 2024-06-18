@@ -7,6 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIter
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -18,9 +19,7 @@ public sealed class TestAttribute : TypeAspect
 
         foreach (var method in builder.Target.Methods)
         {
-            builder.Advice.AddContract(
-                method.ReturnParameter,
-                nameof(ValidateParameter) );
+            builder.With( method.ReturnParameter ).AddContract( nameof(ValidateParameter) );
         }
     }
 

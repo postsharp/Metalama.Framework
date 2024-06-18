@@ -12,7 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeWithMembers
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var type = builder.Advice.IntroduceClass( builder.Target.ContainingNamespace, "TestType" );
+            var type = builder.With( builder.Target.ContainingNamespace ).IntroduceClass( "TestType" );
             type.IntroduceField( "TestField", typeof(int) );
         }
     }

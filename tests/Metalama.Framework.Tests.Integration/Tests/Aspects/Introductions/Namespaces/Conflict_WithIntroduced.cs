@@ -2,6 +2,7 @@
 // @OutputAllSyntaxTrees
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,9 +12,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceNamespace( builder.Target.ContainingNamespace, "TestNamespace" );
-        var n = builder.Advice.IntroduceNamespace( builder.Target.ContainingNamespace, "TestNamespace" );
-        builder.Advice.IntroduceClass( n.Declaration, "TestNestedType" );
+        builder.With( builder.Target.ContainingNamespace ).IntroduceNamespace( "TestNamespace" );
+        var n = builder.With( builder.Target.ContainingNamespace ).IntroduceNamespace( "TestNamespace" );
+        builder.With( n.Declaration ).IntroduceClass( "TestNestedType" );
     }
 }
 

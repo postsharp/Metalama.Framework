@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Attributes;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.Override( field, nameof(Template) );
+                builder.With( field ).Override( nameof(Template) );
             }
         }
 

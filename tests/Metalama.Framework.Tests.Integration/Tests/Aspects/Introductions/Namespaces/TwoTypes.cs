@@ -12,7 +12,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var @namespace = builder.Advice.IntroduceNamespace( builder.Target.Compilation.GlobalNamespace, "Implementation" );
+        var @namespace = builder.With( builder.Target.Compilation.GlobalNamespace ).IntroduceNamespace( "Implementation" );
         var @class1 = @namespace.IntroduceClass( "TestClass1" );
         var @class2 = @namespace.IntroduceClass( "TestClass2" );
 

@@ -52,7 +52,7 @@ public class IntroductionAttribute : TypeAspect
 
         try
         {
-            explicitImplementation.With( builder.Target );
+            _ = explicitImplementation.With( builder.Target );
         }
         catch (NotSupportedException)
         {

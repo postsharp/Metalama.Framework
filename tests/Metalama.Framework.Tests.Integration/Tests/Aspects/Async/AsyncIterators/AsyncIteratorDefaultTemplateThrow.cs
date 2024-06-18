@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
 using Metalama.Framework;
-using Metalama.Framework.Advising; 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 

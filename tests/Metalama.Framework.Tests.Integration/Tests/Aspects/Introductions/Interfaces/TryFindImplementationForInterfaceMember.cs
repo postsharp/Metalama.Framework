@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -12,7 +13,7 @@ public class IntroduceInterfaceAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
     {
-        aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+        aspectBuilder.ImplementInterface( typeof(IInterface) );
     }
 
     [InterfaceMember( IsExplicit = true )]

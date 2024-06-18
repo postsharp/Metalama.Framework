@@ -1,6 +1,6 @@
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
@@ -42,8 +42,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ?? false ))
             {
                 // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
-                var optionalProperty = builder.Advice.IntroduceProperty(
-                        nestedType,
+                var optionalProperty = builder.With( nestedType )
+                    .IntroduceProperty(
                         nameof(OptionalPropertyTemplate),
                         buildProperty: p =>
                         {
@@ -53,10 +53,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                     .Declaration;
 
                 // Override the property in the target type so that it is forwarded to the nested type.
-                builder.Advice.Override(
-                    property,
-                    nameof(OverridePropertyTemplate),
-                    tags: new { optionalProperty = optionalProperty } );
+                builder.With( property )
+                    .Override(
+                        nameof(OverridePropertyTemplate),
+                        tags: new { optionalProperty = optionalProperty } );
             }
         }
 

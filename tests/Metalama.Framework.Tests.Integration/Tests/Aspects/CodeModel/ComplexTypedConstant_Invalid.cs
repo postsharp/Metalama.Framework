@@ -3,6 +3,7 @@
 #endif
 
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -16,7 +17,7 @@ public class Aspect : TypeAspect
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         var typedConstant = TypedConstant.Create( new[] { 42 } );
-        builder.Advice.IntroduceParameter( builder.Target.Constructors.Single(), "p", typeof(int[]), typedConstant );
+        builder.With( builder.Target.Constructors.Single() ).IntroduceParameter( "p", typeof(int[]), typedConstant );
     }
 }
 

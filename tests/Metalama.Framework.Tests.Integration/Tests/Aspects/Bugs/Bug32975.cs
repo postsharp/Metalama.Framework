@@ -62,7 +62,7 @@ internal class NotifyPropertyChangedAttribute : TypeAspect
                      p =>
                          !p.IsAbstract && p.Writeability == Writeability.All ))
         {
-            builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
+            builder.With( property ).OverrideAccessors( null, nameof(OverridePropertySetter) );
         }
     }
 
@@ -128,7 +128,7 @@ public class TrackChangesAttribute : TypeAspect
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {
-                builder.Advice.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.With( fieldOrProperty ).OverrideAccessors( null, nameof(OverrideSetter) );
             }
         }
     }

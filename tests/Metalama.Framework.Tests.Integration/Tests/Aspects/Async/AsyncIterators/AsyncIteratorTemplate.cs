@@ -9,7 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Metalama.Framework;
 using Metalama.Testing.AspectTesting;
-using Metalama.Framework.Advising; 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects; 
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncIterators.AsyncIteratorTemplate

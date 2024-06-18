@@ -1,6 +1,6 @@
 using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_IntroducedInterface;
 
@@ -49,7 +49,7 @@ public class NotNullAttribute : TypeAspect
                 continue;
             }
 
-            builder.Advice.AddContract( property, nameof(Validate), ContractDirection.Both );
+            builder.With( property ).AddContract( nameof(Validate), ContractDirection.Both );
         }
     }
 

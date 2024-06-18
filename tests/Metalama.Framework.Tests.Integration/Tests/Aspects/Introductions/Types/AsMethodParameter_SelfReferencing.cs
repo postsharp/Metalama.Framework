@@ -1,5 +1,5 @@
-﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.AsMethodParameter_SelfReferencing;
@@ -10,14 +10,14 @@ public class IntroductionAttribute : TypeAspect
     {
         var result = builder.IntroduceClass( "IntroducedNestedType" );
 
-        builder.Advice.IntroduceMethod(
-            result.Declaration,
-            nameof(MethodTemplate),
-            buildMethod: b =>
-            {
-                b.Name = "Method";
-                b.AddParameter( "p", result.Declaration );
-            } );
+        builder.With( result.Declaration )
+            .IntroduceMethod(
+                nameof(MethodTemplate),
+                buildMethod: b =>
+                {
+                    b.Name = "Method";
+                    b.AddParameter( "p", result.Declaration );
+                } );
     }
 
     [Template]

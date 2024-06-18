@@ -480,15 +480,25 @@ public class TestOptions
     /// </summary>
     internal void ApplySourceDirectives( string sourceCode )
     {
-        foreach ( Match? option in _optionRegex.Matches( sourceCode ) )
+        var options = _optionRegex.Matches( sourceCode );
+        var ifDirectiveIndex = sourceCode.IndexOf( "#if", StringComparison.InvariantCulture );
+
+
+        foreach ( Match? option in options )
         {
             if ( option == null )
             {
                 continue;
             }
-
+            
             var optionName = option.Groups["name"].Value;
             var optionArg = option.Groups["arg"].Value;
+            
+            if ( ifDirectiveIndex < 0 || option.Index < ifDirectiveIndex )
+            {
+                throw new InvalidTestOptionException( $"The '@{optionName}' option must be in an #if block." );
+            }
+
 
             switch ( optionName )
             {
@@ -550,7 +560,7 @@ public class TestOptions
                     }
                     else
                     {
-                        throw new InvalidOperationException(
+                        throw new InvalidTestOptionException(
                             $"'{optionArg} is not a TestScenario value. Use one of following: {Enum.GetValues( typeof(TestScenario) )}." );
                     }
 
@@ -634,7 +644,7 @@ public class TestOptions
                     }
                     else
                     {
-                        throw new InvalidOperationException( $"'{optionArg} is not a valid code fix index number." );
+                        throw new InvalidTestOptionException( $"'{optionArg} is not a valid code fix index number." );
                     }
 
                     break;
@@ -689,7 +699,7 @@ public class TestOptions
                         else
                         {
                             // Throwing here may kill test discovery. 
-                            throw new InvalidOperationException( $"@LanguageVersion '{optionArg}' is not a valid language version." );
+                            throw new InvalidTestOptionException( $"@LanguageVersion '{optionArg}' is not a valid language version." );
                         }
                     }
 
@@ -710,7 +720,7 @@ public class TestOptions
                         else
                         {
                             // Throwing here may kill test discovery. 
-                            throw new InvalidOperationException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version." );
+                            throw new InvalidTestOptionException( $"@DependencyLanguageVersion '{optionArg}' is not a valid language version." );
                         }
                     }
 

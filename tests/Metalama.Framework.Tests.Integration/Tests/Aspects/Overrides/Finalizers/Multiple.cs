@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Multiple;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Multi
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Finalizer!, nameof(Template) );
+            builder.With( builder.Target.Finalizer! ).Override( nameof(Template) );
         }
 
         [Template]
@@ -29,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Multi
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Finalizer!, nameof(Template) );
+            builder.With( builder.Target.Finalizer! ).Override( nameof(Template) );
         }
 
         [Template]

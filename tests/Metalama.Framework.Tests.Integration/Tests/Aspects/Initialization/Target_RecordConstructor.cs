@@ -9,10 +9,11 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.Target_Rec
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer(
-                builder.Target.Constructors.OfExactSignature( new IType[0] ),
-                nameof(Template),
-                InitializerKind.BeforeInstanceConstructor );
+            builder
+                .With( builder.Target.Constructors.OfExactSignature( new IType[0] )! )
+                .AddInitializer(
+                    nameof(Template),
+                    InitializerKind.BeforeInstanceConstructor );
         }
 
         [Template]

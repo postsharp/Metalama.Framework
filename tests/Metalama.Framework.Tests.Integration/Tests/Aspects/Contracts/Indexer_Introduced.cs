@@ -1,6 +1,6 @@
 using System;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_Introduced;
 
@@ -20,11 +20,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
         {
             foreach (var indexer in builder.Target.Indexers)
             {
-                builder.Advice.AddContract( indexer, nameof(Filter), ContractDirection.Both );
+                builder.With( indexer ).AddContract( nameof(Filter), ContractDirection.Both );
 
                 foreach (var param in indexer.Parameters)
                 {
-                    builder.Advice.AddContract( param, nameof(Filter) );
+                    builder.With( param ).AddContract( nameof(Filter) );
                 }
             }
 
@@ -34,11 +34,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Indexer_I
                     nameof(SetTemplate) )
                 .Declaration;
 
-            builder.Advice.AddContract( introducedIndexer, nameof(Filter), ContractDirection.Both );
+            builder.With( introducedIndexer ).AddContract( nameof(Filter), ContractDirection.Both );
 
             foreach (var param in introducedIndexer.Parameters)
             {
-                builder.Advice.AddContract( param, nameof(Filter) );
+                builder.With( param ).AddContract( nameof(Filter) );
             }
         }
 

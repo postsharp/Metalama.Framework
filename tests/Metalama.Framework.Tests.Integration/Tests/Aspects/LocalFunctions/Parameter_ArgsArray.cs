@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,10 +20,10 @@ internal class Aspect : MethodAspect
 
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.IntroduceMethod(
-            builder.Target.DeclaringType,
-            nameof(GetMethodInvoker),
-            args: new { method = builder.Target } );
+        builder.With( builder.Target.DeclaringType )
+            .IntroduceMethod(
+                nameof(GetMethodInvoker),
+                args: new { method = builder.Target } );
     }
 }
 

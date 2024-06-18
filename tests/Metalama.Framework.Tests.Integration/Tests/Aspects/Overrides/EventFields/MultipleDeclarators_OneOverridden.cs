@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.OverrideAccessors( builder.Target.Events.OfName( "B" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
+            builder.With( builder.Target.Events.OfName( "B" ).Single() ).OverrideAccessors( nameof(OverrideAdd), nameof(OverrideRemove), null );
         }
 
         [Template]

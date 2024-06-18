@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,7 +20,7 @@ public class OverrideAttribute : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.Override( constructor, nameof(Template) );
+            builder.With( constructor ).Override( nameof(Template) );
         }
     }
 

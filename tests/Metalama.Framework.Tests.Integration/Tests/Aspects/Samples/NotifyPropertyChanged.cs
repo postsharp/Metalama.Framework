@@ -7,8 +7,8 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
             foreach (var property in builder.Target.Properties
                          .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ))
             {
-                builder.Advice.OverrideAccessors( property, null, nameof(SetPropertyTemplate) );
+                builder.With( property ).OverrideAccessors( null, nameof(SetPropertyTemplate) );
             }
         }
 

@@ -14,12 +14,13 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceParameter(
-            builder.Target.PrimaryConstructor,
-            "p",
-            typeof(int),
-            TypedConstant.Create( 15 ),
-            ( p, c ) => PullAction.UseExpression( TypedConstant.Create( 51 ) ) );
+        builder
+            .With( builder.Target.PrimaryConstructor! )
+            .IntroduceParameter(
+                "p",
+                typeof(int),
+                TypedConstant.Create( 15 ),
+                ( p, c ) => PullAction.UseExpression( TypedConstant.Create( 51 ) ) );
     }
 }
 
