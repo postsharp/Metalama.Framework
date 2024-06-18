@@ -397,7 +397,10 @@ internal sealed partial class DesignTimeAspectPipeline
                 // Publish compilation errors. This may create some chaos at the receiving end because compilations are unordered.
                 state._pipeline._eventHub.PublishCompileTimeErrors(
                     state._pipeline.ProjectKey,
-                    diagnosticAdder.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => new DiagnosticData( d ) ).ToReadOnlyList() );
+                    diagnosticAdder
+                        .Where( d => d.Severity == DiagnosticSeverity.Error && !d.IsSuppressed )
+                        .Select( d => new DiagnosticData( d ) )
+                        .ToReadOnlyList() );
 
                 if ( !initializeSuccessful )
                 {
