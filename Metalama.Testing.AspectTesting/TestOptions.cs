@@ -483,22 +483,20 @@ public class TestOptions
         var options = _optionRegex.Matches( sourceCode );
         var ifDirectiveIndex = sourceCode.IndexOf( "#if", StringComparison.InvariantCulture );
 
-
         foreach ( Match? option in options )
         {
             if ( option == null )
             {
                 continue;
             }
-            
+
             var optionName = option.Groups["name"].Value;
             var optionArg = option.Groups["arg"].Value;
-            
+
             if ( ifDirectiveIndex < 0 || option.Index < ifDirectiveIndex )
             {
                 throw new InvalidTestOptionException( $"The '@{optionName}' option must be in an #if block." );
             }
-
 
             switch ( optionName )
             {

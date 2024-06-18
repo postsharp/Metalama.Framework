@@ -28,7 +28,7 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var explicitImplementation = builder.ImplementInterface( typeof(IInterface) ).ExplicitImplementation;
+        var explicitImplementation = builder.ImplementInterface( typeof(IInterface) ).ExplicitMembers;
 
         explicitImplementation.IntroduceMethod( nameof(InterfaceMethod) );
         explicitImplementation.IntroduceEvent( nameof(Event) );

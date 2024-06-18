@@ -22,7 +22,7 @@ public class IntroductionAttribute : TypeAspect
     {
         var ic = ((INamedType)TypeFactory.GetType(typeof(I<>))).WithTypeArguments(builder.Target);
 
-        var explicitImplementation = builder.ImplementInterface( ic).ExplicitImplementation;
+        var explicitImplementation = builder.ImplementInterface( ic).ExplicitMembers;
 
         explicitImplementation.IntroduceUnaryOperator(nameof(Foo), builder.Target, builder.Target, OperatorKind.LogicalNot);
     }

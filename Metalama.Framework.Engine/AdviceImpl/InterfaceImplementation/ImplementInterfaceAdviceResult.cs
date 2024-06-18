@@ -38,6 +38,6 @@ internal class ImplementInterfaceAdviceResult : AdviceResult, IImplementInterfac
 
     public IReadOnlyCollection<IInterfaceMemberImplementationResult> InterfaceMembers { get; } = Array.Empty<IInterfaceMemberImplementationResult>();
 
-    public IAdviser<INamedType> ExplicitImplementation
-        => this.Interfaces.FirstOrDefault() ?? throw new InvalidOperationException( "No interfaces were implemented, so explicit implementation is not possible." );
+    public IInterfaceImplementationAdviser ExplicitMembers
+        => this.Interfaces.FirstOrDefault()?.ExplicitMembers ?? throw new InvalidOperationException( "No interfaces were implemented, so explicit implementation is not possible." );
 }
