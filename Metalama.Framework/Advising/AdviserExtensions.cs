@@ -39,7 +39,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a new method or overrides the implementation of the existing one.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced method. This method must be
     ///     annotated with <see cref="TemplateAttribute"/>. This method can have parameters and a return type. The actual parameters and return type
     ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
@@ -56,7 +56,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IMethod> IntroduceMethod(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
@@ -64,7 +64,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceMethod(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             scope,
             whenExists,
@@ -75,7 +75,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a finalizer or overrides the implementation of the existing one.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced finalizer. This method must be
     ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type.</param>
     /// <param name="whenExists">Determines the implementation strategy when a finalizer is already declared in the target type.
@@ -85,20 +85,20 @@ public static class AdviserExtensions
     ///     of the <see cref="meta"/> API.</param>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IMethod> IntroduceFinalizer(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceFinalizer(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             whenExists,
             args,
             tags );
 
     public static IIntroductionAdviceResult<IMethod> IntroduceUnaryOperator(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IType inputType,
         IType resultType,
@@ -108,7 +108,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceUnaryOperator(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             inputType,
             resultType,
@@ -119,7 +119,7 @@ public static class AdviserExtensions
             tags );
 
     public static IIntroductionAdviceResult<IMethod> IntroduceBinaryOperator(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IType leftType,
         IType rightType,
@@ -130,7 +130,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceBinaryOperator(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             leftType,
             rightType,
@@ -142,7 +142,7 @@ public static class AdviserExtensions
             tags );
 
     public static IIntroductionAdviceResult<IMethod> IntroduceConversionOperator(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IType fromType,
         IType toType,
@@ -152,7 +152,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceConversionOperator(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             fromType,
             toType,
@@ -183,7 +183,7 @@ public static class AdviserExtensions
             tags );
 
     public static IIntroductionAdviceResult<IConstructor> IntroduceConstructor(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
@@ -191,7 +191,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceConstructor(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             scope,
             whenExists,
@@ -276,7 +276,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a field to the target type by specifying a template.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">Name of the introduced field.</param>
     /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
     ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
@@ -287,14 +287,14 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IField> IntroduceField(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IFieldBuilder>? buildField = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceField(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             scope,
             whenExists,
@@ -304,7 +304,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a field to the target type by specifying a field name and <see cref="IType"/>.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="fieldName">Name of the introduced field.</param>
     /// <param name="fieldType">Type of the introduced field.</param>
     /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
@@ -316,7 +316,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IField> IntroduceField(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string fieldName,
         IType fieldType,
         IntroductionScope scope = IntroductionScope.Default,
@@ -324,7 +324,7 @@ public static class AdviserExtensions
         Action<IFieldBuilder>? buildField = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceField(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             fieldName,
             fieldType,
             scope,
@@ -335,7 +335,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a field to the target type by specifying a field name and <see cref="Type"/>.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="fieldName">Name of the introduced field.</param>
     /// <param name="fieldType">Type of the introduced field.</param>
     /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
@@ -347,7 +347,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IField> IntroduceField(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string fieldName,
         Type fieldType,
         IntroductionScope scope = IntroductionScope.Default,
@@ -355,7 +355,7 @@ public static class AdviserExtensions
         Action<IFieldBuilder>? buildField = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceField(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             fieldName,
             fieldType,
             scope,
@@ -366,7 +366,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces an auto-implemented property to the target type by specifying a property name and <see cref="Type"/>.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="propertyName">Name of the introduced field.</param>
     /// <param name="propertyType">Type of the introduced field.</param>
     /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
@@ -378,7 +378,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string propertyName,
         Type propertyType,
         IntroductionScope scope = IntroductionScope.Default,
@@ -386,7 +386,7 @@ public static class AdviserExtensions
         Action<IPropertyBuilder>? buildProperty = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceAutomaticProperty(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             propertyName,
             propertyType,
             scope,
@@ -397,7 +397,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces an auto-implemented property to the target type by specifying a property name and <see cref="IType"/>.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="propertyName">Name of the introduced field.</param>
     /// <param name="propertyType">Type of the introduced field.</param>
     /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
@@ -409,7 +409,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string propertyName,
         IType propertyType,
         IntroductionScope scope = IntroductionScope.Default,
@@ -417,7 +417,7 @@ public static class AdviserExtensions
         Action<IPropertyBuilder>? buildProperty = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceAutomaticProperty(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             propertyName,
             propertyType,
             scope,
@@ -428,7 +428,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="template">The name of the property in the aspect class that will be used as a template for the new property.
     ///     This property must be annotated with <see cref="TemplateAttribute"/>. The type of this property can be either <c>dynamic</c> or any specific
     ///     type. It is possible to dynamically change the type of the introduced property thanks to the <see cref="IPropertyBuilder"/> returned by
@@ -445,14 +445,14 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IProperty> IntroduceProperty(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string template,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IPropertyBuilder>? buildProperty = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceProperty(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             template,
             scope,
             whenExists,
@@ -462,7 +462,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="name">Name of the introduced property.</param>
     /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
     ///     the introduced property should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
@@ -482,7 +482,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IProperty> IntroduceProperty(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string name,
         string? getTemplate,
         string? setTemplate,
@@ -492,7 +492,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceProperty(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             name,
             getTemplate,
             setTemplate,
@@ -505,7 +505,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indexType">The type of the initial index parameter.</param>
     /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
     ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
@@ -525,7 +525,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         IType indexType,
         string? getTemplate,
         string? setTemplate,
@@ -535,7 +535,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceIndexer(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             indexType,
             getTemplate,
             setTemplate,
@@ -548,7 +548,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indexType">The type of the initial index parameter.</param>
     /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
     ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
@@ -568,7 +568,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         Type indexType,
         string? getTemplate,
         string? setTemplate,
@@ -578,7 +578,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceIndexer(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             indexType,
             getTemplate,
             setTemplate,
@@ -591,7 +591,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indices">The types and names of the index parameters.</param>
     /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
     ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
@@ -611,7 +611,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         IReadOnlyList<(IType Type, string Name)> indices,
         string? getTemplate,
         string? setTemplate,
@@ -621,7 +621,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceIndexer(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             indices,
             getTemplate,
             setTemplate,
@@ -634,7 +634,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces an indexer to the target type, or overrides the implementation of an existing one, by specifying individual template methods for each accessor. 
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="indices">The types and names of the index parameters.</param>
     /// <param name="getTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the getter, or <c>null</c>
     ///     the introduced indexer should not have a getter. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
@@ -654,7 +654,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IIndexerBuilder"/> that allows to dynamically change the name or type of the introduced indexer.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IIndexer> IntroduceIndexer(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         IReadOnlyList<(Type Type, string Name)> indices,
         string? getTemplate,
         string? setTemplate,
@@ -664,7 +664,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceIndexer(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             indices,
             getTemplate,
             setTemplate,
@@ -707,7 +707,7 @@ public static class AdviserExtensions
     /// <summary>
     /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying an event template.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="eventTemplate">The name of the event in the aspect class that must be used as a template for the introduced event. This event
     ///     must be annotated with <see cref="TemplateAttribute"/>. The type of the template event can be any delegate type. The type of the introduced event
     ///     can be changed dynamically thanks to the <see cref="IEventBuilder"/> returned by this method. 
@@ -723,14 +723,14 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IEvent> IntroduceEvent(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string eventTemplate,
         IntroductionScope scope = IntroductionScope.Default,
         OverrideStrategy whenExists = OverrideStrategy.Default,
         Action<IEventBuilder>? buildEvent = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceEvent(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             eventTemplate,
             scope,
             whenExists,
@@ -741,7 +741,7 @@ public static class AdviserExtensions
     /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying individual template methods
     /// for the adder, the remover, and the raiser.
     /// </summary>
-    /// <param name="adviser">An adviser for a member or a named type.</param>
+    /// <param name="adviser">An adviser for a named type.</param>
     /// <param name="eventName">The name of the introduced event.</param>
     /// <param name="addTemplate">The name of the method of the aspect class whose type and implementation will be used as a template for the adder.
     ///     This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
@@ -762,7 +762,7 @@ public static class AdviserExtensions
     /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
     /// <seealso href="@introducing-members"/>
     public static IIntroductionAdviceResult<IEvent> IntroduceEvent(
-        this IAdviser<IMemberOrNamedType> adviser,
+        this IAdviser<INamedType> adviser,
         string eventName,
         string addTemplate,
         string removeTemplate,
@@ -773,7 +773,7 @@ public static class AdviserExtensions
         object? args = null,
         object? tags = null )
         => ((IAdviserInternal) adviser).AdviceFactory.IntroduceEvent(
-            adviser.Target.GetClosestNamedType() ?? throw new ArgumentOutOfRangeException(),
+            adviser.Target,
             eventName,
             addTemplate,
             removeTemplate,
