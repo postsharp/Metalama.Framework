@@ -28,7 +28,7 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     Task<SerializablePreviewTransformationResult> PreviewTransformationAsync(
         ProjectKey projectKey,
         string syntaxTreeName,
-        CancellationToken cancellationToken );
+        CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Notifies that the user is done editing compile-time code, so the pipeline can be resumed.

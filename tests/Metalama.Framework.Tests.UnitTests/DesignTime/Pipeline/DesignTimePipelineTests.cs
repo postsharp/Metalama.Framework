@@ -1643,4 +1643,41 @@ class D{version}
         Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect1Method, default ) );
         Assert.Empty( pipeline.GetEligibleAspects( compilation, aspect2Method, default ) );
     }
+
+    [Fact]
+    public void TypeFabric()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = new Dictionary<string, string>()
+        {
+            ["aspect.cs"] = """
+                using Metalama.Framework.Aspects;
+
+                class MyAspect : TypeAspect
+                {
+                   [Introduce]
+                   void IntroducedMethod() {}
+                }
+                """,
+            ["target.cs"] = """
+                using Metalama.Framework.Fabrics;
+
+                class C
+                {
+                    class Fabric : TypeFabric
+                    {
+                        public override void AmendType( ITypeAmender amender )
+                            => amender.AddAspect<MyAspect>();
+                    } 
+                }
+                """
+        };
+
+        var compilation = CreateCSharpCompilation( code );
+
+        using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+
+        Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, default, out var results ) );
+    }
 }

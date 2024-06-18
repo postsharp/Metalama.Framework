@@ -24,4 +24,24 @@ namespace Metalama.Framework.DesignTime.Contracts.Preview
             IPreviewTransformationResult[] result,
             CancellationToken cancellationToken );
     }
+
+    /// <summary>
+    /// Defines a method that allows to see the generated code for a single file.
+    /// This service is used to produce the generated code for introduced types.
+    /// </summary>
+    [ComImport]
+    [Guid( "2D800D48-3BF1-4EF8-98F5-62FA4417F3F7" )]
+    public interface ITransformationPreviewService2 : ITransformationPreviewService
+    {
+        /// <summary>
+        /// Transforms a single file.
+        /// </summary>
+        /// <param name="project">The project that contains the file that is being previewed.</param>
+        /// <param name="filePath">Path to the generated file that is being previewed. This file shouldn't exist in the original project.</param>
+        Task PreviewGeneratedFileAsync(
+            Project project,
+            string filePath,
+            IPreviewTransformationResult[] result,
+            CancellationToken cancellationToken );
+    }
 }

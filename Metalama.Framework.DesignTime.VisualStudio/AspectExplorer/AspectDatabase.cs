@@ -6,13 +6,14 @@ using Metalama.Framework.DesignTime.AspectExplorer;
 using Metalama.Framework.DesignTime.Contracts.AspectExplorer;
 using Metalama.Framework.DesignTime.Rpc;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting.UserProcess;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Services;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.AspectExplorer;
 
-internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
+internal sealed class AspectDatabase : IAspectDatabaseService2, IDisposable
 {
     private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
@@ -50,10 +51,41 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         return aspectClasses.Select( ResolveOrNull ).WhereNotNull().ToArray();
     }
 
+#pragma warning disable CS0612 // Type or member is obsolete
+    private static AspectExplorerAspectInstance ToVersion1( IAspectExplorerAspectInstance aspectInstance )
+        => new()
+        {
+            TargetDeclaration = aspectInstance.TargetDeclaration,
+            TargetDeclarationKind = aspectInstance.TargetDeclarationKind,
+            Transformations = aspectInstance.Transformations.Select( ToVersion1 ).ToArray()
+        };
+
+    private static AspectExplorerAspectTransformation ToVersion1( IAspectExplorerAspectTransformation transformation )
+        => new()
+        {
+            TargetDeclaration = transformation.TargetDeclaration,
+            TargetDeclarationKind = transformation.TargetDeclarationKind,
+            Description = transformation.Description
+        };
+
     public async Task GetAspectInstancesAsync(
         Compilation compilation,
         INamedTypeSymbol aspectClass,
         IEnumerable<AspectExplorerAspectInstance>[] result,
+        CancellationToken cancellationToken )
+    {
+        var version2Result = new IEnumerable<AspectExplorerAspectInstance2>[1];
+
+        await this.GetAspectInstancesAsync( compilation, aspectClass, version2Result, cancellationToken );
+
+        result[0] = version2Result[0].Select( ToVersion1 ).ToArray();
+    }
+#pragma warning restore CS0612
+
+    public async Task GetAspectInstancesAsync(
+        Compilation compilation,
+        INamedTypeSymbol aspectClass,
+        IEnumerable<IAspectExplorerAspectInstance>[] result,
         CancellationToken cancellationToken )
     {
         var projectKey = compilation.GetProjectKey();
@@ -71,7 +103,7 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
 
         result[0] = GetAspectInstances().ToArray();
 
-        IEnumerable<AspectExplorerAspectInstance> GetAspectInstances()
+        IEnumerable<IAspectExplorerAspectInstance> GetAspectInstances()
         {
             foreach ( var aspectInstance in aspectInstances )
             {
@@ -82,16 +114,11 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
                     continue;
                 }
 
-                yield return new AspectExplorerAspectInstance
-                {
-                    TargetDeclaration = targetDeclaration,
-                    TargetDeclarationKind = targetDeclarationKind,
-                    Transformations = GetTransformations( aspectInstance ).ToArray()
-                };
+                yield return new AspectExplorerAspectInstance2( targetDeclaration, targetDeclarationKind, GetTransformations( aspectInstance ).ToArray() );
             }
         }
 
-        IEnumerable<AspectExplorerAspectTransformation> GetTransformations( AspectDatabaseAspectInstance aspectInstance )
+        IEnumerable<IAspectExplorerAspectTransformation> GetTransformations( AspectDatabaseAspectInstance aspectInstance )
         {
             foreach ( var transformation in aspectInstance.Transformations )
             {
@@ -102,10 +129,10 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
                     continue;
                 }
 
-                yield return new AspectExplorerAspectTransformation
-                {
-                    TargetDeclaration = targetDeclaration, TargetDeclarationKind = targetDeclarationKind, Description = transformation.Description
-                };
+                var transformedDeclaration = ResolveToSymbol( transformation.TransformedDeclarationId, out var transformedDeclarationKind );
+                Invariant.Assert( transformedDeclarationKind == default );
+
+                yield return new AspectExplorerAspectTransformation2( targetDeclaration, targetDeclarationKind, transformation.Description, transformedDeclaration, transformation.FilePath );
             }
         }
 
@@ -139,4 +166,16 @@ internal sealed class AspectDatabase : IAspectDatabaseService, IDisposable
         this._userProcessEndpoint.AspectClassesChanged -= this.OnAspectClassesChanged;
         this._userProcessEndpoint.AspectInstancesChanged -= this.OnAspectInstancesChanged;
     }
+
+    private record AspectExplorerAspectInstance2(
+        ISymbol TargetDeclaration,
+        AspectExplorerDeclarationKind TargetDeclarationKind,
+        IAspectExplorerAspectTransformation[] Transformations ) : IAspectExplorerAspectInstance;
+
+    private record AspectExplorerAspectTransformation2(
+        ISymbol TargetDeclaration,
+        AspectExplorerDeclarationKind TargetDeclarationKind,
+        string Description,
+        ISymbol? TransformedDeclaration,
+        string? FilePath ) : IAspectExplorerAspectTransformation;
 }

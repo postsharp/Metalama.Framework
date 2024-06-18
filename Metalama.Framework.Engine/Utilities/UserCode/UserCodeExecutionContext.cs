@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
 using Metalama.Framework.Services;
 using Metalama.Framework.Validation;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -256,7 +257,7 @@ public class UserCodeExecutionContext : IExecutionContextInternal
             this.MetaApi );
     }
 
-    internal void AddDependency( IDeclaration declaration )
+    internal void AddDependencyFrom( IDeclaration declaration )
     {
         // Prevent infinite recursion while getting the declaring type.
         // We assume that there is one instance of this class per execution context and that it is single-threaded.
@@ -285,6 +286,16 @@ public class UserCodeExecutionContext : IExecutionContextInternal
         finally
         {
             this._collectDependencyDisabled = false;
+        }
+    }
+
+    internal void AddDependencyTo( SyntaxTree syntaxTree )
+    {
+        if ( this._dependencyCollector != null && this._targetType != null )
+        {
+            this._dependencyCollector.AddDependency(
+                this._targetType.GetSymbol().AssertSymbolNullNotImplemented( UnsupportedFeatures.Uncategorized ),
+                syntaxTree );
         }
     }
 

@@ -7,16 +7,12 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.AdviceImpl.Introduction;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -244,22 +240,8 @@ internal class NamedTypeBuilder : MemberOrNamedTypeBuilder, INamedTypeBuilder, I
     public override SyntaxTree PrimarySyntaxTree
         => this.ContainingDeclaration switch
         {
-            INamespace =>
-                CSharpSyntaxTree.Create(
-                    CompilationUnit(
-                        List<ExternAliasDirectiveSyntax>(),
-                        List<UsingDirectiveSyntax>(),
-                        List<AttributeListSyntax>(),
-                        List<MemberDeclarationSyntax>() ),
-                    path: this.TypeParameters.Count > 0
-                        ? $"{this.FullName}`{this.TypeParameters.Count}.cs"
-                        : $"{this.FullName}.cs",
-                    options: this.Compilation.RoslynCompilation.SyntaxTrees.FirstOrDefault() switch
-                    {
-                        { Options: CSharpParseOptions options } => options,
-                        _ => CSharpParseOptions.Default,
-                    },
-                    encoding: Encoding.UTF8 ),
+            INamespace => this.Compilation.RoslynCompilation.CreateEmptySyntaxTree(
+                this.TypeParameters.Count > 0 ? $"{this.FullName}`{this.TypeParameters.Count}.cs" : $"{this.FullName}.cs" ),
             INamedType namedType => namedType.GetPrimarySyntaxTree().AssertNotNull(),
             _ => throw new AssertionFailedException( $"Unsupported: {this.ContainingDeclaration}" )
         };

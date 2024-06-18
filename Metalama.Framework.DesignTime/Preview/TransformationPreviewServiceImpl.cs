@@ -49,7 +49,7 @@ public sealed class TransformationPreviewServiceImpl : PreviewPipelineBasedServi
             return SerializablePreviewTransformationResult.Failure( errorMessages );
         }
 
-        var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[preparation.SyntaxTree!.FilePath];
+        var transformedSyntaxTree = pipelineResult.Value.SyntaxTrees[syntaxTreeName];
 
         return SerializablePreviewTransformationResult.Success( JsonSerializationHelper.CreateSerializableSyntaxTree( transformedSyntaxTree ), errorMessages );
     }
