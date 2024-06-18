@@ -180,7 +180,8 @@ public sealed class PipelineCancellationTests : UnitTestClass
                 // then we change the target code in each version. If we change the aspect in each version, we 
                 // will have to cope with pausing and resuming the pipeline.
                 const string aspectCode = @"
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Code;
                 using Metalama.Framework.Diagnostics;
                 using Metalama.Framework.Eligibility;
@@ -191,7 +192,7 @@ public sealed class PipelineCancellationTests : UnitTestClass
                     {
                         foreach ( var m in builder.Target.Methods )
                         {
-                            builder.Advice.IntroduceField( builder.Target, ""__"" + m.Name, typeof(int) );
+                            builder.IntroduceField( ""__"" + m.Name, typeof(int) );
                         }
                     }
 

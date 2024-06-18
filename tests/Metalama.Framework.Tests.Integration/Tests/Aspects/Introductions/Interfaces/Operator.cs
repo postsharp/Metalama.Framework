@@ -3,9 +3,8 @@
 #endif
 
 #if NET8_0_OR_GREATER
-
 using Metalama.Framework.Advising;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using System;
 using System.Linq;
@@ -23,9 +22,9 @@ public class IntroductionAttribute : TypeAspect
     {
         var ic = ((INamedType)TypeFactory.GetType(typeof(I<>))).WithTypeArguments(builder.Target);
 
-        builder.Advice.ImplementInterface(builder.Target, ic);
+        builder.ImplementInterface( ic);
 
-        builder.Advice.IntroduceUnaryOperator(builder.Target, nameof(Foo), builder.Target, builder.Target, OperatorKind.LogicalNot);
+        builder.IntroduceUnaryOperator( nameof(Foo), builder.Target, builder.Target, OperatorKind.LogicalNot);
     }
 
     [Template]

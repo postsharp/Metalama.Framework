@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Microsoft.Win32;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AspectMembersRef.Bu
         {
             foreach (var property in builder.Target.FieldsAndProperties.Where( p => p.IsAutoPropertyOrField == true && !p.IsImplicitlyDeclared ))
             {
-                builder.Advice.Override( property, nameof(OverrideProperty) );
+                builder.With( property ).Override( nameof(OverrideProperty) );
             }
         }
 

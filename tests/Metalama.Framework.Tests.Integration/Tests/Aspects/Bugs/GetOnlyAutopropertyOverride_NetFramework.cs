@@ -4,6 +4,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.GetOnlyAutopropertyOverride_NetFramework;
@@ -14,13 +15,13 @@ public sealed class TestAspect : OverrideFieldOrPropertyAspect
     {
         get
         {
-            Console.WriteLine("getter");
+            Console.WriteLine( "getter" );
 
             return meta.Proceed();
         }
         set
         {
-            Console.WriteLine("setter");
+            Console.WriteLine( "setter" );
 
             meta.Proceed();
         }

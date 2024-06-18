@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,19 +9,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30599
 {
     internal class Aspect : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Template));
+            builder.Override( nameof(Template) );
         }
 
         [Template]
         public dynamic? Template()
         {
-            var disposedField = meta.Target.Method.DeclaringType.Fields.OfName("_disposed").FirstOrDefault();
+            var disposedField = meta.Target.Method.DeclaringType.Fields.OfName( "_disposed" ).FirstOrDefault();
 
             if ((bool)disposedField!.Value)
             {
-                throw new InvalidOperationException("The object has already been disposed");
+                throw new InvalidOperationException( "The object has already been disposed" );
             }
 
             return meta.Proceed();
@@ -36,6 +37,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30599
         private async Task<int> Method( int a )
         {
             await Task.Yield();
+
             return a;
         }
     }

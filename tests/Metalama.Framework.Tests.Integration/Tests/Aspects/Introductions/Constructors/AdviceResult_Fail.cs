@@ -1,7 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
-using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -11,7 +11,7 @@ public class TestAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var result = builder.Advice.IntroduceConstructor( builder.Target, nameof(ConstructorTemplate), whenExists: OverrideStrategy.Fail );
+        var result = builder.IntroduceConstructor( nameof(ConstructorTemplate), whenExists: OverrideStrategy.Fail );
 
         if (result.Outcome != AdviceOutcome.Error)
         {
@@ -33,7 +33,7 @@ public class TestAspect : TypeAspect
     [Template]
     public void ConstructorTemplate()
     {
-        Console.WriteLine("Aspect code.");
+        Console.WriteLine( "Aspect code." );
         meta.Proceed();
     }
 }
@@ -44,6 +44,6 @@ public class TargetClass
 {
     public TargetClass()
     {
-        Console.WriteLine("Source code.");
+        Console.WriteLine( "Source code." );
     }
 }

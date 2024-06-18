@@ -1,5 +1,5 @@
 [DerivedAspect]
-class Target
+internal class Target
 {
   public event global::System.EventHandler<dynamic> IntroducedEvent
   {

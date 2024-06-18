@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Return_Switch;
@@ -6,13 +7,14 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        CalledTemplate(0);
-        CalledTemplate(1);
+        CalledTemplate( 0 );
+        CalledTemplate( 1 );
+
         return default;
     }
 
     [Template]
-    private void CalledTemplate([CompileTime] int i)
+    private void CalledTemplate( [CompileTime] int i )
     {
         switch (i)
         {
@@ -26,7 +28,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

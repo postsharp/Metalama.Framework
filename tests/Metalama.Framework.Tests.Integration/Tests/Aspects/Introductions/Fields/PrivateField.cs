@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 
@@ -10,7 +11,7 @@ public class IntroducePrivateFieldAttribute : OverrideMethodAspect
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(_text);
+        Console.WriteLine( _text );
 
         return meta.Proceed();
     }

@@ -2,6 +2,7 @@
 // @RemoveOutputCode(true)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;

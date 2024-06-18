@@ -13,9 +13,9 @@ public class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var introducedType = builder.Advice.IntroduceClass( builder.Target, "IntroducedType" ).Declaration;
-        builder.Advice.IntroduceConstructor( introducedType, nameof(StaticConstructorTemplate), buildConstructor: b => { b.IsStatic = true; } );
-        builder.Advice.AddInitializer( introducedType, nameof(Template), InitializerKind.BeforeTypeConstructor );
+        var introducedType = builder.IntroduceClass( "IntroducedType" ).Declaration;
+        builder.With( introducedType ).IntroduceConstructor( nameof(StaticConstructorTemplate), buildConstructor: b => { b.IsStatic = true; } );
+        builder.With( introducedType ).AddInitializer( nameof(Template), InitializerKind.BeforeTypeConstructor );
     }
 
     [Template]

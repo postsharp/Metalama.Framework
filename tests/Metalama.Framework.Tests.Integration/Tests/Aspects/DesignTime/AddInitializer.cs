@@ -18,9 +18,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DesignTime.AddIniti
 
 public class Aspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddInitializer(builder.Target, StatementFactory.Parse("x = 42;"), InitializerKind.BeforeInstanceConstructor);
+        builder.AddInitializer( StatementFactory.Parse( "x = 42;" ), InitializerKind.BeforeInstanceConstructor );
     }
 }
 
@@ -28,14 +28,14 @@ public class Aspect : TypeAspect
 [Aspect]
 internal partial class RegularClass
 {
-    int x;
+    private int x;
 }
 
 // <target>
 [Aspect]
 internal partial class ClassWithPrimaryConstructor()
 {
-    int x;
+    private int x;
 }
 
 #endif

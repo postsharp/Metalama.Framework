@@ -1,24 +1,25 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Tuples.CompileTimeTuples2
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var t = meta.CompileTime((1, 2, 3));
-            Console.WriteLine(t.Item3);
-            
+            var t = meta.CompileTime( ( 1, 2, 3 ) );
+            Console.WriteLine( t.Item3 );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

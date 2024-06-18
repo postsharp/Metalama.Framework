@@ -6,11 +6,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.AppendParameter.Bas
 
 public class MyAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter(constructor, "p", typeof(int), TypedConstant.Create(15), (p, c) => PullAction.UseExpression(TypedConstant.Create(51)));
+            builder.With( constructor )
+                .IntroduceParameter(
+                    "p",
+                    typeof(int),
+                    TypedConstant.Create( 15 ),
+                    ( p, c ) => PullAction.UseExpression( TypedConstant.Create( 51 ) ) );
         }
     }
 }
@@ -19,7 +24,7 @@ public class MyAspect : TypeAspect
 [MyAspect]
 public class A
 {
-    public A(int x)
+    public A( int x )
     {
         X = x;
     }
@@ -30,7 +35,7 @@ public class A
 // <target>
 public class C : A
 {
-    public C(int x) : base(42)
+    public C( int x ) : base( 42 )
     {
         Y = x;
     }

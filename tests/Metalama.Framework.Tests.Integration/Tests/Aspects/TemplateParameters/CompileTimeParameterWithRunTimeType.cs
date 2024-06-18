@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateParameters.CompileTimeParameterWithRunTimeType;
@@ -11,13 +12,9 @@ internal class MyAspect : TypeAspect
         [CompileTime] TC[] b,
         [CompileTime] TR c,
         [CompileTime] List<TR> d,
-        [CompileTime] Target e )
-    {
-    }
+        [CompileTime] Target e ) { }
 }
 
 // <target>
 [MyAspect]
-internal class Target
-{
-}
+internal class Target { }

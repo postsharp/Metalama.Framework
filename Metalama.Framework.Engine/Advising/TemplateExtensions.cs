@@ -124,7 +124,8 @@ namespace Metalama.Framework.Engine.Advising
             if ( eventFieldTemplate != null )
             {
                 // Initializer template is compiled into a template for event.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
+                var templateName =
+                    TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertSymbolNotNull() );
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetAnyMethod( templateName ) != null )
                 {

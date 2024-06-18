@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
@@ -5,10 +6,10 @@ using Metalama.Framework.Engine.Templating;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Cast.CompileTimeCastOfRunTimeValue;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         var parameter = (IParameter)meta.Target.Parameters[0].Value!;
 
@@ -16,9 +17,9 @@ class Aspect
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    string Method(string a)
+    private string Method( string a )
     {
         return a;
     }

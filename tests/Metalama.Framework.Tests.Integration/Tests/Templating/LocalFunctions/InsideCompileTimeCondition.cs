@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 using System;
@@ -5,25 +6,25 @@ using System;
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.LocalFunctions.InsideCompileTimeCondition;
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
         if (true)
         {
             var local = (Action<TargetCode>)Local;
 
-            void Local(TargetCode x) { }
+            void Local( TargetCode x ) { }
         }
 
         return default;
     }
 }
-    
-class TargetCode
+
+internal class TargetCode
 {
-    int Method(int a)
+    private int Method( int a )
     {
         return a;
     }

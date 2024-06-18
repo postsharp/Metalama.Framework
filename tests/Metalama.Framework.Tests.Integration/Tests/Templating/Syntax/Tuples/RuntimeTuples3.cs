@@ -1,24 +1,25 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Tuples.RunTimeTuples3
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            (int, string) anonymT = (4, "");
-            Console.WriteLine(anonymT.Item1);
-            
+            (int, string) anonymT = ( 4, "" );
+            Console.WriteLine( anonymT.Item1 );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

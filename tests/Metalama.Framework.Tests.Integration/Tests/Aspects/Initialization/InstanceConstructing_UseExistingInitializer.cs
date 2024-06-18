@@ -9,13 +9,13 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var initializer = builder.Target.Fields.OfName("Field1").Single().InitializerExpression;
-            var targetField = builder.Target.Fields.OfName("Field2").Single();
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { field = targetField, initializer = initializer } );
+            var initializer = builder.Target.Fields.OfName( "Field1" ).Single().InitializerExpression;
+            var targetField = builder.Target.Fields.OfName( "Field2" ).Single();
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeInstanceConstructor, args: new { field = targetField, initializer = initializer } );
         }
 
         [Template]
-        public void Template([CompileTime] IField field, [CompileTime] IExpression initializer)
+        public void Template( [CompileTime] IField field, [CompileTime] IExpression initializer )
         {
             field.Value = initializer;
         }

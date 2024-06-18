@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.References;
 
 #pragma warning disable CS0169, CS0649
 
@@ -14,15 +10,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
 {
     public class MementoAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var mementoType =
                 builder.IntroduceClass(
                     "Memento",
-                    buildType: b =>
-                    {
-                        b.Accessibility = Accessibility.Public;
-                    });
+                    buildType: b => { b.Accessibility = Accessibility.Public; } );
 
             var mementoFields = new List<IField>();
 
@@ -41,12 +34,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                         b.Type = fieldOrProperty.Type;
                         b.Accessibility = Accessibility.Public;
                         b.Writeability = Writeability.ConstructorOnly;
-                    });
+                    } );
 
-                mementoFields.Add(field.Declaration);
+                mementoFields.Add( field.Declaration );
             }
 
-            mementoType.ImplementInterface(typeof(IMemento));
+            mementoType.ImplementInterface( typeof(IMemento) );
 
             mementoType.IntroduceConstructor(
                 nameof(MementoConstructorTemplate),
@@ -54,10 +47,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
                 {
                     foreach (var mementoField in mementoFields)
                     {
-                        b.AddParameter(mementoField.Name, mementoField.Type);
+                        b.AddParameter( mementoField.Name, mementoField.Type );
                     }
                 },
-                args: new { fields = mementoFields });
+                args: new { fields = mementoFields } );
 
             builder.ImplementInterface( typeof(IOriginator), tags: new { mementoType = mementoType.Declaration } );
         }
@@ -69,9 +62,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
         public IMemento Save()
         {
             var mementoType = (INamedType)meta.Tags["mementoType"];
-            var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where(f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared);
+            var fieldExpressions = meta.Target.Type.FieldsAndProperties.Where( f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared );
 
-            return mementoType.Constructors.Single().Invoke(fieldExpressions);
+            return mementoType.Constructors.Single().Invoke( fieldExpressions );
         }
 
         [InterfaceMember]
@@ -81,16 +74,16 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
 
             foreach (var fieldOrProperty in meta.Target.Type.FieldsAndProperties.Where( f => f.IsAutoPropertyOrField == true && !f.IsImplicitlyDeclared ))
             {
-                var mementoField = mementoType.FieldsAndProperties.OfName(fieldOrProperty.Name).Single();
+                var mementoField = mementoType.FieldsAndProperties.OfName( fieldOrProperty.Name ).Single();
 
-                fieldOrProperty.Value = mementoField.With((IExpression)meta.Cast(mementoType, memento)).Value;
+                fieldOrProperty.Value = mementoField.With( (IExpression)meta.Cast( mementoType, memento ) ).Value;
             }
         }
 
         [Template]
-        public void MementoConstructorTemplate([CompileTime] List<IField> fields)
+        public void MementoConstructorTemplate( [CompileTime] List<IField> fields )
         {
-            int i = meta.CompileTime(0);
+            var i = meta.CompileTime( 0 );
 
             foreach (var parameter in meta.Target.Constructor.Parameters)
             {
@@ -104,7 +97,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.Memento
     {
         IMemento Save();
 
-        void Restore(IMemento memento);
+        void Restore( IMemento memento );
     }
 
     public interface IMemento { }

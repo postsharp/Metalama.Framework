@@ -10,7 +10,7 @@ public record class TargetClass
       X = 13,
       Y = 42
     };
-    this.X = 42;
+    X = 42;
   }
   public global::System.Int32 Y { get; init; }
   public void Deconstruct(out int X, out int Y)

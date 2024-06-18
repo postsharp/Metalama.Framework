@@ -34,7 +34,15 @@ internal sealed class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, I
         Action<IMethodBuilder>? buildAction,
         IObjectReader tags,
         INamedType? explicitlyImplementedInterfaceType )
-        : base( parameters, explicitName: null, template.TemplateMember, IntroductionScope.Static, overrideStrategy, buildAction, tags, explicitlyImplementedInterfaceType )
+        : base(
+            parameters,
+            explicitName: null,
+            template.TemplateMember,
+            IntroductionScope.Static,
+            overrideStrategy,
+            buildAction,
+            tags,
+            explicitlyImplementedInterfaceType )
     {
         this._template = template;
 

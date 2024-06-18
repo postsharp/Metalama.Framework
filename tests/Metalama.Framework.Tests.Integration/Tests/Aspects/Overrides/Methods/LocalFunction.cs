@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.LocalFunction
@@ -7,25 +8,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.L
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("This is overridden method.");
+            Console.WriteLine( "This is overridden method." );
 
             return Quz();
 
             int Quz()
             {
                 var x = meta.Proceed();
+
                 return x + 1;
             }
         }
     }
 
     // <target>
-    internal class TargetClass 
+    internal class TargetClass
     {
         [Override]
-        public int Foo(int x)
+        public int Foo( int x )
         {
-            return Bar(Bar(x));
+            return Bar( Bar( x ) );
 
             int Bar( int x )
             {

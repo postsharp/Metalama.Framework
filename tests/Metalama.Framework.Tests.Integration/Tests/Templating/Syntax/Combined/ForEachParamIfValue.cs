@@ -1,31 +1,33 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Combined.ForEachParamIfValue
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             foreach (var p in meta.Target.Parameters)
             {
                 if (p.Value == null)
                 {
-                    throw new ArgumentNullException(p.Name);
+                    throw new ArgumentNullException( p.Name );
                 }
             }
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        string Method(object a, object b)
+        private string Method( object a, object b )
         {
             return a.ToString() + b.ToString();
         }

@@ -45,13 +45,13 @@ namespace Metalama.Framework.Validation
         /// <summary>
         /// Gets information about the referenced declaration.
         /// </summary>
-        public ReferenceEnd Destination => this._destinationEnd ??= new ReferenceEnd( this._referencedDeclaration, GetInboundGranularity( this._referencedDeclaration.DeclarationKind ) );
+        public ReferenceEnd Destination
+            => this._destinationEnd ??= new ReferenceEnd( this._referencedDeclaration, GetInboundGranularity( this._referencedDeclaration.DeclarationKind ) );
 
         /// <summary>
         /// Gets information about the referencing declaration, i.e. the declaration containing the reference.
         /// </summary>
-        public ReferenceEnd Origin
-            => this._originEnd ??= new ReferenceEnd( this._referencingDeclaration, this._originGranularity );
+        public ReferenceEnd Origin => this._originEnd ??= new ReferenceEnd( this._referencingDeclaration, this._originGranularity );
 
         /// <summary>
         /// Gets the <see cref="ReferenceEnd"/> according to a <see cref="ReferenceEndRole"/>.

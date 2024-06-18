@@ -1,4 +1,4 @@
-void Method(int a, int b)
+private void Method(int a, int b)
 {
   try
   {

@@ -3,6 +3,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncMeth
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -19,20 +20,20 @@ public sealed class TestAttribute : TypeAspect
                               && !p.Type.IsNullable.GetValueOrDefault()
                               && p.Type.IsReferenceType.GetValueOrDefault() ))
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
 
             if (method.ReturnType.IsReferenceType.GetValueOrDefault()
                 && !method.ReturnType.IsNullable.GetValueOrDefault()
-                && !method.GetAsyncInfo().ResultType.Is(SpecialType.Void))
+                && !method.GetAsyncInfo().ResultType.Is( SpecialType.Void ))
             {
-                builder.Advice.AddContract(
-                    method.ReturnParameter,
-                    nameof(ValidateMethodResult),
-                    args: new { methodName = method.Name });
+                builder.With( method.ReturnParameter )
+                    .AddContract(
+                        nameof(ValidateMethodResult),
+                        args: new { methodName = method.Name } );
             }
         }
     }
@@ -60,33 +61,33 @@ public sealed class TestAttribute : TypeAspect
 [Test]
 public class TestClass
 {
-    public string DoSomething(string text)
+    public string DoSomething( string text )
     {
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
 
         return null!;
     }
 
-    public async Task DoSomethingAsync(string text)
+    public async Task DoSomethingAsync( string text )
     {
         await Task.Yield();
 
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
     }
 
-    public async Task<string> DoSomethingAsyncT(string text)
+    public async Task<string> DoSomethingAsyncT( string text )
     {
         await Task.Yield();
 
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
 
         return null!;
     }
 
-    public async void DoSomethingAsyncVoid(string text)
+    public async void DoSomethingAsyncVoid( string text )
     {
         await Task.Yield();
 
-        Console.WriteLine("Hello");
+        Console.WriteLine( "Hello" );
     }
 }

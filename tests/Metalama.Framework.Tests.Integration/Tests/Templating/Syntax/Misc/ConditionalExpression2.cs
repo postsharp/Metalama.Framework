@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -7,24 +8,22 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Templating.Syntax.Misc.ConditionalExpressionError
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var extraField = meta.Target.Method.DeclaringType.Fields.OfName("extra").SingleOrDefault();
+            var extraField = meta.Target.Method.DeclaringType.Fields.OfName( "extra" ).SingleOrDefault();
 
             // compile-time condition, mix of run-time and compile-time results
-            Console.WriteLine(extraField != null ? extraField.Name : meta.RunTime("undefined"));
+            Console.WriteLine( extraField != null ? extraField.Name : meta.RunTime( "undefined" ) );
 
             return null;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method()
-        {
-        }
+        private void Method() { }
     }
 }

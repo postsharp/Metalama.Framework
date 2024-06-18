@@ -6,21 +6,21 @@ internal class TargetClass
     add
     {
       global::System.Console.WriteLine("This is the overridden method.");
-      this.MethodWithCallerMemberName(42);
-      this.MethodWithCallerMemberName(42, y: 27);
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27);
-      this.MethodWithCallerMemberName(42, "foo", 27);
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42);
+      MethodWithCallerMemberName(42, y: 27);
+      MethodWithCallerMemberName(42, name1: "foo", y: 27);
+      MethodWithCallerMemberName(42, "foo", 27);
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
       return;
     }
     remove
     {
       global::System.Console.WriteLine("This is the overridden method.");
-      this.MethodWithCallerMemberName(42);
-      this.MethodWithCallerMemberName(42, y: 27);
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27);
-      this.MethodWithCallerMemberName(42, "foo", 27);
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42);
+      MethodWithCallerMemberName(42, y: 27);
+      MethodWithCallerMemberName(42, name1: "foo", y: 27);
+      MethodWithCallerMemberName(42, "foo", 27);
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
       return;
     }
   }

@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -13,11 +14,11 @@ public class ReferenceType : ICompileTimeSerializable
 
     public int ValueInitOnly { get; init; }
 
-    public ReferenceType(int value)
+    public ReferenceType( int value )
     {
-        this.Value = value;
-        this.ValueGetOnly = value;
-        this.ValueInitOnly = value;
+        Value = value;
+        ValueGetOnly = value;
+        ValueInitOnly = value;
     }
 }
 
@@ -26,25 +27,23 @@ public class TestAspect : OverrideMethodAspect
 {
     public ReferenceType SerializedValue;
 
-    public TestAspect(int x)
+    public TestAspect( int x )
     {
-        SerializedValue = new ReferenceType(x);
+        SerializedValue = new ReferenceType( x );
     }
 
     public override dynamic? OverrideMethod()
     {
-        Console.WriteLine(meta.CompileTime(SerializedValue.Value));
-        Console.WriteLine(meta.CompileTime(SerializedValue.ValueGetOnly));
-        Console.WriteLine(meta.CompileTime(SerializedValue.ValueInitOnly));
+        Console.WriteLine( meta.CompileTime( SerializedValue.Value ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.ValueGetOnly ) );
+        Console.WriteLine( meta.CompileTime( SerializedValue.ValueInitOnly ) );
+
         return meta.Proceed();
     }
-
 }
 
 public class BaseClass
 {
-    [TestAspect(42)]
-    public virtual void Foo()
-    {
-    }
+    [TestAspect( 42 )]
+    public virtual void Foo() { }
 }

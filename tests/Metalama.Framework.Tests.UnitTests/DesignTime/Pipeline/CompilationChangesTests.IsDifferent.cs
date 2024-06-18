@@ -212,9 +212,11 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.Pipeline
         [Fact]
         public void IsDifferent_ChangeInCompileTimeCode()
         {
-            var syntaxTree1 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 1; } }" );
+            var syntaxTree1 = CSharpSyntaxTree.ParseText(
+                "using Metalama.Framework.Aspects;  class C { int M { get => 1; } }" );
 
-            var syntaxTree2 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 2; } }" );
+            var syntaxTree2 = CSharpSyntaxTree.ParseText(
+                "using Metalama.Framework.Aspects;  class C { int M { get => 2; } }" );
 
             Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }

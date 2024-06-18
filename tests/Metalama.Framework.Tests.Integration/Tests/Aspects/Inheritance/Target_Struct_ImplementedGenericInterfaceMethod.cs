@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Target_Struct_ImplementedGenericInterfaceMethod

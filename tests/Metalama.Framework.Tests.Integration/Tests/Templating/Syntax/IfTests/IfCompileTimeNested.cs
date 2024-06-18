@@ -1,26 +1,28 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompileTimeNested
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            int t = meta.CompileTime(0);
-            string name = meta.Target.Parameters[0].Name;
-            if (name.Contains("a"))
+            var t = meta.CompileTime( 0 );
+            var name = meta.Target.Parameters[0].Name;
+
+            if (name.Contains( "a" ))
             {
-                if (name.Contains("b"))
+                if (name.Contains( "b" ))
                 {
                     t = 1;
                 }
                 else
                 {
-                    if (name.Contains("c"))
+                    if (name.Contains( "c" ))
                     {
                         t = 42;
                     }
@@ -35,16 +37,15 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.IfTests.IfCompi
                 t = 4;
             }
 
-            Console.WriteLine(t);
-            dynamic? result = meta.Proceed();
+            Console.WriteLine( t );
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        void Method(string aBc)
-        {
-        }
+        private void Method( string aBc ) { }
     }
 }

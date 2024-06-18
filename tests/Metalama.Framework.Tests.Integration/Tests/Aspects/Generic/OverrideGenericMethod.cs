@@ -1,8 +1,9 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGenericMethod
 {
-    class Aspect : OverrideMethodAspect
+    internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
@@ -11,10 +12,10 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Generic.OverrideGeneri
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
         [Aspect]
-        T Method<T>(T a)
+        private T Method<T>( T a )
         {
             return a;
         }

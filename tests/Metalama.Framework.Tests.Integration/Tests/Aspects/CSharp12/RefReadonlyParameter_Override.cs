@@ -5,29 +5,30 @@
 #if ROSLYN_4_8_0_OR_GREATER
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.RefReadonlyParameter_Override;
 
-class TheAspect : OverrideMethodAspect
+internal class TheAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
         foreach (var parameter in meta.Target.Parameters)
         {
-            Console.WriteLine($"{parameter}: Kind={parameter.RefKind}, Value={parameter.Value}");
+            Console.WriteLine( $"{parameter}: Kind={parameter.RefKind}, Value={parameter.Value}" );
         }
 
         return meta.Proceed();
     }
 }
 
-class C
+internal class C
 {
     [TheAspect]
-    void M(in int i, ref readonly int j)
+    private void M( in int i, ref readonly int j )
     {
-        Console.WriteLine(i + j);
+        Console.WriteLine( i + j );
     }
 }
 

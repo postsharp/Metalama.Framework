@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.InvalidTarget_DeclarativeInstance
 {
@@ -17,7 +18,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
 
     public class ExplicitInstanceIntroductionAttribute : TypeAspect
     {
-        [Introduce(Scope = IntroductionScope.Instance)]
+        [Introduce( Scope = IntroductionScope.Instance )]
         public static int Method_ExplicitlyInstance()
         {
             return meta.Proceed();
@@ -27,7 +28,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Inva
     // <target>
     [ImplicitlyInstanceIntroduction]
     [ExplicitInstanceIntroduction]
-    internal static class StaticTargetClass
-    {
-    }
+    internal static class StaticTargetClass { }
 }

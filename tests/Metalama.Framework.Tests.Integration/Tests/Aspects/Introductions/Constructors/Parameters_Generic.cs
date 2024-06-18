@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,13 +9,9 @@ public class IntroductionAttribute : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceConstructor(
-            builder.Target,
+        builder.IntroduceConstructor(
             nameof(Template),
-            buildConstructor: introduced =>
-            {
-                introduced.AddParameter( "x", builder.Target );
-            } );
+            buildConstructor: introduced => { introduced.AddParameter( "x", builder.Target ); } );
 
         // TODO: Other members.
     }

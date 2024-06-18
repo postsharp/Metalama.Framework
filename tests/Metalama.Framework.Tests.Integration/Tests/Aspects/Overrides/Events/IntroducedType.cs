@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,10 +9,10 @@ internal class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var typeResult = builder.Advice.IntroduceClass( builder.Target, "TestType" );
-        var methodResult = builder.Advice.IntroduceEvent( typeResult.Declaration, nameof(IntroducedEvent) );
+        var typeResult = builder.IntroduceClass( "TestType" );
+        var methodResult = builder.With( typeResult.Declaration ).IntroduceEvent( nameof(IntroducedEvent) );
 
-        builder.Advice.OverrideAccessors( methodResult.Declaration, nameof(OverrideTemplate), nameof(OverrideTemplate) );
+        builder.With( methodResult.Declaration ).OverrideAccessors( nameof(OverrideTemplate), nameof(OverrideTemplate) );
     }
 
     [Template]

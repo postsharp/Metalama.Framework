@@ -44,40 +44,39 @@ internal class IntroduceMembersAttribute : TypeAspect
 
         var results = new List<IIntroductionAdviceResult<IDeclaration>>();
 
-        results.Add( builder.Advice.IntroduceMethod( builder.Target, nameof(M) ) );
-        results.Add( builder.Advice.IntroduceEvent( builder.Target, nameof(Event) ) );
-        results.Add( builder.Advice.IntroduceProperty( builder.Target, nameof(Property) ) );
+        results.Add( builder.IntroduceMethod( nameof(M) ) );
+        results.Add( builder.IntroduceEvent( nameof(Event) ) );
+        results.Add( builder.IntroduceProperty( nameof(Property) ) );
 
         results.Add(
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 typeof(int),
                 nameof(IndexerGet),
                 nameof(IndexerSet),
                 buildIndexer: builder => builder.IsVirtual = true ) );
 
-        results.Add( builder.Advice.IntroduceFinalizer( builder.Target, nameof(Finalizer) ) );
+        results.Add( builder.IntroduceFinalizer( nameof(Finalizer) ) );
 
         foreach (var result in results)
         {
-            ( (IAspectBuilder)builder ).With<IDeclaration>(result.Declaration).Outbound.AddAspect<NopAspect>();
+            ( (IAspectBuilder)builder ).With<IDeclaration>( result.Declaration ).Outbound.AddAspect<NopAspect>();
 
             if (result.Declaration is IMethod method)
             {
                 if (!method.ReturnType.Is( typeof(void) ))
                 {
-                    ( (IAspectBuilder)builder ).With<IParameter>(method.ReturnParameter).Outbound.AddAspect<NopAspect>();
+                    ( (IAspectBuilder)builder ).With<IParameter>( method.ReturnParameter ).Outbound.AddAspect<NopAspect>();
                 }
             }
 
             if (result.Declaration is IHasParameters hasParameters)
             {
-                ( (IAspectBuilder)builder ).With<IHasParameters>(hasParameters).Outbound.SelectMany(m => m.Parameters).AddAspect<NopAspect>();
+                ( (IAspectBuilder)builder ).With<IHasParameters>( hasParameters ).Outbound.SelectMany( m => m.Parameters ).AddAspect<NopAspect>();
             }
 
             if (result.Declaration is IHasAccessors member)
             {
-                ( (IAspectBuilder)builder ).With<IHasAccessors>(member).Outbound.SelectMany(m => m.Accessors).AddAspect<NopAspect>();
+                ( (IAspectBuilder)builder ).With<IHasAccessors>( member ).Outbound.SelectMany( m => m.Accessors ).AddAspect<NopAspect>();
             }
         }
     }

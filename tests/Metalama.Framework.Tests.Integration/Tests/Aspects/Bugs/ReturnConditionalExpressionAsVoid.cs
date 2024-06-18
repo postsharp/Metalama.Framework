@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -16,7 +17,8 @@ internal class ConditionalMethodCall : OverrideMethodAspect
     public override dynamic? OverrideMethod()
     {
         meta.Proceed();
-        var runTimeClass = ExpressionFactory.Capture(new RunTimeClass()).Value;
+        var runTimeClass = ExpressionFactory.Capture( new RunTimeClass() ).Value;
+
         return runTimeClass?.M();
     }
 }
@@ -26,13 +28,12 @@ internal class TargetCode
     // <target>
     [ConditionalMethodCall]
     [ConditionalPropertyAccess]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }
 
-class RunTimeClass
+internal class RunTimeClass
 {
     public int P { get; }
+
     public void M() { }
 }

@@ -24,7 +24,7 @@ internal abstract class Advice : IAspectDeclarationOrigin, IDiagnosticSource
     public ICompilation SourceCompilation { get; }
 
     public AspectLayerId AspectLayerId { get; }
-    
+
     public abstract AdviceKind AdviceKind { get; }
 
     protected Advice( AdviceConstructorParameters parameters )

@@ -1,10 +1,11 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AdvancedInterpolatedStringBuilder
 {
-    class GenerateMethodAttribute : TypeAspect
+    internal class GenerateMethodAttribute : TypeAspect
     {
         [Introduce]
         public string GeneratedMethod()
@@ -12,26 +13,26 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AdvancedInterp
             // Build an interpolated string that contains all parameters.
             var stringBuilder = new InterpolatedStringBuilder();
 
-            stringBuilder.AddExpression(0);
-            stringBuilder.AddExpression("1", -5);
-            stringBuilder.AddExpression(2, format: "x");
-            stringBuilder.AddExpression(3, 10, "g");
+            stringBuilder.AddExpression( 0 );
+            stringBuilder.AddExpression( "1", -5 );
+            stringBuilder.AddExpression( 2, format: "x" );
+            stringBuilder.AddExpression( 3, 10, "g" );
 
-            stringBuilder.AddText(" a");
-            stringBuilder.AddExpression("b");
-            stringBuilder.AddText("c");
-            stringBuilder.AddExpression("d", 3);
-            stringBuilder.AddText("e");
-            stringBuilder.AddExpression("f", format: "s");
-            stringBuilder.AddExpression("f", format: null);
+            stringBuilder.AddText( " a" );
+            stringBuilder.AddExpression( "b" );
+            stringBuilder.AddText( "c" );
+            stringBuilder.AddExpression( "d", 3 );
+            stringBuilder.AddText( "e" );
+            stringBuilder.AddExpression( "f", format: "s" );
+            stringBuilder.AddExpression( "f", format: null );
 
-            stringBuilder.AddText("{");
-            stringBuilder.AddExpression(0);
-            stringBuilder.AddText("}");
+            stringBuilder.AddText( "{" );
+            stringBuilder.AddExpression( 0 );
+            stringBuilder.AddText( "}" );
 
-            stringBuilder.AddExpression(new Random().Next() == 0 ? 0 : 1);
+            stringBuilder.AddExpression( new Random().Next() == 0 ? 0 : 1 );
 
-            stringBuilder.AddText("\"\\\r\n\t");
+            stringBuilder.AddText( "\"\\\r\n\t" );
 
             return stringBuilder.ToValue();
         }
@@ -39,5 +40,5 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.AdvancedInterp
 
     // <target>
     [GenerateMethod]
-    class Program { }
+    internal class Program { }
 }

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Empty_DirectCall;
@@ -6,7 +7,7 @@ internal sealed class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        this.OverrideAsyncMethod();
+        OverrideAsyncMethod();
 
         return meta.Proceed();
     }
@@ -16,7 +17,5 @@ internal sealed class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

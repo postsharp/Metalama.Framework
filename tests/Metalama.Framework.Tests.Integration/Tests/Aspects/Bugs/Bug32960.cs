@@ -1,20 +1,18 @@
-
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug32960;
 
-
 public class ReportAndSwallowExceptionsAttribute : OverrideMethodAspect
 {
-
     public override dynamic? OverrideMethod()
     {
         try
         {
             return meta.Proceed();
         }
-        catch ( Exception e )
+        catch (Exception e)
         {
             Console.WriteLine( e );
 

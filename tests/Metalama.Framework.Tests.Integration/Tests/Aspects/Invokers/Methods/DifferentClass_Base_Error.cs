@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using System.Linq;
@@ -11,18 +12,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Di
 
 public class InvokerAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
-            new { target = ((INamedType)builder.Target.Parameters[0].Type).Methods.OfName("Method").Single() });
+            new { target = ( (INamedType)builder.Target.Parameters[0].Type ).Methods.OfName( "Method" ).Single() } );
     }
 
     [Template]
-    public dynamic? Template([CompileTime] IMethod target)
+    public dynamic? Template( [CompileTime] IMethod target )
     {
-        target.With((IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Base).Invoke();
+        target.With( (IExpression)meta.Target.Method.Parameters[0].Value!, InvokerOptions.Base ).Invoke();
 
         return meta.Proceed();
     }
@@ -30,16 +30,12 @@ public class InvokerAspect : MethodAspect
 
 public class DifferentClass
 {
-    public void Method()
-    {
-    }
+    public void Method() { }
 }
 
 // <target>
 public class TargetClass
-{    
+{
     [InvokerAspect]
-    public void Invoker(DifferentClass instance)
-    {
-    }
+    public void Invoker( DifferentClass instance ) { }
 }

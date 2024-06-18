@@ -1,5 +1,5 @@
 [GenerateMethod]
-class Program
+internal class Program
 {
   public global::System.String GeneratedMethod()
   {

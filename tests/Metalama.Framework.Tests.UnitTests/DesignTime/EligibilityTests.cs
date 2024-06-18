@@ -72,7 +72,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             const string code = @"
 using System;
 using Metalama.Framework.Code;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Eligibility;
 
 class MethodAspect : IAspect<IMethod> { }
@@ -107,7 +108,8 @@ namespace Ns { class C {} }
             const string code = @"
 using System;
 using Metalama.Framework.Code;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Eligibility;
 
 class MyTypeAspect : TypeAspect {}
@@ -139,7 +141,8 @@ interface Interface {}
             const string code = @"
 using System;
 using Metalama.Framework.Code;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Eligibility;
 
 class MyTypeAspect : TypeAspect {}
@@ -163,7 +166,8 @@ class ClassWithoutAspect {}
             const string code = @"
 using System;
 using Metalama.Framework.Code;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Eligibility;
 
 class MyTypeAspect : TypeAspect {}

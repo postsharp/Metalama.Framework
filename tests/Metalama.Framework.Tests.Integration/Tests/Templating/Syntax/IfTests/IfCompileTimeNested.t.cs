@@ -1,4 +1,4 @@
-void Method(string aBc)
+private void Method(string aBc)
 {
   global::System.Console.WriteLine(42);
   this.Method(aBc);

@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using System;
 using Metalama.Framework.Tests.Integration.Tests.Licensing.Redistribution.Dependency;
 

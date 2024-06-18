@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,11 +9,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Progr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceEvent( builder.Target, nameof(EventField), buildEvent: e => e.Accessibility = Accessibility.Public );
-            builder.Advice.IntroduceEvent( builder.Target, nameof(Event), buildEvent: e => e.Accessibility = Accessibility.Public );
+            builder.IntroduceEvent( nameof(EventField), buildEvent: e => e.Accessibility = Accessibility.Public );
+            builder.IntroduceEvent( nameof(Event), buildEvent: e => e.Accessibility = Accessibility.Public );
 
-            builder.Advice.IntroduceEvent(
-                builder.Target,
+            builder.IntroduceEvent(
                 "EventFromAccessors",
                 nameof(AddEventTemplate),
                 nameof(RemoveEventTemplace),

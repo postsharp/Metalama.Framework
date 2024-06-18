@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Generic_RunTime_DynamicCall;
@@ -7,7 +8,7 @@ internal class Aspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        meta.InvokeTemplate(nameof(CalledTemplate));
+        meta.InvokeTemplate( nameof(CalledTemplate) );
 
         return default;
     }
@@ -15,7 +16,7 @@ internal class Aspect : OverrideMethodAspect
     [Template]
     private void CalledTemplate<T>()
     {
-        Console.WriteLine($"called template T={typeof(T)}");
+        Console.WriteLine( $"called template T={typeof(T)}" );
     }
 }
 
@@ -23,7 +24,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

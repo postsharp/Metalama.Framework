@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.ExtensionMethods.Conditional_CompileTime;
@@ -22,16 +23,19 @@ internal class ReturnNumbers : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        var numbers = meta.CompileTime(new int[] { 42 });
+        var numbers = meta.CompileTime( new int[] { 42 } );
 
         switch (DateTime.Today.DayOfWeek)
         {
             case DayOfWeek.Monday:
                 return numbers?.MyToList();
+
             case DayOfWeek.Tuesday:
                 return numbers?.MyToList().MyToList();
+
             case DayOfWeek.Wednesday:
                 return numbers.MyToList()?.MyToList();
+
             default:
                 return numbers?.MyToList()?.MyToList();
         }

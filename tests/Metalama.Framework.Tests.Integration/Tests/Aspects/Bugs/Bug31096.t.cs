@@ -5,7 +5,7 @@ public class TargetClass
   {
     var td = new TestData()
     {
-      Property = TestData.TryParse1("42", out var result) ? result : null,
+      Property = TestData.TryParse1("42", out var result) ? result : null
     };
     object result_1 = null;
     var result1 = 42;
@@ -19,7 +19,7 @@ public class TargetClass
   {
     var td = new TestData()
     {
-      Property = TestData.TryParse2("42", out (int x, int y) result) ? result.x : null,
+      Property = TestData.TryParse2("42", out var result) ? result.x : null
     };
     object result_1 = null;
     var result1 = 42;
@@ -42,7 +42,7 @@ public class TargetClass
   [TestAspect]
   public void TestMethod4()
   {
-    (var result1, (var result2, var result3)) = (42, (42, 42));
+    var(result1, (result2, result3)) = (42, (42, 42));
     object result = null;
     var result1_1 = 42;
     var result2_1 = 42;
@@ -53,7 +53,7 @@ public class TargetClass
   [TestAspect]
   public void TestMethod5()
   {
-    (var result1, var(result2, result3)) = (42, (42, 42));
+    var(result1, (result2, result3)) = (42, (42, 42));
     object result = null;
     var result1_1 = 42;
     var result2_1 = 42;

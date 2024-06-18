@@ -1,13 +1,13 @@
-class TargetClass
+internal class TargetClass
 {
   [RequiresAttribute]
-  void ShortName()
+  private void ShortName()
   {
     global::System.Console.WriteLine("Applied.");
     return;
   }
   [RequiresAttributeAttribute]
-  void LongName()
+  private void LongName()
   {
     global::System.Console.WriteLine("Applied.");
     return;

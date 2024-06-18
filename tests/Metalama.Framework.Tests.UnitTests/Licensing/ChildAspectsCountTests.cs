@@ -13,19 +13,20 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing;
 public sealed class ChildAspectsCountTests : LicensingTestsBase
 {
     private const string _namespace = "ChildAspectsCountTests";
-    
+
     private const string _overrideMethodChildAspectName = "OverrideMethodChildAspect";
-    
+
     private const string _iAspectChildAspectName = "IAspectChildAspect";
 
     private const string _aspectUsingsCode = $@"using {_namespace};
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
 using System.Linq;
 ";
-    
+
     private const string _overrideMethodChildAspectCodeFormat = @$"namespace {_namespace} {{{{
     internal class {_overrideMethodChildAspectName}{{0}} : OverrideMethodAspect
     {{{{
@@ -38,13 +39,13 @@ using System.Linq;
     }}}}
 }}}}
 ";
-    
+
     private const string _iAspectChildAspectCodeFormat = @$"namespace {_namespace} {{{{
     {{0}} class {_iAspectChildAspectName}{{1}} : IAspect<IMethod>
     {{{{
         public void BuildAspect(IAspectBuilder<IMethod> builder)
         {{{{
-            builder.Advice.Override(builder.Target, nameof(OverrideMethod));
+            builder.Override( nameof(OverrideMethod));
         }}}}
 
         public void BuildEligibility(IEligibilityBuilder<IMethod> builder)
@@ -61,7 +62,7 @@ using System.Linq;
     }}}}
 }}}}
 ";
-    
+
     private const string _parentAspectCodeFormat = @$"namespace {_namespace} {{{{
     public class ParentAspect : TypeAspect
     {{{{
@@ -74,7 +75,7 @@ using System.Linq;
     }}}}
 }}}}
 ";
-    
+
     private const string _targetClassCode = @$"namespace {_namespace} {{
     [ParentAspect]
     internal class Class1
@@ -100,7 +101,7 @@ using System.Linq;
 
     private const string _fabricsUsingsCode = @"using Metalama.Framework.Fabrics;
 ";
-    
+
     private const string _fabricCodeFormat = @$"namespace {_namespace} {{{{
     internal class Fabric : ProjectFabric
     {{{{
@@ -133,7 +134,7 @@ using System.Linq;
     }}}}
 }}}}
 ";
-    
+
     public ChildAspectsCountTests( ITestOutputHelper logger ) : base( logger ) { }
 
     private Task<DiagnosticBag> GetDiagnosticsWithFreeLicenseAsync( string code ) => this.GetDiagnosticsAsync( code, LicenseKeys.MetalamaFreePersonal );
@@ -152,15 +153,15 @@ using System.Linq;
                    + string.Format( _iAspectChildAspectCodeFormat, "internal", "0" )
                    + string.Format( _iAspectChildAspectCodeFormat, "internal", "1" )
                    + string.Format( _iAspectChildAspectCodeFormat, "internal", "2" )
-                   + string.Format( _parentAspectCodeFormat, _iAspectChildAspectName ) 
+                   + string.Format( _parentAspectCodeFormat, _iAspectChildAspectName )
                    + _targetClassCode;
 
         var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
-        
+
         Assert.Empty( diagnostics );
         Assert.True( this.ToastNotifications.WasDetectionTriggered );
     }
-    
+
     [Fact]
     public async Task CompilationFailsWhenChildAspectsAreAttributesAsync()
     {
@@ -175,7 +176,7 @@ using System.Linq;
 
         this.AssertTooManyAspectClasses( diagnostics );
     }
-    
+
     [Fact]
     public async Task CompilationFailsWhenChildAspectsArePublicAsync()
     {
@@ -183,14 +184,14 @@ using System.Linq;
                    + string.Format( _iAspectChildAspectCodeFormat, "public", "0" )
                    + string.Format( _iAspectChildAspectCodeFormat, "public", "1" )
                    + string.Format( _iAspectChildAspectCodeFormat, "public", "2" )
-                   + string.Format( _parentAspectCodeFormat, _iAspectChildAspectName ) 
+                   + string.Format( _parentAspectCodeFormat, _iAspectChildAspectName )
                    + _targetClassCode;
 
         var diagnostics = await this.GetDiagnosticsWithFreeLicenseAsync( code );
 
         this.AssertTooManyAspectClasses( diagnostics );
     }
-    
+
     [Fact]
     public async Task CompilationFailsWhenChildAspectsAreAppliedUsingFabricsAsync()
     {

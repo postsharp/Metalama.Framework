@@ -1,6 +1,7 @@
 #if ROSLYN_4_4_0_OR_GREATER
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.LanguageVersion.Template_Property_OldVersion;
@@ -22,7 +23,7 @@ public class TheAspect : TypeAspect
         get => "";
         set
         {
-            Console.WriteLine("""set""");
+            Console.WriteLine( """set""" );
         }
     }
 }

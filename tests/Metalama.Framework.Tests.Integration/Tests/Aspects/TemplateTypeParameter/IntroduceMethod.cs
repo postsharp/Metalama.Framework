@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,7 +13,7 @@ public class Aspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod( builder.Target, nameof(Method), args: new { T = builder.Target, x = 42} );
+        builder.IntroduceMethod( nameof(Method), args: new { T = builder.Target, x = 42 } );
     }
 
     [Template]

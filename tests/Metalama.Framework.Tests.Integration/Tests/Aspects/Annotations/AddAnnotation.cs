@@ -3,6 +3,7 @@
 #endif
 
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Annotations.AddAnnotation;
@@ -15,7 +16,7 @@ public class AddAnnotationAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.AddAnnotation( builder.Target, new MyAnnotation( "TheValue" ) );
+        builder.AddAnnotation( new MyAnnotation( "TheValue" ) );
     }
 }
 

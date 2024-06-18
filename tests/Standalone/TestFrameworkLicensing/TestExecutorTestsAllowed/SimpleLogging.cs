@@ -1,6 +1,5 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
-using Metalama.Testing.AspectTesting;
 
 namespace Metalama.Framework.Tests.TestExecutorTestsAllowed.SimpleLogging
 {

@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -16,12 +17,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.AddContract( property, nameof(Filter), ContractDirection.Both );
+                builder.With( property ).AddContract( nameof(Filter), ContractDirection.Both );
             }
 
-            var introducedField = builder.Advice.IntroduceProperty( builder.Target, nameof(IntroducedProperty) ).Declaration;
+            var introducedField = builder.IntroduceProperty( nameof(IntroducedProperty) ).Declaration;
 
-            builder.Advice.AddContract( introducedField, nameof(Filter), ContractDirection.Both );
+            builder.With( introducedField ).AddContract( nameof(Filter), ContractDirection.Both );
         }
 
         [Template]

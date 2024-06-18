@@ -1,7 +1,7 @@
 internal class TargetClass
 {
   [Test]
-  void M(int i, int j)
+  private void M(int i, int j)
   {
     if (i == 0)
     {

@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Order.InsertStatement_Initializers;
@@ -17,8 +18,8 @@ internal class Test1Attribute : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.AddInitializer( builder.Target, nameof(Template), args: new { order = 1 } );
-        builder.Advice.AddInitializer( builder.Target, nameof(Template), args: new { order = 2 } );
+        builder.AddInitializer( nameof(Template), args: new { order = 1 } );
+        builder.AddInitializer( nameof(Template), args: new { order = 2 } );
     }
 
     [Template]
@@ -32,7 +33,7 @@ internal class OverrideAttribute : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.Override( builder.Target, nameof(Template) );
+        builder.Override( nameof(Template) );
     }
 
     [Template]
@@ -47,8 +48,8 @@ internal class Test2Attribute : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.AddInitializer( builder.Target, nameof(Template), args: new { order = 1 } );
-        builder.Advice.AddInitializer( builder.Target, nameof(Template), args: new { order = 2 } );
+        builder.AddInitializer( nameof(Template), args: new { order = 1 } );
+        builder.AddInitializer( nameof(Template), args: new { order = 2 } );
     }
 
     [Template]

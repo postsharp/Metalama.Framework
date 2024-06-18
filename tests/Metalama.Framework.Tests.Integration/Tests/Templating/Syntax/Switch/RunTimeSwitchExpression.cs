@@ -3,15 +3,16 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchExpression
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var x = DateTime.Now.DayOfWeek switch
             {
@@ -19,22 +20,22 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.RunTimeSwitchEx
                 DayOfWeek.Tuesday => "Salad",
                 _ => "McDonald"
             };
-            
-            object o = new ();
-            
-            var y = o switch 
+
+            object o = new();
+
+            var y = o switch
             {
                 IEnumerable<object> enumerable when enumerable.Count() > meta.Target.Parameters.Count => -1,
                 IEnumerable<object> enumerable2 => enumerable2.Count()
             };
-            
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

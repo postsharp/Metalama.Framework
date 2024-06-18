@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -13,22 +14,22 @@ public class NewAttribute : Attribute { }
 
 public class IntroduceAttributeAspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
         foreach (var member in builder.Target.Members())
         {
-            builder.Advice.IntroduceAttribute(member, AttributeConstruction.Create(typeof(NewAttribute)));
+            builder.With( member ).IntroduceAttribute( AttributeConstruction.Create( typeof(NewAttribute) ) );
         }
     }
 }
 
 // <target>
 [IntroduceAttributeAspect]
-class IntroduceTarget
+internal class IntroduceTarget
 {
     // first
     [OldAttribute]
+
     // second
-    void M() { }
+    private void M() { }
 }
- 

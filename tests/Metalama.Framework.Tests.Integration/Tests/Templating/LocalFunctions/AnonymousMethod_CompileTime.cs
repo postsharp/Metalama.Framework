@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -10,9 +11,10 @@ internal class Aspect
     [TestTemplate]
     private dynamic? Template()
     {
-        var func = meta.CompileTime( delegate() { return "Hello, world."; }  );
+        var func = meta.CompileTime( delegate() { return "Hello, world."; } );
 
-        Console.WriteLine(func());
+        Console.WriteLine( func() );
+
         return null;
     }
 }

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -6,11 +7,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.Override(property, nameof(Override));
+                builder.With( property ).Override( nameof(Override) );
             }
         }
 
@@ -21,13 +22,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
         {
             get
             {
-                Console.WriteLine("Aspect code");
+                Console.WriteLine( "Aspect code" );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Aspect code");
+                Console.WriteLine( "Aspect code" );
                 meta.Proceed();
             }
         }

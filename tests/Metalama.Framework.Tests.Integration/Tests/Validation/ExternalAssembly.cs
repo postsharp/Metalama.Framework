@@ -5,7 +5,6 @@
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
-using Metalama.Framework.Code;
 using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Validation.ExternalAssembly;

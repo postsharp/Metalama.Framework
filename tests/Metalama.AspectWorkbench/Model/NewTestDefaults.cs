@@ -8,7 +8,8 @@ namespace Metalama.AspectWorkbench.Model
             @"using System;
 using System.Collections.Generic;
 using Metalama.Framework;
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 
 namespace $ns

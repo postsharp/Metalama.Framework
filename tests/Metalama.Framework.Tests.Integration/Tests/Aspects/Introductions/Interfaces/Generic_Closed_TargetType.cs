@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
@@ -16,17 +17,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.ImplementInterface(
-                builder.Target,
-                ((INamedType)TypeFactory.GetType(typeof(IInterface<>))).WithTypeArguments(builder.Target));
+            builder.ImplementInterface( ( (INamedType)TypeFactory.GetType( typeof(IInterface<>) ) ).WithTypeArguments( builder.Target ) );
 
-            builder.Advice.IntroduceMethod(builder.Target, nameof(Foo), args: new { T = builder.Target });
+            builder.IntroduceMethod( nameof(Foo), args: new { T = builder.Target } );
         }
 
         [Template]
-        public void Foo<[CompileTime] T>(T t) { }
+        public void Foo<[CompileTime] T>( T t ) { }
     }
 
     // <target>

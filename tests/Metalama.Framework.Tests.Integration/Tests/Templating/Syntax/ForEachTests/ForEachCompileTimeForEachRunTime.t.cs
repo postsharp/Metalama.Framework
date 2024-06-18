@@ -1,14 +1,14 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
-  global::System.Collections.Generic.IEnumerable<global::System.Int32> array = global::System.Linq.Enumerable.Range(1, 2);
-  foreach (int n in array)
+  var array = global::System.Linq.Enumerable.Range(1, 2);
+  foreach (var n in array)
   {
     if (a <= n)
     {
       global::System.Console.WriteLine("Oops a <= " + n);
     }
   }
-  foreach (int n_1 in array)
+  foreach (var n_1 in array)
   {
     if (b <= n_1)
     {

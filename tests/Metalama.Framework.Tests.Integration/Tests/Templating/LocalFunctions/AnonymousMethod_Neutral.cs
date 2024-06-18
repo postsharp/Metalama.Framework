@@ -1,4 +1,4 @@
-using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -11,7 +11,7 @@ internal class Aspect
     private dynamic? Template()
     {
         // Not supported because neutral.
-        var action = delegate() { return "Hello, world."; } ;
+        var action = delegate() { return "Hello, world."; };
 
         return null;
     }

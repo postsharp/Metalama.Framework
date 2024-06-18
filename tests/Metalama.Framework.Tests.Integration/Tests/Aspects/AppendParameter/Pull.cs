@@ -8,8 +8,7 @@ public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.IntroduceParameter(
-            builder.Target,
+        builder.IntroduceParameter(
             "p",
             typeof(int),
             TypedConstant.Create( 15 ),

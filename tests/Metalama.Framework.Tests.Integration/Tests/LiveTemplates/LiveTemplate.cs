@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.LiveTemplates.LiveTemplate

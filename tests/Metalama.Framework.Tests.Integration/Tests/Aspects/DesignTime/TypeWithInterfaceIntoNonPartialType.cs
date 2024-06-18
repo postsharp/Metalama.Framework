@@ -2,7 +2,6 @@
 // @DesignTime
 #endif
 
-using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -11,17 +10,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.TypeWithInterfa
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var memento = builder.IntroduceClass("Memento");
-        memento.ImplementInterface(typeof(IMemento));
+        var memento = builder.IntroduceClass( "Memento" );
+        memento.ImplementInterface( typeof(IMemento) );
     }
 }
 
-interface IMemento { }
+internal interface IMemento { }
 
 // <target>
 [Introduction]
-internal class TargetClass
-{
-}
+internal class TargetClass { }

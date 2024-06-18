@@ -1,4 +1,4 @@
-async Task Method(int a)
+private async Task Method(int a)
 {
   var x = default(global::System.Int32);
   await this.Method(a);

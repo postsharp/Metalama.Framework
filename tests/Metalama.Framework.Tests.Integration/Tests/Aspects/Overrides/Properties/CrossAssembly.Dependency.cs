@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.CrossAssembly;
@@ -67,7 +68,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Cross
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.OverrideAccessors( property, nameof(Template), nameof(Template) );
+                builder.With( property ).OverrideAccessors( nameof(Template), nameof(Template) );
             }
         }
 

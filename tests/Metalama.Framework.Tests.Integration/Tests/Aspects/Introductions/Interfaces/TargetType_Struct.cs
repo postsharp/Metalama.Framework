@@ -2,6 +2,7 @@
 // @RequiredConstant(ROSLYN_4_4_0_OR_GREATER)
 #endif
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -16,9 +17,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class IntroduceAspectAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
         [InterfaceMember]
@@ -29,20 +30,21 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("Introduced interface member");
+                Console.WriteLine( "Introduced interface member" );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("Introduced interface member");
+                Console.WriteLine( "Introduced interface member" );
             }
         }
 
         [InterfaceMember]
         public void IntroducedMethod()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
         [InterfaceMember]
@@ -50,12 +52,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("Introduced interface member");
+                Console.WriteLine( "Introduced interface member" );
             }
 
             remove
             {
-                Console.WriteLine("Introduced interface member");
+                Console.WriteLine( "Introduced interface member" );
             }
         }
 
@@ -78,7 +80,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     // <target>
     [IntroduceAspect]
-    public struct TargetStruct 
+    public struct TargetStruct
     {
         public int ExistingField;
 
@@ -86,7 +88,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
         public void ExistingMethod()
         {
-            Console.WriteLine("Original struct member");
+            Console.WriteLine( "Original struct member" );
         }
     }
 }

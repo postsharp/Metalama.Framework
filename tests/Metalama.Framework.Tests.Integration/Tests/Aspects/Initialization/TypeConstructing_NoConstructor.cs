@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializer( builder.Target, nameof(Template), InitializerKind.BeforeTypeConstructor );
+            builder.AddInitializer( nameof(Template), InitializerKind.BeforeTypeConstructor );
         }
 
         [Template]
@@ -21,7 +21,5 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
 
     // <target>
     [Aspect]
-    public class TargetCode
-    {
-    }
+    public class TargetCode { }
 }

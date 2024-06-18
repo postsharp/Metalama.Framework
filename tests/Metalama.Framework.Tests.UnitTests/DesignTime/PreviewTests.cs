@@ -22,14 +22,14 @@ public sealed class PreviewTests : DesignTimeTestBase
     private const string _mainProjectName = "master";
 
     public PreviewTests( ITestOutputHelper logger ) : base( logger ) { }
-    
+
     protected override void ConfigureServices( IAdditionalServiceCollection services )
     {
         base.ConfigureServices( services );
         services.AddGlobalService( provider => new TestWorkspaceProvider( provider ) );
     }
 
-    protected override TestContextOptions GetDefaultTestContextOptions() => new TestContextOptions() { CodeFormattingOptions = CodeFormattingOptions.Formatted };
+    protected override TestContextOptions GetDefaultTestContextOptions() => new() { CodeFormattingOptions = CodeFormattingOptions.Formatted };
 
     private Task<string> RunPreviewAsync(
         Dictionary<string, string> code,
@@ -82,14 +82,14 @@ public sealed class PreviewTests : DesignTimeTestBase
             ?? workspace.GetProject( _mainProjectName ).AddDocument( previewedSyntaxTreeName, string.Empty );
 
         var formattedDocument = await UserProcessTransformationPreviewService.FormatOutputAsync( document, result, default );
-        
+
         var text = await formattedDocument.GetTextAsync();
 
         var s = text.ToString();
-        
+
         // Check that the output is formatted.
         Assert.DoesNotContain( "global::", s, StringComparison.Ordinal );
-        
+
         return s;
     }
 
@@ -99,7 +99,8 @@ public sealed class PreviewTests : DesignTimeTestBase
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class MyAspect : TypeAspect
 {
@@ -121,7 +122,8 @@ class MyAspect : TypeAspect
         var masterCode = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Inheritable]
 class MyAspect : TypeAspect
 {
@@ -145,7 +147,8 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Fabrics;
 
 class MyAspect : TypeAspect
@@ -177,7 +180,8 @@ class Fabric : ProjectFabric
             ["aspect.cs"] =
                 """
 
-                using Metalama.Framework.Aspects;
+                using Metalama.Framework.Advising;
+                using Metalama.Framework.Aspects; 
                 using Metalama.Framework.Fabrics;
                 using Metalama.Framework.Code;
 
@@ -205,14 +209,15 @@ class Fabric : ProjectFabric
 
         Assert.Contains( "Field = \"TheValue\"", result, StringComparison.Ordinal );
     }
-    
+
     [Fact]
     public async Task WithTypeFabric()
     {
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class MyAspect : TypeAspect
 {
@@ -250,7 +255,8 @@ class Fabric : TypeFabric
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 namespace Ns;
 
@@ -294,7 +300,8 @@ class C {}"
         var masterCode1 = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Inheritable]
 class MyAspect : TypeAspect
 {
@@ -316,7 +323,8 @@ class MyAspect : TypeAspect
         var masterCode2 = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 [Inheritable]
 class MyAspect : TypeAspect
 {
@@ -338,7 +346,8 @@ class MyAspect : TypeAspect
         var code = new Dictionary<string, string>()
         {
             ["aspect.cs"] = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 
 class MyAspect : TypeAspect
 {

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Invokers;
 
@@ -6,7 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.RecursionInIntroduct
     internal class IntroductionAspect : TypeAspect
     {
         [Introduce]
-        public int Ackermann1(int m, int n)
+        public int Ackermann1( int m, int n )
         {
             if (m == 0)
             {
@@ -14,16 +15,16 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.RecursionInIntroduct
             }
             else if (n == 0)
             {
-                return this.Ackermann1(m - 1, 1);
+                return Ackermann1( m - 1, 1 );
             }
             else
             {
-                return this.Ackermann1(m - 1, this.Ackermann1(m, n - 1));
+                return Ackermann1( m - 1, Ackermann1( m, n - 1 ) );
             }
         }
 
         [Introduce]
-        public int Ackermann2(int m, int n)
+        public int Ackermann2( int m, int n )
         {
             if (m == 0)
             {
@@ -31,16 +32,16 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.RecursionInIntroduct
             }
             else if (n == 0)
             {
-                return meta.This.Ackermann2(m - 1, 1);
+                return meta.This.Ackermann2( m - 1, 1 );
             }
             else
             {
-                return meta.This.Ackermann2(m - 1, meta.This.Ackermann2(m, n - 1));
+                return meta.This.Ackermann2( m - 1, meta.This.Ackermann2( m, n - 1 ) );
             }
         }
 
         [Introduce]
-        public int Ackermann3(int m, int n)
+        public int Ackermann3( int m, int n )
         {
             if (m == 0)
             {
@@ -48,18 +49,16 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.RecursionInIntroduct
             }
             else if (n == 0)
             {
-                return meta.Target.Method.With(InvokerOptions.Final).Invoke(m - 1, 1);
+                return meta.Target.Method.With( InvokerOptions.Final ).Invoke( m - 1, 1 );
             }
             else
             {
-                return meta.Target.Method.With(InvokerOptions.Final).Invoke(m - 1, meta.Target.Method.With(InvokerOptions.Final).Invoke(m, n - 1));
+                return meta.Target.Method.With( InvokerOptions.Final ).Invoke( m - 1, meta.Target.Method.With( InvokerOptions.Final ).Invoke( m, n - 1 ) );
             }
         }
     }
 
     // <target>
     [IntroductionAspect]
-    internal class MyClass
-    {
-    }
+    internal class MyClass { }
 }

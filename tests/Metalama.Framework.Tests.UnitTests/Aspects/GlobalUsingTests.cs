@@ -18,7 +18,8 @@ global using static global::System.Console;
 
     private const string _code = @"
 
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;

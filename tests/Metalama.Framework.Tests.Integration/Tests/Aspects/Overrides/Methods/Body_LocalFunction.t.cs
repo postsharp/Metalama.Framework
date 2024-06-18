@@ -40,7 +40,7 @@ internal class TargetClass
   public int LocalCapture(int x)
   {
     global::System.Int32 result;
-    int y = x + 1;
+    var y = x + 1;
     result = Foo();
     int Foo()
     {

@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Initializer;
@@ -6,18 +7,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.Initia
 internal class Aspect : TypeAspect
 {
     [Introduce]
-    int i = Compute();
+    private int i = Compute();
 
     [Template]
     private static int Compute()
     {
-        Console.WriteLine("called template");
+        Console.WriteLine( "called template" );
+
         return 42;
     }
 }
 
 // <target>
 [Aspect]
-class TargetCode
-{
-}
+internal class TargetCode { }

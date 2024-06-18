@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -7,12 +8,12 @@ namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForEachTests.Fo
 #pragma warning disable CS0169
 
 [CompileTime]
-class Aspect
+internal class Aspect
 {
     [TestTemplate]
-    dynamic? Template()
+    private dynamic? Template()
     {
-        var fieldName = meta.CompileTime("");
+        var fieldName = meta.CompileTime( "" );
 
         if (meta.This.logMembers)
         {
@@ -22,15 +23,15 @@ class Aspect
             }
         }
 
-        Console.WriteLine(fieldName);
+        Console.WriteLine( fieldName );
 
         return meta.Proceed();
     }
 }
 
-class TargetCode
+internal class TargetCode
 {
-    bool logMembers;
+    private bool logMembers;
 
-    void Method() { }
+    private void Method() { }
 }

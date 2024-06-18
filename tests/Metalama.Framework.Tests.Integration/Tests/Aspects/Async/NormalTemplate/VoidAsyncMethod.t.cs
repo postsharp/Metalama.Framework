@@ -1,7 +1,7 @@
 internal class TargetCode
 {
   [Aspect]
-  async void MethodReturningVoid(int a)
+  private async void MethodReturningVoid(int a)
   {
     global::System.Console.WriteLine("Before");
     await this.MethodReturningVoid_Source(a);

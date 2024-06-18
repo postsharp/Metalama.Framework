@@ -21,20 +21,20 @@ internal class TargetClass
   {
     get
     {
-      this.MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
       return 42;
     }
     set
     {
-      this.MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
-      this.MethodWithCallerMemberName(42, "foo", 27, "bar");
+      MethodWithCallerMemberName(42, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, y: 27, name1: "OverriddenProperty", name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, name1: "foo", y: 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, name2: "OverriddenProperty");
+      MethodWithCallerMemberName(42, "foo", 27, "bar");
     }
   }
   public void MethodWithCallerMemberName(int x, [CallerMemberName] string name1 = "", int y = 0, [CallerMemberName] string name2 = "")

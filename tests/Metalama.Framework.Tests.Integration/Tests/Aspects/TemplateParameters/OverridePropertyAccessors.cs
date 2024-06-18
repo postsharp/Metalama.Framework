@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,8 +11,7 @@ public class Aspect : FieldOrPropertyAspect
     {
         base.BuildAspect( builder );
 
-        builder.Advice.OverrideAccessors(
-            builder.Target,
+        builder.OverrideAccessors(
             getTemplate: nameof(GetTemplate),
             setTemplate: nameof(SetTemplate),
             args: new { a = 5, t = builder.Target.Type } );

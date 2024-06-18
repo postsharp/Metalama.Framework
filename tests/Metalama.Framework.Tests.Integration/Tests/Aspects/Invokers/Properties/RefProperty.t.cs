@@ -1,6 +1,6 @@
 internal class TargetClass
 {
-  void M(ref int i)
+  private void M(ref int i)
   {
   }
   public int F;

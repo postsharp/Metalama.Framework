@@ -2,7 +2,6 @@
 // @OutputAllSyntaxTrees
 #endif
 
-using System;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -11,10 +10,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Inter
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        var type = builder.Advice.IntroduceClass(builder.Target.ContainingNamespace, "TestType");
-        type.ImplementInterface(typeof(ITestInterface));
+        var type = builder.With( builder.Target.ContainingNamespace ).IntroduceClass( "TestType" );
+        type.ImplementInterface( typeof(ITestInterface) );
     }
 }
 

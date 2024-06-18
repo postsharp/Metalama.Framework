@@ -55,24 +55,21 @@ internal class IntroduceMembersAttribute : TypeAspect
         var builderIds = new List<string>();
         var results = new List<IIntroductionAdviceResult<IDeclaration>>();
 
-        results.Add( builder.Advice.IntroduceMethod( builder.Target, nameof(M), buildMethod: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-        results.Add( builder.Advice.IntroduceField( builder.Target, nameof(_field), buildField: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-        results.Add( builder.Advice.IntroduceEvent( builder.Target, nameof(Event), buildEvent: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceMethod( nameof(M), buildMethod: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceField( nameof(_field), buildField: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+        results.Add( builder.IntroduceEvent( nameof(Event), buildEvent: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
+
+        results.Add( builder.IntroduceProperty( nameof(Property), buildProperty: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceProperty( builder.Target, nameof(Property), buildProperty: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
-
-        results.Add(
-            builder.Advice.IntroduceIndexer(
-                builder.Target,
+            builder.IntroduceIndexer(
                 typeof(int),
                 nameof(IndexerGet),
                 nameof(IndexerSet),
                 buildIndexer: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceUnaryOperator(
-                builder.Target,
+            builder.IntroduceUnaryOperator(
                 nameof(NotOperator),
                 builder.Target,
                 TypeFactory.GetType( typeof(bool) ),
@@ -80,8 +77,7 @@ internal class IntroduceMembersAttribute : TypeAspect
                 buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceBinaryOperator(
-                builder.Target,
+            builder.IntroduceBinaryOperator(
                 nameof(PlusOperator),
                 builder.Target,
                 builder.Target,
@@ -90,44 +86,42 @@ internal class IntroduceMembersAttribute : TypeAspect
                 buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
         results.Add(
-            builder.Advice.IntroduceConversionOperator(
-                builder.Target,
+            builder.IntroduceConversionOperator(
                 nameof(CastOperator),
                 builder.Target,
                 TypeFactory.GetType( typeof(bool) ),
                 buildOperator: builder => builderIds.Add( builder.ToSerializableId().Id ) ) );
 
-        results.Add( builder.Advice.IntroduceFinalizer( builder.Target, nameof(Finalizer) ) );
+        results.Add( builder.IntroduceFinalizer( nameof(Finalizer) ) );
 
         results.Add(
-            builder.Advice.IntroduceParameter(
-                builder.Target.Constructors.First(),
-                "x",
-                typeof(int),
-                TypedConstant.Create( 42 ),
-                pullAction: ( p, c ) =>
-                {
-                    try
+            builder.With( builder.Target.Constructors.First() )
+                .IntroduceParameter(
+                    "x",
+                    typeof(int),
+                    TypedConstant.Create( 42 ),
+                    pullAction: ( p, c ) =>
                     {
-                        builderIds.Add( p.ToSerializableId().Id );
-                    }
-                    catch (NotSupportedException ex)
-                    {
-                        builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
-                    }
+                        try
+                        {
+                            builderIds.Add( p.ToSerializableId().Id );
+                        }
+                        catch (NotSupportedException ex)
+                        {
+                            builderIds.Add( $"{ex.GetType()}: {ex.Message}" );
+                        }
 
-                    return PullAction.None;
-                } ) );
+                        return PullAction.None;
+                    } ) );
 
-        builder.Advice.IntroduceMethod(
-            builder.Target,
+        builder.IntroduceMethod(
             nameof(GetIds),
             buildMethod: builder => builder.Name = "GetBuilderIds",
             args: new { ids = builderIds.ToArray() } );
 
         var builtIds = results.Select( r => r.Declaration.ToSerializableId().Id ).ToArray();
 
-        builder.Advice.IntroduceMethod( builder.Target, nameof(GetIds), buildMethod: builder => builder.Name = "GetBuiltIds", args: new { ids = builtIds } );
+        builder.IntroduceMethod( nameof(GetIds), buildMethod: builder => builder.Name = "GetBuiltIds", args: new { ids = builtIds } );
     }
 }
 

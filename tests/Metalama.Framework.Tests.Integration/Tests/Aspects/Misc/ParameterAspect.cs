@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -9,7 +10,7 @@ public class RequiredAttribute : ParameterAspect
 {
     public override void BuildAspect( IAspectBuilder<IParameter> builder )
     {
-        builder.Advice.Override( (IMethod)builder.Target.DeclaringMember, nameof(Template), tags: new { ParameterName = builder.Target.Name } );
+        builder.With( (IMethod)builder.Target.DeclaringMember ).Override( nameof(Template), tags: new { ParameterName = builder.Target.Name } );
     }
 
     [Template]

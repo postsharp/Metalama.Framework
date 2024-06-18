@@ -1,8 +1,8 @@
-abstract class Base
+internal abstract class Base
 {
   public abstract void M([NotNull] string m);
 }
-class Target : Base
+internal class Target : Base
 {
   public override void M(string m)
   {

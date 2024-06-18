@@ -1,4 +1,5 @@
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,10 +10,11 @@ public sealed class TestAspect : OverrideMethodAspect
 {
     public override dynamic? OverrideMethod()
     {
-        _ = meta.Target.Type.Methods.Where(x => x.Name.Contains("Bar")).First().Invoke();
-        meta.Target.Type.Methods.Where(x => x.Name.Contains("Bar")).First().Invoke();
-        _ = meta.Target.Type.Methods.Where(x => x.Name.Contains("Bar")).Skip(1).First().WithTypeArguments(typeof(int)).Invoke();
-        meta.Target.Type.Methods.Where(x => x.Name.Contains("Bar")).Skip(1).First().WithTypeArguments(typeof(int)).Invoke();
+        _ = meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).First().Invoke();
+        meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).First().Invoke();
+        _ = meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).Skip( 1 ).First().WithTypeArguments( typeof(int) ).Invoke();
+        meta.Target.Type.Methods.Where( x => x.Name.Contains( "Bar" ) ).Skip( 1 ).First().WithTypeArguments( typeof(int) ).Invoke();
+
         return meta.Proceed();
     }
 }
@@ -31,14 +33,12 @@ public partial class TestClass : ITestInterface
     {
         return 42;
     }
+
     int ITestInterface.Bar<T>()
     {
         return 42;
     }
 
     [TestAspect]
-    public void Foo()
-    {
-    }
+    public void Foo() { }
 }
-

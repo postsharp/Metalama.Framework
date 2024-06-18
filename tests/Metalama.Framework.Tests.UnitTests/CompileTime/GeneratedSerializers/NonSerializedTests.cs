@@ -12,7 +12,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
         {
             // Verifies that serializable type with a non-serialized field can be serialized and deserialized.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -54,7 +55,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that serializable type with a non-serialized property can be serialized and deserialized.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -96,7 +98,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that serializable type with a non-serialized auto-property backing field can be serialized and deserialized.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -138,7 +141,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that serializable type with a static property can be serialized and deserialized.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -178,7 +182,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that serializable type with a static field can be serialized and deserialized.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable
@@ -218,7 +223,8 @@ public class A : ICompileTimeSerializable
         {
             // Verifies that serializable type with a non-auto property can be serialized and deserialized and the property is not used.
             const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Serialization;
 [assembly: CompileTime]
 public class A : ICompileTimeSerializable

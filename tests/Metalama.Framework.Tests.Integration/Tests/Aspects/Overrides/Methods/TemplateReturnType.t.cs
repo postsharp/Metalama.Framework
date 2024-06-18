@@ -174,7 +174,7 @@ internal class TargetClass
     global::System.Console.WriteLine("dynamic");
     global::System.Console.WriteLine("Task<dynamic>");
     Console.WriteLine("This is the original method.");
-    return new(42);
+    return new ValueTask<int>(42);
   }
   [Dynamic]
   [TaskDynamic]

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using System;
 using Metalama.Framework.Engine.Templating;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.CSharpSyntax.CompileTi
 
             var b = a with { Property1 = 2 };
 
-            Console.WriteLine(a.Property1);
+            Console.WriteLine( a.Property1 );
 
             var result = meta.Proceed();
 

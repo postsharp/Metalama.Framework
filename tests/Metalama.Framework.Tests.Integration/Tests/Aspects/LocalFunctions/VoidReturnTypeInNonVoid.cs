@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.VoidReturnTypeInNonVoid;
@@ -12,8 +13,8 @@ public class Override : OverrideMethodAspect
         }
 
         LocalFunction();
-        return default;
 
+        return default;
     }
 }
 

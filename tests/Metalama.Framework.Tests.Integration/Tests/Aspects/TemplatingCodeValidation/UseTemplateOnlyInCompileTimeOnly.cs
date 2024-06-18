@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
@@ -9,29 +10,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 [CompileTime]
 internal class C
 {
-    private void M(IMethodInvoker invoker)
+    private void M( IMethodInvoker invoker )
     {
         meta.Proceed();
 
         meta.ProceedAsync();
 
-        meta.InsertStatement(ExpressionFactory.Capture(42));
+        meta.InsertStatement( ExpressionFactory.Capture( 42 ) );
 
-        invoker.With("");
+        invoker.With( "" );
     }
 
-    private IExpression GetLoggingExpression(IParameter parameter)
+    private IExpression GetLoggingExpression( IParameter parameter )
     {
         var builder = new ExpressionBuilder();
 
-        builder.AppendTypeName(typeof(Console));
-        builder.AppendVerbatim(".WriteLine(\"this: {0}, {1}: {2}\", ");
-        builder.AppendExpression(meta.This);
-        builder.AppendVerbatim(", ");
-        builder.AppendExpression(parameter.Name);
-        builder.AppendVerbatim(", ");
-        builder.AppendExpression(parameter.Value);
-        builder.AppendVerbatim(")");
+        builder.AppendTypeName( typeof(Console) );
+        builder.AppendVerbatim( ".WriteLine(\"this: {0}, {1}: {2}\", " );
+        builder.AppendExpression( meta.This );
+        builder.AppendVerbatim( ", " );
+        builder.AppendExpression( parameter.Name );
+        builder.AppendVerbatim( ", " );
+        builder.AppendExpression( parameter.Value );
+        builder.AppendVerbatim( ")" );
 
         return builder.ToExpression();
     }

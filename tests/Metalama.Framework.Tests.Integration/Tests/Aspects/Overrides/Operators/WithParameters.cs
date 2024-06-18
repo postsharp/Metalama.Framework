@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -22,7 +23,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.WithPa
                     _ => throw new Exception()
                 };
 
-                builder.Advice.Override( o, templateName );
+                builder.With( o ).Override( templateName );
             }
         }
 

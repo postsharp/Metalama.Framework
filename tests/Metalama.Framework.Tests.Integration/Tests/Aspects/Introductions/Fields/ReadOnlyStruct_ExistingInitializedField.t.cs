@@ -5,7 +5,7 @@ internal readonly struct TargetStruct
   public readonly int _fieldInitializedByExpression = 42;
   public TargetStruct()
   {
-    this._fieldInitializedByCtor = 42;
+    _fieldInitializedByCtor = 42;
   }
   public readonly global::System.Int32 IntroducedField;
   public readonly global::System.Int32 IntroducedField_Initializer = (global::System.Int32)42;

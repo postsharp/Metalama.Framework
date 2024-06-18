@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -15,31 +16,27 @@ public class MyAspect : TypeAspect
     {
         foreach (var constructor in builder.Target.Constructors)
         {
-            builder.Advice.IntroduceParameter( constructor, "p", typeof(int), TypedConstant.Create( 15 ) );
+            builder.With( constructor ).IntroduceParameter( "p", typeof(int), TypedConstant.Create( 15 ) );
         }
     }
 }
 
-public class A(int x)
+public class A( int x )
 {
     public int X { get; set; } = x;
 }
 
 // <target>
 [MyAspect]
-public partial class C
-{
-}
+public partial class C { }
 
 // <target>
-public partial class C(int x) : A(42)
+public partial class C( int x ) : A( 42 )
 {
     public int Y { get; } = x;
 }
 
 // <target>
-public partial class C
-{
-}
+public partial class C { }
 
 #endif

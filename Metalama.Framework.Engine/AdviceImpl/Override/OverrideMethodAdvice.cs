@@ -46,8 +46,7 @@ internal sealed class OverrideMethodAdvice : OverrideMemberAdvice<IMethod, IMeth
                 break;
 
             default:
-                addTransformation(
-                    new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
+                addTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this._boundTemplate, this.Tags ) );
 
                 break;
         }

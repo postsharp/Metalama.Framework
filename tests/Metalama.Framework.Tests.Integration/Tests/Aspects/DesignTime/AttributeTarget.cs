@@ -3,6 +3,7 @@
 #endif
 
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.AttributeTarget
@@ -16,13 +17,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.AttributeTarget
     }
 
     [RunTimeOrCompileTime]
-    public class TestAttribute : Attribute
-    {
-    }
+    public class TestAttribute : Attribute { }
 
     // <target>
     [Introduction]
-    internal partial class TargetClass
-    {
-    }
+    internal partial class TargetClass { }
 }

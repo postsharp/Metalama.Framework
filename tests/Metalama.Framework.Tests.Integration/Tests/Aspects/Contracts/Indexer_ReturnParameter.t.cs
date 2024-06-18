@@ -7,7 +7,7 @@ internal class Target
     get
     {
       global::System.Int32 returnValue;
-      System.Console.WriteLine("Original body");
+      Console.WriteLine("Original body");
       returnValue = 42;
       if (returnValue == 0)
       {
@@ -22,7 +22,7 @@ internal class Target
     get
     {
       global::System.Int32 returnValue;
-      System.Console.WriteLine("Original body");
+      Console.WriteLine("Original body");
       returnValue = 42;
       if (returnValue == 0)
       {

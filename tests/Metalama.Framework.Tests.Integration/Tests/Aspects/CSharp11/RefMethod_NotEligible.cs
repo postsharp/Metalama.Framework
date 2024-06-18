@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_4_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp11.RefMethod_NotEligible;
@@ -21,7 +22,7 @@ internal class C
     private int _x;
 
     [TheAspect]
-    public ref int GetX() => ref this._x;
+    public ref int GetX() => ref _x;
 }
 
 #endif

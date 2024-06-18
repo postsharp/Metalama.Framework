@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 
@@ -10,14 +11,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
      * Tests attributes of implicit members.
      */
 
-    public class TestInterfaceAttribute : Attribute 
-    { 
-        public TestInterfaceAttribute(string? value = null) { }
+    public class TestInterfaceAttribute : Attribute
+    {
+        public TestInterfaceAttribute( string? value = null ) { }
     }
 
     public class TestAspectAttribute : Attribute
     {
-        public TestAspectAttribute(string? value = null) { }
+        public TestAspectAttribute( string? value = null ) { }
     }
 
     public interface IInterface
@@ -26,10 +27,22 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         void Method();
 
         [TestInterface]
-        int Property { [TestInterface("Getter")] get; [TestInterface("Setter")] set; }
+        int Property
+        {
+            [TestInterface( "Getter" )]
+            get;
+            [TestInterface( "Setter" )]
+            set;
+        }
 
         [TestInterface]
-        int AutoProperty { [TestInterface("Getter")] get; [TestInterface("Setter")] set; }
+        int AutoProperty
+        {
+            [TestInterface( "Getter" )]
+            get;
+            [TestInterface( "Setter" )]
+            set;
+        }
 
         [TestInterface]
         event EventHandler? EventField;
@@ -40,57 +53,54 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public class IntroductionAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> aspectBuilder)
+        public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [InterfaceMember( IsExplicit = false )]
         [TestAspect]
         public void Method()
         {
-            Console.WriteLine("Introduced interface member");
+            Console.WriteLine( "Introduced interface member" );
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [InterfaceMember( IsExplicit = false )]
         [TestAspect]
         public int Property
         {
-            [TestAspect("Getter")]
+            [TestAspect( "Getter" )]
             get
             {
                 return 42;
             }
 
-            [TestAspect("Setter")]
-            set
-            {
-            }
+            [TestAspect( "Setter" )]
+            set { }
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [InterfaceMember( IsExplicit = false )]
         [TestAspect]
         public int AutoProperty
         {
-            [TestAspect("Getter")]
+            [TestAspect( "Getter" )]
             get;
-
-            [TestAspect("Setter")]
-            set; 
+            [TestAspect( "Setter" )]
+            set;
         }
 
-        [InterfaceMember(IsExplicit = false)]
+        [InterfaceMember( IsExplicit = false )]
         [TestAspect]
         public event EventHandler? EventField;
 
-        [InterfaceMember(IsExplicit = false)]
+        [InterfaceMember( IsExplicit = false )]
         [TestAspect]
         public event EventHandler? Event
         {
-            [TestAspect("Adder")]
+            [TestAspect( "Adder" )]
             add { }
 
-            [TestAspect("Remover")]
+            [TestAspect( "Remover" )]
             remove { }
         }
     }

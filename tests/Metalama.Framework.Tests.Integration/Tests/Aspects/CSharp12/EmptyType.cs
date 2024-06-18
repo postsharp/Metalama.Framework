@@ -5,31 +5,32 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.EmptyType;
 
-class TheAspect : TypeAspect
+internal class TheAspect : TypeAspect
 {
     [Introduce]
-    void M() { }
+    private void M() { }
 }
 
 // <target>
 [TheAspect]
-class C;
+internal class C;
 
 // <target>
 [TheAspect]
-struct S;
+internal struct S;
 
 // Not new in C# 12, included for completeness.
 // <target>
 [TheAspect]
-record R;
+internal record R;
 
 // <target>
 [TheAspect]
-interface I;
+internal interface I;
 
 #endif

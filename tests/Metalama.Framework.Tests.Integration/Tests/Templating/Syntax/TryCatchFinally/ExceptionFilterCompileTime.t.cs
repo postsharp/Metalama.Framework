@@ -1,6 +1,6 @@
-int Method()
+private int Method()
 {
-  int b = 0;
+  var b = 0;
   try
   {
     // comment

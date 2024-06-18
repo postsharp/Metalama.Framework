@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.I
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.ImplementInterface( builder.Target, (INamedType)TypeFactory.GetType( typeof(IntroducedInterface) ) );
+            builder.ImplementInterface( (INamedType)TypeFactory.GetType( typeof(IntroducedInterface) ) );
 
             builder.Outbound.SelectMany( x => x.Methods ).AddAspect( x => new OverrideAttribute() );
         }

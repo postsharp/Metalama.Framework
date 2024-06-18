@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,17 +9,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParamet
 
 public class Aspect : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.IntroduceEvent(builder.Target, "Event", nameof(Template), nameof(Template), args: new { T = typeof(EventHandler), x = 42 });
+        builder.IntroduceEvent( "Event", nameof(Template), nameof(Template), args: new { T = typeof(EventHandler), x = 42 } );
     }
 
     [Template]
-    private void Template<[CompileTime] T>( [CompileTime] int x, T p) where T : class
-    {
-    }
+    private void Template<[CompileTime] T>( [CompileTime] int x, T p ) where T : class { }
 }
 
 // <target>

@@ -21,8 +21,9 @@ public static class ReflectionExtensions
     /// </summary>
     public static IExpression? AsExpression( this ParameterInfo parameterInfo ) => parameterInfo as IExpression;
 
-    private static IExpression Throw( object obj ) => throw new InvalidOperationException(
-        $"Cannot convert an instance of type {obj?.GetType().Name} to a run-time expression. If you are attempting to use a run-time expression as IExpression in compile-time code, that is not supported." );
+    private static IExpression Throw( object obj )
+        => throw new InvalidOperationException(
+            $"Cannot convert an instance of type {obj?.GetType().Name} to a run-time expression. If you are attempting to use a run-time expression as IExpression in compile-time code, that is not supported." );
 
     /// <summary>
     /// Returns the <see cref="IExpression"/> representation of the given <see cref="MemberInfo"/>, when available, or throws an exception.

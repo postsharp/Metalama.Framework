@@ -1,25 +1,27 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion.PartiallyQualified.ChildNs;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
     namespace PartiallyQualified
     {
         [CompileTime]
-        class Aspect
+        internal class Aspect
         {
             [TestTemplate]
-            dynamic? Template()
+            private dynamic? Template()
             {
-                var c = new ChildNs.ChildClass();
+                var c = new ChildClass();
 
                 return meta.Proceed();
             }
         }
 
-        class TargetCode
+        internal class TargetCode
         {
-            int Method(int a)
+            private int Method( int a )
             {
                 return a;
             }
@@ -27,9 +29,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
 
         namespace ChildNs
         {
-            class ChildClass
-            {
-            }
+            internal class ChildClass { }
         }
     }
 }

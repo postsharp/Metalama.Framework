@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
 using System;
@@ -8,22 +9,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30972
 {
     public class TestAspect : OverrideFieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            base.BuildAspect(builder);
+            base.BuildAspect( builder );
         }
 
         public override dynamic? OverrideProperty
         {
             get
             {
-                Console.WriteLine("Aspect");
+                Console.WriteLine( "Aspect" );
+
                 return meta.Proceed();
             }
 
             set
             {
-                Console.WriteLine("Aspect");
+                Console.WriteLine( "Aspect" );
                 meta.Proceed();
             }
         }
@@ -31,9 +33,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30972
 
     public class FieldsFabric : ProjectFabric
     {
-        public override void AmendProject(IProjectAmender amender)
+        public override void AmendProject( IProjectAmender amender )
         {
-            amender.SelectMany(p => p.Types.SelectMany(t => t.Fields)).AddAspect<TestAspect>();
+            amender.SelectMany( p => p.Types.SelectMany( t => t.Fields ) ).AddAspect<TestAspect>();
         }
     }
 

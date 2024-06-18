@@ -1,4 +1,4 @@
-string Method(object a, object bb)
+private string Method(object a, object bb)
 {
   global::System.Console.WriteLine("{0} = {1}", "a", a);
   global::System.Console.WriteLine("{0} = {1}", "bb", bb);

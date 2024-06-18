@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,20 +7,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Constructors
 
 public class IntroductionAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceConstructor(builder.Target, nameof(Constructor), args: new { S = typeof(int), x = 42 });
+        builder.IntroduceConstructor( nameof(Constructor), args: new { S = typeof(int), x = 42 } );
     }
 
     [Template]
-    [Foo(1)]
-    public void Constructor<[CompileTime] S>([CompileTime] int x, [Foo(2)] int y, [Foo(3)] int z)
+    [Foo( 1 )]
+    public void Constructor<[CompileTime] S>( [CompileTime] int x, [Foo( 2 )] int y, [Foo( 3 )] int z )
     {
-        Console.WriteLine("This is introduced constructor.");
+        Console.WriteLine( "This is introduced constructor." );
     }
 }
 
-public class FooAttribute : Attribute 
+public class FooAttribute : Attribute
 {
-    public FooAttribute(int x) { }
+    public FooAttribute( int x ) { }
 }

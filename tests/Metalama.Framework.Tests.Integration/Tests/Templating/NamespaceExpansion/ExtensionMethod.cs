@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -8,10 +9,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
     namespace ExtensionMethod
     {
         [CompileTime]
-        class Aspect
+        internal class Aspect
         {
             [TestTemplate]
-            dynamic? Template()
+            private dynamic? Template()
             {
                 var list = new List<int>();
 
@@ -19,18 +20,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
                 var max = list.Max();
 
                 // Constant argument.
-                var take = list.Take(1);
+                var take = list.Take( 1 );
 
                 // Dynamic argument.
-                var take2 = list.Take((int)meta.Target.Parameters[0].Value);
+                var take2 = list.Take( (int)meta.Target.Parameters[0].Value );
 
                 return meta.Proceed();
             }
         }
 
-        class TargetCode
+        internal class TargetCode
         {
-            int Method(int a)
+            private int Method( int a )
             {
                 return a;
             }

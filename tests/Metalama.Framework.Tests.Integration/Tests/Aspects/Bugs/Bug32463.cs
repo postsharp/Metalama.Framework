@@ -17,20 +17,20 @@ public class BeforeCtorAttribute : TypeAspect
     [Introduce]
     private int f;
 
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.AddInitializer(builder.Target, nameof(this.BeforeInstanceConstructor), InitializerKind.BeforeInstanceConstructor);
+        builder.AddInitializer( nameof(BeforeInstanceConstructor), InitializerKind.BeforeInstanceConstructor );
     }
 
     [Template]
     private void BeforeInstanceConstructor()
     {
-        Console.WriteLine("before ctor");
+        Console.WriteLine( "before ctor" );
     }
 }
 
 // <target>
 [BeforeCtor]
-struct S { }
+internal struct S { }

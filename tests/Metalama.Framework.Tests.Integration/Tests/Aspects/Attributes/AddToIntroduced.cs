@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -33,27 +34,27 @@ internal class AddAttributeAspect : TypeAspect
 
         foreach (var field in builder.Target.Fields)
         {
-            builder.Advice.IntroduceAttribute( field, attribute );
+            builder.With( field ).IntroduceAttribute( attribute );
         }
 
         foreach (var property in builder.Target.Properties)
         {
-            builder.Advice.IntroduceAttribute( property, attribute );
+            builder.With( property ).IntroduceAttribute( attribute );
         }
 
         foreach (var @event in builder.Target.Events)
         {
-            builder.Advice.IntroduceAttribute( @event, attribute );
+            builder.With( @event ).IntroduceAttribute( attribute );
         }
 
         foreach (var method in builder.Target.Methods)
         {
-            builder.Advice.IntroduceAttribute( method, attribute );
-            builder.Advice.IntroduceAttribute( method.ReturnParameter, attribute );
+            builder.With( method ).IntroduceAttribute( attribute );
+            builder.With( method.ReturnParameter ).IntroduceAttribute( attribute );
 
             foreach (var parameter in method.Parameters)
             {
-                builder.Advice.IntroduceAttribute( parameter, attribute );
+                builder.With( parameter ).IntroduceAttribute( attribute );
             }
         }
     }

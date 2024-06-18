@@ -1,4 +1,4 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
   var x = new
   {

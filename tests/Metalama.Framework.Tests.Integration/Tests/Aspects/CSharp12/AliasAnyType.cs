@@ -4,6 +4,7 @@
 
 #if ROSLYN_4_8_0_OR_GREATER
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using MyTuple = (int, int Name);
@@ -13,29 +14,27 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.CSharp12.AliasAnyTy
 
 public class TheAspect : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.Override(builder.Target, nameof(M));
+        builder.Override( nameof(M) );
     }
 
     [CompileTime]
-    void CompileTimeMethod(MyTuple tuple) { }
+    private void CompileTimeMethod( MyTuple tuple ) { }
 
     [Template]
-    static void M(MyTuple tuple) => meta.Proceed();
+    private static void M( MyTuple tuple ) => meta.Proceed();
 
     [Introduce]
-    static void Introduced(MyTuple tuple) { }
+    private static void Introduced( MyTuple tuple ) { }
 }
 
 public class C
 {
     [TheAspect]
-    static unsafe void M(MyTuple tuple, IntPointer ptr)
-    {
-    }
+    private static unsafe void M( MyTuple tuple, IntPointer ptr ) { }
 }
 
 #endif

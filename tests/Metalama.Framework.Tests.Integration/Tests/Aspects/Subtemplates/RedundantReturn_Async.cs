@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Subtemplates.RedundantReturn_Async;
@@ -13,20 +14,23 @@ internal class Aspect : OverrideMethodAspect
     {
         CalledTemplateTask();
         CalledTemplateValueTask();
+
         return default;
     }
 
     [Template]
     private async Task CalledTemplateTask()
     {
-        Console.WriteLine("Task");
+        Console.WriteLine( "Task" );
+
         return;
     }
 
     [Template]
     private async ValueTask CalledTemplateValueTask()
     {
-        Console.WriteLine("ValueTask");
+        Console.WriteLine( "ValueTask" );
+
         return;
     }
 }
@@ -35,7 +39,5 @@ internal class Aspect : OverrideMethodAspect
 internal class TargetCode
 {
     [Aspect]
-    private void Method()
-    {
-    }
+    private void Method() { }
 }

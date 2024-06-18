@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -10,7 +11,7 @@ public class DerivedAspect : BaseAspect
 {
     public override void BuildEligibility( IEligibilityBuilder<IParameter> builder )
     {
-        base.BuildEligibility(builder);
+        base.BuildEligibility( builder );
     }
 
     public override void Validate( dynamic? value )

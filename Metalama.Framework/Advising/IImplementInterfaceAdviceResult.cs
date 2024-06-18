@@ -35,5 +35,5 @@ public interface IImplementInterfaceAdviceResult : IAdviceResult
     /// Gets an <see cref="IAdviser{T}"/> allowing to introduce explicit members to the primary implemented interface.
     /// For introducing memebers to its base interfaces, use the <see cref="Interfaces"/> property.
     /// </summary>
-    IAdviser<INamedType> ExplicitImplementation { get; }
+    IInterfaceImplementationAdviser ExplicitMembers { get; }
 }

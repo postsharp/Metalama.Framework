@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 using MyMath = System.Math;
@@ -8,20 +9,20 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.Alias
     namespace UsingStatic
     {
         [CompileTime]
-        class Aspect
+        internal class Aspect
         {
             [TestTemplate]
-            dynamic? Template()
+            private dynamic? Template()
             {
-                Console.Write(MyMath.PI);
+                Console.Write( MyMath.PI );
 
                 return meta.Proceed();
             }
         }
 
-        class TargetCode
+        internal class TargetCode
         {
-            int Method(int a)
+            private int Method( int a )
             {
                 return a;
             }

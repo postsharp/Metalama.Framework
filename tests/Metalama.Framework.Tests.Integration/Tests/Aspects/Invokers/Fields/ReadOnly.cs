@@ -6,29 +6,28 @@ using System;
 using System.Linq;
 using Metalama.Framework.Code.Invokers;
 
-[assembly: AspectOrder( 
-    AspectOrderDirection.CompileTime, 
+[assembly: AspectOrder(
+    AspectOrderDirection.CompileTime,
     typeof(IntroduceFieldAttribute),
-    typeof(InvokeBeforeAttribute), 
-    typeof(OverrideFieldAttribute), 
-    typeof(InvokeAfterAttribute))]
+    typeof(InvokeBeforeAttribute),
+    typeof(OverrideFieldAttribute),
+    typeof(InvokeAfterAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.ReadOnly;
 
 /*
  * Tests invokers targeting an read-only field.
  */
-
 #pragma warning disable CS0169, CS0649
 
 public class IntroduceFieldAttribute : TypeAspect
 {
-    public override void BuildAspect(IAspectBuilder<INamedType> builder)
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.IntroduceField(nameof(FieldTemplate), buildField: f => f.Name = "IntroducedField");
-        var f = builder.IntroduceField(nameof(FieldTemplate), buildField: f => f.Name = "OverriddenIntroducedField");
-        
-        builder.With<IField>(f.Declaration).Outbound.AddAspect<OverrideFieldAttribute>();
+        builder.IntroduceField( nameof(FieldTemplate), buildField: f => f.Name = "IntroducedField" );
+        var f = builder.IntroduceField( nameof(FieldTemplate), buildField: f => f.Name = "OverriddenIntroducedField" );
+
+        builder.With<IField>( f.Declaration ).Outbound.AddAspect<OverrideFieldAttribute>();
     }
 
     [Template]
@@ -37,52 +36,54 @@ public class IntroduceFieldAttribute : TypeAspect
 
 public class OverrideFieldAttribute : OverrideFieldOrPropertyAspect
 {
-    public override dynamic? OverrideProperty 
-    { 
+    public override dynamic? OverrideProperty
+    {
         get
         {
             Console.WriteLine( "Overridden" );
+
             return meta.Proceed();
         }
 
         set
         {
-            Console.WriteLine("Overridden");
+            Console.WriteLine( "Overridden" );
             meta.Proceed();
         }
     }
 }
+
 public class InvokeBeforeAttribute : ConstructorAspect
 {
-    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+    public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.Override(builder.Target, nameof(Template));
+        builder.Override( nameof(Template) );
     }
 
     [Template]
     public void Template()
     {
-        meta.InsertComment("--- Before ---");
+        meta.InsertComment( "--- Before ---" );
 
-        meta.InsertComment("Base");
+        meta.InsertComment( "Base" );
 
         foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
-            fieldOrProperty.With(InvokerOptions.Base).Value = 42;
+            fieldOrProperty.With( InvokerOptions.Base ).Value = 42;
         }
 
-        meta.InsertComment("Current");
+        meta.InsertComment( "Current" );
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
-            fieldOrProperty.With(InvokerOptions.Current).Value = 42;
+            fieldOrProperty.With( InvokerOptions.Current ).Value = 42;
         }
 
-        meta.InsertComment("Final");
+        meta.InsertComment( "Final" );
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
-            fieldOrProperty.With(InvokerOptions.Final).Value = 42;
+            fieldOrProperty.With( InvokerOptions.Final ).Value = 42;
         }
 
         meta.Proceed();
@@ -91,9 +92,9 @@ public class InvokeBeforeAttribute : ConstructorAspect
 
 public class InvokeAfterAttribute : ConstructorAspect
 {
-    public override void BuildAspect(IAspectBuilder<IConstructor> builder)
+    public override void BuildAspect( IAspectBuilder<IConstructor> builder )
     {
-        builder.Advice.Override(builder.Target, nameof(Template));
+        builder.Override( nameof(Template) );
     }
 
     [Template]
@@ -101,27 +102,27 @@ public class InvokeAfterAttribute : ConstructorAspect
     {
         meta.Proceed();
 
-        meta.InsertComment("--- After ---");
+        meta.InsertComment( "--- After ---" );
 
-        meta.InsertComment("Base");
+        meta.InsertComment( "Base" );
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
-            fieldOrProperty.With(InvokerOptions.Base).Value = 42;
+            fieldOrProperty.With( InvokerOptions.Base ).Value = 42;
         }
 
-        meta.InsertComment("Current");
+        meta.InsertComment( "Current" );
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
-            fieldOrProperty.With(InvokerOptions.Current).Value = 42;
+            fieldOrProperty.With( InvokerOptions.Current ).Value = 42;
         }
 
-        meta.InsertComment("Final");
+        meta.InsertComment( "Final" );
 
-        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy(f => f.Name))
+        foreach (var fieldOrProperty in meta.Target.Constructor.DeclaringType.FieldsAndProperties.OrderBy( f => f.Name ))
         {
-            fieldOrProperty.With(InvokerOptions.Final).Value = 42;
+            fieldOrProperty.With( InvokerOptions.Final ).Value = 42;
         }
     }
 }
@@ -137,7 +138,5 @@ public class TestClass
 
     [InvokeBefore]
     [InvokeAfter]
-    public TestClass()
-    {
-    }
+    public TestClass() { }
 }

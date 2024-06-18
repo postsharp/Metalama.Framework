@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Runtime.CompilerServices;
@@ -14,16 +15,17 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
 
     public class OverrideAttribute : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advice.Override(builder.Target, nameof(Override));
-            builder.Advice.Override(builder.Target, nameof(Override2));
+            builder.Override( nameof(Override) );
+            builder.Override( nameof(Override2) );
         }
 
         [Template]
         public dynamic? Override()
         {
-            Console.WriteLine("This is the overridden method.");
+            Console.WriteLine( "This is the overridden method." );
+
             return meta.Proceed();
         }
 
@@ -32,7 +34,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
         {
             // Block inlining.
             _ = meta.Proceed();
-            Console.WriteLine("This is the overridden method.");
+            Console.WriteLine( "This is the overridden method." );
+
             return meta.Proceed();
         }
     }
@@ -41,29 +44,29 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Oper
     internal class TargetClass
     {
         [Override]
-        public static int operator -(TargetClass x)
+        public static int operator -( TargetClass x )
         {
-            MethodWithCallerMemberName(42);
-            MethodWithCallerMemberName(42, y: 27);
-            MethodWithCallerMemberName(42, name1: "foo", y: 27);
-            MethodWithCallerMemberName(42, "foo", 27);
-            MethodWithCallerMemberName(42, "foo", 27, "bar");
+            MethodWithCallerMemberName( 42 );
+            MethodWithCallerMemberName( 42, y: 27 );
+            MethodWithCallerMemberName( 42, name1: "foo", y: 27 );
+            MethodWithCallerMemberName( 42, "foo", 27 );
+            MethodWithCallerMemberName( 42, "foo", 27, "bar" );
+
             return 42;
         }
 
         [Override]
-        public static implicit operator int (TargetClass x)
+        public static implicit operator int( TargetClass x )
         {
-            MethodWithCallerMemberName(42);
-            MethodWithCallerMemberName(42, y: 27);
-            MethodWithCallerMemberName(42, name1: "foo", y: 27);
-            MethodWithCallerMemberName(42, "foo", 27);
-            MethodWithCallerMemberName(42, "foo", 27, "bar");
+            MethodWithCallerMemberName( 42 );
+            MethodWithCallerMemberName( 42, y: 27 );
+            MethodWithCallerMemberName( 42, name1: "foo", y: 27 );
+            MethodWithCallerMemberName( 42, "foo", 27 );
+            MethodWithCallerMemberName( 42, "foo", 27, "bar" );
+
             return 42;
         }
 
-        public static void MethodWithCallerMemberName(int x, [CallerMemberName]string name1 = "", int y = 0, [CallerMemberName] string name2 = "")
-        {
-        }
+        public static void MethodWithCallerMemberName( int x, [CallerMemberName] string name1 = "", int y = 0, [CallerMemberName] string name2 = "" ) { }
     }
 }

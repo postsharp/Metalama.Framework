@@ -1,7 +1,7 @@
 internal class TargetClass
 {
   [Test]
-  int M(int i, int j) => i + j;
+  private int M(int i, int j) => i + j;
   public global::System.Func<global::System.Object?, global::System.Object? [], global::System.Object?> GetMethodInvokerDelegate()
   {
     return (global::System.Func<global::System.Object?, global::System.Object? [], global::System.Object?>)Invoke;

@@ -1,34 +1,34 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.New.CompileTimeNewClass
 {
-
     [CompileTime]
-    class CompileTimeClass
+    internal class CompileTimeClass
     {
         public string String = "string";
     }
-    
-    class Aspect
+
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var c = meta.CompileTime(new CompileTimeClass());
-            Console.WriteLine(c.String);
+            var c = meta.CompileTime( new CompileTimeClass() );
+            Console.WriteLine( c.String );
 
             var c1 = new CompileTimeClass();
-            Console.WriteLine(c1.String);
-            
+            Console.WriteLine( c1.String );
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -1,9 +1,6 @@
-﻿using System;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Types.Abstract;
 

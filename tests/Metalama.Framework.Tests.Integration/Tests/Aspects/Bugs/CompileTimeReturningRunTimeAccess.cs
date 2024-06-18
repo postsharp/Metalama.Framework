@@ -1,36 +1,37 @@
 using System;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.CompileTimeReturningRunTimeAccess;
 
-class Aspect : PropertyAspect
+internal class Aspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.OverrideAccessors(builder.Target, nameof(OverrideGetter));
+        builder.OverrideAccessors( nameof(OverrideGetter) );
     }
 
     [Template]
     private dynamic? OverrideGetter()
     {
-        var field = (meta.Target.Property.ToFieldOrPropertyInfo().GetCustomAttributes(true).SingleOrDefault(x => x is IEntityField) as IEntityField)
-            ?? throw new Exception("Unable to retrieve field info.");
+        var field = ( meta.Target.Property.ToFieldOrPropertyInfo().GetCustomAttributes( true ).SingleOrDefault( x => x is IEntityField ) as IEntityField )
+                    ?? throw new Exception( "Unable to retrieve field info." );
 
-        Console.WriteLine(field);
+        Console.WriteLine( field );
 
         return meta.Proceed();
     }
 }
 
-interface IEntityField { }
+internal interface IEntityField { }
 
-class EntityFieldAttribute : Attribute, IEntityField { }
+internal class EntityFieldAttribute : Attribute, IEntityField { }
 
-class Target
+internal class Target
 {
     // <target>
     [Aspect]

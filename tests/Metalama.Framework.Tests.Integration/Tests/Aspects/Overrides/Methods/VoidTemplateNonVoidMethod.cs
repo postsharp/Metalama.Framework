@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -6,22 +7,23 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.V
 
 public class OverrideAttribute : MethodAspect
 {
-    public override void BuildAspect(IAspectBuilder<IMethod> builder)
+    public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.Override(builder.Target, nameof(OverrideMethod));
+        builder.Override( nameof(OverrideMethod) );
     }
 
     [Template]
-    public void OverrideMethod(dynamic arg)
+    public void OverrideMethod( dynamic arg )
     {
         if (arg == null)
         {
-            Console.WriteLine("error");
-            meta.Return(default);
+            Console.WriteLine( "error" );
+            meta.Return( default );
         }
-        meta.Return(meta.Proceed());
+
+        meta.Return( meta.Proceed() );
     }
 }
 
@@ -29,15 +31,16 @@ public class OverrideAttribute : MethodAspect
 internal class TargetClass
 {
     [Override]
-    void VoidMethod(object arg)
+    private void VoidMethod( object arg )
     {
-        Console.WriteLine("void method");
+        Console.WriteLine( "void method" );
     }
 
     [Override]
-    int IntMethod(object arg)
+    private int IntMethod( object arg )
     {
-        Console.WriteLine("int method");
+        Console.WriteLine( "int method" );
+
         return 42;
     }
 }

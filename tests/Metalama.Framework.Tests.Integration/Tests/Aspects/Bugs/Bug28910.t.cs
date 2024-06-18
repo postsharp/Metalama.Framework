@@ -1,4 +1,4 @@
-class EmptyOverrideFieldOrPropertyExample
+internal class EmptyOverrideFieldOrPropertyExample
 {
   private global::System.Int32 _field1;
   [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug28910.EmptyOverrideFieldOrPropertyAttribute]

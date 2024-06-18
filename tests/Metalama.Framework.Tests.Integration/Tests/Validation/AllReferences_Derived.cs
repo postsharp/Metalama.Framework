@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
@@ -22,7 +23,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences_Derived
         {
             builder
                 .Outbound
-                .ValidateOutboundReferences( Validate, ReferenceGranularity.ParameterOrAttribute, ReferenceKinds.All, ReferenceValidationOptions.IncludeDerivedTypes );
+                .ValidateOutboundReferences(
+                    Validate,
+                    ReferenceGranularity.ParameterOrAttribute,
+                    ReferenceKinds.All,
+                    ReferenceValidationOptions.IncludeDerivedTypes );
         }
 
         private static void Validate( ReferenceValidationContext context )

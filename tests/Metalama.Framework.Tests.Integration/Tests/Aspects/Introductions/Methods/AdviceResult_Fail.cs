@@ -1,7 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
-using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var result = builder.Advice.IntroduceMethod( builder.Target, nameof(Method), whenExists: OverrideStrategy.Fail );
+            var result = builder.IntroduceMethod( nameof(Method), whenExists: OverrideStrategy.Fail );
 
             if (result.Outcome != AdviceOutcome.Error)
             {

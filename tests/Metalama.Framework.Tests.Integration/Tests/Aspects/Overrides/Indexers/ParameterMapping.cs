@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -12,21 +13,22 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Paramet
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.OverrideAccessors(
-                builder.Target.Indexers.Single(),
-                nameof(RenamedParameterGetTemplate),
-                nameof(RenamedParameterSetTemplate));
+            builder.With( builder.Target.Indexers.Single() )
+                .OverrideAccessors(
+                    nameof(RenamedParameterGetTemplate),
+                    nameof(RenamedParameterSetTemplate) );
         }
 
         [Template]
-        public int RenamedParameterGetTemplate(int y, string x)
+        public int RenamedParameterGetTemplate( int y, string x )
         {
             var q = y + x.ToString().Length;
+
             return meta.Proceed();
         }
 
         [Template]
-        public void RenamedParameterSetTemplate(int y, string x, int z)
+        public void RenamedParameterSetTemplate( int y, string x, int z )
         {
             var q = y + x.ToString().Length + z;
             meta.Proceed();
@@ -35,9 +37,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Indexers.Paramet
 
     // <target>
     [Introduction]
-    internal class TargetClass 
+    internal class TargetClass
     {
-        public int this[int x, string y]
+        public int this[ int x, string y ]
         {
             get
             {

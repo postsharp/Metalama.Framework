@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Operators.Pr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceUnaryOperator(builder.Target, nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation);
+            builder.IntroduceUnaryOperator( nameof(UnaryOperatorTemplate), builder.Target, builder.Target, OperatorKind.UnaryNegation );
         }
 
         [Template]

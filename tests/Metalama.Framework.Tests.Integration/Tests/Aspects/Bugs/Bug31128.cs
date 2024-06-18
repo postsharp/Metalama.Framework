@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
 using System.Collections.Generic;
@@ -23,12 +24,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug31128
                 return;
             }
 
-            builder.Advice.IntroduceMethod( builder.Target, nameof(CreateColumns), whenExists: OverrideStrategy.Override );
+            builder.IntroduceMethod( nameof(CreateColumns), whenExists: OverrideStrategy.Override );
 
             foreach (var property in GetDataClassProperties( builder.Target ))
             {
-                builder.Advice.IntroduceProperty(
-                    builder.Target,
+                builder.IntroduceProperty(
                     name: property.Name,
                     getTemplate: nameof(GetColumn),
                     setTemplate: null,

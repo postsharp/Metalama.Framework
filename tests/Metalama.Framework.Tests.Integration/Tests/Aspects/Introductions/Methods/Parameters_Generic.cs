@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -8,8 +9,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Para
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(Template),
                 buildMethod: introduced =>
                 {

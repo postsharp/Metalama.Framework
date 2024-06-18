@@ -1,4 +1,4 @@
-string Method(object a, object b)
+private string Method(object a, object b)
 {
   if (a == null)
   {

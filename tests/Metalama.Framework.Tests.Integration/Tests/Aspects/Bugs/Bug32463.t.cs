@@ -1,5 +1,5 @@
 [BeforeCtor]
-struct S
+internal struct S
 {
   private global::System.Int32 f;
   public S()

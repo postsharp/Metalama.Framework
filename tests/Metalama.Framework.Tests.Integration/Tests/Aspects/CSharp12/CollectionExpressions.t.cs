@@ -1,5 +1,5 @@
 [TheAspect]
-static void M(int i)
+private static void M(int i)
 {
   int[] collection1 = [1, 2, 3, ..global::System.Linq.Enumerable.Range(3, 2)];
   global::System.Console.WriteLine(collection1);

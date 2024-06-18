@@ -1,11 +1,12 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_MakeExplicit
 {
     /*
-     * Tests that when an incompatible member of the same signature already exist and whenExists is set to MakeExplicit, the interface is introduced and 
+     * Tests that when an incompatible member of the same signature already exist and whenExists is set to MakeExplicit, the interface is introduced and
      * its members are implements explicitly.
      */
 
@@ -13,42 +14,44 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+            aspectBuilder.ImplementInterface( typeof(IInterface) );
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public int Method()
         {
-            Console.WriteLine("This is introduced interface method.");
+            Console.WriteLine( "This is introduced interface method." );
+
             return 42;
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public int Property
         {
             get
             {
-                Console.WriteLine("This is introduced interface property.");
+                Console.WriteLine( "This is introduced interface property." );
+
                 return 42;
             }
 
             set
             {
-                Console.WriteLine("This is introduced interface property.");
+                Console.WriteLine( "This is introduced interface property." );
             }
         }
 
-        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit)]
+        [InterfaceMember( WhenExists = InterfaceMemberOverrideStrategy.MakeExplicit )]
         public event EventHandler Event
         {
             add
             {
-                Console.WriteLine("This is introduced interface event.");
+                Console.WriteLine( "This is introduced interface event." );
             }
 
             remove
             {
-                Console.WriteLine("This is introduced interface event.");
+                Console.WriteLine( "This is introduced interface event." );
             }
         }
     }
@@ -68,7 +71,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public string Method()
         {
-            Console.WriteLine("This is original method.");
+            Console.WriteLine( "This is original method." );
+
             return "42";
         }
 
@@ -76,13 +80,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             get
             {
-                Console.WriteLine("This is original property.");
+                Console.WriteLine( "This is original property." );
+
                 return "42";
             }
 
             set
             {
-                Console.WriteLine("This is original property.");
+                Console.WriteLine( "This is original property." );
             }
         }
 
@@ -90,12 +95,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             add
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
 
             remove
             {
-                Console.WriteLine("This is original event.");
+                Console.WriteLine( "This is original event." );
             }
         }
     }

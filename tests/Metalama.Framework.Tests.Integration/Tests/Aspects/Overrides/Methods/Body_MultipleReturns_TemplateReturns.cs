@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_MultipleReturns_TemplateReturns
@@ -10,7 +11,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mul
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine("Override.");
+            Console.WriteLine( "Override." );
+
             return meta.Proceed();
         }
     }
@@ -19,7 +21,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mul
     internal class TargetClass
     {
         [Override]
-        public void VoidMethod(int x)
+        public void VoidMethod( int x )
         {
             while (x > 0)
             {
@@ -32,11 +34,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mul
             }
 
             if (x > 0)
+            {
                 return;
+            }
         }
 
         [Override]
-        public int Method(int x)
+        public int Method( int x )
         {
             while (x > 0)
             {
@@ -49,15 +53,17 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mul
             }
 
             if (x > 0)
+            {
                 return -1;
+            }
 
             return 0;
         }
 
         [Override]
-        public T? GenericMethod<T>(T? x)
+        public T? GenericMethod<T>( T? x )
         {
-            int z = 42;
+            var z = 42;
 
             {
                 while (z > 0)
@@ -71,7 +77,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Body_Mul
                 }
 
                 if (z > 0)
+                {
                     return x;
+                }
 
                 return default;
             }

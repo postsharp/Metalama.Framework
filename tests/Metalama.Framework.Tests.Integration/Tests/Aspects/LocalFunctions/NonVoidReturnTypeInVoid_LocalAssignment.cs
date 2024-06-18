@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.NonVoidReturnTypeInVoid_LocalAssignment;
@@ -10,6 +11,7 @@ public class Override : OverrideMethodAspect
         int LocalFunction()
         {
             var x = meta.Proceed();
+
             return x?.GetHashCode() ?? 0;
         }
 

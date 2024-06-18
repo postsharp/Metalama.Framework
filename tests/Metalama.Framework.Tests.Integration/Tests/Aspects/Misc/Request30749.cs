@@ -1,10 +1,10 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Code;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30749
 {
@@ -15,25 +15,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30749
             var __metalma_currentThreadId = Thread.CurrentThread.ManagedThreadId;
             var __metalama_result = new StringBuilder();
 
-            __metalama_result.Append(meta.Target.Type.ToDisplayString(CodeDisplayFormat.DiagnosticMessage));
-            __metalama_result.Append(".");
-            __metalama_result.Append(meta.Target.Method.Name);
-            __metalama_result.Append("(");
+            __metalama_result.Append( meta.Target.Type.ToDisplayString( CodeDisplayFormat.DiagnosticMessage ) );
+            __metalama_result.Append( "." );
+            __metalama_result.Append( meta.Target.Method.Name );
+            __metalama_result.Append( "(" );
+
             // var __metalama_i = meta.CompileTime(0);
             if (meta.Target.Parameters.Count > 0)
             {
                 var _metalama_firstParam = meta.Target.Parameters[0];
+
                 foreach (var __metalama_p in meta.Target.Parameters)
                 {
                     var __metalama_comma = __metalama_p != _metalama_firstParam ? ", " : "";
+
                     if (__metalama_p.RefKind == RefKind.Out)
                     {
-                        __metalama_result.Append($"{__metalama_comma}{__metalama_p.Name} = <out> ");
+                        __metalama_result.Append( $"{__metalama_comma}{__metalama_p.Name} = <out> " );
                     }
                     else
                     {
-                        __metalama_result.Append($"{__metalama_comma}{__metalama_p.Name} = {{");
+                        __metalama_result.Append( $"{__metalama_comma}{__metalama_p.Name} = {{" );
                         var __metalama_json = string.Empty;
+
                         try
                         {
                             __metalama_json = /* Newtonsoft.Json.JsonConvert.SerializeObject(__metalama_p.Value) */ "";
@@ -41,64 +45,63 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30749
                         catch
                         {
                             var __metalama_temp = new InterpolatedStringBuilder();
-                            __metalama_temp.AddExpression(__metalama_p.Value);
+                            __metalama_temp.AddExpression( __metalama_p.Value );
                             __metalama_json = __metalama_temp.ToValue();
                         }
 
-                        __metalama_result.Append(__metalama_json);
-                        __metalama_result.Append("}");
+                        __metalama_result.Append( __metalama_json );
+                        __metalama_result.Append( "}" );
                     }
+
                     //     __metalama_i++;
                 }
             }
-            __metalama_result.Append(")");
 
-            ParamsStacks.Push(__metalma_currentThreadId, __metalama_result.ToString());
+            __metalama_result.Append( ")" );
+
+            ParamsStacks.Push( __metalma_currentThreadId, __metalama_result.ToString() );
+
             try
             {
                 return meta.Proceed();
             }
             finally
             {
-                ParamsStacks.Pop(__metalma_currentThreadId);
+                ParamsStacks.Pop( __metalma_currentThreadId );
             }
         }
     }
 
     internal static class ParamsStacks
     {
-        public static void Push(int threadId, string xml) { }
-        public static void Pop(int threadId) { }
-    }
+        public static void Push( int threadId, string xml ) { }
 
+        public static void Pop( int threadId ) { }
+    }
 
     public class OrderCommand { }
 
     public interface ILogger
     {
-        void WriteInfo(string msg);
+        void WriteInfo( string msg );
     }
 
     public class BaseProcessor
     {
-       protected virtual Task HandleFailureAsync(object response, object context) => Task.CompletedTask;
+        protected virtual Task HandleFailureAsync( object response, object context ) => Task.CompletedTask;
     }
-   
+
     // <target>
-    public class OrderAsyncResponseProcessor<TCommand> : BaseProcessor  where TCommand : OrderCommand
+    public class OrderAsyncResponseProcessor<TCommand> : BaseProcessor where TCommand : OrderCommand
     {
         private readonly ILogger _logger = null!;
-  
 
         [LogExceptionContextAspect]
-        protected override async Task HandleFailureAsync(object response, object context)
+        protected override async Task HandleFailureAsync( object response, object context )
         {
-            _logger.WriteInfo($"Handling failure response");
-            await base.HandleFailureAsync(response, context);
-            _logger.WriteInfo($"Handled failure response ");
+            _logger.WriteInfo( $"Handling failure response" );
+            await base.HandleFailureAsync( response, context );
+            _logger.WriteInfo( $"Handled failure response " );
         }
     }
-
-
 }
-

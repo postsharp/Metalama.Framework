@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -11,16 +12,16 @@ public class MyAspect : PropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
 
         if (builder.Target.GetMethod != null)
         {
-            builder.Advice.IntroduceAttribute( builder.Target.GetMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
+            builder.With( builder.Target.GetMethod ).IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
 
         if (builder.Target.SetMethod != null)
         {
-            builder.Advice.IntroduceAttribute( builder.Target.SetMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
+            builder.With( builder.Target.SetMethod ).IntroduceAttribute( AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
     }
 }

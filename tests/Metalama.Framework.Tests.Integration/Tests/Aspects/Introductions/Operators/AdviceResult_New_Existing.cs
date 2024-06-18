@@ -1,7 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
-using Metalama.Framework.Advising;
 
 #pragma warning disable CS0618 // IAdviceResult.AspectBuilder is obsolete
 
@@ -12,8 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Opera
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             var result =
-                builder.Advice.IntroduceBinaryOperator(
-                    builder.Target,
+                builder.IntroduceBinaryOperator(
                     nameof(Operator),
                     builder.Target,
                     TypeFactory.GetType( SpecialType.Int32 ),

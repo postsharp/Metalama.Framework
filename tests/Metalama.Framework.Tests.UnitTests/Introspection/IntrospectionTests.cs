@@ -16,7 +16,8 @@ public sealed class IntrospectionTests : UnitTestClass
     public async Task Success()
     {
         const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -69,7 +70,8 @@ class MyClass
     public async Task UserError()
     {
         const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -118,7 +120,8 @@ class MyClass
     public async Task SyntaxErrorInCompileTimeCode()
     {
         const string code = @"
-using Metalama.Framework.Aspects;
+using Metalama.Framework.Advising; 
+using Metalama.Framework.Aspects; 
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 
@@ -160,38 +163,40 @@ class MyClass
     public async Task Options()
     {
         const string code = """
-            using Metalama.Framework.Aspects;
-            using Metalama.Framework.Code;
-            using Metalama.Framework.Code.DeclarationBuilders;
-            using Metalama.Framework.Options;
+                            using Metalama.Framework.Advising; 
+                            using Metalama.Framework.Advising;
+                            using Metalama.Framework.Aspects; 
+                            using Metalama.Framework.Code;
+                            using Metalama.Framework.Code.DeclarationBuilders;
+                            using Metalama.Framework.Options;
 
-            public class Options : IHierarchicalOptions<IDeclaration>
-            {
-                public string? Path { get; set; }
+                            public class Options : IHierarchicalOptions<IDeclaration>
+                            {
+                                public string? Path { get; set; }
+                            
+                                public IHierarchicalOptions GetDefaultOptions(OptionsInitializationContext context) => new Options { Path = "Start" };
+                            
+                                public object ApplyChanges(object changes, in ApplyChangesContext context)
+                                {
+                                    var other = (Options)changes;
+                            
+                                    return new Options { Path = $"{this.Path}->{other.Path}" };
+                                }
+                            }
 
-                public IHierarchicalOptions GetDefaultOptions(OptionsInitializationContext context) => new Options { Path = "Start" };
+                            class Aspect : TypeAspect
+                            {
+                                public override void BuildAspect(IAspectBuilder<INamedType> builder)
+                                {
+                                    base.BuildAspect(builder);
+                            
+                                    var options = builder.Target.Enhancements().GetOptions<Options>();
+                                }
+                            }
 
-                public object ApplyChanges(object changes, in ApplyChangesContext context)
-                {
-                    var other = (Options)changes;
-
-                    return new Options { Path = $"{this.Path}->{other.Path}" };
-                }
-            }
-
-            class Aspect : TypeAspect
-            {
-                public override void BuildAspect(IAspectBuilder<INamedType> builder)
-                {
-                    base.BuildAspect(builder);
-
-                    var options = builder.Target.Enhancements().GetOptions<Options>();
-                }
-            }
-
-            [Aspect]
-            class Target;
-            """;
+                            [Aspect]
+                            class Target;
+                            """;
 
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( code );

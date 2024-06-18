@@ -1,26 +1,28 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Lock.RunTimeLock
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             lock (meta.This)
             {
                 var x = meta.Target.Parameters.Count;
-                Console.WriteLine(x);
+                Console.WriteLine( x );
+
                 return meta.Proceed();
             }
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

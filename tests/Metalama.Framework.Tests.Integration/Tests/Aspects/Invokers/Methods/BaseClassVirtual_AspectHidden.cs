@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.BaseClassVirtual_AspectHidden;
@@ -16,8 +17,7 @@ public class InvokerBeforeAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
             new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName( "Method" ).Single() } );
     }
@@ -61,8 +61,7 @@ public class InvokerAfterAspect : MethodAspect
 {
     public override void BuildAspect( IAspectBuilder<IMethod> builder )
     {
-        builder.Advice.Override(
-            builder.Target,
+        builder.Override(
             nameof(Template),
             new { target = builder.Target.DeclaringType!.BaseType!.Methods.OfName( "Method" ).Single() } );
     }

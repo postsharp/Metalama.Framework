@@ -1,6 +1,6 @@
 [Aspect]
 [global::Metalama.Framework.Tests.Integration.Aspects.CodeModel.ComplexTypedConstant.MyAttribute(new global::System.Object[] { new global::System.ConsoleColor[] { global::System.ConsoleColor.Red }, new global::System.Object[] { global::System.ConsoleColor.Red } })]
-class TargetCode
+internal class TargetCode
 {
   private global::System.Object[] f = new global::System.Object[]
   {

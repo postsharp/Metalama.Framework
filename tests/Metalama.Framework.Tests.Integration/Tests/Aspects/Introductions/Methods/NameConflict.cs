@@ -1,4 +1,5 @@
 ﻿using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -12,8 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(ParameterConflict),
                 buildMethod: introduced =>
                 {
@@ -21,30 +21,23 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
                     introduced.AddParameter( "x", typeof(int) );
                 } );
 
-
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(NameConflict),
-                buildMethod: introduced =>
-                {
-                    introduced.Name = "Method_NameConflict";
-                });
+                buildMethod: introduced => { introduced.Name = "Method_NameConflict"; } );
 
-
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(TypeParameterConflict),
                 buildMethod: introduced =>
                 {
                     introduced.Name = "Method_GenericParameterConflict";
-                    introduced.AddTypeParameter("TParameter");
-                });
+                    introduced.AddTypeParameter( "TParameter" );
+                } );
         }
 
         [Template]
         public dynamic? ParameterConflict()
         {
-            meta.InsertComment("Forces conflict between the method parameter name and name of the local variable.");
+            meta.InsertComment( "Forces conflict between the method parameter name and name of the local variable." );
             var x = meta.Proceed();
 
             Console.WriteLine( "This is introduced method." );
@@ -53,15 +46,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
         }
 
         [Template]
-        public int NameConflict(int p)
+        public int NameConflict( int p )
         {
-            meta.InsertComment("Forces conflict between the method name (which is different than template name) and a local function.");
-            meta.InsertComment("If the local function is not renamed, an error is produced due to different return type.");
+            meta.InsertComment( "Forces conflict between the method name (which is different than template name) and a local function." );
+            meta.InsertComment( "If the local function is not renamed, an error is produced due to different return type." );
             var x = meta.Proceed();
 
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
 
-            if (p > 0) 
+            if (p > 0)
             {
                 return ExpressionFactory.Parse( "Method_NameConflict(p - 1)" ).Value;
             }
@@ -76,10 +69,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Name
         [Template]
         public dynamic? TypeParameterConflict()
         {
-            meta.InsertComment("Forces conflict between the method type parameter name and name of the local variable.");
+            meta.InsertComment( "Forces conflict between the method type parameter name and name of the local variable." );
             var TParameter = meta.Proceed();
 
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
 
             return TParameter;
         }

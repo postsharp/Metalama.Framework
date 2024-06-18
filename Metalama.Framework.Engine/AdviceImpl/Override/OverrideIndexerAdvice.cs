@@ -16,7 +16,11 @@ internal sealed class OverrideIndexerAdvice : OverrideMemberAdvice<IIndexer, IIn
     private readonly BoundTemplateMethod? _getTemplate;
     private readonly BoundTemplateMethod? _setTemplate;
 
-    public OverrideIndexerAdvice( AdviceConstructorParameters<IIndexer> parameters, BoundTemplateMethod? getTemplate, BoundTemplateMethod? setTemplate, IObjectReader tags )
+    public OverrideIndexerAdvice(
+        AdviceConstructorParameters<IIndexer> parameters,
+        BoundTemplateMethod? getTemplate,
+        BoundTemplateMethod? setTemplate,
+        IObjectReader tags )
         : base( parameters, tags )
     {
         this._getTemplate = getTemplate.ExplicitlyImplementedOrNull();

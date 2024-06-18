@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -16,21 +17,21 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.AddContract( method.ReturnParameter, nameof(Filter) );
+                builder.With( method.ReturnParameter ).AddContract( nameof(Filter) );
 
                 foreach (var parameter in method.Parameters)
                 {
-                    builder.Advice.AddContract( parameter, nameof(Filter) );
+                    builder.With( parameter ).AddContract( nameof(Filter) );
                 }
             }
 
-            var introducedMethod = builder.Advice.IntroduceMethod( builder.Target, nameof(IntroducedMethod) ).Declaration;
+            var introducedMethod = builder.IntroduceMethod( nameof(IntroducedMethod) ).Declaration;
 
-            builder.Advice.AddContract( introducedMethod.ReturnParameter, nameof(Filter) );
+            builder.With( introducedMethod.ReturnParameter ).AddContract( nameof(Filter) );
 
             foreach (var parameter in introducedMethod.Parameters)
             {
-                builder.Advice.AddContract( parameter, nameof(Filter) );
+                builder.With( parameter ).AddContract( nameof(Filter) );
             }
         }
 

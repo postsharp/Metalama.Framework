@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -11,31 +12,32 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.LambdaParamete
 
 internal class Aspect : PropertyAspect
 {
-    public override void BuildAspect(IAspectBuilder<IProperty> builder)
+    public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        base.BuildAspect(builder);
+        base.BuildAspect( builder );
 
-        builder.Advice.IntroduceMethod(builder.Target.DeclaringType, nameof(PropertyBody), args: new { propertyBody = GetPropertyBody(builder.Target) });
+        builder.With( builder.Target.DeclaringType ).IntroduceMethod( nameof(PropertyBody), args: new { propertyBody = GetPropertyBody( builder.Target ) } );
     }
 
-    string? GetPropertyBody(IProperty property)
+    private string? GetPropertyBody( IProperty property )
     {
         var methodBody = property.GetSymbol()
             ?.DeclaringSyntaxReferences
-            .Select(r => r.GetSyntax())
+            .Select( r => r.GetSyntax() )
             .Cast<PropertyDeclarationSyntax>()
-            .Select(SyntaxNode? (p) =>
-            {
-                if (p.ExpressionBody != null)
+            .Select(
+                SyntaxNode? ( p ) =>
                 {
-                    return p.ExpressionBody;
-                }
+                    if (p.ExpressionBody != null)
+                    {
+                        return p.ExpressionBody;
+                    }
 
-                var getter = p.AccessorList?.Accessors
-                    .SingleOrDefault(a => a.Keyword.IsKind(SyntaxKind.GetKeyword));
+                    var getter = p.AccessorList?.Accessors
+                        .SingleOrDefault( a => a.Keyword.IsKind( SyntaxKind.GetKeyword ) );
 
-                return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
-            })
+                    return (SyntaxNode?)getter?.ExpressionBody ?? getter?.Body;
+                } )
             .WhereNotNull()
             .FirstOrDefault();
 
@@ -43,12 +45,15 @@ internal class Aspect : PropertyAspect
     }
 
     [Template]
-    string? PropertyBody([CompileTime] string propertyBody) => propertyBody;
+    private string? PropertyBody( [CompileTime] string propertyBody ) => propertyBody;
 }
 
 // <target>
 internal class TargetCode
 {
     [Aspect]
-    public int P { get => 42; }
+    public int P
+    {
+        get => 42;
+    }
 }

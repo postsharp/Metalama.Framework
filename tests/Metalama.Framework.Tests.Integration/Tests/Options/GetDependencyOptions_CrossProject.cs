@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -9,7 +10,7 @@ using System.ComponentModel;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Options.GetDependencyOptions_CrossProject;
 
-class Aspect : TypeAspect
+internal class Aspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
@@ -17,15 +18,13 @@ class Aspect : TypeAspect
 
         var options = builder.Target.Enhancements().GetOptions<Options>();
 
-        builder.Advice.IntroduceAttribute(builder.Target, AttributeConstruction.Create(typeof(DescriptionAttribute), new[] { options.ProjectPath }));
+        builder.IntroduceAttribute( AttributeConstruction.Create( typeof(DescriptionAttribute), new[] { options.ProjectPath } ) );
     }
 }
 
 // <target>
-class Outer
+internal class Outer
 {
     [Aspect]
-    class Target : C
-    {
-    }
+    private class Target : C { }
 }

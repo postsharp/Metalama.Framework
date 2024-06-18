@@ -1,7 +1,7 @@
-int Method(int a, int b)
+private int Method(int a, int b)
 {
-  global::System.Collections.Generic.IEnumerable<global::System.Int32> array = global::System.Linq.Enumerable.Range(1, 2);
-  foreach (int n in array)
+  var array = global::System.Linq.Enumerable.Range(1, 2);
+  foreach (var n in array)
   {
     if (a <= n)
     {

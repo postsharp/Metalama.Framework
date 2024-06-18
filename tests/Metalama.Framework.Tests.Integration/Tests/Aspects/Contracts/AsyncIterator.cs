@@ -7,6 +7,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.AsyncIter
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -20,10 +21,10 @@ public sealed class TestAttribute : TypeAspect
         {
             foreach (var parameter in method.Parameters)
             {
-                builder.Advice.AddContract(
-                    parameter,
-                    nameof(ValidateParameter),
-                    args: new { parameterName = parameter.Name } );
+                builder.With( parameter )
+                    .AddContract(
+                        nameof(ValidateParameter),
+                        args: new { parameterName = parameter.Name } );
             }
         }
     }
@@ -31,7 +32,7 @@ public sealed class TestAttribute : TypeAspect
     [Template]
     private void ValidateParameter( dynamic? value, [CompileTime] string parameterName )
     {
-        Console.WriteLine($"Advice");
+        Console.WriteLine( $"Advice" );
 
         if (value is null)
         {
@@ -47,16 +48,16 @@ public class Program
         const string text = "testText";
         var test = new TestClass();
 
-        await foreach (var item in test.AsyncEnumerable(text))
+        await foreach (var item in test.AsyncEnumerable( text ))
         {
-            Console.WriteLine($"{item};");
+            Console.WriteLine( $"{item};" );
         }
 
-        var enumerator = test.AsyncEnumerator(text);
-    
-        while(await enumerator.MoveNextAsync())
+        var enumerator = test.AsyncEnumerator( text );
+
+        while (await enumerator.MoveNextAsync())
         {
-            Console.WriteLine($"{enumerator.Current};");
+            Console.WriteLine( $"{enumerator.Current};" );
         }
     }
 }
@@ -68,16 +69,22 @@ public class TestClass
     public async IAsyncEnumerable<string> AsyncEnumerable( string text )
     {
         await Task.Yield();
+
         yield return "Hello";
+
         await Task.Yield();
+
         yield return text;
     }
 
-    public async IAsyncEnumerator<string> AsyncEnumerator(string text)
+    public async IAsyncEnumerator<string> AsyncEnumerator( string text )
     {
         await Task.Yield();
+
         yield return "Hello";
+
         await Task.Yield();
+
         yield return text;
     }
 }

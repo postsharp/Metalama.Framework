@@ -1,15 +1,16 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Assign
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            dynamic? x = TypeFactory.GetType(SpecialType.Int32).DefaultValue();
+            var x = TypeFactory.GetType( SpecialType.Int32 ).DefaultValue();
 
             x = meta.Proceed();
             x += meta.Proceed();
@@ -19,12 +20,11 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Assign
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }
-        
     }
 }

@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.CrossAssembly;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.CrossAsse
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template) );
+                builder.With( @event ).OverrideAccessors( nameof(Template), nameof(Template) );
             }
         }
 

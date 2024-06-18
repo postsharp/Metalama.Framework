@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Templating;
 
@@ -6,44 +7,47 @@ using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchMismatchScope
 {
-    enum RunTimeEnum 
+    internal enum RunTimeEnum
     {
         one = 1,
-        two = 2,
+        two = 2
     }
 
     [CompileTime]
-    enum CompileTimeEnum
+    internal enum CompileTimeEnum
     {
         one = 1,
-        two = 2,
+        two = 2
     }
 
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            
             switch ((int)CompileTimeEnum.one)
             {
                 case (int)RunTimeEnum.one:
-                    Console.WriteLine("1");
+                    Console.WriteLine( "1" );
+
                     break;
+
                 case (int)RunTimeEnum.two:
-                    Console.WriteLine("2");
+                    Console.WriteLine( "2" );
+
                     break;
+
                 default:
                     break;
             }
-            
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

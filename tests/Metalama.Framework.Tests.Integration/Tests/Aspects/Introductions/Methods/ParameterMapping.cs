@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ParameterMapping
@@ -11,19 +12,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Para
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceMethod(
-                builder.Target,
+            builder.IntroduceMethod(
                 nameof(InvertedParameterNames),
                 buildMethod: b =>
                 {
                     b.Parameters[0].Name = "y";
                     b.Parameters[1].Name = "x";
-                    b.AddParameter("z", typeof(int));
+                    b.AddParameter( "z", typeof(int) );
                 } );
         }
 
         [Template]
-        public int InvertedParameterNames(int x, string y)
+        public int InvertedParameterNames( int x, string y )
         {
             return x + y.Length;
         }

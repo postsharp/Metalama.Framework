@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618
@@ -20,8 +21,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
     internal class Target
     {
         [return: NotNull]
-        private void M()
-        {
-        }
+        private void M() { }
     }
 }

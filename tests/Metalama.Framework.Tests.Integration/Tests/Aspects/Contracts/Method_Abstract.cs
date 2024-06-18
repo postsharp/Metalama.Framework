@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Method_Abstract;
@@ -15,15 +16,13 @@ internal class NotNullAttribute : ContractAspect
 }
 
 // <target>
-abstract class Base
+internal abstract class Base
 {
-    public abstract void M([NotNull] string m);
+    public abstract void M( [NotNull] string m );
 }
 
 // <target>
-class Target : Base
+internal class Target : Base
 {
-    public override void M(string m)
-    {
-    }
+    public override void M( string m ) { }
 }

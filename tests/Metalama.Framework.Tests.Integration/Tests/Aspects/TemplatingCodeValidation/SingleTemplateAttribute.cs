@@ -1,3 +1,4 @@
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.SingleTemplateAttribute;
@@ -21,4 +22,4 @@ public class DerivedAspect : Aspect
 
 // <target>
 [Aspect]
-class TargetCode { }
+internal class TargetCode { }
