@@ -141,7 +141,7 @@ public sealed class AspectDatabaseTests( ITestOutputHelper testOutputHelper ) : 
                                     if (builder.Target.Methods.OfName("M").FirstOrDefault() is { } method)
                                     {
                                         //builder.Advice.Override(method, nameof(Template));
-                                        builder.WithTarget(method).Outbound.AddAspect<MethodAspect>();
+                                        builder.With(method).Outbound.AddAspect<MethodAspect>();
                                     }
                             
                                     if (builder.Target.Constructors.OfExactSignature(Array.Empty<IType>()) is { } constructor)

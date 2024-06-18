@@ -14,6 +14,6 @@ public interface IAdviser<out T>
 {
     T Target { get; }
 
-    IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
+    IAdviser<TNewDeclaration> With<TNewDeclaration>( TNewDeclaration declaration )
         where TNewDeclaration : IDeclaration;
 }

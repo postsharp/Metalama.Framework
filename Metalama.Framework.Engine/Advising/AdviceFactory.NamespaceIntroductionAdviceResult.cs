@@ -31,8 +31,8 @@ internal sealed partial class AdviceFactory<T>
 
         public IAdviceFactory AdviceFactory => this._origin;
 
-        public IAdviser<TNewDeclaration> WithTarget<TNewDeclaration>( TNewDeclaration target )
+        public IAdviser<TNewDeclaration> With<TNewDeclaration>( TNewDeclaration declaration )
             where TNewDeclaration : IDeclaration
-            => this._origin.WithDeclaration( target );
+            => this._origin.WithDeclaration( declaration );
     }
 }

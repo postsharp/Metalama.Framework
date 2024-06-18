@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Fields.Rea
  * Tests invokers targeting an read-only field.
  */
 
-#pragma warning disable CS0169
+#pragma warning disable CS0169, CS0649
 
 public class IntroduceFieldAttribute : TypeAspect
 {
@@ -28,7 +28,7 @@ public class IntroduceFieldAttribute : TypeAspect
         builder.IntroduceField(nameof(FieldTemplate), buildField: f => f.Name = "IntroducedField");
         var f = builder.IntroduceField(nameof(FieldTemplate), buildField: f => f.Name = "OverriddenIntroducedField");
         
-        builder.WithTarget<IField>(f.Declaration).Outbound.AddAspect<OverrideFieldAttribute>();
+        builder.With<IField>(f.Declaration).Outbound.AddAspect<OverrideFieldAttribute>();
     }
 
     [Template]
